@@ -87,7 +87,12 @@ def get_backup_path(subpath=''):
         backups_dir = os.path.join(BASE_DIR, backups_dir)
         
     if not os.path.exists(backups_dir):
-        os.makedirs(backups_dir, exist_ok=True)
+        try:
+            os.makedirs(backups_dir, exist_ok=True)
+        except OSError as e:
+            print(f"Error creating backup directory '{backups_dir}': {e}. Falling back to local 'Backups' directory.")
+            backups_dir = os.path.join(BASE_DIR, 'Backups')
+            os.makedirs(backups_dir, exist_ok=True)
         
     return os.path.join(backups_dir, subpath)
 
