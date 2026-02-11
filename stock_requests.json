@@ -1,0 +1,97 @@
+[
+    {
+        "id": "20251229163519",
+        "user": "Angelo",
+        "department": "Diretoria",
+        "date": "29/12/2025",
+        "time": "16:35",
+        "items": "168x Heineken long neck, 144x Corona Long Neck, 72x Stella Artois long neck, 72x Coca-Cola Zero, 72x Coca-Cola, 24x Heineken 0%, 12x Agua Tônica, 96x Água sem gás 275ml Mirapraia, 96x Água com gás 275ml, 5x Pitu, 4x Aperol",
+        "items_structured": [
+            {
+                "name": "Heineken long neck",
+                "qty": 168,
+                "delivered_qty": 168.0
+            },
+            {
+                "name": "Corona Long Neck",
+                "qty": 144,
+                "delivered_qty": 144.0
+            },
+            {
+                "name": "Stella Artois long neck",
+                "qty": 72,
+                "delivered_qty": 72.0
+            },
+            {
+                "name": "Coca-Cola Zero",
+                "qty": 72,
+                "delivered_qty": 72.0
+            },
+            {
+                "name": "Coca-Cola",
+                "qty": 72,
+                "delivered_qty": 72.0
+            },
+            {
+                "name": "Heineken 0%",
+                "qty": 24,
+                "delivered_qty": 24.0
+            },
+            {
+                "name": "Agua Tônica",
+                "qty": 12,
+                "delivered_qty": 12.0
+            },
+            {
+                "name": "Água sem gás 275ml Mirapraia",
+                "qty": 96,
+                "delivered_qty": 96.0
+            },
+            {
+                "name": "Água com gás 275ml",
+                "qty": 96,
+                "delivered_qty": 96.0
+            },
+            {
+                "name": "Pitu",
+                "qty": 5,
+                "delivered_qty": 5.0
+            },
+            {
+                "name": "Aperol",
+                "qty": 4,
+                "delivered_qty": 4.0
+            }
+        ],
+        "type": "Standard",
+        "status": "Concluído",
+        "penalty": false,
+        "fulfillment_date": "29/12/2025 16:35",
+        "fulfilled_by": "Angelo",
+        "confirmation_date": "29/12/2025 16:36",
+        "confirmed_by": "Angelo"
+    },
+    {
+        "id": "20251230120352",
+        "user": "Eduardo",
+        "department": "Principal",
+        "date": "30/12/2025",
+        "time": "12:03",
+        "items": "10x Heineken long neck",
+        "items_structured": [
+            {
+                "name": "Heineken long neck",
+                "qty": 10,
+                "delivered_qty": 10.0,
+                "destination_stock": "Bar"
+            }
+        ],
+        "type": "Emergency",
+        "status": "Concluído",
+        "penalty": false,
+        "fulfillment_date": "30/12/2025 12:04",
+        "fulfilled_by": "Eduardo",
+        "confirmation_date": "30/12/2025 12:04",
+        "confirmed_by": "Eduardo"
+    }
+]

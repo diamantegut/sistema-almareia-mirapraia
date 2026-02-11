@@ -1,0 +1,1178 @@
+[
+    {
+        "id": "AUDIT_20260127185351_6467",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260127185351",
+        "target_details": {
+            "room": null,
+            "total": 10.0,
+            "date": "2026-01-27 18:53:51",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "27/01/2026 18:53",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260127185417_5764",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260127185417",
+        "target_details": {
+            "room": null,
+            "total": 10.0,
+            "date": "2026-01-27 18:54:17",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "27/01/2026 18:54",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260127185446_1151",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260127185446",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-01-27 18:54:46",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "27/01/2026 18:54",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260127185510_4308",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260127185510",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-01-27 18:55:10",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "27/01/2026 18:55",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260127185604_7864",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260127185604",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-01-27 18:56:04",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "27/01/2026 18:56",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260127191332_3998",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260127191332",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-01-27 19:13:32",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "27/01/2026 19:13",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260127204700_8182",
+        "action": "cancel_consumption",
+        "target_id": "TEST_FLOW_20260127204700",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "27/01/2026 20:47",
+            "old_status": "pending"
+        },
+        "user": "admin",
+        "timestamp": "27/01/2026 20:47",
+        "justification": "Flow Test Justification"
+    },
+    {
+        "id": "AUDIT_20260127211043_9785",
+        "action": "cancel_consumption",
+        "target_id": "CHARGE_GOV_31_20260127121337",
+        "target_details": {
+            "room": "31",
+            "total": 24.700000000000003,
+            "date": "27/01/2026 12:13",
+            "old_status": "pending"
+        },
+        "user": "Angelo",
+        "timestamp": "27/01/2026 21:10",
+        "justification": "Lancamento teste"
+    },
+    {
+        "id": "AUDIT_20260127211108_8800",
+        "action": "cancel_consumption",
+        "target_id": "CHARGE_GOV_31_20260127145540",
+        "target_details": {
+            "room": "31",
+            "total": 19.8,
+            "date": "27/01/2026 14:55",
+            "old_status": "pending"
+        },
+        "user": "Angelo",
+        "timestamp": "27/01/2026 21:11",
+        "justification": "teswte de lancamento"
+    },
+    {
+        "id": "AUDIT_20260127211116_3340",
+        "action": "cancel_consumption",
+        "target_id": "CHARGE_GOV_31_20260127125030",
+        "target_details": {
+            "room": "31",
+            "total": 37.6,
+            "date": "27/01/2026 12:50",
+            "old_status": "pending"
+        },
+        "user": "Angelo",
+        "timestamp": "27/01/2026 21:11",
+        "justification": "teswte de lancamento"
+    },
+    {
+        "id": "AUDIT_20260127211124_4537",
+        "action": "cancel_consumption",
+        "target_id": "CHARGE_31_20260127180319_BAR",
+        "target_details": {
+            "room": "31",
+            "total": 33.6,
+            "date": "27/01/2026 18:03",
+            "old_status": "pending"
+        },
+        "user": "Angelo",
+        "timestamp": "27/01/2026 21:11",
+        "justification": "teswte de lancamento"
+    },
+    {
+        "id": "AUDIT_20260128131533_6121",
+        "action": "cancel_consumption",
+        "target_id": "CHARGE_10_20260128110141_REST",
+        "target_details": {
+            "room": "101",
+            "total": 110.0,
+            "date": "28/01/2026 11:01",
+            "old_status": "pending"
+        },
+        "user": "Angelo",
+        "timestamp": "28/01/2026 13:15",
+        "justification": "mesa de teste"
+    },
+    {
+        "id": "AUDIT_20260128232220_4566",
+        "action": "cancel_consumption",
+        "target_id": "CHARGE_96_20260128230747_REST_REC",
+        "target_details": {
+            "room": "15",
+            "total": 52.7,
+            "date": "27/01/2026 08:04",
+            "old_status": "pending"
+        },
+        "user": "Angelo",
+        "timestamp": "28/01/2026 23:22",
+        "justification": "cafe da manha"
+    },
+    {
+        "id": "AUDIT_20260128232237_5039",
+        "action": "cancel_consumption",
+        "target_id": "CHARGE_47_20260128230936_REST_LOG_REC",
+        "target_details": {
+            "room": "03",
+            "total": 78.5,
+            "date": "25/01/2026 20:02",
+            "old_status": "pending"
+        },
+        "user": "Angelo",
+        "timestamp": "28/01/2026 23:22",
+        "justification": "cafe da manha"
+    },
+    {
+        "id": "AUDIT_REC_19849dd8",
+        "action": "recover_charge",
+        "target_id": "CHARGE_31_20260128205040_RECOVERED",
+        "target_details": {
+            "room": "31",
+            "table": "31",
+            "total": 181.50000000000003,
+            "date": "28/01/2026 20:50"
+        },
+        "user": "system_recovery_script",
+        "timestamp": "28/01/2026 23:46",
+        "justification": "Lost charge recovery based on logs"
+    },
+    {
+        "id": "AUDIT_REC_bf978e6c",
+        "action": "recover_charge",
+        "target_id": "CHARGE_99_20260128205116_RECOVERED",
+        "target_details": {
+            "room": "15",
+            "table": "99",
+            "total": 104.80000000000001,
+            "date": "28/01/2026 20:51"
+        },
+        "user": "system_recovery_script",
+        "timestamp": "28/01/2026 23:46",
+        "justification": "Lost charge recovery based on logs"
+    },
+    {
+        "id": "AUDIT_REC_17e1cf17",
+        "action": "recover_charge",
+        "target_id": "CHARGE_59_20260128212453_RECOVERED",
+        "target_details": {
+            "room": "17",
+            "table": "59",
+            "total": 271.7,
+            "date": "28/01/2026 21:24"
+        },
+        "user": "system_recovery_script",
+        "timestamp": "28/01/2026 23:46",
+        "justification": "Lost charge recovery based on logs"
+    },
+    {
+        "id": "AUDIT_20260128235900_daf4",
+        "action": "recover_charge",
+        "target_id": "CHARGE_57_20260128235900_REST_REC",
+        "target_details": {
+            "room": "01",
+            "table": "57",
+            "total": 303.05,
+            "reason": "Lost transfer recovery"
+        },
+        "user": "system_recovery_script",
+        "timestamp": "28/01/2026 23:59",
+        "justification": "Recovering lost charge for Mesa 57 -> Quarto 01 based on action logs"
+    },
+    {
+        "id": "AUDIT_20260129001122_8140",
+        "action": "cancel_consumption",
+        "target_id": "CHARGE_56_20260128230936_REST_LOG_REC",
+        "target_details": {
+            "room": "23",
+            "total": 18.9,
+            "date": "25/01/2026 19:18",
+            "old_status": "pending"
+        },
+        "user": "Angelo",
+        "timestamp": "29/01/2026 00:11",
+        "justification": "erro"
+    },
+    {
+        "id": "AUDIT_20260129001134_2680",
+        "action": "cancel_consumption",
+        "target_id": "CHARGE_70_20260128230936_REST_LOG_REC",
+        "target_details": {
+            "room": "03",
+            "total": 194.7,
+            "date": "25/01/2026 22:33",
+            "old_status": "pending"
+        },
+        "user": "Angelo",
+        "timestamp": "29/01/2026 00:11",
+        "justification": "ewrro"
+    },
+    {
+        "id": "7ecaf65e-99a9-4af1-b06a-6668866de128",
+        "timestamp": "2026-01-29T00:25:34.126470",
+        "user": "system_recovery",
+        "action": "RECOVER_CHARGE",
+        "details": "Recovered charge for Room 01, Table 99, Amount 0.00 from logs."
+    },
+    {
+        "id": "e1cf5d74-5f92-43cb-b2de-dd6307953cf5",
+        "timestamp": "2026-01-29T00:25:34.127317",
+        "user": "system_recovery",
+        "action": "RECOVER_CHARGE",
+        "details": "Recovered charge for Room 01, Table 59, Amount 0.00 from logs."
+    },
+    {
+        "id": "AUDIT_20260129060748_5953",
+        "action": "cancel_consumption",
+        "target_id": "CHARGE_83_20260128230936_REST_LOG_REC",
+        "target_details": {
+            "room": "32",
+            "total": 578.8,
+            "date": "25/01/2026 19:23",
+            "old_status": "pending"
+        },
+        "user": "Angelo",
+        "timestamp": "29/01/2026 06:07",
+        "justification": "erro de sistem"
+    },
+    {
+        "id": "AUDIT_20260129060845_8447",
+        "action": "cancel_consumption",
+        "target_id": "CHARGE_47_20260128230747_REST_REC",
+        "target_details": {
+            "room": "24",
+            "total": 78.5,
+            "date": "27/01/2026 08:39",
+            "old_status": "pending"
+        },
+        "user": "Angelo",
+        "timestamp": "29/01/2026 06:08",
+        "justification": "erro do sistema"
+    },
+    {
+        "id": "AUDIT_20260129060918_3353",
+        "action": "cancel_consumption",
+        "target_id": "CHARGE_55_20260128230936_REST_LOG_REC",
+        "target_details": {
+            "room": "22",
+            "total": 331.2,
+            "date": "28/01/2026 19:35",
+            "old_status": "pending"
+        },
+        "user": "Angelo",
+        "timestamp": "29/01/2026 06:09",
+        "justification": "erro do sistema"
+    },
+    {
+        "id": "AUDIT_20260129060944_9221",
+        "action": "cancel_consumption",
+        "target_id": "CHARGE_90_20260128230747_REST_REC",
+        "target_details": {
+            "room": "22",
+            "total": 8.9,
+            "date": "27/01/2026 08:03",
+            "old_status": "pending"
+        },
+        "user": "Angelo",
+        "timestamp": "29/01/2026 06:09",
+        "justification": "erro do sistema"
+    },
+    {
+        "id": "AUDIT_20260129060958_6901",
+        "action": "cancel_consumption",
+        "target_id": "CHARGE_89_20260128230936_REST_LOG_REC",
+        "target_details": {
+            "room": "22",
+            "total": 91.3,
+            "date": "25/01/2026 21:43",
+            "old_status": "pending"
+        },
+        "user": "Angelo",
+        "timestamp": "29/01/2026 06:09",
+        "justification": "erro do sistema"
+    },
+    {
+        "id": "AUDIT_20260129061010_3310",
+        "action": "cancel_consumption",
+        "target_id": "CHARGE_91_20260128230936_REST_LOG_REC",
+        "target_details": {
+            "room": "21",
+            "total": 81.7,
+            "date": "26/01/2026 18:34",
+            "old_status": "pending"
+        },
+        "user": "Angelo",
+        "timestamp": "29/01/2026 06:10",
+        "justification": "erro do sistema"
+    },
+    {
+        "id": "AUDIT_20260129061038_5030",
+        "action": "cancel_consumption",
+        "target_id": "CHARGE_59_20260128212453_RECOVERED",
+        "target_details": {
+            "room": "17",
+            "total": 271.7,
+            "date": "28/01/2026 21:24",
+            "old_status": "pending"
+        },
+        "user": "Angelo",
+        "timestamp": "29/01/2026 06:10",
+        "justification": "erro do sistema"
+    },
+    {
+        "id": "AUDIT_20260129061134_7432",
+        "action": "cancel_consumption",
+        "target_id": "CHARGE_54_20260128230747_REST_REC",
+        "target_details": {
+            "room": "14",
+            "total": 105.3,
+            "date": "27/01/2026 08:10",
+            "old_status": "pending"
+        },
+        "user": "Angelo",
+        "timestamp": "29/01/2026 06:11",
+        "justification": "erro do sistema"
+    },
+    {
+        "id": "AUDIT_20260129061145_4445",
+        "action": "cancel_consumption",
+        "target_id": "CHARGE_92_20260128230936_REST_LOG_REC",
+        "target_details": {
+            "room": "12",
+            "total": 66.8,
+            "date": "25/01/2026 21:55",
+            "old_status": "pending"
+        },
+        "user": "Angelo",
+        "timestamp": "29/01/2026 06:11",
+        "justification": "erro do sistema"
+    },
+    {
+        "id": "AUDIT_20260129061157_3297",
+        "action": "cancel_consumption",
+        "target_id": "CHARGE_89_20260128230747_REST_REC",
+        "target_details": {
+            "room": "11",
+            "total": 91.3,
+            "date": "27/01/2026 09:07",
+            "old_status": "pending"
+        },
+        "user": "Angelo",
+        "timestamp": "29/01/2026 06:11",
+        "justification": "erro do sistema"
+    },
+    {
+        "id": "AUDIT_20260129061212_5566",
+        "action": "cancel_consumption",
+        "target_id": "CHARGE_40_20260128230747_REST_REC",
+        "target_details": {
+            "room": "03",
+            "total": 56.7,
+            "date": "27/01/2026 09:54",
+            "old_status": "pending"
+        },
+        "user": "Angelo",
+        "timestamp": "29/01/2026 06:12",
+        "justification": "erro do sistema"
+    },
+    {
+        "id": "AUDIT_20260129061227_4838",
+        "action": "cancel_consumption",
+        "target_id": "CHARGE_95_20260128230747_REST_REC",
+        "target_details": {
+            "room": "02",
+            "total": 66.6,
+            "date": "27/01/2026 08:47",
+            "old_status": "pending"
+        },
+        "user": "Angelo",
+        "timestamp": "29/01/2026 06:12",
+        "justification": "erro do sistema"
+    },
+    {
+        "id": "AUDIT_20260129061237_3277",
+        "action": "cancel_consumption",
+        "target_id": "CHARGE_99_20260128205116_REC",
+        "target_details": {
+            "room": "01",
+            "total": 0,
+            "date": "28/01/2026 20:51",
+            "old_status": "pending"
+        },
+        "user": "Angelo",
+        "timestamp": "29/01/2026 06:12",
+        "justification": "erro do sistema"
+    },
+    {
+        "id": "AUDIT_20260129061244_2685",
+        "action": "cancel_consumption",
+        "target_id": "CHARGE_59_20260128212453_REC",
+        "target_details": {
+            "room": "01",
+            "total": 0,
+            "date": "28/01/2026 21:24",
+            "old_status": "pending"
+        },
+        "user": "Angelo",
+        "timestamp": "29/01/2026 06:12",
+        "justification": "erro do sistema"
+    },
+    {
+        "id": "AUDIT_20260129061340_1880",
+        "action": "cancel_consumption",
+        "target_id": "CHARGE_10_20260128110141_REST",
+        "target_details": {
+            "room": "101",
+            "total": 110.0,
+            "date": "28/01/2026 11:01",
+            "old_status": "pending"
+        },
+        "user": "Angelo",
+        "timestamp": "29/01/2026 06:13",
+        "justification": "erro do sistema"
+    },
+    {
+        "id": "AUDIT_20260129061356_1154",
+        "action": "cancel_consumption",
+        "target_id": "CHARGE_55_20260128230747_REST_REC",
+        "target_details": {
+            "room": "26",
+            "total": 331.2,
+            "date": "27/01/2026 08:55",
+            "old_status": "pending"
+        },
+        "user": "Angelo",
+        "timestamp": "29/01/2026 06:13",
+        "justification": "erro do sistema"
+    },
+    {
+        "id": "AUDIT_20260129061413_4644",
+        "action": "cancel_consumption",
+        "target_id": "CHARGE_54_20260128230936_REST_LOG_REC",
+        "target_details": {
+            "room": "26",
+            "total": 8.9,
+            "date": "25/01/2026 19:19",
+            "old_status": "pending"
+        },
+        "user": "Angelo",
+        "timestamp": "29/01/2026 06:14",
+        "justification": "erro do sistema"
+    },
+    {
+        "id": "AUDIT_20260129081743_9586",
+        "action": "cancel_consumption",
+        "target_id": "CHARGE_99_20260128205116_RECOVERED",
+        "target_details": {
+            "room": "15",
+            "total": 104.80000000000001,
+            "date": "28/01/2026 20:51",
+            "old_status": "pending"
+        },
+        "user": "Angelo",
+        "timestamp": "29/01/2026 08:17",
+        "justification": "pedido duplicado"
+    },
+    {
+        "id": "AUDIT_20260129083959_2346",
+        "action": "cancel_consumption",
+        "target_id": "CHARGE_57_20260128235900_REST_REC",
+        "target_details": {
+            "room": "01",
+            "total": 303.05,
+            "date": "28/01/2026 19:33",
+            "old_status": "pending"
+        },
+        "user": "Angelo",
+        "timestamp": "29/01/2026 08:39",
+        "justification": "erro"
+    },
+    {
+        "id": "AUDIT_20260129084021_2123",
+        "action": "cancel_consumption",
+        "target_id": "CHARGE_73_20260128230936_REST_LOG_REC",
+        "target_details": {
+            "room": "17",
+            "total": 273.4,
+            "date": "25/01/2026 17:53",
+            "old_status": "pending"
+        },
+        "user": "Angelo",
+        "timestamp": "29/01/2026 08:40",
+        "justification": "erro do sistem"
+    },
+    {
+        "id": "AUDIT_20260129084153_4524",
+        "action": "cancel_consumption",
+        "target_id": "CHARGE_91_20260128230747_REST_REC",
+        "target_details": {
+            "room": "16",
+            "total": 81.7,
+            "date": "27/01/2026 09:03",
+            "old_status": "pending"
+        },
+        "user": "Angelo",
+        "timestamp": "29/01/2026 08:41",
+        "justification": "eroo "
+    },
+    {
+        "id": "AUDIT_20260129090440_6948",
+        "action": "cancel_consumption",
+        "target_id": "CHARGE_TEST_RECEP",
+        "target_details": {
+            "room": "101",
+            "total": 50.0,
+            "date": "29/01/2026",
+            "old_status": "pending"
+        },
+        "user": "jose",
+        "timestamp": "29/01/2026 09:04",
+        "justification": "Wrong room"
+    },
+    {
+        "id": "AUDIT_20260129172951_5941",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260129172951",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-01-29 17:29:51",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "29/01/2026 17:29",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260129173222_5157",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260129173222",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-01-29 17:32:22",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "29/01/2026 17:32",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260129173257_2101",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260129173257",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-01-29 17:32:57",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "29/01/2026 17:32",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260129173305_1808",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260129173305",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-01-29 17:33:05",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "29/01/2026 17:33",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260129173314_4616",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260129173314",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-01-29 17:33:14",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "29/01/2026 17:33",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260129173341_8273",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260129173341",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-01-29 17:33:41",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "29/01/2026 17:33",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260129182424_8253",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260129182424",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-01-29 18:24:24",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "29/01/2026 18:24",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260129182435_1368",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260129182435",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-01-29 18:24:35",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "29/01/2026 18:24",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260129183801_3018",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260129183801",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-01-29 18:38:01",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "29/01/2026 18:38",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260129185846_1568",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260129185846",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-01-29 18:58:46",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "29/01/2026 18:58",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260130094125_2102",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260130094125",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-01-30 09:41:25",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "30/01/2026 09:41",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260130100413_2876",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260130100413",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-01-30 10:04:13",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "30/01/2026 10:04",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260130101439_4162",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260130101439",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-01-30 10:14:39",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "30/01/2026 10:14",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260203152059_3586",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260203152059",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-02-03 15:20:59",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "03/02/2026 15:20",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260203153129_1255",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260203153129",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-02-03 15:31:29",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "03/02/2026 15:31",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260203153556_8283",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260203153556",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-02-03 15:35:56",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "03/02/2026 15:35",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260203154822_9980",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260203154822",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-02-03 15:48:22",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "03/02/2026 15:48",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260203164446_1363",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260203164446",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-02-03 16:44:46",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "03/02/2026 16:44",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260203164743_3774",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260203164743",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-02-03 16:47:43",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "03/02/2026 16:47",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260203165201_6049",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260203165201",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-02-03 16:52:01",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "03/02/2026 16:52",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260203171806_3851",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260203171806",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-02-03 17:18:06",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "03/02/2026 17:18",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260203174414_3268",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260203174414",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-02-03 17:44:14",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "03/02/2026 17:44",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260203180214_9747",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260203180214",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-02-03 18:02:14",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "03/02/2026 18:02",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260203181802_6141",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260203181802",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-02-03 18:18:02",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "03/02/2026 18:18",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260203184553_3296",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260203184553",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-02-03 18:45:53",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "03/02/2026 18:45",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260204083847_8550",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260204083847",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-02-04 08:38:47",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "04/02/2026 08:38",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260204090721_2652",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260204090721",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-02-04 09:07:21",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "04/02/2026 09:07",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260204094009_7718",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260204094009",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-02-04 09:40:09",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "04/02/2026 09:40",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260204095030_8574",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260204095030",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-02-04 09:50:30",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "04/02/2026 09:50",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260204095645_9364",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260204095645",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-02-04 09:56:45",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "04/02/2026 09:56",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260204100653_3450",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260204100653",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-02-04 10:06:53",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "04/02/2026 10:06",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260204104906_3863",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260204104906",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-02-04 10:49:06",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "04/02/2026 10:49",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260204105920_5566",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260204105920",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-02-04 10:59:20",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "04/02/2026 10:59",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260204110823_8133",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260204110823",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-02-04 11:08:23",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "04/02/2026 11:08",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260204120125_4528",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260204120125",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-02-04 12:01:25",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "04/02/2026 12:01",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260204131720_6237",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260204131720",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-02-04 13:17:20",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "04/02/2026 13:17",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260204134015_4611",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260204134015",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-02-04 13:40:15",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "04/02/2026 13:40",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260204134624_4219",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260204134624",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-02-04 13:46:24",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "04/02/2026 13:46",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260204140313_5410",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260204140313",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-02-04 14:03:13",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "04/02/2026 14:03",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260205073212_3950",
+        "action": "cancel_consumption",
+        "target_id": "TEST_CHARGE_20260205073212",
+        "target_details": {
+            "room": "999",
+            "total": 10.0,
+            "date": "2026-02-05 07:32:12",
+            "old_status": "pending"
+        },
+        "user": "admin_user",
+        "timestamp": "05/02/2026 07:32",
+        "justification": "Integration Test Justification"
+    },
+    {
+        "id": "AUDIT_20260205110628_1150",
+        "action": "cancel_consumption",
+        "target_id": "CHARGE_GOV_11_20260203101406_910414",
+        "target_details": {
+            "room": "11",
+            "total": 17.8,
+            "date": "03/02/2026 10:14",
+            "old_status": "pending"
+        },
+        "user": "Angelo",
+        "timestamp": "05/02/2026 11:06",
+        "justification": "teste"
+    }
+]
