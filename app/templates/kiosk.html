@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ponto Kiosk - Almareia</title>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
+        .kiosk-container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 90%; max-width: 500px; text-align: center; }
+        h1 { color: #2c3e50; margin-bottom: 20px; }
+        #reader { width: 100%; border-radius: 10px; overflow: hidden; }
+        .status-box { display: none; margin-top: 20px; }
+        .user-name { font-size: 1.5em; font-weight: bold; color: #2980b9; margin: 10px 0; }
+        .current-status { margin-bottom: 20px; color: #7f8c8d; }
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .btn { padding: 15px; border: none; border-radius: 8px; font-size: 1.1em; cursor: pointer; color: white; transition: opacity 0.3s; }
+        .btn:hover { opacity: 0.9; }
+        .btn-start { background: #27ae60; }
+        .btn-pause { background: #f39c12; }
+        .btn-resume { background: #27ae60; }
+        .btn-end { background: #c0392b; grid-column: span 2; }
+        .btn-cancel { background: #95a5a6; margin-top: 10px; width: 100%; }
+        
+        /* Verification Modal */
+        #verification-area { display: none; margin-top: 20px; }
+        #camera-preview { width: 100%; border-radius: 8px; background: #333; }
+        
+        .success-msg { color: #27ae60; font-size: 1.2em; margin-top: 20px; font-weight: bold; display: none; }
+        .error-msg { color: #c0392b; margin-top: 10px; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="kiosk-container">
+    <h1><i class="bi bi-clock"></i> Ponto Rápido</h1>
+    
+    <div id="scan-area">
+        <div id="reader"></div>
+        <p style="margin-top: 10px; color: #666;">Aproxime seu QR Code da câmera</p>
+    </div>
+
+    <div id="user-area" class="status-box">
+        <p>Olá,</p>
+        <div class="user-name" id="display-name">Nome do Usuário</div>
+        <div class="current-status">Status atual: <strong id="display-status">...</strong></div>
+        
+        <div id="actions-area" class="btn-grid">
+            <!-- Buttons injected via JS -->
+        </div>
+        
+        <button class="btn btn-cancel" onclick="resetKiosk()">Cancelar</button>
+    </div>
+
+    <div id="verification-area">
+        <h3><i class="bi bi-camera"></i> Confirmação Visual</h3>
+        <p>Tire uma foto para confirmar</p>
+        <video id="camera-preview" autoplay playsinline></video>
+        <canvas id="snapshot" style="display:none;"></canvas>
+        <div class="btn-grid">
+            <button class="btn btn-start" onclick="captureAndSend()">Confirmar e Enviar</button>
+            <button class="btn btn-cancel" onclick="cancelVerification()">Voltar</button>
+        </div>
+    </div>
+
+    <div id="message-area">
+        <div class="success-msg" id="success-msg"><i class="bi bi-check-circle"></i> Ponto registrado com sucesso!</div>
+        <div class="error-msg" id="error-msg"><i class="bi bi-x-circle"></i> Erro ao registrar.</div>
+    </div>
+</div>
+
+<script>
+    let html5QrcodeScanner;
+    let currentToken = null;
+    let currentAction = null;
+    let videoStream = null;
+
+    function startScanner() {
+        html5QrcodeScanner = new Html5Qrcode("reader");
+        html5QrcodeScanner.start(
+            { facingMode: "user" }, 
+            { fps: 10, qrbox: { width: 250, height: 250 } },
+            onScanSuccess,
+            onScanFailure
+        ).catch(err => console.error("Error starting scanner", err));
+    }
+
+    function onScanSuccess(decodedText, decodedResult) {
+        // Stop scanning
+        html5QrcodeScanner.stop().then(() => {
+            document.getElementById('scan-area').style.display = 'none';
+            verifyToken(decodedText);
+        }).catch(err => console.error("Failed to stop scanner", err));
+    }
+
+    function onScanFailure(error) {
+        // handle scan failure, usually better to ignore and keep scanning.
+    }
+
+    async function verifyToken(token) {
+        try {
+            const response = await fetch('/kiosk/scan', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ token: token })
+            });
+            const data = await response.json();
+            
+            if (data.valid) {
+                currentToken = token;
+                showUserActions(data);
+            } else {
+                showError("QR Code inválido: " + (data.message || ''));
+                setTimeout(resetKiosk, 2000);
+            }
+        } catch (e) {
+            showError("Erro de conexão");
+            setTimeout(resetKiosk, 2000);
+        }
+    }
+
+    function showUserActions(data) {
+        document.getElementById('user-area').style.display = 'block';
+        document.getElementById('display-name').innerText = data.name;
+        document.getElementById('display-status').innerText = data.status;
+        
+        const actionsDiv = document.getElementById('actions-area');
+        actionsDiv.innerHTML = '';
+        
+        if (data.status === 'Não iniciado') {
+            actionsDiv.innerHTML = `<button class="btn btn-start" onclick="initiateAction('start')">▶️ Iniciar Jornada</button>`;
+        } else if (data.status === 'Trabalhando') {
+            actionsDiv.innerHTML = `
+                <button class="btn btn-pause" onclick="initiateAction('pause')">⏸️ Pausa</button>
+                <button class="btn btn-end" onclick="initiateAction('end')">⏹️ Finalizar</button>
+            `;
+        } else if (data.status === 'Pausa') {
+            actionsDiv.innerHTML = `
+                <button class="btn btn-resume" onclick="initiateAction('resume')">▶️ Voltar da Pausa</button>
+                <button class="btn btn-end" onclick="initiateAction('end')">⏹️ Finalizar</button>
+            `;
+        } else if (data.status === 'Finalizado') {
+            actionsDiv.innerHTML = `<p>Jornada já finalizada hoje.</p>`;
+        }
+    }
+
+    function initiateAction(action) {
+        currentAction = action;
+        if (action === 'start' || action === 'end') {
+            // Require verification
+            document.getElementById('user-area').style.display = 'none';
+            document.getElementById('verification-area').style.display = 'block';
+            startCamera();
+        } else {
+            // Pause/Resume might not need photo? Let's verify anyway for consistency or skip?
+            // User requested "so bater o ponto", simple. But security wise... 
+            // Let's skip photo for pause/resume to be faster, but require for start/end.
+            submitAction(action, null);
+        }
+    }
+
+    function startCamera() {
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+                .then(stream => {
+                    videoStream = stream;
+                    document.getElementById('camera-preview').srcObject = stream;
+                });
+        }
+    }
+
+    function captureAndSend() {
+        const video = document.getElementById('camera-preview');
+        const canvas = document.getElementById('snapshot');
+        
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        
+        const photoData = canvas.toDataURL('image/jpeg');
+        submitAction(currentAction, photoData);
+    }
+
+    async function submitAction(action, photoData) {
+        try {
+            const response = await fetch('/kiosk/action', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    token: currentToken,
+                    action: action,
+                    photo_data: photoData,
+                    latitude: null, // Kiosk is fixed
+                    longitude: null
+                })
+            });
+            const result = await response.json();
+            
+            if (result.success) {
+                document.getElementById('verification-area').style.display = 'none';
+                document.getElementById('user-area').style.display = 'none';
+                document.getElementById('success-msg').style.display = 'block';
+                setTimeout(resetKiosk, 3000);
+            } else {
+                showError("Erro: " + result.message);
+            }
+        } catch (e) {
+            showError("Erro ao enviar: " + e);
+        }
+    }
+
+    function cancelVerification() {
+        if (videoStream) {
+            videoStream.getTracks().forEach(track => track.stop());
+        }
+        document.getElementById('verification-area').style.display = 'none';
+        document.getElementById('user-area').style.display = 'block';
+    }
+
+    function resetKiosk() {
+        if (videoStream) {
+            videoStream.getTracks().forEach(track => track.stop());
+        }
+        currentToken = null;
+        currentAction = null;
+        document.getElementById('user-area').style.display = 'none';
+        document.getElementById('verification-area').style.display = 'none';
+        document.getElementById('message-area').children[0].style.display = 'none';
+        document.getElementById('message-area').children[1].style.display = 'none';
+        document.getElementById('scan-area').style.display = 'block';
+        startScanner();
+    }
+
+    function showError(msg) {
+        const el = document.getElementById('error-msg');
+        el.innerText = msg;
+        el.style.display = 'block';
+    }
+
+    // Init
+    window.onload = startScanner;
+</script>
+
+</body>
+</html>

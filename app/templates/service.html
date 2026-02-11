@@ -1,0 +1,630 @@
+{% extends "base.html" %}
+
+{% block title %}{{ service.name }} - Almareia Mirapraia{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="{{ service.icon }}"></i> {{ service.name }}</h2>
+        <div>
+            <span class="text-muted me-3"><i class="bi bi-person-circle"></i> {{ session.get('user') }}</span>
+            <a href="{{ url_for('main.index') }}" class="btn btn-secondary">
+                <i class="bi bi-house-door-fill"></i> Home
+            </a>
+        </div>
+    </div>
+
+    <!-- Purchase Alerts -->
+    {% if purchase_alerts %}
+    <div class="alert alert-warning shadow-sm mb-4" role="alert">
+        <h4 class="alert-heading"><i class="bi bi-exclamation-triangle-fill"></i> Alerta de Reposição</h4>
+        <p>Os seguintes produtos estão sem compra há mais tempo que a frequência estipulada:</p>
+        <hr>
+        <ul class="mb-0">
+            {% for alert in purchase_alerts %}
+            <li>
+                <strong>{{ alert.product }}</strong> 
+                ({{ alert.frequency }}) - 
+                Última compra: {{ alert.last_date }} 
+                <span class="fw-bold text-danger">({{ alert.days }})</span>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        
+
+
+        <!-- PRINCIPAL (Almoxarifado/Compras) -->
+        {% if service.id == 'principal' %}
+            <!-- Operações de Consumo -->
+            <div class="col">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-primary">
+                            <i class="bi bi-box-seam display-4"></i>
+                        </div>
+                        <h4 class="card-title">Solicitar Material</h4>
+                        <p class="card-text text-muted">Faça requisições de insumos para outros setores.</p>
+                        <a href="{{ url_for('stock.new_stock_request') }}" class="btn btn-primary w-100 stretched-link">
+                            Nova Solicitação
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            {% if session.get('role') in ['gerente', 'admin'] %}
+            <div class="col">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-success">
+                            <i class="bi bi-check-circle display-4"></i>
+                        </div>
+                        <h4 class="card-title">Confirmar Recebimento</h4>
+                        <p class="card-text text-muted">Confirme o recebimento de mercadorias solicitadas.</p>
+                        <a href="{{ url_for('stock.stock_confirmation') }}" class="btn btn-success w-100 stretched-link">
+                            Confirmar
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-warning">
+                            <i class="bi bi-box-arrow-right display-4"></i>
+                        </div>
+                        <h4 class="card-title">Separação de Pedidos</h4>
+                        <p class="card-text text-muted">Gerencie e separe os pedidos de estoque pendentes.</p>
+                        <a href="{{ url_for('stock.stock_fulfillment') }}" class="btn btn-warning w-100 stretched-link text-dark">
+                            Separar Pedidos
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if is_manager %}
+            <!-- Compras e Entradas -->
+            <div class="col">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-info">
+                            <i class="bi bi-list-check display-4"></i>
+                        </div>
+                        <h4 class="card-title">Lista de Compras</h4>
+                        <p class="card-text text-muted">Gere listas de compras baseadas no estoque mínimo.</p>
+                        <a href="{{ url_for('stock.stock_order') }}" class="btn btn-info w-100 stretched-link text-white">
+                            Gerar Lista
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-success">
+                            <i class="bi bi-box-arrow-in-down display-4"></i>
+                        </div>
+                        <h4 class="card-title">Entrada de Mercadoria</h4>
+                        <p class="card-text text-muted">Registre a entrada de novos produtos no estoque.</p>
+                        <a href="{{ url_for('stock.stock_entry') }}" class="btn btn-success w-100 stretched-link">
+                            Registrar Entrada
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gestão -->
+            <div class="col">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-dark">
+                            <i class="bi bi-boxes display-4"></i>
+                        </div>
+                        <h4 class="card-title">Gerenciar Insumos</h4>
+                        <p class="card-text text-muted">Cadastre, edite e visualize todos os produtos.</p>
+                        <a href="{{ url_for('stock.stock_products') }}" class="btn btn-outline-dark w-100 stretched-link">
+                            Gerenciar
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-danger">
+                            <i class="bi bi-sliders display-4"></i>
+                        </div>
+                        <h4 class="card-title">Estoque Mínimo</h4>
+                        <p class="card-text text-muted">Ajuste os níveis mínimos de estoque para alertas.</p>
+                        <a href="{{ url_for('stock.stock_adjust_min_levels') }}" class="btn btn-outline-danger w-100 stretched-link">
+                            Ajustar
+                        </a>
+                    </div>
+                </div>
+            </div>
+             <div class="col">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-secondary">
+                            <i class="bi bi-tags display-4"></i>
+                        </div>
+                        <h4 class="card-title">Categorias</h4>
+                        <p class="card-text text-muted">Gerencie as categorias de produtos.</p>
+                        <a href="{{ url_for('stock.stock_categories') }}" class="btn btn-outline-secondary w-100 stretched-link">
+                            Gerenciar
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        {% endif %}
+
+        <!-- RESTAURANTE MIRAPRAIA -->
+        {% if service.id == 'restaurante_mirapraia' %}
+            <div class="col">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-primary">
+                            <i class="bi bi-grid-3x3 display-4"></i>
+                        </div>
+                        <h4 class="card-title">Mesas & Pedidos</h4>
+                        <p class="card-text text-muted">Mapa de mesas, pedidos e fechamento de contas.</p>
+                        <a href="{{ url_for('restaurant.restaurant_tables') }}" class="btn btn-primary w-100 stretched-link">
+                            Acessar Mesas
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-info">
+                            <i class="bi bi-phone display-4"></i>
+                        </div>
+                        <h4 class="card-title">Cardápio Virtual</h4>
+                        <p class="card-text text-muted">Visualizar como o cliente vê o cardápio.</p>
+                        <a href="{{ url_for('menu.client_menu') }}" class="btn btn-info w-100 stretched-link text-white" target="_blank">
+                            Visualizar
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-warning">
+                            <i class="bi bi-people display-4"></i>
+                        </div>
+                        <h4 class="card-title">Fila de Espera</h4>
+                        <p class="card-text text-muted">Link público para a fila de espera.</p>
+                        <a href="{{ url_for('restaurant.public_waiting_list') }}" class="btn btn-warning w-100 stretched-link text-dark" target="_blank">
+                            Link Público
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            {% if is_manager or session.get('role') == 'admin' or session.get('role') == 'recepcao' %}
+            <div class="col">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-dark">
+                            <i class="bi bi-journal-text display-4"></i>
+                        </div>
+                        <h4 class="card-title">Gerenciar Cardápio</h4>
+                        <p class="card-text text-muted">Adicionar, editar e pausar itens do menu.</p>
+                        <a href="{{ url_for('menu.menu_management') }}" class="btn btn-dark w-100 stretched-link">
+                            Gerenciar
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        {% endif %}
+
+        <!-- GOVERNANÇA -->
+        {% if service.id == 'governanca' %}
+            <div class="col">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-primary">
+                            <i class="bi bi-door-closed display-4"></i>
+                        </div>
+                        <h4 class="card-title">Controle de Quartos</h4>
+                        <p class="card-text text-muted">Status de limpeza, ocupação e manutenção dos quartos.</p>
+                        <a href="{{ url_for('governance.governance_rooms') }}" class="btn btn-primary w-100 stretched-link">
+                            Acessar Quartos
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-info">
+                            <i class="bi bi-basket display-4"></i>
+                        </div>
+                        <h4 class="card-title">Lavanderia</h4>
+                        <p class="card-text text-muted">Controle de enxoval e itens em lavagem.</p>
+                        <a href="{{ url_for('governance.laundry_management') }}" class="btn btn-info w-100 stretched-link text-white">
+                            Acessar Lavanderia
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-danger">
+                            <i class="bi bi-tools display-4"></i>
+                        </div>
+                        <h4 class="card-title">Solicitar Manutenção</h4>
+                        <p class="card-text text-muted">Abrir chamados de manutenção para quartos ou áreas.</p>
+                        <a href="{{ url_for('maintenance.new_maintenance_request') }}" class="btn btn-outline-danger w-100 stretched-link">
+                            Nova Solicitação
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-secondary">
+                            <i class="bi bi-box-arrow-up display-4"></i>
+                        </div>
+                        <h4 class="card-title">Solicitar Material</h4>
+                        <p class="card-text text-muted">Requisitar insumos de limpeza e amenidades.</p>
+                        <a href="{{ url_for('stock.new_stock_request') }}" class="btn btn-secondary w-100 stretched-link">
+                            Solicitar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- RH -->
+        {% if service.id == 'rh' %}
+            <div class="col">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-primary">
+                            <i class="bi bi-person-lines-fill display-4"></i>
+                        </div>
+                        <h4 class="card-title">Gerenciar Usuários</h4>
+                        <p class="card-text text-muted">Cadastro e edição de funcionários e acessos.</p>
+                        <a href="{{ url_for('admin.admin_users') }}" class="btn btn-primary w-100 stretched-link">
+                            Gerenciar
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-secondary">
+                            <i class="bi bi-archive display-4"></i>
+                        </div>
+                        <h4 class="card-title">Ex-Funcionários</h4>
+                        <p class="card-text text-muted">Histórico de colaboradores desligados.</p>
+                        <a href="{{ url_for('hr.rh_ex_employees') }}" class="btn btn-secondary w-100 stretched-link">
+                            Ver Arquivo
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-info">
+                            <i class="bi bi-clock-history display-4"></i>
+                        </div>
+                        <h4 class="card-title">Relatórios de Ponto</h4>
+                        <p class="card-text text-muted">Controle de jornada e horas trabalhadas.</p>
+                        <a href="{{ url_for('hr.rh_timesheet') }}" class="btn btn-info w-100 stretched-link text-white">
+                            Acessar Ponto
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- FINANCEIRO -->
+        {% if service.id == 'financeiro' %}
+            {% if service.actions %}
+                {% for action in service.actions %}
+                    {% if action.url == 'finance_commission' %}
+                        {% if session.get('role') in ['admin', 'gerente', 'financeiro'] or 'comissao' in session.get('permissions', []) %}
+                        <div class="col">
+                            <div class="card h-100 shadow-sm hover-card">
+                                <div class="card-body text-center p-4">
+                                    <div class="mb-3 text-success">
+                                        <i class="{{ action.icon }} display-4"></i>
+                                    </div>
+                                    <h4 class="card-title">{{ action.name }}</h4>
+                                    <p class="card-text text-muted">Gestão de comissões e pagamentos.</p>
+                                    <a href="{{ url_for(action.url) }}" class="btn btn-success w-100 stretched-link">
+                                        Acessar
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="col">
+                            <div class="card h-100 shadow-sm hover-card">
+                                <div class="card-body text-center p-4">
+                                    <div class="mb-3 text-primary">
+                                        <i class="{{ action.icon }} display-4"></i>
+                                    </div>
+                                    <h4 class="card-title">{{ action.name }}</h4>
+                                    <p class="card-text text-muted">Ação financeira configurada.</p>
+                                    <a href="{{ url_for(action.url) }}" class="btn btn-primary w-100 stretched-link">
+                                        Acessar
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+            
+            <div class="col">
+                <div class="card h-100 shadow-sm hover-card border-secondary border-opacity-25">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-secondary">
+                            <i class="bi bi-cash display-4"></i>
+                        </div>
+                        <h4 class="card-title">Fluxo de Caixa</h4>
+                        <p class="card-text text-muted">Em desenvolvimento.</p>
+                        <button class="btn btn-secondary w-100 disabled">
+                            Em Breve
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-danger">
+                            <i class="bi bi-receipt display-4"></i>
+                        </div>
+                        <h4 class="card-title">Contas a Pagar</h4>
+                        <p class="card-text text-muted">Gestão de pagamentos e vencimentos.</p>
+                        <a href="{{ url_for('finance.accounts_payable') }}" class="btn btn-danger w-100 stretched-link">
+                            Acessar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- COZINHA -->
+        {% if service.id == 'cozinha' %}
+            <div class="col">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-warning">
+                            <i class="bi bi-tv display-4"></i>
+                        </div>
+                        <h4 class="card-title">KDS (Pedidos)</h4>
+                        <p class="card-text text-muted">Monitor de pedidos da cozinha.</p>
+                        <a href="{{ url_for('kitchen.kitchen_kds') }}" class="btn btn-warning w-100 stretched-link text-dark">
+                            Abrir KDS
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-success">
+                            <i class="bi bi-check2-square display-4"></i>
+                        </div>
+                        <h4 class="card-title">Listas e Checklists</h4>
+                        <p class="card-text text-muted">Gerenciar compras e rotinas da cozinha.</p>
+                        <a href="{{ url_for('kitchen.kitchen_checklist_manage') }}" class="btn btn-success w-100 stretched-link">
+                            Acessar Listas
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3" style="color: #d35400;">
+                            <i class="bi bi-pie-chart display-4"></i>
+                        </div>
+                        <h4 class="card-title">Porcionar Item</h4>
+                        <p class="card-text text-muted">Registro de porcionamento e quebras.</p>
+                        <a href="{{ url_for('kitchen.kitchen_portion') }}" class="btn w-100 stretched-link text-white" style="background-color: #d35400;">
+                            Porcionar
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3" style="color: #8e44ad;">
+                            <i class="bi bi-file-text display-4"></i>
+                        </div>
+                        <h4 class="card-title">Relatórios</h4>
+                        <p class="card-text text-muted">Histórico e relatórios de produção.</p>
+                        <a href="{{ url_for('kitchen.kitchen_reports') }}" class="btn w-100 stretched-link text-white" style="background-color: #8e44ad;">
+                            Ver Relatórios
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% if session.get('role') == 'admin' %}
+            <div class="col">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-secondary">
+                            <i class="bi bi-gear display-4"></i>
+                        </div>
+                        <h4 class="card-title">Configurações</h4>
+                        <p class="card-text text-muted">Gerenciar categorias e regras de porcionamento.</p>
+                        <a href="{{ url_for('kitchen.kitchen_portion_settings') }}" class="btn btn-secondary w-100 stretched-link">
+                            Configurar
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        {% endif %}
+
+        <!-- MANUTENÇÃO -->
+        {% if service.id == 'manutencao' %}
+            <div class="col">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-primary">
+                            <i class="bi bi-plus-circle display-4"></i>
+                        </div>
+                        <h4 class="card-title">Nova Solicitação</h4>
+                        <p class="card-text text-muted">Registrar nova demanda de manutenção.</p>
+                        <a href="{{ url_for('maintenance.new_maintenance_request') }}" class="btn btn-primary w-100 stretched-link">
+                            Criar Solicitação
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% if is_manager %}
+            <div class="col">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-success">
+                            <i class="bi bi-list-check display-4"></i>
+                        </div>
+                        <h4 class="card-title">Gerenciar Solicitações</h4>
+                        <p class="card-text text-muted">Acompanhar e atualizar status dos chamados.</p>
+                        <a href="{{ url_for('maintenance.maintenance_requests_view') }}" class="btn btn-success w-100 stretched-link">
+                            Gerenciar
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        {% endif %}
+
+        <!-- CONFERÊNCIAS -->
+        {% if service.id == 'conferencias' %}
+            <div class="col">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-primary">
+                            <i class="bi bi-plus-circle display-4"></i>
+                        </div>
+                        <h4 class="card-title">Nova Conferência</h4>
+                        <p class="card-text text-muted">Iniciar nova auditoria ou conferência.</p>
+                        <a href="{{ url_for('stock.new_conference') }}" class="btn btn-primary w-100 stretched-link">
+                            Iniciar
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-info">
+                            <i class="bi bi-clock-history display-4"></i>
+                        </div>
+                        <h4 class="card-title">Histórico</h4>
+                        <p class="card-text text-muted">Visualizar conferências passadas.</p>
+                        <a href="{{ url_for('stock.conference_history') }}" class="btn btn-info w-100 stretched-link text-white">
+                            Ver Histórico
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-secondary">
+                            <i class="bi bi-slash-circle display-4"></i>
+                        </div>
+                        <h4 class="card-title">Itens Ignorados</h4>
+                        <p class="card-text text-muted">Gerenciar itens ignorados nas conferências.</p>
+                        <a href="{{ url_for('stock.conference_skipped_list') }}" class="btn btn-secondary w-100 stretched-link">
+                            Gerenciar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- ENTRETENIMENTO -->
+        {% if service.id == 'entretenimento' %}
+            <div class="col">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-primary">
+                            <i class="bi bi-music-note-beamed display-4"></i>
+                        </div>
+                        <h4 class="card-title">Sistema de Som</h4>
+                        <p class="card-text text-muted">Controle de playlist e volume ambiente.</p>
+                        <a href="{{ '#' }}" class="btn btn-primary w-100 stretched-link">
+                            Controlar Som
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-info">
+                            <i class="bi bi-tv display-4"></i>
+                        </div>
+                        <h4 class="card-title">TVs Roku</h4>
+                        <p class="card-text text-muted">Controle de exibição e publicidade nas TVs.</p>
+                        <a href="{{ '#' }}" class="btn btn-info w-100 stretched-link text-white">
+                            Gerenciar TVs
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- GENERIC ACTIONS (If not covered above or additional ones) -->
+        {% if service.actions and service.id != 'financeiro' %}
+            {% for action in service.actions %}
+            <div class="col">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-primary">
+                            <i class="{{ action.icon }} display-4"></i>
+                        </div>
+                        <h4 class="card-title">{{ action.name }}</h4>
+                        <p class="card-text text-muted">Ação configurada.</p>
+                        <a href="{{ url_for(action.url) }}" class="btn btn-primary w-100 stretched-link">
+                            Acessar
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% endif %}
+
+    </div>
+</div>
+
+<style>
+    .hover-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: none;
+    }
+    .hover-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+    }
+    .card-body i.display-4 {
+        font-size: 2.5rem;
+    }
+</style>
+{% endblock %}

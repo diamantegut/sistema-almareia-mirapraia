@@ -1,0 +1,384 @@
+{% extends 'base.html' %}
+
+{% block title %}Administração - Back of the House{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-shield-lock"></i> Painel Administrativo</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Administração</li>
+            </ol>
+        </nav>
+    </div>
+
+    <div class="row g-4">
+        <!-- User Management -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body text-center">
+                    <div class="mb-3 text-primary">
+                        <i class="bi bi-people-fill display-4"></i>
+                    </div>
+                    <h5 class="card-title">Usuários e Acessos</h5>
+                    <p class="card-text text-muted small">Gerencie usuários, permissões e senhas.</p>
+                    <a href="{{ url_for('admin.admin_users') }}" class="btn btn-outline-primary w-100">Acessar</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reports -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body text-center">
+                    <div class="mb-3 text-success">
+                        <i class="bi bi-file-earmark-text display-4"></i>
+                    </div>
+                    <h5 class="card-title">Relatórios</h5>
+                    <p class="card-text text-muted small">Vendas, estoque e performance.</p>
+                    <a href="{{ url_for('reports.reports') }}" class="btn btn-outline-success w-100">Acessar</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body text-center">
+                    <div class="mb-3 text-primary">
+                        <i class="bi bi-credit-card-2-front-fill display-4"></i>
+                    </div>
+                    <h5 class="card-title">Conciliação</h5>
+                    <p class="card-text text-muted small">Conciliação de cartões e adquirentes.</p>
+                    <a href="{{ url_for('finance.finance_reconciliation') }}" class="btn btn-outline-primary w-100">Acessar</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stock Management -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body text-center">
+                    <div class="mb-3" style="color: #8e44ad;">
+                        <i class="bi bi-clipboard-data display-4"></i>
+                    </div>
+                    <h5 class="card-title">Insumos</h5>
+                    <p class="card-text text-muted small">Cadastro e controle de insumos.</p>
+                    <a href="{{ url_for('stock.stock_products') }}" class="btn w-100" style="color: #8e44ad; border-color: #8e44ad;">Acessar</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fiscal Configuration -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body text-center">
+                    <div class="mb-3 text-warning">
+                        <i class="bi bi-receipt display-4"></i>
+                    </div>
+                    <h5 class="card-title">Fiscal</h5>
+                    <p class="card-text text-muted small">Configurações fiscais e tributárias.</p>
+                    <a href="{{ url_for('admin.fiscal_config') }}" class="btn btn-outline-warning w-100">Configurar</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Printers -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body text-center">
+                    <div class="mb-3 text-dark">
+                        <i class="bi bi-printer display-4"></i>
+                    </div>
+                    <h5 class="card-title">Impressoras</h5>
+                    <p class="card-text text-muted small">Gerenciamento de impressão.</p>
+                    <a href="{{ url_for('admin.printers_config') }}" class="btn btn-outline-dark w-100">Gerenciar</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body text-center">
+                    <div class="mb-3 text-danger">
+                        <i class="bi bi-shield-exclamation display-4"></i>
+                    </div>
+                    <h5 class="card-title">Segurança</h5>
+                    <p class="card-text text-muted small">Alertas e configurações de segurança.</p>
+                    <a href="{{ url_for('admin.admin_security_dashboard') }}" class="btn btn-outline-danger w-100">Monitorar</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Logs -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body text-center">
+                    <div class="mb-3 text-secondary">
+                        <i class="bi bi-journal-text display-4"></i>
+                    </div>
+                    <h5 class="card-title">Logs</h5>
+                    <p class="card-text text-muted small">Auditoria de ações do sistema.</p>
+                    <a href="{{ url_for('admin.view_logs') }}" class="btn btn-outline-secondary w-100">Visualizar</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Health/Dashboard -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body text-center">
+                    <div class="mb-3 text-info">
+                        <i class="bi bi-speedometer2 display-4"></i>
+                    </div>
+                    <h5 class="card-title">Sistema</h5>
+                    <p class="card-text text-muted small">Backups e saúde do servidor.</p>
+                    <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-outline-info w-100">Dashboard</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Backups -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body text-center">
+                    <div class="mb-3 text-primary">
+                        <i class="bi bi-cloud-arrow-up display-4"></i>
+                    </div>
+                    <h5 class="card-title">Backups</h5>
+                    <p class="card-text text-muted small">Gerenciamento e restauração de dados.</p>
+                    <a href="{{ url_for('admin.admin_backups_view') }}" class="btn btn-outline-primary w-100">Gerenciar</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- HR (Optional but useful) -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body text-center">
+                    <div class="mb-3" style="color: #fd7e14;">
+                        <i class="bi bi-person-badge display-4"></i>
+                    </div>
+                    <h5 class="card-title">Recursos Humanos</h5>
+                    <p class="card-text text-muted small">Gestão de funcionários e documentos.</p>
+                    <a href="{{ url_for('hr.hr_dashboard') }}" class="btn w-100" style="color: #fd7e14; border-color: #fd7e14;">Acessar RH</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Server Actions -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 shadow-sm border-danger">
+                <div class="card-body text-center">
+                    <div class="mb-3 text-danger">
+                        <i class="bi bi-power display-4"></i>
+                    </div>
+                    <h5 class="card-title">Servidor</h5>
+                    <p class="card-text text-muted small">Ações críticas do sistema.</p>
+                    <form action="/admin/restart" method="POST" onsubmit="return confirm('Tem certeza que deseja reiniciar o servidor? Todos os usuários serão desconectados momentaneamente.');">
+                        <button type="submit" class="btn btn-danger w-100"><i class="bi bi-arrow-clockwise"></i> Reiniciar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Health & Alerts -->
+    {% if stats or backup_health or alerts %}
+    <div class="row mt-4">
+        <!-- System Stats -->
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-speedometer2"></i> Status do Sistema</h5>
+                </div>
+                <div class="card-body">
+                    {% if stats %}
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            CPU
+                            <span class="badge bg-primary rounded-pill">{{ stats.cpu_load }}%</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Memória
+                            <span class="badge bg-primary rounded-pill">{{ stats.memory_usage }}%</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Disco
+                            <span class="badge bg-primary rounded-pill">{{ stats.disk_usage }}%</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Uptime
+                            <span class="badge bg-secondary rounded-pill">{{ stats.uptime }}</span>
+                        </li>
+                    </ul>
+                    {% endif %}
+                    
+                    {% if backup_health %}
+                    <div class="mt-3">
+                        <h6>Backup Recente</h6>
+                        {% if backup_health[0] %}
+                            <div class="alert alert-success py-2 mb-0 small">
+                                <i class="bi bi-check-circle-fill"></i> {{ backup_health[1] }}
+                            </div>
+                        {% else %}
+                            <div class="alert alert-danger py-2 mb-0 small">
+                                <i class="bi bi-exclamation-triangle-fill"></i> {{ backup_health[1] }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Alerts -->
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-bell"></i> Alertas Recentes</h5>
+                    <a href="{{ url_for('admin.admin_security_dashboard') }}" class="btn btn-sm btn-outline-light">Ver Todos</a>
+                </div>
+                <div class="card-body p-0">
+                    {% if alerts %}
+                        <div class="list-group list-group-flush">
+                        {% for alert in alerts %}
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1 text-{{ 'danger' if alert.severity == 'Critical' else 'warning' if alert.severity == 'High' else 'info' }}">
+                                        {{ alert.type }}
+                                    </h6>
+                                    <small class="text-muted">{{ alert.timestamp }}</small>
+                                </div>
+                                <p class="mb-1 small">{{ alert.message }}</p>
+                            </div>
+                        {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4 text-muted">
+                            <i class="bi bi-check-circle display-4"></i>
+                            <p class="mt-2">Nenhum alerta recente.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Ngrok External Tunnels Status -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-globe"></i> Status dos Túneis Externos (Ngrok)</h5>
+                    <button class="btn btn-sm btn-outline-light" onclick="refreshNgrokStatus()">
+                        <i class="bi bi-arrow-repeat"></i> Atualizar
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="ngrokStatusContent">
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status"></div>
+                            <p class="mt-2 text-muted">Carregando status dos túneis...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function refreshNgrokStatus() {
+    const container = document.getElementById('ngrokStatusContent');
+    container.innerHTML = `
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2 text-muted">Carregando status dos túneis...</p>
+        </div>
+    `;
+
+    fetch('/admin/api/ngrok/status')
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'inactive') {
+                container.innerHTML = `
+                    <div class="alert alert-warning mb-0">
+                        <i class="bi bi-exclamation-triangle"></i> ${data.message}
+                        <hr>
+                        <p class="mb-0 small">Inicie o script <code>start_ngrok_tunnels.bat</code> no servidor para ativar o acesso externo.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>Ambiente:</strong> <span class="badge bg-info">${data.environment}</span>
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Porta Local:</strong> <span class="badge bg-secondary">${data.port}</span>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <small class="text-muted">Última atualização: ${data.last_update}</small>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Função</th>
+                                <th>Domínio Externo</th>
+                                <th>Status</th>
+                                <th>Link</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            data.tunnels.forEach(t => {
+                const statusBadge = t.status === 'active' 
+                    ? '<span class="badge bg-success">Ativo</span>' 
+                    : `<span class="badge bg-danger" title="${t.error || 'Erro desconhecido'}">Falhou</span>`;
+                
+                const link = t.status === 'active'
+                    ? `<a href="${t.url}" target="_blank" class="btn btn-xs btn-primary"><i class="bi bi-box-arrow-up-right"></i> Abrir</a>`
+                    : '-';
+
+                html += `
+                    <tr>
+                        <td><strong>${t.description}</strong></td>
+                        <td><code>${t.domain}</code></td>
+                        <td>${statusBadge}</td>
+                        <td>${link}</td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            container.innerHTML = html;
+        })
+        .catch(err => {
+            container.innerHTML = `<div class="alert alert-danger">Erro ao carregar status: ${err}</div>`;
+        });
+}
+
+// Initial load
+document.addEventListener('DOMContentLoaded', refreshNgrokStatus);
+</script>
+
+<style>
+.btn-xs {
+    padding: 0.1rem 0.4rem;
+    font-size: 0.75rem;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}Histórico de Conferências - Back of the House{% endblock %}
+
+{% block content %}
+<div class="history-page">
+    <h2><i class="bi bi-journal-text"></i> Histórico de Conferências</h2>
+    
+    <div style="margin-bottom: 20px; display: flex; justify-content: space-between;">
+        <a href="{{ url_for('main.index') }}" class="action-btn" style="background-color: #95a5a6; text-decoration: none;"><i class="bi bi-arrow-left"></i> Voltar</a>
+        <div>
+            <a href="{{ url_for('stock.conference_skipped_list') }}" class="action-btn" style="background-color: #7f8c8d; text-decoration: none; margin-right: 10px;"><i class="bi bi-slash-circle"></i> Itens Ignorados</a>
+            <a href="{{ url_for('stock.conference_monthly_report') }}" class="action-btn" style="background-color: #8e44ad; text-decoration: none;"><i class="bi bi-calendar-event"></i> Relatório Mensal (16-15)</a>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                <th>ID</th>
+                <th>Data</th>
+                <th>Período</th>
+                <th>Departamento</th>
+                <th>Responsável</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for conf in conferences | reverse %}
+            <tr>
+                <td>{{ conf.id }}</td>
+                <td>{{ conf.created_at }}</td>
+                <td><small>{{ conf.reference_period }}</small></td>
+                <td>{{ conf.department }}</td>
+                <td>{{ conf.created_by }}</td>
+                <td>
+                    <span class="status-badge {{ 'bg-warning' if conf.status == 'Em Andamento' else ('bg-danger' if conf.status == 'Cancelada' else 'bg-success') }}" style="padding: 5px 10px; border-radius: 15px; color: white;">
+                        {{ conf.status }}
+                    </span>
+                    {% if conf.status == 'Cancelada' and conf.cancellation_reason %}
+                    <br><small style="color: #c0392b; font-size: 0.8em;">Motivo: {{ conf.cancellation_reason }}</small>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="table-actions">
+                        {% if conf.status == 'Em Andamento' %}
+                        <a href="{{ url_for('stock.conference_count', conf_id=conf.id) }}" class="action-btn" style="background-color: #f39c12; font-size: 0.8em; text-decoration: none;"><i class="bi bi-pencil-square"></i> Continuar</a>
+                        <button class="action-btn" style="background-color: #e74c3c; font-size: 0.8em;" onclick="openCancelModal('{{ conf.id }}')"><i class="bi bi-x-octagon-fill"></i> Cancelar</button>
+                        {% elif conf.status == 'Finalizada' %}
+                        <a href="{{ url_for('stock.conference_report', conf_id=conf.id) }}" class="action-btn" style="background-color: #1e3a8a; font-size: 0.8em; text-decoration: none;"><i class="bi bi-file-earmark-text-fill"></i> Ver Relatório</a>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal de Cancelamento -->
+<div id="cancelModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);">
+    <div style="background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 400px; border-radius: 8px;">
+        <h3>Cancelar Conferência</h3>
+        <p>Por favor, informe o motivo do cancelamento:</p>
+        <form id="cancelForm" method="POST" action="">
+            <textarea name="reason" rows="4" style="width: 100%; margin-bottom: 10px; padding: 5px;" required placeholder="Ex: Erro na criação, contagem duplicada..."></textarea>
+            <div style="text-align: right;">
+                <button type="button" class="action-btn" style="background-color: #95a5a6;" onclick="closeCancelModal()">Fechar</button>
+                <button type="submit" class="action-btn" style="background-color: #e74c3c;">Confirmar Cancelamento</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    var modal = document.getElementById("cancelModal");
+    var form = document.getElementById("cancelForm");
+
+    function openCancelModal(confId) {
+        form.action = "/conference/" + confId + "/cancel";
+        modal.style.display = "block";
+    }
+
+    function closeCancelModal() {
+        modal.style.display = "none";
+    }
+
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            closeCancelModal();
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,501 @@
+{% extends 'base.html' %}
+
+{% block title %}Gerenciamento de Backups - Back of the House{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-cloud-arrow-up"></i> Gerenciamento de Backups</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('admin.admin_dashboard') }}">Administração</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Backups</li>
+            </ol>
+        </nav>
+    </div>
+
+    <div class="row">
+        <!-- Control Panel -->
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-gear"></i> Controle</h5>
+                </div>
+                <div class="card-body">
+                    <form id="backupControlForm">
+                        <div class="mb-3">
+                            <label for="backupType" class="form-label">Tipo de Backup</label>
+                            <select class="form-select" id="backupType" required>
+                                <option value="" selected disabled>Selecione um tipo...</option>
+                                <option value="products">Produtos e Estoque</option>
+                                <option value="insumos">Insumos (Cadastro e Estoques)</option>
+                                <option value="tables">Mesas do Restaurante</option>
+                                <option value="reception">Recepção e Hóspedes</option>
+                                <option value="cashiers_open">Caixas Abertos</option>
+                                <option value="full_system">Sistema Completo (Apenas Visualização)</option>
+                            </select>
+                            <div class="form-text text-muted" id="backupDesc">
+                                Selecione um tipo para ver detalhes.
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-outline-primary" id="btnListBackups" disabled>
+                                <i class="bi bi-list-ul"></i> Listar Backups Disponíveis
+                            </button>
+                            <button type="button" class="btn btn-success" id="btnTriggerBackup" disabled>
+                                <i class="bi bi-plus-circle"></i> Gerar Novo Backup Agora
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" id="btnConfigBackup" disabled>
+                                <i class="bi bi-gear"></i> Configurar Frequência
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Instructions Card -->
+            <div class="card shadow-sm border-info">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> Informações Importantes</h5>
+                </div>
+                <div class="card-body bg-light">
+                    <ul class="small mb-0 ps-3">
+                        <li><strong>Produtos:</strong> Restaura menu, estoque e alterações.</li>
+                        <li><strong>Insumos:</strong> Restaura cadastro e movimentações de estoque.</li>
+                        <li><strong>Mesas:</strong> Restaura pedidos em aberto nas mesas.</li>
+                        <li><strong>Recepção:</strong> Restaura ocupação de quartos e contas.</li>
+                        <li><strong>Caixas Abertos:</strong> Restaura apenas caixas em aberto.</li>
+                        <li class="text-danger"><strong>Atenção:</strong> A restauração substitui os dados atuais pelos do backup selecionado. Esta ação é irreversível.</li>
+                        <li>Backups "Full System" devem ser restaurados manualmente pelo suporte técnico.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- List / Results Panel -->
+        <div class="col-md-8">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Backups Disponíveis</h5>
+                    <span id="loadingSpinner" class="spinner-border spinner-border-sm text-primary d-none" role="status"></span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped mb-0" id="backupsTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Arquivo</th>
+                                    <th>Data/Hora</th>
+                                    <th>Tamanho</th>
+                                    <th class="text-end">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="backupsList">
+                                <tr>
+                                    <td colspan="4" class="text-center py-5 text-muted">
+                                        <i class="bi bi-cloud text-secondary display-4 d-block mb-3"></i>
+                                        Selecione um tipo de backup ao lado para começar.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Restore Confirmation Modal -->
+<div class="modal fade" id="restoreModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-danger">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="bi bi-exclamation-triangle-fill"></i> Confirmar Restauração</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="fw-bold">Você está prestes a restaurar o seguinte backup:</p>
+                <div class="alert alert-secondary font-monospace" id="restoreFileName">filename.json</div>
+                <p class="text-danger mb-0">
+                    <strong>CUIDADO:</strong> Isso irá SOBRESCREVER os dados atuais do tipo selecionado (<span id="restoreType"></span>).
+                    Dados criados após este backup serão PERDIDOS.
+                </p>
+                <div class="form-check mt-3">
+                    <input class="form-check-input" type="checkbox" id="confirmCheck">
+                    <label class="form-check-label" for="confirmCheck">
+                        Estou ciente e quero prosseguir.
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="btnConfirmRestore" disabled>
+                    <i class="bi bi-arrow-counterclockwise"></i> Restaurar Agora
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Configuration Modal -->
+<div class="modal fade" id="configModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-gear"></i> Configurar Backup: <span id="configTypeTitle"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="configForm">
+                    <input type="hidden" id="configType">
+                    
+                    <div class="mb-3">
+                        <label for="configInterval" class="form-label">Intervalo (Segundos)</label>
+                        <input type="number" class="form-control" id="configInterval" min="60" required>
+                        <div class="form-text">Tempo entre cada execução do backup.</div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label for="configRetention" class="form-label">Tempo de Retenção</label>
+                                <input type="number" class="form-control" id="configRetention" min="1" required>
+                                <div class="form-text">Quanto tempo manter os backups.</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="configRetentionUnit" class="form-label">Unidade</label>
+                                <select class="form-select" id="configRetentionUnit">
+                                    <option value="hours">Horas</option>
+                                    <option value="minutes">Minutos</option>
+                                    <option value="count">Backups</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnSaveConfig">
+                    <i class="bi bi-save"></i> Salvar Configuração
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast for Notifications -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <strong class="me-auto" id="toastTitle">Sistema</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id="toastBody">
+            Hello, world! This is a toast message.
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const backupTypeSelect = document.getElementById('backupType');
+    const btnList = document.getElementById('btnListBackups');
+    const btnTrigger = document.getElementById('btnTriggerBackup');
+    const btnConfig = document.getElementById('btnConfigBackup');
+    const backupDesc = document.getElementById('backupDesc');
+    const backupsList = document.getElementById('backupsList');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    
+    // Restore Modal Elements
+    const restoreModal = new bootstrap.Modal(document.getElementById('restoreModal'));
+    const restoreFileNameEl = document.getElementById('restoreFileName');
+    const restoreTypeEl = document.getElementById('restoreType');
+    const confirmCheck = document.getElementById('confirmCheck');
+    const btnConfirmRestore = document.getElementById('btnConfirmRestore');
+
+    // Config Modal Elements
+    const configModal = new bootstrap.Modal(document.getElementById('configModal'));
+    const configTypeTitle = document.getElementById('configTypeTitle');
+    const configTypeInput = document.getElementById('configType');
+    const configInterval = document.getElementById('configInterval');
+    const configRetention = document.getElementById('configRetention');
+    const configRetentionUnit = document.getElementById('configRetentionUnit');
+    const btnSaveConfig = document.getElementById('btnSaveConfig');
+    
+    let currentRestoreFile = '';
+    let currentType = '';
+
+    // Descriptions map
+    const descriptions = {
+        'products': 'Gerencia backups de Produtos, Menu e Estoque.',
+        'insumos': 'Gerencia backups de Insumos (Cadastro e Estoques).',
+        'tables': 'Gerencia backups de pedidos em aberto nas Mesas.',
+        'reception': 'Gerencia backups de Ocupação e Contas da Recepção.',
+        'cashiers_open': 'Gerencia backups de Caixas Abertos.',
+        'full_system': 'Backups completos do sistema (Restore apenas manual).'
+    };
+
+    // UI Updates on Selection
+    backupTypeSelect.addEventListener('change', function() {
+        const type = this.value;
+        currentType = type;
+        backupDesc.textContent = descriptions[type] || '';
+        
+        btnList.disabled = false;
+        btnTrigger.disabled = false;
+        btnConfig.disabled = false;
+        
+        // Auto-list on change
+        listBackups(type);
+    });
+
+    // List Backups Action
+    btnList.addEventListener('click', () => {
+        if (currentType) listBackups(currentType);
+    });
+
+    // Config Backup Action
+    btnConfig.addEventListener('click', () => {
+        if (!currentType) return;
+        
+        setLoading(true);
+        fetch('/admin/api/backups/config')
+        .then(res => res.json())
+        .then(configs => {
+            setLoading(false);
+            if (configs.error) {
+                showToast('Erro', configs.error, 'danger');
+                return;
+            }
+            
+            const config = configs[currentType];
+            if (!config) {
+                showToast('Erro', 'Configuração não encontrada para este tipo.', 'danger');
+                return;
+            }
+            
+            configTypeTitle.textContent = currentType;
+            configTypeInput.value = currentType;
+            configInterval.value = config.interval_seconds;
+            
+            if (config.retention_count) {
+                configRetention.value = config.retention_count;
+                configRetentionUnit.value = 'count';
+            } else if (config.retention_minutes) {
+                configRetention.value = config.retention_minutes;
+                configRetentionUnit.value = 'minutes';
+            } else {
+                configRetention.value = config.retention_hours || 24;
+                configRetentionUnit.value = 'hours';
+            }
+            
+            configModal.show();
+        })
+        .catch(err => {
+            setLoading(false);
+            showToast('Erro', 'Falha ao carregar configurações.', 'danger');
+        });
+    });
+
+    // Save Config Action
+    btnSaveConfig.addEventListener('click', () => {
+        const type = configTypeInput.value;
+        const interval = configInterval.value;
+        const retention = configRetention.value;
+        const unit = configRetentionUnit.value;
+        
+        if (!type || !interval || !retention) {
+            showToast('Atenção', 'Preencha todos os campos.', 'warning');
+            return;
+        }
+        
+        configModal.hide();
+        setLoading(true);
+        
+        fetch('/admin/api/backups/config', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                type: type,
+                interval: interval,
+                retention: retention,
+                retention_unit: unit
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            setLoading(false);
+            if (data.success) {
+                showToast('Sucesso', data.message, 'success');
+            } else {
+                showToast('Erro', data.error, 'danger');
+            }
+        })
+        .catch(err => {
+            setLoading(false);
+            showToast('Erro', 'Falha ao salvar configuração.', 'danger');
+        });
+    });
+
+    // Trigger Backup Action
+    btnTrigger.addEventListener('click', () => {
+        if (!currentType) return;
+        if (!confirm('Deseja gerar um novo backup agora?')) return;
+        
+        setLoading(true);
+        fetch('/admin/api/backups/trigger', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ type: currentType })
+        })
+        .then(res => res.json())
+        .then(data => {
+            setLoading(false);
+            if (data.success) {
+                showToast('Sucesso', data.message, 'success');
+                listBackups(currentType); // Refresh list
+            } else {
+                showToast('Erro', data.error, 'danger');
+            }
+        })
+        .catch(err => {
+            setLoading(false);
+            showToast('Erro', 'Falha na comunicação com o servidor.', 'danger');
+        });
+    });
+
+    // Fetch List
+    function listBackups(type) {
+        setLoading(true);
+        backupsList.innerHTML = '<tr><td colspan="4" class="text-center py-3">Carregando...</td></tr>';
+        
+        fetch(`/admin/api/backups/list/${type}`)
+        .then(res => res.json())
+        .then(data => {
+            setLoading(false);
+            if (data.error) {
+                showToast('Erro', data.error, 'danger');
+                backupsList.innerHTML = `<tr><td colspan="4" class="text-center text-danger py-3">Erro: ${data.error}</td></tr>`;
+            } else {
+                renderTable(data, type);
+            }
+        })
+        .catch(err => {
+            setLoading(false);
+            console.error(err);
+            backupsList.innerHTML = '<tr><td colspan="4" class="text-center text-danger py-3">Erro ao carregar backups (Verifique o Console).</td></tr>';
+        });
+    }
+
+    // Render Table
+    function renderTable(files, type) {
+        if (!files || files.length === 0) {
+            backupsList.innerHTML = '<tr><td colspan="4" class="text-center py-3 text-muted">Nenhum backup encontrado.</td></tr>';
+            return;
+        }
+
+        let html = '';
+        files.forEach(file => {
+            const isFullSystem = type === 'full_system';
+            const restoreBtn = isFullSystem 
+                ? `<button class="btn btn-sm btn-outline-secondary" disabled title="Apenas restore manual">Restore Manual</button>`
+                : `<button class="btn btn-sm btn-outline-danger btn-restore" data-file="${file.name}">
+                     <i class="bi bi-arrow-counterclockwise"></i> Restaurar
+                   </button>`;
+
+            html += `
+                <tr>
+                    <td class="font-monospace small">${file.name}</td>
+                    <td>${file.date}</td>
+                    <td>${file.size}</td>
+                    <td class="text-end">${restoreBtn}</td>
+                </tr>
+            `;
+        });
+        backupsList.innerHTML = html;
+
+        // Attach event listeners to new buttons
+        document.querySelectorAll('.btn-restore').forEach(btn => {
+            btn.addEventListener('click', function() {
+                openRestoreModal(this.dataset.file);
+            });
+        });
+    }
+
+    // Restore Modal Logic
+    function openRestoreModal(filename) {
+        currentRestoreFile = filename;
+        restoreFileNameEl.textContent = filename;
+        restoreTypeEl.textContent = currentType;
+        confirmCheck.checked = false;
+        btnConfirmRestore.disabled = true;
+        restoreModal.show();
+    }
+
+    confirmCheck.addEventListener('change', function() {
+        btnConfirmRestore.disabled = !this.checked;
+    });
+
+    btnConfirmRestore.addEventListener('click', function() {
+        performRestore();
+    });
+
+    function performRestore() {
+        restoreModal.hide();
+        setLoading(true);
+        
+        fetch('/admin/api/backups/restore', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                type: currentType,
+                filename: currentRestoreFile
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            setLoading(false);
+            if (data.success) {
+                showToast('Sucesso', data.message, 'success');
+                // Optional: Reload page or something
+            } else {
+                showToast('Erro', data.error, 'danger');
+            }
+        })
+        .catch(err => {
+            setLoading(false);
+            showToast('Erro', 'Falha na comunicação com o servidor.', 'danger');
+        });
+    }
+
+    // Helpers
+    function setLoading(isLoading) {
+        if (isLoading) {
+            loadingSpinner.classList.remove('d-none');
+        } else {
+            loadingSpinner.classList.add('d-none');
+        }
+    }
+
+    function showToast(title, message, type='primary') {
+        const toastEl = document.getElementById('liveToast');
+        document.getElementById('toastTitle').textContent = title;
+        document.getElementById('toastBody').textContent = message;
+        
+        // Reset classes
+        toastEl.className = 'toast';
+        if (type === 'success') toastEl.classList.add('bg-success', 'text-white');
+        if (type === 'danger') toastEl.classList.add('bg-danger', 'text-white');
+        
+        const toast = new bootstrap.Toast(toastEl);
+        toast.show();
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html class="no-js" lang="pt-br">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Back of the House{% endblock %}</title>
+    <link rel="icon" href="/assets/img/favicon.png">
+    <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/assets/css/fontawesome.min.css">
+    <link rel="stylesheet" href="/assets/css/animate.css">
+    <link rel="stylesheet" href="/assets/css/slick.min.css">
+    <link rel="stylesheet" href="/assets/css/swiper.min.css">
+    <link rel="stylesheet" href="/assets/css/daterangepicker.css">
+    <link rel="stylesheet" href="/assets/css/lightgallery.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
+  </head>
+  <body>
+    <div id="background-watermark"></div>
+    <div class="cs_preloader cs_accent_color cs_primary_font" style="display: none;">
+      <div class="cs_preloader_in">S</div>
+    </div>
+    <header class="cs_site_header cs_style_1 cs_primary_color">
+      <div class="cs_main_header">
+        <div class="container">
+          <div class="cs_main_header_in">
+            <div class="cs_main_header_left">
+              <a class="cs_site_branding" href="{{ url_for('index') }}" style="display: flex; gap: 20px; align-items: center;">
+                <img src="{{ url_for('static', filename='img/LOGO-almareia.png') }}" alt="Almareia Logo" style="height: 40px; width: auto;">
+                <img src="{{ url_for('static', filename='img/LOGO-MIRA.PNG') }}" alt="Mirapraia Logo" style="height: 55px; width: auto;">
+              </a>
+            </div>
+            <div class="cs_main_header_center">
+              {% if session.get('user') %}
+              <nav class="cs_nav cs_fs_13 cs_semibold">
+                <ul class="cs_nav_list">
+                  <li class="menu-item-has-children">
+                    <a href="{{ url_for('index') }}">Painel</a>
+                  </li>
+                  <li class="menu-item-has-children">
+                    <a href="{{ url_for('restaurant_tables') }}">Restaurante</a>
+                  </li>
+                  <li class="menu-item-has-children">
+                    <a href="#">Recepção</a>
+                    <ul class="sub-menu">
+                        <li><a href="{{ url_for('reception_waiting_list') }}">Fila de Espera</a></li>
+                        <li><a href="{{ url_for('reception_chat') }}">Chat WhatsApp</a></li>
+                    </ul>
+                  </li>
+                  <li class="menu-item-has-children">
+                        <a href="{{ url_for('index') }}">Estoque</a>
+                  </li>
+                  {% if session.get('role') == 'admin' or session.get('department') == 'Recursos Humanos' or 'rh' in session.get('permissions', []) %}
+                  <li class="menu-item-has-children">
+                    <a href="{{ url_for('hr.hr_dashboard') }}">RH</a>
+                  </li>
+                  {% endif %}
+                  {% if session.get('role') == 'admin' %}
+                  <li class="menu-item-has-children">
+                    <a href="{{ url_for('admin_dashboard') }}">Administração</a>
+                  </li>
+                  <li class="menu-item-has-children">
+                    <a href="{{ url_for('admin_invoice_report') }}">Relatórios</a>
+                    <ul class="sub-menu">
+                        <li><a href="{{ url_for('admin_invoice_report') }}">Faturamento</a></li>
+                        <li><a href="{{ url_for('quality.quality_audit_history') }}">Auditoria de Qualidade</a></li>
+                    </ul>
+                  </li>
+                  <li class="menu-item-has-children">
+                    <a href="{{ url_for('fiscal_config') }}">Fiscal</a>
+                  </li>
+                  <li class="menu-item-has-children">
+                    <a href="{{ url_for('finance_reconciliation') }}">Conciliação</a>
+                  </li>
+                  <li class="menu-item-has-children">
+                    <a href="{{ url_for('manage_printers') }}">Impressoras</a>
+                  </li>
+                  <li class="menu-item-has-children">
+                    <a href="{{ url_for('admin_security_dashboard') }}">Segurança</a>
+                  </li>
+                  <li class="menu-item-has-children">
+                    <a href="{{ url_for('admin_system_dashboard_view') }}">Sistema</a>
+                  </li>
+                  {% endif %}
+                </ul>
+              </nav>
+              {% endif %}
+            </div>
+            <div class="cs_main_header_right">
+              {% if session.get('user') %}
+              <div class="cs_header_btns d-flex align-items-center">
+                <span class="cs_white_color me-3">
+                  Olá, {{ session['user'] }}
+                  {% if session.get('department') %}
+                  ({{ session['department'] }})
+                  {% endif %}
+                </span>
+                <a href="{{ url_for('logout') }}" class="cs_btn cs_style_2 cs_radius_5 cs_fs_15">
+                  Sair
+                </a>
+              </div>
+              {% else %}
+              <a href="{{ url_for('login') }}" class="cs_btn cs_style_2 cs_radius_5 cs_fs_15" style="min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" aria-label="Entrar">
+                Entrar
+              </a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+    <div class="cs_site_main" style="padding-top: 140px;">
+      <div class="container cs_py_40">
+        {% if not hide_back_button %}
+        <div style="margin-bottom: 20px;">
+            <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm" style="min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" aria-label="Voltar">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+        </div>
+        {% endif %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ 'info' if category == 'message' else category }} alert-dismissible fade show mt-3" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+      </div>
+    </div>
+    <script src="/assets/js/jquery-3.6.0.min.js"></script>
+    <script src="/assets/js/wow.min.js"></script>
+    <script src="/assets/js/jquery.slick.min.js"></script>
+    <script src="/assets/js/swiper.min.js"></script>
+    <script src="/assets/js/moment.min.js"></script>
+    <script src="/assets/js/daterangepicker.min.js"></script>
+    <script src="/assets/js/lightgallery.min.js"></script>
+    <script src="/assets/js/YTPlayer.min.js"></script>
+    <script src="/assets/js/main.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll('select').forEach(function(el) {
+          if (el.classList.contains('no-search')) return;
+          new TomSelect(el, {
+            create: false,
+            sortField: {
+              field: "text",
+              direction: "asc"
+            },
+            plugins: ['dropdown_input']
+          });
+        });
+      });
+    </script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const watermarkContainer = document.getElementById('background-watermark');
+        if (watermarkContainer) {
+          const logo1 = "{{ url_for('static', filename='img/LOGO-almareia.png') }}";
+          const logo2 = "{{ url_for('static', filename='img/LOGO-MIRA.PNG') }}";
+          
+          for (let i = 0; i < 50; i++) {
+            const img = document.createElement('img');
+            img.src = i % 2 === 0 ? logo1 : logo2;
+            img.alt = "Watermark";
+            watermarkContainer.appendChild(img);
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

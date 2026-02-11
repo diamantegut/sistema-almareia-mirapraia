@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Nova Solicitação de Manutenção - Almareia Hotel{% endblock %}
+
+{% block content %}
+<div class="service-page">
+    <div class="service-header">
+        <span class="service-icon">🔧</span>
+        <h2>Nova Solicitação de Manutenção</h2>
+    </div>
+
+    <div style="margin-bottom: 20px;">
+        <a href="{{ url_for('main.index') }}" class="action-btn" style="background-color: #95a5a6; text-decoration: none;">← Voltar</a>
+    </div>
+    
+    <div class="auth-box" style="max-width: 600px;">
+        <form method="POST" action="{{ url_for('maintenance.submit_maintenance') }}" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="location">Local do Problema</label>
+                <input type="text" id="location" name="location" placeholder="Ex: Quarto 101, Cozinha, Hall" required>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Descrição do Problema</label>
+                <textarea id="description" name="description" rows="4" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" placeholder="Descreva o problema encontrado..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="photo">Foto do Problema</label>
+                <input type="file" id="photo" name="photo" accept="image/*" capture="environment" required>
+                <p style="font-size: 0.8rem; color: #7f8c8d; margin-top: 5px;">A foto será otimizada automaticamente para envio.</p>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="auth-btn">Enviar Solicitação</button>
+                <a href="{{ url_for('main.index') }}" class="back-link" style="display: block; text-align: center; margin-top: 10px;">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

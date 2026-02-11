@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="service-container">
+    <div class="header-section">
+        <h1>Detalhes da Requisição</h1>
+        <p>Visualização do pedido #{{ order.id }}</p>
+    </div>
+
+    <div style="margin-bottom: 20px;">
+        <a href="{{ url_for('stock.stock_fulfillment') }}" class="action-btn" style="background-color: #95a5a6; text-decoration: none;">← Voltar</a>
+    </div>
+
+    <div class="request-card" style="background: white; border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 8px;">
+        <div class="req-header" style="display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+            <div>
+                <strong>Departamento:</strong> {{ order.department }}<br>
+                <strong>Solicitante:</strong> {{ order.user }}<br>
+                <small>Data: {{ order.date }} às {{ order.time }}</small>
+            </div>
+            <div style="text-align: right;">
+                <span class="badge {{ 'badge-danger' if order.type == 'Emergency' else 'badge-primary' }}">
+                    {{ 'Emergência' if order.type == 'Emergency' else 'Padrão' }}
+                </span>
+                <br>
+                <span class="badge" style="background-color: #34495e; margin-top: 5px;">{{ order.status }}</span>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Qtd. Solicitada</th>
+                        <th>Qtd. Entregue</th>
+                        <th>Destino</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if order.items_structured %}
+                        {% for item in order.items_structured %}
+                        <tr>
+                            <td>{{ item.name }}</td>
+                            <td>{{ item.qty }}</td>
+                            <td>{{ item.delivered_qty if item.delivered_qty is defined else '-' }}</td>
+                            <td>{{ item.destination_stock if item.destination_stock is defined else '-' }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="4">
+                                {{ order.items }}
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+        
+        {% if order.fulfillment_date %}
+        <div style="margin-top: 15px; padding: 10px; background-color: #f8f9fa; border-radius: 4px;">
+            <p style="margin: 0;"><strong>Atendido por:</strong> {{ order.fulfilled_by }} em {{ order.fulfillment_date }}</p>
+        </div>
+        {% endif %}
+        
+        {% if order.received_date %}
+        <div style="margin-top: 5px; padding: 10px; background-color: #e8f6f3; border-radius: 4px; color: #155724;">
+            <p style="margin: 0;"><strong>Recebido por:</strong> {{ order.received_by }} em {{ order.received_date }}</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

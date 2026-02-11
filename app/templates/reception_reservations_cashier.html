@@ -1,0 +1,633 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>📅 Caixa Recepção - Reservas</h2>
+            <p class="text-muted">Gestão de Check-in, Check-out e Pagamentos Antecipados</p>
+        </div>
+        <div>
+            <a href="{{ url_for('reception.reception_cashier') }}" class="btn btn-outline-primary me-2">
+                <i class="bi bi-receipt"></i> Ir para Contas
+            </a>
+            <a href="{{ url_for('reception.reception_dashboard') }}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+        </div>
+    </div>
+
+    {% if not cashier %}
+    <!-- CASHIER CLOSED STATE -->
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center py-3">
+                    <h4 class="mb-0"><i class="bi bi-lock-fill"></i> Caixa de Reservas Fechado</h4>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-center text-muted mb-4">O caixa de reservas está fechado. Informe o valor inicial para abrir.</p>
+                    
+                    <form method="POST">
+                        <input type="hidden" name="action" value="open_cashier">
+                        <div class="mb-4">
+                            <label class="form-label">Fundo de Caixa (R$)</label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text">R$</span>
+                                <input type="tel" class="form-control" name="opening_balance" value="0.00" required onfocus="this.select()" oninput="formatCurrency(this)">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 btn-lg">
+                            <i class="bi bi-unlock-fill"></i> Abrir Caixa de Reservas
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            {% if sessions|length > 1 %}
+            <!-- History Removed for Centralization -->
+            {% endif %}
+        </div>
+    </div>
+    
+    {% else %}
+    <!-- CASHIER OPEN STATE -->
+    <div class="row g-3">
+        <!-- Summary Cards -->
+        <div class="col-md-4">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body text-center">
+                    <h6 class="card-title opacity-75">Saldo Atual</h6>
+                    {% if session.get('role') == 'admin' %}
+                    <h2 class="display-6 fw-bold">R$ {{ "%.2f"|format(total_balance) }}</h2>
+                    <div class="small mt-2 opacity-75">
+                        Abertura: R$ {{ "%.2f"|format(cashier.opening_balance) }}
+                    </div>
+                    {% else %}
+                    <h2 class="display-6 fw-bold">R$ ****</h2>
+                    <div class="small mt-2 opacity-75">
+                        Abertura: R$ ****
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">Recebimentos por Forma de Pagamento</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row row-cols-2 row-cols-md-4 g-2">
+                        {% for method, amount in current_totals.items() %}
+                        <div class="col">
+                            <div class="border rounded p-2 text-center bg-light">
+                                <div class="small text-muted text-uppercase">{{ method }}</div>
+                                {% if session.get('role') == 'admin' %}
+                                <div class="fw-bold">R$ {{ "%.2f"|format(amount) }}</div>
+                                {% else %}
+                                <div class="fw-bold">R$ ****</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="col-12 text-center text-muted py-3">
+                            Nenhum recebimento registrado ainda.
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body d-flex gap-2 justify-content-end bg-light">
+                    <!-- Generic Add Transaction (Sale) for Reservations -->
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#saleModal">
+                        <i class="bi bi-cash-coin"></i> Registrar Recebimento
+                    </button>
+                    
+                    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#sangriaModal">
+                        <i class="bi bi-dash-circle"></i> Sangria
+                    </button>
+                    <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#suprimentoModal">
+                        <i class="bi bi-plus-circle"></i> Suprimento
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#transferModal">
+                        <i class="bi bi-arrow-left-right"></i> Transferência
+                    </button>
+                    <button type="button" class="btn btn-dark ms-auto" data-bs-toggle="modal" data-bs-target="#closeCashierModal">
+                        <i class="bi bi-lock-fill"></i> Fechar Caixa
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transactions Table -->
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Movimentações</h5>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Horário</th>
+                                <th>Tipo</th>
+                                <th>Descrição</th>
+                                <th>Forma Pagto</th>
+                                <th class="text-end">Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for t in displayed_transactions %}
+                            <tr>
+                                <td>{{ t.time }}</td>
+                                <td>
+                                    {% if t.type == 'sale' %}
+                                        <span class="badge bg-success">Recebimento</span>
+                                    {% elif t.category == 'Pagamento de Conta' or t.type == 'in' %}
+                                        <span class="badge bg-success">Recebimento</span>
+                                    {% elif t.category == 'Suprimento' or t.type == 'deposit' %}
+                                        <span class="badge bg-info text-dark">Suprimento</span>
+                                    {% elif t.category == 'Sangria' or t.type == 'withdrawal' or t.type == 'out' %}
+                                        <span class="badge bg-danger">Sangria</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ t.category|default(t.type) }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ t.description }}</td>
+                                <td>
+                                    {% if t.payment_method == 'Múltiplos' %}
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="showPaymentDetails({{ t.details.payment_details|tojson|forceescape }})">
+                                            <i class="bi bi-info-circle"></i> Múltiplos
+                                        </button>
+                                    {% else %}
+                                        {{ t.payment_method|default('-')|title }}
+                                    {% endif %}
+                                </td>
+                                <td class="text-end fw-bold {{ 'text-danger' if t.type in ['out', 'withdrawal'] else 'text-success' }}">
+                                    {% if t.type in ['out', 'withdrawal'] %}-{% endif %}
+                                    R$ {{ "%.2f"|format(t.amount) }}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-muted">
+                                    Nenhuma movimentação registrada.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    
+    <!-- Sale Modal (New for Reservations) -->
+    <div class="modal fade" id="saleModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">Registrar Recebimento (Reserva/Check-in)</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" onsubmit="this.querySelector('button[type=submit]').disabled=true; this.querySelector('button[type=submit]').innerHTML='<span class=\'spinner-border spinner-border-sm me-2\'></span>Processando...';">
+                    <div class="modal-body">
+                        <input type="hidden" name="action" value="add_transaction">
+                        <input type="hidden" name="type" value="sale">
+                        <div class="mb-3">
+                            <label class="form-label">Valor (R$)</label>
+                            <input type="tel" class="form-control" name="amount" required onfocus="this.select()" oninput="formatCurrency(this)">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Descrição (Ex: Check-in Quarto 101)</label>
+                            <input type="text" class="form-control" name="description" required>
+                        </div>
+                        
+                        <!-- Dados Fiscais (NFSe) -->
+                        <div class="card bg-light mb-3">
+                            <div class="card-body py-2">
+                                <h6 class="card-title text-muted mb-2"><i class="bi bi-receipt"></i> Emissão de Nota Fiscal (NFSe)</h6>
+                                <div class="form-check form-switch mb-2">
+                                    <input class="form-check-input" type="checkbox" id="nfseSwitch" name="nfse_required" checked>
+                                    <label class="form-check-label" for="nfseSwitch">Emitir NFSe Automaticamente</label>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label small">Nome do Cliente / Tomador</label>
+                                    <input type="text" class="form-control form-control-sm" name="customer_name" placeholder="Nome Completo">
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label small">CPF / CNPJ</label>
+                                    <input type="text" class="form-control form-control-sm" name="customer_doc" placeholder="000.000.000-00">
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label small">Endereço Completo</label>
+                                    <input type="text" class="form-control form-control-sm" name="customer_address" placeholder="Rua, Número, Bairro, Cidade - UF">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check form-switch mb-2">
+                                <input class="form-check-input" type="checkbox" id="multiPaymentSwitch" onchange="toggleMultiPayment(this)">
+                                <label class="form-check-label" for="multiPaymentSwitch">Múltiplos Pagamentos</label>
+                            </div>
+
+                            <!-- Single Payment (Default) -->
+                            <div id="singlePaymentDiv">
+                                <label class="form-label">Forma de Pagamento</label>
+                                <select class="form-select" name="payment_method" id="singlePaymentSelect">
+                                    {% for method in payment_methods %}
+                                    <option value="{{ method.id }}">{{ method.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <!-- Multi Payment (Hidden by default) -->
+                            <div id="multiPaymentDiv" class="d-none">
+                                <div class="card bg-light p-2 mb-2">
+                                    <div id="paymentRows"></div>
+                                    
+                                    <div class="input-group mt-2">
+                                        <select class="form-select form-select-sm" id="newPaymentMethod">
+                                            {% for method in payment_methods %}
+                                            <option value="{{ method.id }}" data-name="{{ method.name }}">{{ method.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <input type="tel" class="form-control form-select-sm" id="newPaymentAmount" placeholder="0,00" oninput="formatCurrency(this)">
+                                        <button type="button" class="btn btn-success btn-sm" onclick="addPaymentRow()">
+                                            <i class="bi bi-plus-lg"></i>
+                                        </button>
+                                    </div>
+                                    <div class="d-flex justify-content-between mt-2 small">
+                                        <span>Total: <strong id="currentPaymentTotal">R$ 0,00</strong></span>
+                                        <span id="remainingPaymentText" class="text-danger">Restante: <strong>R$ 0,00</strong></span>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="payment_list_json" id="paymentListJson">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Confirmar Recebimento</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sangria Modal -->
+    <div class="modal fade" id="sangriaModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Realizar Sangria (Retirada)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" onsubmit="this.querySelector('button[type=submit]').disabled=true; this.querySelector('button[type=submit]').innerHTML='<span class=\'spinner-border spinner-border-sm me-2\'></span>Processando...';">
+                    <div class="modal-body">
+                        <input type="hidden" name="action" value="add_transaction">
+                        <input type="hidden" name="type" value="withdrawal">
+                        <div class="mb-3">
+                            <label class="form-label">Valor (R$)</label>
+                            <input type="tel" class="form-control" name="amount" required onfocus="this.select()" oninput="formatCurrency(this)">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Descrição / Motivo</label>
+                            <input type="text" class="form-control" name="description" required placeholder="Ex: Pagamento fornecedor">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger">Confirmar Sangria</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Suprimento Modal -->
+    <div class="modal fade" id="suprimentoModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">Realizar Suprimento (Entrada)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" onsubmit="this.querySelector('button[type=submit]').disabled=true; this.querySelector('button[type=submit]').innerHTML='<span class=\'spinner-border spinner-border-sm me-2\'></span>Processando...';">
+                    <div class="modal-body">
+                        <input type="hidden" name="action" value="add_transaction">
+                        <input type="hidden" name="type" value="deposit">
+                        <div class="mb-3">
+                            <label class="form-label">Valor (R$)</label>
+                            <input type="tel" class="form-control" name="amount" required onfocus="this.select()" oninput="formatCurrency(this)">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Descrição / Origem</label>
+                            <input type="text" class="form-control" name="description" required placeholder="Ex: Troco adicional">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Confirmar Suprimento</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transfer Modal -->
+    <div class="modal fade" id="transferModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Realizar Transferência</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST">
+                    <input type="hidden" name="action" value="add_transaction">
+                    <input type="hidden" name="type" value="transfer">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Caixa de Destino</label>
+                            <select class="form-select" name="target_cashier" required>
+                                <option value="reception">Caixa Recepção</option>
+                                <option value="restaurant_service">Caixa Restaurante</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Valor (R$)</label>
+                            <input type="tel" class="form-control" name="amount" required onfocus="this.select()" oninput="formatCurrency(this)">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Motivo / Descrição</label>
+                            <input type="text" class="form-control" name="description" required placeholder="Ex: Transferência de troco">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Realizar Transferência</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Close Cashier Modal -->
+    <div class="modal fade" id="closeCashierModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title">Fechar Caixa de Reservas</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" onsubmit="return confirm('ATENÇÃO: Você está prestes a fechar o caixa de reservas. Esta ação é irreversível.\n\nTem certeza que deseja continuar?');">
+                    <div class="modal-body">
+                        <input type="hidden" name="action" value="close_cashier">
+                        <p>Confira os valores antes de fechar.</p>
+                        <div class="alert alert-info">
+                            Saldo Calculado pelo Sistema: <strong>R$ {{ "%.2f"|format(total_balance) }}</strong>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Saldo Final em Gaveta (Real)</label>
+                            <input type="number" step="0.01" class="form-control" name="closing_balance" required value="{{ "%.2f"|format(total_balance) }}">
+                            <div class="form-text">Informe o valor contado fisicamente.</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-dark">Confirmar Fechamento</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Details Modal -->
+    <div class="modal fade" id="paymentDetailsModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title">Detalhes do Pagamento</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="list-group" id="paymentDetailsList">
+                        <!-- Populated by JS -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    // Multi-Payment Logic
+    let paymentList = [];
+
+    function toggleMultiPayment(checkbox) {
+        const singleDiv = document.getElementById('singlePaymentDiv');
+        const multiDiv = document.getElementById('multiPaymentDiv');
+        const singleSelect = document.getElementById('singlePaymentSelect');
+        const jsonInput = document.getElementById('paymentListJson');
+
+        if (checkbox.checked) {
+            singleDiv.classList.add('d-none');
+            multiDiv.classList.remove('d-none');
+            singleSelect.removeAttribute('required');
+            singleSelect.removeAttribute('name'); // Prevent sending this
+            jsonInput.setAttribute('name', 'payment_list_json');
+            updatePaymentCalculations();
+        } else {
+            singleDiv.classList.remove('d-none');
+            multiDiv.classList.add('d-none');
+            singleSelect.setAttribute('required', 'true');
+            singleSelect.setAttribute('name', 'payment_method');
+            jsonInput.removeAttribute('name');
+            paymentList = [];
+            renderPaymentRows();
+        }
+    }
+
+    function addPaymentRow() {
+        const methodSelect = document.getElementById('newPaymentMethod');
+        const amountInput = document.getElementById('newPaymentAmount');
+        
+        const methodId = methodSelect.value;
+        const methodName = methodSelect.options[methodSelect.selectedIndex].text;
+        const amountStr = amountInput.value.replace(/\D/g, '');
+        const amount = parseInt(amountStr || '0') / 100;
+
+        if (amount <= 0) return;
+
+        paymentList.push({
+            id: methodId,
+            name: methodName,
+            amount: amount
+        });
+
+        amountInput.value = '';
+        renderPaymentRows();
+    }
+
+    function removePaymentRow(index) {
+        paymentList.splice(index, 1);
+        renderPaymentRows();
+    }
+
+    function renderPaymentRows() {
+        const container = document.getElementById('paymentRows');
+        container.innerHTML = '';
+
+        paymentList.forEach((p, index) => {
+            const row = document.createElement('div');
+            row.className = 'd-flex justify-content-between align-items-center mb-1 border-bottom pb-1';
+            row.innerHTML = `
+                <small>${p.name}</small>
+                <div class="d-flex align-items-center">
+                    <span class="me-2">R$ ${p.amount.toFixed(2)}</span>
+                    <button type="button" class="btn btn-xs btn-outline-danger py-0 px-1" onclick="removePaymentRow(${index})">&times;</button>
+                </div>
+            `;
+            container.appendChild(row);
+        });
+
+        updatePaymentCalculations();
+    }
+
+    function updatePaymentCalculations() {
+        const totalPaid = paymentList.reduce((sum, p) => sum + p.amount, 0);
+        
+        // Get Main Amount
+        const mainAmountInput = document.querySelector('input[name="amount"]');
+        let mainTotal = 0;
+        if (mainAmountInput) {
+            mainTotal = parseInt(mainAmountInput.value.replace(/\D/g, '') || '0') / 100;
+        }
+
+        const remaining = mainTotal - totalPaid;
+
+        document.getElementById('currentPaymentTotal').innerText = `R$ ${totalPaid.toFixed(2)}`;
+        
+        const remainingEl = document.getElementById('remainingPaymentText');
+        if (Math.abs(remaining) < 0.01) {
+            remainingEl.innerHTML = '<span class="text-success">Total Pago</span>';
+            remainingEl.className = 'text-success';
+        } else if (remaining > 0) {
+            remainingEl.innerHTML = `Restante: <strong>R$ ${remaining.toFixed(2)}</strong>`;
+            remainingEl.className = 'text-danger';
+        } else {
+             remainingEl.innerHTML = `Troco: <strong>R$ ${Math.abs(remaining).toFixed(2)}</strong>`;
+             remainingEl.className = 'text-warning';
+        }
+
+        // Update JSON
+        document.getElementById('paymentListJson').value = JSON.stringify(paymentList);
+    }
+
+    // Attach listener to main amount input
+    document.addEventListener('DOMContentLoaded', function() {
+        const mainAmountInput = document.querySelector('input[name="amount"]');
+        if (mainAmountInput) {
+            mainAmountInput.addEventListener('input', updatePaymentCalculations);
+        }
+    });
+
+    function showPaymentDetails(details) {
+        const list = document.getElementById('paymentDetailsList');
+        list.innerHTML = '';
+        
+        if (details && details.length > 0) {
+            details.forEach(p => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                li.innerHTML = `
+                    ${p.method_name}
+                    <span class="badge bg-primary rounded-pill">R$ ${parseFloat(p.amount).toFixed(2)}</span>
+                `;
+                list.appendChild(li);
+            });
+        } else {
+            list.innerHTML = '<li class="list-group-item">Nenhum detalhe disponível</li>';
+        }
+        
+        const modal = new bootstrap.Modal(document.getElementById('paymentDetailsModal'));
+        modal.show();
+    }
+
+    window.formatCurrency = function(input) {
+        let value = input.value.replace(/\D/g, '');
+        value = (value / 100).toFixed(2) + '';
+        input.value = value;
+    }
+</script>
+
+{% if receipt_transaction %}
+<!-- Receipt Print Template -->
+<div id="receipt-print" class="d-none d-print-block">
+    <div class="text-center mb-4">
+        <h4>Mirapraia Hotel</h4>
+        <h5>Comprovante de Retirada (Sangria)</h5>
+    </div>
+    
+    <div class="mb-4">
+        <p><strong>Data/Hora:</strong> {{ receipt_transaction.timestamp.split(' ')[1] if receipt_transaction.timestamp else receipt_transaction.time }} - {{ receipt_transaction.timestamp.split(' ')[0] if receipt_transaction.timestamp else '' }}</p>
+        <p><strong>Responsável:</strong> {{ receipt_transaction.user|default('Recepção') }}</p>
+        <p><strong>Descrição:</strong> {{ receipt_transaction.description }}</p>
+        <div class="border-top border-bottom py-2 my-2">
+            <h3>Valor: R$ {{ "%.2f"|format(receipt_transaction.amount) }}</h3>
+        </div>
+    </div>
+
+    <div class="mt-5 pt-5 text-center">
+        <div class="border-top border-dark w-75 mx-auto pt-2">
+            <p>Assinatura do Responsável</p>
+        </div>
+    </div>
+    
+    <div class="mt-5 pt-5 text-center">
+        <div class="border-top border-dark w-75 mx-auto pt-2">
+            <p>Assinatura da Gerência / Financeiro</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Trigger print dialog
+        window.print();
+        
+        // Optional: Remove query param after print to avoid re-printing on refresh
+        // But for now, let's keep it simple. User can navigate away.
+    });
+</script>
+
+<style>
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        #receipt-print, #receipt-print * {
+            visibility: visible;
+        }
+        #receipt-print {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            padding: 20px;
+        }
+    }
+</style>
+{% endif %}
+{% endblock %}

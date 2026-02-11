@@ -1,0 +1,118 @@
+    {% extends 'base.html' %}
+
+{% block title %}Visualizar Documento{% endblock %}
+
+{% block content %}
+<div class="service-container">
+    <div class="header-section">
+        <h1>{{ doc.title }}</h1>
+        <p>Criado em {{ doc.created_at }} por {{ doc.created_by }}</p>
+    </div>
+
+    <div style="margin-bottom: 20px;">
+        <a href="{{ url_for('hr.rh_documents') }}" class="action-btn" style="background-color: #6c757d; text-decoration: none; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" aria-label="Voltar"><i class="bi bi-arrow-left"></i> Voltar</a>
+    </div>
+
+    <div class="row" style="display: flex; gap: 20px; flex-wrap: wrap;">
+        <div class="col-md-8" style="flex: 2; min-width: 300px;">
+            <div class="card" style="height: 600px; padding: 0; overflow: hidden;">
+                <iframe src="{{ url_for('static', filename='uploads/rh_documents/' ~ doc.filename) }}" width="100%" height="100%" style="border: none;"></iframe>
+            </div>
+        </div>
+        <div class="col-md-4" style="flex: 1; min-width: 300px;">
+            <div class="card">
+                <h3>Status: 
+                    {% if doc.status == 'pending' %}
+                    <span style="color: #f39c12;">Pendente</span>
+                    {% else %}
+                    <span style="color: #27ae60;">Assinado</span>
+                    {% endif %}
+                </h3>
+
+                {% if doc.status == 'signed' %}
+                    <div style="margin-top: 20px; text-align: center;">
+                        <p><strong>Assinado por:</strong> {{ doc.assigned_to }}</p>
+                        <p><strong>Data:</strong> {{ doc.signed_at }}</p>
+                        <img src="{{ doc.signature_data }}" style="max-width: 100%; border: 1px solid #ccc; padding: 10px; background: white;">
+                    </div>
+                {% elif doc.assigned_to == session['user'] %}
+                    <div style="margin-top: 20px;">
+                        <h4>Assinar Documento</h4>
+                        <p>Utilize a área abaixo para desenhar sua assinatura.</p>
+                        <canvas id="signature-pad" class="signature-pad" width=300 height=200 style="border: 1px solid #000; background: #fff; touch-action: none;"></canvas>
+                        <div style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
+                            <button id="clear" class="action-btn" style="background-color: #e74c3c; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" aria-label="Limpar Assinatura"><i class="bi bi-eraser-fill"></i> Limpar</button>
+                            <button id="save" class="action-btn" style="background-color: #27ae60; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" aria-label="Confirmar Assinatura"><i class="bi bi-check-lg"></i> Confirmar Assinatura</button>
+                        </div>
+                    </div>
+                {% else %}
+                    <p class="text-muted" style="margin-top: 20px;">Aguardando assinatura de {{ doc.assigned_to }}.</p>
+                {% endif %}
+                
+                <hr>
+                <h4>Histórico</h4>
+                <ul style="font-size: 0.8em; color: #7f8c8d; list-style: none; padding: 0;">
+                    {% for log in doc.audit_log %}
+                    <li style="margin-bottom: 5px;">
+                        <strong>{{ log.timestamp }}</strong>: {{ log.action|upper }} por {{ log.by }}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if doc.status == 'pending' and doc.assigned_to == session['user'] %}
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+<script>
+    var canvas = document.getElementById('signature-pad');
+    
+    // Resize canvas for high DPI
+    function resizeCanvas() {
+        var ratio =  Math.max(window.devicePixelRatio || 1, 1);
+        canvas.width = canvas.offsetWidth * ratio;
+        canvas.height = canvas.offsetHeight * ratio;
+        canvas.getContext("2d").scale(ratio, ratio);
+    }
+    window.onresize = resizeCanvas;
+    resizeCanvas();
+
+    var signaturePad = new SignaturePad(canvas);
+
+    document.getElementById('clear').addEventListener('click', function () {
+        signaturePad.clear();
+    });
+
+    document.getElementById('save').addEventListener('click', function () {
+        if (signaturePad.isEmpty()) {
+            alert("Por favor, forneça uma assinatura.");
+        } else {
+            var dataURL = signaturePad.toDataURL();
+            
+            // Send to backend
+            fetch('{{ url_for("rh_sign_document", doc_id=doc.id) }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ signature: dataURL })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Documento assinado com sucesso!');
+                    location.reload();
+                } else {
+                    alert('Erro: ' + data.message);
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert('Erro ao enviar assinatura.');
+            });
+        }
+    });
+</script>
+{% endif %}
+{% endblock %}

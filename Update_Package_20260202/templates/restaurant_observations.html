@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            <a href="{{ url_for('restaurant_tables') }}" class="text-decoration-none text-dark">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            Gerenciar Observações
+        </h2>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
+            <i class="bi bi-plus-lg"></i> Nova Observação
+        </button>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Texto da Observação</th>
+                            <th>Categorias Vinculadas</th>
+                            <th class="text-end">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for obs in observations %}
+                        <tr>
+                            <td>{{ obs.text }}</td>
+                            <td>
+                                {% for cat in obs.categories %}
+                                <span class="badge bg-secondary">{{ cat }}</span>
+                                {% endfor %}
+                            </td>
+                            <td class="text-end">
+                                <div class="table-actions justify-content-end">
+                                    <button class="btn btn-sm btn-outline-primary" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#editModal{{ obs.id }}">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <form action="{{ url_for('restaurant_observations') }}" method="POST" class="d-inline" onsubmit="return confirm('Tem certeza?');">
+                                        <input type="hidden" name="action" value="delete">
+                                        <input type="hidden" name="id" value="{{ obs.id }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Edit Modal -->
+                        <div class="modal fade" id="editModal{{ obs.id }}" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Editar Observação</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <form action="{{ url_for('restaurant_observations') }}" method="POST">
+                                        <div class="modal-body">
+                                            <input type="hidden" name="action" value="edit">
+                                            <input type="hidden" name="id" value="{{ obs.id }}">
+                                            
+                                            <div class="mb-3">
+                                                <label class="form-label">Texto da Observação</label>
+                                                <input type="text" class="form-control" name="text" value="{{ obs.text }}" required>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <label class="form-label">Categorias de Produto</label>
+                                                <select class="form-select" name="categories" multiple required size="5">
+                                                    {% for cat in categories %}
+                                                    <option value="{{ cat }}" {% if cat in obs.categories %}selected{% endif %}>{{ cat }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                                <div class="form-text">Segure Ctrl (Windows) ou Command (Mac) para selecionar várias.</div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                            <button type="submit" class="btn btn-primary">Salvar</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <tr>
+                            <td colspan="3" class="text-center text-muted py-4">Nenhuma observação cadastrada.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Modal -->
+<div class="modal fade" id="addModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nova Observação</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('restaurant_observations') }}" method="POST">
+                <div class="modal-body">
+                    <input type="hidden" name="action" value="add">
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Texto da Observação</label>
+                        <input type="text" class="form-control" name="text" required placeholder="Ex: Sem cebola">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Categorias de Produto</label>
+                        <select class="form-select" name="categories" multiple required size="5">
+                            {% for cat in categories %}
+                            <option value="{{ cat }}">{{ cat }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">Segure Ctrl (Windows) ou Command (Mac) para selecionar várias.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Adicionar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

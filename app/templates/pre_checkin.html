@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pré-Check-in | Almareia Mirapraia</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .header-brand {
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+        .form-section {
+            background: #fff;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            border-left: 5px solid #0d6efd;
+        }
+        .section-title {
+            color: #0d6efd;
+            font-weight: 600;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .required-field::after {
+            content: " *";
+            color: red;
+        }
+        .preview-img {
+            max-width: 100px;
+            max-height: 100px;
+            margin-top: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        .minor-card {
+            background-color: #fcfcfc;
+            border: 1px dashed #ccc;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            position: relative;
+        }
+        .btn-remove-minor {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header-brand text-center">
+        <div class="container">
+            <!-- Logo Placeholder -->
+            <h2 class="text-primary mb-0">
+                <i class="bi bi-building-check"></i> Almareia Mirapraia
+            </h2>
+            <p class="text-muted mt-2">Pré-Check-in Digital</p>
+        </div>
+    </header>
+
+    <div class="container pb-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                
+                {% if error %}
+                <div class="alert alert-danger text-center">
+                    <h4><i class="bi bi-exclamation-triangle"></i> Ops!</h4>
+                    <p>{{ error }}</p>
+                </div>
+                {% elif success %}
+                <div class="card text-center shadow-sm p-5">
+                    <div class="card-body">
+                        <div class="mb-4 text-success">
+                            <i class="bi bi-check-circle-fill" style="font-size: 4rem;"></i>
+                        </div>
+                        <h2 class="card-title text-success">Tudo Pronto!</h2>
+                        <p class="card-text lead">Seu pré-check-in foi realizado com sucesso.</p>
+                        <p class="text-muted">Aguardamos sua chegada para uma estadia incrível.</p>
+                    </div>
+                </div>
+                {% else %}
+
+                <form id="preCheckinForm" method="POST" enctype="multipart/form-data" action="/api/pre-checkin/submit">
+                    <input type="hidden" name="token" value="{{ token }}">
+                    
+                    <!-- Dados da Reserva (Read Only) -->
+                    <div class="form-section border-secondary">
+                        <h4 class="section-title text-secondary"><i class="bi bi-calendar-check"></i> Dados da Reserva</h4>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Check-in</label>
+                                <input type="text" class="form-control bg-light" name="checkin_date" value="{{ guest.stay_info.checkin_date if guest else link_data.checkin_date }}" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Check-out</label>
+                                <input type="text" class="form-control bg-light" name="checkout_date" value="{{ guest.stay_info.checkout_date if guest else link_data.checkout_date }}" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Acomodação</label>
+                                <input type="text" class="form-control bg-light" value="{{ link_data.room_number if link_data.room_number else 'A definir na chegada' }}" readonly>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dados Pessoais -->
+                    <div class="form-section">
+                        <h4 class="section-title"><i class="bi bi-person-vcard"></i> Dados Pessoais</h4>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="name" class="form-label required-field">Nome</label>
+                                <input type="text" class="form-control" id="name" name="name" value="{{ guest.personal_info.name if guest else link_data.guest_name }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="surname" class="form-label required-field">Sobrenome</label>
+                                <input type="text" class="form-control" id="surname" name="surname" value="{{ guest.personal_info.surname if guest else '' }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="cpf" class="form-label required-field">CPF</label>
+                                <input type="text" class="form-control" id="cpf" name="cpf" value="{{ guest.fiscal_info.cpf if guest else '' }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="rg" class="form-label">RG</label>
+                                <input type="text" class="form-control" id="rg" name="rg" value="{{ guest.personal_info.rg if guest else '' }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="birth_date" class="form-label required-field">Data de Nascimento</label>
+                                <input type="date" class="form-control" id="birth_date" name="birth_date" value="{{ guest.personal_info.birth_date if guest else '' }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="phone" class="form-label required-field">Telefone / WhatsApp</label>
+                                <input type="text" class="form-control" id="phone" name="phone" value="{{ guest.personal_info.phone if guest else '' }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="email" class="form-label required-field">E-mail</label>
+                                <input type="email" class="form-control" id="email" name="email" value="{{ guest.personal_info.email if guest else '' }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="nationality" class="form-label required-field">Nacionalidade</label>
+                                <select class="form-select" id="nationality" name="nationality" required>
+                                    <option value="Brasileira" selected>Brasileira</option>
+                                    <option value="Estrangeira">Estrangeira</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="marital_status" class="form-label required-field">Estado Civil</label>
+                                <select class="form-select" id="marital_status" name="marital_status" required>
+                                    <option value="">Selecione...</option>
+                                    <option value="Solteiro(a)">Solteiro(a)</option>
+                                    <option value="Casado(a)">Casado(a)</option>
+                                    <option value="Divorciado(a)">Divorciado(a)</option>
+                                    <option value="Viúvo(a)">Viúvo(a)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Endereço -->
+                    <div class="form-section">
+                        <h4 class="section-title"><i class="bi bi-geo-alt"></i> Endereço Completo</h4>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="zip_code" class="form-label required-field">CEP</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="zip_code" name="zip_code" required>
+                                    <button class="btn btn-outline-secondary" type="button" id="btnBuscaCep"><i class="bi bi-search"></i></button>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="street" class="form-label required-field">Logradouro (Rua/Av)</label>
+                                <input type="text" class="form-control" id="street" name="street" required>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="number" class="form-label required-field">Número</label>
+                                <input type="text" class="form-control" id="number" name="number" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="neighborhood" class="form-label required-field">Bairro</label>
+                                <input type="text" class="form-control" id="neighborhood" name="neighborhood" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="city" class="form-label required-field">Cidade</label>
+                                <input type="text" class="form-control" id="city" name="city" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="state" class="form-label required-field">Estado</label>
+                                <input type="text" class="form-control" id="state" name="state" required>
+                            </div>
+                             <div class="col-md-12">
+                                <label for="complement" class="form-label">Complemento</label>
+                                <input type="text" class="form-control" id="complement" name="complement">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Informações Adicionais -->
+                    <div class="form-section">
+                        <h4 class="section-title"><i class="bi bi-info-circle"></i> Informações Adicionais</h4>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="vehicle" name="vehicle">
+                            <label class="form-check-label" for="vehicle">Possui veículo? (Necessário para vaga de estacionamento)</label>
+                        </div>
+                        
+                        <!-- Vehicle Details (Conditional) -->
+                        <div id="vehicleSection" style="display: none;" class="mb-4 p-3 bg-light rounded border">
+                            <h6 class="text-muted mb-3">Dados do Veículo</h6>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label small">Marca</label>
+                                    <input type="text" class="form-control" name="vehicle_brand" placeholder="Ex: Fiat">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small">Modelo</label>
+                                    <input type="text" class="form-control" name="vehicle_model" placeholder="Ex: Toro">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small">Placa</label>
+                                    <input type="text" class="form-control" name="vehicle_plate" placeholder="ABC-1234" style="text-transform: uppercase;">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="has_minors">
+                            <label class="form-check-label" for="has_minors">Vem acompanhado de menores de 18 anos?</label>
+                        </div>
+
+                        <!-- Seção Menores (Condicional) -->
+                        <div id="minorsSection" style="display: none;">
+                            <h5 class="mt-4 mb-3 text-muted">Cadastro de Menores</h5>
+                            <div id="minorsContainer"></div>
+                            <button type="button" class="btn btn-outline-primary btn-sm mt-2" id="btnAddMinor">
+                                <i class="bi bi-plus-circle"></i> Adicionar Menor
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Upload Documentos -->
+                    <div class="form-section">
+                        <h4 class="section-title"><i class="bi bi-cloud-upload"></i> Documentos</h4>
+                        <p class="text-muted small">Para agilizar seu check-in, envie uma foto do seu documento (RG ou CNH). Formatos aceitos: JPG, PNG, PDF. Max 5MB.</p>
+                        <div class="mb-3">
+                            <label for="doc_file" class="form-label">Selecione o arquivo</label>
+                            <input class="form-control" type="file" id="doc_file" name="doc_file" accept=".jpg,.jpeg,.png,.pdf">
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg py-3">
+                            Confirmar Pré-Check-in
+                        </button>
+                    </div>
+
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.8/jquery.inputmask.min.js"></script>
+
+    <script>
+        $(document).ready(function(){
+            // Máscaras
+            $('#cpf').inputmask('999.999.999-99');
+            $('#zip_code').inputmask('99999-999');
+            $('#phone').inputmask('(99) 99999-9999');
+            
+            // Busca CEP
+            function buscaCep() {
+                var cep = $('#zip_code').val().replace(/\D/g, '');
+                if (cep.length === 8) {
+                    $.getJSON("https://viacep.com.br/ws/"+ cep +"/json/?callback=?", function(dados) {
+                        if (!("erro" in dados)) {
+                            $("#street").val(dados.logradouro);
+                            $("#neighborhood").val(dados.bairro);
+                            $("#city").val(dados.localidade);
+                            $("#state").val(dados.uf);
+                            $("#number").focus();
+                        } else {
+                            alert("CEP não encontrado.");
+                        }
+                    });
+                }
+            }
+            
+            $('#zip_code').blur(buscaCep);
+            $('#btnBuscaCep').click(buscaCep);
+
+            // Toggle Vehicle
+            $('#vehicle').change(function(){
+                if($(this).is(':checked')) {
+                    $('#vehicleSection').slideDown();
+                } else {
+                    $('#vehicleSection').slideUp();
+                }
+            });
+
+            // Toggle Menores
+            $('#has_minors').change(function(){
+                if($(this).is(':checked')) {
+                    $('#minorsSection').slideDown();
+                } else {
+                    $('#minorsSection').slideUp();
+                }
+            });
+
+            // Adicionar Menor Dinamicamente
+            let minorCount = 0;
+            $('#btnAddMinor').click(function(){
+                minorCount++;
+                const html = `
+                <div class="minor-card" id="minor_${minorCount}">
+                    <button type="button" class="btn-close btn-remove-minor" onclick="removeMinor(${minorCount})"></button>
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <label class="form-label small">Nome</label>
+                            <input type="text" class="form-control form-control-sm" name="minors[${minorCount}][name]" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small">Sobrenome</label>
+                            <input type="text" class="form-control form-control-sm" name="minors[${minorCount}][surname]" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small">Data Nasc.</label>
+                            <input type="date" class="form-control form-control-sm" name="minors[${minorCount}][dob]" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small">CPF/RG</label>
+                            <input type="text" class="form-control form-control-sm" name="minors[${minorCount}][doc]" required>
+                        </div>
+                    </div>
+                </div>`;
+                $('#minorsContainer').append(html);
+            });
+        });
+
+        function removeMinor(id) {
+            $('#minor_' + id).remove();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,373 @@
+{% extends "base.html" %}
+
+{% block title %}Checklist de Compras{% endblock %}
+
+{% block content %}
+<div class="container py-5 mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-list-check"></i> Checklist de Compras Diário</h2>
+    </div>
+    
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white p-0 border-bottom-0">
+            <ul class="nav nav-tabs card-header-tabs m-0 px-3 pt-3" id="myTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active fw-bold" id="daily-tab" data-bs-toggle="tab" data-bs-target="#daily" type="button" role="tab"><i class="bi bi-calendar-check me-2"></i>Checklist do Dia</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link fw-bold" id="items-tab" data-bs-toggle="tab" data-bs-target="#items" type="button" role="tab"><i class="bi bi-list-ul me-2"></i>Gerenciar Itens</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link fw-bold" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings" type="button" role="tab"><i class="bi bi-gear me-2"></i>Configurações</button>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="card-body">
+            <div class="tab-content" id="myTabContent">
+                <!-- Daily Checklist Tab -->
+                <div class="tab-pane fade show active" id="daily" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                        <h4 class="text-primary mb-0"><i class="bi bi-calendar3 me-2"></i>{{ today_date }}</h4>
+                        <div>
+                            <button class="btn btn-outline-primary btn-lg shadow-sm me-2" onclick="copyList()">
+                                <i class="bi bi-clipboard me-2"></i>Copiar Lista
+                            </button>
+                            <button class="btn btn-success btn-lg shadow-sm" onclick="sendWhatsApp()">
+                                <i class="bi bi-whatsapp me-2"></i>Enviar Lista
+                            </button>
+                        </div>
+                    </div>
+                
+                <div id="daily-list-container">
+                    {% if not daily_items_by_category %}
+                        <div class="alert alert-info text-center py-4">
+                            <i class="bi bi-info-circle display-6 d-block mb-3"></i>
+                            Nenhum item cadastrado. Vá em "Gerenciar Itens" para começar.
+                        </div>
+                    {% endif %}
+                    
+                    {% for category, items in daily_items_by_category.items() %}
+                        <div class="card mb-4 shadow-sm">
+                            <div class="card-header bg-light border-bottom-0 py-3">
+                                <h5 class="mb-0 text-primary"><i class="bi bi-tag-fill me-2"></i>{{ category }}</h5>
+                            </div>
+                            <div class="card-body p-0">
+                                <ul class="list-group list-group-flush">
+                                {% for item in items %}
+                                    <li class="list-group-item list-group-item-action hover-bg-light">
+                                        <div class="row align-items-center">
+                                            <div class="col-auto">
+                                                <div class="form-check">
+                                                    <input type="checkbox" class="form-check-input cursor-pointer" 
+                                                           id="check-{{ item.id }}" 
+                                                           {% if item.checked %}checked{% endif %}
+                                                           onchange="updateItem('{{ item.id }}')"
+                                                           style="width: 24px; height: 24px; border-color: #adb5bd;">
+                                                </div>
+                                            </div>
+                                            <div class="col">
+                                                <label for="check-{{ item.id }}" class="form-check-label fw-semibold mb-0 cursor-pointer text-dark" style="font-size: 1.05em;">{{ item.name }}</label>
+                                                <small class="text-muted d-block mt-1"><i class="bi bi-box-seam me-1"></i>{{ item.unit }}</small>
+                                            </div>
+                                            <div class="col-auto">
+                                                <div class="input-group input-group-sm" style="width: 150px;">
+                                                    <span class="input-group-text bg-white text-muted">Qtd</span>
+                                                    <input type="number" step="any" class="form-control text-center fw-bold" 
+                                                           id="qty-{{ item.id }}" 
+                                                           value="{{ item.qty }}" 
+                                                           placeholder="0"
+                                                           onchange="updateItem('{{ item.id }}')">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Manage Items Tab -->
+        <div class="tab-pane fade" id="items" role="tabpanel" aria-labelledby="items-tab">
+            <div class="mt-3">
+                <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addItemModal" onclick="resetModal()">
+                    <i class="bi bi-plus-circle"></i> Novo Item
+                </button>
+                
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Categoria</th>
+                                <th>Unidade</th>
+                                <th class="text-end">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in all_items %}
+                                <tr>
+                                    <td>{{ item.name }}</td>
+                                    <td>{{ item.category }}</td>
+                                    <td>{{ item.unit }}</td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-outline-warning me-1" onclick="editItem('{{ item.id }}', '{{ item.name }}', '{{ item.category }}', '{{ item.unit }}')">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="deleteItem('{{ item.id }}')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="settings-tab">
+            <div class="mt-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Configuração WhatsApp</h5>
+                        <div class="mb-3">
+                            <label for="whatsapp-number" class="form-label">Número para envio (com DDD)</label>
+                            <input type="text" class="form-control" id="whatsapp-number" value="{{ settings.whatsapp_number }}">
+                            <div class="form-text">Ex: 5581999999999 (Sempre use o código do país 55)</div>
+                        </div>
+                        <button class="btn btn-primary" onclick="saveSettings()">Salvar Configurações</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- Modals -->
+<!-- Add/Edit Item Modal -->
+<div class="modal fade" id="addItemModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="itemModalTitle">Novo Item</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="item-id">
+                <div class="mb-3">
+                    <label for="item-name" class="form-label">Nome</label>
+                    <input type="text" class="form-control" id="item-name" list="insumos-list" required autocomplete="off">
+                    <datalist id="insumos-list">
+                        {% for insumo in insumos %}
+                            <option value="{{ insumo.name }}">{{ insumo.unit }}</option>
+                        {% endfor %}
+                    </datalist>
+                    <div class="form-text">Selecione um insumo da lista ou digite um novo nome.</div>
+                </div>
+                <div class="mb-3">
+                    <label for="item-category" class="form-label">Categoria</label>
+                    <input type="text" class="form-control" id="item-category" list="category-list">
+                    <datalist id="category-list">
+                        <option value="Hortifruti">
+                        <option value="Açougue">
+                        <option value="Laticínios">
+                        <option value="Mercearia">
+                        <option value="Limpeza">
+                        <option value="Bebidas">
+                        <option value="Descartáveis">
+                    </datalist>
+                </div>
+                <div class="mb-3">
+                    <label for="item-unit" class="form-label">Unidade</label>
+                    <input type="text" class="form-control" id="item-unit" value="un" list="unit-list">
+                    <datalist id="unit-list">
+                        <option value="un">
+                        <option value="kg">
+                        <option value="g">
+                        <option value="L">
+                        <option value="ml">
+                        <option value="pct">
+                        <option value="cx">
+                    </datalist>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="saveItem()">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Global Department
+const CURRENT_DEPARTMENT = "{{ department }}";
+
+// Data for auto-filling from insumos
+const insumoData = {
+    {% for insumo in insumos %}
+    "{{ insumo.name|replace('"', '\\"') }}": { unit: "{{ insumo.unit }}", category: "{{ insumo.department }}" },
+    {% endfor %}
+};
+
+// Auto-fill unit and category when insumo is selected
+document.addEventListener('DOMContentLoaded', function() {
+    const nameInput = document.getElementById('item-name');
+    if(nameInput) {
+        nameInput.addEventListener('change', function() {
+            const val = this.value;
+            if (insumoData[val]) {
+                const unitInput = document.getElementById('item-unit');
+                const catInput = document.getElementById('item-category');
+                
+                if(unitInput) unitInput.value = insumoData[val].unit;
+                if(catInput && insumoData[val].category) {
+                     catInput.value = insumoData[val].category;
+                }
+            }
+        });
+    }
+});
+
+// Scripts for interacting with API
+function updateItem(itemId) {
+    const checked = document.getElementById('check-' + itemId).checked;
+    const qty = document.getElementById('qty-' + itemId).value;
+    
+    // Add visual feedback
+    const row = document.getElementById('check-' + itemId).closest('.list-group-item');
+    if (checked) {
+        row.classList.add('bg-success', 'bg-opacity-10');
+    } else {
+        row.classList.remove('bg-success', 'bg-opacity-10');
+    }
+    
+    fetch('/api/checklist/update_daily', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({item_id: itemId, checked: checked, qty: qty, department: CURRENT_DEPARTMENT})
+    });
+}
+
+function resetModal() {
+    document.getElementById('item-id').value = '';
+    document.getElementById('item-name').value = '';
+    document.getElementById('item-category').value = '';
+    document.getElementById('item-unit').value = 'un';
+    document.getElementById('itemModalTitle').innerText = 'Novo Item';
+}
+
+function saveItem() {
+    const id = document.getElementById('item-id').value;
+    const name = document.getElementById('item-name').value;
+    const category = document.getElementById('item-category').value;
+    const unit = document.getElementById('item-unit').value;
+    
+    if (!name) {
+        alert('Nome é obrigatório');
+        return;
+    }
+    
+    const url = id ? '/api/checklist/update_item' : '/api/checklist/add_item';
+    
+    fetch(url, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({id: id, name: name, category: category, unit: unit, department: CURRENT_DEPARTMENT})
+    }).then(r => location.reload());
+}
+
+function deleteItem(id) {
+    if(confirm('Tem certeza que deseja excluir este item?')) {
+        fetch('/api/checklist/delete_item', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({id: id})
+        }).then(r => location.reload());
+    }
+}
+
+function editItem(id, name, cat, unit) {
+    document.getElementById('item-id').value = id;
+    document.getElementById('item-name').value = name;
+    document.getElementById('item-category').value = cat;
+    document.getElementById('item-unit').value = unit;
+    document.getElementById('itemModalTitle').innerText = 'Editar Item';
+    
+    new bootstrap.Modal(document.getElementById('addItemModal')).show();
+}
+
+function saveSettings() {
+    const number = document.getElementById('whatsapp-number').value;
+    fetch('/api/checklist/settings', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({whatsapp_number: number})
+    }).then(r => alert('Configurações salvas!'));
+}
+
+function sendWhatsApp() {
+    if(!confirm('Enviar lista de compras para o WhatsApp configurado?')) return;
+    
+    const btn = document.querySelector('button[onclick="sendWhatsApp()"]');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Enviando...';
+    btn.disabled = true;
+
+    fetch('/api/checklist/send', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({department: CURRENT_DEPARTMENT})
+    }).then(r => r.json())
+      .then(data => {
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+          
+          if(data.success) alert('Lista enviada com sucesso!');
+          else alert('Erro ao enviar: ' + (data.error || 'Erro desconhecido'));
+      })
+      .catch(e => {
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+          alert('Erro de conexão');
+      });
+}
+
+function copyList() {
+    const btn = document.querySelector('button[onclick="copyList()"]');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Copiando...';
+    btn.disabled = true;
+
+    fetch(`/api/checklist/preview?department=${encodeURIComponent(CURRENT_DEPARTMENT)}`)
+        .then(r => r.json())
+        .then(data => {
+            if(data.success) {
+                navigator.clipboard.writeText(data.text).then(() => {
+                    alert('Lista copiada para a área de transferência!');
+                }).catch(err => {
+                    console.error('Erro ao copiar:', err);
+                    alert('Erro ao copiar. O texto é:\n\n' + data.text);
+                });
+            } else {
+                alert('Erro ao gerar lista: ' + (data.error || 'Erro desconhecido'));
+            }
+        })
+        .catch(e => {
+            console.error(e);
+            alert('Erro de conexão ao gerar lista');
+        })
+        .finally(() => {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        });
+}
+</script>
+{% endblock %}

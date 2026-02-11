@@ -1,0 +1,418 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ cycle.name }} - Detalhes do Ciclo{% endblock %}
+
+{% block content %}
+<div class="service-page">
+    <div class="service-header">
+        <span class="service-icon">🧮</span>
+        <h2>{{ cycle.name }} <small class="text-muted">({{ cycle.month }})</small>
+            {% if cycle.status == 'approved' %}
+            <span class="badge bg-success ms-2">Aprovado</span>
+            {% else %}
+            <span class="badge bg-warning text-dark ms-2">Em Aberto</span>
+            {% endif %}
+        </h2>
+    </div>
+
+    <div class="mb-3">
+        <a href="{{ url_for('finance.finance_commission') }}" class="btn btn-secondary">← Voltar</a>
+    </div>
+
+    <form id="commissionForm" action="{{ url_for('finance.finance_commission_calculate', cycle_id=cycle.id) }}" method="POST">
+        <input type="hidden" name="check_submit" value="1">
+        
+        <!-- Global Inputs -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Dados Financeiros</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Comissão Total (R$)</label>
+                        <input type="text" class="form-control" name="total_commission" value="{{ '%.2f'|format(cycle.total_commission) }}" required placeholder="Ex: 10000,00">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Bonificação Total (R$)</label>
+                        <input type="text" class="form-control" name="total_bonus" value="{{ '%.2f'|format(cycle.total_bonus) }}" required placeholder="Ex: 0,00">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">% via Cartão (0.0 a 1.0)</label>
+                        <input type="number" class="form-control" name="card_percent" step="0.01" min="0" max="1" value="{{ cycle.card_percent }}" required>
+                        <small class="text-muted">Ex: 0.8 para 80%</small>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Descontos Extras (R$)</label>
+                        <input type="text" class="form-control" name="extras" value="{{ cycle.extras }}" placeholder="Ex: 0,00">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Imp. Comissão (%)</label>
+                        <input type="number" class="form-control" name="commission_tax_percent" step="0.01" min="0" max="100" value="{{ cycle.commission_tax_percent | default(12) }}" required>
+                        <small class="text-muted">Ex: 12 para 12%</small>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Imp. Bonificação (%)</label>
+                        <input type="number" class="form-control" name="bonus_tax_percent" step="0.01" min="0" max="100" value="{{ cycle.bonus_tax_percent | default(12) }}" required>
+                        <small class="text-muted">Ex: 12 para 12%</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Department Bonuses -->
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Bonificações por Departamento (R$)</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for dept in cycle.department_bonuses %}
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">{{ dept.name }}</label>
+                        <input type="text" class="form-control" name="dept_bonus_{{ dept.name }}" value="{{ dept.value }}">
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+    {% if cycle.results %}
+    <!-- Results Summary -->
+    <div class="card mb-4 border-success">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0">Resumo do Cálculo</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <table class="table table-sm">
+                        <tr>
+                            <td>Total Bruto:</td>
+                            <td class="text-end">R$ {{ cycle.results.gross_total }}</td>
+                        </tr>
+                        <tr>
+                            <td>Convenção (20%):</td>
+                            <td class="text-end text-danger">- R$ {{ cycle.results.ded_convention }}</td>
+                        </tr>
+                        <tr>
+                            <td>Imp. Comissão ({{ cycle.commission_tax_percent | default(12) }}%):</td>
+                            <td class="text-end text-danger">- R$ {{ cycle.results.ded_tax_commission }}</td>
+                        </tr>
+                        <tr>
+                            <td>Imp. Bonificação ({{ cycle.bonus_tax_percent | default(12) }}%):</td>
+                            <td class="text-end text-danger">- R$ {{ cycle.results.ded_tax_bonus }}</td>
+                        </tr>
+                        <tr>
+                            <td>Taxa Cartão:</td>
+                            <td class="text-end text-danger">- R$ {{ cycle.results.ded_card }}</td>
+                        </tr>
+                        <tr class="fw-bold">
+                            <td>Total Deduções Globais:</td>
+                            <td class="text-end text-danger">- R$ {{ cycle.results.total_global_deductions }}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-md-4">
+                    <table class="table table-sm">
+                        <tr>
+                            <td>Líquido Disponível (Pontos):</td>
+                            <td class="text-end fw-bold text-primary">R$ {{ cycle.results.net_distributable }}</td>
+                        </tr>
+                        <tr>
+                            <td>Total Distribuído:</td>
+                            <td class="text-end fw-bold text-success">R$ {{ cycle.results.total_distributed }}</td>
+                        </tr>
+                        <tr>
+                            <td>Sobra (Arredondamentos/Faltas):</td>
+                            <td class="text-end text-muted">R$ {{ cycle.results.remainder }}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-md-4">
+                     <div class="alert alert-info">
+                        <small>
+                            <i class="bi bi-info-circle"></i> O valor distribuído considera os pontos de cada funcionário ponderados pelos dias trabalhados (Dias/30). A sobra ocorre quando funcionários não trabalharam 30 dias completos.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Employees Table -->
+    <div class="card mb-4">
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Funcionários</h5>
+            <div>
+                <span class="badge bg-light text-dark">{{ cycle.employees|length }} Funcionários</span>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered mb-0" id="employeesTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Nome</th>
+                            <th>Depto</th>
+                            <th style="width: 80px;">Pontos</th>
+                            <th style="width: 80px;">Dias</th>
+                            <th style="width: 100px;">Bônus Indiv.</th>
+                            <th style="width: 100px;">Dedução</th>
+                            <th style="width: 100px;">Consumo</th>
+                            {% if cycle.results %}
+                            <th class="table-primary">Rateio Pontos</th>
+                            <th class="table-primary">Bonif. Depto</th>
+                            <th class="table-primary">Total Final</th>
+                            {% endif %}
+                            <th style="width: 50px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for emp in cycle.employees %}
+                        <tr data-index="{{ loop.index0 }}">
+                            <td>
+                                {{ emp.name }}
+                                <input type="hidden" name="emp_name" class="emp-name" value="{{ emp.name }}">
+                                <input type="hidden" name="emp_role" class="emp-role" value="{{ emp.role }}">
+                            </td>
+                            <td>
+                                {{ emp.department }}
+                                <input type="hidden" name="emp_dept" class="emp-dept" value="{{ emp.department }}">
+                            </td>
+                            <td>
+                                <input type="text" name="emp_points" class="form-control form-control-sm emp-points" value="{{ emp.points }}" placeholder="0" {% if cycle.status == 'approved' and session.role != 'admin' %}readonly{% endif %}>
+                            </td>
+                            <td>
+                                <input type="text" name="emp_days" class="form-control form-control-sm emp-days" value="{{ emp.days_worked }}" placeholder="0" {% if cycle.status == 'approved' and session.role != 'admin' %}readonly{% endif %}>
+                            </td>
+                            <td>
+                                <input type="text" name="emp_bonus" class="form-control form-control-sm emp-bonus" value="{{ emp.individual_bonus }}" {% if cycle.status == 'approved' and session.role != 'admin' %}readonly{% endif %}>
+                            </td>
+                            <td>
+                                <input type="text" name="emp_deduction" class="form-control form-control-sm emp-deduction" value="{{ emp.individual_deduction }}" {% if cycle.status == 'approved' and session.role != 'admin' %}readonly{% endif %}>
+                            </td>
+                            <td>
+                                <input type="text" class="form-control form-control-sm text-danger" value="{{ '%.2f'|format(emp.consumption|default(0)) }}" readonly>
+                            </td>
+                            {% if cycle.results %}
+                            <td class="text-end">{{ "%.2f"|format(emp.calculated.point_share) if emp.calculated else '-' }}</td>
+                            <td class="text-end">{{ "%.2f"|format(emp.calculated.dept_share) if emp.calculated else '-' }}</td>
+                            <td class="text-end fw-bold">{{ "%.2f"|format(emp.calculated.total) if emp.calculated else '-' }}</td>
+                            {% endif %}
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-outline-primary" onclick="openEditModal(this)" title="Editar individualmente">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-outline-danger" onclick="removeRow(this)" title="Remover">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="p-2">
+                    {% if cycle.status != 'approved' or session.role == 'admin' %}
+                    <button type="submit" formaction="{{ url_for('finance.finance_commission_refresh_scores', cycle_id=cycle.id) }}" class="btn btn-sm btn-outline-info me-2" onclick="return confirm('Isso atualizará a pontuação de todos os funcionários listados com base no cadastro atual. Deseja continuar?')">
+                        <i class="bi bi-arrow-clockwise"></i> Atualizar Pontuações
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Action Buttons (Moved) -->
+        <div class="d-grid gap-2 mt-4 mb-2 d-md-flex justify-content-md-end">
+            {% if cycle.status != 'approved' or session.role == 'admin' %}
+            <button type="submit" class="btn btn-primary btn-lg ms-2">
+                <i class="bi bi-calculator"></i> Calcular e Salvar
+            </button>
+            {% endif %}
+            
+            {% if session.role == 'admin' and cycle.status != 'approved' %}
+            <button type="button" class="btn btn-success btn-lg ms-2" data-bs-toggle="modal" data-bs-target="#approveModal">
+                <i class="bi bi-check-circle"></i> Aprovar Comissão
+            </button>
+            {% endif %}
+        </div>
+    </form>
+
+
+    {% if dept_rankings %}
+    <div class="row mt-5 mb-5">
+        <div class="col-12">
+            <h4 class="mb-3 border-bottom pb-2">Classificação por Departamento</h4>
+        </div>
+        {% for dept_name, employees in dept_rankings.items() %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-light fw-bold text-center">
+                    {{ dept_name }}
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        {% for emp in employees %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="fw-bold">{{ emp.name }}</span>
+                                <div class="small text-muted">{{ emp.points }} pontos</div>
+                            </div>
+                            {% if cycle.results and emp.calculated %}
+                            <div class="text-end">
+                                <span class="badge bg-success rounded-pill">
+                                    R$ {{ "%.2f"|format(emp.calculated.total) }}
+                                </span>
+                            </div>
+                            {% else %}
+                            <span class="badge bg-secondary rounded-pill">-</span>
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                        {% if not employees %}
+                        <li class="list-group-item text-center text-muted fst-italic">
+                            Nenhum funcionário
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+                {% if dept_totals and dept_totals[dept_name] > 0 %}
+                <div class="card-footer bg-white text-end">
+                    <span class="text-muted small me-2">Total Depto:</span>
+                    <span class="fw-bold text-success fs-5">R$ {{ "%.2f"|format(dept_totals[dept_name]) }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+ </div>
+
+<div class="modal fade" id="approveModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form method="POST" action="{{ url_for('finance.finance_commission_approve', cycle_id=cycle.id) }}">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Aprovação da Comissão</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Ao aprovar a comissão:</p>
+                    <ul>
+                        <li>As mesas de consumo dos funcionários deste ciclo serão fechadas.</li>
+                        <li>O ciclo será marcado como aprovado e bloqueado para edição (exceto admin).</li>
+                    </ul>
+                    <p>Deseja continuar?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Confirmar Aprovação</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Edit Employee -->
+<div class="modal fade" id="editEmployeeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form method="POST" action="{{ url_for('finance.finance_commission_update_employee', cycle_id=cycle.id) }}">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Funcionário</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-warning small">
+                        <i class="bi bi-exclamation-triangle"></i> Atenção: Ao salvar, a página será recarregada. Alterações não salvas na tabela principal serão perdidas.
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nome</label>
+                        <input type="text" class="form-control" name="emp_name" id="editEmpName" readonly>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Departamento</label>
+                             <select class="form-select" name="emp_dept" id="editEmpDept">
+                                <option value="Cozinha">Cozinha</option>
+                                <option value="Serviço">Serviço</option>
+                                <option value="Manutenção">Manutenção</option>
+                                <option value="Recepção">Recepção</option>
+                                <option value="Estoque">Estoque</option>
+                                <option value="Governança">Governança</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Cargo</label>
+                            <input type="text" class="form-control" name="emp_role" id="editEmpRole">
+                        </div>
+                    </div>
+                    <div class="row">
+                         <div class="col-md-6 mb-3">
+                            <label class="form-label">Pontos</label>
+                            <input type="text" class="form-control" name="emp_points" id="editEmpPoints">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Dias Trabalhados</label>
+                            <input type="text" class="form-control" name="emp_days" id="editEmpDays">
+                        </div>
+                    </div>
+                     <div class="row">
+                         <div class="col-md-6 mb-3">
+                            <label class="form-label">Bônus Indiv.</label>
+                            <input type="text" class="form-control" name="emp_bonus" id="editEmpBonus">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Dedução</label>
+                            <input type="text" class="form-control" name="emp_deduction" id="editEmpDeduction">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openEditModal(btn) {
+    const row = btn.closest('tr');
+    
+    // Get values from the row inputs/text
+    const name = row.querySelector('.emp-name').value;
+    const dept = row.querySelector('.emp-dept').value;
+    const role = row.querySelector('.emp-role').value;
+    const points = row.querySelector('.emp-points').value;
+    const days = row.querySelector('.emp-days').value;
+    const bonus = row.querySelector('.emp-bonus').value;
+    const deduction = row.querySelector('.emp-deduction').value;
+    
+    document.getElementById('editEmpName').value = name;
+    document.getElementById('editEmpDept').value = dept;
+    document.getElementById('editEmpRole').value = role;
+    document.getElementById('editEmpPoints').value = points;
+    document.getElementById('editEmpDays').value = days;
+    document.getElementById('editEmpBonus').value = bonus;
+    document.getElementById('editEmpDeduction').value = deduction;
+    
+    var modal = new bootstrap.Modal(document.getElementById('editEmployeeModal'));
+    modal.show();
+}
+
+function removeRow(btn) {
+    if(confirm('Remover funcionário da lista?')) {
+        const row = btn.closest('tr');
+        row.remove();
+    }
+}
+</script>
+{% endblock %}

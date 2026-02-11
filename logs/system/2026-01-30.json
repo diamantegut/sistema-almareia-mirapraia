@@ -1,0 +1,3532 @@
+[
+    {
+        "id": "SYS_20260130094124896063",
+        "timestamp": "30/01/2026 09:41:24",
+        "timestamp_iso": "2026-01-30T09:41:24.896078",
+        "action": "cancel_consumption",
+        "user": "admin_user",
+        "category": "Cancelamento",
+        "details": {
+            "charge_id": "CHARGE_TEST_001",
+            "room_number": "101",
+            "total": 100.0,
+            "old_status": "pending",
+            "justification": "Erro de lançamento"
+        }
+    },
+    {
+        "id": "SYS_20260130094125580273",
+        "timestamp": "30/01/2026 09:41:25",
+        "timestamp_iso": "2026-01-30T09:41:25.580290",
+        "action": "cancel_consumption",
+        "user": "admin_user",
+        "category": "Cancelamento",
+        "details": {
+            "charge_id": "TEST_CHARGE_20260130094125",
+            "room_number": "999",
+            "total": 10.0,
+            "old_status": "pending",
+            "justification": "Integration Test Justification"
+        }
+    },
+    {
+        "id": "SYS_20260130094125676937",
+        "timestamp": "30/01/2026 09:41:25",
+        "timestamp_iso": "2026-01-30T09:41:25.676959",
+        "action": "Cardápio Criado",
+        "user": "Sistema",
+        "category": "Cardápio",
+        "details": {
+            "name": "Test Burger",
+            "category": "Lanches",
+            "message": "Produto \"Test Burger\" criado."
+        }
+    },
+    {
+        "id": "SYS_20260130094126152686",
+        "timestamp": "30/01/2026 09:41:26",
+        "timestamp_iso": "2026-01-30T09:41:26.152699",
+        "action": "transfer_item",
+        "user": "SupervisorUser",
+        "category": "Restaurante",
+        "details": {
+            "description": "Transferiu 1.0x Coke da Mesa 10 para Mesa 20",
+            "source_table": "10",
+            "target_table": "20",
+            "item": "Coke",
+            "qty": 1.0,
+            "user": "SupervisorUser"
+        }
+    },
+    {
+        "id": "SYS_20260130094126169630",
+        "timestamp": "30/01/2026 09:41:26",
+        "timestamp_iso": "2026-01-30T09:41:26.169661",
+        "action": "transfer_item",
+        "user": "SupervisorUser",
+        "category": "Restaurante",
+        "details": {
+            "description": "Transferiu 1.0x Coke da Mesa 10 para Mesa 20",
+            "source_table": "10",
+            "target_table": "20",
+            "item": "Coke",
+            "qty": 1.0,
+            "user": "SupervisorUser"
+        }
+    },
+    {
+        "id": "SYS_20260130094126190060",
+        "timestamp": "30/01/2026 09:41:26",
+        "timestamp_iso": "2026-01-30T09:41:26.190075",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260130094126205360",
+        "timestamp": "30/01/2026 09:41:26",
+        "timestamp_iso": "2026-01-30T09:41:26.205376",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260130094126225483",
+        "timestamp": "30/01/2026 09:41:26",
+        "timestamp_iso": "2026-01-30T09:41:26.225499",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260130100412714262",
+        "timestamp": "30/01/2026 10:04:12",
+        "timestamp_iso": "2026-01-30T10:04:12.714281",
+        "action": "cancel_consumption",
+        "user": "admin_user",
+        "category": "Cancelamento",
+        "details": {
+            "charge_id": "CHARGE_TEST_001",
+            "room_number": "101",
+            "total": 100.0,
+            "old_status": "pending",
+            "justification": "Erro de lançamento"
+        }
+    },
+    {
+        "id": "SYS_20260130100413427709",
+        "timestamp": "30/01/2026 10:04:13",
+        "timestamp_iso": "2026-01-30T10:04:13.427729",
+        "action": "cancel_consumption",
+        "user": "admin_user",
+        "category": "Cancelamento",
+        "details": {
+            "charge_id": "TEST_CHARGE_20260130100413",
+            "room_number": "999",
+            "total": 10.0,
+            "old_status": "pending",
+            "justification": "Integration Test Justification"
+        }
+    },
+    {
+        "id": "SYS_20260130100413531322",
+        "timestamp": "30/01/2026 10:04:13",
+        "timestamp_iso": "2026-01-30T10:04:13.531337",
+        "action": "Cardápio Criado",
+        "user": "Sistema",
+        "category": "Cardápio",
+        "details": {
+            "name": "Test Burger",
+            "category": "Lanches",
+            "message": "Produto \"Test Burger\" criado."
+        }
+    },
+    {
+        "id": "SYS_20260130100413993199",
+        "timestamp": "30/01/2026 10:04:13",
+        "timestamp_iso": "2026-01-30T10:04:13.993211",
+        "action": "transfer_item",
+        "user": "SupervisorUser",
+        "category": "Restaurante",
+        "details": {
+            "description": "Transferiu 1.0x Coke da Mesa 10 para Mesa 20",
+            "source_table": "10",
+            "target_table": "20",
+            "item": "Coke",
+            "qty": 1.0,
+            "user": "SupervisorUser"
+        }
+    },
+    {
+        "id": "SYS_20260130100414011462",
+        "timestamp": "30/01/2026 10:04:14",
+        "timestamp_iso": "2026-01-30T10:04:14.011473",
+        "action": "transfer_item",
+        "user": "SupervisorUser",
+        "category": "Restaurante",
+        "details": {
+            "description": "Transferiu 1.0x Coke da Mesa 10 para Mesa 20",
+            "source_table": "10",
+            "target_table": "20",
+            "item": "Coke",
+            "qty": 1.0,
+            "user": "SupervisorUser"
+        }
+    },
+    {
+        "id": "SYS_20260130100414034154",
+        "timestamp": "30/01/2026 10:04:14",
+        "timestamp_iso": "2026-01-30T10:04:14.034170",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260130100414052677",
+        "timestamp": "30/01/2026 10:04:14",
+        "timestamp_iso": "2026-01-30T10:04:14.052691",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260130100414072525",
+        "timestamp": "30/01/2026 10:04:14",
+        "timestamp_iso": "2026-01-30T10:04:14.072541",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260130101438788438",
+        "timestamp": "30/01/2026 10:14:38",
+        "timestamp_iso": "2026-01-30T10:14:38.788459",
+        "action": "cancel_consumption",
+        "user": "admin_user",
+        "category": "Cancelamento",
+        "details": {
+            "charge_id": "CHARGE_TEST_001",
+            "room_number": "101",
+            "total": 100.0,
+            "old_status": "pending",
+            "justification": "Erro de lançamento"
+        }
+    },
+    {
+        "id": "SYS_20260130101439500877",
+        "timestamp": "30/01/2026 10:14:39",
+        "timestamp_iso": "2026-01-30T10:14:39.500906",
+        "action": "cancel_consumption",
+        "user": "admin_user",
+        "category": "Cancelamento",
+        "details": {
+            "charge_id": "TEST_CHARGE_20260130101439",
+            "room_number": "999",
+            "total": 10.0,
+            "old_status": "pending",
+            "justification": "Integration Test Justification"
+        }
+    },
+    {
+        "id": "SYS_20260130101439606008",
+        "timestamp": "30/01/2026 10:14:39",
+        "timestamp_iso": "2026-01-30T10:14:39.606023",
+        "action": "Cardápio Criado",
+        "user": "Sistema",
+        "category": "Cardápio",
+        "details": {
+            "name": "Test Burger",
+            "category": "Lanches",
+            "message": "Produto \"Test Burger\" criado."
+        }
+    },
+    {
+        "id": "SYS_20260130101440061534",
+        "timestamp": "30/01/2026 10:14:40",
+        "timestamp_iso": "2026-01-30T10:14:40.061547",
+        "action": "transfer_item",
+        "user": "SupervisorUser",
+        "category": "Restaurante",
+        "details": {
+            "description": "Transferiu 1.0x Coke da Mesa 10 para Mesa 20",
+            "source_table": "10",
+            "target_table": "20",
+            "item": "Coke",
+            "qty": 1.0,
+            "user": "SupervisorUser"
+        }
+    },
+    {
+        "id": "SYS_20260130101440078381",
+        "timestamp": "30/01/2026 10:14:40",
+        "timestamp_iso": "2026-01-30T10:14:40.078392",
+        "action": "transfer_item",
+        "user": "SupervisorUser",
+        "category": "Restaurante",
+        "details": {
+            "description": "Transferiu 1.0x Coke da Mesa 10 para Mesa 20",
+            "source_table": "10",
+            "target_table": "20",
+            "item": "Coke",
+            "qty": 1.0,
+            "user": "SupervisorUser"
+        }
+    },
+    {
+        "id": "SYS_20260130101440102031",
+        "timestamp": "30/01/2026 10:14:40",
+        "timestamp_iso": "2026-01-30T10:14:40.102046",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260130101440120287",
+        "timestamp": "30/01/2026 10:14:40",
+        "timestamp_iso": "2026-01-30T10:14:40.120303",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260130101440140615",
+        "timestamp": "30/01/2026 10:14:40",
+        "timestamp_iso": "2026-01-30T10:14:40.140631",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260130103808860696",
+        "timestamp": "30/01/2026 10:38:08",
+        "timestamp_iso": "2026-01-30T10:38:08.860715",
+        "action": "transfer_to_room",
+        "user": "Angelo",
+        "category": "Geral",
+        "details": {
+            "source_table": "47",
+            "target_room": "33",
+            "total": 25.189999999999998,
+            "items": [
+                {
+                    "id": "e2dea9f1-8351-435a-8607-22a615ccadf9",
+                    "printed": true,
+                    "print_status": "skipped",
+                    "name": "Banoffe",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 22.9,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [
+                        "Não Imprimir"
+                    ],
+                    "category": "Sobremesas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "Angelo",
+                    "created_at": "30/01/2026 10:28"
+                }
+            ],
+            "user": "Angelo",
+            "description": "Mesa 47 -> Quarto 33"
+        }
+    },
+    {
+        "id": "SYS_20260130103853333453",
+        "timestamp": "30/01/2026 10:38:53",
+        "timestamp_iso": "2026-01-30T10:38:53.333483",
+        "action": "transfer_to_room",
+        "user": "Angelo",
+        "category": "Geral",
+        "details": {
+            "source_table": "33",
+            "target_room": "33",
+            "total": 25.189999999999998,
+            "items": [
+                {
+                    "id": "2ad1ccc0-393d-472c-8086-cc0a47293e40",
+                    "printed": true,
+                    "print_status": "skipped",
+                    "name": "Banoffe",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 22.9,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [
+                        "Não Imprimir"
+                    ],
+                    "category": "Sobremesas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "Angelo",
+                    "created_at": "30/01/2026 10:38"
+                }
+            ],
+            "user": "Angelo",
+            "description": "Mesa 33 -> Quarto 33"
+        }
+    },
+    {
+        "id": "SYS_20260130103900833036",
+        "timestamp": "30/01/2026 10:39:00",
+        "timestamp_iso": "2026-01-30T10:39:00.833055",
+        "action": "transfer_to_room",
+        "user": "Angelo",
+        "category": "Geral",
+        "details": {
+            "source_table": "99",
+            "target_room": "99",
+            "total": 55.0,
+            "items": [
+                {
+                    "name": "Test Burger",
+                    "price": 50.0,
+                    "qty": 1,
+                    "total": 50.0,
+                    "category": "Lanches"
+                }
+            ],
+            "user": "Angelo",
+            "description": "Mesa 99 -> Quarto 99"
+        }
+    },
+    {
+        "id": "SYS_20260130103941241770",
+        "timestamp": "30/01/2026 10:39:41",
+        "timestamp_iso": "2026-01-30T10:39:41.241798",
+        "action": "transfer_to_room",
+        "user": "Angelo",
+        "category": "Geral",
+        "details": {
+            "source_table": "99",
+            "target_room": "99",
+            "total": 55.0,
+            "items": [
+                {
+                    "name": "Test Burger",
+                    "price": 50.0,
+                    "qty": 1,
+                    "total": 50.0,
+                    "category": "Lanches"
+                }
+            ],
+            "user": "Angelo",
+            "description": "Mesa 99 -> Quarto 99"
+        }
+    },
+    {
+        "id": "SYS_20260130104100625585",
+        "timestamp": "30/01/2026 10:41:00",
+        "timestamp_iso": "2026-01-30T10:41:00.625604",
+        "action": "transfer_to_room",
+        "user": "Angelo",
+        "category": "Geral",
+        "details": {
+            "source_table": "47",
+            "target_room": "33",
+            "total": 25.189999999999998,
+            "items": [
+                {
+                    "id": "75346a86-551b-4c6b-ad30-c8212f7f8aef",
+                    "printed": true,
+                    "print_status": "skipped",
+                    "name": "Banoffe",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 22.9,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [
+                        "Não Imprimir"
+                    ],
+                    "category": "Sobremesas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "Angelo",
+                    "created_at": "30/01/2026 10:40"
+                }
+            ],
+            "user": "Angelo",
+            "description": "Mesa 47 -> Quarto 33"
+        }
+    },
+    {
+        "id": "SYS_20260130104701144568",
+        "timestamp": "30/01/2026 10:47:01",
+        "timestamp_iso": "2026-01-30T10:47:01.144595",
+        "action": "transfer_to_room",
+        "user": "Angelo",
+        "category": "Geral",
+        "details": {
+            "source_table": "99",
+            "target_room": "99",
+            "total": 55.0,
+            "items": [
+                {
+                    "name": "Test Burger",
+                    "price": 50.0,
+                    "qty": 1,
+                    "total": 50.0,
+                    "category": "Lanches"
+                }
+            ],
+            "user": "Angelo",
+            "description": "Mesa 99 -> Quarto 99"
+        }
+    },
+    {
+        "id": "SYS_20260130104701299118",
+        "timestamp": "30/01/2026 10:47:01",
+        "timestamp_iso": "2026-01-30T10:47:01.299136",
+        "action": "cancel_transfer",
+        "user": "Angelo",
+        "category": "Mesa",
+        "details": {
+            "source_table": "98",
+            "target_table": "97",
+            "return_table": "98",
+            "items_count": 1,
+            "total_value": 0
+        }
+    },
+    {
+        "id": "SYS_20260130104944318913",
+        "timestamp": "30/01/2026 10:49:44",
+        "timestamp_iso": "2026-01-30T10:49:44.318934",
+        "action": "transfer_to_room",
+        "user": "Angelo",
+        "category": "Geral",
+        "details": {
+            "source_table": "47",
+            "target_room": "33",
+            "total": 75.57,
+            "items": [
+                {
+                    "id": "78140d2c-26e3-44b4-9a6e-258cd75f9fff",
+                    "printed": true,
+                    "print_status": "skipped",
+                    "name": "Banoffe",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 22.9,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [
+                        "Não Imprimir"
+                    ],
+                    "category": "Sobremesas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "Angelo",
+                    "created_at": "30/01/2026 10:41"
+                },
+                {
+                    "id": "6b1928c6-93a9-40be-850d-ccb30146b858",
+                    "printed": true,
+                    "print_status": "skipped",
+                    "name": "Banoffe",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 22.9,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [
+                        "Não Imprimir"
+                    ],
+                    "category": "Sobremesas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "Angelo",
+                    "created_at": "30/01/2026 10:41"
+                },
+                {
+                    "id": "81bff65a-b8f8-42e8-a6ba-652799f8f2ac",
+                    "printed": true,
+                    "print_status": "skipped",
+                    "name": "Banoffe",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 22.9,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [
+                        "Não Imprimir"
+                    ],
+                    "category": "Sobremesas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "Angelo",
+                    "created_at": "30/01/2026 10:45"
+                }
+            ],
+            "user": "Angelo",
+            "description": "Mesa 47 -> Quarto 33"
+        }
+    },
+    {
+        "id": "SYS_20260130105144546923",
+        "timestamp": "30/01/2026 10:51:44",
+        "timestamp_iso": "2026-01-30T10:51:44.546946",
+        "action": "transfer_to_room",
+        "user": "Angelo",
+        "category": "Geral",
+        "details": {
+            "source_table": "99",
+            "target_room": "99",
+            "total": 55.0,
+            "items": [
+                {
+                    "name": "Test Burger",
+                    "price": 50.0,
+                    "qty": 1,
+                    "total": 50.0,
+                    "category": "Lanches"
+                }
+            ],
+            "user": "Angelo",
+            "description": "Mesa 99 -> Quarto 99"
+        }
+    },
+    {
+        "id": "SYS_20260130105144695828",
+        "timestamp": "30/01/2026 10:51:44",
+        "timestamp_iso": "2026-01-30T10:51:44.695842",
+        "action": "cancel_transfer",
+        "user": "Angelo",
+        "category": "Mesa",
+        "details": {
+            "source_table": "98",
+            "target_table": "97",
+            "return_table": "98",
+            "items_count": 1,
+            "total_value": 0
+        }
+    },
+    {
+        "id": "SYS_20260130113413073737",
+        "timestamp": "30/01/2026 11:34:13",
+        "timestamp_iso": "2026-01-30T11:34:13.073759",
+        "action": "Login",
+        "user": "Angelo",
+        "category": "Autenticação",
+        "details": "Usuário Angelo entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130113439143002",
+        "timestamp": "30/01/2026 11:34:39",
+        "timestamp_iso": "2026-01-30T11:34:39.143019",
+        "action": "cancel_transfer",
+        "user": "Angelo",
+        "category": "Mesa",
+        "details": {
+            "source_table": "48",
+            "target_table": "47",
+            "return_table": "48",
+            "items_count": 1,
+            "total_value": 22.9
+        }
+    },
+    {
+        "id": "SYS_20260130113444949232",
+        "timestamp": "30/01/2026 11:34:44",
+        "timestamp_iso": "2026-01-30T11:34:44.949251",
+        "action": "transfer_to_room",
+        "user": "Angelo",
+        "category": "Geral",
+        "details": {
+            "source_table": "47",
+            "target_room": "33",
+            "total": 25.189999999999998,
+            "items": [
+                {
+                    "id": "0075259a-ff73-49a3-a1c0-c9d83fbb0aaa",
+                    "printed": true,
+                    "print_status": "skipped",
+                    "name": "Banoffe",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 22.9,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [
+                        "Não Imprimir"
+                    ],
+                    "category": "Sobremesas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "Angelo",
+                    "created_at": "30/01/2026 10:50"
+                }
+            ],
+            "user": "Angelo",
+            "description": "Mesa 47 -> Quarto 33"
+        }
+    },
+    {
+        "id": "SYS_20260130113448514654",
+        "timestamp": "30/01/2026 11:34:48",
+        "timestamp_iso": "2026-01-30T11:34:48.514670",
+        "action": "transfer_to_room",
+        "user": "Angelo",
+        "category": "Geral",
+        "details": {
+            "source_table": "48",
+            "target_room": "33",
+            "total": 25.189999999999998,
+            "items": [
+                {
+                    "id": "4d2e22cc-5679-402e-b644-dc5707f05b61",
+                    "printed": true,
+                    "print_status": "skipped",
+                    "name": "Banoffe",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 22.9,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [
+                        "Não Imprimir"
+                    ],
+                    "category": "Sobremesas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "Angelo",
+                    "created_at": "30/01/2026 10:50"
+                }
+            ],
+            "user": "Angelo",
+            "description": "Mesa 48 -> Quarto 33"
+        }
+    },
+    {
+        "id": "SYS_20260130120903422502",
+        "timestamp": "30/01/2026 12:09:03",
+        "timestamp_iso": "2026-01-30T12:09:03.422518",
+        "action": "Login",
+        "user": "pedro",
+        "category": "Autenticação",
+        "details": "Usuário pedro entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130121225115589",
+        "timestamp": "30/01/2026 12:12:25",
+        "timestamp_iso": "2026-01-30T12:12:25.115608",
+        "action": "Produto Atualizado",
+        "user": "Sistema",
+        "category": "Estoque",
+        "details": {
+            "id": "206",
+            "name": "Camarão (34g) Alho e oleo",
+            "department": "Cozinha",
+            "message": "Produto \"Camarão (34g) Alho e oleo\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260130121552867468",
+        "timestamp": "30/01/2026 12:15:52",
+        "timestamp_iso": "2026-01-30T12:15:52.867490",
+        "action": "Produto Atualizado",
+        "user": "Sistema",
+        "category": "Estoque",
+        "details": {
+            "id": "9",
+            "name": "Camarão 12g M",
+            "department": "Cozinha",
+            "message": "Produto \"Camarão 12g M\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260130122129103031",
+        "timestamp": "30/01/2026 12:21:29",
+        "timestamp_iso": "2026-01-30T12:21:29.103048",
+        "action": "Produto Atualizado",
+        "user": "Sistema",
+        "category": "Estoque",
+        "details": {
+            "id": "207",
+            "name": "Camarão 150 (23g) Porção",
+            "department": "Cozinha",
+            "message": "Produto \"Camarão 150 (23g) Porção\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260130122350243270",
+        "timestamp": "30/01/2026 12:23:50",
+        "timestamp_iso": "2026-01-30T12:23:50.243291",
+        "action": "Produto Atualizado",
+        "user": "Sistema",
+        "category": "Estoque",
+        "details": {
+            "id": "10",
+            "name": "Camarão 23g G",
+            "department": "Cozinha",
+            "message": "Produto \"Camarão 23g G\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260130122925370776",
+        "timestamp": "30/01/2026 12:29:25",
+        "timestamp_iso": "2026-01-30T12:29:25.370809",
+        "action": "Produto Atualizado",
+        "user": "Sistema",
+        "category": "Estoque",
+        "details": {
+            "id": "209",
+            "name": "Camarão 23g Parmegiana",
+            "department": "Cozinha",
+            "message": "Produto \"Camarão 23g Parmegiana\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260130123620530333",
+        "timestamp": "30/01/2026 12:36:20",
+        "timestamp_iso": "2026-01-30T12:36:20.530350",
+        "action": "Produto Atualizado",
+        "user": "Sistema",
+        "category": "Estoque",
+        "details": {
+            "id": "208",
+            "name": "Camarão 23g moqueca",
+            "department": "Cozinha",
+            "message": "Produto \"Camarão 23g moqueca\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260130123802928621",
+        "timestamp": "30/01/2026 12:38:02",
+        "timestamp_iso": "2026-01-30T12:38:02.928649",
+        "action": "Produto Atualizado",
+        "user": "Sistema",
+        "category": "Estoque",
+        "details": {
+            "id": "11",
+            "name": "Camarão 34g GG",
+            "department": "Cozinha",
+            "message": "Produto \"Camarão 34g GG\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260130124116069244",
+        "timestamp": "30/01/2026 12:41:16",
+        "timestamp_iso": "2026-01-30T12:41:16.069261",
+        "action": "Produto Atualizado",
+        "user": "Sistema",
+        "category": "Estoque",
+        "details": {
+            "id": "211",
+            "name": "Camarão Enfeite",
+            "department": "Cozinha",
+            "message": "Produto \"Camarão Enfeite\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260130124212152704",
+        "timestamp": "30/01/2026 12:42:12",
+        "timestamp_iso": "2026-01-30T12:42:12.152722",
+        "action": "Produto Atualizado",
+        "user": "Sistema",
+        "category": "Estoque",
+        "details": {
+            "id": "210",
+            "name": "Camarão empanado (REALEZA)",
+            "department": "Cozinha",
+            "message": "Produto \"Camarão empanado (REALEZA)\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260130124350284827",
+        "timestamp": "30/01/2026 12:43:50",
+        "timestamp_iso": "2026-01-30T12:43:50.284844",
+        "action": "Produto Atualizado",
+        "user": "Sistema",
+        "category": "Estoque",
+        "details": {
+            "id": "376",
+            "name": "Camino de Chile Rosado",
+            "department": "Serviço",
+            "message": "Produto \"Camino de Chile Rosado\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260130124513770758",
+        "timestamp": "30/01/2026 12:45:13",
+        "timestamp_iso": "2026-01-30T12:45:13.770782",
+        "action": "Produto Atualizado",
+        "user": "Sistema",
+        "category": "Estoque",
+        "details": {
+            "id": "356",
+            "name": "Camino de Chile Sauvign Blanc 750ml",
+            "department": "Serviço",
+            "message": "Produto \"Camino de Chile Sauvign Blanc 750ml\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260130124955478095",
+        "timestamp": "30/01/2026 12:49:55",
+        "timestamp_iso": "2026-01-30T12:49:55.478112",
+        "action": "Produto Atualizado",
+        "user": "Sistema",
+        "category": "Estoque",
+        "details": {
+            "id": "568",
+            "name": "Camisinha para cerveja",
+            "department": "Estoque",
+            "message": "Produto \"Camisinha para cerveja\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260130125029871655",
+        "timestamp": "30/01/2026 12:50:29",
+        "timestamp_iso": "2026-01-30T12:50:29.871667",
+        "action": "close_cashier",
+        "user": "Angelo",
+        "category": "Caixa",
+        "details": {
+            "session_id": "SESSION_RESTAURANT_AUTO_20260130102808",
+            "closing_balance": 75.57,
+            "opened_at": "30/01/2026 10:28",
+            "closed_at": "30/01/2026 12:50",
+            "department": "Restaurante"
+        }
+    },
+    {
+        "id": "SYS_20260130125042713452",
+        "timestamp": "30/01/2026 12:50:42",
+        "timestamp_iso": "2026-01-30T12:50:42.713461",
+        "action": "close_cashier",
+        "user": "Angelo",
+        "category": "Caixa",
+        "details": {
+            "session_id": "SESSION_TEST_ADV",
+            "closing_balance": 371.11,
+            "opened_at": "29/01/2026 18:21",
+            "closed_at": "30/01/2026 12:50",
+            "department": "Restaurante"
+        }
+    },
+    {
+        "id": "SYS_20260130125141003908",
+        "timestamp": "30/01/2026 12:51:41",
+        "timestamp_iso": "2026-01-30T12:51:41.003916",
+        "action": "close_cashier",
+        "user": "Angelo",
+        "category": "Caixa",
+        "details": {
+            "session_id": "CASHIER_REST_20260130125044_Angelo",
+            "closing_balance": 151.14,
+            "opened_at": "30/01/2026 12:50",
+            "closed_at": "30/01/2026 12:51",
+            "department": "Restaurante"
+        }
+    },
+    {
+        "id": "SYS_20260130125254875931",
+        "timestamp": "30/01/2026 12:52:54",
+        "timestamp_iso": "2026-01-30T12:52:54.875950",
+        "action": "Produto Atualizado",
+        "user": "Sistema",
+        "category": "Estoque",
+        "details": {
+            "id": "43",
+            "name": "Canela em Pau",
+            "department": "Estoque",
+            "message": "Produto \"Canela em Pau\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260130125338352433",
+        "timestamp": "30/01/2026 12:53:38",
+        "timestamp_iso": "2026-01-30T12:53:38.352450",
+        "action": "Produto Atualizado",
+        "user": "Sistema",
+        "category": "Estoque",
+        "details": {
+            "id": "44",
+            "name": "Canela em Pó",
+            "department": "Estoque",
+            "message": "Produto \"Canela em Pó\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260130125452803066",
+        "timestamp": "30/01/2026 12:54:52",
+        "timestamp_iso": "2026-01-30T12:54:52.803083",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130125513727415",
+        "timestamp": "30/01/2026 12:55:13",
+        "timestamp_iso": "2026-01-30T12:55:13.727436",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130125707213507",
+        "timestamp": "30/01/2026 12:57:07",
+        "timestamp_iso": "2026-01-30T12:57:07.213525",
+        "action": "Produto Atualizado",
+        "user": "Sistema",
+        "category": "Estoque",
+        "details": {
+            "id": "754",
+            "name": "Canudo Para Drinks",
+            "department": "Serviço",
+            "message": "Produto \"Canudo Para Drinks\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260130130001253444",
+        "timestamp": "30/01/2026 13:00:01",
+        "timestamp_iso": "2026-01-30T13:00:01.253461",
+        "action": "Produto Atualizado",
+        "user": "Sistema",
+        "category": "Estoque",
+        "details": {
+            "id": "402",
+            "name": "Canudo Para coco",
+            "department": "Estoque",
+            "message": "Produto \"Canudo Para coco\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260130130347818519",
+        "timestamp": "30/01/2026 13:03:47",
+        "timestamp_iso": "2026-01-30T13:03:47.818541",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130130347847644",
+        "timestamp": "30/01/2026 13:03:47",
+        "timestamp_iso": "2026-01-30T13:03:47.847658",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130130347878377",
+        "timestamp": "30/01/2026 13:03:47",
+        "timestamp_iso": "2026-01-30T13:03:47.878395",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130130347896367",
+        "timestamp": "30/01/2026 13:03:47",
+        "timestamp_iso": "2026-01-30T13:03:47.896379",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130130347914710",
+        "timestamp": "30/01/2026 13:03:47",
+        "timestamp_iso": "2026-01-30T13:03:47.914724",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130130347929065",
+        "timestamp": "30/01/2026 13:03:47",
+        "timestamp_iso": "2026-01-30T13:03:47.929082",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130130358114318",
+        "timestamp": "30/01/2026 13:03:58",
+        "timestamp_iso": "2026-01-30T13:03:58.114335",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130130358141398",
+        "timestamp": "30/01/2026 13:03:58",
+        "timestamp_iso": "2026-01-30T13:03:58.141412",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130130358163504",
+        "timestamp": "30/01/2026 13:03:58",
+        "timestamp_iso": "2026-01-30T13:03:58.163518",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130130358178430",
+        "timestamp": "30/01/2026 13:03:58",
+        "timestamp_iso": "2026-01-30T13:03:58.178442",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130130358194978",
+        "timestamp": "30/01/2026 13:03:58",
+        "timestamp_iso": "2026-01-30T13:03:58.194990",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130130358205947",
+        "timestamp": "30/01/2026 13:03:58",
+        "timestamp_iso": "2026-01-30T13:03:58.205959",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130130423072245",
+        "timestamp": "30/01/2026 13:04:23",
+        "timestamp_iso": "2026-01-30T13:04:23.072262",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130130423102214",
+        "timestamp": "30/01/2026 13:04:23",
+        "timestamp_iso": "2026-01-30T13:04:23.102230",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130130423129178",
+        "timestamp": "30/01/2026 13:04:23",
+        "timestamp_iso": "2026-01-30T13:04:23.129195",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130130423147455",
+        "timestamp": "30/01/2026 13:04:23",
+        "timestamp_iso": "2026-01-30T13:04:23.147469",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130130423168035",
+        "timestamp": "30/01/2026 13:04:23",
+        "timestamp_iso": "2026-01-30T13:04:23.168049",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130130423182592",
+        "timestamp": "30/01/2026 13:04:23",
+        "timestamp_iso": "2026-01-30T13:04:23.182616",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130130634932470",
+        "timestamp": "30/01/2026 13:06:34",
+        "timestamp_iso": "2026-01-30T13:06:34.932487",
+        "action": "Produto Atualizado",
+        "user": "Sistema",
+        "category": "Estoque",
+        "details": {
+            "id": "401",
+            "name": "Canudo de Drink",
+            "department": "Serviço",
+            "message": "Produto \"Canudo de Drink\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260130130806874339",
+        "timestamp": "30/01/2026 13:08:06",
+        "timestamp_iso": "2026-01-30T13:08:06.874357",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130130806901901",
+        "timestamp": "30/01/2026 13:08:06",
+        "timestamp_iso": "2026-01-30T13:08:06.901914",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130130806925385",
+        "timestamp": "30/01/2026 13:08:06",
+        "timestamp_iso": "2026-01-30T13:08:06.925400",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130130806943200",
+        "timestamp": "30/01/2026 13:08:06",
+        "timestamp_iso": "2026-01-30T13:08:06.943213",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130130806961388",
+        "timestamp": "30/01/2026 13:08:06",
+        "timestamp_iso": "2026-01-30T13:08:06.961404",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130130806974542",
+        "timestamp": "30/01/2026 13:08:06",
+        "timestamp_iso": "2026-01-30T13:08:06.974555",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130130821214390",
+        "timestamp": "30/01/2026 13:08:21",
+        "timestamp_iso": "2026-01-30T13:08:21.214411",
+        "action": "Produto Atualizado",
+        "user": "Sistema",
+        "category": "Estoque",
+        "details": {
+            "id": "402",
+            "name": "Canudo Para coco",
+            "department": "Serviço",
+            "message": "Produto \"Canudo Para coco\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260130130857262864",
+        "timestamp": "30/01/2026 13:08:57",
+        "timestamp_iso": "2026-01-30T13:08:57.262881",
+        "action": "Produto Atualizado",
+        "user": "Sistema",
+        "category": "Estoque",
+        "details": {
+            "id": "401",
+            "name": "Canudo de Drink",
+            "department": "Serviço",
+            "message": "Produto \"Canudo de Drink\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260130131021853399",
+        "timestamp": "30/01/2026 13:10:21",
+        "timestamp_iso": "2026-01-30T13:10:21.853418",
+        "action": "Produto Atualizado",
+        "user": "Sistema",
+        "category": "Estoque",
+        "details": {
+            "id": "754",
+            "name": "Canudo Para Drinks ( ESTOQUE PRINCIPAL )",
+            "department": "Estoque",
+            "message": "Produto \"Canudo Para Drinks ( ESTOQUE PRINCIPAL )\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260130131134193814",
+        "timestamp": "30/01/2026 13:11:34",
+        "timestamp_iso": "2026-01-30T13:11:34.193831",
+        "action": "Produto Atualizado",
+        "user": "Sistema",
+        "category": "Estoque",
+        "details": {
+            "id": "753",
+            "name": "Canudo para cocos ( ESTOQUE PRINCIPAL )",
+            "department": "Estoque",
+            "message": "Produto \"Canudo para cocos ( ESTOQUE PRINCIPAL )\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260130131140740461",
+        "timestamp": "30/01/2026 13:11:40",
+        "timestamp_iso": "2026-01-30T13:11:40.740477",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130131140767560",
+        "timestamp": "30/01/2026 13:11:40",
+        "timestamp_iso": "2026-01-30T13:11:40.767573",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130131140790414",
+        "timestamp": "30/01/2026 13:11:40",
+        "timestamp_iso": "2026-01-30T13:11:40.790428",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130131140807256",
+        "timestamp": "30/01/2026 13:11:40",
+        "timestamp_iso": "2026-01-30T13:11:40.807267",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130131140825112",
+        "timestamp": "30/01/2026 13:11:40",
+        "timestamp_iso": "2026-01-30T13:11:40.825124",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130131140838972",
+        "timestamp": "30/01/2026 13:11:40",
+        "timestamp_iso": "2026-01-30T13:11:40.838985",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130131202441196",
+        "timestamp": "30/01/2026 13:12:02",
+        "timestamp_iso": "2026-01-30T13:12:02.441211",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130131202468917",
+        "timestamp": "30/01/2026 13:12:02",
+        "timestamp_iso": "2026-01-30T13:12:02.468935",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130131202493104",
+        "timestamp": "30/01/2026 13:12:02",
+        "timestamp_iso": "2026-01-30T13:12:02.493119",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130131202510912",
+        "timestamp": "30/01/2026 13:12:02",
+        "timestamp_iso": "2026-01-30T13:12:02.510925",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130131202529463",
+        "timestamp": "30/01/2026 13:12:02",
+        "timestamp_iso": "2026-01-30T13:12:02.529475",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130131202540774",
+        "timestamp": "30/01/2026 13:12:02",
+        "timestamp_iso": "2026-01-30T13:12:02.540787",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130131239738092",
+        "timestamp": "30/01/2026 13:12:39",
+        "timestamp_iso": "2026-01-30T13:12:39.738113",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130131342185543",
+        "timestamp": "30/01/2026 13:13:42",
+        "timestamp_iso": "2026-01-30T13:13:42.185559",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130131352698460",
+        "timestamp": "30/01/2026 13:13:52",
+        "timestamp_iso": "2026-01-30T13:13:52.698476",
+        "action": "Produto Atualizado",
+        "user": "Sistema",
+        "category": "Estoque",
+        "details": {
+            "id": "621",
+            "name": "Guarda canudos",
+            "department": "Serviço",
+            "message": "Produto \"Guarda canudos\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260130131517058318",
+        "timestamp": "30/01/2026 13:15:17",
+        "timestamp_iso": "2026-01-30T13:15:17.058335",
+        "action": "Produto Atualizado",
+        "user": "Sistema",
+        "category": "Estoque",
+        "details": {
+            "id": "493",
+            "name": "Capa de almofoda 30x50",
+            "department": "Governança",
+            "message": "Produto \"Capa de almofoda 30x50\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260130131613420061",
+        "timestamp": "30/01/2026 13:16:13",
+        "timestamp_iso": "2026-01-30T13:16:13.420078",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130131627674985",
+        "timestamp": "30/01/2026 13:16:27",
+        "timestamp_iso": "2026-01-30T13:16:27.675002",
+        "action": "Produto Atualizado",
+        "user": "Sistema",
+        "category": "Estoque",
+        "details": {
+            "id": "494",
+            "name": "Capas Edredom cetim 250fios listrada 1,75 X 2,40",
+            "department": "Governança",
+            "message": "Produto \"Capas Edredom cetim 250fios listrada 1,75 X 2,40\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260130131646864414",
+        "timestamp": "30/01/2026 13:16:46",
+        "timestamp_iso": "2026-01-30T13:16:46.864430",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130131717942900",
+        "timestamp": "30/01/2026 13:17:17",
+        "timestamp_iso": "2026-01-30T13:17:17.942917",
+        "action": "Produto Atualizado",
+        "user": "Sistema",
+        "category": "Estoque",
+        "details": {
+            "id": "495",
+            "name": "Capas Edredom cetim 250fios listrada 2,85x2,65",
+            "department": "Governança",
+            "message": "Produto \"Capas Edredom cetim 250fios listrada 2,85x2,65\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260130131931430054",
+        "timestamp": "30/01/2026 13:19:31",
+        "timestamp_iso": "2026-01-30T13:19:31.430071",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130131935660903",
+        "timestamp": "30/01/2026 13:19:35",
+        "timestamp_iso": "2026-01-30T13:19:35.660921",
+        "action": "Produto Atualizado",
+        "user": "Sistema",
+        "category": "Estoque",
+        "details": {
+            "id": "755",
+            "name": "Caputino Clasico",
+            "department": "Estoque",
+            "message": "Produto \"Caputino Clasico\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260130132103565075",
+        "timestamp": "30/01/2026 13:21:03",
+        "timestamp_iso": "2026-01-30T13:21:03.565096",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130132126134019",
+        "timestamp": "30/01/2026 13:21:26",
+        "timestamp_iso": "2026-01-30T13:21:26.134037",
+        "action": "Produto Atualizado",
+        "user": "Sistema",
+        "category": "Estoque",
+        "details": {
+            "id": "432",
+            "name": "Carne Moida equipe",
+            "department": "Cozinha",
+            "message": "Produto \"Carne Moida equipe\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260130132435291850",
+        "timestamp": "30/01/2026 13:24:35",
+        "timestamp_iso": "2026-01-30T13:24:35.291867",
+        "action": "Produto Atualizado",
+        "user": "Sistema",
+        "category": "Estoque",
+        "details": {
+            "id": "431",
+            "name": "Carne de Boi (Peito bovino/Chambaril)",
+            "department": "Cozinha",
+            "message": "Produto \"Carne de Boi (Peito bovino/Chambaril)\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260130132600261755",
+        "timestamp": "30/01/2026 13:26:00",
+        "timestamp_iso": "2026-01-30T13:26:00.261770",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130132600290274",
+        "timestamp": "30/01/2026 13:26:00",
+        "timestamp_iso": "2026-01-30T13:26:00.290291",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130132600401737",
+        "timestamp": "30/01/2026 13:26:00",
+        "timestamp_iso": "2026-01-30T13:26:00.401752",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130132600420206",
+        "timestamp": "30/01/2026 13:26:00",
+        "timestamp_iso": "2026-01-30T13:26:00.420220",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130132600437778",
+        "timestamp": "30/01/2026 13:26:00",
+        "timestamp_iso": "2026-01-30T13:26:00.437793",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130132600451903",
+        "timestamp": "30/01/2026 13:26:00",
+        "timestamp_iso": "2026-01-30T13:26:00.451915",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130132613326006",
+        "timestamp": "30/01/2026 13:26:13",
+        "timestamp_iso": "2026-01-30T13:26:13.326025",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130132759303121",
+        "timestamp": "30/01/2026 13:27:59",
+        "timestamp_iso": "2026-01-30T13:27:59.303138",
+        "action": "Produto Atualizado",
+        "user": "Sistema",
+        "category": "Estoque",
+        "details": {
+            "id": "180",
+            "name": "Carne de terra e mar Porção",
+            "department": "Cozinha",
+            "message": "Produto \"Carne de terra e mar Porção\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260130132931827845",
+        "timestamp": "30/01/2026 13:29:31",
+        "timestamp_iso": "2026-01-30T13:29:31.827862",
+        "action": "Produto Atualizado",
+        "user": "Sistema",
+        "category": "Estoque",
+        "details": {
+            "id": "181",
+            "name": "Carne petisco",
+            "department": "Cozinha",
+            "message": "Produto \"Carne petisco\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260130133104788453",
+        "timestamp": "30/01/2026 13:31:04",
+        "timestamp_iso": "2026-01-30T13:31:04.788468",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130133104816265",
+        "timestamp": "30/01/2026 13:31:04",
+        "timestamp_iso": "2026-01-30T13:31:04.816277",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130133104906871",
+        "timestamp": "30/01/2026 13:31:04",
+        "timestamp_iso": "2026-01-30T13:31:04.906886",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130133104922923",
+        "timestamp": "30/01/2026 13:31:04",
+        "timestamp_iso": "2026-01-30T13:31:04.922936",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130133104938379",
+        "timestamp": "30/01/2026 13:31:04",
+        "timestamp_iso": "2026-01-30T13:31:04.938391",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130133104950967",
+        "timestamp": "30/01/2026 13:31:04",
+        "timestamp_iso": "2026-01-30T13:31:04.950979",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130133227943176",
+        "timestamp": "30/01/2026 13:32:27",
+        "timestamp_iso": "2026-01-30T13:32:27.943193",
+        "action": "Produto Atualizado",
+        "user": "Sistema",
+        "category": "Estoque",
+        "details": {
+            "id": "182",
+            "name": "Carne petisco Confeitaria",
+            "department": "Cozinha",
+            "message": "Produto \"Carne petisco Confeitaria\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260130133442015669",
+        "timestamp": "30/01/2026 13:34:42",
+        "timestamp_iso": "2026-01-30T13:34:42.015692",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130133442042921",
+        "timestamp": "30/01/2026 13:34:42",
+        "timestamp_iso": "2026-01-30T13:34:42.042934",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130133442137275",
+        "timestamp": "30/01/2026 13:34:42",
+        "timestamp_iso": "2026-01-30T13:34:42.137289",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130133442152579",
+        "timestamp": "30/01/2026 13:34:42",
+        "timestamp_iso": "2026-01-30T13:34:42.152592",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130133442169759",
+        "timestamp": "30/01/2026 13:34:42",
+        "timestamp_iso": "2026-01-30T13:34:42.169775",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130133442182690",
+        "timestamp": "30/01/2026 13:34:42",
+        "timestamp_iso": "2026-01-30T13:34:42.182705",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130133529360355",
+        "timestamp": "30/01/2026 13:35:29",
+        "timestamp_iso": "2026-01-30T13:35:29.360372",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130133542613239",
+        "timestamp": "30/01/2026 13:35:42",
+        "timestamp_iso": "2026-01-30T13:35:42.613256",
+        "action": "Produto Atualizado",
+        "user": "Sistema",
+        "category": "Estoque",
+        "details": {
+            "id": "12",
+            "name": "Carré de Cordeiro",
+            "department": "Cozinha",
+            "message": "Produto \"Carré de Cordeiro\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260130133824642377",
+        "timestamp": "30/01/2026 13:38:24",
+        "timestamp_iso": "2026-01-30T13:38:24.642398",
+        "action": "Produto Atualizado",
+        "user": "Sistema",
+        "category": "Estoque",
+        "details": {
+            "id": "338",
+            "name": "Casa Perini Aquarela Rosé",
+            "department": "Serviço",
+            "message": "Produto \"Casa Perini Aquarela Rosé\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260130134010051270",
+        "timestamp": "30/01/2026 13:40:10",
+        "timestamp_iso": "2026-01-30T13:40:10.051287",
+        "action": "Produto Atualizado",
+        "user": "Sistema",
+        "category": "Estoque",
+        "details": {
+            "id": "339",
+            "name": "Casa Perini Brut Charmat",
+            "department": "Serviço",
+            "message": "Produto \"Casa Perini Brut Charmat\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260130134930150887",
+        "timestamp": "30/01/2026 13:49:30",
+        "timestamp_iso": "2026-01-30T13:49:30.150904",
+        "action": "Produto Atualizado",
+        "user": "Sistema",
+        "category": "Estoque",
+        "details": {
+            "id": "340",
+            "name": "Casa Perini Demi Sec",
+            "department": "Serviço",
+            "message": "Produto \"Casa Perini Demi Sec\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260130135110250761",
+        "timestamp": "30/01/2026 13:51:10",
+        "timestamp_iso": "2026-01-30T13:51:10.250777",
+        "action": "Produto Atualizado",
+        "user": "Sistema",
+        "category": "Estoque",
+        "details": {
+            "id": "341",
+            "name": "Casa Perini Moscatel",
+            "department": "Serviço",
+            "message": "Produto \"Casa Perini Moscatel\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260130142154885097",
+        "timestamp": "30/01/2026 14:21:54",
+        "timestamp_iso": "2026-01-30T14:21:54.885114",
+        "action": "Produto Atualizado",
+        "user": "Sistema",
+        "category": "Estoque",
+        "details": {
+            "id": "357",
+            "name": "Casal Garcia Verde",
+            "department": "Serviço",
+            "message": "Produto \"Casal Garcia Verde\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260130142536563700",
+        "timestamp": "30/01/2026 14:25:36",
+        "timestamp_iso": "2026-01-30T14:25:36.563719",
+        "action": "Produto Atualizado",
+        "user": "Sistema",
+        "category": "Estoque",
+        "details": {
+            "id": "358",
+            "name": "Casal Miranda",
+            "department": "Serviço",
+            "message": "Produto \"Casal Miranda\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260130142817983708",
+        "timestamp": "30/01/2026 14:28:17",
+        "timestamp_iso": "2026-01-30T14:28:17.983725",
+        "action": "Produto Atualizado",
+        "user": "Sistema",
+        "category": "Estoque",
+        "details": {
+            "id": "212",
+            "name": "Casquinho de Aratu Porção",
+            "department": "Cozinha",
+            "message": "Produto \"Casquinho de Aratu Porção\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260130145108376058",
+        "timestamp": "30/01/2026 14:51:08",
+        "timestamp_iso": "2026-01-30T14:51:08.376080",
+        "action": "transfer_to_room",
+        "user": "admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "10",
+            "total": 38.5,
+            "items": [
+                {
+                    "id": "91f2e9b1-68f8-4107-81e6-d40d7c9ba589",
+                    "printed": false,
+                    "print_status": "pending",
+                    "name": "Coca Cola",
+                    "flavor": null,
+                    "qty": 2.0,
+                    "price": 5.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Bebidas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "John",
+                    "created_at": "30/01/2026 14:51"
+                },
+                {
+                    "id": "530e9795-4595-4b5b-af59-7a6fee278a13",
+                    "printed": false,
+                    "print_status": "pending",
+                    "name": "X-Burger",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 20.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Lanches",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "Jane",
+                    "created_at": "30/01/2026 14:51"
+                },
+                {
+                    "id": "5e756b07-7ea5-47ed-8d6b-288021ca98de",
+                    "printed": false,
+                    "print_status": "pending",
+                    "name": "Coca Cola",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 5.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Bebidas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "John",
+                    "created_at": "30/01/2026 14:51"
+                }
+            ],
+            "user": "admin",
+            "description": "Mesa 10 -> Quarto 10"
+        }
+    },
+    {
+        "id": "SYS_20260130145109623499",
+        "timestamp": "30/01/2026 14:51:09",
+        "timestamp_iso": "2026-01-30T14:51:09.623518",
+        "action": "transfer_to_room",
+        "user": "admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "15",
+            "target_room": "15",
+            "total": 165.0,
+            "items": [
+                {
+                    "id": "17eee8b5-86c2-44ff-a3e4-684f92a70155",
+                    "printed": false,
+                    "print_status": "pending",
+                    "name": "Steak",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 100.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Pratos",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "WaiterA",
+                    "created_at": "30/01/2026 14:51"
+                },
+                {
+                    "id": "b5e02ad8-d623-46d1-93b7-b54457db510f",
+                    "printed": false,
+                    "print_status": "pending",
+                    "name": "Salad",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 50.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Entradas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "WaiterB",
+                    "created_at": "30/01/2026 14:51"
+                }
+            ],
+            "user": "admin",
+            "description": "Mesa 15 -> Quarto 15"
+        }
+    },
+    {
+        "id": "SYS_20260130145141316514",
+        "timestamp": "30/01/2026 14:51:41",
+        "timestamp_iso": "2026-01-30T14:51:41.316532",
+        "action": "transfer_to_room",
+        "user": "admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "10",
+            "total": 38.5,
+            "items": [
+                {
+                    "id": "1a579ada-f633-4d45-a5af-72b2b9b5d528",
+                    "printed": false,
+                    "print_status": "pending",
+                    "name": "Coca Cola",
+                    "flavor": null,
+                    "qty": 2.0,
+                    "price": 5.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Bebidas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "John",
+                    "created_at": "30/01/2026 14:51"
+                },
+                {
+                    "id": "ef8a4624-8311-42e3-ad09-e50d8b6e1785",
+                    "printed": false,
+                    "print_status": "pending",
+                    "name": "X-Burger",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 20.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Lanches",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "Jane",
+                    "created_at": "30/01/2026 14:51"
+                },
+                {
+                    "id": "e010a7db-cc7d-445e-89fb-1a623699b18d",
+                    "printed": false,
+                    "print_status": "pending",
+                    "name": "Coca Cola",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 5.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Bebidas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "John",
+                    "created_at": "30/01/2026 14:51"
+                }
+            ],
+            "user": "admin",
+            "description": "Mesa 10 -> Quarto 10"
+        }
+    },
+    {
+        "id": "SYS_20260130145141734749",
+        "timestamp": "30/01/2026 14:51:41",
+        "timestamp_iso": "2026-01-30T14:51:41.734769",
+        "action": "transfer_to_room",
+        "user": "admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "15",
+            "target_room": "15",
+            "total": 165.0,
+            "items": [
+                {
+                    "id": "e4736792-e020-4514-aa5a-2b46e0147190",
+                    "printed": false,
+                    "print_status": "pending",
+                    "name": "Steak",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 100.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Pratos",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "WaiterA",
+                    "created_at": "30/01/2026 14:51"
+                },
+                {
+                    "id": "30b69a51-19cd-44fe-9eb2-4b03bc7e473b",
+                    "printed": false,
+                    "print_status": "pending",
+                    "name": "Salad",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 50.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Entradas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "WaiterB",
+                    "created_at": "30/01/2026 14:51"
+                }
+            ],
+            "user": "admin",
+            "description": "Mesa 15 -> Quarto 15"
+        }
+    },
+    {
+        "id": "SYS_20260130145400554036",
+        "timestamp": "30/01/2026 14:54:00",
+        "timestamp_iso": "2026-01-30T14:54:00.554049",
+        "action": "transfer_to_room",
+        "user": "admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "10",
+            "total": 38.5,
+            "items": [
+                {
+                    "id": "f875760a-8655-4c17-901d-47f35b0a262d",
+                    "printed": false,
+                    "print_status": "pending",
+                    "name": "Coca Cola",
+                    "flavor": null,
+                    "qty": 2.0,
+                    "price": 5.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Bebidas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "John",
+                    "created_at": "30/01/2026 14:54"
+                },
+                {
+                    "id": "9b3eb613-12c8-4d91-b518-d6d88a262dde",
+                    "printed": false,
+                    "print_status": "pending",
+                    "name": "X-Burger",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 20.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Lanches",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "Jane",
+                    "created_at": "30/01/2026 14:54"
+                },
+                {
+                    "id": "5f8706ad-e193-4ee7-a000-62c20879b877",
+                    "printed": false,
+                    "print_status": "pending",
+                    "name": "Coca Cola",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 5.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Bebidas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "John",
+                    "created_at": "30/01/2026 14:54"
+                }
+            ],
+            "user": "admin",
+            "description": "Mesa 10 -> Quarto 10"
+        }
+    },
+    {
+        "id": "SYS_20260130145400915451",
+        "timestamp": "30/01/2026 14:54:00",
+        "timestamp_iso": "2026-01-30T14:54:00.915466",
+        "action": "transfer_to_room",
+        "user": "admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "15",
+            "target_room": "15",
+            "total": 165.0,
+            "items": [
+                {
+                    "id": "34e8465a-1192-4d98-b8a9-1656972eed70",
+                    "printed": false,
+                    "print_status": "pending",
+                    "name": "Steak",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 100.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Pratos",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "WaiterA",
+                    "created_at": "30/01/2026 14:54"
+                },
+                {
+                    "id": "045a47f1-a172-4c84-ac29-1b812cd4004a",
+                    "printed": false,
+                    "print_status": "pending",
+                    "name": "Salad",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 50.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Entradas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "WaiterB",
+                    "created_at": "30/01/2026 14:54"
+                }
+            ],
+            "user": "admin",
+            "description": "Mesa 15 -> Quarto 15"
+        }
+    },
+    {
+        "id": "SYS_20260130145654753881",
+        "timestamp": "30/01/2026 14:56:54",
+        "timestamp_iso": "2026-01-30T14:56:54.753897",
+        "action": "transfer_to_room",
+        "user": "admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "10",
+            "total": 38.5,
+            "items": [
+                {
+                    "id": "74bbb287-a364-4190-a409-254a7d69ac86",
+                    "printed": false,
+                    "print_status": "pending",
+                    "name": "Coca Cola",
+                    "flavor": null,
+                    "qty": 2.0,
+                    "price": 5.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Bebidas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "John",
+                    "created_at": "30/01/2026 14:56"
+                },
+                {
+                    "id": "4eddfd08-0f09-46b5-beca-52b0a9ba812e",
+                    "printed": false,
+                    "print_status": "pending",
+                    "name": "X-Burger",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 20.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Lanches",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "Jane",
+                    "created_at": "30/01/2026 14:56"
+                },
+                {
+                    "id": "90cb304f-fd75-427d-9982-9253ae8bd473",
+                    "printed": false,
+                    "print_status": "pending",
+                    "name": "Coca Cola",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 5.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Bebidas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "John",
+                    "created_at": "30/01/2026 14:56"
+                }
+            ],
+            "user": "admin",
+            "description": "Mesa 10 -> Quarto 10"
+        }
+    },
+    {
+        "id": "SYS_20260130145654955817",
+        "timestamp": "30/01/2026 14:56:54",
+        "timestamp_iso": "2026-01-30T14:56:54.955838",
+        "action": "transfer_to_room",
+        "user": "admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "15",
+            "target_room": "15",
+            "total": 165.0,
+            "items": [
+                {
+                    "id": "2f5719b5-d1ce-49b6-853e-1d945cd529e8",
+                    "printed": false,
+                    "print_status": "pending",
+                    "name": "Steak",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 100.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Pratos",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "WaiterA",
+                    "created_at": "30/01/2026 14:56"
+                },
+                {
+                    "id": "15af21be-c697-4156-baf5-6b96980e8937",
+                    "printed": false,
+                    "print_status": "pending",
+                    "name": "Salad",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 50.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Entradas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "WaiterB",
+                    "created_at": "30/01/2026 14:56"
+                }
+            ],
+            "user": "admin",
+            "description": "Mesa 15 -> Quarto 15"
+        }
+    },
+    {
+        "id": "SYS_20260130150124533362",
+        "timestamp": "30/01/2026 15:01:24",
+        "timestamp_iso": "2026-01-30T15:01:24.533377",
+        "action": "transfer_to_room",
+        "user": "admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "15",
+            "target_room": "15",
+            "total": 165.0,
+            "items": [
+                {
+                    "id": "62bfa964-421e-4231-829e-848d26e1c0a3",
+                    "printed": false,
+                    "print_status": "pending",
+                    "name": "Steak",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 100.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Pratos",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "WaiterA",
+                    "created_at": "30/01/2026 15:01"
+                },
+                {
+                    "id": "c7336b79-50f8-491a-a77c-4df3415869b9",
+                    "printed": false,
+                    "print_status": "pending",
+                    "name": "Salad",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 50.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Entradas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "WaiterB",
+                    "created_at": "30/01/2026 15:01"
+                }
+            ],
+            "user": "admin",
+            "description": "Mesa 15 -> Quarto 15"
+        }
+    },
+    {
+        "id": "SYS_20260130150137760921",
+        "timestamp": "30/01/2026 15:01:37",
+        "timestamp_iso": "2026-01-30T15:01:37.760934",
+        "action": "transfer_to_room",
+        "user": "admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "10",
+            "total": 38.5,
+            "items": [
+                {
+                    "id": "76c44641-bc52-4b5d-8f2f-53f5ed38e192",
+                    "printed": false,
+                    "print_status": "pending",
+                    "name": "Coca Cola",
+                    "flavor": null,
+                    "qty": 2.0,
+                    "price": 5.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Bebidas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "John",
+                    "created_at": "30/01/2026 15:01"
+                },
+                {
+                    "id": "98c43228-cb1f-4c2a-ae75-99933dda3256",
+                    "printed": false,
+                    "print_status": "pending",
+                    "name": "X-Burger",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 20.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Lanches",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "Jane",
+                    "created_at": "30/01/2026 15:01"
+                },
+                {
+                    "id": "9935a03c-e04d-425a-93a3-a16f1ddad0a7",
+                    "printed": false,
+                    "print_status": "pending",
+                    "name": "Coca Cola",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 5.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Bebidas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "John",
+                    "created_at": "30/01/2026 15:01"
+                }
+            ],
+            "user": "admin",
+            "description": "Mesa 10 -> Quarto 10"
+        }
+    },
+    {
+        "id": "SYS_20260130151754570401",
+        "timestamp": "30/01/2026 15:17:54",
+        "timestamp_iso": "2026-01-30T15:17:54.570413",
+        "action": "close_cashier",
+        "user": "admin",
+        "category": "Caixa",
+        "details": {
+            "session_id": "SESSION_GUEST_CONSUMPTION_20260130151754_admin",
+            "closing_balance": 150.0,
+            "difference": 50.0,
+            "opened_at": "30/01/2026 15:17",
+            "closed_at": "30/01/2026 15:17",
+            "department": "Recepção"
+        }
+    },
+    {
+        "id": "SYS_20260130152048665995",
+        "timestamp": "30/01/2026 15:20:48",
+        "timestamp_iso": "2026-01-30T15:20:48.666009",
+        "action": "close_cashier",
+        "user": "admin",
+        "category": "Caixa",
+        "details": {
+            "session_id": "SESSION_GUEST_CONSUMPTION_20260130152048_admin",
+            "closing_balance": 150.0,
+            "difference": 50.0,
+            "opened_at": "30/01/2026 15:20",
+            "closed_at": "30/01/2026 15:20",
+            "department": "Recepção"
+        }
+    },
+    {
+        "id": "SYS_20260130152146324328",
+        "timestamp": "30/01/2026 15:21:46",
+        "timestamp_iso": "2026-01-30T15:21:46.324340",
+        "action": "close_cashier",
+        "user": "admin",
+        "category": "Caixa",
+        "details": {
+            "session_id": "SESSION_GUEST_CONSUMPTION_20260130152146_admin",
+            "closing_balance": 150.0,
+            "difference": 50.0,
+            "opened_at": "30/01/2026 15:21",
+            "closed_at": "30/01/2026 15:21",
+            "department": "Recepção"
+        }
+    },
+    {
+        "id": "SYS_20260130152246106491",
+        "timestamp": "30/01/2026 15:22:46",
+        "timestamp_iso": "2026-01-30T15:22:46.106504",
+        "action": "close_cashier",
+        "user": "admin",
+        "category": "Caixa",
+        "details": {
+            "session_id": "SESSION_GUEST_CONSUMPTION_20260130152246_admin",
+            "closing_balance": 150.0,
+            "difference": 50.0,
+            "opened_at": "30/01/2026 15:22",
+            "closed_at": "30/01/2026 15:22",
+            "department": "Recepção"
+        }
+    },
+    {
+        "id": "SYS_20260130153233388354",
+        "timestamp": "30/01/2026 15:32:33",
+        "timestamp_iso": "2026-01-30T15:32:33.388367",
+        "action": "transfer_to_room",
+        "user": "admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "10",
+            "total": 38.5,
+            "items": [
+                {
+                    "id": "b96f0fdb-a6fb-4f91-9c0e-78b28c04e65b",
+                    "printed": false,
+                    "print_status": "pending",
+                    "name": "Coca Cola",
+                    "flavor": null,
+                    "qty": 2.0,
+                    "price": 5.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Bebidas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "John",
+                    "created_at": "30/01/2026 15:32"
+                },
+                {
+                    "id": "11a37c1f-b874-4c5b-b391-cab5d9c4b3be",
+                    "printed": false,
+                    "print_status": "pending",
+                    "name": "X-Burger",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 20.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Lanches",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "Jane",
+                    "created_at": "30/01/2026 15:32"
+                },
+                {
+                    "id": "f426dd77-2a4a-4443-9acc-d0c2fab1ea19",
+                    "printed": false,
+                    "print_status": "pending",
+                    "name": "Coca Cola",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 5.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Bebidas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "John",
+                    "created_at": "30/01/2026 15:32"
+                }
+            ],
+            "user": "admin",
+            "description": "Mesa 10 -> Quarto 10"
+        }
+    },
+    {
+        "id": "SYS_20260130153233567657",
+        "timestamp": "30/01/2026 15:32:33",
+        "timestamp_iso": "2026-01-30T15:32:33.567673",
+        "action": "transfer_to_room",
+        "user": "admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "15",
+            "target_room": "15",
+            "total": 165.0,
+            "items": [
+                {
+                    "id": "38c44686-884f-463d-ae18-74d5669e7a26",
+                    "printed": false,
+                    "print_status": "pending",
+                    "name": "Steak",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 100.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Pratos",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "WaiterA",
+                    "created_at": "30/01/2026 15:32"
+                },
+                {
+                    "id": "4c6fed46-1da5-40d5-a76d-d931ab795d75",
+                    "printed": false,
+                    "print_status": "pending",
+                    "name": "Salad",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 50.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Entradas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "WaiterB",
+                    "created_at": "30/01/2026 15:32"
+                }
+            ],
+            "user": "admin",
+            "description": "Mesa 15 -> Quarto 15"
+        }
+    },
+    {
+        "id": "SYS_20260130153233925466",
+        "timestamp": "30/01/2026 15:32:33",
+        "timestamp_iso": "2026-01-30T15:32:33.925478",
+        "action": "close_cashier",
+        "user": "admin",
+        "category": "Caixa",
+        "details": {
+            "session_id": "SESSION_GUEST_CONSUMPTION_20260130153233_admin",
+            "closing_balance": 150.0,
+            "difference": 50.0,
+            "opened_at": "30/01/2026 15:32",
+            "closed_at": "30/01/2026 15:32",
+            "department": "Recepção"
+        }
+    },
+    {
+        "id": "SYS_20260130153301466806",
+        "timestamp": "30/01/2026 15:33:01",
+        "timestamp_iso": "2026-01-30T15:33:01.466819",
+        "action": "transfer_to_room",
+        "user": "admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "10",
+            "total": 38.5,
+            "items": [
+                {
+                    "id": "4e37ce81-adbf-4b65-b153-6ff3c464f621",
+                    "printed": false,
+                    "print_status": "pending",
+                    "name": "Coca Cola",
+                    "flavor": null,
+                    "qty": 2.0,
+                    "price": 5.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Bebidas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "John",
+                    "created_at": "30/01/2026 15:33"
+                },
+                {
+                    "id": "7524b197-df5c-44dd-aaa5-55f2e03651ae",
+                    "printed": false,
+                    "print_status": "pending",
+                    "name": "X-Burger",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 20.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Lanches",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "Jane",
+                    "created_at": "30/01/2026 15:33"
+                },
+                {
+                    "id": "0a060506-b859-4eeb-8075-cf13787a93ad",
+                    "printed": false,
+                    "print_status": "pending",
+                    "name": "Coca Cola",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 5.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Bebidas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "John",
+                    "created_at": "30/01/2026 15:33"
+                }
+            ],
+            "user": "admin",
+            "description": "Mesa 10 -> Quarto 10"
+        }
+    },
+    {
+        "id": "SYS_20260130153301658441",
+        "timestamp": "30/01/2026 15:33:01",
+        "timestamp_iso": "2026-01-30T15:33:01.658455",
+        "action": "transfer_to_room",
+        "user": "admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "15",
+            "target_room": "15",
+            "total": 165.0,
+            "items": [
+                {
+                    "id": "1752e79b-6d08-49dc-a828-71b6ace13b7b",
+                    "printed": false,
+                    "print_status": "pending",
+                    "name": "Steak",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 100.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Pratos",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "WaiterA",
+                    "created_at": "30/01/2026 15:33"
+                },
+                {
+                    "id": "f49dd1c9-3ea3-4a7c-9a90-107caa302c25",
+                    "printed": false,
+                    "print_status": "pending",
+                    "name": "Salad",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 50.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Entradas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "WaiterB",
+                    "created_at": "30/01/2026 15:33"
+                }
+            ],
+            "user": "admin",
+            "description": "Mesa 15 -> Quarto 15"
+        }
+    },
+    {
+        "id": "SYS_20260130153302023229",
+        "timestamp": "30/01/2026 15:33:02",
+        "timestamp_iso": "2026-01-30T15:33:02.023242",
+        "action": "close_cashier",
+        "user": "admin",
+        "category": "Caixa",
+        "details": {
+            "session_id": "SESSION_GUEST_CONSUMPTION_20260130153301_admin",
+            "closing_balance": 150.0,
+            "difference": 50.0,
+            "opened_at": "30/01/2026 15:33",
+            "closed_at": "30/01/2026 15:33",
+            "department": "Recepção"
+        }
+    },
+    {
+        "id": "SYS_20260130154705537126",
+        "timestamp": "30/01/2026 15:47:05",
+        "timestamp_iso": "2026-01-30T15:47:05.537145",
+        "action": "transfer_to_room",
+        "user": "Angelo",
+        "category": "Geral",
+        "details": {
+            "source_table": "47",
+            "target_room": "33",
+            "total": 25.189999999999998,
+            "items": [
+                {
+                    "id": "a486f6ef-87e0-4643-a683-d3cf0a613dda",
+                    "printed": true,
+                    "print_status": "skipped",
+                    "name": "Banoffe",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 22.9,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [
+                        "Não Imprimir"
+                    ],
+                    "category": "Sobremesas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "Angelo",
+                    "created_at": "30/01/2026 15:47"
+                }
+            ],
+            "user": "Angelo",
+            "description": "Mesa 47 -> Quarto 33"
+        }
+    },
+    {
+        "id": "SYS_20260130154726688581",
+        "timestamp": "30/01/2026 15:47:26",
+        "timestamp_iso": "2026-01-30T15:47:26.688617",
+        "action": "transfer_to_room",
+        "user": "Angelo",
+        "category": "Geral",
+        "details": {
+            "source_table": "47",
+            "target_room": "33",
+            "total": 25.189999999999998,
+            "items": [
+                {
+                    "id": "6f40eb29-60bf-43bc-a8e8-4173a3416491",
+                    "printed": true,
+                    "print_status": "skipped",
+                    "name": "Banoffe",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 22.9,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [
+                        "Não Imprimir"
+                    ],
+                    "category": "Sobremesas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "Angelo",
+                    "created_at": "30/01/2026 15:47"
+                }
+            ],
+            "user": "Angelo",
+            "description": "Mesa 47 -> Quarto 33"
+        }
+    },
+    {
+        "id": "SYS_20260130155012100450",
+        "timestamp": "30/01/2026 15:50:12",
+        "timestamp_iso": "2026-01-30T15:50:12.100472",
+        "action": "Login",
+        "user": "Angelo",
+        "category": "Autenticação",
+        "details": "Usuário Angelo entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130160240021744",
+        "timestamp": "30/01/2026 16:02:40",
+        "timestamp_iso": "2026-01-30T16:02:40.021760",
+        "action": "Produto Atualizado",
+        "user": "Sistema",
+        "category": "Estoque",
+        "details": {
+            "id": "45",
+            "name": "Castanha de Caju",
+            "department": "Cozinha",
+            "message": "Produto \"Castanha de Caju\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260130172549599917",
+        "timestamp": "30/01/2026 17:25:49",
+        "timestamp_iso": "2026-01-30T17:25:49.599936",
+        "action": "Login",
+        "user": "Angelo",
+        "category": "Autenticação",
+        "details": "Usuário Angelo entrou no sistema"
+    },
+    {
+        "id": "SYS_20260130180537770115",
+        "timestamp": "30/01/2026 18:05:37",
+        "timestamp_iso": "2026-01-30T18:05:37.770132",
+        "action": "transfer_to_room",
+        "user": "admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "50",
+            "target_room": "101",
+            "total": 27.5,
+            "items": [
+                {
+                    "id": "7bd337cb-788f-467b-af57-91811cdb6983",
+                    "printed": false,
+                    "print_status": "error",
+                    "name": "Prato Feito",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 25.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Refeição",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "GarcomW",
+                    "created_at": "30/01/2026 18:05"
+                }
+            ],
+            "user": "admin",
+            "description": "Mesa 50 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260130180620094593",
+        "timestamp": "30/01/2026 18:06:20",
+        "timestamp_iso": "2026-01-30T18:06:20.094628",
+        "action": "transfer_to_room",
+        "user": "admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "50",
+            "target_room": "101",
+            "total": 27.5,
+            "items": [
+                {
+                    "id": "359543c4-b819-4638-8b7e-6d72a24c5e9c",
+                    "printed": false,
+                    "print_status": "error",
+                    "name": "Prato Feito",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 25.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Refeição",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "GarcomW",
+                    "created_at": "30/01/2026 18:06"
+                }
+            ],
+            "user": "admin",
+            "description": "Mesa 50 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260130180926254317",
+        "timestamp": "30/01/2026 18:09:26",
+        "timestamp_iso": "2026-01-30T18:09:26.254335",
+        "action": "transfer_to_room",
+        "user": "admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "50",
+            "target_room": "101",
+            "total": 27.5,
+            "items": [
+                {
+                    "id": "4b2b1ea6-ceb5-4a0b-a742-8187433d58a1",
+                    "printed": false,
+                    "print_status": "error",
+                    "name": "Prato Feito",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 25.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Refeição",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "GarcomW",
+                    "created_at": "30/01/2026 18:09"
+                }
+            ],
+            "user": "admin",
+            "description": "Mesa 50 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260130181716812447",
+        "timestamp": "30/01/2026 18:17:16",
+        "timestamp_iso": "2026-01-30T18:17:16.812464",
+        "action": "transfer_to_room",
+        "user": "admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "50",
+            "target_room": "101",
+            "total": 27.5,
+            "items": [
+                {
+                    "id": "1dd01b1a-c643-4ad0-8f75-04ce97572a08",
+                    "printed": false,
+                    "print_status": "error",
+                    "name": "Prato Feito",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 25.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Refeição",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "GarcomW",
+                    "created_at": "30/01/2026 18:17"
+                }
+            ],
+            "user": "admin",
+            "description": "Mesa 50 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260130182326831098",
+        "timestamp": "30/01/2026 18:23:26",
+        "timestamp_iso": "2026-01-30T18:23:26.831122",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "50",
+            "target_room": "10",
+            "total": 77.0,
+            "items": [
+                {
+                    "id": "item1",
+                    "name": "Burger",
+                    "qty": 1,
+                    "price": 50.0,
+                    "waiter": "Waiter A"
+                },
+                {
+                    "id": "item2",
+                    "name": "Coke",
+                    "qty": 2,
+                    "price": 10.0,
+                    "waiter": "Waiter B"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 50 -> Quarto 10"
+        }
+    },
+    {
+        "id": "SYS_20260130190417042624",
+        "timestamp": "30/01/2026 19:04:17",
+        "timestamp_iso": "2026-01-30T19:04:17.042639",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "50",
+            "target_room": "10",
+            "total": 77.0,
+            "items": [
+                {
+                    "id": "item1",
+                    "name": "Burger",
+                    "qty": 1,
+                    "price": 50.0,
+                    "waiter": "Waiter A"
+                },
+                {
+                    "id": "item2",
+                    "name": "Coke",
+                    "qty": 2,
+                    "price": 10.0,
+                    "waiter": "Waiter B"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 50 -> Quarto 10"
+        }
+    },
+    {
+        "id": "SYS_20260130190557088998",
+        "timestamp": "30/01/2026 19:05:57",
+        "timestamp_iso": "2026-01-30T19:05:57.089013",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "50",
+            "target_room": "10",
+            "total": 77.0,
+            "items": [
+                {
+                    "id": "item1",
+                    "name": "Burger",
+                    "qty": 1,
+                    "price": 50.0,
+                    "waiter": "Waiter A"
+                },
+                {
+                    "id": "item2",
+                    "name": "Coke",
+                    "qty": 2,
+                    "price": 10.0,
+                    "waiter": "Waiter B"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 50 -> Quarto 10"
+        }
+    },
+    {
+        "id": "SYS_20260130190643589877",
+        "timestamp": "30/01/2026 19:06:43",
+        "timestamp_iso": "2026-01-30T19:06:43.589891",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "50",
+            "target_room": "10",
+            "total": 77.0,
+            "items": [
+                {
+                    "id": "item1",
+                    "name": "Burger",
+                    "qty": 1,
+                    "price": 50.0,
+                    "waiter": "Waiter A"
+                },
+                {
+                    "id": "item2",
+                    "name": "Coke",
+                    "qty": 2,
+                    "price": 10.0,
+                    "waiter": "Waiter B"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 50 -> Quarto 10"
+        }
+    },
+    {
+        "id": "SYS_20260130191112887432",
+        "timestamp": "30/01/2026 19:11:12",
+        "timestamp_iso": "2026-01-30T19:11:12.887451",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "50",
+            "target_room": "10",
+            "total": 77.0,
+            "items": [
+                {
+                    "id": "item1",
+                    "name": "Burger",
+                    "qty": 1,
+                    "price": 50.0,
+                    "waiter": "Waiter A"
+                },
+                {
+                    "id": "item2",
+                    "name": "Coke",
+                    "qty": 2,
+                    "price": 10.0,
+                    "waiter": "Waiter B"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 50 -> Quarto 10"
+        }
+    },
+    {
+        "id": "SYS_20260130191113353246",
+        "timestamp": "30/01/2026 19:11:13",
+        "timestamp_iso": "2026-01-30T19:11:13.353269",
+        "action": "transfer_to_room",
+        "user": "admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "50",
+            "target_room": "101",
+            "total": 27.5,
+            "items": [
+                {
+                    "id": "69f67072-2de2-4a14-905f-1810cd4906fe",
+                    "printed": false,
+                    "print_status": "error",
+                    "name": "Prato Feito",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 25.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Refeição",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "GarcomW",
+                    "created_at": "30/01/2026 19:11"
+                }
+            ],
+            "user": "admin",
+            "description": "Mesa 50 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260130192955239749",
+        "timestamp": "30/01/2026 19:29:55",
+        "timestamp_iso": "2026-01-30T19:29:55.239766",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "50",
+            "target_room": "10",
+            "total": 77.0,
+            "items": [
+                {
+                    "id": "item1",
+                    "name": "Burger",
+                    "qty": 1,
+                    "price": 50.0,
+                    "waiter": "Waiter A"
+                },
+                {
+                    "id": "item2",
+                    "name": "Coke",
+                    "qty": 2,
+                    "price": 10.0,
+                    "waiter": "Waiter B"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 50 -> Quarto 10"
+        }
+    },
+    {
+        "id": "SYS_20260130192955821540",
+        "timestamp": "30/01/2026 19:29:55",
+        "timestamp_iso": "2026-01-30T19:29:55.821560",
+        "action": "transfer_to_room",
+        "user": "admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "50",
+            "target_room": "101",
+            "total": 27.5,
+            "items": [
+                {
+                    "id": "d67777bf-b8d1-4e24-83d5-bfe93f3817fa",
+                    "printed": false,
+                    "print_status": "error",
+                    "name": "Prato Feito",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 25.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Refeição",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "GarcomW",
+                    "created_at": "30/01/2026 19:29"
+                }
+            ],
+            "user": "admin",
+            "description": "Mesa 50 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260130202924293478",
+        "timestamp": "30/01/2026 20:29:24",
+        "timestamp_iso": "2026-01-30T20:29:24.293493",
+        "action": "transfer_to_room",
+        "user": "admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "50",
+            "target_room": "101",
+            "total": 27.5,
+            "items": [
+                {
+                    "id": "1230794c-31f6-46c3-b7e8-11f67919a554",
+                    "printed": false,
+                    "print_status": "error",
+                    "name": "Prato Feito",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 25.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Refeição",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "GarcomW",
+                    "created_at": "30/01/2026 20:29"
+                }
+            ],
+            "user": "admin",
+            "description": "Mesa 50 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260130204233230844",
+        "timestamp": "30/01/2026 20:42:33",
+        "timestamp_iso": "2026-01-30T20:42:33.230863",
+        "action": "Login",
+        "user": "Angelo",
+        "category": "Autenticação",
+        "details": "Usuário Angelo entrou no sistema"
+    }
+]

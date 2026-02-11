@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            <a href="{{ url_for('restaurant_tables') }}" class="text-decoration-none text-dark">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            Gerenciar Complementos
+        </h2>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
+            <i class="bi bi-plus-lg"></i> Novo Complemento
+        </button>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Nome</th>
+                            <th>Categoria Vinculada</th>
+                            <th>Preço Adicional</th>
+                            <th class="text-end">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for comp in complements %}
+                        <tr>
+                            <td>{{ comp.name }}</td>
+                            <td><span class="badge bg-secondary">{{ comp.category }}</span></td>
+                            <td>R$ {{ "%.2f"|format(comp.price) }}</td>
+                            <td class="text-end">
+                            <div class="table-actions justify-content-end">
+                                <button class="btn btn-sm btn-outline-primary" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#editModal{{ comp.id }}">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <form action="{{ url_for('restaurant_complements') }}" method="POST" class="d-inline" onsubmit="return confirm('Tem certeza?');">
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="id" value="{{ comp.id }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                        </tr>
+
+                        <!-- Edit Modal -->
+                        <div class="modal fade" id="editModal{{ comp.id }}" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Editar Complemento</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <form action="{{ url_for('restaurant_complements') }}" method="POST">
+                                        <div class="modal-body">
+                                            <input type="hidden" name="action" value="edit">
+                                            <input type="hidden" name="id" value="{{ comp.id }}">
+                                            
+                                            <div class="mb-3">
+                                                <label class="form-label">Nome</label>
+                                                <input type="text" class="form-control" name="name" value="{{ comp.name }}" required>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <label class="form-label">Categoria de Produto</label>
+                                                <select class="form-select" name="category" required>
+                                                    <option value="">Selecione...</option>
+                                                    {% for cat in categories %}
+                                                    <option value="{{ cat }}" {% if cat == comp.category %}selected{% endif %}>{{ cat }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                                <div class="form-text">O complemento aparecerá apenas para produtos desta categoria.</div>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <label class="form-label">Preço Adicional (R$)</label>
+                                                <input type="number" class="form-control" name="price" value="{{ comp.price }}" step="0.01" required>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                            <button type="submit" class="btn btn-primary">Salvar</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-4">Nenhum complemento cadastrado.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Modal -->
+<div class="modal fade" id="addModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Novo Complemento</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('restaurant_complements') }}" method="POST">
+                <div class="modal-body">
+                    <input type="hidden" name="action" value="add">
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Nome</label>
+                        <input type="text" class="form-control" name="name" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Categoria de Produto</label>
+                        <select class="form-select" name="category" required>
+                            <option value="">Selecione...</option>
+                            {% for cat in categories %}
+                            <option value="{{ cat }}">{{ cat }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">O complemento aparecerá apenas para produtos desta categoria.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Preço Adicional (R$)</label>
+                        <input type="number" class="form-control" name="price" value="0.00" step="0.01" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Adicionar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

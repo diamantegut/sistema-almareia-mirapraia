@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Pesquisa - Recepção{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h2 class="mb-1"><i class="bi bi-sliders"></i> Editar Pesquisa</h2>
+      <div class="text-muted small">{{ survey.id }}</div>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="/reception/surveys" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Voltar
+      </a>
+      <a href="{{ url_for('reception.reception_dashboard', survey_id=survey.id) }}" class="btn btn-success">
+        <i class="bi bi-list-check"></i> Perguntas ({{ questions_count }})
+      </a>
+      <a href="{{ url_for('reception.reception_dashboard', survey_id=survey.id) }}" class="btn btn-outline-primary">
+        <i class="bi bi-graph-up"></i> Dashboard
+      </a>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="card shadow-sm">
+        <div class="card-header bg-white">
+          <strong>Configurações</strong>
+        </div>
+        <div class="card-body">
+          <form method="POST" class="row g-3">
+            <div class="col-12">
+              <label class="form-label">Título</label>
+              <input type="text" class="form-control" name="title" value="{{ survey.title }}" maxlength="120" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Público</label>
+              <select class="form-select" name="audience" required>
+                <option value="hotel" {{ 'selected' if survey.audience == 'hotel' else '' }}>Hóspedes</option>
+                <option value="restaurant" {{ 'selected' if survey.audience == 'restaurant' else '' }}>Restaurante</option>
+                <option value="colaboradores" {{ 'selected' if survey.audience == 'colaboradores' else '' }}>Colaboradores</option>
+                <option value="candidatos" {{ 'selected' if survey.audience == 'candidatos' else '' }}>Candidatos</option>
+              </select>
+            </div>
+            <div class="col-md-6 d-flex align-items-end">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="is_active" id="isActive" {{ 'checked' if survey.is_active else '' }}>
+                <label class="form-check-label" for="isActive">Ativa</label>
+              </div>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Texto de abertura</label>
+              <textarea class="form-control" name="intro_text" rows="3" placeholder="Mensagem exibida antes das perguntas.">{{ survey.intro_text or '' }}</textarea>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Mensagem de agradecimento</label>
+              <textarea class="form-control" name="thank_you_text" rows="2" placeholder="Mensagem exibida após o envio.">{{ survey.thank_you_text or '' }}</textarea>
+            </div>
+            <div class="col-12">
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-save"></i> Salvar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+          <strong>Link Público</strong>
+          <span class="badge bg-light text-dark border">Enviadas: {{ invites_count }} • Respostas: {{ responses_count }}</span>
+        </div>
+        <div class="card-body">
+          <div class="input-group">
+            <input type="text" class="form-control" value="{{ public_url }}" readonly onclick="this.select()">
+            <button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText('{{ public_url }}')">
+              <i class="bi bi-clipboard"></i>
+            </button>
+            <a class="btn btn-outline-primary" href="{{ public_url }}" target="_blank">
+              <i class="bi bi-box-arrow-up-right"></i>
+            </a>
+          </div>
+          <div class="mt-3">
+            <div class="text-muted small mb-1">Link com ID (para rastrear o envio)</div>
+            <div class="input-group">
+              <input id="inviteLink" type="text" class="form-control" value="" readonly onclick="this.select()">
+              <button class="btn btn-outline-secondary" type="button" onclick="copyInviteLink()">
+                <i class="bi bi-clipboard"></i>
+              </button>
+              <button class="btn btn-outline-primary" type="button" onclick="regenInviteLink()">
+                <i class="bi bi-arrow-repeat"></i>
+              </button>
+            </div>
+          </div>
+          <div class="text-muted small mt-2">
+            Use este link para enviar aos clientes pelo WhatsApp.
+          </div>
+        </div>
+      </div>
+
+      <div class="card shadow-sm">
+        <div class="card-header bg-white">
+          <strong>Atalhos</strong>
+        </div>
+        <div class="card-body d-grid gap-2">
+          <a href="{{ url_for('reception.reception_dashboard', survey_id=survey.id) }}" class="btn btn-success">
+            <i class="bi bi-list-check"></i> Editar Perguntas
+          </a>
+          <a href="/reception/surveys" class="btn btn-outline-secondary">
+            <i class="bi bi-grid"></i> Ver Todas
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+function randomRef(len) {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let out = '';
+  for (let i = 0; i < len; i++) out += chars[Math.floor(Math.random() * chars.length)];
+  return out;
+}
+async function regenInviteLink() {
+  const base = '{{ public_url }}';
+  try {
+    const res = await fetch('{{ url_for("reception.reception_dashboard", survey_id=survey.id) }}', { method: 'POST' });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.ok && data.ref) {
+        const link = data.link || (base + (base.includes('?') ? '&' : '?') + 'ref=' + encodeURIComponent(data.ref));
+        const el = document.getElementById('inviteLink');
+        if (el) el.value = link;
+        return link;
+      }
+    }
+  } catch (e) {}
+  const ref = randomRef(8);
+  const link = base + (base.includes('?') ? '&' : '?') + 'ref=' + encodeURIComponent(ref);
+  const el = document.getElementById('inviteLink');
+  if (el) el.value = link;
+  return link;
+}
+async function copyInviteLink() {
+  const el = document.getElementById('inviteLink');
+  let value = (el && el.value) ? el.value : '';
+  if (!value) value = await regenInviteLink();
+  navigator.clipboard.writeText(value);
+}
+document.addEventListener('DOMContentLoaded', () => {
+  regenInviteLink();
+});
+</script>
+{% endblock %}

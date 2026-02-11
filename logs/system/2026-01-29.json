@@ -1,0 +1,1671 @@
+[
+    {
+        "id": "SYS_20260129163032455641",
+        "timestamp": "29/01/2026 16:30:32",
+        "timestamp_iso": "2026-01-29T16:30:32.455660",
+        "action": "Login",
+        "user": "Angelo",
+        "category": "Autenticação",
+        "details": "Usuário Angelo entrou no sistema"
+    },
+    {
+        "id": "SYS_20260129172951183966",
+        "timestamp": "29/01/2026 17:29:51",
+        "timestamp_iso": "2026-01-29T17:29:51.183992",
+        "action": "close_cashier",
+        "user": "test_user",
+        "category": "Caixa",
+        "details": {
+            "session_id": "REC_BILL_20260129143820_Angelo",
+            "closing_balance": 100.0,
+            "difference": 100.0,
+            "opened_at": "29/01/2026 14:38",
+            "closed_at": "29/01/2026 17:29",
+            "department": "Recepção"
+        }
+    },
+    {
+        "id": "SYS_20260129172951331676",
+        "timestamp": "29/01/2026 17:29:51",
+        "timestamp_iso": "2026-01-29T17:29:51.331695",
+        "action": "cancel_consumption",
+        "user": "admin_user",
+        "category": "Cancelamento",
+        "details": {
+            "charge_id": "CHARGE_TEST_001",
+            "room_number": "101",
+            "total": 100.0,
+            "old_status": "pending",
+            "justification": "Erro de lançamento"
+        }
+    },
+    {
+        "id": "SYS_20260129172951770471",
+        "timestamp": "29/01/2026 17:29:51",
+        "timestamp_iso": "2026-01-29T17:29:51.770497",
+        "action": "cancel_consumption",
+        "user": "admin_user",
+        "category": "Cancelamento",
+        "details": {
+            "charge_id": "TEST_CHARGE_20260129172951",
+            "room_number": "999",
+            "total": 10.0,
+            "old_status": "pending",
+            "justification": "Integration Test Justification"
+        }
+    },
+    {
+        "id": "SYS_20260129172951920008",
+        "timestamp": "29/01/2026 17:29:51",
+        "timestamp_iso": "2026-01-29T17:29:51.920023",
+        "action": "Cardápio Criado",
+        "user": "Sistema",
+        "category": "Cardápio",
+        "details": {
+            "name": "Test Burger",
+            "category": "Lanches",
+            "message": "Produto \"Test Burger\" criado."
+        }
+    },
+    {
+        "id": "SYS_20260129172952404427",
+        "timestamp": "29/01/2026 17:29:52",
+        "timestamp_iso": "2026-01-29T17:29:52.404441",
+        "action": "transfer_item",
+        "user": "SupervisorUser",
+        "category": "Restaurante",
+        "details": {
+            "description": "Transferiu 1.0x Coke da Mesa 10 para Mesa 20",
+            "source_table": "10",
+            "target_table": "20",
+            "item": "Coke",
+            "qty": 1.0,
+            "user": "SupervisorUser"
+        }
+    },
+    {
+        "id": "SYS_20260129172952419971",
+        "timestamp": "29/01/2026 17:29:52",
+        "timestamp_iso": "2026-01-29T17:29:52.419982",
+        "action": "transfer_item",
+        "user": "SupervisorUser",
+        "category": "Restaurante",
+        "details": {
+            "description": "Transferiu 1.0x Coke da Mesa 10 para Mesa 20",
+            "source_table": "10",
+            "target_table": "20",
+            "item": "Coke",
+            "qty": 1.0,
+            "user": "SupervisorUser"
+        }
+    },
+    {
+        "id": "SYS_20260129172952442675",
+        "timestamp": "29/01/2026 17:29:52",
+        "timestamp_iso": "2026-01-29T17:29:52.442692",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260129172952460260",
+        "timestamp": "29/01/2026 17:29:52",
+        "timestamp_iso": "2026-01-29T17:29:52.460277",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260129172952479878",
+        "timestamp": "29/01/2026 17:29:52",
+        "timestamp_iso": "2026-01-29T17:29:52.479896",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260129173222022364",
+        "timestamp": "29/01/2026 17:32:22",
+        "timestamp_iso": "2026-01-29T17:32:22.022400",
+        "action": "cancel_consumption",
+        "user": "admin_user",
+        "category": "Cancelamento",
+        "details": {
+            "charge_id": "CHARGE_TEST_001",
+            "room_number": "101",
+            "total": 100.0,
+            "old_status": "pending",
+            "justification": "Erro de lançamento"
+        }
+    },
+    {
+        "id": "SYS_20260129173222659763",
+        "timestamp": "29/01/2026 17:32:22",
+        "timestamp_iso": "2026-01-29T17:32:22.659790",
+        "action": "cancel_consumption",
+        "user": "admin_user",
+        "category": "Cancelamento",
+        "details": {
+            "charge_id": "TEST_CHARGE_20260129173222",
+            "room_number": "999",
+            "total": 10.0,
+            "old_status": "pending",
+            "justification": "Integration Test Justification"
+        }
+    },
+    {
+        "id": "SYS_20260129173222860887",
+        "timestamp": "29/01/2026 17:32:22",
+        "timestamp_iso": "2026-01-29T17:32:22.860909",
+        "action": "Cardápio Criado",
+        "user": "Sistema",
+        "category": "Cardápio",
+        "details": {
+            "name": "Test Burger",
+            "category": "Lanches",
+            "message": "Produto \"Test Burger\" criado."
+        }
+    },
+    {
+        "id": "SYS_20260129173223528559",
+        "timestamp": "29/01/2026 17:32:23",
+        "timestamp_iso": "2026-01-29T17:32:23.528577",
+        "action": "transfer_item",
+        "user": "SupervisorUser",
+        "category": "Restaurante",
+        "details": {
+            "description": "Transferiu 1.0x Coke da Mesa 10 para Mesa 20",
+            "source_table": "10",
+            "target_table": "20",
+            "item": "Coke",
+            "qty": 1.0,
+            "user": "SupervisorUser"
+        }
+    },
+    {
+        "id": "SYS_20260129173223549204",
+        "timestamp": "29/01/2026 17:32:23",
+        "timestamp_iso": "2026-01-29T17:32:23.549230",
+        "action": "transfer_item",
+        "user": "SupervisorUser",
+        "category": "Restaurante",
+        "details": {
+            "description": "Transferiu 1.0x Coke da Mesa 10 para Mesa 20",
+            "source_table": "10",
+            "target_table": "20",
+            "item": "Coke",
+            "qty": 1.0,
+            "user": "SupervisorUser"
+        }
+    },
+    {
+        "id": "SYS_20260129173223579740",
+        "timestamp": "29/01/2026 17:32:23",
+        "timestamp_iso": "2026-01-29T17:32:23.579768",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260129173223600272",
+        "timestamp": "29/01/2026 17:32:23",
+        "timestamp_iso": "2026-01-29T17:32:23.600298",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260129173223622026",
+        "timestamp": "29/01/2026 17:32:23",
+        "timestamp_iso": "2026-01-29T17:32:23.622060",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260129173256520122",
+        "timestamp": "29/01/2026 17:32:56",
+        "timestamp_iso": "2026-01-29T17:32:56.520148",
+        "action": "cancel_consumption",
+        "user": "admin_user",
+        "category": "Cancelamento",
+        "details": {
+            "charge_id": "CHARGE_TEST_001",
+            "room_number": "101",
+            "total": 100.0,
+            "old_status": "pending",
+            "justification": "Erro de lançamento"
+        }
+    },
+    {
+        "id": "SYS_20260129173257158892",
+        "timestamp": "29/01/2026 17:32:57",
+        "timestamp_iso": "2026-01-29T17:32:57.158918",
+        "action": "cancel_consumption",
+        "user": "admin_user",
+        "category": "Cancelamento",
+        "details": {
+            "charge_id": "TEST_CHARGE_20260129173257",
+            "room_number": "999",
+            "total": 10.0,
+            "old_status": "pending",
+            "justification": "Integration Test Justification"
+        }
+    },
+    {
+        "id": "SYS_20260129173257337636",
+        "timestamp": "29/01/2026 17:32:57",
+        "timestamp_iso": "2026-01-29T17:32:57.337659",
+        "action": "Cardápio Criado",
+        "user": "Sistema",
+        "category": "Cardápio",
+        "details": {
+            "name": "Test Burger",
+            "category": "Lanches",
+            "message": "Produto \"Test Burger\" criado."
+        }
+    },
+    {
+        "id": "SYS_20260129173257934370",
+        "timestamp": "29/01/2026 17:32:57",
+        "timestamp_iso": "2026-01-29T17:32:57.934392",
+        "action": "transfer_item",
+        "user": "SupervisorUser",
+        "category": "Restaurante",
+        "details": {
+            "description": "Transferiu 1.0x Coke da Mesa 10 para Mesa 20",
+            "source_table": "10",
+            "target_table": "20",
+            "item": "Coke",
+            "qty": 1.0,
+            "user": "SupervisorUser"
+        }
+    },
+    {
+        "id": "SYS_20260129173257956381",
+        "timestamp": "29/01/2026 17:32:57",
+        "timestamp_iso": "2026-01-29T17:32:57.956396",
+        "action": "transfer_item",
+        "user": "SupervisorUser",
+        "category": "Restaurante",
+        "details": {
+            "description": "Transferiu 1.0x Coke da Mesa 10 para Mesa 20",
+            "source_table": "10",
+            "target_table": "20",
+            "item": "Coke",
+            "qty": 1.0,
+            "user": "SupervisorUser"
+        }
+    },
+    {
+        "id": "SYS_20260129173257987926",
+        "timestamp": "29/01/2026 17:32:57",
+        "timestamp_iso": "2026-01-29T17:32:57.987952",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260129173258008497",
+        "timestamp": "29/01/2026 17:32:58",
+        "timestamp_iso": "2026-01-29T17:32:58.008526",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260129173258035229",
+        "timestamp": "29/01/2026 17:32:58",
+        "timestamp_iso": "2026-01-29T17:32:58.035262",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260129173304658414",
+        "timestamp": "29/01/2026 17:33:04",
+        "timestamp_iso": "2026-01-29T17:33:04.658434",
+        "action": "cancel_consumption",
+        "user": "admin_user",
+        "category": "Cancelamento",
+        "details": {
+            "charge_id": "CHARGE_TEST_001",
+            "room_number": "101",
+            "total": 100.0,
+            "old_status": "pending",
+            "justification": "Erro de lançamento"
+        }
+    },
+    {
+        "id": "SYS_20260129173305138099",
+        "timestamp": "29/01/2026 17:33:05",
+        "timestamp_iso": "2026-01-29T17:33:05.138118",
+        "action": "cancel_consumption",
+        "user": "admin_user",
+        "category": "Cancelamento",
+        "details": {
+            "charge_id": "TEST_CHARGE_20260129173305",
+            "room_number": "999",
+            "total": 10.0,
+            "old_status": "pending",
+            "justification": "Integration Test Justification"
+        }
+    },
+    {
+        "id": "SYS_20260129173305273218",
+        "timestamp": "29/01/2026 17:33:05",
+        "timestamp_iso": "2026-01-29T17:33:05.273236",
+        "action": "Cardápio Criado",
+        "user": "Sistema",
+        "category": "Cardápio",
+        "details": {
+            "name": "Test Burger",
+            "category": "Lanches",
+            "message": "Produto \"Test Burger\" criado."
+        }
+    },
+    {
+        "id": "SYS_20260129173305710228",
+        "timestamp": "29/01/2026 17:33:05",
+        "timestamp_iso": "2026-01-29T17:33:05.710242",
+        "action": "transfer_item",
+        "user": "SupervisorUser",
+        "category": "Restaurante",
+        "details": {
+            "description": "Transferiu 1.0x Coke da Mesa 10 para Mesa 20",
+            "source_table": "10",
+            "target_table": "20",
+            "item": "Coke",
+            "qty": 1.0,
+            "user": "SupervisorUser"
+        }
+    },
+    {
+        "id": "SYS_20260129173305731813",
+        "timestamp": "29/01/2026 17:33:05",
+        "timestamp_iso": "2026-01-29T17:33:05.731836",
+        "action": "transfer_item",
+        "user": "SupervisorUser",
+        "category": "Restaurante",
+        "details": {
+            "description": "Transferiu 1.0x Coke da Mesa 10 para Mesa 20",
+            "source_table": "10",
+            "target_table": "20",
+            "item": "Coke",
+            "qty": 1.0,
+            "user": "SupervisorUser"
+        }
+    },
+    {
+        "id": "SYS_20260129173305756622",
+        "timestamp": "29/01/2026 17:33:05",
+        "timestamp_iso": "2026-01-29T17:33:05.756638",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260129173305771876",
+        "timestamp": "29/01/2026 17:33:05",
+        "timestamp_iso": "2026-01-29T17:33:05.771891",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260129173305792152",
+        "timestamp": "29/01/2026 17:33:05",
+        "timestamp_iso": "2026-01-29T17:33:05.792170",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260129173313666573",
+        "timestamp": "29/01/2026 17:33:13",
+        "timestamp_iso": "2026-01-29T17:33:13.666590",
+        "action": "cancel_consumption",
+        "user": "admin_user",
+        "category": "Cancelamento",
+        "details": {
+            "charge_id": "CHARGE_TEST_001",
+            "room_number": "101",
+            "total": 100.0,
+            "old_status": "pending",
+            "justification": "Erro de lançamento"
+        }
+    },
+    {
+        "id": "SYS_20260129173314177586",
+        "timestamp": "29/01/2026 17:33:14",
+        "timestamp_iso": "2026-01-29T17:33:14.177604",
+        "action": "cancel_consumption",
+        "user": "admin_user",
+        "category": "Cancelamento",
+        "details": {
+            "charge_id": "TEST_CHARGE_20260129173314",
+            "room_number": "999",
+            "total": 10.0,
+            "old_status": "pending",
+            "justification": "Integration Test Justification"
+        }
+    },
+    {
+        "id": "SYS_20260129173314307295",
+        "timestamp": "29/01/2026 17:33:14",
+        "timestamp_iso": "2026-01-29T17:33:14.307310",
+        "action": "Cardápio Criado",
+        "user": "Sistema",
+        "category": "Cardápio",
+        "details": {
+            "name": "Test Burger",
+            "category": "Lanches",
+            "message": "Produto \"Test Burger\" criado."
+        }
+    },
+    {
+        "id": "SYS_20260129173314691027",
+        "timestamp": "29/01/2026 17:33:14",
+        "timestamp_iso": "2026-01-29T17:33:14.691042",
+        "action": "transfer_item",
+        "user": "SupervisorUser",
+        "category": "Restaurante",
+        "details": {
+            "description": "Transferiu 1.0x Coke da Mesa 10 para Mesa 20",
+            "source_table": "10",
+            "target_table": "20",
+            "item": "Coke",
+            "qty": 1.0,
+            "user": "SupervisorUser"
+        }
+    },
+    {
+        "id": "SYS_20260129173314711279",
+        "timestamp": "29/01/2026 17:33:14",
+        "timestamp_iso": "2026-01-29T17:33:14.711292",
+        "action": "transfer_item",
+        "user": "SupervisorUser",
+        "category": "Restaurante",
+        "details": {
+            "description": "Transferiu 1.0x Coke da Mesa 10 para Mesa 20",
+            "source_table": "10",
+            "target_table": "20",
+            "item": "Coke",
+            "qty": 1.0,
+            "user": "SupervisorUser"
+        }
+    },
+    {
+        "id": "SYS_20260129173314738904",
+        "timestamp": "29/01/2026 17:33:14",
+        "timestamp_iso": "2026-01-29T17:33:14.738924",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260129173314755665",
+        "timestamp": "29/01/2026 17:33:14",
+        "timestamp_iso": "2026-01-29T17:33:14.755682",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260129173314772892",
+        "timestamp": "29/01/2026 17:33:14",
+        "timestamp_iso": "2026-01-29T17:33:14.772909",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260129173340302895",
+        "timestamp": "29/01/2026 17:33:40",
+        "timestamp_iso": "2026-01-29T17:33:40.302923",
+        "action": "cancel_consumption",
+        "user": "admin_user",
+        "category": "Cancelamento",
+        "details": {
+            "charge_id": "CHARGE_TEST_001",
+            "room_number": "101",
+            "total": 100.0,
+            "old_status": "pending",
+            "justification": "Erro de lançamento"
+        }
+    },
+    {
+        "id": "SYS_20260129173341176701",
+        "timestamp": "29/01/2026 17:33:41",
+        "timestamp_iso": "2026-01-29T17:33:41.176725",
+        "action": "cancel_consumption",
+        "user": "admin_user",
+        "category": "Cancelamento",
+        "details": {
+            "charge_id": "TEST_CHARGE_20260129173341",
+            "room_number": "999",
+            "total": 10.0,
+            "old_status": "pending",
+            "justification": "Integration Test Justification"
+        }
+    },
+    {
+        "id": "SYS_20260129173341326331",
+        "timestamp": "29/01/2026 17:33:41",
+        "timestamp_iso": "2026-01-29T17:33:41.326348",
+        "action": "Cardápio Criado",
+        "user": "Sistema",
+        "category": "Cardápio",
+        "details": {
+            "name": "Test Burger",
+            "category": "Lanches",
+            "message": "Produto \"Test Burger\" criado."
+        }
+    },
+    {
+        "id": "SYS_20260129173341720904",
+        "timestamp": "29/01/2026 17:33:41",
+        "timestamp_iso": "2026-01-29T17:33:41.720916",
+        "action": "transfer_item",
+        "user": "SupervisorUser",
+        "category": "Restaurante",
+        "details": {
+            "description": "Transferiu 1.0x Coke da Mesa 10 para Mesa 20",
+            "source_table": "10",
+            "target_table": "20",
+            "item": "Coke",
+            "qty": 1.0,
+            "user": "SupervisorUser"
+        }
+    },
+    {
+        "id": "SYS_20260129173341740449",
+        "timestamp": "29/01/2026 17:33:41",
+        "timestamp_iso": "2026-01-29T17:33:41.740465",
+        "action": "transfer_item",
+        "user": "SupervisorUser",
+        "category": "Restaurante",
+        "details": {
+            "description": "Transferiu 1.0x Coke da Mesa 10 para Mesa 20",
+            "source_table": "10",
+            "target_table": "20",
+            "item": "Coke",
+            "qty": 1.0,
+            "user": "SupervisorUser"
+        }
+    },
+    {
+        "id": "SYS_20260129173341764613",
+        "timestamp": "29/01/2026 17:33:41",
+        "timestamp_iso": "2026-01-29T17:33:41.764631",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260129173341781627",
+        "timestamp": "29/01/2026 17:33:41",
+        "timestamp_iso": "2026-01-29T17:33:41.781643",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260129173341800916",
+        "timestamp": "29/01/2026 17:33:41",
+        "timestamp_iso": "2026-01-29T17:33:41.800942",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260129181713264214",
+        "timestamp": "29/01/2026 18:17:13",
+        "timestamp_iso": "2026-01-29T18:17:13.264242",
+        "action": "Cardápio Criado",
+        "user": "Sistema",
+        "category": "Cardápio",
+        "details": {
+            "name": "Test Persistence Product",
+            "category": "Test Category",
+            "message": "Produto \"Test Persistence Product\" criado."
+        }
+    },
+    {
+        "id": "SYS_20260129181713424766",
+        "timestamp": "29/01/2026 18:17:13",
+        "timestamp_iso": "2026-01-29T18:17:13.424786",
+        "action": "Cardápio Atualizado",
+        "user": "Sistema",
+        "category": "Cardápio",
+        "details": {
+            "id": "99999",
+            "name": "Test Product Questions",
+            "category": "Test",
+            "message": "Produto \"Test Product Questions\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260129181713900735",
+        "timestamp": "29/01/2026 18:17:13",
+        "timestamp_iso": "2026-01-29T18:17:13.900757",
+        "action": "transfer_to_room",
+        "user": "Angelo",
+        "category": "Geral",
+        "details": {
+            "source_table": "99",
+            "target_room": "99",
+            "total": 55.0,
+            "items": [
+                {
+                    "name": "Test Burger",
+                    "price": 50.0,
+                    "qty": 1,
+                    "total": 50.0,
+                    "category": "Lanches"
+                }
+            ],
+            "user": "Angelo",
+            "description": "Mesa 99 -> Quarto 99"
+        }
+    },
+    {
+        "id": "SYS_20260129181736999595",
+        "timestamp": "29/01/2026 18:17:36",
+        "timestamp_iso": "2026-01-29T18:17:36.999612",
+        "action": "Cardápio Criado",
+        "user": "Sistema",
+        "category": "Cardápio",
+        "details": {
+            "name": "Test Persistence Product",
+            "category": "Test Category",
+            "message": "Produto \"Test Persistence Product\" criado."
+        }
+    },
+    {
+        "id": "SYS_20260129181737152429",
+        "timestamp": "29/01/2026 18:17:37",
+        "timestamp_iso": "2026-01-29T18:17:37.152446",
+        "action": "Cardápio Atualizado",
+        "user": "Sistema",
+        "category": "Cardápio",
+        "details": {
+            "id": "99999",
+            "name": "Test Product Questions",
+            "category": "Test",
+            "message": "Produto \"Test Product Questions\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260129181737499491",
+        "timestamp": "29/01/2026 18:17:37",
+        "timestamp_iso": "2026-01-29T18:17:37.499513",
+        "action": "transfer_to_room",
+        "user": "Angelo",
+        "category": "Geral",
+        "details": {
+            "source_table": "99",
+            "target_room": "99",
+            "total": 55.0,
+            "items": [
+                {
+                    "name": "Test Burger",
+                    "price": 50.0,
+                    "qty": 1,
+                    "total": 50.0,
+                    "category": "Lanches"
+                }
+            ],
+            "user": "Angelo",
+            "description": "Mesa 99 -> Quarto 99"
+        }
+    },
+    {
+        "id": "SYS_20260129181836194057",
+        "timestamp": "29/01/2026 18:18:36",
+        "timestamp_iso": "2026-01-29T18:18:36.194075",
+        "action": "Cardápio Criado",
+        "user": "Sistema",
+        "category": "Cardápio",
+        "details": {
+            "name": "Test Persistence Product",
+            "category": "Test Category",
+            "message": "Produto \"Test Persistence Product\" criado."
+        }
+    },
+    {
+        "id": "SYS_20260129181836352579",
+        "timestamp": "29/01/2026 18:18:36",
+        "timestamp_iso": "2026-01-29T18:18:36.352601",
+        "action": "Cardápio Atualizado",
+        "user": "Sistema",
+        "category": "Cardápio",
+        "details": {
+            "id": "99999",
+            "name": "Test Product Questions",
+            "category": "Test",
+            "message": "Produto \"Test Product Questions\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260129181836718593",
+        "timestamp": "29/01/2026 18:18:36",
+        "timestamp_iso": "2026-01-29T18:18:36.718612",
+        "action": "transfer_to_room",
+        "user": "Angelo",
+        "category": "Geral",
+        "details": {
+            "source_table": "99",
+            "target_room": "99",
+            "total": 55.0,
+            "items": [
+                {
+                    "name": "Test Burger",
+                    "price": 50.0,
+                    "qty": 1,
+                    "total": 50.0,
+                    "category": "Lanches"
+                }
+            ],
+            "user": "Angelo",
+            "description": "Mesa 99 -> Quarto 99"
+        }
+    },
+    {
+        "id": "SYS_20260129181857475464",
+        "timestamp": "29/01/2026 18:18:57",
+        "timestamp_iso": "2026-01-29T18:18:57.475483",
+        "action": "Cardápio Criado",
+        "user": "Sistema",
+        "category": "Cardápio",
+        "details": {
+            "name": "Test Persistence Product",
+            "category": "Test Category",
+            "message": "Produto \"Test Persistence Product\" criado."
+        }
+    },
+    {
+        "id": "SYS_20260129181857656546",
+        "timestamp": "29/01/2026 18:18:57",
+        "timestamp_iso": "2026-01-29T18:18:57.656562",
+        "action": "Cardápio Atualizado",
+        "user": "Sistema",
+        "category": "Cardápio",
+        "details": {
+            "id": "99999",
+            "name": "Test Product Questions",
+            "category": "Test",
+            "message": "Produto \"Test Product Questions\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260129181858049727",
+        "timestamp": "29/01/2026 18:18:58",
+        "timestamp_iso": "2026-01-29T18:18:58.049752",
+        "action": "transfer_to_room",
+        "user": "Angelo",
+        "category": "Geral",
+        "details": {
+            "source_table": "99",
+            "target_room": "99",
+            "total": 55.0,
+            "items": [
+                {
+                    "name": "Test Burger",
+                    "price": 50.0,
+                    "qty": 1,
+                    "total": 50.0,
+                    "category": "Lanches"
+                }
+            ],
+            "user": "Angelo",
+            "description": "Mesa 99 -> Quarto 99"
+        }
+    },
+    {
+        "id": "SYS_20260129182423279305",
+        "timestamp": "29/01/2026 18:24:23",
+        "timestamp_iso": "2026-01-29T18:24:23.279327",
+        "action": "cancel_consumption",
+        "user": "admin_user",
+        "category": "Cancelamento",
+        "details": {
+            "charge_id": "CHARGE_TEST_001",
+            "room_number": "101",
+            "total": 100.0,
+            "old_status": "pending",
+            "justification": "Erro de lançamento"
+        }
+    },
+    {
+        "id": "SYS_20260129182424023685",
+        "timestamp": "29/01/2026 18:24:24",
+        "timestamp_iso": "2026-01-29T18:24:24.023725",
+        "action": "cancel_consumption",
+        "user": "admin_user",
+        "category": "Cancelamento",
+        "details": {
+            "charge_id": "TEST_CHARGE_20260129182424",
+            "room_number": "999",
+            "total": 10.0,
+            "old_status": "pending",
+            "justification": "Integration Test Justification"
+        }
+    },
+    {
+        "id": "SYS_20260129182424161490",
+        "timestamp": "29/01/2026 18:24:24",
+        "timestamp_iso": "2026-01-29T18:24:24.161512",
+        "action": "Cardápio Criado",
+        "user": "Sistema",
+        "category": "Cardápio",
+        "details": {
+            "name": "Test Burger",
+            "category": "Lanches",
+            "message": "Produto \"Test Burger\" criado."
+        }
+    },
+    {
+        "id": "SYS_20260129182424876620",
+        "timestamp": "29/01/2026 18:24:24",
+        "timestamp_iso": "2026-01-29T18:24:24.876645",
+        "action": "transfer_item",
+        "user": "SupervisorUser",
+        "category": "Restaurante",
+        "details": {
+            "description": "Transferiu 1.0x Coke da Mesa 10 para Mesa 20",
+            "source_table": "10",
+            "target_table": "20",
+            "item": "Coke",
+            "qty": 1.0,
+            "user": "SupervisorUser"
+        }
+    },
+    {
+        "id": "SYS_20260129182424907087",
+        "timestamp": "29/01/2026 18:24:24",
+        "timestamp_iso": "2026-01-29T18:24:24.907108",
+        "action": "transfer_item",
+        "user": "SupervisorUser",
+        "category": "Restaurante",
+        "details": {
+            "description": "Transferiu 1.0x Coke da Mesa 10 para Mesa 20",
+            "source_table": "10",
+            "target_table": "20",
+            "item": "Coke",
+            "qty": 1.0,
+            "user": "SupervisorUser"
+        }
+    },
+    {
+        "id": "SYS_20260129182424949529",
+        "timestamp": "29/01/2026 18:24:24",
+        "timestamp_iso": "2026-01-29T18:24:24.949557",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260129182424976808",
+        "timestamp": "29/01/2026 18:24:24",
+        "timestamp_iso": "2026-01-29T18:24:24.976847",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260129182425006290",
+        "timestamp": "29/01/2026 18:24:25",
+        "timestamp_iso": "2026-01-29T18:24:25.006313",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260129182434201166",
+        "timestamp": "29/01/2026 18:24:34",
+        "timestamp_iso": "2026-01-29T18:24:34.201188",
+        "action": "cancel_consumption",
+        "user": "admin_user",
+        "category": "Cancelamento",
+        "details": {
+            "charge_id": "CHARGE_TEST_001",
+            "room_number": "101",
+            "total": 100.0,
+            "old_status": "pending",
+            "justification": "Erro de lançamento"
+        }
+    },
+    {
+        "id": "SYS_20260129182435031631",
+        "timestamp": "29/01/2026 18:24:35",
+        "timestamp_iso": "2026-01-29T18:24:35.031664",
+        "action": "cancel_consumption",
+        "user": "admin_user",
+        "category": "Cancelamento",
+        "details": {
+            "charge_id": "TEST_CHARGE_20260129182435",
+            "room_number": "999",
+            "total": 10.0,
+            "old_status": "pending",
+            "justification": "Integration Test Justification"
+        }
+    },
+    {
+        "id": "SYS_20260129182435165046",
+        "timestamp": "29/01/2026 18:24:35",
+        "timestamp_iso": "2026-01-29T18:24:35.165069",
+        "action": "Cardápio Criado",
+        "user": "Sistema",
+        "category": "Cardápio",
+        "details": {
+            "name": "Test Burger",
+            "category": "Lanches",
+            "message": "Produto \"Test Burger\" criado."
+        }
+    },
+    {
+        "id": "SYS_20260129182435624048",
+        "timestamp": "29/01/2026 18:24:35",
+        "timestamp_iso": "2026-01-29T18:24:35.624065",
+        "action": "transfer_item",
+        "user": "SupervisorUser",
+        "category": "Restaurante",
+        "details": {
+            "description": "Transferiu 1.0x Coke da Mesa 10 para Mesa 20",
+            "source_table": "10",
+            "target_table": "20",
+            "item": "Coke",
+            "qty": 1.0,
+            "user": "SupervisorUser"
+        }
+    },
+    {
+        "id": "SYS_20260129182435645413",
+        "timestamp": "29/01/2026 18:24:35",
+        "timestamp_iso": "2026-01-29T18:24:35.645428",
+        "action": "transfer_item",
+        "user": "SupervisorUser",
+        "category": "Restaurante",
+        "details": {
+            "description": "Transferiu 1.0x Coke da Mesa 10 para Mesa 20",
+            "source_table": "10",
+            "target_table": "20",
+            "item": "Coke",
+            "qty": 1.0,
+            "user": "SupervisorUser"
+        }
+    },
+    {
+        "id": "SYS_20260129182435675541",
+        "timestamp": "29/01/2026 18:24:35",
+        "timestamp_iso": "2026-01-29T18:24:35.675560",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260129182435696403",
+        "timestamp": "29/01/2026 18:24:35",
+        "timestamp_iso": "2026-01-29T18:24:35.696429",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260129182435719766",
+        "timestamp": "29/01/2026 18:24:35",
+        "timestamp_iso": "2026-01-29T18:24:35.719787",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260129183801259745",
+        "timestamp": "29/01/2026 18:38:01",
+        "timestamp_iso": "2026-01-29T18:38:01.259760",
+        "action": "cancel_consumption",
+        "user": "admin_user",
+        "category": "Cancelamento",
+        "details": {
+            "charge_id": "CHARGE_TEST_001",
+            "room_number": "101",
+            "total": 100.0,
+            "old_status": "pending",
+            "justification": "Erro de lançamento"
+        }
+    },
+    {
+        "id": "SYS_20260129183801893202",
+        "timestamp": "29/01/2026 18:38:01",
+        "timestamp_iso": "2026-01-29T18:38:01.893218",
+        "action": "cancel_consumption",
+        "user": "admin_user",
+        "category": "Cancelamento",
+        "details": {
+            "charge_id": "TEST_CHARGE_20260129183801",
+            "room_number": "999",
+            "total": 10.0,
+            "old_status": "pending",
+            "justification": "Integration Test Justification"
+        }
+    },
+    {
+        "id": "SYS_20260129183802031084",
+        "timestamp": "29/01/2026 18:38:02",
+        "timestamp_iso": "2026-01-29T18:38:02.031100",
+        "action": "Cardápio Criado",
+        "user": "Sistema",
+        "category": "Cardápio",
+        "details": {
+            "name": "Test Burger",
+            "category": "Lanches",
+            "message": "Produto \"Test Burger\" criado."
+        }
+    },
+    {
+        "id": "SYS_20260129183802459769",
+        "timestamp": "29/01/2026 18:38:02",
+        "timestamp_iso": "2026-01-29T18:38:02.459782",
+        "action": "transfer_item",
+        "user": "SupervisorUser",
+        "category": "Restaurante",
+        "details": {
+            "description": "Transferiu 1.0x Coke da Mesa 10 para Mesa 20",
+            "source_table": "10",
+            "target_table": "20",
+            "item": "Coke",
+            "qty": 1.0,
+            "user": "SupervisorUser"
+        }
+    },
+    {
+        "id": "SYS_20260129183802477054",
+        "timestamp": "29/01/2026 18:38:02",
+        "timestamp_iso": "2026-01-29T18:38:02.477065",
+        "action": "transfer_item",
+        "user": "SupervisorUser",
+        "category": "Restaurante",
+        "details": {
+            "description": "Transferiu 1.0x Coke da Mesa 10 para Mesa 20",
+            "source_table": "10",
+            "target_table": "20",
+            "item": "Coke",
+            "qty": 1.0,
+            "user": "SupervisorUser"
+        }
+    },
+    {
+        "id": "SYS_20260129183802502016",
+        "timestamp": "29/01/2026 18:38:02",
+        "timestamp_iso": "2026-01-29T18:38:02.502055",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260129183802525082",
+        "timestamp": "29/01/2026 18:38:02",
+        "timestamp_iso": "2026-01-29T18:38:02.525105",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260129183802544681",
+        "timestamp": "29/01/2026 18:38:02",
+        "timestamp_iso": "2026-01-29T18:38:02.544698",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260129185845896756",
+        "timestamp": "29/01/2026 18:58:45",
+        "timestamp_iso": "2026-01-29T18:58:45.896776",
+        "action": "cancel_consumption",
+        "user": "admin_user",
+        "category": "Cancelamento",
+        "details": {
+            "charge_id": "CHARGE_TEST_001",
+            "room_number": "101",
+            "total": 100.0,
+            "old_status": "pending",
+            "justification": "Erro de lançamento"
+        }
+    },
+    {
+        "id": "SYS_20260129185846643687",
+        "timestamp": "29/01/2026 18:58:46",
+        "timestamp_iso": "2026-01-29T18:58:46.643708",
+        "action": "cancel_consumption",
+        "user": "admin_user",
+        "category": "Cancelamento",
+        "details": {
+            "charge_id": "TEST_CHARGE_20260129185846",
+            "room_number": "999",
+            "total": 10.0,
+            "old_status": "pending",
+            "justification": "Integration Test Justification"
+        }
+    },
+    {
+        "id": "SYS_20260129185846759487",
+        "timestamp": "29/01/2026 18:58:46",
+        "timestamp_iso": "2026-01-29T18:58:46.759505",
+        "action": "Cardápio Criado",
+        "user": "Sistema",
+        "category": "Cardápio",
+        "details": {
+            "name": "Test Burger",
+            "category": "Lanches",
+            "message": "Produto \"Test Burger\" criado."
+        }
+    },
+    {
+        "id": "SYS_20260129185847260761",
+        "timestamp": "29/01/2026 18:58:47",
+        "timestamp_iso": "2026-01-29T18:58:47.260775",
+        "action": "transfer_item",
+        "user": "SupervisorUser",
+        "category": "Restaurante",
+        "details": {
+            "description": "Transferiu 1.0x Coke da Mesa 10 para Mesa 20",
+            "source_table": "10",
+            "target_table": "20",
+            "item": "Coke",
+            "qty": 1.0,
+            "user": "SupervisorUser"
+        }
+    },
+    {
+        "id": "SYS_20260129185847279968",
+        "timestamp": "29/01/2026 18:58:47",
+        "timestamp_iso": "2026-01-29T18:58:47.279981",
+        "action": "transfer_item",
+        "user": "SupervisorUser",
+        "category": "Restaurante",
+        "details": {
+            "description": "Transferiu 1.0x Coke da Mesa 10 para Mesa 20",
+            "source_table": "10",
+            "target_table": "20",
+            "item": "Coke",
+            "qty": 1.0,
+            "user": "SupervisorUser"
+        }
+    },
+    {
+        "id": "SYS_20260129185847307165",
+        "timestamp": "29/01/2026 18:58:47",
+        "timestamp_iso": "2026-01-29T18:58:47.307183",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260129185847326162",
+        "timestamp": "29/01/2026 18:58:47",
+        "timestamp_iso": "2026-01-29T18:58:47.326181",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260129185847347802",
+        "timestamp": "29/01/2026 18:58:47",
+        "timestamp_iso": "2026-01-29T18:58:47.347822",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    }
+]

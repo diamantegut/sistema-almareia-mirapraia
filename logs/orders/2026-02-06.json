@@ -1,0 +1,63 @@
+[
+    {
+        "id": "ORD_20260206130553389277",
+        "timestamp": "06/02/2026 13:05:53",
+        "timestamp_iso": "2026-02-06T13:05:53.389305",
+        "action": "cancel_table",
+        "user": "Angelo",
+        "order_id": null,
+        "table": "54",
+        "waiter": "Angelo",
+        "items": [],
+        "total": 0,
+        "status": "cancelled"
+    },
+    {
+        "id": "ORD_20260206130603969761",
+        "timestamp": "06/02/2026 13:06:03",
+        "timestamp_iso": "2026-02-06T13:06:03.969781",
+        "action": "cancel_table",
+        "user": "Angelo",
+        "order_id": null,
+        "table": "58",
+        "waiter": "Angelo",
+        "items": [],
+        "total": 0,
+        "status": "cancelled"
+    },
+    {
+        "id": "ORD_20260206130751304175",
+        "timestamp": "06/02/2026 13:07:51",
+        "timestamp_iso": "2026-02-06T13:07:51.304202",
+        "action": "add_items",
+        "user": "adailton",
+        "order_id": "batch_1770394182143_n10igewzm",
+        "table": "72",
+        "waiter": "adailton",
+        "items": [
+            {
+                "id": "393b16d2-d6a3-481b-84d2-f2007e31a7f9",
+                "printed": false,
+                "print_status": "pending",
+                "name": "Caipirinha de Pitú",
+                "flavor": "Limão",
+                "qty": 1.0,
+                "price": 28.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "Sem açúcar",
+                    "Fazer de adoçante"
+                ],
+                "category": "Drinks",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "adailton",
+                "created_at": "06/02/2026 13:07"
+            }
+        ],
+        "total": 28.9,
+        "status": "submitted"
+    }
+]

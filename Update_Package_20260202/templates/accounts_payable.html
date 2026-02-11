@@ -1,0 +1,257 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Contas a Pagar</h2>
+        <div>
+            <a href="{{ url_for('manage_suppliers') }}" class="btn btn-outline-secondary me-2">
+                <i class="bi bi-people"></i> Gerenciar Fornecedores
+            </a>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPayableModal">
+                <i class="bi bi-plus-lg"></i> Nova Conta
+            </button>
+        </div>
+    </div>
+
+    <!-- Filters could go here -->
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Vencimento</th>
+                        <th>Fornecedor</th>
+                        <th>CNPJ</th>
+                        <th>Descrição</th>
+                        <th>Valor</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in payables|sort(attribute='due_date') %}
+                    <tr class="{{ 'table-success' if p.status == 'paid' else '' }}">
+                        <td>{{ p.due_date }}</td>
+                        <td>
+                            {% if p.type == 'tax' %}
+                            <i class="bi bi-bank me-1 text-secondary" title="Imposto"></i>
+                            {% else %}
+                            <i class="bi bi-box-seam me-1 text-secondary" title="Fornecedor"></i>
+                            {% endif %}
+                            {{ p.supplier }}
+                        </td>
+                        <td>{{ p.cnpj|default('') }}</td>
+                        <td>{{ p.description }}</td>
+                        <td>R$ {{ "%.2f"|format(p.amount) }}</td>
+                        <td>
+                            {% if p.status == 'paid' %}
+                            <span class="badge bg-success">Pago</span>
+                            <small class="text-muted d-block">{{ p.payment_date }}</small>
+                            {% else %}
+                            <span class="badge bg-warning text-dark">Pendente</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if p.status != 'paid' %}
+                            {% set supplier_name = p.supplier if p.supplier is string else (p.supplier.name if p.supplier else 'Desconhecido') %}
+                            <button type="button" class="btn btn-sm btn-success pay-btn" 
+                                    data-id="{{ p.id }}"
+                                    data-supplier="{{ supplier_name }}"
+                                    data-amount="{{ '%.2f'|format(p.amount or 0) }}"
+                                    data-barcode="{{ p.barcode or '' }}">
+                                <i class="bi bi-check-lg"></i> Pagar
+                            </button>
+                            <form action="{{ url_for('accounts_payable') }}" method="POST" class="d-inline" onsubmit="return confirm('Excluir esta conta?');">
+                                <input type="hidden" name="action" value="delete">
+                                <input type="hidden" name="id" value="{{ p.id }}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add Modal -->
+<div class="modal fade" id="addPayableModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{{ url_for('accounts_payable') }}" method="POST">
+                <input type="hidden" name="action" value="add">
+                <div class="modal-header">
+                    <h5 class="modal-title">Nova Conta a Pagar</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Tipo</label>
+                        <select name="type" class="form-select">
+                            <option value="supplier">Fornecedor</option>
+                            <option value="tax">Imposto / Tributo</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Fornecedor / Entidade</label>
+                        <select name="supplier" class="form-select" required id="supplierSelect" onchange="checkPix(this)">
+                            <option value="">Selecione...</option>
+                            {% for s in suppliers %}
+                            <option value="{{ s.name if s is mapping else s }}" 
+                                    data-pix="{{ s.pix if s is mapping else '' }}"
+                                    data-cnpj="{{ s.cnpj if s is mapping else '' }}">
+                                {{ s.name if s is mapping else s }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tipo de Imposto (opcional)</label>
+                        <input type="text" name="tax_type" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">CNPJ (opcional)</label>
+                        <input type="text" name="cnpj" id="cnpjField" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Descrição</label>
+                        <input type="text" name="description" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Valor (R$)</label>
+                        <input type="number" step="0.01" name="amount" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Vencimento</label>
+                        <input type="date" name="due_date" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Código de Barras / PIX</label>
+                        <div class="input-group">
+                            <input type="text" name="barcode" id="barcodeField" class="form-control">
+                            <button type="button" class="btn btn-outline-secondary" onclick="copyPix()">
+                                <i class="bi bi-clipboard"></i>
+                            </button>
+                        </div>
+                        <small class="text-muted" id="pixInfo"></small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Pay Modal -->
+<div class="modal fade" id="payModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{{ url_for('accounts_payable') }}" method="POST">
+                <input type="hidden" name="action" value="pay">
+                <input type="hidden" name="id" id="payId">
+                <div class="modal-header">
+                    <h5 class="modal-title">Registrar Pagamento</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Confirmar pagamento para <strong id="paySupplier"></strong>?</p>
+                    <p>Valor: R$ <strong id="payAmount"></strong></p>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Código de Barras / PIX Salvo</label>
+                        <div class="input-group">
+                            <input type="text" id="payBarcode" class="form-control" readonly>
+                            <button type="button" class="btn btn-outline-primary" onclick="navigator.clipboard.writeText(document.getElementById('payBarcode').value)">
+                                <i class="bi bi-clipboard"></i> Copiar
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Data do Pagamento</label>
+                        <input type="date" name="payment_date" class="form-control" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Confirmar Pagamento</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var payBtns = document.querySelectorAll('.pay-btn');
+    payBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var id = this.getAttribute('data-id');
+            var supplier = this.getAttribute('data-supplier');
+            var amount = this.getAttribute('data-amount');
+            var barcode = this.getAttribute('data-barcode');
+            openPayModal(id, supplier, amount, barcode);
+        });
+    });
+});
+
+function openPayModal(id, supplier, amount, barcode) {
+    console.log("Opening pay modal for:", id, supplier);
+    try {
+        document.getElementById('payId').value = id;
+        document.getElementById('paySupplier').innerText = supplier;
+        document.getElementById('payAmount').innerText = amount;
+        document.getElementById('payBarcode').value = barcode || '';
+        
+        // Set today's date
+        var today = new Date().toISOString().split('T')[0];
+        var dateInput = document.querySelector('input[name="payment_date"]');
+        if (dateInput) dateInput.value = today;
+        
+        var modalEl = document.getElementById('payModal');
+        if (modalEl) {
+            var modal = new bootstrap.Modal(modalEl);
+            modal.show();
+        } else {
+            console.error("Modal element #payModal not found!");
+            alert("Erro: Modal de pagamento não encontrado.");
+        }
+    } catch (e) {
+        console.error("Error opening pay modal:", e);
+        alert("Erro ao abrir modal de pagamento: " + e.message);
+    }
+}
+
+function checkPix(select) {
+    var option = select.options[select.selectedIndex];
+    var pix = option.getAttribute('data-pix');
+    var cnpj = option.getAttribute('data-cnpj');
+    if (pix) {
+        document.getElementById('barcodeField').value = pix;
+        document.getElementById('pixInfo').innerText = "PIX carregado do cadastro do fornecedor.";
+    } else {
+        document.getElementById('barcodeField').value = '';
+        document.getElementById('pixInfo').innerText = "";
+    }
+    if (cnpj) {
+        document.getElementById('cnpjField').value = cnpj;
+    } else {
+        document.getElementById('cnpjField').value = '';
+    }
+}
+
+function copyPix() {
+    var copyText = document.getElementById("barcodeField");
+    copyText.select();
+    navigator.clipboard.writeText(copyText.value);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,646 @@
+[
+    {
+        "id": "CLOSED_20260205203619_101",
+        "timestamp": "05/02/2026 20:36:19",
+        "origin": "reception_room",
+        "original_id": "101",
+        "total": 150.0,
+        "items": [
+            {
+                "id": "CHARGE_001",
+                "date": "",
+                "time": "",
+                "source": "Restaurante",
+                "line_items": [
+                    {
+                        "name": "Item 1",
+                        "qty": 1,
+                        "unit_price": 100.0,
+                        "total": 100.0
+                    }
+                ],
+                "service_fee": 0.0,
+                "total": 100.0
+            },
+            {
+                "id": "CHARGE_002",
+                "date": "",
+                "time": "",
+                "source": "Restaurante",
+                "line_items": [
+                    {
+                        "name": "Item 2",
+                        "qty": 1,
+                        "unit_price": 50.0,
+                        "total": 50.0
+                    }
+                ],
+                "service_fee": 0.0,
+                "total": 50.0
+            }
+        ],
+        "payments": [
+            {
+                "method": "Dinheiro",
+                "amount": 100.0
+            },
+            {
+                "method": "Pix",
+                "amount": 50.0
+            }
+        ],
+        "user": "Tester",
+        "details": {
+            "guest_name": "Test Guest",
+            "charges_ids": [
+                "CHARGE_001",
+                "CHARGE_002"
+            ],
+            "checkin_date": "",
+            "checkout_date": ""
+        }
+    },
+    {
+        "id": "CLOSED_20260205203619_101_CHARGE_001",
+        "timestamp": "05/02/2026 20:36:19",
+        "origin": "reception_charge",
+        "original_id": "101_CHARGE_001",
+        "total": 100.0,
+        "items": [
+            {
+                "name": "Item 1",
+                "qty": 1,
+                "unit_price": 100.0,
+                "total": 100.0
+            }
+        ],
+        "payments": [
+            {
+                "method": "Cartão de Crédito",
+                "amount": 50.0
+            },
+            {
+                "method": "Pix",
+                "amount": 50.0
+            }
+        ],
+        "user": "Tester",
+        "details": {
+            "room_number": "101",
+            "charge_id": "CHARGE_001",
+            "notes": "Pagamento Individual"
+        }
+    },
+    {
+        "id": "CLOSED_20260205204115_101",
+        "timestamp": "05/02/2026 20:41:15",
+        "origin": "reception_room",
+        "original_id": "101",
+        "total": 150.0,
+        "items": [
+            {
+                "id": "CHARGE_001",
+                "date": "",
+                "time": "",
+                "source": "Restaurante",
+                "line_items": [
+                    {
+                        "name": "Item 1",
+                        "qty": 1,
+                        "unit_price": 100.0,
+                        "total": 100.0
+                    }
+                ],
+                "service_fee": 0.0,
+                "total": 100.0
+            },
+            {
+                "id": "CHARGE_002",
+                "date": "",
+                "time": "",
+                "source": "Restaurante",
+                "line_items": [
+                    {
+                        "name": "Item 2",
+                        "qty": 1,
+                        "unit_price": 50.0,
+                        "total": 50.0
+                    }
+                ],
+                "service_fee": 0.0,
+                "total": 50.0
+            }
+        ],
+        "payments": [
+            {
+                "method": "Dinheiro",
+                "amount": 100.0
+            },
+            {
+                "method": "Pix",
+                "amount": 50.0
+            }
+        ],
+        "user": "Tester",
+        "details": {
+            "guest_name": "Test Guest",
+            "charges_ids": [
+                "CHARGE_001",
+                "CHARGE_002"
+            ],
+            "checkin_date": "",
+            "checkout_date": ""
+        }
+    },
+    {
+        "id": "CLOSED_20260205204115_101_CHARGE_001",
+        "timestamp": "05/02/2026 20:41:15",
+        "origin": "reception_charge",
+        "original_id": "101_CHARGE_001",
+        "total": 100.0,
+        "items": [
+            {
+                "name": "Item 1",
+                "qty": 1,
+                "unit_price": 100.0,
+                "total": 100.0
+            }
+        ],
+        "payments": [
+            {
+                "method": "Cartão de Crédito",
+                "amount": 50.0
+            },
+            {
+                "method": "Pix",
+                "amount": 50.0
+            }
+        ],
+        "user": "Tester",
+        "details": {
+            "room_number": "101",
+            "charge_id": "CHARGE_001",
+            "notes": "Pagamento Individual"
+        }
+    },
+    {
+        "id": "CLOSED_20260205204508_101",
+        "timestamp": "05/02/2026 20:45:08",
+        "origin": "reception_room",
+        "original_id": "101",
+        "total": 150.0,
+        "items": [
+            {
+                "id": "CHARGE_001",
+                "date": "",
+                "time": "",
+                "source": "Restaurante",
+                "line_items": [
+                    {
+                        "name": "Item 1",
+                        "qty": 1,
+                        "unit_price": 100.0,
+                        "total": 100.0
+                    }
+                ],
+                "service_fee": 0.0,
+                "total": 100.0
+            },
+            {
+                "id": "CHARGE_002",
+                "date": "",
+                "time": "",
+                "source": "Restaurante",
+                "line_items": [
+                    {
+                        "name": "Item 2",
+                        "qty": 1,
+                        "unit_price": 50.0,
+                        "total": 50.0
+                    }
+                ],
+                "service_fee": 0.0,
+                "total": 50.0
+            }
+        ],
+        "payments": [
+            {
+                "method": "Dinheiro",
+                "amount": 100.0
+            },
+            {
+                "method": "Pix",
+                "amount": 50.0
+            }
+        ],
+        "user": "Tester",
+        "details": {
+            "guest_name": "Test Guest",
+            "charges_ids": [
+                "CHARGE_001",
+                "CHARGE_002"
+            ],
+            "checkin_date": "",
+            "checkout_date": ""
+        }
+    },
+    {
+        "id": "CLOSED_20260205204508_101_CHARGE_001",
+        "timestamp": "05/02/2026 20:45:08",
+        "origin": "reception_charge",
+        "original_id": "101_CHARGE_001",
+        "total": 100.0,
+        "items": [
+            {
+                "name": "Item 1",
+                "qty": 1,
+                "unit_price": 100.0,
+                "total": 100.0
+            }
+        ],
+        "payments": [
+            {
+                "method": "Cartão de Crédito",
+                "amount": 50.0
+            },
+            {
+                "method": "Pix",
+                "amount": 50.0
+            }
+        ],
+        "user": "Tester",
+        "details": {
+            "room_number": "101",
+            "charge_id": "CHARGE_001",
+            "notes": "Pagamento Individual"
+        }
+    },
+    {
+        "id": "CLOSED_20260205210450_101",
+        "timestamp": "05/02/2026 21:04:50",
+        "origin": "reception_room",
+        "original_id": "101",
+        "total": 150.0,
+        "items": [
+            {
+                "id": "CHARGE_001",
+                "date": "",
+                "time": "",
+                "source": "Restaurante",
+                "line_items": [
+                    {
+                        "name": "Item 1",
+                        "qty": 1,
+                        "unit_price": 100.0,
+                        "total": 100.0
+                    }
+                ],
+                "service_fee": 0.0,
+                "total": 100.0
+            },
+            {
+                "id": "CHARGE_002",
+                "date": "",
+                "time": "",
+                "source": "Restaurante",
+                "line_items": [
+                    {
+                        "name": "Item 2",
+                        "qty": 1,
+                        "unit_price": 50.0,
+                        "total": 50.0
+                    }
+                ],
+                "service_fee": 0.0,
+                "total": 50.0
+            }
+        ],
+        "payments": [
+            {
+                "method": "Dinheiro",
+                "amount": 100.0
+            },
+            {
+                "method": "Pix",
+                "amount": 50.0
+            }
+        ],
+        "user": "Tester",
+        "details": {
+            "guest_name": "Test Guest",
+            "charges_ids": [
+                "CHARGE_001",
+                "CHARGE_002"
+            ],
+            "checkin_date": "",
+            "checkout_date": ""
+        }
+    },
+    {
+        "id": "CLOSED_20260205210450_101_CHARGE_001",
+        "timestamp": "05/02/2026 21:04:50",
+        "origin": "reception_charge",
+        "original_id": "101_CHARGE_001",
+        "total": 100.0,
+        "items": [
+            {
+                "name": "Item 1",
+                "qty": 1,
+                "unit_price": 100.0,
+                "total": 100.0
+            }
+        ],
+        "payments": [
+            {
+                "method": "Cartão de Crédito",
+                "amount": 50.0
+            },
+            {
+                "method": "Pix",
+                "amount": 50.0
+            }
+        ],
+        "user": "Tester",
+        "details": {
+            "room_number": "101",
+            "charge_id": "CHARGE_001",
+            "notes": "Pagamento Individual"
+        }
+    },
+    {
+        "id": "CLOSED_20260205210630_101",
+        "timestamp": "05/02/2026 21:06:30",
+        "origin": "reception_room",
+        "original_id": "101",
+        "total": 150.0,
+        "items": [
+            {
+                "id": "CHARGE_001",
+                "date": "",
+                "time": "",
+                "source": "Restaurante",
+                "line_items": [
+                    {
+                        "name": "Item 1",
+                        "qty": 1,
+                        "unit_price": 100.0,
+                        "total": 100.0
+                    }
+                ],
+                "service_fee": 0.0,
+                "total": 100.0
+            },
+            {
+                "id": "CHARGE_002",
+                "date": "",
+                "time": "",
+                "source": "Restaurante",
+                "line_items": [
+                    {
+                        "name": "Item 2",
+                        "qty": 1,
+                        "unit_price": 50.0,
+                        "total": 50.0
+                    }
+                ],
+                "service_fee": 0.0,
+                "total": 50.0
+            }
+        ],
+        "payments": [
+            {
+                "method": "Dinheiro",
+                "amount": 100.0
+            },
+            {
+                "method": "Pix",
+                "amount": 50.0
+            }
+        ],
+        "user": "Tester",
+        "details": {
+            "guest_name": "Test Guest",
+            "charges_ids": [
+                "CHARGE_001",
+                "CHARGE_002"
+            ],
+            "checkin_date": "",
+            "checkout_date": ""
+        }
+    },
+    {
+        "id": "CLOSED_20260205210630_101_CHARGE_001",
+        "timestamp": "05/02/2026 21:06:30",
+        "origin": "reception_charge",
+        "original_id": "101_CHARGE_001",
+        "total": 100.0,
+        "items": [
+            {
+                "name": "Item 1",
+                "qty": 1,
+                "unit_price": 100.0,
+                "total": 100.0
+            }
+        ],
+        "payments": [
+            {
+                "method": "Cartão de Crédito",
+                "amount": 50.0
+            },
+            {
+                "method": "Pix",
+                "amount": 50.0
+            }
+        ],
+        "user": "Tester",
+        "details": {
+            "room_number": "101",
+            "charge_id": "CHARGE_001",
+            "notes": "Pagamento Individual"
+        }
+    },
+    {
+        "id": "CLOSED_20260205210700_101",
+        "timestamp": "05/02/2026 21:07:00",
+        "origin": "reception_room",
+        "original_id": "101",
+        "total": 150.0,
+        "items": [
+            {
+                "id": "CHARGE_001",
+                "date": "",
+                "time": "",
+                "source": "Restaurante",
+                "line_items": [
+                    {
+                        "name": "Item 1",
+                        "qty": 1,
+                        "unit_price": 100.0,
+                        "total": 100.0
+                    }
+                ],
+                "service_fee": 0.0,
+                "total": 100.0
+            },
+            {
+                "id": "CHARGE_002",
+                "date": "",
+                "time": "",
+                "source": "Restaurante",
+                "line_items": [
+                    {
+                        "name": "Item 2",
+                        "qty": 1,
+                        "unit_price": 50.0,
+                        "total": 50.0
+                    }
+                ],
+                "service_fee": 0.0,
+                "total": 50.0
+            }
+        ],
+        "payments": [
+            {
+                "method": "Dinheiro",
+                "amount": 100.0
+            },
+            {
+                "method": "Pix",
+                "amount": 50.0
+            }
+        ],
+        "user": "Tester",
+        "details": {
+            "guest_name": "Test Guest",
+            "charges_ids": [
+                "CHARGE_001",
+                "CHARGE_002"
+            ],
+            "checkin_date": "",
+            "checkout_date": ""
+        }
+    },
+    {
+        "id": "CLOSED_20260205210700_101_CHARGE_001",
+        "timestamp": "05/02/2026 21:07:00",
+        "origin": "reception_charge",
+        "original_id": "101_CHARGE_001",
+        "total": 100.0,
+        "items": [
+            {
+                "name": "Item 1",
+                "qty": 1,
+                "unit_price": 100.0,
+                "total": 100.0
+            }
+        ],
+        "payments": [
+            {
+                "method": "Cartão de Crédito",
+                "amount": 50.0
+            },
+            {
+                "method": "Pix",
+                "amount": 50.0
+            }
+        ],
+        "user": "Tester",
+        "details": {
+            "room_number": "101",
+            "charge_id": "CHARGE_001",
+            "notes": "Pagamento Individual"
+        }
+    },
+    {
+        "id": "CLOSED_20260206085009_101",
+        "timestamp": "06/02/2026 08:50:09",
+        "origin": "reception_room",
+        "original_id": "101",
+        "total": 150.0,
+        "items": [
+            {
+                "id": "CHARGE_001",
+                "date": "",
+                "time": "",
+                "source": "Restaurante",
+                "line_items": [
+                    {
+                        "name": "Item 1",
+                        "qty": 1,
+                        "unit_price": 100.0,
+                        "total": 100.0
+                    }
+                ],
+                "service_fee": 0.0,
+                "total": 100.0
+            },
+            {
+                "id": "CHARGE_002",
+                "date": "",
+                "time": "",
+                "source": "Restaurante",
+                "line_items": [
+                    {
+                        "name": "Item 2",
+                        "qty": 1,
+                        "unit_price": 50.0,
+                        "total": 50.0
+                    }
+                ],
+                "service_fee": 0.0,
+                "total": 50.0
+            }
+        ],
+        "payments": [
+            {
+                "method": "Dinheiro",
+                "amount": 100.0
+            },
+            {
+                "method": "Pix",
+                "amount": 50.0
+            }
+        ],
+        "user": "Tester",
+        "details": {
+            "guest_name": "Test Guest",
+            "charges_ids": [
+                "CHARGE_001",
+                "CHARGE_002"
+            ],
+            "checkin_date": "",
+            "checkout_date": ""
+        }
+    },
+    {
+        "id": "CLOSED_20260206085009_101_CHARGE_001",
+        "timestamp": "06/02/2026 08:50:09",
+        "origin": "reception_charge",
+        "original_id": "101_CHARGE_001",
+        "total": 100.0,
+        "items": [
+            {
+                "name": "Item 1",
+                "qty": 1,
+                "unit_price": 100.0,
+                "total": 100.0
+            }
+        ],
+        "payments": [
+            {
+                "method": "Cartão de Crédito",
+                "amount": 50.0
+            },
+            {
+                "method": "Pix",
+                "amount": 50.0
+            }
+        ],
+        "user": "Tester",
+        "details": {
+            "room_number": "101",
+            "charge_id": "CHARGE_001",
+            "notes": "Pagamento Individual"
+        }
+    }
+]

@@ -1,0 +1,1301 @@
+[
+    {
+        "id": "SYS_20260131083517999811",
+        "timestamp": "31/01/2026 08:35:17",
+        "timestamp_iso": "2026-01-31T08:35:17.999829",
+        "action": "cancel_transfer",
+        "user": "Angelo",
+        "category": "Mesa",
+        "details": {
+            "source_table": "43",
+            "target_table": "41",
+            "return_table": "43",
+            "items_count": 1,
+            "total_value": 68.69999999999999
+        }
+    },
+    {
+        "id": "SYS_20260131083921189690",
+        "timestamp": "31/01/2026 08:39:21",
+        "timestamp_iso": "2026-01-31T08:39:21.189705",
+        "action": "transfer_to_room",
+        "user": "admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "33",
+            "target_room": "33",
+            "total": 5.5,
+            "items": [
+                {
+                    "id": "b1e75771-c7a4-4c32-abd0-f3e575da7be2",
+                    "printed": false,
+                    "print_status": "error",
+                    "name": "Coca Cola",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 5.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Bebidas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "GarcomZ",
+                    "created_at": "31/01/2026 08:39"
+                }
+            ],
+            "user": "admin",
+            "description": "Mesa 33 -> Quarto 33"
+        }
+    },
+    {
+        "id": "SYS_20260131085019319493",
+        "timestamp": "31/01/2026 08:50:19",
+        "timestamp_iso": "2026-01-31T08:50:19.319508",
+        "action": "Emissão Fiscal Admin",
+        "user": "Sistema",
+        "category": "Fiscal",
+        "details": {
+            "entry_id": "50055148-4180-48f8-b1ff-5477f292096b",
+            "nfe_id": "nfc_3a1f2b388ad04113860a4d61895a89fa",
+            "amount": 68.69999999999999,
+            "user": "Angelo"
+        }
+    },
+    {
+        "id": "SYS_20260131090013484382",
+        "timestamp": "31/01/2026 09:00:13",
+        "timestamp_iso": "2026-01-31T09:00:13.484391",
+        "action": "close_cashier",
+        "user": "Angelo",
+        "category": "Caixa",
+        "details": {
+            "session_id": "CASHIER_REST_20260130125418_Angelo",
+            "closing_balance": 169.46,
+            "opened_at": "30/01/2026 12:54",
+            "closed_at": "31/01/2026 09:00",
+            "department": "Restaurante"
+        }
+    },
+    {
+        "id": "SYS_20260131090103284003",
+        "timestamp": "31/01/2026 09:01:03",
+        "timestamp_iso": "2026-01-31T09:01:03.284016",
+        "action": "close_cashier",
+        "user": "Angelo",
+        "category": "Caixa",
+        "details": {
+            "session_id": "SESSION_GUEST_CONSUMPTION_20260130150549_admin",
+            "closing_balance": 265.0,
+            "difference": 165.0,
+            "opened_at": "30/01/2026 15:05",
+            "closed_at": "31/01/2026 09:01",
+            "department": "Recepção"
+        }
+    },
+    {
+        "id": "SYS_20260131095433442913",
+        "timestamp": "31/01/2026 09:54:33",
+        "timestamp_iso": "2026-01-31T09:54:33.442932",
+        "action": "Login Falhou",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Tentativa de usuário inexistente: admin"
+    },
+    {
+        "id": "SYS_20260131100529888258",
+        "timestamp": "31/01/2026 10:05:29",
+        "timestamp_iso": "2026-01-31T10:05:29.888276",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260131100614668206",
+        "timestamp": "31/01/2026 10:06:14",
+        "timestamp_iso": "2026-01-31T10:06:14.668225",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260131100731708554",
+        "timestamp": "31/01/2026 10:07:31",
+        "timestamp_iso": "2026-01-31T10:07:31.708570",
+        "action": "Login",
+        "user": "jose",
+        "category": "Autenticação",
+        "details": "Usuário jose entrou no sistema"
+    },
+    {
+        "id": "SYS_20260131110000893759",
+        "timestamp": "31/01/2026 11:00:00",
+        "timestamp_iso": "2026-01-31T11:00:00.893774",
+        "action": "transfer_to_room",
+        "user": "Angelo",
+        "category": "Geral",
+        "details": {
+            "source_table": "41",
+            "target_room": "03",
+            "total": 25.189999999999998,
+            "items": [
+                {
+                    "id": "a0ad3ca2-debc-41bf-9e82-921993663efc",
+                    "printed": true,
+                    "print_status": "printed",
+                    "name": "Banoffe",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 22.9,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Sobremesas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "Angelo",
+                    "created_at": "31/01/2026 10:58"
+                }
+            ],
+            "user": "Angelo",
+            "description": "Mesa 41 -> Quarto 03"
+        }
+    },
+    {
+        "id": "SYS_20260131110159328989",
+        "timestamp": "31/01/2026 11:01:59",
+        "timestamp_iso": "2026-01-31T11:01:59.329005",
+        "action": "transfer_to_room",
+        "user": "Angelo",
+        "category": "Geral",
+        "details": {
+            "source_table": "41",
+            "target_room": "03",
+            "total": 125.95,
+            "items": [
+                {
+                    "id": "9cfd864e-d8da-4697-82a1-cc630d2c0dc2",
+                    "printed": true,
+                    "print_status": "skipped",
+                    "name": "Banoffe",
+                    "flavor": null,
+                    "qty": 5.0,
+                    "price": 22.9,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [
+                        "Não Imprimir"
+                    ],
+                    "category": "Sobremesas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "Angelo",
+                    "created_at": "31/01/2026 11:01"
+                }
+            ],
+            "user": "Angelo",
+            "description": "Mesa 41 -> Quarto 03"
+        }
+    },
+    {
+        "id": "SYS_20260131112613751159",
+        "timestamp": "31/01/2026 11:26:13",
+        "timestamp_iso": "2026-01-31T11:26:13.751173",
+        "action": "transfer_to_room",
+        "user": "admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "33",
+            "target_room": "33",
+            "total": 5.5,
+            "items": [
+                {
+                    "id": "23737872-fbb2-4acd-afad-fd044883227e",
+                    "printed": false,
+                    "print_status": "error",
+                    "name": "Coca Cola",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 5.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Bebidas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "GarcomZ",
+                    "created_at": "31/01/2026 11:26"
+                }
+            ],
+            "user": "admin",
+            "description": "Mesa 33 -> Quarto 33"
+        }
+    },
+    {
+        "id": "SYS_20260131112616279292",
+        "timestamp": "31/01/2026 11:26:16",
+        "timestamp_iso": "2026-01-31T11:26:16.279309",
+        "action": "transfer_to_room",
+        "user": "Angelo",
+        "category": "Geral",
+        "details": {
+            "source_table": "40",
+            "target_room": "01",
+            "total": 100.75999999999999,
+            "items": [
+                {
+                    "id": "defe6848-b5b5-4463-93c4-f68980fb0617",
+                    "printed": true,
+                    "print_status": "skipped",
+                    "name": "Banoffe",
+                    "flavor": null,
+                    "qty": 4.0,
+                    "price": 22.9,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [
+                        "Não Imprimir"
+                    ],
+                    "category": "Sobremesas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "Angelo",
+                    "created_at": "31/01/2026 11:26"
+                }
+            ],
+            "user": "Angelo",
+            "description": "Mesa 40 -> Quarto 01"
+        }
+    },
+    {
+        "id": "SYS_20260131112708356357",
+        "timestamp": "31/01/2026 11:27:08",
+        "timestamp_iso": "2026-01-31T11:27:08.356374",
+        "action": "transfer_to_room",
+        "user": "admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "33",
+            "target_room": "33",
+            "total": 5.5,
+            "items": [
+                {
+                    "id": "3c4b18c2-a63e-46c1-b199-d6c50ce06b69",
+                    "printed": false,
+                    "print_status": "error",
+                    "name": "Coca Cola",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 5.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Bebidas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "GarcomZ",
+                    "created_at": "31/01/2026 11:27"
+                }
+            ],
+            "user": "admin",
+            "description": "Mesa 33 -> Quarto 33"
+        }
+    },
+    {
+        "id": "SYS_20260131114148515242",
+        "timestamp": "31/01/2026 11:41:48",
+        "timestamp_iso": "2026-01-31T11:41:48.515257",
+        "action": "transfer_to_room",
+        "user": "Angelo",
+        "category": "Geral",
+        "details": {
+            "source_table": "01",
+            "target_room": "01",
+            "total": 100.75999999999999,
+            "items": [
+                {
+                    "id": "f84c0ee7-8dcd-42e5-9427-cc426f468065",
+                    "printed": true,
+                    "print_status": "skipped",
+                    "name": "Banoffe",
+                    "flavor": null,
+                    "qty": 4.0,
+                    "price": 22.9,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [
+                        "Não Imprimir"
+                    ],
+                    "category": "Sobremesas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "Angelo",
+                    "created_at": "31/01/2026 11:40"
+                }
+            ],
+            "user": "Angelo",
+            "description": "Mesa 01 -> Quarto 01"
+        }
+    },
+    {
+        "id": "SYS_20260131123337599547",
+        "timestamp": "31/01/2026 12:33:37",
+        "timestamp_iso": "2026-01-31T12:33:37.599565",
+        "action": "transfer_to_room",
+        "user": "Angelo",
+        "category": "Geral",
+        "details": {
+            "source_table": "41",
+            "target_room": "01",
+            "total": 75.57,
+            "items": [
+                {
+                    "id": "9b3a771b-f8f5-470a-b9b6-b5dcc24d7e4e",
+                    "printed": true,
+                    "print_status": "printed",
+                    "name": "Banoffe",
+                    "flavor": null,
+                    "qty": 3.0,
+                    "price": 22.9,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Sobremesas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "Angelo",
+                    "created_at": "31/01/2026 12:33"
+                }
+            ],
+            "user": "Angelo",
+            "description": "Mesa 41 -> Quarto 01"
+        }
+    },
+    {
+        "id": "SYS_20260131124108323616",
+        "timestamp": "31/01/2026 12:41:08",
+        "timestamp_iso": "2026-01-31T12:41:08.323636",
+        "action": "Login",
+        "user": "jose",
+        "category": "Autenticação",
+        "details": "Usuário jose entrou no sistema"
+    },
+    {
+        "id": "SYS_20260131125853151452",
+        "timestamp": "31/01/2026 12:58:53",
+        "timestamp_iso": "2026-01-31T12:58:53.151469",
+        "action": "Login",
+        "user": "jose",
+        "category": "Autenticação",
+        "details": "Usuário jose entrou no sistema"
+    },
+    {
+        "id": "SYS_20260131131209468295",
+        "timestamp": "31/01/2026 13:12:09",
+        "timestamp_iso": "2026-01-31T13:12:09.468313",
+        "action": "Login",
+        "user": "carlos",
+        "category": "Autenticação",
+        "details": "Usuário carlos entrou no sistema"
+    },
+    {
+        "id": "SYS_20260131131908413547",
+        "timestamp": "31/01/2026 13:19:08",
+        "timestamp_iso": "2026-01-31T13:19:08.413563",
+        "action": "transfer_to_room",
+        "user": "jose",
+        "category": "Geral",
+        "details": {
+            "source_table": "100",
+            "target_room": "02",
+            "total": 372.9,
+            "items": [
+                {
+                    "id": "629a05ff-b8e4-421a-b39f-1d9c2d42863c",
+                    "printed": true,
+                    "print_status": "skipped",
+                    "name": "Agulhinha Branca",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 69.9,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [
+                        "Não Imprimir"
+                    ],
+                    "category": "Entradas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "jose",
+                    "created_at": "31/01/2026 13:11"
+                },
+                {
+                    "id": "48fe91c3-7dd2-4133-9e16-f19798f47303",
+                    "printed": true,
+                    "print_status": "skipped",
+                    "name": "Agua com Gás 275ml",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 9.9,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [
+                        {
+                            "question": "Copo",
+                            "answer": "Nada"
+                        }
+                    ],
+                    "observations": [
+                        "Não Imprimir"
+                    ],
+                    "category": "Sucos e Águas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "jose",
+                    "created_at": "31/01/2026 13:11"
+                },
+                {
+                    "id": "7b7b53a2-50f6-4da7-b865-befe665de447",
+                    "printed": true,
+                    "print_status": "skipped",
+                    "name": "Coca Cola Zero 350ml",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 8.9,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [
+                        {
+                            "question": "Copo",
+                            "answer": "Nada"
+                        }
+                    ],
+                    "observations": [
+                        "Não Imprimir"
+                    ],
+                    "category": "Refrigerante",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "jose",
+                    "created_at": "31/01/2026 13:12"
+                },
+                {
+                    "id": "6ac2e95c-e189-43c5-90e8-bec427423e03",
+                    "printed": true,
+                    "print_status": "skipped",
+                    "name": "Coca Cola Zero 350ml",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 8.9,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [
+                        {
+                            "question": "Copo",
+                            "answer": "Nada"
+                        }
+                    ],
+                    "observations": [
+                        "Não Imprimir"
+                    ],
+                    "category": "Refrigerante",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "jose",
+                    "created_at": "31/01/2026 13:12"
+                },
+                {
+                    "id": "9786a436-137c-42bb-b64e-c5af4850c0d5",
+                    "printed": true,
+                    "print_status": "skipped",
+                    "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 16.9,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [
+                        "Não Imprimir"
+                    ],
+                    "category": "Cervejas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "jose",
+                    "created_at": "31/01/2026 13:14"
+                },
+                {
+                    "id": "666ee5c6-747c-422b-a1ec-895cf6f63b3c",
+                    "printed": true,
+                    "print_status": "skipped",
+                    "name": "Peixe ao Molho de Camarão (Individual)",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 98.9,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [
+                        "Não Imprimir"
+                    ],
+                    "category": "Pratos",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "jose",
+                    "created_at": "31/01/2026 13:15"
+                },
+                {
+                    "id": "0496e1f3-6cb2-4295-a11b-8b323261c72c",
+                    "printed": true,
+                    "print_status": "skipped",
+                    "name": "Peixe na farofa de Castanha (Individual)",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 99.9,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [
+                        "Não Imprimir"
+                    ],
+                    "category": "Pratos",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "jose",
+                    "created_at": "31/01/2026 13:16"
+                },
+                {
+                    "id": "c9d83c09-7fab-43a0-9f56-f5080dda6891",
+                    "printed": true,
+                    "print_status": "skipped",
+                    "name": "Agua com Gás 275ml",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 9.9,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [
+                        {
+                            "question": "Copo",
+                            "answer": "Nada"
+                        }
+                    ],
+                    "observations": [
+                        "Não Imprimir"
+                    ],
+                    "category": "Sucos e Águas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "jose",
+                    "created_at": "31/01/2026 13:17"
+                },
+                {
+                    "id": "5ed6187c-7a0b-4d5e-a263-f212bca686cf",
+                    "printed": true,
+                    "print_status": "skipped",
+                    "name": "Café Expresso",
+                    "flavor": null,
+                    "qty": 2.0,
+                    "price": 7.9,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [
+                        "Não Imprimir"
+                    ],
+                    "category": "Sucos e Águas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "jose",
+                    "created_at": "31/01/2026 13:18"
+                }
+            ],
+            "user": "jose",
+            "description": "Mesa 100 -> Quarto 02"
+        }
+    },
+    {
+        "id": "SYS_20260131134008537940",
+        "timestamp": "31/01/2026 13:40:08",
+        "timestamp_iso": "2026-01-31T13:40:08.537959",
+        "action": "Login",
+        "user": "Angelo",
+        "category": "Autenticação",
+        "details": "Usuário Angelo entrou no sistema"
+    },
+    {
+        "id": "SYS_20260131134147716362",
+        "timestamp": "31/01/2026 13:41:47",
+        "timestamp_iso": "2026-01-31T13:41:47.716394",
+        "action": "transfer_to_room",
+        "user": "Angelo",
+        "category": "Geral",
+        "details": {
+            "source_table": "41",
+            "target_room": "01",
+            "total": 25.189999999999998,
+            "items": [
+                {
+                    "id": "ebbc4cfa-5ef8-4a99-88ad-4692ed16ca89",
+                    "printed": true,
+                    "print_status": "printed",
+                    "name": "Banoffe",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 22.9,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Sobremesas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "Angelo",
+                    "created_at": "31/01/2026 13:41"
+                }
+            ],
+            "user": "Angelo",
+            "description": "Mesa 41 -> Quarto 01"
+        }
+    },
+    {
+        "id": "SYS_20260131134229059708",
+        "timestamp": "31/01/2026 13:42:29",
+        "timestamp_iso": "2026-01-31T13:42:29.059726",
+        "action": "transfer_to_room",
+        "user": "jose",
+        "category": "Geral",
+        "details": {
+            "source_table": "100",
+            "target_room": "02",
+            "total": 190.41,
+            "items": [
+                {
+                    "id": "2fbdf9b3-92b5-42c7-8164-b2d71c2d7219",
+                    "printed": true,
+                    "print_status": "skipped",
+                    "name": "Ceviche Tropical (Individual)",
+                    "flavor": null,
+                    "qty": 2.0,
+                    "price": 47.9,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [
+                        "Não Imprimir"
+                    ],
+                    "category": "Especiais da Casa",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "jose",
+                    "created_at": "31/01/2026 13:24"
+                },
+                {
+                    "id": "0e7236f7-94cb-4cbc-8cb6-65ef243aaa26",
+                    "printed": true,
+                    "print_status": "skipped",
+                    "name": "Caldo (Consultar sabor do dia)",
+                    "flavor": "Feijão (Caldo)",
+                    "qty": 2.0,
+                    "price": 15.9,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [
+                        "Não Imprimir"
+                    ],
+                    "category": "Entradas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "jose",
+                    "created_at": "31/01/2026 13:32"
+                },
+                {
+                    "id": "18da7141-5093-46ba-b25b-49a560ae9d62",
+                    "printed": true,
+                    "print_status": "skipped",
+                    "name": "Agua com Gás 275ml",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 9.9,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [
+                        {
+                            "question": "Copo",
+                            "answer": "Nada"
+                        }
+                    ],
+                    "observations": [
+                        "Não Imprimir"
+                    ],
+                    "category": "Sucos e Águas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "jose",
+                    "created_at": "31/01/2026 13:40"
+                },
+                {
+                    "id": "5cd8be53-afcb-4f26-82a7-21f8faf40b17",
+                    "printed": true,
+                    "print_status": "skipped",
+                    "name": "Coca Cola Zero 350ml",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 8.9,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [
+                        {
+                            "question": "Copo",
+                            "answer": "Nada"
+                        }
+                    ],
+                    "observations": [
+                        "Não Imprimir"
+                    ],
+                    "category": "Refrigerante",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "jose",
+                    "created_at": "31/01/2026 13:40"
+                },
+                {
+                    "id": "5dd438e5-744c-4288-b2cb-4533af99586b",
+                    "printed": true,
+                    "print_status": "skipped",
+                    "name": "Café Expresso",
+                    "flavor": null,
+                    "qty": 2.0,
+                    "price": 7.9,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [
+                        "Não Imprimir"
+                    ],
+                    "category": "Sucos e Águas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "jose",
+                    "created_at": "31/01/2026 13:41"
+                },
+                {
+                    "id": "8eaa5885-b394-4e43-87c7-077ee49c94bd",
+                    "printed": true,
+                    "print_status": "skipped",
+                    "name": "Suco Copo (Escolha o Sabor)",
+                    "flavor": "Abacaxi",
+                    "qty": 1.0,
+                    "price": 10.9,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [
+                        "Não Imprimir"
+                    ],
+                    "category": "Sucos e Águas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "jose",
+                    "created_at": "31/01/2026 13:42"
+                }
+            ],
+            "user": "jose",
+            "description": "Mesa 100 -> Quarto 02"
+        }
+    },
+    {
+        "id": "SYS_20260131134847409968",
+        "timestamp": "31/01/2026 13:48:47",
+        "timestamp_iso": "2026-01-31T13:48:47.409983",
+        "action": "cancel_consumption",
+        "user": "admin_user",
+        "category": "Cancelamento",
+        "details": {
+            "charge_id": "CHARGE_TEST_001",
+            "room_number": "101",
+            "total": 100.0,
+            "old_status": "pending",
+            "justification": "Erro de lançamento"
+        }
+    },
+    {
+        "id": "SYS_20260131140232780456",
+        "timestamp": "31/01/2026 14:02:32",
+        "timestamp_iso": "2026-01-31T14:02:32.780470",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "40",
+            "target_room": "01",
+            "total": 100.0,
+            "items": [
+                {
+                    "name": "Item 1",
+                    "price": 100.0,
+                    "qty": 1,
+                    "waiter": "Waiter1"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 40 -> Quarto 01"
+        }
+    },
+    {
+        "id": "SYS_20260131140232805554",
+        "timestamp": "31/01/2026 14:02:32",
+        "timestamp_iso": "2026-01-31T14:02:32.805570",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "41",
+            "target_room": "01",
+            "total": 110.0,
+            "items": [
+                {
+                    "name": "Item 2",
+                    "price": 100.0,
+                    "qty": 1,
+                    "waiter": "Waiter1"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 41 -> Quarto 01"
+        }
+    },
+    {
+        "id": "SYS_20260131142041432720",
+        "timestamp": "31/01/2026 14:20:41",
+        "timestamp_iso": "2026-01-31T14:20:41.432741",
+        "action": "transfer_to_room",
+        "user": "admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "33",
+            "target_room": "33",
+            "total": 5.5,
+            "items": [
+                {
+                    "id": "7d870146-5ed2-4a48-bb8d-492ea091c6bc",
+                    "printed": false,
+                    "print_status": "error",
+                    "name": "Coca Cola",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 5.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Bebidas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "GarcomZ",
+                    "created_at": "31/01/2026 14:20"
+                }
+            ],
+            "user": "admin",
+            "description": "Mesa 33 -> Quarto 33"
+        }
+    },
+    {
+        "id": "SYS_20260131142150912759",
+        "timestamp": "31/01/2026 14:21:50",
+        "timestamp_iso": "2026-01-31T14:21:50.912774",
+        "action": "transfer_to_room",
+        "user": "admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "33",
+            "target_room": "33",
+            "total": 5.5,
+            "items": [
+                {
+                    "id": "5e1bb9fb-c5cc-4f25-8f28-d06e558af9cd",
+                    "printed": false,
+                    "print_status": "error",
+                    "name": "Coca Cola",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 5.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Bebidas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "GarcomZ",
+                    "created_at": "31/01/2026 14:21"
+                }
+            ],
+            "user": "admin",
+            "description": "Mesa 33 -> Quarto 33"
+        }
+    },
+    {
+        "id": "SYS_20260131145224270471",
+        "timestamp": "31/01/2026 14:52:24",
+        "timestamp_iso": "2026-01-31T14:52:24.270489",
+        "action": "Login Falhou",
+        "user": "Angelo",
+        "category": "Autenticação",
+        "details": "Tentativa de senha incorreta para Angelo"
+    },
+    {
+        "id": "SYS_20260131145230186300",
+        "timestamp": "31/01/2026 14:52:30",
+        "timestamp_iso": "2026-01-31T14:52:30.186318",
+        "action": "Login",
+        "user": "Angelo",
+        "category": "Autenticação",
+        "details": "Usuário Angelo entrou no sistema"
+    },
+    {
+        "id": "SYS_20260131152950032091",
+        "timestamp": "31/01/2026 15:29:50",
+        "timestamp_iso": "2026-01-31T15:29:50.032109",
+        "action": "Cardápio Criado",
+        "user": "Sistema",
+        "category": "Cardápio",
+        "details": {
+            "name": "Bolo Especial",
+            "category": "Sobremesas",
+            "message": "Produto \"Bolo Especial\" criado."
+        }
+    },
+    {
+        "id": "SYS_20260131153110136950",
+        "timestamp": "31/01/2026 15:31:10",
+        "timestamp_iso": "2026-01-31T15:31:10.136961",
+        "action": "Cardápio Criado",
+        "user": "Sistema",
+        "category": "Cardápio",
+        "details": {
+            "name": "Bolo Especial",
+            "category": "Sobremesas",
+            "message": "Produto \"Bolo Especial\" criado."
+        }
+    },
+    {
+        "id": "SYS_20260131153110193598",
+        "timestamp": "31/01/2026 15:31:10",
+        "timestamp_iso": "2026-01-31T15:31:10.193611",
+        "action": "Cardápio Atualizado",
+        "user": "Sistema",
+        "category": "Cardápio",
+        "details": {
+            "id": "1",
+            "name": "Bolo Especial (Editado)",
+            "category": "Sobremesas",
+            "message": "Produto \"Bolo Especial (Editado)\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260131153150802148",
+        "timestamp": "31/01/2026 15:31:50",
+        "timestamp_iso": "2026-01-31T15:31:50.802165",
+        "action": "transfer_to_room",
+        "user": "admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "33",
+            "target_room": "33",
+            "total": 5.5,
+            "items": [
+                {
+                    "id": "f7ab8ce5-e108-43e4-85bc-827d5ab36e7a",
+                    "printed": false,
+                    "print_status": "error",
+                    "name": "Coca Cola",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 5.0,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [],
+                    "category": "Bebidas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "GarcomZ",
+                    "created_at": "31/01/2026 15:31"
+                }
+            ],
+            "user": "admin",
+            "description": "Mesa 33 -> Quarto 33"
+        }
+    },
+    {
+        "id": "SYS_20260131155404685609",
+        "timestamp": "31/01/2026 15:54:04",
+        "timestamp_iso": "2026-01-31T15:54:04.685628",
+        "action": "Cardápio Atualizado",
+        "user": "Sistema",
+        "category": "Cardápio",
+        "details": {
+            "id": "2",
+            "name": "Acai",
+            "category": "Sobremesas",
+            "message": "Produto \"Acai\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260131155542323805",
+        "timestamp": "31/01/2026 15:55:42",
+        "timestamp_iso": "2026-01-31T15:55:42.323826",
+        "action": "Cardápio Atualizado",
+        "user": "Sistema",
+        "category": "Cardápio",
+        "details": {
+            "id": "2",
+            "name": "Acai",
+            "category": "Sobremesas",
+            "message": "Produto \"Acai\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260131160405953249",
+        "timestamp": "31/01/2026 16:04:05",
+        "timestamp_iso": "2026-01-31T16:04:05.953274",
+        "action": "Cardápio Alterado",
+        "user": "Sistema",
+        "category": "Cardápio",
+        "details": {
+            "id": "2",
+            "name": "Acai",
+            "active": false,
+            "message": "Produto \"Acai\" desativado."
+        }
+    },
+    {
+        "id": "SYS_20260131160409032594",
+        "timestamp": "31/01/2026 16:04:09",
+        "timestamp_iso": "2026-01-31T16:04:09.032617",
+        "action": "Cardápio Alterado",
+        "user": "Sistema",
+        "category": "Cardápio",
+        "details": {
+            "id": "2",
+            "name": "Acai",
+            "active": true,
+            "message": "Produto \"Acai\" ativado."
+        }
+    },
+    {
+        "id": "SYS_20260131172923026441",
+        "timestamp": "31/01/2026 17:29:23",
+        "timestamp_iso": "2026-01-31T17:29:23.026460",
+        "action": "Login",
+        "user": "Angelo",
+        "category": "Autenticação",
+        "details": "Usuário Angelo entrou no sistema"
+    },
+    {
+        "id": "SYS_20260131172936192093",
+        "timestamp": "31/01/2026 17:29:36",
+        "timestamp_iso": "2026-01-31T17:29:36.192118",
+        "action": "Cardápio Alterado",
+        "user": "Sistema",
+        "category": "Cardápio",
+        "details": {
+            "id": "2",
+            "name": "Acai",
+            "active": false,
+            "message": "Produto \"Acai\" desativado."
+        }
+    },
+    {
+        "id": "SYS_20260131172938894609",
+        "timestamp": "31/01/2026 17:29:38",
+        "timestamp_iso": "2026-01-31T17:29:38.894634",
+        "action": "Cardápio Alterado",
+        "user": "Sistema",
+        "category": "Cardápio",
+        "details": {
+            "id": "2",
+            "name": "Acai",
+            "active": true,
+            "message": "Produto \"Acai\" ativado."
+        }
+    },
+    {
+        "id": "SYS_20260131173000864672",
+        "timestamp": "31/01/2026 17:30:00",
+        "timestamp_iso": "2026-01-31T17:30:00.864692",
+        "action": "Cardápio Atualizado",
+        "user": "Sistema",
+        "category": "Cardápio",
+        "details": {
+            "id": "227",
+            "name": "Rolha",
+            "category": "Vinhos",
+            "message": "Produto \"Rolha\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260131190849020901",
+        "timestamp": "31/01/2026 19:08:49",
+        "timestamp_iso": "2026-01-31T19:08:49.020919",
+        "action": "Cardápio Atualizado",
+        "user": "Sistema",
+        "category": "Cardápio",
+        "details": {
+            "id": "2",
+            "name": "Acai",
+            "category": "Sobremesas",
+            "message": "Produto \"Acai\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260131190856821919",
+        "timestamp": "31/01/2026 19:08:56",
+        "timestamp_iso": "2026-01-31T19:08:56.821967",
+        "action": "Cardápio Atualizado",
+        "user": "Sistema",
+        "category": "Cardápio",
+        "details": {
+            "id": "2",
+            "name": "Acai",
+            "category": "Sobremesas",
+            "message": "Produto \"Acai\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260131201442123763",
+        "timestamp": "31/01/2026 20:14:42",
+        "timestamp_iso": "2026-01-31T20:14:42.123786",
+        "action": "transfer_to_room",
+        "user": "Angelo",
+        "category": "Geral",
+        "details": {
+            "source_table": "99",
+            "target_room": "99",
+            "total": 55.0,
+            "items": [
+                {
+                    "name": "Test Burger",
+                    "price": 50.0,
+                    "qty": 1,
+                    "total": 50.0,
+                    "category": "Lanches"
+                }
+            ],
+            "user": "Angelo",
+            "description": "Mesa 99 -> Quarto 99"
+        }
+    },
+    {
+        "id": "SYS_20260131201442264711",
+        "timestamp": "31/01/2026 20:14:42",
+        "timestamp_iso": "2026-01-31T20:14:42.264731",
+        "action": "cancel_transfer",
+        "user": "Angelo",
+        "category": "Mesa",
+        "details": {
+            "source_table": "98",
+            "target_table": "97",
+            "return_table": "98",
+            "items_count": 1,
+            "total_value": 0
+        }
+    },
+    {
+        "id": "SYS_20260131202420923720",
+        "timestamp": "31/01/2026 20:24:20",
+        "timestamp_iso": "2026-01-31T20:24:20.923744",
+        "action": "Cardápio Atualizado",
+        "user": "Sistema",
+        "category": "Cardápio",
+        "details": {
+            "id": "265",
+            "name": "Caldo (Consultar sabor do dia)",
+            "category": "Entradas",
+            "message": "Produto \"Caldo (Consultar sabor do dia)\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260131203100057220",
+        "timestamp": "31/01/2026 20:31:00",
+        "timestamp_iso": "2026-01-31T20:31:00.057239",
+        "action": "Cardápio Atualizado",
+        "user": "Sistema",
+        "category": "Cardápio",
+        "details": {
+            "id": "265",
+            "name": "Caldo (Consultar sabor do dia)",
+            "category": "Entradas",
+            "message": "Produto \"Caldo (Consultar sabor do dia)\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260131205700122530",
+        "timestamp": "31/01/2026 20:57:00",
+        "timestamp_iso": "2026-01-31T20:57:00.122550",
+        "action": "Cardápio Atualizado",
+        "user": "Sistema",
+        "category": "Cardápio",
+        "details": {
+            "id": "19",
+            "name": "Mojito",
+            "category": "Drinks",
+            "message": "Produto \"Mojito\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260131205744698850",
+        "timestamp": "31/01/2026 20:57:44",
+        "timestamp_iso": "2026-01-31T20:57:44.698869",
+        "action": "Cardápio Atualizado",
+        "user": "Sistema",
+        "category": "Cardápio",
+        "details": {
+            "id": "19",
+            "name": "Mojito",
+            "category": "Drinks",
+            "message": "Produto \"Mojito\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260131210306660373",
+        "timestamp": "31/01/2026 21:03:06",
+        "timestamp_iso": "2026-01-31T21:03:06.660393",
+        "action": "Cardápio Atualizado",
+        "user": "Sistema",
+        "category": "Cardápio",
+        "details": {
+            "id": "2",
+            "name": "Acai",
+            "category": "Sobremesas",
+            "message": "Produto \"Acai\" atualizado."
+        }
+    },
+    {
+        "id": "SYS_20260131210315971642",
+        "timestamp": "31/01/2026 21:03:15",
+        "timestamp_iso": "2026-01-31T21:03:15.971663",
+        "action": "Cardápio Atualizado",
+        "user": "Sistema",
+        "category": "Cardápio",
+        "details": {
+            "id": "2",
+            "name": "Acai",
+            "category": "Sobremesas",
+            "message": "Produto \"Acai\" atualizado."
+        }
+    }
+]

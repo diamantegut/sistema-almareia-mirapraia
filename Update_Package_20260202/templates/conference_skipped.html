@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+
+{% block title %}Itens Ignorados na Conferência{% endblock %}
+
+{% block content %}
+<div class="page-content">
+    <h2><i class="bi bi-slash-circle"></i> Itens Marcados como "Não Conferir"</h2>
+    <p>Estes itens foram removidos das listas de conferência. Clique em "Reintegrar" para que voltem a aparecer nas próximas conferências.</p>
+    
+    <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+        <a href="{{ url_for('index') }}" class="action-btn" style="background-color: #95a5a6; text-decoration: none;">← Voltar</a>
+        <div style="display: flex; gap: 10px;">
+            <select id="rowsPerPage" onchange="changeRowsPerPage()" style="padding: 10px; border: 1px solid #bdc3c7; border-radius: 4px; font-size: 14px;">
+                <option value="10">10 itens por pág.</option>
+                <option value="25">25 itens por pág.</option>
+                <option value="50">50 itens por pág.</option>
+                <option value="100">100 itens por pág.</option>
+                <option value="-1">Todos</option>
+            </select>
+            <div style="position: relative;">
+                <input type="text" id="searchBox" placeholder="Buscar item por nome ou departamento..." onkeyup="filterTable()" style="padding: 10px; padding-left: 35px; width: 350px; border: 1px solid #bdc3c7; border-radius: 4px; font-size: 14px;">
+                <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #7f8c8d;"><i class="bi bi-search"></i></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-hover" id="skippedTable">
+            <thead>
+                <tr>
+                <th>Produto</th>
+                <th>Departamento</th>
+                <th>Data da Exclusão</th>
+                <th>Excluído Por</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in skipped_items %}
+            <tr id="row-{{ item.id }}" class="item-row">
+                <td>{{ item.name }}</td>
+                <td>{{ item.department }}</td>
+                <td>{{ item.skipped_at }}</td>
+                <td>{{ item.skipped_by }}</td>
+                <td>
+                    <button class="action-btn" style="background-color: #27ae60;" data-id="{{ item.id }}" data-name="{{ item.name }}" onclick="unskipItem(this)">Reintegrar</button>
+                </td>
+            </tr>
+            {% else %}
+            <tr class="no-data">
+                <td colspan="5" style="text-align: center; color: #7f8c8d;">Nenhum item ignorado.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div id="paginationControls" style="margin-top: 20px; display: flex; justify-content: center; gap: 10px; align-items: center;">
+        <button onclick="prevPage()" class="action-btn" style="background-color: #34495e;">Anterior</button>
+        <span id="pageInfo">Página 1 de 1</span>
+        <button onclick="nextPage()" class="action-btn" style="background-color: #34495e;">Próxima</button>
+    </div>
+</div>
+
+<script>
+var currentPage = 1;
+var rowsPerPage = 10;
+var filteredRows = [];
+
+document.addEventListener('DOMContentLoaded', function() {
+    initTable();
+});
+
+function initTable() {
+    var table = document.getElementById("skippedTable");
+    var allRowsCollection = table.getElementsByClassName("item-row");
+    filteredRows = [];
+    for (var i = 0; i < allRowsCollection.length; i++) {
+        filteredRows.push(allRowsCollection[i]);
+    }
+    changeRowsPerPage();
+}
+
+function changeRowsPerPage() {
+    var select = document.getElementById("rowsPerPage");
+    var val = parseInt(select.value, 10);
+    if (val === -1) {
+        rowsPerPage = filteredRows.length;
+    } else {
+        rowsPerPage = val;
+    }
+    currentPage = 1;
+    renderTable();
+}
+
+function renderTable() {
+    var table = document.getElementById("skippedTable");
+    var allRowsCollection = table.getElementsByClassName("item-row");
+    var allRows = [];
+    for (var i = 0; i < allRowsCollection.length; i++) {
+        allRows.push(allRowsCollection[i]);
+    }
+    
+    for (var j = 0; j < allRows.length; j++) {
+        allRows[j].style.display = "none";
+    }
+    
+    var start = (currentPage - 1) * rowsPerPage;
+    var end = start + rowsPerPage;
+    
+    var pageRows = filteredRows.slice(start, end);
+    for (var k = 0; k < pageRows.length; k++) {
+        pageRows[k].style.display = "";
+    }
+    
+    var totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+    var pageInfo = document.getElementById("pageInfo");
+    pageInfo.textContent = "Página " + currentPage + " de " + (totalPages || 1);
+    
+    var prevBtn = document.querySelector("button[onclick='prevPage()']");
+    var nextBtn = document.querySelector("button[onclick='nextPage()']");
+    
+    if (prevBtn) {
+        prevBtn.disabled = currentPage === 1;
+        prevBtn.style.opacity = currentPage === 1 ? "0.5" : "1";
+    }
+    if (nextBtn) {
+        nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+        nextBtn.style.opacity = (currentPage === totalPages || totalPages === 0) ? "0.5" : "1";
+    }
+}
+
+function prevPage() {
+    if (currentPage > 1) {
+        currentPage--;
+        renderTable();
+    }
+}
+
+function nextPage() {
+    var totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+    if (currentPage < totalPages) {
+        currentPage++;
+        renderTable();
+    }
+}
+
+function filterTable() {
+    var input, filter, table, tdName, tdDept, i, txtValueName, txtValueDept;
+    input = document.getElementById("searchBox");
+    filter = input.value.toUpperCase();
+    table = document.getElementById("skippedTable");
+    var allRowsCollection = table.getElementsByClassName("item-row");
+    filteredRows = [];
+    
+    for (i = 0; i < allRowsCollection.length; i++) {
+        var row = allRowsCollection[i];
+        tdName = row.getElementsByTagName("td")[0];
+        tdDept = row.getElementsByTagName("td")[1];
+        
+        if (tdName && tdDept) {
+            txtValueName = tdName.textContent || tdName.innerText;
+            txtValueDept = tdDept.textContent || tdDept.innerText;
+            if (txtValueName.toUpperCase().indexOf(filter) > -1 || txtValueDept.toUpperCase().indexOf(filter) > -1) {
+                filteredRows.push(row);
+            }
+        }
+    }
+    
+    currentPage = 1;
+    renderTable();
+}
+
+function unskipItem(button) {
+    var productId = button.getAttribute('data-id');
+    var productName = button.getAttribute('data-name');
+    if (confirm('Deseja reintegrar "' + productName + '" às listas de conferência?')) {
+        fetch('/conference/item/unskip', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                product_id: productId
+            })
+        })
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
+            if (data.success) {
+                var row = document.getElementById('row-' + productId);
+                if (row) { row.remove(); }
+            } else {
+                alert('Erro ao reintegrar item: ' + data.message);
+            }
+        })
+        .catch(function(error) {
+            console.error('Error:', error);
+            alert('Erro de conexão.');
+        });
+    }
+}
+</script>
+{% endblock %}

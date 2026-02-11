@@ -1,0 +1,72 @@
+{
+    "development": {
+        "port": 5001,
+        "tunnels": [
+            {
+                "name": "pre-checkin",
+                "domain": "checkinalmareia.ngrok.app",
+                "description": "Pré-Checkin Digital"
+            },
+            {
+                "name": "survey",
+                "domain": "pesquisa.almareia.ngrok.app",
+                "description": "Pesquisa de Satisfação"
+            },
+            {
+                "name": "whatsapp",
+                "domain": "mirapraiawhatts.ngrok.app",
+                "description": "Webhook WhatsApp"
+            },
+            {
+                "name": "staff",
+                "domain": "almareia.mirapraia.ngrok.app",
+                "description": "Acesso Colaboradores"
+            },
+            {
+                "name": "queue",
+                "domain": "fila.mirapraia.ngrok.app",
+                "description": "Fila de Espera"
+            },
+            {
+                "name": "menu",
+                "domain": "menu.mirapraia.ngrok.app",
+                "description": "Cardápio Digital"
+            }
+        ]
+    },
+    "production": {
+        "port": 5000,
+        "tunnels": [
+            {
+                "name": "pre-checkin",
+                "domain": "checkinalmareia.ngrok.app",
+                "description": "Pré-Checkin Digital"
+            },
+            {
+                "name": "survey",
+                "domain": "pesquisa.almareia.ngrok.app",
+                "description": "Pesquisa de Satisfação"
+            },
+            {
+                "name": "whatsapp",
+                "domain": "mirapraiawhatts.ngrok.app",
+                "description": "Webhook WhatsApp"
+            },
+            {
+                "name": "staff",
+                "domain": "almareia.mirapraia.ngrok.app",
+                "description": "Acesso Colaboradores"
+            },
+            {
+                "name": "queue",
+                "domain": "fila.mirapraia.ngrok.app",
+                "description": "Fila de Espera"
+            },
+            {
+                "name": "menu",
+                "domain": "menu.mirapraia.ngrok.app",
+                "description": "Cardápio Digital"
+            }
+        ]
+    }
+}

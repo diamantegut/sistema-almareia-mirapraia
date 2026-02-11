@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - Almareia Hotel{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-box">
+        <h2>Acesso Restrito</h2>
+        
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="alert">
+                    {% for message in messages %}
+                        <p>{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('login') }}">
+            <div class="form-group">
+                <label for="username">Nome do Colaborador</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Senha (4 dígitos)</label>
+                <input type="password" id="password" name="password" maxlength="4" pattern="\d{4}" title="A senha deve ter 4 dígitos numéricos" required>
+            </div>
+            <button type="submit" class="auth-btn" style="min-height: 44px; display: flex; align-items: center; justify-content: center;" aria-label="Entrar">Entrar</button>
+        </form>
+        
+        <p class="auth-footer">
+            Novo colaborador? <a href="{{ url_for('register') }}">Cadastre-se aqui</a>
+            <br>
+            <a href="{{ url_for('forgot_password') }}" style="font-size: 0.9em; color: #e74c3c;">Esqueci minha senha</a>
+        </p>
+        
+        <div style="margin-top: 15px; text-align: center;">
+            <a href="{{ url_for('hr.kiosk_mode') }}" class="btn" style="background: #8e44ad; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; min-height: 44px;" aria-label="Modo Quiosque">
+                <i class="fas fa-qrcode"></i> &nbsp; Modo Quiosque (Ponto)
+            </a>
+        </div>
+        
+        {% if external_link %}
+        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; text-align: center;">
+            <p style="color: #7f8c8d; font-size: 0.9em; margin-bottom: 5px;">
+                <i class="fas fa-globe"></i> Acesso Externo (Fora do Wi-Fi)
+            </p>
+            <a href="{{ external_link }}" target="_blank" style="color: #3498db; font-weight: bold; font-size: 0.9em; word-break: break-all;">
+                {{ external_link }}
+            </a>
+            <p style="font-size: 0.8em; color: #95a5a6; margin-top: 5px;">
+                Salve este link para acessar de casa.
+            </p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

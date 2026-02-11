@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="MainScene" extends="Scene">
+    <script type="text/brightscript" uri="pkg:/components/MainScene.brs" />
+    
+    <interface>
+        <field id="roomNumber" type="string" value="" />
+    </interface>
+
+    <children>
+        <!-- Timer para iniciar carregamento após UI estar pronta -->
+        <Timer id="loadTimer" repeat="false" duration="1.0" />
+
+        <!-- Fundo Principal -->
+        <Rectangle 
+            id="background" 
+            width="1920" 
+            height="1080" 
+            color="0x003366FF" 
+            translation="[0,0]" />
+
+        <Poster
+            id="backgroundImage"
+            uri="pkg:/images/IMG_20240610_211748.jpg"
+            width="1920"
+            height="1080"
+            translation="[0,0]"
+            loadDisplayMode="scaleToFill" />
+
+        <!-- Faixa escura para destacar os textos -->
+        <Rectangle 
+            id="overlay"
+            width="1920"
+            height="1080"
+            color="0x000000CC"
+            translation="[0,0]" />
+
+        <!-- Logo ou Título do Hotel -->
+        <Label
+            id="hotelName"
+            translation="[0, 50]"
+            width="1920"
+            height="60"
+            horizAlign="center"
+            font="font:MediumBoldSystemFont"
+            color="0xAAAAAAFF"
+            text="AL MARE" />
+
+        <!-- Título principal de boas vindas / Aniversário -->
+        <Label
+            id="welcomeLabel"
+            translation="[0, 250]"
+            width="1920"
+            height="120"
+            horizAlign="center"
+            vertAlign="center"
+            font="font:LargeBoldSystemFont"
+            color="0xFFFFFFFF"
+            text="Carregando..." />
+
+        <!-- Mensagem Global ou Detalhes -->
+        <Label
+            id="globalLabel"
+            translation="[100, 400]"
+            width="1720"
+            height="300"
+            horizAlign="center"
+            vertAlign="top"
+            wrap="true"
+            font="font:MediumSystemFont"
+            color="0xCCCCCCFF"
+            text="" />
+
+        <!-- Botões de Menu -->
+        <Label
+            id="restaurantButton"
+            translation="[360, 800]"
+            width="400"
+            height="80"
+            horizAlign="center"
+            vertAlign="center"
+            font="font:MediumBoldSystemFont"
+            color="0xFFFFFFFF"
+            text="Restaurante" />
+
+        <Label
+            id="minibarButton"
+            translation="[1160, 800]"
+            width="400"
+            height="80"
+            horizAlign="center"
+            vertAlign="center"
+            font="font:MediumBoldSystemFont"
+            color="0xAAAAAAFF"
+            text="Frigobar" />
+
+        <!-- Rodapé / Debug Info -->
+        <Label
+            id="infoLabel"
+            translation="[50, 950]"
+            width="1820"
+            height="50"
+            horizAlign="right"
+            font="font:SmallSystemFont"
+            color="0x444444FF"
+            text="v1.9 - IP Fix" />
+    </children>
+</component>

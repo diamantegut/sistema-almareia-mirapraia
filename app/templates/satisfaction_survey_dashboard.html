@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Pesquisa{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <div>
+      <h2 class="mb-1"><i class="bi bi-graph-up"></i> Dashboard da Pesquisa</h2>
+      <div class="text-muted">{{ survey.title }}</div>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('reception.reception_dashboard', survey_id=survey.id) }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Voltar
+      </a>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <div class="d-flex gap-2 flex-wrap">
+      {% if survey.audience == 'hotel' %}
+        <span class="badge bg-primary">Hóspedes</span>
+      {% elif survey.audience == 'restaurant' %}
+        <span class="badge bg-warning text-dark">Restaurante</span>
+      {% elif survey.audience == 'colaboradores' %}
+        <span class="badge bg-info text-dark">Colaboradores</span>
+      {% else %}
+        <span class="badge bg-secondary">Candidatos</span>
+      {% endif %}
+    </div>
+    <div class="btn-group" role="group" aria-label="Período">
+      <a class="btn btn-outline-primary {{ 'active' if range_mode == 'week' else '' }}" href="{{ url_for('reception.reception_dashboard', survey_id=survey.id, range='week') }}">Semanal</a>
+      <a class="btn btn-outline-primary {{ 'active' if range_mode == 'month' else '' }}" href="{{ url_for('reception.reception_dashboard', survey_id=survey.id, range='month') }}">Mensal</a>
+      <a class="btn btn-outline-primary {{ 'active' if range_mode == 'semester' else '' }}" href="{{ url_for('reception.reception_dashboard', survey_id=survey.id, range='semester') }}">Semestral</a>
+      <a class="btn btn-outline-primary {{ 'active' if range_mode == 'year' else '' }}" href="{{ url_for('reception.reception_dashboard', survey_id=survey.id, range='year') }}">Anual</a>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <div class="text-muted small">Respostas</div>
+          <div class="fs-3 fw-semibold">{{ total_responses }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <div class="text-muted small">Nota média</div>
+          {% if has_rating and avg_score is not none %}
+            <div class="fs-3 fw-semibold">{{ "%.2f"|format(avg_score) }}</div>
+          {% else %}
+            <div class="fs-3 fw-semibold">—</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <div class="text-muted small">NPS</div>
+          {% if has_rating and nps is not none %}
+            <div class="fs-3 fw-semibold">{{ nps }}</div>
+          {% else %}
+            <div class="fs-3 fw-semibold">—</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <div class="text-muted small">Promotores / Neutros / Detratores</div>
+          <div class="fs-5 fw-semibold">{{ promoters }} / {{ passives }} / {{ detractors }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-lg-7">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-white">
+          <strong>Volume de respostas ({{ range_mode }})</strong>
+        </div>
+        <div class="card-body">
+          <canvas id="chartCount"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-white">
+          <strong>Distribuição</strong>
+        </div>
+        <div class="card-body">
+          <canvas id="chartNps"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-white">
+      <strong>Nota média por período</strong>
+    </div>
+    <div class="card-body">
+      <canvas id="chartAvg"></canvas>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+      <strong>Respostas recentes</strong>
+      <span class="text-muted small">{{ recent|length }} item(ns)</span>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Data</th>
+            <th>Protocolo</th>
+            <th class="text-center">Nota</th>
+            <th>Status</th>
+            <th>Observações</th>
+            <th class="text-end">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in recent %}
+          <tr>
+            <td>{{ r.submitted_at.strftime('%d/%m/%Y %H:%M') if r.submitted_at else '' }}</td>
+            <td><span class="font-monospace">{{ r.ref or r.short_id }}</span></td>
+            <td class="text-center">
+              {% if r.score is not none %}
+                <span class="badge bg-light text-dark border">{{ r.score }}</span>
+              {% else %}
+                <span class="text-muted">—</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if r.category == 'promotor' %}
+                <span class="badge bg-success">Promotor</span>
+              {% elif r.category == 'neutro' %}
+                <span class="badge bg-warning text-dark">Neutro</span>
+              {% elif r.category == 'detrator' %}
+                <span class="badge bg-danger">Detrator</span>
+              {% else %}
+                <span class="badge bg-secondary">Sem nota</span>
+              {% endif %}
+            </td>
+            <td class="text-muted small">{{ r.notes }}</td>
+            <td class="text-end" style="min-width: 220px;">
+              <div class="btn-group btn-group-sm" role="group">
+                <button type="button" class="btn btn-outline-secondary" onclick="navigator.clipboard.writeText('{{ r.ref or r.short_id }}')">
+                  <i class="bi bi-clipboard"></i>
+                </button>
+                {% if r.category == 'promotor' %}
+                  {% if google_review_url %}
+                    <a class="btn btn-outline-success" href="{{ google_review_url }}" target="_blank" rel="noopener noreferrer">
+                      Google
+                    </a>
+                  {% endif %}
+                  {% if tripadvisor_review_url %}
+                    <a class="btn btn-outline-primary" href="{{ tripadvisor_review_url }}" target="_blank" rel="noopener noreferrer">
+                      TripAdvisor
+                    </a>
+                  {% endif %}
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="6" class="text-center text-muted py-4">Nenhuma resposta ainda.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script id="chart-labels-data" type="application/json">{{ chart_labels|tojson }}</script>
+<script id="chart-counts-data" type="application/json">{{ chart_counts|tojson }}</script>
+<script id="chart-avgs-data" type="application/json">{{ chart_avgs|tojson }}</script>
+
+<script>
+const labels = JSON.parse(document.getElementById('chart-labels-data').textContent);
+const counts = JSON.parse(document.getElementById('chart-counts-data').textContent);
+const avgs = JSON.parse(document.getElementById('chart-avgs-data').textContent);
+
+new Chart(document.getElementById('chartCount'), {
+  type: 'line',
+  data: { labels, datasets: [{ label: 'Respostas', data: counts, borderColor: '#0d6efd', backgroundColor: 'rgba(13,110,253,0.12)', fill: true, tension: 0.3 }] },
+  options: { responsive: true, plugins: { legend: { display: true } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+});
+
+new Chart(document.getElementById('chartAvg'), {
+  type: 'line',
+  data: { labels, datasets: [{ label: 'Nota média', data: avgs, borderColor: '#198754', backgroundColor: 'rgba(25,135,84,0.10)', fill: true, tension: 0.3 }] },
+  options: { responsive: true, plugins: { legend: { display: true } }, scales: { y: { beginAtZero: true, min: 0, max: 10 } } }
+});
+
+new Chart(document.getElementById('chartNps'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Promotores', 'Neutros', 'Detratores'],
+    datasets: [{ data: [Number("{{ promoters }}"), Number("{{ passives }}"), Number("{{ detractors }}")], backgroundColor: ['#198754', '#ffc107', '#dc3545'] }]
+  },
+  options: { responsive: true, plugins: { legend: { display: true } } }
+});
+</script>
+{% endblock %}

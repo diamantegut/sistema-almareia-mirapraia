@@ -1,0 +1,283 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-3">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>📊 Restaurante — Dashboard</h2>
+    <div class="d-flex gap-2">
+      <input type="date" id="datePicker" class="form-control form-control-sm" style="width: 180px;">
+      <button class="btn btn-outline-secondary btn-sm" id="btnRefresh">Atualizar</button>
+      <button class="btn btn-outline-dark btn-sm" id="btnExportCSV">Exportar CSV</button>
+      <button class="btn btn-outline-primary btn-sm" id="btnExportPDF">Exportar PDF</button>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="row text-center">
+            <div class="col-6 col-md-3">
+              <div class="fw-bold">Total de Pedidos</div>
+              <div class="display-6" id="kpiTotalPedidos">0</div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="fw-bold">Total de Atendimentos</div>
+              <div class="display-6" id="kpiTotalAtendimentos">0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12">
+      <ul class="nav nav-pills mb-3" id="pillsTabs">
+        <li class="nav-item"><button class="nav-link active" data-target="#tabBreakfast">Café da Manhã</button></li>
+        <li class="nav-item"><button class="nav-link" data-target="#tabLunch">Almoço</button></li>
+        <li class="nav-item"><button class="nav-link" data-target="#tabDinner">Jantar</button></li>
+      </ul>
+
+      <div id="tabBreakfast" class="tab-panel">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <div class="card"><div class="card-body">
+              <div class="fw-bold mb-2">Pedidos no Período</div>
+              <div class="h3" id="bfTotalPedidos">0</div>
+            </div></div>
+          </div>
+          <div class="col-md-4">
+            <div class="card"><div class="card-body">
+              <div class="fw-bold mb-2">Top 5 Itens</div>
+              <canvas id="bfTopItems"></canvas>
+            </div></div>
+          </div>
+          <div class="col-md-4">
+            <div class="card"><div class="card-body">
+              <div class="fw-bold mb-2">Movimentação por Hora</div>
+              <canvas id="bfHourly"></canvas>
+            </div></div>
+          </div>
+          <div class="col-12">
+            <div class="card"><div class="card-body">
+              <div class="fw-bold mb-2">Lançamentos por Atendente</div>
+              <canvas id="bfAttendants"></canvas>
+            </div></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tabLunch" class="tab-panel d-none">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <div class="card"><div class="card-body">
+              <div class="fw-bold mb-2">Atendimentos</div>
+              <div class="d-flex gap-4">
+                <div><div class="small text-muted">Hóspedes</div><div class="h4" id="lnHospedes">0</div></div>
+                <div><div class="small text-muted">Passantes</div><div class="h4" id="lnPassantes">0</div></div>
+              </div>
+            </div></div>
+          </div>
+          <div class="col-md-4">
+            <div class="card"><div class="card-body">
+              <div class="fw-bold mb-2">Movimentação por Hora (Geral)</div>
+              <canvas id="lnHourly"></canvas>
+            </div></div>
+          </div>
+          <div class="col-md-4">
+            <div class="card"><div class="card-body">
+              <div class="fw-bold mb-2">Movimentação por Hora (Cozinha/Bar)</div>
+              <canvas id="lnSegmented"></canvas>
+            </div></div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="card"><div class="card-body">
+              <div class="fw-bold mb-2">Top 6 — Cozinha</div>
+              <canvas id="lnTopKitchen"></canvas>
+            </div></div>
+          </div>
+          <div class="col-md-6">
+            <div class="card"><div class="card-body">
+              <div class="fw-bold mb-2">Top 6 — Bar</div>
+              <canvas id="lnTopBar"></canvas>
+            </div></div>
+          </div>
+          <div class="col-12">
+            <div class="card"><div class="card-body">
+              <div class="fw-bold mb-2">Lançamentos por Atendente</div>
+              <canvas id="lnAttendants"></canvas>
+            </div></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tabDinner" class="tab-panel d-none">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <div class="card"><div class="card-body">
+              <div class="fw-bold mb-2">Atendimentos</div>
+              <div class="d-flex gap-4">
+                <div><div class="small text-muted">Hóspedes</div><div class="h4" id="dnHospedes">0</div></div>
+                <div><div class="small text-muted">Passantes</div><div class="h4" id="dnPassantes">0</div></div>
+              </div>
+            </div></div>
+          </div>
+          <div class="col-md-4">
+            <div class="card"><div class="card-body">
+              <div class="fw-bold mb-2">Movimentação por Hora (Geral)</div>
+              <canvas id="dnHourly"></canvas>
+            </div></div>
+          </div>
+          <div class="col-md-4">
+            <div class="card"><div class="card-body">
+              <div class="fw-bold mb-2">Movimentação por Hora (Cozinha/Bar)</div>
+              <canvas id="dnSegmented"></canvas>
+            </div></div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="card"><div class="card-body">
+              <div class="fw-bold mb-2">Top 4 — Cozinha</div>
+              <canvas id="dnTopKitchen"></canvas>
+            </div></div>
+          </div>
+          <div class="col-md-6">
+            <div class="card"><div class="card-body">
+              <div class="fw-bold mb-2">Top 4 — Bar</div>
+              <canvas id="dnTopBar"></canvas>
+            </div></div>
+          </div>
+          <div class="col-12">
+            <div class="card"><div class="card-body">
+              <div class="fw-bold mb-2">Lançamentos por Atendente</div>
+              <canvas id="dnAttendants"></canvas>
+            </div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+let charts = {};
+function initTabs() {
+  document.querySelectorAll('#pillsTabs .nav-link').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('d-none'));
+      document.querySelectorAll('#pillsTabs .nav-link').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const target = btn.getAttribute('data-target');
+      document.querySelector(target).classList.remove('d-none');
+    });
+  });
+}
+function lineChart(ctx, labels, data, label) {
+  return new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets: [{ label, data, borderColor: '#0d6efd', backgroundColor: 'rgba(13,110,253,0.1)', tension: 0.3, fill: true }] },
+    options: { responsive: true, plugins: { legend: { display: true }, tooltip: { enabled: true } }, scales: { y: { beginAtZero: true } } }
+  });
+}
+function barChart(ctx, labels, data, label) {
+  return new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [{ label, data, backgroundColor: '#198754' }] },
+    options: { responsive: true, plugins: { legend: { display: true }, tooltip: { enabled: true } }, scales: { y: { beginAtZero: true } } }
+  });
+}
+function stackedLine(ctx, labels, dataA, dataB, labelA, labelB) {
+  return new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets: [
+      { label: labelA, data: dataA, borderColor: '#198754', backgroundColor: 'rgba(25,135,84,0.1)', tension: 0.3, fill: true },
+      { label: labelB, data: dataB, borderColor: '#dc3545', backgroundColor: 'rgba(220,53,69,0.1)', tension: 0.3, fill: true }
+    ] },
+    options: { responsive: true, plugins: { legend: { display: true }, tooltip: { enabled: true } }, scales: { y: { beginAtZero: true } } }
+  });
+}
+function setKPI(data) {
+  document.getElementById('kpiTotalPedidos').innerText = (data.kpi.total_pedidos || 0).toFixed(0);
+  document.getElementById('kpiTotalAtendimentos').innerText = data.kpi.total_atendimentos || 0;
+}
+function updateBreakfast(data) {
+  document.getElementById('bfTotalPedidos').innerText = (data.breakfast.total_pedidos || 0).toFixed(0);
+  const topLabels = data.breakfast.top_items.map(x => x.name);
+  const topData = data.breakfast.top_items.map(x => x.qty);
+  charts.bfTopItems?.destroy(); charts.bfTopItems = barChart(document.getElementById('bfTopItems'), topLabels, topData, 'Pedidos');
+  const hrs = data.breakfast.movement_hourly.map(x => x.hour);
+  const hdata = data.breakfast.movement_hourly.map(x => x.count);
+  charts.bfHourly?.destroy(); charts.bfHourly = lineChart(document.getElementById('bfHourly'), hrs, hdata, 'Pedidos/h');
+  const attLabels = data.breakfast.attendants.map(x => x.name);
+  const attData = data.breakfast.attendants.map(x => x.count);
+  charts.bfAttendants?.destroy(); charts.bfAttendants = barChart(document.getElementById('bfAttendants'), attLabels, attData, 'Lançamentos');
+}
+function updateLunch(data) {
+  document.getElementById('lnHospedes').innerText = data.lunch.attendances.hospedes || 0;
+  document.getElementById('lnPassantes').innerText = data.lunch.attendances.passantes || 0;
+  const hrs = data.lunch.movement_hourly.map(x => x.hour);
+  charts.lnHourly?.destroy(); charts.lnHourly = lineChart(document.getElementById('lnHourly'), hrs, data.lunch.movement_hourly.map(x => x.count), 'Pedidos/h');
+  charts.lnSegmented?.destroy(); charts.lnSegmented = stackedLine(document.getElementById('lnSegmented'), hrs, data.lunch.movement_segmented.cozinha.map(x => x.count), data.lunch.movement_segmented.bar.map(x => x.count), 'Cozinha', 'Bar');
+  charts.lnTopKitchen?.destroy(); charts.lnTopKitchen = barChart(document.getElementById('lnTopKitchen'), data.lunch.top_kitchen.map(x => x.name), data.lunch.top_kitchen.map(x => x.qty), 'Pedidos');
+  charts.lnTopBar?.destroy(); charts.lnTopBar = barChart(document.getElementById('lnTopBar'), data.lunch.top_bar.map(x => x.name), data.lunch.top_bar.map(x => x.qty), 'Pedidos');
+  charts.lnAttendants?.destroy(); charts.lnAttendants = barChart(document.getElementById('lnAttendants'), data.lunch.attendants.map(x => x.name), data.lunch.attendants.map(x => x.count), 'Lançamentos');
+}
+function updateDinner(data) {
+  document.getElementById('dnHospedes').innerText = data.dinner.attendances.hospedes || 0;
+  document.getElementById('dnPassantes').innerText = data.dinner.attendances.passantes || 0;
+  const hrs = data.dinner.movement_hourly.map(x => x.hour);
+  charts.dnHourly?.destroy(); charts.dnHourly = lineChart(document.getElementById('dnHourly'), hrs, data.dinner.movement_hourly.map(x => x.count), 'Pedidos/h');
+  charts.dnSegmented?.destroy(); charts.dnSegmented = stackedLine(document.getElementById('dnSegmented'), hrs, data.dinner.movement_segmented.cozinha.map(x => x.count), data.dinner.movement_segmented.bar.map(x => x.count), 'Cozinha', 'Bar');
+  charts.dnTopKitchen?.destroy(); charts.dnTopKitchen = barChart(document.getElementById('dnTopKitchen'), data.dinner.top_kitchen.map(x => x.name), data.dinner.top_kitchen.map(x => x.qty), 'Pedidos');
+  charts.dnTopBar?.destroy(); charts.dnTopBar = barChart(document.getElementById('dnTopBar'), data.dinner.top_bar.map(x => x.name), data.dinner.top_bar.map(x => x.qty), 'Pedidos');
+  charts.dnAttendants?.destroy(); charts.dnAttendants = barChart(document.getElementById('dnAttendants'), data.dinner.attendants.map(x => x.name), data.dinner.attendants.map(x => x.count), 'Lançamentos');
+}
+function exportCSV(data) {
+  const rows = [];
+  rows.push(['Data', data.date]);
+  rows.push(['KPI Total Pedidos', data.kpi.total_pedidos]);
+  rows.push(['KPI Total Atendimentos', data.kpi.total_atendimentos]);
+  rows.push([]);
+  function pushSection(title, list) {
+    rows.push([title]);
+    list.forEach(x => rows.push([x.name, x.qty || x.count || 0]));
+    rows.push([]);
+  }
+  pushSection('Top Café', data.breakfast.top_items);
+  pushSection('Atendentes Café', data.breakfast.attendants);
+  pushSection('Top Almoço Cozinha', data.lunch.top_kitchen);
+  pushSection('Top Almoço Bar', data.lunch.top_bar);
+  pushSection('Atendentes Almoço', data.lunch.attendants);
+  pushSection('Top Jantar Cozinha', data.dinner.top_kitchen);
+  pushSection('Top Jantar Bar', data.dinner.top_bar);
+  pushSection('Atendentes Jantar', data.dinner.attendants);
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'restaurante_dashboard.csv';
+  a.click();
+}
+async function fetchStats() {
+  const d = document.getElementById('datePicker').value;
+  const url = '/api/restaurant/stats' + (d ? ('?date=' + d) : '');
+  const res = await fetch(url);
+  const data = await res.json();
+  setKPI(data); updateBreakfast(data); updateLunch(data); updateDinner(data);
+  window.__lastStats = data;
+}
+function init() {
+  initTabs();
+  const inp = document.getElementById('datePicker');
+  const today = new Date(); const yyyy = today.getFullYear(); const mm = String(today.getMonth()+1).padStart(2,'0'); const dd = String(today.getDate()).padStart(2,'0');
+  inp.value = `${yyyy}-${mm}-${dd}`;
+  document.getElementById('btnRefresh').addEventListener('click', fetchStats);
+  document.getElementById('btnExportCSV').addEventListener('click', () => { if (window.__lastStats) exportCSV(window.__lastStats); });
+  document.getElementById('btnExportPDF').addEventListener('click', () => window.print());
+  fetchStats();
+  setInterval(fetchStats, 5 * 60 * 1000);
+}
+document.addEventListener('DOMContentLoaded', init);
+</script>
+{% endblock %}

@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+
+{% block title %}Gerenciar Manutenção - Back of the House{% endblock %}
+
+{% block content %}
+<div class="service-page">
+    <div class="service-header">
+        <span class="service-icon"><i class="bi bi-wrench"></i></span>
+        <h2>Solicitações de Manutenção</h2>
+    </div>
+
+    <div style="margin-bottom: 20px;">
+        <a href="{{ url_for('index') }}" class="action-btn" style="background-color: #95a5a6; text-decoration: none; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" aria-label="Voltar"><i class="bi bi-arrow-left"></i> Voltar</a>
+    </div>
+
+    <div class="requests-container">
+        {% if not requests %}
+        <p>Nenhuma solicitação encontrada.</p>
+        {% else %}
+        
+        {% for req in requests %}
+        <div class="request-card status-{{ req.status | lower | replace(' ', '-') }}">
+            <div class="request-header">
+                <span class="req-id">#{{ req.id[-4:] }}</span>
+                <span class="req-date">{{ req.date }} às {{ req.time }}</span>
+                <span class="req-status">{{ req.status }}</span>
+            </div>
+            
+            <div class="request-body">
+                <p><strong>Solicitante:</strong> {{ req.user }} ({{ req.department }})</p>
+                <p><strong>Local:</strong> {{ req.location }}</p>
+                <p><strong>Descrição:</strong> {{ req.description }}</p>
+                
+                {% if req.photo_url %}
+                <div class="request-image">
+                    <a href="{{ req.photo_url }}" target="_blank">
+                        <img src="{{ req.photo_url }}" alt="Foto do problema">
+                    </a>
+                </div>
+                {% endif %}
+                
+                {% if req.status == 'Agendado' %}
+                <div class="schedule-info" style="background-color: #f0e6f5; padding: 10px; border-radius: 5px; margin-top: 10px; color: #8e44ad;">
+                    <p><strong><i class="bi bi-calendar-event"></i> Agendado para:</strong> {{ req.scheduled_date }} às {{ req.scheduled_time }}</p>
+                </div>
+                {% endif %}
+
+                {% if req.status == 'Finalizado' and req.finish_photo_url %}
+                <div class="completion-info">
+                    <p><strong>Foto da Finalização:</strong></p>
+                    <a href="{{ req.finish_photo_url }}" target="_blank">
+                        <img src="{{ req.finish_photo_url }}" alt="Reparo concluído">
+                    </a>
+                </div>
+                {% endif %}
+                
+                {% if req.status == 'Não Realizado' %}
+                <div class="rejection-info">
+                    <p><strong>Motivo:</strong> {{ req.reason }}</p>
+                    {% if req.missing_material %}
+                    <p><strong>Material Faltante:</strong> {{ req.missing_material }}</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="request-actions">
+                {% if req.status == 'Pendente' %}
+                <form action="{{ url_for('update_maintenance_request', req_id=req.id) }}" method="POST" style="display:inline;">
+                    <input type="hidden" name="action" value="start">
+                    <button type="submit" class="action-btn btn-progress" style="min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" aria-label="Marcar Em Andamento"><i class="bi bi-hourglass-split"></i> Em Andamento</button>
+                </form>
+                <form action="{{ url_for('update_maintenance_request', req_id=req.id) }}" method="POST" style="display:inline;">
+                    <input type="hidden" name="action" value="request_schedule">
+                    <button type="submit" class="action-btn" style="background-color: #9b59b6; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" aria-label="Solicitar Agendamento"><i class="bi bi-calendar-plus"></i> Solicitar Agendamento</button>
+                </form>
+                {% endif %}
+                
+                {% if req.status == 'Pendente' or req.status == 'Em Andamento' or req.status == 'Agendado' %}
+                <button onclick="openModal('finish-{{ req.id }}')" class="action-btn btn-finish" style="min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" aria-label="Finalizar Solicitação"><i class="bi bi-check-circle"></i> Finalizar</button>
+                <button onclick="openModal('cancel-{{ req.id }}')" class="action-btn btn-cancel" style="min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" aria-label="Marcar Não Realizado"><i class="bi bi-x-circle"></i> Não Realizado</button>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Modal Finalizar -->
+        <div id="finish-{{ req.id }}" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('finish-{{ req.id }}')">&times;</span>
+                <h3>Finalizar Solicitação</h3>
+                <form action="{{ url_for('update_maintenance_request', req_id=req.id) }}" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="action" value="finish">
+                    <div class="form-group">
+                        <label>Foto do Reparo (Opcional):</label>
+                        <input type="file" name="finish_photo" accept="image/*" capture="environment">
+                    </div>
+                    <button type="submit" class="action-btn" style="min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" aria-label="Confirmar Finalização">Confirmar Finalização</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal Não Realizado -->
+        <div id="cancel-{{ req.id }}" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('cancel-{{ req.id }}')">&times;</span>
+                <h3>Solicitação Não Realizada</h3>
+                <form action="{{ url_for('update_maintenance_request', req_id=req.id) }}" method="POST">
+                    <input type="hidden" name="action" value="cancel">
+                    <div class="form-group">
+                        <label>Motivo:</label>
+                        <select name="reason" id="reason-{{ req.id }}" onchange="toggleMaterialInput('{{ req.id }}')" required>
+                            <option value="">Selecione...</option>
+                            <option value="Falta de Tempo">Falta de Tempo</option>
+                            <option value="Falta de Acesso">Falta de Acesso ao Local</option>
+                            <option value="Falta de Material">Falta de Material</option>
+                            <option value="Outros">Outros</option>
+                        </select>
+                    </div>
+                    <div id="material-input-{{ req.id }}" class="form-group" style="display:none;">
+                        <label>Qual material está faltando?</label>
+                        <input type="text" name="material_name" placeholder="Especifique o material...">
+                    </div>
+                    <button type="submit" class="action-btn btn-cancel" style="min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" aria-label="Registrar Motivo">Registrar Motivo</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+        
+        {% endif %}
+    </div>
+    
+    <a href="{{ url_for('index') }}" class="back-link" style="min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" aria-label="Voltar">← Voltar</a>
+</div>
+
+<script>
+function openModal(id) {
+    document.getElementById(id).style.display = "block";
+}
+
+function closeModal(id) {
+    document.getElementById(id).style.display = "none";
+}
+
+function toggleMaterialInput(id) {
+    var select = document.getElementById('reason-' + id);
+    var inputDiv = document.getElementById('material-input-' + id);
+    if (select.value === 'Falta de Material') {
+        inputDiv.style.display = 'block';
+        inputDiv.querySelector('input').required = true;
+    } else {
+        inputDiv.style.display = 'none';
+        inputDiv.querySelector('input').required = false;
+    }
+}
+
+// Fechar modal ao clicar fora
+window.onclick = function(event) {
+    if (event.target.className === 'modal') {
+        event.target.style.display = "none";
+    }
+}
+</script>
+
+<style>
+/* Estilos específicos para esta página */
+.request-card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.status-agendado { border-left: 5px solid #9b59b6; }
+.status-aguardando-agendamento { border-left: 5px solid #9b59b6; border-style: dashed; }
+.status-em-andamento { border-left: 5px solid #3498db; }
+.status-finalizado { border-left: 5px solid #27ae60; opacity: 0.8; }
+.status-não-realizado { border-left: 5px solid #c0392b; opacity: 0.8; }
+
+.request-header {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.request-image img, .completion-info img {
+    max-width: 100px;
+    border-radius: 4px;
+    margin-top: 5px;
+}
+
+.request-actions {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn-progress { background-color: #1e3a8a; }
+.btn-finish { background-color: #27ae60; }
+.btn-cancel { background-color: #c0392b; }
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 90%;
+    max-width: 500px;
+    border-radius: 8px;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover { color: black; }
+</style>
+{% endblock %}

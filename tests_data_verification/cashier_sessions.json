@@ -1,0 +1,38 @@
+[
+    {
+        "id": "SESSION_TEST_001",
+        "user": "Tester",
+        "type": "guest_consumption",
+        "status": "open",
+        "opened_at": "06/02/2026 08:50",
+        "opening_balance": 100.0,
+        "transactions": [
+            {
+                "id": "TX_20260206085009_c906bd",
+                "type": "sale",
+                "amount": 50.0,
+                "description": "Pagamento Item Individual Quarto 101 - Cartão de Crédito",
+                "payment_method": "Cartão de Crédito",
+                "timestamp": "06/02/2026 08:50",
+                "user": "Tester",
+                "details": {
+                    "room_number": "101",
+                    "charge_id": "CHARGE_001"
+                }
+            },
+            {
+                "id": "TX_20260206085009_d6400b",
+                "type": "sale",
+                "amount": 50.0,
+                "description": "Pagamento Item Individual Quarto 101 - Pix",
+                "payment_method": "Pix",
+                "timestamp": "06/02/2026 08:50",
+                "user": "Tester",
+                "details": {
+                    "room_number": "101",
+                    "charge_id": "CHARGE_001"
+                }
+            }
+        ]
+    }
+]

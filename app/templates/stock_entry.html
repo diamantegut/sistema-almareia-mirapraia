@@ -1,0 +1,693 @@
+{% extends 'base.html' %}
+
+{% block title %}Entrada de Mercadoria - Estoques{% endblock %}
+
+{% block content %}
+
+<div class="service-page">
+    <div class="service-header">
+        <span class="service-icon"><i class="bi bi-box-arrow-in-down"></i></span>
+        <h2>Entrada de Nota Fiscal</h2>
+    </div>
+
+    <div style="margin-bottom: 20px; display: flex; justify-content: flex-end; align-items: center;">
+        
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <div style="position: relative;">
+                <input type="text" id="accessKey" placeholder="Escaneie o código de barras da Nota (44 dígitos)" 
+                       style="padding: 8px; width: 350px; border: 1px solid #bdc3c7; border-radius: 4px;"
+                       onkeyup="checkAccessKey(event)">
+                <span id="keyStatus" style="position: absolute; right: 10px; top: 8px; font-size: 1.2em; display: none;"><i class="bi bi-search"></i></span>
+            </div>
+            
+            <button type="button" class="action-btn" style="background-color: #1e3a8a; margin: 0;" onclick="openNfeList()">
+                <i class="bi bi-list-ul"></i> Buscar Notas na Nuvem
+            </button>
+            
+            <label for="xmlFile" class="action-btn" style="background-color: #e67e22; cursor: pointer; margin: 0;">
+                <i class="bi bi-folder2-open"></i> Importar XML
+            </label>
+            <input type="file" id="xmlFile" accept=".xml" style="display: none;" onchange="uploadXML()">
+            <span id="uploadStatus" style="font-size: 0.9em; color: #7f8c8d;"></span>
+        </div>
+    </div>
+
+    <!-- NFe List Modal -->
+    <div id="nfeListModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center;">
+        <div style="background: white; padding: 20px; border-radius: 8px; width: 95%; max-width: 800px; max-height: 80vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3>Notas Fiscais Recebidas (Últimas 50)</h3>
+                <button type="button" onclick="document.getElementById('nfeListModal').style.display = 'none'" style="background: none; border: none; font-size: 1.5em; cursor: pointer;">&times;</button>
+            </div>
+            
+            <div id="nfeListContent">
+                <p style="text-align: center;">Carregando...</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <!-- Header Info (Supplier & Invoice) -->
+        <div class="form-row">
+            <div class="form-group" style="flex: 1;">
+                <label for="date">Data da Compra:</label>
+                <input type="text" id="date" name="date" required placeholder="DD/MM/YYYY" maxlength="10" onkeyup="formatDate(this)">
+            </div>
+            <div class="form-group" style="flex: 2;">
+                <label for="supplier">Fornecedor:</label>
+                <input type="text" id="supplier" name="supplier" list="allSuppliers" required placeholder="Nome do Fornecedor" onchange="updateSupplierInvoice()">
+                <datalist id="allSuppliers">
+                    {% for s in suppliers %}
+                    <option value="{{ s.name }}">
+                    {% endfor %}
+                </datalist>
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label for="invoice">Nota Fiscal:</label>
+                <input type="text" id="invoice" name="invoice" placeholder="Opcional" onchange="updateSupplierInvoice()">
+            </div>
+        </div>
+        
+        <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+
+        <!-- Item Entry Form -->
+        <div class="maintenance-form" style="background-color: #f8f9fa; padding: 15px; border-radius: 8px;">
+            <h4 style="margin-top: 0; margin-bottom: 15px; font-size: 1.1em; color: #2c3e50;">Adicionar Item</h4>
+            <div class="form-row">
+                <div class="form-group" style="flex: 3;">
+                    <label for="product">Produto:</label>
+                    <input type="text" id="product" list="productsList" placeholder="Digite o nome do produto..." onchange="updateProductInfo()">
+                    <datalist id="productsList">
+                        {% for product in products %}
+                        <option value="{{ product.name }}">
+                        {% endfor %}
+                    </datalist>
+                    <small id="knownSuppliers" style="display:block; color: #2980b9; font-size: 0.85em; margin-top: 4px; min-height: 1.2em; font-weight: bold;"></small>
+                </div>
+                <div class="form-group" style="flex: 2;">
+                    <label for="itemSupplier">Fornecedor (Item):</label>
+                    <input type="text" id="itemSupplier" list="allSuppliers" placeholder="Igual da Nota (Opcional)">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label for="qty">Qtd (<span id="unitLabel">Un</span>):</label>
+                    <input type="number" id="qty" step="0.01" min="0">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label for="price">Preço Unit. (R$):</label>
+                    <input type="number" id="price" step="0.01" min="0" placeholder="0.00">
+                </div>
+                <div class="form-group" style="flex: 0 0 auto; align-self: flex-end;">
+                    <input type="hidden" id="original_name">
+                    <button type="button" class="action-btn" style="background-color: #1e3a8a; margin: 0;" onclick="addItem()"><i class="bi bi-plus-circle-fill"></i> Adicionar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Items Table -->
+        <div style="margin-top: 20px;">
+            <table class="table" style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background-color: #f1f2f6; text-align: left;">
+                        <th>Produto</th>
+                        <th>Categoria</th>
+                        <th>Unid.</th>
+                        <th>Quantidade</th>
+                    </tr>
+                </thead>
+                <tbody id="itemsTableBody">
+                    <!-- Items will be added here -->
+                </tbody>
+                <tfoot>
+                    <tr style="font-weight: bold; background-color: #f8f9fa;">
+                        <td colspan="4" style="text-align: right;">Total da Nota:</td>
+                        <td id="totalInvoice">R$ 0.00</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <div class="form-actions" style="margin-top: 30px;">
+            <form id="stockEntryForm" method="POST" onsubmit="return submitForm(event)">
+                <input type="hidden" name="data" id="hiddenData">
+                <button type="submit" class="action-btn" style="background-color: #27ae60;"><i class="bi bi-save-fill"></i> Salvar Entrada (F2)</button>
+                <a href="{{ url_for('main.index') }}" class="cancel-link">Cancelar</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script type="application/json" id="products-json-data">
+    {{ products_json | safe }}
+</script>
+
+<script>
+// Dados dos produtos passados pelo backend
+const productsData = JSON.parse(document.getElementById('products-json-data').textContent);
+let currentItems = [];
+
+// Helper function to normalize text (remove accents and lowercase)
+function normalizeText(text) {
+    if (!text) return "";
+    return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
+// Set today's date
+const today = new Date();
+const dd = String(today.getDate()).padStart(2, '0');
+const mm = String(today.getMonth() + 1).padStart(2, '0');
+const yyyy = today.getFullYear();
+document.getElementById('date').value = dd + '/' + mm + '/' + yyyy;
+
+function formatDate(input) {
+    var v = input.value;
+    if (v.match(/^\d{2}$/) !== null) {
+        input.value = v + '/';
+    } else if (v.match(/^\d{2}\/\d{2}$/) !== null) {
+        input.value = v + '/';
+    }
+}
+
+function abbreviateUnit(unit) {
+    if (!unit) return "";
+    const map = {
+        'Kilogramas': 'Kg', 'Kilograma': 'Kg',
+        'Gramas': 'g', 'Grama': 'g',
+        'Litros': 'L', 'Litro': 'L',
+        'Mililitros': 'ml', 'Mililitro': 'ml',
+        'Unidade': 'Un', 'Unidades': 'Un',
+        'Pacote': 'Pct', 'Pacotes': 'Pct',
+        'Caixa': 'Cx', 'Caixas': 'Cx'
+    };
+    return map[unit] || unit;
+}
+
+function updateProductInfo() {
+    const productName = document.getElementById('product').value;
+    const product = productsData.find(p => p.name === productName);
+    const knownSuppliersEl = document.getElementById('knownSuppliers');
+    const itemSupplierInput = document.getElementById('itemSupplier');
+    
+    // Auto-fill item supplier from header if empty
+    if (!itemSupplierInput.value) {
+        itemSupplierInput.value = document.getElementById('supplier').value;
+    }
+    
+    if (product) {
+        // Show known suppliers
+        if (product.suppliers && product.suppliers.length > 0) {
+            knownSuppliersEl.textContent = 'Fornecedores Conhecidos: ' + product.suppliers.join(', ');
+        } else {
+            knownSuppliersEl.textContent = 'Nenhum fornecedor registrado.';
+        }
+        
+        // Atualizar Unidade
+        document.getElementById('unitLabel').textContent = abbreviateUnit(product.unit || 'Un');
+        
+        // Atualizar Preço Sugerido (último preço)
+        if (product.price) {
+            document.getElementById('price').value = product.price;
+        }
+        
+        // Focar na quantidade
+        document.getElementById('qty').focus();
+    } else {
+        knownSuppliersEl.textContent = '';
+    }
+}
+
+function addItem() {
+    const productInput = document.getElementById('product');
+    const qtyInput = document.getElementById('qty');
+    const priceInput = document.getElementById('price');
+    const originalNameInput = document.getElementById('original_name');
+    const itemSupplierInput = document.getElementById('itemSupplier');
+    
+    const product = productInput.value;
+    const qty = parseFloat(qtyInput.value);
+    const price = parseFloat(priceInput.value);
+    const originalName = originalNameInput.value;
+    const itemSupplier = itemSupplierInput.value;
+    
+    if (!product || isNaN(qty) || qty <= 0 || isNaN(price) || price < 0) {
+        alert('Por favor, preencha o produto, quantidade e preço corretamente.');
+        return;
+    }
+    
+    // Check if product exists in system
+    const systemProduct = productsData.find(p => p.name === product);
+    const isUnknown = !systemProduct;
+
+    // Add to list
+    currentItems.push({
+        product: product,
+        original_name: originalName || product, // Default to product name if empty
+        supplier: itemSupplier,
+        qty: qty,
+        price: price,
+        total: qty * price,
+        isUnknown: isUnknown,
+        department: systemProduct ? systemProduct.department : 'N/A'
+    });
+    
+    renderTable();
+    
+    // Clear item inputs and refocus product
+    productInput.value = '';
+    qtyInput.value = '';
+    priceInput.value = '';
+    originalNameInput.value = '';
+    itemSupplierInput.value = ''; // Clear item supplier so it resets to header next time
+    document.getElementById('knownSuppliers').textContent = '';
+    document.getElementById('unitLabel').textContent = 'Un';
+    productInput.focus();
+}
+
+function removeItem(index) {
+    currentItems.splice(index, 1);
+    renderTable();
+}
+
+function editItem(index) {
+    const item = currentItems[index];
+    
+    document.getElementById('product').value = item.product;
+    document.getElementById('qty').value = item.qty;
+    document.getElementById('price').value = item.price;
+    document.getElementById('original_name').value = item.original_name || '';
+    document.getElementById('itemSupplier').value = item.supplier || '';
+    
+    updateProductInfo(); // Update unit/price logic if needed
+    
+    // Remove from list so it can be re-added
+    removeItem(index);
+}
+
+function renderTable() {
+    const tbody = document.getElementById('itemsTableBody');
+    tbody.innerHTML = '';
+    
+    let grandTotal = 0;
+    
+    currentItems.forEach((item, index) => {
+        grandTotal += item.total;
+        
+        const tr = document.createElement('tr');
+        tr.style.borderBottom = '1px solid #eee';
+        
+        tr.innerHTML = `
+            <td>
+                ${item.product}
+                ${item.isUnknown ? '<span style="color: #e74c3c; margin-left: 5px;"><i class="bi bi-exclamation-triangle-fill"></i> Novo/Desconhecido</span>' : ''}
+                ${item.original_name && item.original_name !== item.product ? `<br><small style="color: #7f8c8d;">XML: ${item.original_name}</small>` : ''}
+            </td>
+            <td>
+                ${item.supplier || '-'}
+            </td>
+            <td>${item.qty.toFixed(2)}</td>
+            <td>R$ ${item.price.toFixed(2)}</td>
+            <td>R$ ${item.total.toFixed(2)}</td>
+            <td>
+                <div class="table-actions">
+                    <button type="button" onclick="editItem(${index})" style="background: none; border: none; cursor: pointer; color: #f39c12; font-size: 1.2em;"><i class="bi bi-pencil-square"></i></button>
+                    <button type="button" onclick="removeItem(${index})" style="background: none; border: none; cursor: pointer; color: #c0392b; font-size: 1.2em;"><i class="bi bi-trash-fill"></i></button>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+    
+    document.getElementById('totalInvoice').textContent = 'R$ ' + grandTotal.toFixed(2);
+    
+    // Update hidden input for form submission
+    document.getElementById('hiddenData').value = JSON.stringify({
+        supplier: document.getElementById('supplier').value,
+        invoice: document.getElementById('invoice').value,
+        date: document.getElementById('date').value,
+        items: currentItems
+    });
+}
+
+function submitForm(event) {
+    if (currentItems.length === 0) {
+        alert('Adicione pelo menos um item.');
+        return false;
+    }
+    
+    // Update hidden data one last time
+    document.getElementById('hiddenData').value = JSON.stringify({
+        supplier: document.getElementById('supplier').value,
+        invoice: document.getElementById('invoice').value,
+        date: document.getElementById('date').value,
+        items: currentItems
+    });
+    
+    return true;
+}
+
+function updateSupplierInvoice() {
+    renderTable(); // Just to trigger hidden input update
+}
+
+async function openNfeList(isDemo = false) {
+        document.getElementById('nfeListModal').style.display = 'flex';
+        document.getElementById('nfeListContent').innerHTML = `
+            <div style="text-align: center; padding: 40px;">
+                <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem; margin-bottom: 15px; color: #3498db;">
+                    <span class="sr-only">Carregando...</span>
+                </div>
+                <p style="color: #7f8c8d; font-size: 1.1em;">${isDemo ? 'Gerando dados de teste...' : 'Sincronizando com a SEFAZ e buscando novas notas...'}</p>
+            </div>`;
+        
+        let url = '/list-nfe-dfe';
+        if (isDemo) url += '?demo=1';
+        
+        fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                document.getElementById('nfeListContent').innerHTML = `
+                    <div style="text-align: center; padding: 20px;">
+                        <i class="fas fa-exclamation-circle" style="font-size: 3em; color: #e74c3c; margin-bottom: 15px;"></i>
+                        <p style="color: #e74c3c; font-size: 1.1em;">${data.error}</p>
+                        <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
+                            <button class="action-btn" onclick="openNfeList()">Tentar Novamente</button>
+                            <button class="action-btn" style="background-color: #95a5a6;" onclick="openNfeList(true)">Ver Demo</button>
+                        </div>
+                    </div>`;
+                return;
+            }
+            
+            if (!data.documents || data.documents.length === 0) {
+                document.getElementById('nfeListContent').innerHTML = `
+                    <div style="text-align: center; padding: 40px;">
+                        <i class="fas fa-inbox" style="font-size: 3em; color: #bdc3c7; margin-bottom: 15px;"></i>
+                        <p style="color: #7f8c8d; font-size: 1.1em;">Nenhuma nota encontrada recentemente.</p>
+                        <button class="action-btn" style="background-color: #95a5a6; margin-top: 15px;" onclick="openNfeList(true)">
+                            <i class="fas fa-eye"></i> Ver Exemplo (Demo)
+                        </button>
+                    </div>`;
+                return;
+            }
+            
+            let html = '<div class="nfe-grid">';
+            
+            data.documents.forEach(doc => {
+                // Format Date
+                let dateStr = doc.date;
+                try {
+                    const dateObj = new Date(doc.date);
+                    if (!isNaN(dateObj)) {
+                         dateStr = dateObj.toLocaleDateString('pt-BR');
+                    }
+                } catch(e) {}
+                
+                // Format Value
+                let valStr = parseFloat(doc.amount).toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
+                
+                html += `
+                <button class="nfe-card" onclick="selectNfe('${doc.key}')">
+                    <div class="nfe-card-header">
+                        <span class="nfe-supplier">${doc.issuer}</span>
+                        <span class="nfe-date">${dateStr}</span>
+                    </div>
+                    <div class="nfe-info">
+                        <span class="nfe-cnpj">${doc.cnpj}</span>
+                    </div>
+                    <div class="nfe-info" style="margin-top: 5px;">
+                        <span class="nfe-status">${doc.status}</span>
+                        <span class="nfe-amount">${valStr}</span>
+                    </div>
+                </button>`;
+            });
+            html += '</div>';
+            
+            document.getElementById('nfeListContent').innerHTML = html;
+        })
+        .catch(err => {
+            document.getElementById('nfeListContent').innerHTML = `<p style="color: red; text-align: center;">Erro de conexão: ${err}</p>`;
+        });
+    }
+    
+    async function selectNfe(key) {
+        document.getElementById('nfeListModal').style.display = 'none';
+        document.getElementById('accessKey').value = key;
+        await checkAccessKey({ key: 'Enter', preventDefault: () => {} });
+    }
+
+    async function checkAccessKey(event) {
+    const input = document.getElementById('accessKey');
+    const status = document.getElementById('keyStatus');
+    const key = input.value.trim();
+    
+    // Barcode scanners often send Enter
+    if (event.key === 'Enter') {
+        event.preventDefault();
+    }
+    
+    if (key.length === 44) {
+        status.style.display = 'block';
+        status.innerHTML = '<i class="bi bi-hourglass-split"></i>'; // Loading
+        input.disabled = true;
+        
+        try {
+            const response = await fetch('/stock/entry/lookup-key', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ key: key })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                status.innerHTML = '<i class="bi bi-check-circle-fill"></i>';
+                // Fill form
+                document.getElementById('supplier').value = data.supplier;
+                document.getElementById('invoice').value = data.invoice;
+                document.getElementById('date').value = data.date;
+                
+                processItems(data.items);
+                
+                // Notify user
+                document.getElementById('uploadStatus').textContent = `Encontrado: ${data.filename}`;
+                
+            } else {
+                status.textContent = '❌';
+                alert(data.error);
+                input.value = ''; // Clear to try again
+            }
+            
+        } catch (error) {
+            console.error(error);
+            status.textContent = '❌';
+            alert('Erro ao buscar nota.');
+        }
+        
+        input.disabled = false;
+        input.focus();
+    } else {
+        status.style.display = 'none';
+    }
+}
+
+function processItems(items) {
+    let matchCount = 0;
+    const headerSupplier = document.getElementById('supplier').value;
+    
+    items.forEach(xmlItem => {
+        let bestMatch = null;
+        let suggestions = [];
+        const normalizedXmlName = normalizeText(xmlItem.name);
+        
+        // 1. Exact match (accent insensitive)
+        bestMatch = productsData.find(p => normalizeText(p.name) === normalizedXmlName);
+        
+        // 2. Alias match
+        if (!bestMatch) {
+             bestMatch = productsData.find(p => p.aliases && p.aliases.some(alias => normalizeText(alias) === normalizedXmlName));
+        }
+        
+        // 3. Fuzzy / Similarity Search if still not found
+        if (!bestMatch) {
+            suggestions = getSimilarProducts(xmlItem.name);
+            // If very strong match (dist=0 or 1), maybe auto-select? For now, just suggest.
+            if (suggestions.length > 0 && normalizeText(suggestions[0].name) === normalizedXmlName) {
+                 bestMatch = suggestions[0]; // Exact match recovered via similarity logic if missed
+            }
+        }
+        
+        const finalName = bestMatch ? bestMatch.name : xmlItem.name;
+        const isUnknown = !bestMatch;
+        
+        if (!isUnknown) matchCount++;
+        
+        // Determine department
+        let dept = 'N/A';
+        if (bestMatch) dept = bestMatch.department;
+
+        // Add to list
+        currentItems.push({
+            product: finalName,
+            original_name: xmlItem.name, // Keep XML name for reference/linking
+            supplier: headerSupplier, // Use header supplier for now, or match XML logic if improved
+            qty: parseFloat(xmlItem.qty),
+            price: parseFloat(xmlItem.price),
+            total: parseFloat(xmlItem.qty) * parseFloat(xmlItem.price),
+            isUnknown: isUnknown,
+            suggestions: suggestions, // Store suggestions
+            department: dept
+        });
+    });
+    
+    renderTable();
+    
+    if (matchCount < items.length) {
+        alert(`${items.length - matchCount} itens não foram identificados automaticamente. Verifique os itens marcados em vermelho.`);
+    }
+}
+
+async function uploadXML() {
+    const fileInput = document.getElementById('xmlFile');
+    const file = fileInput.files[0];
+    const statusSpan = document.getElementById('uploadStatus');
+    
+    if (!file) return;
+    
+    statusSpan.textContent = 'Enviando...';
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    try {
+        const response = await fetch('/stock/entry/upload-xml', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            statusSpan.textContent = 'Sucesso!';
+            
+            // Fill Header
+            document.getElementById('supplier').value = data.supplier;
+            document.getElementById('invoice').value = data.invoice;
+            document.getElementById('date').value = data.date;
+            
+            // Process Items
+            const matchCount = processItems(data.items);
+            statusSpan.textContent = `Importado! ${matchCount}/${data.items.length} associados.`;
+            
+        } else {
+            statusSpan.textContent = 'Erro: ' + data.error;
+            alert(data.error);
+        }
+        
+    } catch (error) {
+        console.error(error);
+        statusSpan.textContent = 'Erro de conexão';
+    }
+}
+
+// Quick Create & Link Logic
+let currentEditIndex = -1;
+let currentOriginalName = "";
+
+function openCreateModal(name, price, unit, index) {
+    currentEditIndex = index;
+    currentOriginalName = name;
+    
+    document.getElementById('qc_name').value = name;
+    document.getElementById('qc_price').value = price;
+    document.getElementById('qc_unit').value = unit;
+    
+    // Attempt to guess department (simple logic or default)
+    document.getElementById('qc_department').value = "Cozinha"; 
+    
+    const modal = new bootstrap.Modal(document.getElementById('quickCreateModal'));
+    modal.show();
+}
+
+function submitQuickCreate() {
+    const name = document.getElementById('qc_name').value;
+    const department = document.getElementById('qc_department').value;
+    const unit = document.getElementById('qc_unit').value;
+    const price = document.getElementById('qc_price').value;
+    
+    if(!name || !department) {
+        alert("Nome e Departamento são obrigatórios.");
+        return;
+    }
+    
+    fetch('/api/stock/product/create', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            name: name,
+            department: department,
+            unit: unit,
+            price: price
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if(data.success) {
+            // Add to local productsData
+            productsData.push(data.product);
+            
+            // Link current item to new product (add alias automatically? Yes, good practice)
+            linkProduct(currentOriginalName, data.product.name, currentEditIndex);
+            
+            // Close modal
+            const modalEl = document.getElementById('quickCreateModal');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            modal.hide();
+            
+            alert(`Produto ${name} criado com sucesso!`);
+        } else {
+            alert("Erro: " + data.error);
+        }
+    })
+    .catch(err => alert("Erro ao criar produto: " + err));
+}
+
+function linkProduct(xmlName, systemName, index) {
+    if(!confirm(`Deseja vincular "${xmlName}" ao produto "${systemName}"?`)) return;
+    
+    fetch('/api/stock/product/alias', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            product_name: systemName,
+            alias: xmlName
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if(data.success) {
+            // Update local productsData aliases
+            const product = productsData.find(p => p.name === systemName);
+            if(product) {
+                if(!product.aliases) product.aliases = [];
+                product.aliases.push(xmlName);
+            }
+            
+            // Update item in currentItems
+            if (index >= 0 && index < currentItems.length) {
+                currentItems[index].product = systemName;
+                currentItems[index].isUnknown = false;
+                currentItems[index].department = product ? product.department : 'N/A';
+                currentItems[index].suggestions = []; // Clear suggestions
+            }
+            
+            renderTable();
+        } else {
+            alert("Erro ao vincular: " + data.error);
+        }
+    })
+    .catch(err => alert("Erro de conexão: " + err));
+}
+</script>
+{% endblock %}

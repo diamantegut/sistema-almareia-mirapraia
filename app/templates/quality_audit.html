@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-clipboard-check"></i> Auditoria de Qualidade & Operações</h2>
+        <div>
+            <a href="{{ url_for('quality.quality_audit_history') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-clock-history"></i> Histórico
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Novo Relatório de Avaliação</h5>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('quality.quality_audit_submit') }}">
+                
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label">Avaliador</label>
+                        <input type="text" class="form-control" name="evaluator" value="{{ session.get('user', '') }}" readonly>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Data/Hora</label>
+                        <input type="text" class="form-control" value="{{ now }}" readonly>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Tipo de Cenário</label>
+                        <div class="form-check form-switch mt-2">
+                            <input class="form-check-input" type="checkbox" id="peakScenario" name="peak_scenario">
+                            <label class="form-check-label fw-bold text-danger" for="peakScenario">Cenário de Pico de Demanda</label>
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+
+                <!-- 1. Atendimento ao Cliente -->
+                <div class="mb-4">
+                    <h5 class="text-primary">1. Atendimento ao Cliente</h5>
+                    <div class="row g-3 align-items-center">
+                        <div class="col-md-8">
+                            <p class="text-muted small mb-0">Avalie a cortesia, proatividade e apresentação da equipe.</p>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Pontuação (0-10)</label>
+                            <input type="number" class="form-control" name="score_service" min="0" max="10" required>
+                        </div>
+                        <div class="col-12">
+                            <textarea class="form-control" name="obs_service" rows="2" placeholder="Observações sobre o atendimento..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Tempo de Preparo -->
+                <div class="mb-4">
+                    <h5 class="text-primary">2. Tempo de Preparo dos Pratos</h5>
+                    <div class="row g-3 align-items-center">
+                        <div class="col-md-8">
+                            <p class="text-muted small mb-0">Avalie a agilidade da cozinha e tempo de entrega à mesa.</p>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Pontuação (0-10)</label>
+                            <input type="number" class="form-control" name="score_speed" min="0" max="10" required>
+                        </div>
+                        <div class="col-12">
+                            <textarea class="form-control" name="obs_speed" rows="2" placeholder="Observações sobre tempos..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Limpeza do Ambiente -->
+                <div class="mb-4">
+                    <h5 class="text-primary">3. Limpeza do Ambiente</h5>
+                    <div class="row g-3 align-items-center">
+                        <div class="col-md-8">
+                            <p class="text-muted small mb-0">Avalie a limpeza do salão, mesas, banheiros e cozinha.</p>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Pontuação (0-10)</label>
+                            <input type="number" class="form-control" name="score_cleanliness" min="0" max="10" required>
+                        </div>
+                        <div class="col-12">
+                            <textarea class="form-control" name="obs_cleanliness" rows="2" placeholder="Observações sobre limpeza..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Precisão dos Pedidos -->
+                <div class="mb-4">
+                    <h5 class="text-primary">4. Precisão dos Pedidos</h5>
+                    <div class="row g-3 align-items-center">
+                        <div class="col-md-8">
+                            <p class="text-muted small mb-0">Avalie se os pratos chegaram conforme solicitado (pontos, itens extras).</p>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Pontuação (0-10)</label>
+                            <input type="number" class="form-control" name="score_accuracy" min="0" max="10" required>
+                        </div>
+                        <div class="col-12">
+                            <textarea class="form-control" name="obs_accuracy" rows="2" placeholder="Observações sobre precisão..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                 <!-- 5. Segurança Alimentar -->
+                 <div class="mb-4">
+                    <h5 class="text-primary">5. Conformidade e Segurança Alimentar</h5>
+                    <div class="row g-3 align-items-center">
+                        <div class="col-md-8">
+                            <p class="text-muted small mb-0">Avalie validade, armazenamento e manipulação.</p>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Pontuação (0-10)</label>
+                            <input type="number" class="form-control" name="score_safety" min="0" max="10" required>
+                        </div>
+                        <div class="col-12">
+                            <textarea class="form-control" name="obs_safety" rows="2" placeholder="Observações sobre segurança..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. Satisfação Geral -->
+                <div class="mb-4">
+                    <h5 class="text-primary">6. Satisfação Geral</h5>
+                    <div class="row g-3 align-items-center">
+                        <div class="col-md-8">
+                            <p class="text-muted small mb-0">Avaliação global da experiência.</p>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Pontuação (0-10)</label>
+                            <input type="number" class="form-control" name="score_general" min="0" max="10" required>
+                        </div>
+                        <div class="col-12">
+                            <textarea class="form-control" name="obs_general" rows="2" placeholder="Comentários gerais..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-success btn-lg">
+                        <i class="bi bi-check-circle"></i> Registrar Avaliação
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

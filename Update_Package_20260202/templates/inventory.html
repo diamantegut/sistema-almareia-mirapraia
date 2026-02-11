@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block title %}Inventário - Almoxarifado{% endblock %}
+
+{% block content %}
+<div class="service-page">
+    <div class="service-header">
+        <span class="service-icon"><i class="bi bi-bar-chart-fill"></i></span>
+        <h2>Inventário Geral</h2>
+    </div>
+
+    <div style="margin-bottom: 20px;">
+        <a href="{{ url_for('index') }}" class="action-btn" style="background-color: #95a5a6; text-decoration: none;">← Voltar</a>
+        <a href="{{ url_for('stock_products') }}" class="action-btn" style="background-color: #8e44ad; text-decoration: none; margin-left: 10px;"><i class="bi bi-clipboard-data"></i> Gerenciar Insumos</a>
+    </div>
+
+    {% if last_sync_date %}
+    <div style="background-color: #fff3cd; color: #856404; padding: 10px; border-radius: 4px; border: 1px solid #ffeeba; margin-bottom: 20px; text-align: center;">
+        <i class="bi bi-exclamation-triangle-fill"></i> <strong>Atenção:</strong> A última dedução de vendas foi realizada em: <strong>{{ last_sync_date }}</strong>.
+    </div>
+    {% endif %}
+
+    <div class="card">
+        <div style="margin-bottom: 20px;">
+            <h3>Posição de Estoque</h3>
+            
+            <!-- Search and Filter Bar -->
+            <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef; display: flex; flex-wrap: wrap; gap: 15px; align-items: center; justify-content: space-between;">
+                <div style="display: flex; gap: 10px; align-items: center; flex: 1; flex-wrap: wrap;">
+                    
+                    <!-- Department Selector (Server-side) -->
+                    <form action="{{ url_for('stock_inventory') }}" method="get" style="margin: 0;">
+                        <select name="dept" onchange="this.form.submit()" style="padding: 10px; border-radius: 4px; border: 1px solid #2980b9; background-color: #ebf5fb; font-weight: bold; min-width: 150px;">
+                            <option value="Geral" {% if current_dept == 'Geral' %}selected{% endif %}><i class="bi bi-globe"></i> Visão Geral (Todos)</option>
+                            <option value="Principal" {% if current_dept == 'Principal' %}selected{% endif %}><i class="bi bi-building"></i> Estoque Principal</option>
+                            {% for dept in departments %}
+                                {% if dept != 'Principal' %}
+                                <option value="{{ dept }}" {% if current_dept == dept %}selected{% endif %}>{{ dept }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </form>
+
+                    <div style="position: relative; flex: 1; min-width: 200px; max-width: 400px;">
+                        <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Buscar produto por nome..." 
+                               style="width: 100%; padding: 10px; padding-left: 35px; border-radius: 4px; border: 1px solid #ced4da;">
+                        <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #6c757d;"><i class="bi bi-search"></i></span>
+                    </div>
+                    
+                    <select id="categoryFilter" onchange="filterTable()" style="padding: 10px; border-radius: 4px; border: 1px solid #ced4da; min-width: 150px;">
+                        <option value="all"><i class="bi bi-folder-fill"></i> Todas as Categorias</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat }}">{{ cat }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                {% if session.get('department') == 'Diretoria' or session.get('role') == 'admin' %}
+                <div class="summary-box" style="background-color: #dff9fb; padding: 10px 20px; border-radius: 8px; border: 1px solid #c7ecee; white-space: nowrap;">
+                    <strong>Valor Total ({{ current_dept }}):</strong>
+                    <span style="font-size: 1.2em; color: #27ae60;">R$ {{ "%.2f"|format(total_value) }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <table class="table" id="inventoryTable">
+            <thead>
+                <tr>
+                    <th>Produto</th>
+                    <th>Estoque</th>
+                    <th>Categoria</th>
+                    <th>Unid.</th>
+                    <th>Entradas</th>
+                    <th>Saídas</th>
+                    <th>Saldo Atual</th>
+                    <th>Preço Unit.</th>
+                    {% if session.get('department') == 'Diretoria' or session.get('role') == 'admin' %}
+                    <th>Valor Total</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in inventory %}
+                <tr data-category="{{ item.category }}">
+                    <td>{{ item.name }}</td>
+                    <td><span class="status-badge" style="background-color: #ecf0f1; color: #2c3e50;">{{ item.department }}</span></td>
+                    <td>{{ item.category }}</td>
+                    <td>{{ item.unit | abbreviate_unit }}</td>
+                    <td style="color: #27ae60;">{{ "%.2f"|format(item.qty_in) }}</td>
+                    <td style="color: #c0392b;">{{ "%.2f"|format(item.qty_out) }}</td>
+                    <td>
+                        <span style="font-weight: bold;" class="{% if item.balance > 0 %}text-success{% else %}text-danger{% endif %}">
+                            {{ "%.2f"|format(item.balance) }}
+                        </span>
+                    </td>
+                    <td>R$ {{ "%.2f"|format(item.price) }}</td>
+                    {% if session.get('department') == 'Diretoria' or session.get('role') == 'admin' %}
+                    <td>R$ {{ "%.2f"|format(item.total_value) }}</td>
+                    {% endif %}
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="9" style="text-align: center; color: #7f8c8d;">Nenhum produto encontrado.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="form-actions" style="margin-top: 20px;">
+        <a href="{{ url_for('index') }}" style="color: #7f8c8d; text-decoration: none; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" aria-label="Voltar para Menu"><i class="bi bi-arrow-left"></i> Voltar para Menu</a>
+    </div>
+</div>
+
+<script>
+    function filterTable() {
+        const category = document.getElementById('categoryFilter').value;
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const rows = document.querySelectorAll('#inventoryTable tbody tr');
+        let hasVisible = false;
+
+        rows.forEach(row => {
+            // Skip the "No products found" row if it exists
+            if (row.cells.length === 1 && row.cells[0].colSpan === 9) return;
+
+            const rowCategory = row.getAttribute('data-category');
+            const productName = row.cells[0].textContent.toLowerCase();
+            
+            const categoryMatch = (category === 'all' || rowCategory === category);
+            const nameMatch = productName.includes(searchTerm);
+            
+            if (categoryMatch && nameMatch) {
+                row.style.display = '';
+                hasVisible = true;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+</script>
+{% endblock %}

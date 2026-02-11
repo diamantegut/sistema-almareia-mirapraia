@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-tv"></i> TVs Roku / Publicidade</h2>
+        <a href="{{ url_for('main.index') }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Cadastrar TV Roku</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <input type="hidden" name="action" value="add">
+                        <div class="mb-3">
+                            <label class="form-label">Nome da TV</label>
+                            <input type="text" class="form-control" name="name" required placeholder="Ex: TV Bar 1">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Localização</label>
+                            <input type="text" class="form-control" name="location" placeholder="Ex: Bar, Recepção, Piscina">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Quarto</label>
+                            <select class="form-select" name="room_number">
+                                <option value="">Sem quarto vinculado</option>
+                                {% set rooms_range = range(1, 36) %}
+                                {% for i in rooms_range %}
+                                    {% set room_str = i|format_room %}
+                                    {% set data = occupancy.get(room_str) if occupancy else None %}
+                                    <option value="{{ room_str }}">
+                                        Quarto {{ room_str }}{% if data %} - {{ data.guest_name }}{% endif %}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">Use o mesmo número do quarto na recepção.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">IP / Endereço de Rede</label>
+                            <input type="text" class="form-control" name="ip" placeholder="Ex: 192.168.0.50">
+                            <div class="form-text">Opcional, usado para futuras integrações automáticas.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Mensagem de Boas-vindas</label>
+                            <input type="text" class="form-control" name="message" placeholder="Ex: Bem-vindo, Sr. Silva!">
+                        </div>
+                        <div class="mb-3 form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="enabled" id="addEnabled" checked>
+                            <label class="form-check-label" for="addEnabled">Ativa para publicidades</label>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-plus-circle"></i> Adicionar TV
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">Mensagem Automática Global</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <input type="hidden" name="action" value="update_global_message">
+                        <div class="mb-3">
+                            <label class="form-label">Mensagem padrão para todas as TVs</label>
+                            <textarea class="form-control" name="global_message" rows="2" placeholder="Ex: Seja bem-vindo(a) ao Almareia Hotel. Desejamos uma ótima estadia.">{{ global_message }}</textarea>
+                            <div class="form-text">Esta mensagem será enviada para todas as TVs conectadas, junto com a mensagem de boas-vindas do hóspede.</div>
+                        </div>
+                        <button type="submit" class="btn btn-outline-dark w-100">
+                            <i class="bi bi-broadcast"></i> Atualizar mensagem global
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">TVs Cadastradas</h5>
+                </div>
+                <div class="card-body">
+                    {% if tvs %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Quarto</th>
+                                    <th>Localização</th>
+                                    <th>IP / Rede</th>
+                                    <th>Mensagem</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for tv in tvs %}
+                                <tr>
+                                    <td>
+                                        <i class="bi bi-tv-fill me-2 text-muted"></i>
+                                        {{ tv.name }}
+                                    </td>
+                                    <td>{{ tv.room_number or '-' }}</td>
+                                    <td>{{ tv.location or '-' }}</td>
+                                    <td>{{ tv.ip or '-' }}</td>
+                                    <td class="text-truncate" style="max-width: 150px;" title="{{ tv.message or '' }}">{{ tv.message or '-' }}</td>
+                                    <td>
+                                        {% if tv.enabled %}
+                                        <span class="badge bg-success">Ativa</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">Desativada</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="table-actions justify-content-end">
+                                            <button type="button" class="btn btn-outline-primary btn-sm me-2"
+                                                onclick="openEditTvModal('{{ tv.id }}', '{{ tv.name }}', '{{ tv.location or '' }}', '{{ tv.room_number or '' }}', '{{ tv.ip or '' }}', '{{ tv.message or '' }}', {{ 'true' if tv.enabled else 'false' }})">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <form method="POST" class="d-inline" onsubmit="return confirm('Remover esta TV Roku?');">
+                                                <input type="hidden" name="action" value="delete">
+                                                <input type="hidden" name="id" value="{{ tv.id }}">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-tv fs-1 mb-2"></i>
+                        <p>Nenhuma TV Roku cadastrada.</p>
+                        <p class="mb-0">Use o formulário ao lado para adicionar suas TVs.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editTvModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST">
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar TV Roku</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="action" value="edit">
+                    <input type="hidden" name="id" id="editTvId">
+                    <div class="mb-3">
+                        <label class="form-label">Nome</label>
+                        <input type="text" class="form-control" name="name" id="editTvName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Localização</label>
+                        <input type="text" class="form-control" name="location" id="editTvLocation">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Quarto</label>
+                        <select class="form-select" name="room_number" id="editTvRoomNumber">
+                            <option value="">Sem quarto vinculado</option>
+                            {% set rooms_range = range(1, 36) %}
+                            {% for i in rooms_range %}
+                                {% set room_str = i|string %}
+                                {% set data = occupancy.get(room_str) if occupancy else None %}
+                                <option value="{{ i }}">
+                                    Quarto {{ i }}{% if data %} - {{ data.guest_name }}{% endif %}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">IP / Endereço de Rede</label>
+                        <input type="text" class="form-control" name="ip" id="editTvIp">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Mensagem de Boas-vindas</label>
+                        <input type="text" class="form-control" name="message" id="editTvMessage">
+                    </div>
+                    <div class="mb-3 form-check form-switch">
+                        <input class="form-check-input" type="checkbox" name="enabled" id="editTvEnabled">
+                        <label class="form-check-label" for="editTvEnabled">Ativa para publicidades</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openEditTvModal(id, name, location, roomNumber, ip, message, enabled) {
+        document.getElementById('editTvId').value = id;
+        document.getElementById('editTvName').value = name;
+        document.getElementById('editTvLocation').value = location;
+        document.getElementById('editTvRoomNumber').value = roomNumber;
+        document.getElementById('editTvIp').value = ip;
+        document.getElementById('editTvMessage').value = message;
+        document.getElementById('editTvEnabled').checked = enabled === true || enabled === 'true';
+
+        var modal = new bootstrap.Modal(document.getElementById('editTvModal'));
+        modal.show();
+    }
+</script>
+{% endblock %}

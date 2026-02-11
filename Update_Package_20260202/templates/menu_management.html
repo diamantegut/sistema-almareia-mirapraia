@@ -1,0 +1,1308 @@
+{% extends 'base.html' %}
+
+{% block title %}Produtos - Principal{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --input-padding: 0.3rem 0.5rem;
+        --input-font-size: 0.9rem;
+        --label-font-size: 0.85rem;
+        --section-margin: 1rem;
+    }
+
+    .compact-container {
+        font-size: var(--input-font-size);
+    }
+
+    .compact-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #eee;
+    }
+
+    .compact-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    /* Grid System for Form */
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 0.75rem;
+        align-items: end;
+    }
+    
+    .form-grid-3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.75rem;
+    }
+
+    .form-group {
+        margin-bottom: 0; /* Let grid handle gap */
+    }
+
+    .form-group label {
+        display: block;
+        font-size: var(--label-font-size);
+        font-weight: 600;
+        margin-bottom: 0.2rem;
+        color: #555;
+    }
+
+    .form-control, .form-select, input[type="text"], input[type="number"], input[type="file"], textarea {
+        width: 100%;
+        padding: var(--input-padding);
+        font-size: var(--input-font-size);
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        transition: border-color 0.15s ease-in-out;
+    }
+
+    .form-control:focus {
+        border-color: #3498db;
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+    }
+
+    /* Accordion Styles */
+    details {
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        margin-bottom: 0.5rem;
+        background-color: #fff;
+    }
+
+    details > summary {
+        padding: 0.5rem 1rem;
+        background-color: #f8f9fa;
+        cursor: pointer;
+        font-weight: 600;
+        color: #495057;
+        list-style: none;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: background-color 0.2s;
+        border-radius: 4px;
+    }
+
+    details[open] > summary {
+        border-bottom: 1px solid #e0e0e0;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+        background-color: #e9ecef;
+    }
+
+    details > summary::after {
+        content: '+';
+        font-size: 1.2em;
+        font-weight: bold;
+    }
+
+    details[open] > summary::after {
+        content: '-';
+    }
+
+    .details-content {
+        padding: 1rem;
+    }
+
+    /* Compact Buttons */
+    .btn-compact {
+        padding: 0.25rem 0.75rem;
+        font-size: 0.85rem;
+        line-height: 1.5;
+        border-radius: 0.2rem;
+    }
+
+    .category-btn {
+        padding: 0.2rem 0.6rem !important;
+        font-size: 0.8rem !important;
+    }
+
+    /* Switch Toggle Compact */
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 36px;
+        height: 20px;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 20px;
+    }
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 14px;
+        width: 14px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+    input:checked + .slider { background-color: #2196F3; }
+    input:checked + .slider:before { transform: translateX(16px); }
+
+    /* Custom Scrollbar for inner lists */
+    .scrollable-list {
+        max-height: 150px;
+        overflow-y: auto;
+        border: 1px solid #eee;
+        padding: 0.5rem;
+        border-radius: 4px;
+    }
+    
+    /* Utility */
+    .w-full { width: 100%; }
+    .d-none { display: none !important; }
+</style>
+
+<div class="container-fluid mt-3 compact-container">
+    <div class="compact-header">
+        <div class="service-header" style="margin-bottom: 0;">
+            <span class="service-icon" style="font-size: 1.5rem; margin-right: 0.5rem;"><i class="bi bi-basket"></i></span>
+            <h4 style="margin: 0; display: inline;">Produtos (v3.1)</h4>
+        </div>
+        <div class="compact-actions">
+            <a href="{{ url_for('index') }}" class="btn btn-secondary btn-compact"><i class="bi bi-arrow-left"></i> Voltar</a>
+            <button id="toggleFormBtn" class="btn btn-success btn-compact" onclick="toggleForm()"><i class="bi bi-plus-lg"></i> Novo</button>
+            <a href="{{ url_for('flavor_config_endpoint') }}" class="btn btn-warning btn-compact text-white"><i class="bi bi-ui-checks-grid"></i> Sabores</a>
+            <a href="{{ url_for('config_categories') }}" class="btn btn-info btn-compact text-white"><i class="bi bi-list-check"></i> Categorias</a>
+            <button class="btn btn-primary btn-compact" onclick="openDigitalOrderModal()"><i class="bi bi-phone"></i> Ordenar Menu Digital</button>
+        </div>
+    </div>
+
+    <!-- Product Form -->
+    <div class="card mb-3" id="productFormCard" style="display: none; border: 1px solid #ddd; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+        <div class="card-header py-2 bg-light d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary" id="formTitle">Novo Produto</h6>
+            <button type="button" class="btn-close btn-sm" onclick="toggleForm()" aria-label="Close"></button>
+        </div>
+        <div class="card-body p-3">
+            <form method="POST" class="maintenance-form w-100" id="productForm" enctype="multipart/form-data">
+                <input type="hidden" id="product_id" name="id">
+                <input type="hidden" id="current_image" name="current_image">
+
+                <!-- 1. Dados Principais (Always Visible or First Accordion) -->
+                <details open>
+                    <summary><i class="bi bi-info-circle me-2"></i> Dados Gerais</summary>
+                    <div class="details-content">
+                        <div class="form-grid mb-3">
+                            <div class="form-group" style="grid-column: span 2;">
+                                <label for="name">Nome do Produto:</label>
+                                <input type="text" id="name" name="name" placeholder="Ex: X-Bacon" required>
+                            </div>
+                            <div class="form-group position-relative">
+                                <label for="category">Categoria:</label>
+                                <div class="input-group input-group-sm">
+                                    <input type="text" id="category" name="category" class="form-control" readonly placeholder="Selecione abaixo" required style="background: #f8f9fa; cursor: pointer;" onclick="toggleCategoryPanel()">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="toggleCategoryPanel()"><i class="bi bi-caret-down-fill"></i></button>
+                                </div>
+                                <!-- Collapsible Category Selection -->
+                                <div id="categoryPanel" class="p-2 border rounded mt-1 bg-white shadow-sm" style="display: none; position: absolute; z-index: 1050; width: 350px; min-width: 300px; max-width: 85vw; left: 0;">
+                                    <!-- Search Categories -->
+                                    <input type="text" id="categorySearchFilter" class="form-control form-control-sm mb-2" placeholder="Filtrar categorias..." onkeyup="filterCategoryButtons()" style="width: 100%;">
+                                    
+                                    <div id="categoryButtonsContainer" class="d-flex flex-wrap gap-1 mb-2" style="max-height: 200px; overflow-y: auto;">
+                                        {% if categories %}
+                                            {% for cat in categories %}
+                                            {% set cat_color = category_colors.get(cat) if category_colors else None %}
+                                            <button type="button" class="btn btn-sm category-btn {{ 'btn-secondary' if not cat_color else '' }}" 
+                                                onclick="selectCategory('{{ cat }}', this)"
+                                                {% if cat_color %}style="background-color: {{ cat_color }}; border-color: {{ cat_color }}; color: white;"{% endif %}>
+                                                {{ cat }}
+                                            </button>
+                                            {% endfor %}
+                                        {% else %}
+                                            <small class="text-muted">Sem categorias.</small>
+                                        {% endif %}
+                                    </div>
+                                    <div class="input-group input-group-sm border-top pt-2">
+                                        <input type="text" id="categoryInput" class="form-control" placeholder="Nova Categoria (Criar)">
+                                        <button type="button" class="btn btn-success" onclick="addNewCategoryFromInput()">Add</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-grid mb-3">
+                            <div class="form-group">
+                                <label for="price">Preço Venda (R$):</label>
+                                <input type="text" id="price" name="price" class="currency-input" required placeholder="0,00">
+                            </div>
+                            <div class="form-group">
+                                <label for="cost_price">Preço Custo (R$):</label>
+                                <input type="text" id="cost_price" name="cost_price" class="currency-input" placeholder="0,00">
+                            </div>
+                            <div class="form-group">
+                                <label for="printer_id">Impressora:</label>
+                                <select id="printer_id" name="printer_id" class="form-select form-select-sm no-search">
+                                    <option value="">Selecione...</option>
+                                    {% for printer in printers %}
+                                    <option value="{{ printer.id }}">{{ printer.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-2">
+                            <label for="description">Descrição:</label>
+                            <textarea id="description" name="description" rows="1" class="form-control" placeholder="Ingredientes..."></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                             <label for="image" class="btn btn-outline-secondary btn-sm w-100 text-start">
+                                <i class="bi bi-image"></i> Escolher Imagem...
+                                <input type="file" id="image" name="image" accept="image/*" onchange="previewImage(this)" style="display: none;">
+                            </label>
+                            <div id="imagePreviewContainer" class="mt-1" style="display: none;">
+                                <img id="imagePreview" src="" alt="Preview" style="height: 60px; border-radius: 4px;">
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-2">
+                             <label for="video_file" class="btn btn-outline-secondary btn-sm w-100 text-start">
+                                <i class="bi bi-camera-video"></i> Escolher Vídeo (WebM)...
+                                <input type="file" id="video_file" name="video_file" accept=".webm" onchange="previewVideo(this)" style="display: none;">
+                            </label>
+                            <div id="videoPreviewContainer" class="mt-1" style="display: none;">
+                                <video id="videoPreview" src="" style="height: 60px; border-radius: 4px;" autoplay muted loop></video>
+                                <div class="small text-muted" id="videoNameDisplay"></div>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+
+                <!-- 2. Configurations (Status, Printing, Type) -->
+                <details>
+                    <summary><i class="bi bi-sliders me-2"></i> Configurações & Status</summary>
+                    <div class="details-content">
+                        <div class="d-flex flex-wrap gap-4 align-items-center mb-3">
+                             <div class="d-flex align-items-center gap-2">
+                                <label class="switch">
+                                    <input type="checkbox" id="active" name="active" checked onchange="updateStatusLabel()">
+                                    <span class="slider"></span>
+                                </label>
+                                <span id="active_label" class="small fw-bold">Ativo</span>
+                            </div>
+                            
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="checkbox" id="should_print" name="should_print" checked>
+                                <label for="should_print" class="mb-0 small">Imprimir Pedido</label>
+                            </div>
+
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="checkbox" id="service_fee_exempt" name="service_fee_exempt">
+                                <label for="service_fee_exempt" class="mb-0 small">Isento Taxa Serviço</label>
+                            </div>
+
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="checkbox" id="visible_virtual_menu" name="visible_virtual_menu">
+                                <label for="visible_virtual_menu" class="mb-0 small">Visível Menu Cliente</label>
+                            </div>
+
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="checkbox" id="highlight" name="highlight">
+                                <label for="highlight" class="mb-0 small fw-bold text-primary"><i class="bi bi-star-fill"></i> Destacar</label>
+                            </div>
+                        </div>
+
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <div class="p-2 border rounded bg-light">
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <label class="switch">
+                                            <input type="checkbox" id="paused" name="paused" onchange="togglePauseDetails()">
+                                            <span class="slider" style="background-color: #e74c3c;"></span>
+                                        </label>
+                                        <span class="small fw-bold text-danger">Pausar Vendas</span>
+                                    </div>
+                                    <div id="pauseDetails" style="display: none;">
+                                        <input type="text" id="pause_reason" name="pause_reason" class="form-control form-control-sm mb-1" placeholder="Motivo (ex: Falta ingrediente)">
+                                        <div class="d-flex gap-1">
+                                            <input type="datetime-local" id="pause_start" name="pause_start" class="form-control form-control-sm">
+                                            <input type="datetime-local" id="pause_end" name="pause_end" class="form-control form-control-sm">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="p-2 border rounded bg-light">
+                                    <label class="small fw-bold mb-1">Tipo de Item</label>
+                                    <select id="product_type" name="product_type" class="form-select form-select-sm mb-1 no-search" onchange="toggleAccompanimentOptions()">
+                                        <option value="standard">Padrão</option>
+                                        <option value="accompaniment_only">Somente Acompanhamento</option>
+                                        <option value="accompaniment_and_order">Acompanhamento e Pedido</option>
+                                    </select>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="has_accompaniments" name="has_accompaniments" onchange="toggleAccompanimentSelection()">
+                                        <label class="form-check-label small" for="has_accompaniments">Possui Acompanhamentos?</label>
+                                    </div>
+                                    <div id="accompanimentSelectionContainer" class="mt-1 scrollable-list bg-white" style="display: none; height: 100px;">
+                                        {% for item in menu_items %}
+                                        <div class="form-check accompaniment-option small" data-type="{{ item.product_type|default('standard') }}">
+                                            <input class="form-check-input" type="checkbox" name="allowed_accompaniments" value="{{ item.id }}" id="acc_{{ item.id }}">
+                                            <label class="form-check-label" for="acc_{{ item.id }}">
+                                                {{ item.name }} (R$ {{ "%.2f"|format(item.price) }})
+                                            </label>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+
+                <!-- 3. Technical & Fiscal (Grouped) -->
+                <details>
+                    <summary><i class="bi bi-gear-wide-connected me-2"></i> Ficha Técnica, Sabores & Fiscal</summary>
+                    <div class="details-content">
+                        <!-- Flavors -->
+                        <div class="mb-3 p-2 border rounded bg-warning-subtle">
+                             <h6 class="small fw-bold text-warning-emphasis mb-2"><i class="bi bi-ui-checks-grid"></i> Sabores</h6>
+                             <div class="d-flex gap-2">
+                                <select id="flavor_group_id" name="flavor_group_id" class="form-select form-select-sm" style="flex: 2;">
+                                    <option value="">Sem Grupo de Sabores</option>
+                                    {% for group in flavor_groups %}
+                                    <option value="{{ group.id }}">{{ group.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="input-group input-group-sm" style="flex: 1;">
+                                    <span class="input-group-text">Mult.</span>
+                                    <input type="number" id="flavor_multiplier" name="flavor_multiplier" class="form-control" step="0.1" value="1.0">
+                                </div>
+                             </div>
+                        </div>
+
+                        <!-- Recipe -->
+                        <div class="mb-3">
+                            <h6 class="small fw-bold text-success mb-2"><i class="bi bi-receipt"></i> Ficha Técnica (Insumos)</h6>
+                            <div id="ingredientsContainer" class="mb-2"></div>
+                            <button type="button" class="btn btn-sm btn-outline-success" onclick="addIngredientRow()">+ Insumo</button>
+                        </div>
+
+                        <!-- Questions -->
+                        <div class="mb-3">
+                             <h6 class="small fw-bold text-info mb-2"><i class="bi bi-question-circle"></i> Perguntas</h6>
+                             <div id="questionsContainer" class="mb-2"></div>
+                             <div class="btn-group btn-group-sm">
+                                <button type="button" class="btn btn-outline-info" onclick="addQuestionRow()">+ Pergunta</button>
+                                <button type="button" class="btn btn-outline-info dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span class="visually-hidden">Toggle Dropdown</span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#" onclick="addPredefinedQuestion('meat_point'); return false;">Ponto da Carne</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="addPredefinedQuestion('sugar_ice'); return false;">Gelo/Açúcar</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="addPredefinedQuestion('cutlery'); return false;">Talheres</a></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Fiscal (Compact) -->
+                        <div class="p-2 border rounded bg-light">
+                             <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="small fw-bold text-secondary m-0"><i class="bi bi-bank"></i> Fiscal</h6>
+                                <div class="input-group input-group-sm" style="width: auto;">
+                                    <select id="copyFromProduct" class="form-select" style="max-width: 150px;">
+                                        <option value="">Copiar de...</option>
+                                        {% for item in menu_items %}
+                                        <option value="{{ item.id }}">{{ item.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="copyFiscalData()"><i class="bi bi-files"></i></button>
+                                </div>
+                             </div>
+                             
+                             <div class="form-grid-3">
+                                 <div><label>NCM</label><input type="text" id="ncm" name="ncm" class="form-control form-control-sm"></div>
+                                 <div><label>Origem</label><select id="origin" name="origin" class="form-select form-select-sm">
+                                     <option value="0">0 - Nacional</option>
+                                     <option value="1">1 - Import. Direta</option>
+                                     <option value="2">2 - Estrang. Adq. Int.</option>
+                                 </select></div>
+                                 <div><label>CFOP</label><input type="text" id="cfop" name="cfop" class="form-control form-control-sm" placeholder="5102"></div>
+                                 <div><label>CEST</label><input type="text" id="cest" name="cest" class="form-control form-control-sm"></div>
+                                 <div><label>CST/CSOSN</label><input type="text" id="tax_situation" name="tax_situation" class="form-control form-control-sm" placeholder="102"></div>
+                                 <div><label>ICMS %</label><input type="number" id="icms_rate" name="icms_rate" class="form-control form-control-sm" step="0.01"></div>
+                             </div>
+                             <div class="text-center mt-2">
+                                <button type="button" class="btn btn-sm btn-link p-0" onclick="document.getElementById('moreFiscal').style.display = document.getElementById('moreFiscal').style.display === 'none' ? 'grid' : 'none'">Mostrar Mais Fiscal</button>
+                             </div>
+                             <div id="moreFiscal" class="form-grid-3 mt-2" style="display: none;">
+                                 <div><label>PIS CST</label><input type="text" id="pis_cst" name="pis_cst" class="form-control form-control-sm"></div>
+                                 <div><label>PIS %</label><input type="number" id="pis_rate" name="pis_rate" class="form-control form-control-sm" step="0.01"></div>
+                                 <div><label>COFINS CST</label><input type="text" id="cofins_cst" name="cofins_cst" class="form-control form-control-sm"></div>
+                                 <div><label>COFINS %</label><input type="number" id="cofins_rate" name="cofins_rate" class="form-control form-control-sm" step="0.01"></div>
+                                 <div><label>Red. BC ICMS</label><input type="number" id="icms_base_reduction" name="icms_base_reduction" class="form-control form-control-sm" step="0.01"></div>
+                                <div><label>FCP %</label><input type="number" id="fcp_rate" name="fcp_rate" class="form-control form-control-sm" step="0.01"></div>
+                                <div><label>Transp. %</label><input type="number" id="transparency_tax" name="transparency_tax" class="form-control form-control-sm" step="0.01"></div>
+                                <div><label>Cód. Benef. Fiscal</label><input type="text" id="fiscal_benefit_code" name="fiscal_benefit_code" class="form-control form-control-sm"></div>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+
+                <div class="mt-3 pt-2 border-top d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-secondary btn-compact" onclick="toggleForm()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary btn-compact" id="submitBtn">Salvar Produto</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="d-flex gap-2 mb-2 align-items-center flex-wrap bg-light p-2 rounded">
+        <div class="flex-grow-1 position-relative">
+            <i class="bi bi-search position-absolute text-muted" style="left: 10px; top: 50%; transform: translateY(-50%);"></i>
+            <input type="text" id="searchInput" onkeyup="filterMenu()" class="form-control form-control-sm ps-4" placeholder="Buscar produto...">
+        </div>
+        
+        <select id="statusFilter" class="form-select form-select-sm" style="width: auto;" onchange="filterMenu()">
+            <option value="all">Todos os Status</option>
+            <option value="ft_ok">FT: Com Ficha Técnica</option>
+            <option value="ft_missing">FT: Sem Ficha Técnica</option>
+            <option value="fiscal_ok">Fiscal: Dados OK</option>
+            <option value="fiscal_missing">Fiscal: Dados Pendentes</option>
+            <option value="menu_visible">Menu: Visível</option>
+            <option value="menu_hidden">Menu: Oculto</option>
+        </select>
+
+        <div class="form-check form-switch m-0">
+            <input class="form-check-input" type="checkbox" id="pausedFilter" onchange="filterMenu()">
+            <label class="form-check-label small fw-bold text-danger" for="pausedFilter">Pausados / Inativos</label>
+        </div>
+    </div>
+
+    <!-- Products Table -->
+    <div class="card shadow-sm">
+        <div class="card-body p-0 table-responsive" style="max-height: 70vh;">
+            <table class="table table-hover table-sm table-striped mb-0 align-middle" id="menuTable" style="font-size: 0.9rem;">
+                <thead class="table-light sticky-top">
+                    <tr>
+                        <th width="50">Img</th>
+                        <th>Nome</th>
+                        <th>Categoria</th>
+                        <th>Preço</th>
+                        <th>Impressora</th>
+                        <th>Status</th>
+                        <th class="text-end">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in menu_items %}
+                    <tr data-paused="{{ 'true' if item.paused else 'false' }}" 
+                        data-active="{{ 'true' if item.get('active', True) else 'false' }}"
+                        data-has-recipe="{{ 'true' if item.recipe|length > 0 else 'false' }}"
+                        data-has-fiscal="{{ 'true' if item.ncm else 'false' }}"
+                        data-menu-visible="{{ 'true' if item.visible_virtual_menu else 'false' }}">
+                        <td>
+                            {% if item.image_url %}
+                            <img src="{{ item.image_url }}" alt="" style="width: 32px; height: 32px; object-fit: cover; border-radius: 4px;">
+                            {% else %}
+                            <div class="bg-secondary text-white rounded d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;"><i class="bi bi-image"></i></div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="fw-bold text-truncate" style="max-width: 200px;" title="{{ item.name }}">{{ item.name }}</div>
+                            {% if item.paused %}
+                            <span class="badge bg-danger" style="font-size: 0.65em;"><i class="bi bi-pause-circle"></i> Pausado</span>
+                            {% endif %}
+                            {% if not item.get('active', True) %}
+                            <span class="badge bg-secondary" style="font-size: 0.65em;"><i class="bi bi-stop-circle"></i> Inativo</span>
+                            {% endif %}
+                            {% if not item.ncm %}
+                            <span class="badge bg-warning text-dark" style="font-size: 0.65em;">! Fiscal</span>
+                            {% endif %}
+                        </td>
+                        <td><span class="badge bg-light text-dark border">{{ item.category }}</span></td>
+                        <td>R$ {{ "%.2f"|format(item.price) }}</td>
+                        <td class="small text-muted">{{ item.printer_name if item.printer_id != 'no_print' else '-' }}</td>
+                        <td class="text-nowrap">
+                            <!-- Ficha Técnica -->
+                            {% if item.recipe|length > 0 %}
+                            <span class="badge bg-success" title="Com Ficha Técnica" style="font-size: 0.7em; cursor: help;">
+                                <i class="bi bi-receipt"></i> FT
+                            </span>
+                            {% else %}
+                            <span class="badge bg-secondary opacity-25" title="Sem Ficha Técnica" style="font-size: 0.7em; cursor: help;">
+                                <i class="bi bi-receipt"></i> FT
+                            </span>
+                            {% endif %}
+
+                            <!-- Fiscal -->
+                            {% if item.ncm %}
+                            <span class="badge bg-success" title="Dados Fiscais OK" style="font-size: 0.7em; cursor: help;">
+                                <i class="bi bi-bank"></i> Fiscal
+                            </span>
+                            {% else %}
+                            <span class="badge bg-danger" title="Dados Fiscais Pendentes" style="font-size: 0.7em; cursor: help;">
+                                <i class="bi bi-bank"></i> Fiscal
+                            </span>
+                            {% endif %}
+
+                            <!-- Menu Cliente -->
+                            {% if item.visible_virtual_menu %}
+                            <span class="badge bg-primary" title="Visível no Menu Digital" style="font-size: 0.7em; cursor: help;">
+                                <i class="bi bi-phone"></i> Menu
+                            </span>
+                            {% else %}
+                            <span class="badge bg-secondary opacity-25" title="Oculto no Menu Digital" style="font-size: 0.7em; cursor: help;">
+                                <i class="bi bi-phone-slash"></i> Menu
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm">
+                                <button onclick="toggleActive('{{ item.id }}', this)" class="btn btn-outline-secondary btn-sm py-0 px-2" title="Pausar/Ativar">
+                                    <i class="bi {{ 'bi-pause-circle' if item.get('active', True) else 'bi-play-circle' }}"></i>
+                                </button>
+                                <button data-product-name="{{ item.name }}" onclick="openStockEditModal(this)" class="btn btn-outline-primary btn-sm py-0 px-2" title="Estoque">
+                                    <i class="bi bi-box-seam"></i>
+                                </button>
+                                <button data-product="{{ item|tojson|forceescape }}" onclick='editProduct(JSON.parse(this.dataset.product))' class="btn btn-outline-warning btn-sm py-0 px-2" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <form method="POST" action="{{ url_for('delete_menu_item', item_id=item.id) }}" class="d-inline" onsubmit="return confirm('Excluir?');">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm py-0 px-2" title="Excluir">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="7" class="text-center text-muted py-4">Nenhum produto cadastrado.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Stock Edit Modal (Preserved) -->
+<div id="stockEditModal" style="display: none; position: fixed; z-index: 1050; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); backdrop-filter: blur(2px);">
+    <div style="background-color: #fefefe; margin: 10% auto; padding: 20px; border: 1px solid #888; width: 90%; max-width: 400px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+        <h5 class="mb-3">Ajuste Rápido de Estoque</h5>
+        <p id="stockEditProductName" class="fw-bold text-primary mb-3"></p>
+        
+        <div id="stockLoading" style="display: none; text-align: center; padding: 20px;">
+            <div class="spinner-border text-primary" role="status"></div>
+        </div>
+
+        <div id="stockError" class="alert alert-danger py-2" style="display: none;">
+            <p id="stockErrorMsg" class="mb-0 small"></p>
+        </div>
+        
+        <div id="stockFormContent" style="display: none;">
+            <div class="mb-2">
+                <label class="small text-muted">Estoque Atual</label>
+                <input type="text" id="currentStockDisplay" disabled class="form-control form-control-sm bg-light">
+            </div>
+            <div class="mb-2">
+                <label for="newStockQuantity" class="small fw-bold">Nova Quantidade</label>
+                <input type="number" id="newStockQuantity" step="0.001" class="form-control">
+            </div>
+            <div class="mb-3">
+                <label for="stockAdjustReason" class="small">Motivo</label>
+                <input type="text" id="stockAdjustReason" class="form-control form-control-sm" placeholder="Ex: Inventário">
+            </div>
+        </div>
+        
+        <div class="d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="closeStockEditModal()">Cancelar</button>
+            <button type="button" id="btnSaveStock" class="btn btn-success btn-sm" onclick="submitStockAdjustment()" style="display: none;">Salvar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Global variables
+let currentEditingProductName = null;
+const productsMap = {};
+
+try {
+    const productsData = JSON.parse(document.getElementById('products-data').textContent);
+    if (Array.isArray(productsData)) {
+        productsData.forEach(item => {
+            productsMap[item.id] = item;
+        });
+    }
+} catch (e) {
+    console.error('Error parsing products data:', e);
+}
+
+// Toggle Form Visibility
+function toggleForm() {
+    const card = document.getElementById('productFormCard');
+    if (card.style.display === 'none') {
+        card.style.display = 'block';
+        document.getElementById('productForm').reset();
+        document.getElementById('product_id').value = '';
+        document.getElementById('formTitle').innerText = 'Novo Produto';
+        document.getElementById('imagePreviewContainer').style.display = 'none';
+        document.getElementById('ingredientsContainer').innerHTML = '';
+        document.getElementById('questionsContainer').innerHTML = '';
+        // Reset Accordions
+        document.querySelectorAll('details').forEach(d => d.open = false);
+        document.querySelector('details').open = true; // Open first one
+        
+        // Trigger toggle to filter list correctly (initial state)
+        toggleAccompanimentOptions();
+    } else {
+        card.style.display = 'none';
+    }
+}
+
+function toggleActive(id, btn) {
+    if(!confirm('Alterar status do produto?')) return;
+    
+    fetch('/menu/toggle-active/' + id, { method: 'POST' })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success) {
+            location.reload();
+        } else {
+            alert('Erro: ' + data.error);
+        }
+    })
+    .catch(err => alert('Erro de conexão: ' + err));
+}
+
+function openStockEditModal(btn) {
+    const name = btn.getAttribute('data-product-name');
+    if(!name) return;
+    
+    currentEditingProductName = name;
+    document.getElementById('stockEditProductName').innerText = name;
+    document.getElementById('newStockQuantity').value = '';
+    document.getElementById('stockAdjustReason').value = '';
+    document.getElementById('stockError').style.display = 'none';
+    document.getElementById('stockFormContent').style.display = 'none';
+    document.getElementById('stockLoading').style.display = 'block';
+    document.getElementById('btnSaveStock').style.display = 'none';
+    
+    document.getElementById('stockEditModal').style.display = 'block';
+    
+    fetch('/api/stock/product/' + encodeURIComponent(name))
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById('stockLoading').style.display = 'none';
+        if(data.error) {
+            document.getElementById('stockError').style.display = 'block';
+            document.getElementById('stockErrorMsg').innerText = data.error;
+        } else {
+            document.getElementById('stockFormContent').style.display = 'block';
+            document.getElementById('currentStockDisplay').value = data.quantity + ' ' + (data.unit || 'un');
+            document.getElementById('btnSaveStock').style.display = 'inline-block';
+        }
+    })
+    .catch(err => {
+        document.getElementById('stockLoading').style.display = 'none';
+        document.getElementById('stockError').style.display = 'block';
+        document.getElementById('stockErrorMsg').innerText = 'Erro de conexão';
+    });
+}
+
+function toggleCategoryPanel() {
+    const panel = document.getElementById('categoryPanel');
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+
+function selectCategory(cat, btn) {
+    document.getElementById('category').value = cat;
+    toggleCategoryPanel();
+}
+
+function filterCategoryButtons() {
+    const filter = document.getElementById('categorySearchFilter').value.toLowerCase();
+    const container = document.getElementById('categoryButtonsContainer');
+    const buttons = container.getElementsByTagName('button');
+
+    for (let i = 0; i < buttons.length; i++) {
+        const txtValue = buttons[i].textContent || buttons[i].innerText;
+        if (txtValue.toLowerCase().indexOf(filter) > -1) {
+            buttons[i].style.display = "";
+        } else {
+            buttons[i].style.display = "none";
+        }
+    }
+}
+
+function addNewCategoryFromInput() {
+    const input = document.getElementById('categoryInput');
+    const val = input.value.trim();
+    if(val) {
+        document.getElementById('category').value = val;
+        toggleCategoryPanel();
+        input.value = '';
+    }
+}
+
+// Keep existing logic for tabs (now accordions), but map calls to prevent errors if old functions are called
+function openTab(tabName, btn) {
+    // Legacy support if needed, but we use accordions now.
+}
+
+// ... preserve other JS functions ...
+// I will rewrite the essential JS functions to match the new ID structure if needed, but I kept most IDs the same.
+// Specifically: addIngredientRow, addQuestionRow, previewImage, togglePauseDetails, etc.
+
+function previewImage(input) {
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('imagePreview').src = e.target.result;
+            document.getElementById('imagePreviewContainer').style.display = 'block';
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+function togglePauseDetails() {
+    const isPaused = document.getElementById('paused').checked;
+    document.getElementById('pauseDetails').style.display = isPaused ? 'block' : 'none';
+}
+
+function toggleAccompanimentOptions() {
+    const type = document.getElementById('product_type').value;
+    const isStandard = type === 'standard';
+    
+    // Logic to show/hide accompaniment selection
+    const accContainer = document.getElementById('accompanimentSelectionContainer');
+    const options = accContainer.querySelectorAll('.accompaniment-option');
+    
+    // Filter the options list based on type
+    // If we are configuring a product, what can be ITS accompaniment?
+    // Generally, accompaniments should be items of type 'accompaniment_only' or 'accompaniment_and_order'
+    // Items of type 'standard' should NOT be accompaniments for other items.
+    
+    options.forEach(opt => {
+        const itemType = opt.getAttribute('data-type');
+        // Hide standard items from being selected as accompaniments
+        if (itemType === 'standard') {
+            opt.style.display = 'none';
+        } else {
+            opt.style.display = 'block';
+        }
+    });
+}
+
+function toggleAccompanimentSelection() {
+    const hasAcc = document.getElementById('has_accompaniments').checked;
+    document.getElementById('accompanimentSelectionContainer').style.display = hasAcc ? 'block' : 'none';
+}
+
+// Add Ingredient Row (adapted for compact)
+function addIngredientRow(ingredient = null) {
+    const container = document.getElementById('ingredientsContainer');
+    const div = document.createElement('div');
+    div.className = 'd-flex gap-2 mb-2 align-items-center ingredient-row';
+    div.innerHTML = `
+        <select name="ingredient_id[]" class="form-select form-select-sm" style="flex: 2;">
+            <option value="">Selecione Insumo...</option>
+            {% for p in insumos %}
+            <option value="{{ p.id }}">{{ p.name }} ({{ p.unit }})</option>
+            {% endfor %}
+        </select>
+        <input type="number" name="ingredient_qty[]" step="0.001" class="form-control form-control-sm" placeholder="Qtd" style="flex: 1;">
+        <button type="button" class="btn btn-outline-danger btn-sm p-0 px-2" onclick="this.parentElement.remove()">&times;</button>
+    `;
+    container.appendChild(div);
+    
+    if (ingredient) {
+        div.querySelector('select').value = ingredient.ingredient_id || ingredient.product_id; // Support both just in case
+        div.querySelector('input').value = ingredient.qty || ingredient.quantity;
+    }
+}
+
+function addQuestionRow(question = null) {
+    const container = document.getElementById('questionsContainer');
+    const div = document.createElement('div');
+    div.className = 'd-flex gap-2 mb-2 align-items-center question-row flex-wrap';
+    
+    // Default values
+    let qText = '';
+    let qRequired = false;
+    let qType = 'text';
+    let qOptions = '';
+
+    if (question) {
+        qText = question.question || question.text || '';
+        qRequired = question.required === true || question.required === 'true';
+        qType = question.type || 'text';
+        qOptions = Array.isArray(question.options) ? question.options.join(',') : (question.options || '');
+    }
+
+    div.innerHTML = `
+            <div class="d-flex gap-2 w-100 align-items-center">
+              <input type="text" name="question_text[]" class="form-control form-control-sm" placeholder="Pergunta (Ex: Qual o ponto?)" style="flex: 2;" value="${qText.replace(/"/g, '&quot;')}" required>
+              <select name="question_type[]" class="form-select form-select-sm" style="width: 110px;" onchange="toggleQuestionOptions(this)">
+                <option value="text" ${qType === 'text' ? 'selected' : ''}>Texto Livre</option>
+                <option value="choice" ${qType === 'choice' ? 'selected' : ''}>Múltipla Esc.</option>
+                <option value="check" ${qType === 'check' ? 'selected' : ''}>Seleção (Check)</option>
+              </select>
+              <input type="text" name="question_options[]" class="form-control form-control-sm" placeholder="Opções (sep. por vírgula)" style="flex: 2; display: ${qType === 'choice' || qType === 'check' ? 'block' : 'none'};" value="${qOptions}">
+              <input type="hidden" name="question_required[]" value="${qRequired}">
+              <div class="form-check form-switch m-0" style="min-width: 60px;">
+                <input class="form-check-input" type="checkbox" ${qRequired ? 'checked' : ''} onchange="this.closest('.question-row').querySelector('input[type=hidden]').value = this.checked">
+                <label class="form-check-label small">Obrig.</label>
+              </div>
+              <button type="button" class="btn btn-outline-danger btn-sm p-0 px-2" onclick="this.closest('.question-row').remove()">&times;</button>
+            </div>
+          `;
+    container.appendChild(div);
+}
+
+function toggleQuestionOptions(select) {
+    // Find the options input which is the next element sibling
+    const optionsInput = select.nextElementSibling;
+    if (select.value === 'choice' || select.value === 'check') {
+        optionsInput.style.display = 'block';
+        optionsInput.focus();
+    } else {
+        optionsInput.style.display = 'none';
+    }
+}
+
+function addPredefinedQuestion(type) {
+    let text = '';
+    if(type === 'meat_point') text = 'Qual o ponto da carne?';
+    if(type === 'sugar_ice') text = 'Gelo e Açúcar?';
+    if(type === 'cutlery') text = 'Precisa de talheres?';
+    
+    addQuestionRow({text: text, required: true});
+}
+
+function copyFiscalData() {
+    const sourceId = document.getElementById('copyFromProduct').value;
+    if(!sourceId) return;
+    
+    const data = productsMap[sourceId];
+    if(data) {
+        document.getElementById('ncm').value = data.ncm || '';
+        document.getElementById('origin').value = data.origin || '0';
+        document.getElementById('cfop').value = data.cfop || '';
+        document.getElementById('cest').value = data.cest || '';
+        document.getElementById('tax_situation').value = data.tax_situation || '';
+        document.getElementById('icms_rate').value = data.icms_rate || '';
+        document.getElementById('pis_cst').value = data.pis_cst || '';
+        document.getElementById('pis_rate').value = data.pis_rate || '';
+        document.getElementById('cofins_cst').value = data.cofins_cst || '';
+        document.getElementById('cofins_rate').value = data.cofins_rate || '';
+        document.getElementById('icms_base_reduction').value = data.icms_base_reduction || '';
+        document.getElementById('fcp_rate').value = data.fcp_rate || '';
+        document.getElementById('transparency_tax').value = data.transparency_tax || '';
+        document.getElementById('fiscal_benefit_code').value = data.fiscal_benefit_code || '';
+        
+        alert('Dados fiscais copiados de: ' + data.name);
+    }
+}
+
+function updateStatusLabel() {
+    const active = document.getElementById('active').checked;
+    const label = document.getElementById('active_label');
+    if(label) {
+        label.textContent = active ? 'Ativo' : 'Inativo';
+        label.className = active ? 'small fw-bold text-success' : 'small fw-bold text-secondary';
+    }
+}
+
+// Edit Product Function
+function editProduct(product) {
+    console.log('Editing product:', product);
+    
+    // Ensure form is open and clean
+    const card = document.getElementById('productFormCard');
+    if (card.style.display === 'none') {
+        toggleForm(); // Opens and resets
+    } else {
+        // Already open, just reset fields to avoid stale data
+        document.getElementById('productForm').reset();
+        document.getElementById('ingredientsContainer').innerHTML = '';
+        document.getElementById('questionsContainer').innerHTML = '';
+        document.querySelectorAll('details').forEach(d => d.open = false);
+        document.querySelector('details').open = true;
+    }
+
+    document.getElementById('formTitle').innerText = 'Editar: ' + product.name;
+    
+    document.getElementById('product_id').value = product.id;
+    document.getElementById('name').value = product.name;
+    document.getElementById('category').value = product.category;
+    document.getElementById('price').value = product.price ? Number(product.price).toLocaleString('pt-BR', {minimumFractionDigits: 2}) : '';
+    document.getElementById('cost_price').value = product.cost_price ? Number(product.cost_price).toLocaleString('pt-BR', {minimumFractionDigits: 2}) : '';
+    document.getElementById('description').value = product.description || '';
+    document.getElementById('printer_id').value = product.printer_id || '';
+    document.getElementById('current_image').value = product.image_url || '';
+    document.getElementById('current_video').value = product.video || '';
+
+    if(product.image_url) {
+        document.getElementById('imagePreview').src = product.image_url;
+        document.getElementById('imagePreviewContainer').style.display = 'block';
+    }
+    
+    if(product.video_url) {
+        document.getElementById('videoPreview').src = product.video_url;
+        document.getElementById('videoPreviewContainer').style.display = 'block';
+        document.getElementById('videoNameDisplay').innerText = product.video || 'Vídeo Atual';
+    } else {
+        document.getElementById('videoPreviewContainer').style.display = 'none';
+        document.getElementById('videoPreview').src = '';
+    }
+    
+    // Status Fields - Handle various truthy values
+    // Active
+    const isActive = product.active !== undefined ? (String(product.active) !== 'false' && String(product.active) !== '0') : true;
+    document.getElementById('active').checked = isActive;
+    updateStatusLabel();
+
+    // Helper for loose boolean matching
+    const isTrue = (val) => {
+        if (!val) return false;
+        const s = String(val).toLowerCase();
+        return s === 'true' || s === 'on' || s === '1' || s === 'checked' || s === 'paused' || s === 'highlight' || s === 'yes';
+    };
+
+    document.getElementById('should_print').checked = isTrue(product.should_print);
+    document.getElementById('paused').checked = isTrue(product.paused);
+    document.getElementById('visible_virtual_menu').checked = String(product.visible_virtual_menu) !== 'false' && String(product.visible_virtual_menu) !== '0'; // Default true
+    document.getElementById('highlight').checked = isTrue(product.highlight);
+    document.getElementById('service_fee_exempt').checked = isTrue(product.service_fee_exempt);
+    
+    togglePauseDetails();
+    if(product.paused) {
+        document.getElementById('pause_reason').value = product.pause_reason || '';
+        document.getElementById('pause_start').value = product.pause_start || '';
+        document.getElementById('pause_end').value = product.pause_end || '';
+    }
+    
+    document.getElementById('product_type').value = product.product_type || 'standard';
+    document.getElementById('has_accompaniments').checked = product.has_accompaniments === true || product.has_accompaniments === 'true';
+    
+    // Clear and set allowed accompaniments
+    document.querySelectorAll('input[name="allowed_accompaniments"]').forEach(cb => cb.checked = false);
+    if (product.allowed_accompaniments && Array.isArray(product.allowed_accompaniments)) {
+        product.allowed_accompaniments.forEach(accId => {
+            const cb = document.getElementById('acc_' + accId);
+            if (cb) cb.checked = true;
+        });
+    }
+
+    document.getElementById('flavor_group_id').value = product.flavor_group_id || '';
+    document.getElementById('flavor_multiplier').value = product.flavor_multiplier || 1.0;
+    
+    // Trigger UI updates for accompaniments
+    toggleAccompanimentOptions();
+    toggleAccompanimentSelection();
+    
+    // Fiscal
+    document.getElementById('ncm').value = product.ncm || '';
+    document.getElementById('origin').value = product.origin || '0';
+    document.getElementById('cfop').value = product.cfop || '';
+    document.getElementById('cest').value = product.cest || '';
+    document.getElementById('tax_situation').value = product.tax_situation || '';
+    document.getElementById('icms_rate').value = product.icms_rate || '';
+    
+    // Extended Fiscal
+    document.getElementById('pis_cst').value = product.pis_cst || '';
+    document.getElementById('pis_rate').value = product.pis_rate || '';
+    document.getElementById('cofins_cst').value = product.cofins_cst || '';
+    document.getElementById('cofins_rate').value = product.cofins_rate || '';
+    document.getElementById('icms_base_reduction').value = product.icms_base_reduction || '';
+    document.getElementById('fcp_rate').value = product.fcp_rate || '';
+    document.getElementById('transparency_tax').value = product.transparency_tax || '';
+    document.getElementById('fiscal_benefit_code').value = product.fiscal_benefit_code || '';
+    
+    // Ingredients & Questions
+    if(product.recipe && Array.isArray(product.recipe)) {
+        product.recipe.forEach(ing => addIngredientRow(ing));
+    }
+    if(product.mandatory_questions && Array.isArray(product.mandatory_questions)) {
+        product.mandatory_questions.forEach(q => addQuestionRow(q));
+    }
+    
+    // Trigger toggle to filter list correctly
+    toggleAccompanimentOptions();
+}
+
+// Filter Menu
+function filterMenu() {
+    const term = document.getElementById('searchInput').value.toLowerCase();
+    const pausedOnly = document.getElementById('pausedFilter').checked;
+    const statusFilter = document.getElementById('statusFilter').value;
+    
+    console.log('Filtering: term=', term, 'pausedOnly=', pausedOnly, 'status=', statusFilter);
+
+    const rows = document.querySelectorAll('#menuTable tbody tr');
+    let visibleCount = 0;
+    let totalProcessed = 0;
+    let debugFirstItems = [];
+
+    rows.forEach(row => {
+        if(row.cells.length < 2) return; // Skip "No products" row
+        
+        totalProcessed++;
+        const name = row.cells[1].textContent.toLowerCase();
+        const category = row.cells[2].textContent.toLowerCase();
+        
+        // Robust attribute reading
+        const pAttr = row.getAttribute('data-paused');
+        const aAttr = row.getAttribute('data-active');
+        const hasRecipe = row.getAttribute('data-has-recipe') === 'true';
+        const hasFiscal = row.getAttribute('data-has-fiscal') === 'true';
+        const menuVisible = row.getAttribute('data-menu-visible') === 'true';
+        
+        // Handle "True"/"False" python strings, "true"/"false" js strings, "1"/"0", etc.
+        const isPaused = (pAttr && (pAttr.toLowerCase() === 'true' || pAttr === '1'));
+        // Active defaults to true if missing or weird, unless explicitly false/0
+        const isActive = (!aAttr || (aAttr.toLowerCase() !== 'false' && aAttr !== '0'));
+        
+        let visible = true;
+        
+        // 1. Search Filter
+        if(term && !name.includes(term) && !category.includes(term)) visible = false;
+        
+        // 2. Paused/Inactive Filter
+        // If checked: Show ONLY (Paused OR Inactive)
+        // Equivalent to: HIDE if (Not Paused AND Active)
+        if(pausedOnly) {
+            if(!isPaused && isActive) visible = false;
+        }
+        
+        // 3. Status Filter
+        if(statusFilter !== 'all') {
+            if (statusFilter === 'ft_ok' && !hasRecipe) visible = false;
+            if (statusFilter === 'ft_missing' && hasRecipe) visible = false;
+            if (statusFilter === 'fiscal_ok' && !hasFiscal) visible = false;
+            if (statusFilter === 'fiscal_missing' && hasFiscal) visible = false;
+            if (statusFilter === 'menu_visible' && !menuVisible) visible = false;
+            if (statusFilter === 'menu_hidden' && menuVisible) visible = false;
+        }
+        
+        row.style.display = visible ? '' : 'none';
+        if(visible) visibleCount++;
+        
+        // Capture debug info for first 3 items
+        if (totalProcessed <= 3) {
+            debugFirstItems.push(`${name.substring(0,10)}..: P=${isPaused} A=${isActive} FT=${hasRecipe} Fisc=${hasFiscal} Menu=${menuVisible} -> ${visible?'VIS':'HID'}`);
+        }
+    });
+
+    console.log('Filter Result:', {total: totalProcessed, visible: visibleCount, debug: debugFirstItems});
+
+    // Show "No results" message if needed
+    let noResultsRow = document.getElementById('noResultsRow');
+    if (visibleCount === 0) {
+        if (!noResultsRow) {
+            const tbody = document.querySelector('#menuTable tbody');
+            noResultsRow = document.createElement('tr');
+            noResultsRow.id = 'noResultsRow';
+            tbody.appendChild(noResultsRow);
+        }
+        
+        // Add Debug Info to the message so user can see it
+        noResultsRow.innerHTML = `<td colspan="7" class="text-center text-muted py-4">
+            Nenhum produto encontrado com os filtros atuais.<br>
+            <span style="font-size: 0.7em; color: #aaa;">
+                (Debug: Processados ${totalProcessed}, Pausados/Inativos: ${pausedOnly}, Exemplo: ${debugFirstItems.join(' | ')})
+            </span>
+        </td>`;
+        noResultsRow.style.display = '';
+    } else {
+        if (noResultsRow) noResultsRow.style.display = 'none';
+    }
+    
+    // Also update the badge count to match logic
+    updatePausedCount();
+}
+
+function updatePausedCount() {
+    const rows = document.querySelectorAll('#menuTable tbody tr');
+    let count = 0;
+    rows.forEach(row => {
+        if(row.cells.length < 2) return;
+        const pAttr = row.getAttribute('data-paused');
+        const aAttr = row.getAttribute('data-active');
+        const isPaused = (pAttr && (pAttr.toLowerCase() === 'true' || pAttr === '1'));
+        const isActive = (!aAttr || (aAttr.toLowerCase() !== 'false' && aAttr !== '0'));
+        
+        if (isPaused || !isActive) {
+            count++;
+        }
+    });
+
+    const badge = document.getElementById('pausedCount');
+    if(badge) {
+        badge.textContent = count;
+        badge.style.display = count > 0 ? 'inline-block' : 'none';
+    }
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    updatePausedCount();
+});
+
+// Stock Edit Modal Functions (Preserved)
+// ... (same as original file) ...
+function closeStockEditModal() {
+    document.getElementById('stockEditModal').style.display = 'none';
+    currentEditingProductName = null;
+}
+
+function submitStockAdjustment() {
+    const newQty = document.getElementById('newStockQuantity').value;
+    const reason = document.getElementById('stockAdjustReason').value;
+    
+    if(!newQty) return alert('Informe a quantidade.');
+    
+    fetch('/api/stock/adjust-by-name', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            product_name: currentEditingProductName,
+            new_quantity: parseFloat(newQty),
+            reason: reason || 'Ajuste Rápido Menu'
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success) {
+            closeStockEditModal();
+            // Optional: Show success toast
+        } else {
+            alert('Erro: ' + data.error);
+        }
+    });
+}
+
+// Digital Menu Order Logic
+let currentDigitalOrder = [];
+</script>
+
+<!-- Digital Menu Order Data -->
+<script type="application/json" id="digital-categories-data">
+    {{ digital_categories|tojson }}
+</script>
+
+<!-- Products Data -->
+<script type="application/json" id="products-data">
+    {{ menu_items|tojson }}
+</script>
+
+<script>
+function openDigitalOrderModal() {
+    // Initialize current order from server-provided list
+    try {
+        const dataEl = document.getElementById('digital-categories-data');
+        if (dataEl) {
+            currentDigitalOrder = JSON.parse(dataEl.textContent);
+        } else {
+            currentDigitalOrder = [];
+        }
+    } catch (e) {
+        console.error('Error parsing digital categories:', e);
+        currentDigitalOrder = [];
+    }
+    
+    renderDigitalOrderList();
+    
+    // Show Modal
+    const modal = new bootstrap.Modal(document.getElementById('digitalOrderModal'));
+    modal.show();
+}
+
+function renderDigitalOrderList() {
+    const list = document.getElementById('digitalOrderList');
+    list.innerHTML = '';
+    
+    currentDigitalOrder.forEach((cat, index) => {
+        const item = document.createElement('div');
+        item.className = 'list-group-item d-flex justify-content-between align-items-center p-2';
+        item.innerHTML = `
+            <span>${cat}</span>
+            <div class="btn-group btn-group-sm">
+                <button class="btn btn-outline-secondary" onclick="moveCategory(${index}, -1)" ${index === 0 ? 'disabled' : ''}>
+                    <i class="bi bi-arrow-up"></i>
+                </button>
+                <button class="btn btn-outline-secondary" onclick="moveCategory(${index}, 1)" ${index === currentDigitalOrder.length - 1 ? 'disabled' : ''}>
+                    <i class="bi bi-arrow-down"></i>
+                </button>
+            </div>
+        `;
+        list.appendChild(item);
+    });
+}
+
+function moveCategory(index, direction) {
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= currentDigitalOrder.length) return;
+    
+    // Swap
+    const temp = currentDigitalOrder[index];
+    currentDigitalOrder[index] = currentDigitalOrder[newIndex];
+    currentDigitalOrder[newIndex] = temp;
+    
+    renderDigitalOrderList();
+}
+
+function saveDigitalOrder() {
+    fetch('/api/menu/digital-category-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order: currentDigitalOrder })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            alert('Ordem salva com sucesso!');
+            const modalEl = document.getElementById('digitalOrderModal');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            modal.hide();
+        } else {
+            alert('Erro ao salvar: ' + data.error);
+        }
+    })
+    .catch(err => alert('Erro de conexão: ' + err));
+}
+</script>
+
+<!-- Digital Order Modal -->
+<div class="modal fade" id="digitalOrderModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ordenar Menu Digital</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted small">Defina a ordem das categorias especificamente para o Menu Digital (QR Code).</p>
+                <div id="digitalOrderList" class="list-group">
+                    <!-- Items rendered by JS -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="saveDigitalOrder()">Salvar Ordem</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

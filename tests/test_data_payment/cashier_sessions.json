@@ -1,0 +1,26 @@
+[
+    {
+        "id": "SESSION_RESTAURANT_20260209222125_admin",
+        "user": "admin",
+        "type": "restaurant",
+        "entity": "Restaurante Mirapraia",
+        "opened_at": "09/02/2026 22:21",
+        "opening_balance": 100.0,
+        "transactions": [
+            {
+                "id": "TX_20260209222125_061c08",
+                "type": "sale",
+                "amount": 22.0,
+                "description": "Venda Mesa 500 - Dinheiro",
+                "payment_method": "Dinheiro",
+                "timestamp": "09/02/2026 22:21",
+                "user": "admin",
+                "details": {}
+            }
+        ],
+        "status": "open",
+        "closed_at": null,
+        "closing_balance": null,
+        "difference": null
+    }
+]

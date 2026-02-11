@@ -1,0 +1,541 @@
+[
+    {
+        "id": "34fdb63a-bf03-49c9-a0d0-f7518b50ae31",
+        "origin": "reception",
+        "original_id": "ROOM_101",
+        "closed_at": "2026-02-05 20:36:19",
+        "closed_by": "Tester",
+        "total_amount": 150.0,
+        "items": [
+            {
+                "name": "Item 1",
+                "qty": 1,
+                "unit_price": 100.0,
+                "total": 100.0
+            },
+            {
+                "name": "Item 2",
+                "qty": 1,
+                "unit_price": 50.0,
+                "total": 50.0
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 100.0,
+                "is_fiscal": false
+            },
+            {
+                "method": "Pix",
+                "amount": 50.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "room_number": "101",
+            "guest_name": "Test Guest"
+        },
+        "status": "pending",
+        "notes": null,
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "1d95d44b-3439-4eaa-b559-6af70f6179b2",
+        "origin": "reception_charge",
+        "original_id": "CHARGE_CHARGE_001",
+        "closed_at": "2026-02-05 20:36:19",
+        "closed_by": "Tester",
+        "total_amount": 100.0,
+        "items": [
+            {
+                "name": "Item 1",
+                "qty": 1,
+                "unit_price": 100.0,
+                "total": 100.0
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Cartão de Crédito",
+                "amount": 50.0,
+                "is_fiscal": false
+            },
+            {
+                "method": "Pix",
+                "amount": 50.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "room_number": "101"
+        },
+        "status": "pending",
+        "notes": null,
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "fe46d46e-fbeb-4eee-8f1b-d8eb49b88f99",
+        "origin": "reception",
+        "original_id": "ROOM_101",
+        "closed_at": "2026-02-05 20:41:15",
+        "closed_by": "Tester",
+        "total_amount": 150.0,
+        "items": [
+            {
+                "name": "Item 1",
+                "qty": 1,
+                "unit_price": 100.0,
+                "total": 100.0
+            },
+            {
+                "name": "Item 2",
+                "qty": 1,
+                "unit_price": 50.0,
+                "total": 50.0
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 100.0,
+                "is_fiscal": false
+            },
+            {
+                "method": "Pix",
+                "amount": 50.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "room_number": "101",
+            "guest_name": "Test Guest"
+        },
+        "status": "pending",
+        "notes": null,
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "f5eb0362-a840-4533-8f2f-4eb023702de3",
+        "origin": "reception_charge",
+        "original_id": "CHARGE_CHARGE_001",
+        "closed_at": "2026-02-05 20:41:15",
+        "closed_by": "Tester",
+        "total_amount": 100.0,
+        "items": [
+            {
+                "name": "Item 1",
+                "qty": 1,
+                "unit_price": 100.0,
+                "total": 100.0
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Cartão de Crédito",
+                "amount": 50.0,
+                "is_fiscal": false
+            },
+            {
+                "method": "Pix",
+                "amount": 50.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "room_number": "101"
+        },
+        "status": "pending",
+        "notes": null,
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "997bff75-8b01-4378-9d8e-f4255f444942",
+        "origin": "reception",
+        "original_id": "ROOM_101",
+        "closed_at": "2026-02-05 20:45:08",
+        "closed_by": "Tester",
+        "total_amount": 150.0,
+        "items": [
+            {
+                "name": "Item 1",
+                "qty": 1,
+                "unit_price": 100.0,
+                "total": 100.0
+            },
+            {
+                "name": "Item 2",
+                "qty": 1,
+                "unit_price": 50.0,
+                "total": 50.0
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 100.0,
+                "is_fiscal": false
+            },
+            {
+                "method": "Pix",
+                "amount": 50.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "room_number": "101",
+            "guest_name": "Test Guest"
+        },
+        "status": "pending",
+        "notes": null,
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "26300e91-78c1-46bc-9b26-9a70d59671d4",
+        "origin": "reception_charge",
+        "original_id": "CHARGE_CHARGE_001",
+        "closed_at": "2026-02-05 20:45:08",
+        "closed_by": "Tester",
+        "total_amount": 100.0,
+        "items": [
+            {
+                "name": "Item 1",
+                "qty": 1,
+                "unit_price": 100.0,
+                "total": 100.0
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Cartão de Crédito",
+                "amount": 50.0,
+                "is_fiscal": false
+            },
+            {
+                "method": "Pix",
+                "amount": 50.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "room_number": "101"
+        },
+        "status": "pending",
+        "notes": null,
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "2f9862a9-9d32-4532-85f8-55cec3b7d9ea",
+        "origin": "reception",
+        "original_id": "ROOM_101",
+        "closed_at": "2026-02-05 21:04:50",
+        "closed_by": "Tester",
+        "total_amount": 150.0,
+        "items": [
+            {
+                "name": "Item 1",
+                "qty": 1,
+                "unit_price": 100.0,
+                "total": 100.0
+            },
+            {
+                "name": "Item 2",
+                "qty": 1,
+                "unit_price": 50.0,
+                "total": 50.0
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 100.0,
+                "is_fiscal": false
+            },
+            {
+                "method": "Pix",
+                "amount": 50.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "room_number": "101",
+            "guest_name": "Test Guest"
+        },
+        "status": "pending",
+        "notes": null,
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "db6d7a5f-fe62-4bc9-8f40-800b7336ed0f",
+        "origin": "reception_charge",
+        "original_id": "CHARGE_CHARGE_001",
+        "closed_at": "2026-02-05 21:04:50",
+        "closed_by": "Tester",
+        "total_amount": 100.0,
+        "items": [
+            {
+                "name": "Item 1",
+                "qty": 1,
+                "unit_price": 100.0,
+                "total": 100.0
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Cartão de Crédito",
+                "amount": 50.0,
+                "is_fiscal": false
+            },
+            {
+                "method": "Pix",
+                "amount": 50.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "room_number": "101"
+        },
+        "status": "pending",
+        "notes": null,
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "ebab4e83-1e0e-4aac-9e1a-06091a7c2c69",
+        "origin": "reception",
+        "original_id": "ROOM_101",
+        "closed_at": "2026-02-05 21:06:30",
+        "closed_by": "Tester",
+        "total_amount": 150.0,
+        "items": [
+            {
+                "name": "Item 1",
+                "qty": 1,
+                "unit_price": 100.0,
+                "total": 100.0
+            },
+            {
+                "name": "Item 2",
+                "qty": 1,
+                "unit_price": 50.0,
+                "total": 50.0
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 100.0,
+                "is_fiscal": false
+            },
+            {
+                "method": "Pix",
+                "amount": 50.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "room_number": "101",
+            "guest_name": "Test Guest"
+        },
+        "status": "pending",
+        "notes": null,
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "f4053af3-47f1-464f-983f-bd9099a3f0b3",
+        "origin": "reception_charge",
+        "original_id": "CHARGE_CHARGE_001",
+        "closed_at": "2026-02-05 21:06:30",
+        "closed_by": "Tester",
+        "total_amount": 100.0,
+        "items": [
+            {
+                "name": "Item 1",
+                "qty": 1,
+                "unit_price": 100.0,
+                "total": 100.0
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Cartão de Crédito",
+                "amount": 50.0,
+                "is_fiscal": false
+            },
+            {
+                "method": "Pix",
+                "amount": 50.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "room_number": "101"
+        },
+        "status": "pending",
+        "notes": null,
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "6e46fdae-6ed6-4775-85f6-e519875b37d9",
+        "origin": "reception",
+        "original_id": "ROOM_101",
+        "closed_at": "2026-02-05 21:07:00",
+        "closed_by": "Tester",
+        "total_amount": 150.0,
+        "items": [
+            {
+                "name": "Item 1",
+                "qty": 1,
+                "unit_price": 100.0,
+                "total": 100.0
+            },
+            {
+                "name": "Item 2",
+                "qty": 1,
+                "unit_price": 50.0,
+                "total": 50.0
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 100.0,
+                "is_fiscal": false
+            },
+            {
+                "method": "Pix",
+                "amount": 50.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "room_number": "101",
+            "guest_name": "Test Guest"
+        },
+        "status": "pending",
+        "notes": null,
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "6d0bde40-fec3-4213-a28c-2d66206c7897",
+        "origin": "reception_charge",
+        "original_id": "CHARGE_CHARGE_001",
+        "closed_at": "2026-02-05 21:07:00",
+        "closed_by": "Tester",
+        "total_amount": 100.0,
+        "items": [
+            {
+                "name": "Item 1",
+                "qty": 1,
+                "unit_price": 100.0,
+                "total": 100.0
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Cartão de Crédito",
+                "amount": 50.0,
+                "is_fiscal": false
+            },
+            {
+                "method": "Pix",
+                "amount": 50.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "room_number": "101"
+        },
+        "status": "pending",
+        "notes": null,
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "8abdb2fa-d3e4-4d6c-b2c1-2cc3d0a35896",
+        "origin": "reception",
+        "original_id": "ROOM_101",
+        "closed_at": "2026-02-06 08:50:09",
+        "closed_by": "Tester",
+        "total_amount": 150.0,
+        "items": [
+            {
+                "name": "Item 1",
+                "qty": 1,
+                "unit_price": 100.0,
+                "total": 100.0
+            },
+            {
+                "name": "Item 2",
+                "qty": 1,
+                "unit_price": 50.0,
+                "total": 50.0
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 100.0,
+                "is_fiscal": false
+            },
+            {
+                "method": "Pix",
+                "amount": 50.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "room_number": "101",
+            "guest_name": "Test Guest"
+        },
+        "status": "pending",
+        "notes": null,
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "aa07e694-7cde-4591-b5cd-6f29d33708e8",
+        "origin": "reception_charge",
+        "original_id": "CHARGE_CHARGE_001",
+        "closed_at": "2026-02-06 08:50:09",
+        "closed_by": "Tester",
+        "total_amount": 100.0,
+        "items": [
+            {
+                "name": "Item 1",
+                "qty": 1,
+                "unit_price": 100.0,
+                "total": 100.0
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Cartão de Crédito",
+                "amount": 50.0,
+                "is_fiscal": false
+            },
+            {
+                "method": "Pix",
+                "amount": 50.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "room_number": "101"
+        },
+        "status": "pending",
+        "notes": null,
+        "fiscal_doc_uuid": null,
+        "history": []
+    }
+]

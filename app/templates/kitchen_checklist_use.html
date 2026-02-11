@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block title %}Usar Lista - {{ checklist.name }}{% endblock %}
+
+{% block content %}
+<div class="service-page">
+    <div class="service-header">
+        <span class="service-icon"><i class="bi bi-cart-check"></i></span>
+        <h2>{{ checklist.name }}</h2>
+    </div>
+
+    <div class="mb-3">
+        <a href="{{ url_for('kitchen.kitchen_checklist_manage') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <p class="text-muted mb-4">Marque os itens que deseja solicitar e informe a quantidade.</p>
+            
+            <form id="checklistForm">
+                <input type="hidden" id="listName" value="{{ checklist.name }}">
+                
+                <div class="list-group list-group-flush">
+                    {% for item in checklist.items %}
+                    <div class="list-group-item py-3">
+                        <div class="d-flex align-items-center flex-wrap gap-3">
+                            <div class="form-check flex-grow-1">
+                                <input class="form-check-input fs-4" type="checkbox" value="{{ item.name }}" id="check_{{ loop.index }}" onchange="toggleQty(this, {{ loop.index }})">
+                                <label class="form-check-label fs-5 ms-2" for="check_{{ loop.index }}">
+                                    {{ item.name }}
+                                </label>
+                                <input type="hidden" id="unit_{{ loop.index }}" value="{{ item.unit or '' }}">
+                            </div>
+                            
+                            {% if checklist.type == 'quantity' %}
+                            <div class="qty-input-group" id="qty_group_{{ loop.index }}" style="display: none; width: 150px;">
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="qty_{{ loop.index }}" placeholder="Qtd" step="0.1" min="0">
+                                    {% if item.unit %}
+                                    <span class="input-group-text">{{ item.unit }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <button type="button" class="btn btn-success btn-lg" onclick="generateOrder()">
+                        <i class="bi bi-whatsapp"></i> Gerar Pedido
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Resultado -->
+<div class="modal fade" id="resultModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">Pedido Gerado</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Revise o pedido abaixo:</p>
+                <textarea id="orderText" class="form-control" rows="15" readonly style="font-family: monospace; background-color: #f8f9fa;"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" onclick="copyText()">
+                    <i class="bi bi-clipboard"></i> Copiar Texto
+                </button>
+                <a href="#" id="waLink" target="_blank" class="btn btn-success">
+                    <i class="bi bi-whatsapp"></i> Enviar no WhatsApp
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleQty(checkbox, index) {
+    const group = document.getElementById('qty_group_' + index);
+    const input = document.getElementById('qty_' + index);
+    
+    if (group) {
+        if (checkbox.checked) {
+            group.style.display = 'block';
+            input.focus();
+        } else {
+            group.style.display = 'none';
+            input.value = '';
+        }
+    }
+}
+
+async function generateOrder() {
+    const listName = document.getElementById('listName').value;
+    const checkboxes = document.querySelectorAll('.form-check-input:checked');
+    
+    if (checkboxes.length === 0) {
+        alert('Selecione pelo menos um item para gerar o pedido.');
+        return;
+    }
+    
+    const items = [];
+    let hasEmptyQty = false;
+    
+    checkboxes.forEach(cb => {
+        const index = cb.id.split('_')[1];
+        const qtyInput = document.getElementById('qty_' + index);
+        const unitInput = document.getElementById('unit_' + index);
+        
+        let qty = '';
+        if (qtyInput) {
+            qty = qtyInput.value;
+            if (!qty) hasEmptyQty = true;
+        } else {
+            qty = '1'; // Default for simple checklist? Or just "Ok"? User said "Lista com quantidade ou checklist".
+            // If type is checklist, qty is likely not needed or just "X"
+             qty = '✓';
+        }
+        
+        items.push({
+            name: cb.value,
+            qty: qty,
+            unit: unitInput ? unitInput.value : ''
+        });
+    });
+    
+    if (document.getElementById('qty_group_1') && hasEmptyQty) {
+        if (!confirm('Alguns itens estão sem quantidade definida. Deseja continuar mesmo assim?')) {
+            return;
+        }
+    }
+    
+    // Call API
+    try {
+        const response = await fetch('/api/kitchen/checklist/send', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                list_name: listName,
+                items: items
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            document.getElementById('orderText').value = data.text;
+            
+            // Setup WhatsApp Link
+            const encodedText = encodeURIComponent(data.text);
+            document.getElementById('waLink').href = `https://wa.me/?text=${encodedText}`;
+            
+            const modal = new bootstrap.Modal(document.getElementById('resultModal'));
+            modal.show();
+        } else {
+            alert('Erro ao gerar pedido: ' + data.error);
+        }
+        
+    } catch (e) {
+        alert('Erro de conexão: ' + e);
+    }
+}
+
+function copyText() {
+    const copyText = document.getElementById("orderText");
+    copyText.select();
+    copyText.setSelectionRange(0, 99999); 
+    navigator.clipboard.writeText(copyText.value).then(() => {
+        alert("Texto copiado para a área de transferência!");
+    });
+}
+</script>
+{% endblock %}

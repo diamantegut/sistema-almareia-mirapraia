@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+
+{% block title %}Histórico de Porcionamento - Cozinha{% endblock %}
+
+{% block content %}
+<div class="service-page">
+    <div class="service-header">
+        <span class="service-icon"><i class="bi bi-clock-history"></i></span>
+        <h2>Histórico de Porcionamento</h2>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <a href="{{ url_for('main.service_page', service_id='cozinha') }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+        <div class="btn-group">
+            <a href="{{ url_for('kitchen.kitchen_reports_export', format='csv', start_date=start_date, end_date=end_date, products=selected_products) }}" class="btn btn-outline-success">
+                <i class="bi bi-file-earmark-spreadsheet"></i> Exportar CSV
+            </a>
+            <a href="{{ url_for('kitchen.kitchen_reports_export', format='pdf', start_date=start_date, end_date=end_date, products=selected_products) }}" target="_blank" class="btn btn-outline-danger">
+                <i class="bi bi-file-earmark-pdf"></i> Imprimir PDF
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body text-center">
+                    <h6 class="card-title opacity-75">Total Porcionado (Kg)</h6>
+                    <h2 class="display-6 fw-bold">{{ "%.2f"|format(stats.total_kg) }} kg</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body text-center">
+                    <h6 class="card-title opacity-75">Valor Total Processado</h6>
+                    <h2 class="display-6 fw-bold">R$ {{ "%.2f"|format(stats.total_value) }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body text-center">
+                    <h6 class="card-title opacity-75">Registros Filtrados</h6>
+                    <h2 class="display-6 fw-bold">{{ stats.count }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body bg-light">
+            <form method="GET" action="{{ url_for('kitchen.kitchen_reports') }}" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Período</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-calendar-range"></i></span>
+                        <input type="text" class="form-control" name="daterange" id="daterange" placeholder="Selecione as datas">
+                        <input type="hidden" name="start_date" id="start_date" value="{{ start_date }}">
+                        <input type="hidden" name="end_date" id="end_date" value="{{ end_date }}">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Filtrar por Produto</label>
+                    <select name="products[]" id="product-select" multiple placeholder="Selecione produtos..." autocomplete="off">
+                        {% for p in all_products %}
+                        <option value="{{ p.name }}" {% if p.name in selected_products %}selected{% endif %}>{{ p.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-funnel-fill"></i> Filtrar Resultados
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Data/Hora</th>
+                        <th>Produto (Origem)</th>
+                        <th>Qtd (Kg)</th>
+                        <th>Preço/Kg (Bruto)</th>
+                        <th>Perda Gelo %</th>
+                        <th>Custo Total (Líquido)</th>
+                        <th>Responsável</th>
+                        <th>Detalhes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in data %}
+                    <tr>
+                        <td>{{ item.date }}</td>
+                        <td class="fw-bold text-primary">{{ item.product }}</td>
+                        <td>{{ "%.3f"|format(item.qty_kg) }}</td>
+                        <td>R$ {{ "%.2f"|format(item.price_gross) }}</td>
+                        <td>
+                            {% if item.ice_loss_pct > 10 %}
+                                <span class="badge bg-danger">{{ "%.1f"|format(item.ice_loss_pct) }}%</span>
+                            {% elif item.ice_loss_pct > 5 %}
+                                <span class="badge bg-warning text-dark">{{ "%.1f"|format(item.ice_loss_pct) }}%</span>
+                            {% else %}
+                                <span class="text-success">{{ "%.1f"|format(item.ice_loss_pct) }}%</span>
+                            {% endif %}
+                        </td>
+                        <td class="fw-bold">R$ {{ "%.2f"|format(item.total_cost_liquid) }}</td>
+                        <td><small class="text-muted">{{ item.staff }}</small></td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-link text-decoration-none" data-bs-toggle="popover" data-bs-trigger="focus" title="Detalhes" data-bs-content="{{ item.details }}">
+                                <i class="bi bi-info-circle"></i> Ver
+                            </button>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center py-5 text-muted">
+                            <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                            Nenhum registro encontrado para os filtros selecionados.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        {% if total_pages > 1 %}
+        <div class="card-footer bg-white py-3">
+            <nav>
+                <ul class="pagination justify-content-center mb-0">
+                    <li class="page-item {% if page == 1 %}disabled{% endif %}">
+                        <a class="page-link" href="{{ url_for('kitchen.kitchen_reports', page=page-1, start_date=start_date, end_date=end_date) }}">Anterior</a>
+                    </li>
+                    <li class="page-item disabled">
+                        <span class="page-link">Página {{ page }} de {{ total_pages }}</span>
+                    </li>
+                    <li class="page-item {% if page == total_pages %}disabled{% endif %}">
+                        <a class="page-link" href="{{ url_for('kitchen.kitchen_reports', page=page+1, start_date=start_date, end_date=end_date) }}">Próxima</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment/min/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Init Popovers
+        var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+        var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+            return new bootstrap.Popover(popoverTriggerEl)
+        })
+
+        // Init TomSelect
+        new TomSelect("#product-select", {
+            plugins: ['remove_button', 'checkbox_options'],
+            create: false,
+            placeholder: "Selecione produtos...",
+            maxOptions: null
+        });
+
+        // Init DateRangePicker
+        $('#daterange').daterangepicker({
+            autoUpdateInput: false,
+            locale: {
+                format: 'DD/MM/YYYY',
+                applyLabel: "Aplicar",
+                cancelLabel: "Limpar",
+                fromLabel: "De",
+                toLabel: "Até",
+                daysOfWeek: ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"],
+                monthNames: ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"]
+            }
+        });
+
+        $('#daterange').on('apply.daterangepicker', function(ev, picker) {
+            $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
+            $('#start_date').val(picker.startDate.format('DD/MM/YYYY'));
+            $('#end_date').val(picker.endDate.format('DD/MM/YYYY'));
+        });
+
+        $('#daterange').on('cancel.daterangepicker', function(ev, picker) {
+            $(this).val('');
+            $('#start_date').val('');
+            $('#end_date').val('');
+        });
+
+        // Pre-fill if exists
+        const start = "{{ start_date }}";
+        const end = "{{ end_date }}";
+        if(start && end) {
+            $('#daterange').data('daterangepicker').setStartDate(start);
+            $('#daterange').data('daterangepicker').setEndDate(end);
+            $('#daterange').val(start + ' - ' + end);
+        }
+    });
+</script>
+{% endblock %}

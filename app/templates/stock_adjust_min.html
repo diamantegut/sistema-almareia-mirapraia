@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="service-container">
+    <div class="header-section">
+        <h1>Sugestões de Ajuste de Estoque Mínimo</h1>
+        <p>Com base na média de consumo dos últimos 90 dias.</p>
+    </div>
+
+    {% if suggestions %}
+    <form action="{{ url_for('stock.stock_adjust_min_levels') }}" method="POST">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Produto</th>
+                        <th>Estoque Mín. Atual</th>
+                        <th>Média Mensal (Consumo)</th>
+                        <th>Sugestão (50% da Média)</th>
+                        <th>Diferença</th>
+                        <th>Novo Estoque Mínimo</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in suggestions %}
+                    <tr>
+                        <td>{{ item.product }}</td>
+                        <td>{{ item.current_min }}</td>
+                        <td>{{ item.avg_monthly }}</td>
+                        <td style="font-weight: bold; color: #2980b9;">{{ item.suggested_min }}</td>
+                        <td class="{{ 'text-danger' if item.diff < 0 else 'text-success' }}" style="font-weight: bold;">
+                            {{ '+' if item.diff > 0 else '' }}{{ item.diff }}
+                        </td>
+                        <td>
+                            <input type="number" step="0.01" name="new_min_{{ item.id }}" value="{{ item.suggested_min }}" class="form-control" style="width: 100px;">
+                        </td>
+                        <td>
+                            <label class="switch">
+                                <input type="checkbox" name="apply_{{ item.id }}" checked>
+                                <span class="slider round"></span>
+                            </label>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="form-actions" style="margin-top: 20px;">
+            <button type="submit" class="action-btn" style="background-color: #27ae60;">Aplicar Alterações Selecionadas</button>
+            <a href="{{ url_for('main.index') }}" class="cancel-link">Voltar</a>
+        </div>
+    </form>
+    {% else %}
+    <div class="empty-state">
+        <p>Nenhuma sugestão de ajuste encontrada no momento.</p>
+        <p>Os níveis atuais de estoque mínimo parecem adequados com base no consumo recente.</p>
+        <a href="{{ url_for('main.index') }}" class="action-btn">Voltar</a>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+
+.switch input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+</style>
+
+<script>
+// Disable input if checkbox is unchecked
+document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+        const row = this.closest('tr');
+        const input = row.querySelector('input[type="number"]');
+        if (this.checked) {
+            input.removeAttribute('disabled');
+            // Ensure the input name is active for form submission
+             input.name = input.getAttribute('data-name') || input.name;
+        } else {
+            input.setAttribute('disabled', 'disabled');
+        }
+    });
+});
+</script>
+{% endblock %}

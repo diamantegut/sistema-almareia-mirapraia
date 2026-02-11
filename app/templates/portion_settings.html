@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+
+{% block title %}Configurar Regras de Porcionamento{% endblock %}
+
+{% block content %}
+<div class="service-page">
+    <div class="service-header">
+        <span class="service-icon"><i class="bi bi-gear-fill"></i></span>
+        <h2>Regras de Porcionamento</h2>
+    </div>
+
+    <div style="margin-bottom: 20px;">
+        <a href="{{ url_for('main.index') }}" class="action-btn" style="background-color: #95a5a6; text-decoration: none;">← Voltar</a>
+    </div>
+
+    <div class="card" style="margin-bottom: 30px;">
+        <h2 style="color: #2c3e50; border-bottom: 2px solid #e67e22; padding-bottom: 10px;">Regras por Produto (Específicas)</h2>
+        <p class="description">Defina regras específicas para produtos individuais. Estas regras têm prioridade sobre as regras de categoria.</p>
+
+        <!-- Lista de Regras de Produto -->
+        {% if product_rules %}
+        <div class="rules-list" style="margin-bottom: 30px;">
+            <h3 style="color: #2c3e50;">Regras Ativas (Produtos)</h3>
+            <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 15px;">
+                {% for rule in product_rules %}
+                <div class="rule-item" style="background: #fff9e6; padding: 15px; border-radius: 8px; border: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="flex: 1;">
+                        <div style="font-weight: bold; color: #d35400; margin-bottom: 5px;">
+                            Origem: {{ rule.origin }}
+                        </div>
+                        <div style="color: #7f8c8d; font-size: 0.9em;">
+                            <strong>Destinos Permitidos:</strong> {{ rule.destinations | join(', ') }}
+                        </div>
+                    </div>
+                    <form method="POST" style="margin: 0;">
+                        <input type="hidden" name="action" value="delete_product_rule">
+                        <input type="hidden" name="rule_index" value="{{ loop.index0 }}">
+                        <button type="submit" style="background: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer;">
+                            <i class="bi bi-trash-fill"></i> Remover
+                        </button>
+                    </form>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Formulário para Adicionar Nova Regra de Produto -->
+        <div class="add-rule-form" style="background: #fff; border: 1px solid #ddd; padding: 20px; border-radius: 8px;">
+            <h3 style="color: #2c3e50; margin-top: 0;">Adicionar Nova Regra de Produto</h3>
+            <form method="POST">
+                <input type="hidden" name="action" value="add_product_rule">
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-weight: bold; margin-bottom: 8px;">Produto de Origem (Selecionar 1)</label>
+                    <select name="origin_product" class="no-search" required style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
+                        <option value="" disabled selected>Selecione o produto de origem...</option>
+                        {% for product in products %}
+                        <option value="{{ product.name }}">{{ product.name }} ({{ product.category }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-weight: bold; margin-bottom: 8px;">Produtos de Destino (Selecionar Múltiplos)</label>
+                    <div style="margin-bottom: 10px;">
+                        <input type="text" id="product-search" placeholder="🔍 Buscar produto..." style="width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ddd;" onkeyup="filterProducts()">
+                    </div>
+                    <div class="products-grid" id="products-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; max-height: 300px; overflow-y: auto; padding: 10px; border: 1px solid #eee; border-radius: 5px; background: #fafafa;">
+                        {% for product in products %}
+                        <label class="product-option" style="display: flex; align-items: center; gap: 10px; padding: 5px; cursor: pointer;">
+                            <input type="checkbox" name="destination_products" value="{{ product.name }}" style="width: 16px; height: 16px;">
+                            <span class="product-name">{{ product.name }} <small style="color:#7f8c8d">({{ product.unit }})</small></span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary" style="width: 100%; padding: 12px; font-size: 1.1em; background-color: #d35400;">
+                    <i class="bi bi-plus-circle-fill"></i> Adicionar Regra de Produto
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2 style="color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px;">Regras por Categoria (Gerais)</h2>
+        
+        <!-- Lista de Regras Existentes -->
+        {% if rules %}
+        <div class="rules-list" style="margin-bottom: 30px;">
+            <h3 style="color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px;">Regras Ativas</h3>
+            <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 15px;">
+                {% for rule in rules %}
+                <div class="rule-item" style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="flex: 1;">
+                        <div style="font-weight: bold; color: #2980b9; margin-bottom: 5px;">
+                            Origem: {{ rule.origin }}
+                        </div>
+                        <div style="color: #7f8c8d; font-size: 0.9em;">
+                            <strong>Destinos:</strong> {{ rule.destinations | join(', ') }}
+                        </div>
+                    </div>
+                    <form method="POST" style="margin: 0;">
+                        <input type="hidden" name="action" value="delete">
+                        <input type="hidden" name="rule_index" value="{{ loop.index0 }}">
+                        <button type="submit" style="background: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer;">
+                            <i class="bi bi-trash-fill"></i> Remover
+                        </button>
+                    </form>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 20px; color: #95a5a6; background: #f8f9fa; border-radius: 8px; margin-bottom: 30px;">
+            Nenhuma regra configurada. Adicione uma abaixo.
+        </div>
+        {% endif %}
+
+        <!-- Formulário para Adicionar Nova Regra -->
+        <div class="add-rule-form" style="background: #fff; border: 1px solid #ddd; padding: 20px; border-radius: 8px;">
+            <h3 style="color: #2c3e50; margin-top: 0;">Adicionar Nova Regra</h3>
+            <form method="POST">
+                <input type="hidden" name="action" value="add">
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-weight: bold; margin-bottom: 8px;">Categoria de Origem (Selecionar 1)</label>
+                    <select name="origin_category" class="no-search" required style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
+                        <option value="" disabled selected>Selecione a categoria de origem...</option>
+                        {% for category in categories %}
+                        <option value="{{ category }}">{{ category }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-weight: bold; margin-bottom: 8px;">Categorias de Destino (Selecionar Múltiplas)</label>
+                    <div class="categories-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; max-height: 200px; overflow-y: auto; padding: 10px; border: 1px solid #eee; border-radius: 5px; background: #fafafa;">
+                        {% for category in categories %}
+                        <label class="category-option" style="display: flex; align-items: center; gap: 10px; padding: 5px; cursor: pointer;">
+                            <input type="checkbox" name="destination_categories" value="{{ category }}" style="width: 16px; height: 16px;">
+                            <span>{{ category }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary" style="width: 100%; padding: 12px; font-size: 1.1em;">
+                    <i class="bi bi-plus-circle-fill"></i> Adicionar Regra
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function filterProducts() {
+    const input = document.getElementById('product-search');
+    const filter = input.value.toLowerCase();
+    const grid = document.getElementById('products-grid');
+    const options = grid.querySelectorAll('.product-option');
+
+    options.forEach(option => {
+        const name = option.querySelector('.product-name').textContent.toLowerCase();
+        if (name.includes(filter)) {
+            option.style.display = "";
+        } else {
+            option.style.display = "none";
+        }
+    });
+}
+
+// Initialize TomSelect for origin product
+document.addEventListener('DOMContentLoaded', function() {
+    new TomSelect('select[name="origin_product"]', {
+        create: false,
+        sortField: {
+            field: "text",
+            direction: "asc"
+        },
+        placeholder: "Selecione o produto de origem...",
+        plugins: ['dropdown_input']
+    });
+
+    new TomSelect('select[name="origin_category"]', {
+        create: false,
+        sortField: {
+            field: "text",
+            direction: "asc"
+        },
+        placeholder: "Selecione a categoria de origem...",
+        plugins: ['dropdown_input']
+    });
+});
+</script>
+{% endblock %}

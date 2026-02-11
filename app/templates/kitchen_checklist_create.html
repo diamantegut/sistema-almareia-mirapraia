@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Editar' if is_edit else 'Nova' }} Lista - Cozinha{% endblock %}
+
+{% block content %}
+<div class="service-page">
+    <div class="service-header">
+        <span class="service-icon"><i class="bi bi-pencil-square"></i></span>
+        <h2>{{ 'Editar' if is_edit else 'Criar Nova' }} Lista</h2>
+    </div>
+
+    <form method="POST" id="listForm">
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8 mb-3">
+                        <label for="name" class="form-label">Nome da Lista</label>
+                        <input type="text" class="form-control form-control-lg" id="name" name="name" value="{{ checklist.name if checklist else '' }}" required placeholder="Ex: Feira de Quarta, Checklist Limpeza...">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="type" class="form-label">Tipo de Lista</label>
+                        <select class="form-select form-select-lg" id="type" name="type">
+                            <option value="quantity" {% if checklist and checklist.type == 'quantity' %}selected{% endif %}>Lista de Compras (Com Quantidade)</option>
+                            <option value="checklist" {% if checklist and checklist.type == 'checklist' %}selected{% endif %}>Checklist Simples (Apenas Marcar)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Itens da Lista</h5>
+                <button type="button" class="btn btn-sm btn-success" onclick="addItemRow()">
+                    <i class="bi bi-plus-lg"></i> Adicionar Item
+                </button>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-striped mb-0" id="itemsTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 60%">Item / Insumo</th>
+                            <th style="width: 30%">Unidade (Opcional)</th>
+                            <th style="width: 10%"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if checklist and checklist.items %}
+                            {% for item in checklist.items %}
+                            <tr>
+                                <td>
+                                    <input type="text" class="form-control" name="item_name[]" list="insumosList" value="{{ item.name }}" required>
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control" name="item_unit[]" value="{{ item.unit or '' }}" placeholder="Ex: kg, un, cx">
+                                </td>
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeRow(this)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <!-- Default Empty Row -->
+                            <tr>
+                                <td>
+                                    <input type="text" class="form-control" name="item_name[]" list="insumosList" placeholder="Digite o nome do item..." required>
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control" name="item_unit[]" placeholder="Ex: kg, un, cx">
+                                </td>
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeRow(this)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+                
+                <div class="p-3 text-center border-top">
+                    <button type="button" class="btn btn-outline-primary" onclick="addItemRow()">
+                        <i class="bi bi-plus-circle"></i> Adicionar Mais Itens
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between">
+            <a href="{{ url_for('kitchen.kitchen_checklist_manage') }}" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-primary btn-lg px-5">Salvar Lista</button>
+        </div>
+    </form>
+</div>
+
+<datalist id="insumosList">
+    {% for insumo in insumos %}
+    <option value="{{ insumo.name }}">{{ insumo.unit or '' }}</option>
+    {% endfor %}
+</datalist>
+
+<script>
+function addItemRow() {
+    const tbody = document.querySelector('#itemsTable tbody');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+        <td>
+            <input type="text" class="form-control" name="item_name[]" list="insumosList" placeholder="Digite o nome do item..." required>
+        </td>
+        <td>
+            <input type="text" class="form-control" name="item_unit[]" placeholder="Ex: kg, un, cx">
+        </td>
+        <td class="text-center">
+            <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeRow(this)">
+                <i class="bi bi-trash"></i>
+            </button>
+        </td>
+    `;
+    tbody.appendChild(tr);
+    // Focus on new input
+    tr.querySelector('input').focus();
+}
+
+function removeRow(btn) {
+    const tbody = document.querySelector('#itemsTable tbody');
+    if (tbody.rows.length > 1) {
+        btn.closest('tr').remove();
+    } else {
+        // Clear instead of remove if only one
+        const tr = btn.closest('tr');
+        tr.querySelectorAll('input').forEach(i => i.value = '');
+    }
+}
+</script>
+{% endblock %}

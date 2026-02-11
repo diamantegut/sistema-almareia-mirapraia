@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-gear"></i> Configurações Fiscais</h2>
+        <a href="{{ url_for('admin.fiscal_pool_view') }}" class="btn btn-outline-primary">
+            <i class="bi bi-list-ul"></i> Ver Pool Fiscal
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form method="POST">
+                <h5 class="card-title mb-4">Credenciais NFC-e</h5>
+                
+                <div class="mb-3">
+                    <label class="form-label">Ambiente</label>
+                    <select name="environment" class="form-select">
+                        <option value="2" {% if settings.get('environment') == '2' %}selected{% endif %}>Homologação (Testes)</option>
+                        <option value="1" {% if settings.get('environment') == '1' %}selected{% endif %}>Produção</option>
+                    </select>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">CSC ID (Token ID)</label>
+                        <input type="text" name="csc_id" class="form-control" value="{{ settings.get('csc_id', '') }}" required>
+                        <div class="form-text">Ex: 000001</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">CSC Token (Código de Segurança)</label>
+                        <input type="text" name="csc_token" class="form-control" value="{{ settings.get('csc_token', '') }}" required>
+                    </div>
+                </div>
+
+                <h5 class="card-title mt-4 mb-3">Certificado Digital</h5>
+                
+                <div class="mb-3">
+                    <label class="form-label">Caminho do Certificado (.pfx)</label>
+                    <input type="text" name="certificate_path" class="form-control" value="{{ settings.get('certificate_path', '') }}">
+                    <div class="form-text">Caminho absoluto no servidor ou relativo à pasta raiz.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Senha do Certificado</label>
+                    <input type="password" name="certificate_password" class="form-control" value="{{ settings.get('certificate_password', '') }}">
+                </div>
+
+                <hr class="my-4">
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{{ url_for('main.index') }}" class="btn btn-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-primary">Salvar Configurações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

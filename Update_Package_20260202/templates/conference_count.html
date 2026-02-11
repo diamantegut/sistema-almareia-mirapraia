@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block title %}Contagem - Conferência {{ conference.id }}{% endblock %}
+
+{% block content %}
+<div class="conference-page">
+    <h2><i class="bi bi-clipboard-check"></i> Conferência: {{ conference.department }}</h2>
+    <p>Data de Início: {{ conference.created_at }}</p>
+    <p>Status: <strong>{{ conference.status }}</strong></p>
+
+    <form method="POST">
+        <div class="actions-bar" style="margin-bottom: 20px; position: sticky; top: 0; background: white; padding: 10px; z-index: 100; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <input type="text" id="searchBox" placeholder="Buscar produto..." onkeyup="filterTable()" style="padding: 8px; width: 300px; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+            <div>
+                <a href="{{ url_for('index') }}" class="action-btn" style="background-color: #95a5a6; text-decoration: none; margin-right: 10px;"><i class="bi bi-door-closed"></i> Sair</a>
+                <button type="submit" class="action-btn" style="background-color: #1e3a8a;"><i class="bi bi-save-fill"></i> Salvar Progresso</button>
+                <button type="submit" name="finish" value="true" class="action-btn" style="background-color: #27ae60;" onclick="return confirm('Tem certeza que deseja finalizar a conferência? Isso irá gerar o relatório de divergências.')"><i class="bi bi-check-circle-fill"></i> Finalizar</button>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-striped table-hover" id="countTable">
+                <thead>
+                    <tr>
+                        <th>Produto</th>
+                        <th>Unid.</th>
+                        <th>Estoque Sistema</th>
+                        <th>Contagem Física</th>
+                        <th>Diferença</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+            <tbody>
+                {% for item in conference['items'] %}
+                <tr style="border-bottom: 1px solid #eee;" id="row-{{ item.product_id }}">
+                    <td>{{ item.product_name }}</td>
+                    <td>{{ item.unit | abbreviate_unit }}</td>
+                    <td>{{ item.system_qty }}</td>
+                    <td>
+                        <input type="number" step="0.01" name="qty_{{ item.product_id }}" value="{{ item.counted_qty if item.counted_qty is not none else '' }}" class="form-control" style="width: 100px; padding: 5px;" data-system-qty="{{ item.system_qty }}" oninput="updateDiff(this)">
+                    </td>
+                    <td class="diff-cell" style="font-weight: bold;">
+                        {% if item.counted_qty is not none %}
+                            {% set diff = item.counted_qty - item.system_qty %}
+                            <span class="{{ 'text-danger' if diff < 0 else ('text-success' if diff > 0 else 'text-dark') }}">
+                                {{ diff | round(2) }}
+                            </span>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td style="text-align: center;">
+                        <button type="button" class="action-btn" style="background-color: #7f8c8d; font-size: 0.8em; padding: 5px 10px;" data-id="{{ item.product_id }}" data-name="{{ item.product_name }}" onclick="skipItem(this.dataset.id, this.dataset.name)"><i class="bi bi-slash-circle"></i> Não Conferir</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </form>
+</div>
+
+<script>
+function filterTable() {
+    var input, filter, table, tr, td, i, txtValue;
+    input = document.getElementById("searchBox");
+    filter = input.value.toUpperCase();
+    table = document.getElementById("countTable");
+    tr = table.getElementsByTagName("tr");
+    for (i = 0; i < tr.length; i++) {
+        td = tr[i].getElementsByTagName("td")[0];
+        if (td) {
+            txtValue = td.textContent || td.innerText;
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                tr[i].style.display = "";
+            } else {
+                tr[i].style.display = "none";
+            }
+        }       
+    }
+}
+
+function updateDiff(input) {
+    var systemQty = parseFloat(input.dataset.systemQty);
+    var row = input.closest('tr');
+    var diffCell = row.querySelector('.diff-cell');
+    var val = parseFloat(input.value);
+    
+    if (isNaN(val)) {
+        diffCell.textContent = '-';
+        diffCell.style.color = 'black';
+    } else {
+        var diff = val - systemQty;
+        diffCell.textContent = diff.toFixed(2);
+        if (diff < 0) diffCell.style.color = 'red';
+        else if (diff > 0) diffCell.style.color = 'green';
+        else diffCell.style.color = 'black';
+    }
+}
+
+function skipItem(productId, productName) {
+    if (confirm('Deseja marcar "' + productName + '" como NÃO CONFERIR? Ele será removido desta lista e de conferências futuras.')) {
+        fetch('/conference/item/skip', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                product_id: productId,
+                product_name: productName,
+                department: '{{ conference.department }}'
+            })
+        })
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
+            if (data.success) {
+                var row = document.getElementById('row-' + productId);
+                if (row) { row.remove(); }
+            } else {
+                alert('Erro ao marcar item: ' + data.message);
+            }
+        })
+        .catch(function(error) {
+            console.error('Error:', error);
+            alert('Erro de conexão.');
+        });
+    }
+}
+</script>
+{% endblock %}

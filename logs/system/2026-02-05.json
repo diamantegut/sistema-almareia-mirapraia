@@ -1,0 +1,330 @@
+[
+    {
+        "id": "SYS_20260205073211898813",
+        "timestamp": "05/02/2026 07:32:11",
+        "timestamp_iso": "2026-02-05T07:32:11.898827",
+        "action": "close_cashier",
+        "user": "test_user",
+        "category": "Caixa",
+        "details": {
+            "session_id": "SESSION_123",
+            "closing_balance": 100.0,
+            "difference": 0.0,
+            "opened_at": "01/01/2026 10:00",
+            "closed_at": "05/02/2026 07:32",
+            "department": "Recepção"
+        }
+    },
+    {
+        "id": "SYS_20260205073212023980",
+        "timestamp": "05/02/2026 07:32:12",
+        "timestamp_iso": "2026-02-05T07:32:12.023997",
+        "action": "cancel_consumption",
+        "user": "admin_user",
+        "category": "Cancelamento",
+        "details": {
+            "charge_id": "CHARGE_TEST_001",
+            "room_number": "101",
+            "total": 100.0,
+            "old_status": "pending",
+            "justification": "Erro de lançamento"
+        }
+    },
+    {
+        "id": "SYS_20260205073212501143",
+        "timestamp": "05/02/2026 07:32:12",
+        "timestamp_iso": "2026-02-05T07:32:12.501159",
+        "action": "Login",
+        "user": "admin",
+        "category": "Autenticação",
+        "details": "Usuário admin entrou no sistema"
+    },
+    {
+        "id": "SYS_20260205073212948014",
+        "timestamp": "05/02/2026 07:32:12",
+        "timestamp_iso": "2026-02-05T07:32:12.948032",
+        "action": "cancel_consumption",
+        "user": "admin_user",
+        "category": "Cancelamento",
+        "details": {
+            "charge_id": "TEST_CHARGE_20260205073212",
+            "room_number": "999",
+            "total": 10.0,
+            "old_status": "pending",
+            "justification": "Integration Test Justification"
+        }
+    },
+    {
+        "id": "SYS_20260205073213064135",
+        "timestamp": "05/02/2026 07:32:13",
+        "timestamp_iso": "2026-02-05T07:32:13.064150",
+        "action": "Cardápio Criado",
+        "user": "Sistema",
+        "category": "Cardápio",
+        "details": {
+            "name": "Test Burger",
+            "category": "Lanches",
+            "message": "Produto \"Test Burger\" criado."
+        }
+    },
+    {
+        "id": "SYS_20260205073213789400",
+        "timestamp": "05/02/2026 07:32:13",
+        "timestamp_iso": "2026-02-05T07:32:13.789416",
+        "action": "transfer_item",
+        "user": "SupervisorUser",
+        "category": "Restaurante",
+        "details": {
+            "description": "Transferiu 1.0x Coke da Mesa 10 para Mesa 20",
+            "source_table": "10",
+            "target_table": "20",
+            "item": "Coke",
+            "qty": 1.0,
+            "user": "SupervisorUser"
+        }
+    },
+    {
+        "id": "SYS_20260205073213804853",
+        "timestamp": "05/02/2026 07:32:13",
+        "timestamp_iso": "2026-02-05T07:32:13.804873",
+        "action": "transfer_item",
+        "user": "SupervisorUser",
+        "category": "Restaurante",
+        "details": {
+            "description": "Transferiu 1.0x Coke da Mesa 10 para Mesa 20",
+            "source_table": "10",
+            "target_table": "20",
+            "item": "Coke",
+            "qty": 1.0,
+            "user": "SupervisorUser"
+        }
+    },
+    {
+        "id": "SYS_20260205073213829195",
+        "timestamp": "05/02/2026 07:32:13",
+        "timestamp_iso": "2026-02-05T07:32:13.829214",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260205073213846055",
+        "timestamp": "05/02/2026 07:32:13",
+        "timestamp_iso": "2026-02-05T07:32:13.846074",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260205073213863170",
+        "timestamp": "05/02/2026 07:32:13",
+        "timestamp_iso": "2026-02-05T07:32:13.863186",
+        "action": "transfer_to_room",
+        "user": "Admin",
+        "category": "Geral",
+        "details": {
+            "source_table": "10",
+            "target_room": "101",
+            "total": 22.0,
+            "items": [
+                {
+                    "name": "Burger",
+                    "price": 20,
+                    "qty": 1,
+                    "source": "restaurant"
+                }
+            ],
+            "user": "Admin",
+            "description": "Mesa 10 -> Quarto 101"
+        }
+    },
+    {
+        "id": "SYS_20260205074027730139",
+        "timestamp": "05/02/2026 07:40:27",
+        "timestamp_iso": "2026-02-05T07:40:27.730153",
+        "action": "Cardápio Criado",
+        "user": "Sistema",
+        "category": "Cardápio",
+        "details": {
+            "name": "Test Burger",
+            "category": "Lanches",
+            "message": "Produto \"Test Burger\" criado."
+        }
+    },
+    {
+        "id": "SYS_20260205110628716158",
+        "timestamp": "05/02/2026 11:06:28",
+        "timestamp_iso": "2026-02-05T11:06:28.716174",
+        "action": "cancel_consumption",
+        "user": "Angelo",
+        "category": "Cancelamento",
+        "details": {
+            "charge_id": "CHARGE_GOV_11_20260203101406_910414",
+            "room_number": "11",
+            "total": 17.8,
+            "old_status": "pending",
+            "justification": "teste"
+        }
+    },
+    {
+        "id": "SYS_20260205110802873196",
+        "timestamp": "05/02/2026 11:08:02",
+        "timestamp_iso": "2026-02-05T11:08:02.873213",
+        "action": "close_cashier",
+        "user": "Angelo",
+        "category": "Caixa",
+        "details": {
+            "session_id": "SESSION_GUEST_CONSUMPTION_20260205110057_Angelo",
+            "closing_balance": 537.68,
+            "difference": 0.0,
+            "opened_at": "05/02/2026 11:00",
+            "closed_at": "05/02/2026 11:08",
+            "department": "Recepção"
+        }
+    },
+    {
+        "id": "SYS_20260205152002688460",
+        "timestamp": "05/02/2026 15:20:02",
+        "timestamp_iso": "2026-02-05T15:20:02.688484",
+        "action": "Logout",
+        "user": "priscila",
+        "category": "Autenticação",
+        "details": "Usuário priscila saiu do sistema"
+    },
+    {
+        "id": "SYS_20260205153247579682",
+        "timestamp": "05/02/2026 15:32:47",
+        "timestamp_iso": "2026-02-05T15:32:47.579694",
+        "action": "close_cashier",
+        "user": "Angelo",
+        "category": "Caixa",
+        "details": {
+            "session_id": "SESSION_GUEST_CONSUMPTION_20260205110805_Angelo",
+            "closing_balance": 1588.73,
+            "difference": 0.0,
+            "opened_at": "05/02/2026 11:08",
+            "closed_at": "05/02/2026 15:32",
+            "department": "Recepção"
+        }
+    },
+    {
+        "id": "SYS_20260205201130538706",
+        "timestamp": "05/02/2026 20:11:30",
+        "timestamp_iso": "2026-02-05T20:11:30.538724",
+        "action": "return_to_restaurant",
+        "user": "admin",
+        "category": "Geral",
+        "details": {
+            "charge_id": "charge_123",
+            "source_room": "101",
+            "target_table": "10",
+            "total": 5.0,
+            "user": "admin"
+        }
+    },
+    {
+        "id": "SYS_20260205201513927250",
+        "timestamp": "05/02/2026 20:15:13",
+        "timestamp_iso": "2026-02-05T20:15:13.927265",
+        "action": "return_to_restaurant",
+        "user": "admin",
+        "category": "Geral",
+        "details": {
+            "charge_id": "charge_123",
+            "source_room": "101",
+            "target_table": "10",
+            "total": 5.0,
+            "user": "admin"
+        }
+    },
+    {
+        "id": "SYS_20260205203119735128",
+        "timestamp": "05/02/2026 20:31:19",
+        "timestamp_iso": "2026-02-05T20:31:19.735143",
+        "action": "return_to_restaurant",
+        "user": "admin",
+        "category": "Geral",
+        "details": {
+            "charge_id": "charge_123",
+            "source_room": "101",
+            "target_table": "10",
+            "total": 5.0,
+            "user": "admin"
+        }
+    },
+    {
+        "id": "SYS_20260205203629159480",
+        "timestamp": "05/02/2026 20:36:29",
+        "timestamp_iso": "2026-02-05T20:36:29.159495",
+        "action": "return_to_restaurant",
+        "user": "admin",
+        "category": "Geral",
+        "details": {
+            "charge_id": "charge_123",
+            "source_room": "101",
+            "target_table": "10",
+            "total": 5.0,
+            "user": "admin"
+        }
+    },
+    {
+        "id": "SYS_20260205204511196656",
+        "timestamp": "05/02/2026 20:45:11",
+        "timestamp_iso": "2026-02-05T20:45:11.196670",
+        "action": "return_to_restaurant",
+        "user": "admin",
+        "category": "Geral",
+        "details": {
+            "charge_id": "charge_123",
+            "source_room": "101",
+            "target_table": "10",
+            "total": 5.0,
+            "user": "admin"
+        }
+    },
+    {
+        "id": "SYS_20260205210711898774",
+        "timestamp": "05/02/2026 21:07:11",
+        "timestamp_iso": "2026-02-05T21:07:11.898796",
+        "action": "return_to_restaurant",
+        "user": "admin",
+        "category": "Geral",
+        "details": {
+            "charge_id": "charge_123",
+            "source_room": "101",
+            "target_table": "10",
+            "total": 5.0,
+            "user": "admin"
+        }
+    }
+]

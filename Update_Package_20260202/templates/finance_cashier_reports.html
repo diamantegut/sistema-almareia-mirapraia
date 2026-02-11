@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+
+{% macro render_sessions_table(sessions, id_prefix, empty_message) %}
+    <div class="card shadow-sm">
+        <div class="card-body">
+            {% if sessions %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Data Fechamento</th>
+                            <th>Operador</th>
+                            <th class="text-end">Abertura</th>
+                            <th class="text-end text-success">Entradas</th>
+                            <th class="text-end text-danger">Saídas</th>
+                            <th class="text-end fw-bold">Saldo Final</th>
+                            <th class="text-center">Detalhes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for session in sessions %}
+                        <tr>
+                            <td>
+                                <div>{{ session.closed_at.split(' ')[0] }}</div>
+                                <small class="text-muted">{{ session.closed_at.split(' ')[1] }}</small>
+                            </td>
+                            <td>{{ session.user }}</td>
+                            <td class="text-end">R$ {{ "%.2f"|format(session.opening_balance) }}</td>
+                            <td class="text-end text-success">R$ {{ "%.2f"|format(session.total_in) }}</td>
+                            <td class="text-end text-danger">R$ {{ "%.2f"|format(session.total_out) }}</td>
+                            <td class="text-end fw-bold">R$ {{ "%.2f"|format(session.closing_balance) }}</td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-outline-info" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ id_prefix }}{{ loop.index }}" style="min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" aria-label="Ver Detalhes">
+                                    <i class="bi bi-chevron-down"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr class="collapse" id="collapse{{ id_prefix }}{{ loop.index }}">
+                            <td colspan="7" class="bg-light">
+                                <div class="p-3">
+                                    <h6>Movimentações</h6>
+                                    <table class="table table-sm table-bordered bg-white">
+                                        <thead>
+                                            <tr>
+                                                <th>Hora</th>
+                                                <th>Tipo</th>
+                                                <th>Descrição</th>
+                                                <th>Forma Pag.</th>
+                                                <th class="text-end">Valor</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for t in session.transactions %}
+                                            <tr>
+                                                <td>
+                                                    {% if t.timestamp %}
+                                                        {{ t.timestamp.split(' ')[1] }}
+                                                    {% else %}
+                                                        {{ t.time }}
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if t.type == 'sale' or t.type == 'in' or t.type == 'deposit' %}
+                                                        <span class="badge bg-success">Entrada</span>
+                                                    {% else %}
+                                                        <span class="badge bg-danger">Saída</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>{{ t.description }}</td>
+                                                <td>{{ t.payment_method }}</td>
+                                                <td class="text-end">R$ {{ "%.2f"|format(t.amount) }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info">{{ empty_message }}</div>
+            {% endif %}
+        </div>
+    </div>
+{% endmacro %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-journal-text"></i> Relatório de Fechamentos de Caixa</h2>
+        <a href="{{ url_for('index') }}" class="btn btn-secondary" style="min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" aria-label="Voltar">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+    </div>
+
+    <!-- Status Summary Cards -->
+    <div class="row mb-4">
+        <!-- Restaurant Cashier -->
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-{{ 'success' if status_summary.restaurant.status == 'open' else 'secondary' }}">
+                <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Caixa Restaurante</h5>
+                    <span class="badge bg-{{ 'success' if status_summary.restaurant.status == 'open' else 'secondary' }}">
+                        {{ 'ABERTO' if status_summary.restaurant.status == 'open' else 'FECHADO' }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    {% if status_summary.restaurant.status == 'open' %}
+                        <p class="mb-1 text-muted">Operador: <strong>{{ status_summary.restaurant.user }}</strong></p>
+                        <p class="mb-1 text-muted">Aberto em: {{ status_summary.restaurant.opened_at }}</p>
+                        <h3 class="text-primary mt-3">R$ {{ "%.2f"|format(status_summary.restaurant.current_balance) }}</h3>
+                        <small class="text-muted">{{ status_summary.restaurant.transaction_count }} transações</small>
+                    {% else %}
+                        <p class="mb-1 text-muted">Último Fechamento:</p>
+                        <p class="mb-1"><strong>{{ status_summary.restaurant.last_closed_at or 'Nunca' }}</strong></p>
+                        <p class="mb-1">Por: {{ status_summary.restaurant.last_closed_by or '-' }}</p>
+                        {% if status_summary.restaurant.last_difference and status_summary.restaurant.last_difference != 0 %}
+                            <div class="alert alert-warning py-1 mt-2 mb-0">
+                                <i class="bi bi-exclamation-triangle"></i> Divergência: R$ {{ "%.2f"|format(status_summary.restaurant.last_difference) }}
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Guest Consumption Cashier -->
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-{{ 'success' if status_summary.guest_consumption.status == 'open' else 'secondary' }}">
+                <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Caixa Hóspedes</h5>
+                    <span class="badge bg-{{ 'success' if status_summary.guest_consumption.status == 'open' else 'secondary' }}">
+                        {{ 'ABERTO' if status_summary.guest_consumption.status == 'open' else 'FECHADO' }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    {% if status_summary.guest_consumption.status == 'open' %}
+                        <p class="mb-1 text-muted">Operador: <strong>{{ status_summary.guest_consumption.user }}</strong></p>
+                        <p class="mb-1 text-muted">Aberto em: {{ status_summary.guest_consumption.opened_at }}</p>
+                        <h3 class="text-primary mt-3">R$ {{ "%.2f"|format(status_summary.guest_consumption.current_balance) }}</h3>
+                        <small class="text-muted">{{ status_summary.guest_consumption.transaction_count }} transações</small>
+                    {% else %}
+                        <p class="mb-1 text-muted">Último Fechamento:</p>
+                        <p class="mb-1"><strong>{{ status_summary.guest_consumption.last_closed_at or 'Nunca' }}</strong></p>
+                        <p class="mb-1">Por: {{ status_summary.guest_consumption.last_closed_by or '-' }}</p>
+                        {% if status_summary.guest_consumption.last_difference and status_summary.guest_consumption.last_difference != 0 %}
+                            <div class="alert alert-warning py-1 mt-2 mb-0">
+                                <i class="bi bi-exclamation-triangle"></i> Divergência: R$ {{ "%.2f"|format(status_summary.guest_consumption.last_difference) }}
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Daily Rates Cashier -->
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-{{ 'success' if status_summary.daily_rates.status == 'open' else 'secondary' }}">
+                <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Caixa Diárias</h5>
+                    <span class="badge bg-{{ 'success' if status_summary.daily_rates.status == 'open' else 'secondary' }}">
+                        {{ 'ABERTO' if status_summary.daily_rates.status == 'open' else 'FECHADO' }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    {% if status_summary.daily_rates.status == 'open' %}
+                        <p class="mb-1 text-muted">Operador: <strong>{{ status_summary.daily_rates.user }}</strong></p>
+                        <p class="mb-1 text-muted">Aberto em: {{ status_summary.daily_rates.opened_at }}</p>
+                        <h3 class="text-primary mt-3">R$ {{ "%.2f"|format(status_summary.daily_rates.current_balance) }}</h3>
+                        <small class="text-muted">{{ status_summary.daily_rates.transaction_count }} transações</small>
+                    {% else %}
+                        <p class="mb-1 text-muted">Último Fechamento:</p>
+                        <p class="mb-1"><strong>{{ status_summary.daily_rates.last_closed_at or 'Nunca' }}</strong></p>
+                        <p class="mb-1">Por: {{ status_summary.daily_rates.last_closed_by or '-' }}</p>
+                        {% if status_summary.daily_rates.last_difference and status_summary.daily_rates.last_difference != 0 %}
+                            <div class="alert alert-warning py-1 mt-2 mb-0">
+                                <i class="bi bi-exclamation-triangle"></i> Divergência: R$ {{ "%.2f"|format(status_summary.daily_rates.last_difference) }}
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('finance_cashier_reports') }}" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label for="start_date" class="form-label">Data Inicial</label>
+                    <input type="date" class="form-control" id="start_date" name="start_date" value="{{ filters.start_date or '' }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="end_date" class="form-label">Data Final</label>
+                    <input type="date" class="form-control" id="end_date" name="end_date" value="{{ filters.end_date or '' }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="department" class="form-label">Departamento</label>
+                    <select class="form-select" id="department" name="department">
+                        <option value="all" {% if filters.department == 'all' %}selected{% endif %}>Todos</option>
+                        <option value="restaurant_service" {% if filters.department == 'restaurant_service' %}selected{% endif %}>Restaurante - Serviço</option>
+                        <option value="reception_room_billing" {% if filters.department == 'reception_room_billing' %}selected{% endif %}>Recepção - Contas</option>
+                        <option value="reception_reservations" {% if filters.department == 'reception_reservations' %}selected{% endif %}>Recepção - Reservas</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100 mb-2">
+                        <i class="bi bi-filter"></i> Filtrar
+                    </button>
+                    <a href="{{ url_for('finance_cashier_reports') }}" class="btn btn-outline-secondary w-100">
+                        Limpar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <ul class="nav nav-tabs mb-3" id="cashierTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link {% if filters.department == 'restaurant_service' or filters.department == 'all' %}active{% endif %}" id="restaurant-tab" data-bs-toggle="tab" data-bs-target="#restaurant" type="button" role="tab" aria-selected="true" {% if filters.department != 'all' and filters.department != 'restaurant_service' %}disabled{% endif %}>
+                <i class="bi bi-shop"></i> Restaurante - Serviço
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link {% if filters.department == 'reception_room_billing' %}active{% endif %}" id="reception-billing-tab" data-bs-toggle="tab" data-bs-target="#reception-billing" type="button" role="tab" aria-selected="false" {% if filters.department != 'all' and filters.department != 'reception_room_billing' %}disabled{% endif %}>
+                <i class="bi bi-receipt"></i> Recepção - Contas
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link {% if filters.department == 'reception_reservations' %}active{% endif %}" id="reception-reservations-tab" data-bs-toggle="tab" data-bs-target="#reception-reservations" type="button" role="tab" aria-selected="false" {% if filters.department != 'all' and filters.department != 'reception_reservations' %}disabled{% endif %}>
+                <i class="bi bi-calendar-check"></i> Recepção - Reservas
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="cashierTabsContent">
+        <!-- Restaurante Tab -->
+        <div class="tab-pane fade {% if filters.department == 'restaurant_service' or filters.department == 'all' %}show active{% endif %}" id="restaurant" role="tabpanel" aria-labelledby="restaurant-tab">
+            {{ render_sessions_table(restaurant_service_sessions, 'Rest', 'Nenhum fechamento de caixa encontrado para o serviço de restaurante.') }}
+        </div>
+
+        <!-- Recepção Billing Tab -->
+        <div class="tab-pane fade {% if filters.department == 'reception_room_billing' %}show active{% endif %}" id="reception-billing" role="tabpanel" aria-labelledby="reception-billing-tab">
+             {{ render_sessions_table(reception_room_billing_sessions, 'RecBill', 'Nenhum fechamento de caixa encontrado para contas da recepção.') }}
+        </div>
+        
+        <!-- Recepção Reservations Tab -->
+        <div class="tab-pane fade {% if filters.department == 'reception_reservations' %}show active{% endif %}" id="reception-reservations" role="tabpanel" aria-labelledby="reception-reservations-tab">
+             {{ render_sessions_table(reception_reservations_sessions, 'RecRes', 'Nenhum fechamento de caixa encontrado para reservas.') }}
+        </div>
+    </div>
+</div>
+{% endblock %}

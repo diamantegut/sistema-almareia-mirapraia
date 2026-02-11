@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Registro - Almareia Hotel{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-box">
+        <div style="margin-bottom: 20px; text-align: left;">
+            <a href="{{ url_for('auth.login') }}" style="text-decoration: none; color: #7f8c8d; font-weight: bold;">← Voltar</a>
+        </div>
+        <h2>Registro de Colaborador</h2>
+        
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="alert">
+                    {% for message in messages %}
+                        <p>{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('auth.register') }}">
+            <div class="form-group">
+                <label for="username">Nome do Colaborador</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="department">Departamento</label>
+                <select id="department" name="department" required class="form-control">
+                    <option value="" disabled selected>Selecione seu departamento</option>
+                    {% for dept in departments %}
+                    <option value="{{ dept }}">{{ dept }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="role">Cargo</label>
+                <select id="role" name="role" required class="form-control">
+                    <option value="colaborador" selected>Colaborador</option>
+                    <option value="gerente">Gerente</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Senha (4 dígitos)</label>
+                <input type="password" id="password" name="password" maxlength="4" pattern="\d{4}" title="A senha deve ter 4 dígitos numéricos" required>
+            </div>
+            <div class="form-group">
+                <label for="confirm_password">Confirmar Senha</label>
+                <input type="password" id="confirm_password" name="confirm_password" maxlength="4" pattern="\d{4}" required>
+            </div>
+            <button type="submit" class="auth-btn" style="min-height: 44px; display: flex; align-items: center; justify-content: center;" aria-label="Registrar">Registrar</button>
+        </form>
+        
+        <p class="auth-footer">
+            Já tem conta? <a href="{{ url_for('auth.login') }}">Faça login</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

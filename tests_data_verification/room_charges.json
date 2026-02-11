@@ -1,0 +1,32 @@
+[
+    {
+        "id": "CHARGE_001",
+        "room_number": "101",
+        "total": 100.0,
+        "status": "paid",
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 100.0,
+                "qty": 1
+            }
+        ],
+        "service_fee_removed": true,
+        "paid_at": "06/02/2026 08:50",
+        "closed_by": "Tester",
+        "payment_method": "Cartão de Crédito (R$ 50.00), Pix (R$ 50.00)",
+        "payments": [
+            {
+                "method_id": "2",
+                "method_name": "Cartão de Crédito",
+                "amount": 50.0
+            },
+            {
+                "method_id": "3",
+                "method_name": "Pix",
+                "amount": 50.0
+            }
+        ],
+        "notes": " [Pago Individualmente por Tester em 06/02/2026 08:50]"
+    }
+]

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Gerenciar Listas - Cozinha{% endblock %}
+
+{% block content %}
+<div class="service-page">
+    <div class="service-header">
+        <span class="service-icon"><i class="bi bi-card-checklist"></i></span>
+        <h2>Gerenciar Listas de Cozinha</h2>
+    </div>
+
+    <div class="mb-4 d-flex justify-content-between">
+        <a href="{{ url_for('kitchen.kitchen_checklist_create') }}" class="btn btn-primary btn-lg">
+            <i class="bi bi-plus-circle"></i> Adicionar Nova Lista
+        </a>
+    </div>
+
+    {% if lists %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for list in lists %}
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">{{ list.name }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">
+                        {% if list.type == 'quantity' %}
+                            <span class="badge bg-info text-dark">Lista de Quantidades</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Checklist Simples</span>
+                        {% endif %}
+                    </h6>
+                    <p class="card-text">
+                        {{ list.items|length }} itens cadastrados.<br>
+                        <small class="text-muted">Criado em: {{ list.created_at }}</small>
+                    </p>
+                </div>
+                <div class="card-footer bg-transparent border-top-0 d-flex justify-content-between">
+                    <a href="{{ url_for('kitchen.kitchen_checklist_use', list_id=list.id) }}" class="btn btn-success flex-grow-1 me-2">
+                        <i class="bi bi-play-fill"></i> Usar
+                    </a>
+                    <a href="{{ url_for('kitchen.kitchen_checklist_edit', list_id=list.id) }}" class="btn btn-outline-primary me-1">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+                    <form action="{{ url_for('kitchen.kitchen_checklist_delete', list_id=list.id) }}" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir esta lista?');">
+                        <button type="submit" class="btn btn-outline-danger">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center p-5">
+        <h4>Nenhuma lista encontrada</h4>
+        <p>Crie sua primeira lista de compras ou checklist para começar.</p>
+        <a href="{{ url_for('kitchen.kitchen_checklist_create') }}" class="btn btn-primary mt-3">Criar Lista</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

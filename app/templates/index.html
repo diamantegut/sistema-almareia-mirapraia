@@ -1,0 +1,315 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Back of the House{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    {% if stock_notification %}
+    <div class="notification-banner" style="background-color: #f39c12; color: white; padding: 15px; border-radius: 5px; margin-bottom: 20px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+        <h3><i class="bi bi-box-seam"></i> Lembrete de Estoques</h3>
+        <p>{{ stock_notification }}</p>
+    </div>
+    {% endif %}
+
+    {% if stock_adjustment_alert %}
+    <div class="notification-banner" style="background-color: #2980b9; color: white; padding: 15px; border-radius: 5px; margin-bottom: 20px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+        <h3><i class="bi bi-bar-chart-fill"></i> Ajuste de Estoque Mensal</h3>
+        <p>Hoje é o primeiro dia do mês. Verifique as sugestões de ajuste de estoque mínimo baseadas no consumo.</p>
+        <a href="{{ url_for('stock.stock_adjust_min_levels') }}" class="action-btn" style="background-color: white; color: #2980b9; display: inline-block; margin-top: 10px;">Ver Sugestões</a>
+    </div>
+    {% endif %}
+
+    {% if pending_maintenance and pending_maintenance > 0 %}
+    <div class="notification-banner" style="background-color: #e74c3c; color: white; padding: 15px; border-radius: 5px; margin-bottom: 20px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+        <h3><i class="bi bi-bell-fill"></i> Novas Solicitações</h3>
+        <p>Você tem <strong>{{ pending_maintenance }}</strong> solicitação(ões) de manutenção pendente(s).</p>
+        <a href="{{ url_for('maintenance.maintenance_requests_view') }}" class="action-btn" style="background-color: white; color: #e74c3c; display: inline-block; margin-top: 10px;">Ver Solicitações</a>
+    </div>
+    {% endif %}
+
+    {% if scheduling_requests and scheduling_requests > 0 %}
+    <div class="notification-banner" style="background-color: #9b59b6; color: white; padding: 15px; border-radius: 5px; margin-bottom: 20px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+        <h3><i class="bi bi-calendar-event"></i> Agendamentos Necessários</h3>
+        <p>Você tem <strong>{{ scheduling_requests }}</strong> solicitação(ões) aguardando definição de horário.</p>
+        <a href="{{ url_for('maintenance.department_schedules') }}" class="action-btn" style="background-color: white; color: #9b59b6; display: inline-block; margin-top: 10px;">Definir Horários</a>
+    </div>
+    {% endif %}
+
+    {% if session.get('department') == 'Estoque' or session.get('role') == 'estoque' %}
+    <div class="stock-panel" style="margin-bottom: 30px; border: 2px solid #e67e22; border-radius: 8px; padding: 20px; background-color: #fdf2e9;">
+        <h3 style="color: #d35400; margin-top: 0;"><i class="bi bi-box-seam"></i> Painel de Estoque</h3>
+        <p>Gerenciamento de insumos e entradas.</p>
+        <div class="action-buttons">
+            <a href="{{ url_for('stock.stock_products') }}" class="action-btn" style="background-color: #e67e22;"><i class="bi bi-clipboard-data"></i> Gerenciar Insumos</a>
+            <a href="{{ url_for('stock.stock_entry') }}" class="action-btn" style="background-color: #d35400; margin-left: 10px;"><i class="bi bi-box-arrow-in-down"></i> Entrada de Nota</a>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="time-tracking-panel" style="margin-bottom: 30px; border: 2px solid #3498db; border-radius: 8px; padding: 20px; background-color: #f0f8ff;">
+        <h3 style="color: #2c3e50; margin-top: 0;"><i class="bi bi-stopwatch"></i> Controle de Ponto</h3>
+
+        {% if celebrants %}
+        <div style="background-color: #d1ecf1; color: #0c5460; padding: 10px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #bee5eb;">
+            <strong><i class="bi bi-stars"></i> Celebrações de Hoje:</strong>
+            <ul style="margin: 5px 0 0 20px; padding: 0;">
+                {% for cel in celebrants %}
+                    <li>
+                        {% if cel.type == 'birthday' %}
+                            <i class="bi bi-cake2"></i> Aniversário de <strong>{{ cel.name }}</strong>
+                        {% elif cel.type == 'anniversary' %}
+                            <i class="bi bi-briefcase-fill"></i> <strong>{{ cel.name }}</strong> completa {{ cel.years }} ano(s) de casa
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <div id="time-tracking-status">
+            <p>Status: <strong id="status-text">{{ time_tracking_status }}</strong></p>
+            <p id="timer-display" style="font-size: 2em; font-weight: bold; font-family: monospace;">{{ time_tracking_total }}</p>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <p style="margin: 0;">Meta do dia: <strong>{{ time_tracking_target }}</strong>{% if time_tracking_is_day_off %} (Folga){% endif %}</p>
+                <p style="margin: 0;">Banco de horas: <strong>{{ time_tracking_bank }}</strong></p>
+            </div>
+            {% if time_tracking_has_overtime %}
+            <div style="margin-top: 12px; padding: 10px; border-radius: 6px; background-color: #ffe6e6; border: 1px solid #e74c3c; color: #c0392b;">
+                <strong>Aviso:</strong> horas extras hoje: <strong>{{ time_tracking_overtime }}</strong>
+            </div>
+            {% endif %}
+            
+            <div class="action-buttons" style="margin-top: 15px; display: flex; flex-wrap: wrap; gap: 10px;">
+                {% if time_tracking_status == 'Não iniciado' %}
+                    <button type="button" onclick="openVerificationModal('start')" class="action-btn" style="background-color: #27ae60;"><i class="bi bi-play-circle-fill"></i> Iniciar Jornada</button>
+                {% elif time_tracking_status == 'Trabalhando' %}
+                    <div style="display: flex; gap: 20px; justify-content: flex-start; align-items: center; flex-wrap: wrap;">
+                        <form action="{{ url_for('hr.time_tracking_action') }}" method="POST">
+                            <input type="hidden" name="action" value="pause">
+                            <button type="submit" class="action-btn" style="background-color: #f39c12;"><i class="bi bi-pause-circle-fill"></i> Pausa</button>
+                        </form>
+                        <button type="button" onclick="openVerificationModal('end')" class="action-btn" style="background-color: #c0392b;"><i class="bi bi-stop-circle-fill"></i> Finalizar Jornada</button>
+                    <button type="button" onclick="registerSignature()" id="btn-signature" class="action-btn" style="display: flex; align-items: center; gap: 8px;">
+                        <i class="bi bi-pen-fill"></i> Cadastrar Assinatura Eletrônica
+                    </button>
+                </div>
+                {% elif time_tracking_status == 'Pausa' %}
+                    <div style="display: flex; gap: 20px; justify-content: flex-start; align-items: center; flex-wrap: wrap;">
+                        <form action="{{ url_for('hr.time_tracking_action') }}" method="POST">
+                            <input type="hidden" name="action" value="resume">
+                            <button type="submit" class="action-btn" style="background-color: #27ae60;"><i class="bi bi-play-circle-fill"></i> Voltar da Pausa</button>
+                        </form>
+                        <button type="button" onclick="openVerificationModal('end')" class="action-btn" style="background-color: #c0392b;"><i class="bi bi-stop-circle-fill"></i> Finalizar Jornada</button>
+                    </div>
+                {% elif time_tracking_status == 'Finalizado' %}
+                    <p>Jornada finalizada.</p>
+                {% endif %}
+                
+                <button type="button" onclick="registerSignature()" id="btn-signature" class="action-btn" style="display: flex; align-items: center; gap: 8px;">
+                    <i class="bi bi-pen-fill"></i> Cadastrar Assinatura Eletrônica
+                </button>
+            </div>
+        </div>
+        
+        <!-- Live Timer Script -->
+        {% if time_tracking_status == 'Trabalhando' %}
+        <script>
+            (function() {
+                // Parse initial time from server "HH:MM:SS"
+                var timeParts = "{{ time_tracking_total }}".split(':');
+                var totalSeconds = parseInt(timeParts[0]) * 3600 + parseInt(timeParts[1]) * 60 + parseInt(timeParts[2]);
+                
+                var display = document.getElementById('timer-display');
+                
+                setInterval(function() {
+                    totalSeconds++;
+                    var hours = Math.floor(totalSeconds / 3600);
+                    var minutes = Math.floor((totalSeconds % 3600) / 60);
+                    var seconds = totalSeconds % 60;
+                    
+                    display.textContent = 
+                        (hours < 10 ? "0" + hours : hours) + ":" + 
+                        (minutes < 10 ? "0" + minutes : minutes) + ":" + 
+                        (seconds < 10 ? "0" + seconds : seconds);
+                }, 1000);
+            })();
+        </script>
+        {% endif %}
+
+        <script>
+            function registerSignature() {
+                const btn = document.getElementById('btn-signature');
+                const originalText = btn.innerHTML;
+                
+                // Disable button and show loading state
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processando...';
+                
+                fetch('/api/assinafy/register-signer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        btn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Assinatura Cadastrada!';
+                        btn.classList.remove('action-btn');
+                        btn.classList.add('btn', 'btn-success'); // Assuming bootstrap classes or similar style
+                        btn.style.backgroundColor = '#27ae60';
+                        
+                        // Show success message (using alert for now, or a better UI if available)
+                        alert('Processo de cadastro de assinatura iniciado com sucesso! Verifique seu e-mail para concluir.');
+                    } else {
+                        // Revert state on error
+                        btn.disabled = false;
+                        btn.innerHTML = originalText;
+                        alert('Erro ao cadastrar assinatura: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                    alert('Erro de conexão ao tentar cadastrar assinatura.');
+                });
+            }
+        </script>
+
+        <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #dae1e7; text-align: center;">
+            <a href="{{ url_for('auth.change_password') }}" class="action-btn" style="background-color: #34495e; font-size: 0.9em; padding: 8px 15px;"><i class="bi bi-key-fill"></i> Alterar Senha</a>
+        </div>
+    </div>
+
+    <h2>Bem-vindo, {{ session.get('full_name') or session.get('user')|title }}</h2>
+    <p>Selecione o serviço que deseja acessar:</p>
+    
+    <div class="services-grid">
+        {% for service in services %}
+        <a href="{{ url_for('main.service_page', service_id=service.id) }}" class="service-card" style="position: relative;">
+            {% if service.id == 'rh' and rh_docs_pending and rh_docs_pending > 0 %}
+            <div style="position: absolute; top: -10px; right: -10px; background: #e74c3c; color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
+                {{ rh_docs_pending }}
+            </div>
+            {% endif %}
+            <div class="icon">
+                <i class="{{ service.icon }}"></i>
+            </div>
+            <h3>{{ service.name }}</h3>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Modal de Verificação (Uniforme e Localização) -->
+<div id="verificationModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center;">
+    <div style="background:white; padding:20px; border-radius:10px; max-width:500px; width:90%; text-align:center;">
+        <h3>Verificação de Jornada</h3>
+        <p>Tire uma foto para comprovar uso do uniforme e sua presença na empresa.</p>
+        
+        <div style="position:relative; width:100%; height:0; padding-bottom:75%; background:#ccc; margin-bottom:15px; overflow:hidden; border-radius:8px;">
+            <video id="camera" autoplay playsinline style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;"></video>
+            <canvas id="snapshot" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;"></canvas>
+        </div>
+        
+        <div id="locationStatus" style="margin-bottom:10px; font-size:12px; color:#666;">Obtendo localização...</div>
+        
+        <div style="display:flex; justify-content:space-between; gap:10px;">
+            <button onclick="closeVerificationModal()" class="action-btn" style="background:#6c757d; border:none; color:white; padding:10px; border-radius:5px; cursor:pointer;">Cancelar</button>
+            <button id="captureBtn" onclick="captureAndSubmit()" class="action-btn" style="background:#1e3a8a; border:none; color:white; padding:10px; border-radius:5px; cursor:pointer;" disabled><i class="bi bi-camera"></i> Enviar Comprovação</button>
+        </div>
+    </div>
+</div>
+
+<form id="verificationForm" action="{{ url_for('hr.time_tracking_action') }}" method="POST" style="display:none;">
+    <input type="hidden" name="action" id="formAction">
+    <input type="hidden" name="photo_data" id="formPhoto">
+    <input type="hidden" name="latitude" id="formLat">
+    <input type="hidden" name="longitude" id="formLon">
+</form>
+
+<script>
+let videoStream = null;
+let currentAction = '';
+
+function openVerificationModal(action) {
+    currentAction = action;
+    if (action === 'end') {
+        if (!confirm('ATENÇÃO: Deseja realmente finalizar a jornada de trabalho de hoje?')) return;
+    }
+    
+    document.getElementById('verificationModal').style.display = 'flex';
+    document.getElementById('formAction').value = action;
+    
+    // Start Camera
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+            .then(stream => {
+                videoStream = stream;
+                document.getElementById('camera').srcObject = stream;
+            })
+            .catch(err => {
+                alert("Erro ao acessar a câmera: " + err);
+                // Allow proceeding without camera if error? No, strict requirement.
+                document.getElementById('locationStatus').innerText += " (Câmera indisponível)";
+            });
+    } else {
+        alert("Seu navegador não suporta acesso à câmera.");
+    }
+        
+    // Get Location
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                document.getElementById('formLat').value = position.coords.latitude;
+                document.getElementById('formLon').value = position.coords.longitude;
+                document.getElementById('locationStatus').innerText = "📍 Localização confirmada!";
+                document.getElementById('locationStatus').style.color = "green";
+                document.getElementById('captureBtn').disabled = false;
+            },
+            (error) => {
+                let msg = "Erro na localização.";
+                switch(error.code) {
+                    case error.PERMISSION_DENIED: msg = "Permissão de localização negada."; break;
+                    case error.POSITION_UNAVAILABLE: msg = "Localização indisponível."; break;
+                    case error.TIMEOUT: msg = "Tempo esgotado ao buscar localização."; break;
+                }
+                document.getElementById('locationStatus').innerText = "⚠️ " + msg;
+                document.getElementById('locationStatus').style.color = "red";
+                // Enable button anyway to not block work, but server will see missing loc
+                document.getElementById('captureBtn').disabled = false; 
+            }
+        );
+    } else {
+        document.getElementById('locationStatus').innerText = "Geolocalização não suportada.";
+        document.getElementById('captureBtn').disabled = false;
+    }
+}
+
+function closeVerificationModal() {
+    document.getElementById('verificationModal').style.display = 'none';
+    if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+        videoStream = null;
+    }
+}
+
+function captureAndSubmit() {
+    const video = document.getElementById('camera');
+    const canvas = document.getElementById('snapshot');
+    
+    if (video.srcObject) {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        
+        const dataURL = canvas.toDataURL('image/jpeg');
+        document.getElementById('formPhoto').value = dataURL;
+    }
+    
+    document.getElementById('verificationForm').submit();
+}
+</script>
+
+{% endblock %}

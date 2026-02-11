@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-receipt-cutoff"></i> Pool Fiscal Centralizado</h2>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+            <button class="btn btn-primary" onclick="location.reload()">
+                <i class="bi bi-arrow-clockwise"></i> Atualizar
+            </button>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0"><i class="bi bi-funnel"></i> Filtros</h5>
+        </div>
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Origem</label>
+                    <select name="origin" class="form-select">
+                        <option value="">Todas</option>
+                        <option value="reception" {% if request.args.get('origin') == 'reception' %}selected{% endif %}>Recepção</option>
+                        <option value="restaurant" {% if request.args.get('origin') == 'restaurant' %}selected{% endif %}>Restaurante</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="">Todos</option>
+                        <option value="pending" {% if request.args.get('status') == 'pending' %}selected{% endif %}>Pendente</option>
+                        <option value="emitted" {% if request.args.get('status') == 'emitted' %}selected{% endif %}>Emitido</option>
+                        <option value="error" {% if request.args.get('status') == 'error' %}selected{% endif %}>Erro</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Data Início</label>
+                    <input type="date" name="date_start" class="form-control" value="{{ request.args.get('date_start', '') }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Data Fim</label>
+                    <input type="date" name="date_end" class="form-control" value="{{ request.args.get('date_end', '') }}">
+                </div>
+                <div class="col-12 text-end">
+                    <button type="submit" class="btn btn-primary">Filtrar</button>
+                    <a href="{{ url_for('fiscal_config') }}" class="btn btn-outline-secondary">Limpar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Pool Table -->
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped align-middle mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Data/Hora</th>
+                            <th>Origem</th>
+                            <th>ID Original</th>
+                            <th>Valor Total</th>
+                            <th>Cliente</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in pool %}
+                        <tr>
+                            <td>{{ entry.closed_at }}</td>
+                            <td>
+                                {% if entry.origin == 'reception' %}
+                                    <span class="badge bg-info">Recepção</span>
+                                {% elif entry.origin == 'restaurant' %}
+                                    <span class="badge bg-warning text-dark">Restaurante</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ entry.origin }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ entry.original_id }}</td>
+                            <td>R$ {{ "%.2f"|format(entry.total_amount) }}</td>
+                            <td>
+                                {% if entry.customer.guest_name %}
+                                    {{ entry.customer.guest_name }}
+                                {% elif entry.customer.cpf_cnpj %}
+                                    CPF/CNPJ: {{ entry.customer.cpf_cnpj }}
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if entry.status == 'pending' %}
+                                    <span class="badge bg-secondary">Pendente</span>
+                                {% elif entry.status == 'emitted' %}
+                                    <span class="badge bg-success">Emitido</span>
+                                {% elif entry.status == 'error' %}
+                                    <span class="badge bg-danger">Erro</span>
+                                {% else %}
+                                    <span class="badge bg-light text-dark">{{ entry.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" onclick="viewDetails('{{ entry.id }}')">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                {% if entry.status == 'emitted' %}
+                                <button class="btn btn-sm btn-outline-primary" onclick="printFiscal('{{ entry.id }}')">
+                                    <i class="bi bi-printer"></i>
+                                </button>
+                                {% endif %}
+                                {% if entry.status == 'pending' %}
+                                <button class="btn btn-sm btn-success" onclick="emitFiscal('{{ entry.id }}')">
+                                    <i class="bi bi-send"></i> Emitir
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">Nenhum registro encontrado no pool fiscal.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Details Modal -->
+<div class="modal fade" id="detailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detalhes do Registro Fiscal</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="detailsContent">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const poolData = {{ pool|tojson }};
+
+function viewDetails(id) {
+    const entry = poolData.find(e => e.id === id);
+    if (!entry) return;
+
+    let itemsHtml = '<table class="table table-sm table-striped"><thead><tr><th>Item</th><th>Qtd</th><th>Preço</th><th>Total</th></tr></thead><tbody>';
+    (entry.items || []).forEach(item => {
+        const qty = item.qty || item.quantity || 1;
+        const price = item.price || item.unit_price || 0;
+        const total = (qty * price).toFixed(2);
+        itemsHtml += `<tr>
+            <td>${item.name || item.description || '-'}</td>
+            <td>${qty}</td>
+            <td>R$ ${parseFloat(price).toFixed(2)}</td>
+            <td>R$ ${total}</td>
+        </tr>`;
+    });
+    itemsHtml += '</tbody></table>';
+
+    const historyHtml = (entry.history || []).length
+        ? `<ul class="list-unstyled mb-0">${entry.history.map(h => `<li><small class="text-muted">${h.timestamp} - ${h.action} (${h.from || ''}→${h.to || ''}) - ${h.user || ''}</small></li>`).join('')}</ul>`
+        : '<span class="text-muted">Sem histórico</span>';
+
+    const content = document.getElementById('detailsContent');
+    content.innerHTML = `
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <p class="mb-1"><strong>Origem:</strong> ${entry.origin || '-'}</p>
+                <p class="mb-1"><strong>ID Original:</strong> ${entry.original_id || '-'}</p>
+                <p class="mb-1"><strong>Fechado em:</strong> ${entry.closed_at || '-'}</p>
+                <p class="mb-1"><strong>Fechado por:</strong> ${entry.closed_by || '-'}</p>
+                <p class="mb-1"><strong>UUID Fiscal:</strong> ${entry.fiscal_doc_uuid || '-'}</p>
+            </div>
+            <div class="col-md-6 text-end">
+                <h3 class="text-primary">R$ ${(entry.total_amount || 0).toFixed(2)}</h3>
+                <span class="badge bg-${entry.status === 'emitted' ? 'success' : (entry.status === 'pending' ? 'secondary' : (entry.status === 'error' ? 'danger' : 'light text-dark'))} fs-6">${(entry.status || '').toUpperCase()}</span>
+            </div>
+        </div>
+        <hr>
+        <h5>Itens</h5>
+        ${itemsHtml}
+        <hr>
+        <div class="row">
+            <div class="col-md-6">
+                <h5>Cliente</h5>
+                <p class="mb-1"><strong>Nome:</strong> ${(entry.customer && (entry.customer.guest_name || entry.customer.name)) || 'Consumidor Final'}</p>
+                <p class="mb-1"><strong>CPF/CNPJ:</strong> ${(entry.customer && (entry.customer.cpf_cnpj || entry.customer.doc)) || 'Não informado'}</p>
+            </div>
+            <div class="col-md-6">
+                <h5>Pagamento</h5>
+                <ul class="list-unstyled mb-0">
+                    ${(entry.payment_methods || []).map(pm => `<li>${pm.method || 'Pagamento'}: R$ ${((pm.amount || 0)).toFixed(2)} ${pm.is_fiscal ? '<span class="badge bg-success ms-1">Fiscal</span>' : ''}</li>`).join('') || '<li class="text-muted">-</li>'}
+                </ul>
+            </div>
+        </div>
+        <hr>
+        <h5>Histórico</h5>
+        ${historyHtml}
+        ${entry.notes ? `<div class="alert alert-info mt-3 mb-0"><i class="bi bi-info-circle"></i> ${entry.notes}</div>` : ''}
+    `;
+
+    new bootstrap.Modal(document.getElementById('detailsModal')).show();
+}
+
+function emitFiscal(id) {
+    if(confirm('Confirmar emissão fiscal para este registro?')) {
+        fetch('/config/fiscal/emit/' + id, { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+            if(data.success) {
+                alert('Emissão iniciada!');
+                location.reload();
+            } else {
+                alert('Erro: ' + data.error);
+            }
+        });
+    }
+}
+
+function printFiscal(id) {
+    fetch('/config/fiscal/print/' + id, { method: 'POST' })
+    .then(r => r.json())
+    .then(data => {
+        if(data.success) {
+            alert('Impressão iniciada!');
+        } else {
+            alert('Erro: ' + (data.error || 'Falha ao imprimir'));
+        }
+    });
+}
+</script>
+{% endblock %}

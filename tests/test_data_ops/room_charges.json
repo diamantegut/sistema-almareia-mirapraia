@@ -1,0 +1,39 @@
+[
+    {
+        "id": "CHARGE_33_20260204140312_900a98_REST",
+        "room_number": "33",
+        "table_id": "33",
+        "total": 5.5,
+        "items": [
+            {
+                "id": "3ed208e8-d0f1-4be8-b38c-22f1bc625507",
+                "printed": false,
+                "print_status": "error",
+                "name": "Coca Cola",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 5.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Bebidas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "GarcomZ",
+                "created_at": "04/02/2026 14:03"
+            }
+        ],
+        "service_fee": 0.5,
+        "discount": 0,
+        "flags": [],
+        "waiter": "GarcomZ",
+        "waiter_breakdown": {
+            "GarcomZ": 5.5
+        },
+        "service_fee_removed": false,
+        "date": "04/02/2026 14:03",
+        "status": "pending",
+        "type": "restaurant"
+    }
+]

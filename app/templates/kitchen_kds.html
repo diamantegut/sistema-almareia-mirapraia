@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}KDS - Cozinha{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="text-white"><i class="bi bi-tv"></i> KDS - Monitor de Pedidos</h2>
+        <div>
+            <span class="text-white me-3" id="clock"></span>
+            <a href="{{ url_for('kitchen.kitchen_kds') }}" class="btn btn-primary"><i class="bi bi-arrow-clockwise"></i> Atualizar</a>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        {% for table_id, order in orders.items() %}
+            {% if order.status == 'open' and order['items'] %}
+                {% set has_kitchen_items = false %}
+                {% for item in order['items'] %}
+                    {% if item.category != 'Bebidas' %} 
+                        {% set has_kitchen_items = true %}
+                    {% endif %}
+                {% endfor %}
+
+                {% if has_kitchen_items %}
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                            <h4 class="m-0">
+                                {% if 'FUNC_' in table_id %}
+                                    <i class="bi bi-person-badge"></i> {{ order.staff_name }}
+                                {% else %}
+                                    Mesa {{ table_id }}
+                                {% endif %}
+                            </h4>
+                            <span class="badge bg-secondary">{{ order.opened_at.split(' ')[1] }}</span>
+                        </div>
+                        <div class="card-body p-0" style="max-height: 400px; overflow-y: auto;">
+                            <ul class="list-group list-group-flush">
+                                {% for item in order['items'] %}
+                                    {% if item.category != 'Bebidas' %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                                        <div class="ms-2 me-auto">
+                                            <div class="fw-bold" style="font-size: 1.1em;">
+                                                {{ item.qty|int }}x {{ item.name }}
+                                            </div>
+                                            {% if item.complements %}
+                                                <small class="text-muted">
+                                                    {% for comp in item.complements %}
+                                                        + {{ comp.name }}<br>
+                                                    {% endfor %}
+                                                </small>
+                                            {% endif %}
+                                            {% if item.notes %}
+                                                <div class="text-danger small"><i class="bi bi-chat-left-text"></i> {{ item.notes }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </li>
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div class="card-footer bg-light text-end">
+                            <small class="text-muted">Garçom: {{ order.waiter }}</small>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            {% endif %}
+        {% else %}
+            <div class="col-12 text-center mt-5">
+                <div class="alert alert-success display-6">
+                    <i class="bi bi-check-circle"></i> Todos os pedidos prontos!
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    // Relógio
+    setInterval(() => {
+        const now = new Date();
+        document.getElementById('clock').innerText = now.toLocaleTimeString();
+    }, 1000);
+
+    // Auto-refresh a cada 30 segundos
+    setTimeout(() => {
+        window.location.reload();
+    }, 30000);
+</script>
+
+<style>
+    body {
+        background-color: #343a40;
+    }
+</style>
+{% endblock %}

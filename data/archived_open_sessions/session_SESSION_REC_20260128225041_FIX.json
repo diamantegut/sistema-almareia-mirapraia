@@ -1,0 +1,27 @@
+{
+    "id": "SESSION_REC_20260128225041_FIX",
+    "user": "alan",
+    "type": "reception_room_billing",
+    "status": "open",
+    "opened_at": "28/01/2026 08:00",
+    "transactions": [
+        {
+            "id": "TRANS_20260129061311",
+            "type": "in",
+            "category": "Suprimento",
+            "description": "Adiciona",
+            "amount": 1.0,
+            "payment_method": "Dinheiro",
+            "time": "06:13"
+        },
+        {
+            "id": "TRANS_20260129061324",
+            "type": "out",
+            "category": "Sangria",
+            "description": "saida",
+            "amount": 1.0,
+            "payment_method": "Dinheiro",
+            "time": "06:13"
+        }
+    ]
+}

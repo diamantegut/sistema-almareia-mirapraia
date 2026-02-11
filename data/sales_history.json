@@ -1,0 +1,1324 @@
+[
+    {
+        "items": [
+            {
+                "id": "af697cef-85de-45c4-97ca-3da9251a3a78",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Corona Long Neck",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 16.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "1 cp",
+                    "Com limão",
+                    "Transf de Mesa 60",
+                    "Estorno de Mesa 59"
+                ],
+                "category": "Cervejas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "guilherme",
+                "created_at": "11/02/2026 11:56"
+            },
+            {
+                "id": "ee3ab2fa-121a-4a3d-9d67-0fea84fc9082",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Espumante Chandon Reserve Brut",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 180.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "2 Taças",
+                    "Transf de Mesa 60",
+                    "Estorno de Mesa 59"
+                ],
+                "category": "Vinhos",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "henrique",
+                "created_at": "11/02/2026 11:58"
+            },
+            {
+                "id": "26f37721-757d-43a8-b734-79a5636f36cb",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Água de Coco",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 10.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "Transf de Mesa 59",
+                    "Estorno de Mesa 56",
+                    "Transf de Mesa 59",
+                    "Estorno de Mesa 58",
+                    "Transf de Mesa 60",
+                    "Estorno de Mesa 59"
+                ],
+                "category": "Sucos e Águas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "henrique",
+                "created_at": "11/02/2026 10:53"
+            }
+        ],
+        "total": 207.8,
+        "status": "open",
+        "opened_at": "11/02/2026 12:23",
+        "num_adults": "2",
+        "customer_type": "hospede",
+        "customer_name": "",
+        "room_number": "15",
+        "waiter": null,
+        "staff_name": null,
+        "partial_payments": [],
+        "total_paid": 0.0,
+        "closed_at": "11/02/2026 12:23",
+        "payment_method": "Room Charge",
+        "room_charge": "15"
+    },
+    {
+        "id": "999",
+        "status": "open",
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 100.0,
+                "qty": 1,
+                "total": 100.0
+            }
+        ],
+        "total": 100.0,
+        "total_paid": 110.0,
+        "partial_payments": [
+            {
+                "id": "e8549308-0c84-44b1-89e8-e7c3ff384a9e",
+                "timestamp": "11/02/2026 13:00",
+                "amount": 110.0,
+                "method": "Dinheiro",
+                "user": "test_user"
+            },
+            {
+                "amount": 110.0,
+                "method": "Dinheiro"
+            }
+        ],
+        "closed_at": "11/02/2026 13:00",
+        "final_total": 110.00000000000001,
+        "discount": 0.0,
+        "payments": [
+            {
+                "id": "e8549308-0c84-44b1-89e8-e7c3ff384a9e",
+                "timestamp": "11/02/2026 13:00",
+                "amount": 110.0,
+                "method": "Dinheiro",
+                "user": "test_user"
+            },
+            {
+                "amount": 110.0,
+                "method": "Dinheiro"
+            }
+        ]
+    },
+    {
+        "id": "101",
+        "status": "open",
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 100.0,
+                "qty": 1,
+                "total": 100.0
+            }
+        ],
+        "total": 100.0,
+        "total_paid": 0.0,
+        "partial_payments": [],
+        "closed_at": "11/02/2026 13:01",
+        "final_total": 110.00000000000001,
+        "discount": 0.0,
+        "payments": [
+            {
+                "id": "5d42481e-02c7-4b51-9096-d373156c9ae0",
+                "timestamp": "11/02/2026 13:01",
+                "amount": 110.0,
+                "method": "Dinheiro",
+                "user": "test_user",
+                "type": "final_payment"
+            }
+        ]
+    },
+    {
+        "id": "102",
+        "status": "open",
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 100.0,
+                "qty": 1,
+                "total": 100.0
+            }
+        ],
+        "total": 100.0,
+        "total_paid": 110.0,
+        "partial_payments": [],
+        "closed_at": "11/02/2026 13:01",
+        "final_total": 110.00000000000001,
+        "discount": 0.0,
+        "payments": []
+    },
+    {
+        "id": "103",
+        "status": "open",
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 100.0,
+                "qty": 1,
+                "total": 100.0
+            }
+        ],
+        "total": 100.0,
+        "total_paid": 50.0,
+        "partial_payments": [],
+        "closed_at": "11/02/2026 13:01",
+        "final_total": 110.00000000000001,
+        "discount": 0.0,
+        "payments": [
+            {
+                "id": "a4d5c763-ebe9-4303-9351-8de2b9f69250",
+                "timestamp": "11/02/2026 13:01",
+                "amount": 60.0,
+                "method": "Cartão",
+                "user": "test",
+                "type": "final_payment"
+            }
+        ]
+    },
+    {
+        "id": "105",
+        "status": "open",
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 33.33,
+                "qty": 1,
+                "total": 33.33
+            }
+        ],
+        "total": 33.33,
+        "total_paid": 0.0,
+        "partial_payments": [],
+        "closed_at": "11/02/2026 13:01",
+        "final_total": 36.663000000000004,
+        "discount": 0.0,
+        "payments": [
+            {
+                "id": "f3b577dc-f3d4-4fd4-a855-68c8f5a7267c",
+                "timestamp": "11/02/2026 13:01",
+                "amount": 36.66,
+                "method": "Dinheiro",
+                "user": "test",
+                "type": "final_payment"
+            }
+        ]
+    },
+    {
+        "id": "106",
+        "status": "open",
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 100.0,
+                "qty": 1,
+                "total": 100.0
+            }
+        ],
+        "total": 100.0,
+        "total_paid": 0.0,
+        "partial_payments": [],
+        "closed_at": "11/02/2026 13:01",
+        "final_total": 110.00000000000001,
+        "discount": 0.0,
+        "payments": [
+            {
+                "id": "61d0124e-40ad-40a2-bd83-42697b479355",
+                "timestamp": "11/02/2026 13:01",
+                "amount": 150.0,
+                "method": "Dinheiro",
+                "user": "test",
+                "type": "final_payment"
+            }
+        ]
+    },
+    {
+        "id": "101",
+        "status": "open",
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 100.0,
+                "qty": 1,
+                "total": 100.0
+            }
+        ],
+        "total": 100.0,
+        "total_paid": 0.0,
+        "partial_payments": [],
+        "closed_at": "11/02/2026 13:05",
+        "final_total": 110.00000000000001,
+        "discount": 0.0,
+        "payments": [
+            {
+                "id": "3211799c-9f4a-4f5c-8277-db96e6e955d8",
+                "timestamp": "11/02/2026 13:05",
+                "amount": 110.0,
+                "method": "Dinheiro",
+                "user": "test_user",
+                "type": "final_payment"
+            }
+        ]
+    },
+    {
+        "id": "102",
+        "status": "open",
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 100.0,
+                "qty": 1,
+                "total": 100.0
+            }
+        ],
+        "total": 100.0,
+        "total_paid": 110.0,
+        "partial_payments": [],
+        "closed_at": "11/02/2026 13:05",
+        "final_total": 110.00000000000001,
+        "discount": 0.0,
+        "payments": []
+    },
+    {
+        "id": "103",
+        "status": "open",
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 100.0,
+                "qty": 1,
+                "total": 100.0
+            }
+        ],
+        "total": 100.0,
+        "total_paid": 50.0,
+        "partial_payments": [],
+        "closed_at": "11/02/2026 13:05",
+        "final_total": 110.00000000000001,
+        "discount": 0.0,
+        "payments": [
+            {
+                "id": "1ac064a9-15d3-4b4e-a68d-c82e9b296e1d",
+                "timestamp": "11/02/2026 13:05",
+                "amount": 60.0,
+                "method": "Cartão",
+                "user": "test",
+                "type": "final_payment"
+            }
+        ]
+    },
+    {
+        "id": "105",
+        "status": "open",
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 33.33,
+                "qty": 1,
+                "total": 33.33
+            }
+        ],
+        "total": 33.33,
+        "total_paid": 0.0,
+        "partial_payments": [],
+        "closed_at": "11/02/2026 13:05",
+        "final_total": 36.663000000000004,
+        "discount": 0.0,
+        "payments": [
+            {
+                "id": "2598bab5-9929-4a04-83ae-224f8b4767c5",
+                "timestamp": "11/02/2026 13:05",
+                "amount": 36.66,
+                "method": "Dinheiro",
+                "user": "test",
+                "type": "final_payment"
+            }
+        ]
+    },
+    {
+        "id": "106",
+        "status": "open",
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 100.0,
+                "qty": 1,
+                "total": 100.0
+            }
+        ],
+        "total": 100.0,
+        "total_paid": 0.0,
+        "partial_payments": [],
+        "closed_at": "11/02/2026 13:05",
+        "final_total": 110.00000000000001,
+        "discount": 0.0,
+        "payments": [
+            {
+                "id": "3998e02b-2048-4010-a899-31915fc22fef",
+                "timestamp": "11/02/2026 13:05",
+                "amount": 150.0,
+                "method": "Dinheiro",
+                "user": "test",
+                "type": "final_payment"
+            }
+        ]
+    },
+    {
+        "id": "107",
+        "status": "open",
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 100.0,
+                "qty": 1,
+                "total": 100.0
+            }
+        ],
+        "total": 100.0,
+        "total_paid": 120.0,
+        "partial_payments": [],
+        "closed_at": "11/02/2026 13:05",
+        "final_total": 110.00000000000001,
+        "discount": 0.0,
+        "payments": []
+    },
+    {
+        "id": "201",
+        "status": "open",
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 100.0,
+                "qty": 1,
+                "total": 100.0
+            }
+        ],
+        "total": 100.0,
+        "total_paid": 50.0,
+        "partial_payments": [],
+        "closed_at": "11/02/2026 13:05",
+        "final_total": 110.00000000000001,
+        "discount": 0.0,
+        "payments": [
+            {
+                "id": "e12ca314-5771-4173-b1f6-cdbbb09ebe1a",
+                "timestamp": "11/02/2026 13:05",
+                "amount": 100.0,
+                "method": "Dinheiro",
+                "user": "test",
+                "type": "final_payment"
+            }
+        ]
+    },
+    {
+        "id": "202",
+        "status": "open",
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 10.0,
+                "qty": 1,
+                "total": 10.0
+            }
+        ],
+        "total": 10.0,
+        "total_paid": 0.0,
+        "partial_payments": [],
+        "closed_at": "11/02/2026 13:05",
+        "final_total": 11.0,
+        "discount": 0.0,
+        "payments": [
+            {
+                "id": "3a85a2b2-8b8b-4003-a638-7ef6b0c8d07c",
+                "timestamp": "11/02/2026 13:05",
+                "amount": 1000.0,
+                "method": "Dinheiro",
+                "user": "test",
+                "type": "final_payment"
+            }
+        ]
+    },
+    {
+        "id": "203",
+        "status": "open",
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 14.32,
+                "qty": 1,
+                "total": 14.32
+            }
+        ],
+        "total": 14.32,
+        "total_paid": 0.0,
+        "partial_payments": [],
+        "closed_at": "11/02/2026 13:05",
+        "final_total": 15.752000000000002,
+        "discount": 0.0,
+        "payments": [
+            {
+                "id": "de6a9d04-7cfb-4490-98ef-570439768539",
+                "timestamp": "11/02/2026 13:05",
+                "amount": 15.75,
+                "method": "Dinheiro",
+                "user": "test",
+                "type": "final_payment"
+            }
+        ]
+    },
+    {
+        "id": "204",
+        "status": "open",
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 0.0,
+                "qty": 1,
+                "total": 0.0
+            }
+        ],
+        "total": 0.0,
+        "total_paid": 0.0,
+        "partial_payments": [],
+        "closed_at": "11/02/2026 13:05",
+        "final_total": 0.0,
+        "discount": 0.0,
+        "payments": []
+    },
+    {
+        "id": "101",
+        "status": "open",
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 100.0,
+                "qty": 1,
+                "total": 100.0
+            }
+        ],
+        "total": 100.0,
+        "total_paid": 0.0,
+        "partial_payments": [],
+        "closed_at": "11/02/2026 13:06",
+        "final_total": 110.00000000000001,
+        "discount": 0.0,
+        "payments": [
+            {
+                "id": "fa9ef891-d2cd-457a-b0e5-74caba922cf1",
+                "timestamp": "11/02/2026 13:06",
+                "amount": 110.0,
+                "method": "Dinheiro",
+                "user": "test_user",
+                "type": "final_payment"
+            }
+        ]
+    },
+    {
+        "id": "102",
+        "status": "open",
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 100.0,
+                "qty": 1,
+                "total": 100.0
+            }
+        ],
+        "total": 100.0,
+        "total_paid": 110.0,
+        "partial_payments": [],
+        "closed_at": "11/02/2026 13:06",
+        "final_total": 110.00000000000001,
+        "discount": 0.0,
+        "payments": []
+    },
+    {
+        "id": "103",
+        "status": "open",
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 100.0,
+                "qty": 1,
+                "total": 100.0
+            }
+        ],
+        "total": 100.0,
+        "total_paid": 50.0,
+        "partial_payments": [],
+        "closed_at": "11/02/2026 13:06",
+        "final_total": 110.00000000000001,
+        "discount": 0.0,
+        "payments": [
+            {
+                "id": "eaf24284-1384-4810-8bcd-411cc980307f",
+                "timestamp": "11/02/2026 13:06",
+                "amount": 60.0,
+                "method": "Cartão",
+                "user": "test",
+                "type": "final_payment"
+            }
+        ]
+    },
+    {
+        "id": "105",
+        "status": "open",
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 33.33,
+                "qty": 1,
+                "total": 33.33
+            }
+        ],
+        "total": 33.33,
+        "total_paid": 0.0,
+        "partial_payments": [],
+        "closed_at": "11/02/2026 13:06",
+        "final_total": 36.663000000000004,
+        "discount": 0.0,
+        "payments": [
+            {
+                "id": "8f195419-b387-44c2-b2ea-9d245ed8d80f",
+                "timestamp": "11/02/2026 13:06",
+                "amount": 36.66,
+                "method": "Dinheiro",
+                "user": "test",
+                "type": "final_payment"
+            }
+        ]
+    },
+    {
+        "id": "106",
+        "status": "open",
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 100.0,
+                "qty": 1,
+                "total": 100.0
+            }
+        ],
+        "total": 100.0,
+        "total_paid": 0.0,
+        "partial_payments": [],
+        "closed_at": "11/02/2026 13:06",
+        "final_total": 110.00000000000001,
+        "discount": 0.0,
+        "payments": [
+            {
+                "id": "fc7a3de0-962d-4052-a6e0-ac179c717a7c",
+                "timestamp": "11/02/2026 13:06",
+                "amount": 150.0,
+                "method": "Dinheiro",
+                "user": "test",
+                "type": "final_payment"
+            }
+        ]
+    },
+    {
+        "id": "107",
+        "status": "open",
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 100.0,
+                "qty": 1,
+                "total": 100.0
+            }
+        ],
+        "total": 100.0,
+        "total_paid": 120.0,
+        "partial_payments": [],
+        "closed_at": "11/02/2026 13:06",
+        "final_total": 110.00000000000001,
+        "discount": 0.0,
+        "payments": []
+    },
+    {
+        "id": "201",
+        "status": "open",
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 100.0,
+                "qty": 1,
+                "total": 100.0
+            }
+        ],
+        "total": 100.0,
+        "total_paid": 50.0,
+        "partial_payments": [],
+        "closed_at": "11/02/2026 13:06",
+        "final_total": 110.00000000000001,
+        "discount": 0.0,
+        "payments": [
+            {
+                "id": "5c660ec0-ea48-4822-b89c-a51104d33976",
+                "timestamp": "11/02/2026 13:06",
+                "amount": 100.0,
+                "method": "Dinheiro",
+                "user": "test",
+                "type": "final_payment"
+            }
+        ]
+    },
+    {
+        "id": "202",
+        "status": "open",
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 10.0,
+                "qty": 1,
+                "total": 10.0
+            }
+        ],
+        "total": 10.0,
+        "total_paid": 0.0,
+        "partial_payments": [],
+        "closed_at": "11/02/2026 13:06",
+        "final_total": 11.0,
+        "discount": 0.0,
+        "payments": [
+            {
+                "id": "c97bcf63-f827-44a4-9da5-09f58e77b1c3",
+                "timestamp": "11/02/2026 13:06",
+                "amount": 1000.0,
+                "method": "Dinheiro",
+                "user": "test",
+                "type": "final_payment"
+            }
+        ]
+    },
+    {
+        "id": "203",
+        "status": "open",
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 14.32,
+                "qty": 1,
+                "total": 14.32
+            }
+        ],
+        "total": 14.32,
+        "total_paid": 0.0,
+        "partial_payments": [],
+        "closed_at": "11/02/2026 13:06",
+        "final_total": 15.752000000000002,
+        "discount": 0.0,
+        "payments": [
+            {
+                "id": "cd4b938d-9546-4717-bf45-aafda0b1ddc4",
+                "timestamp": "11/02/2026 13:06",
+                "amount": 15.75,
+                "method": "Dinheiro",
+                "user": "test",
+                "type": "final_payment"
+            }
+        ]
+    },
+    {
+        "id": "204",
+        "status": "open",
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 0.0,
+                "qty": 1,
+                "total": 0.0
+            }
+        ],
+        "total": 0.0,
+        "total_paid": 0.0,
+        "partial_payments": [],
+        "closed_at": "11/02/2026 13:06",
+        "final_total": 0.0,
+        "discount": 0.0,
+        "payments": []
+    },
+    {
+        "id": "101",
+        "status": "open",
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 100.0,
+                "qty": 1,
+                "total": 100.0
+            }
+        ],
+        "total": 100.0,
+        "total_paid": 0.0,
+        "partial_payments": [],
+        "closed_at": "11/02/2026 13:27",
+        "final_total": 110.00000000000001,
+        "discount": 0.0,
+        "payments": [
+            {
+                "id": "6c003ef3-ae9b-496f-921b-f7399701d0e1",
+                "timestamp": "11/02/2026 13:27",
+                "amount": 110.0,
+                "method": "Dinheiro",
+                "user": "test_user",
+                "type": "final_payment"
+            }
+        ]
+    },
+    {
+        "id": "102",
+        "status": "open",
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 100.0,
+                "qty": 1,
+                "total": 100.0
+            }
+        ],
+        "total": 100.0,
+        "total_paid": 110.0,
+        "partial_payments": [],
+        "closed_at": "11/02/2026 13:27",
+        "final_total": 110.00000000000001,
+        "discount": 0.0,
+        "payments": []
+    },
+    {
+        "id": "103",
+        "status": "open",
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 100.0,
+                "qty": 1,
+                "total": 100.0
+            }
+        ],
+        "total": 100.0,
+        "total_paid": 50.0,
+        "partial_payments": [],
+        "closed_at": "11/02/2026 13:27",
+        "final_total": 110.00000000000001,
+        "discount": 0.0,
+        "payments": [
+            {
+                "id": "7f3e8446-3b73-4a49-8b14-ba649d761d37",
+                "timestamp": "11/02/2026 13:27",
+                "amount": 60.0,
+                "method": "Cartão",
+                "user": "test",
+                "type": "final_payment"
+            }
+        ]
+    },
+    {
+        "id": "105",
+        "status": "open",
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 33.33,
+                "qty": 1,
+                "total": 33.33
+            }
+        ],
+        "total": 33.33,
+        "total_paid": 0.0,
+        "partial_payments": [],
+        "closed_at": "11/02/2026 13:27",
+        "final_total": 36.663000000000004,
+        "discount": 0.0,
+        "payments": [
+            {
+                "id": "85f8995b-3ca3-4e39-b23b-27a56cae2b9b",
+                "timestamp": "11/02/2026 13:27",
+                "amount": 36.66,
+                "method": "Dinheiro",
+                "user": "test",
+                "type": "final_payment"
+            }
+        ]
+    },
+    {
+        "id": "106",
+        "status": "open",
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 100.0,
+                "qty": 1,
+                "total": 100.0
+            }
+        ],
+        "total": 100.0,
+        "total_paid": 0.0,
+        "partial_payments": [],
+        "closed_at": "11/02/2026 13:27",
+        "final_total": 110.00000000000001,
+        "discount": 0.0,
+        "payments": [
+            {
+                "id": "310ee02f-6745-44c3-a439-72744f62b5f3",
+                "timestamp": "11/02/2026 13:27",
+                "amount": 150.0,
+                "method": "Dinheiro",
+                "user": "test",
+                "type": "final_payment"
+            }
+        ]
+    },
+    {
+        "id": "107",
+        "status": "open",
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 100.0,
+                "qty": 1,
+                "total": 100.0
+            }
+        ],
+        "total": 100.0,
+        "total_paid": 120.0,
+        "partial_payments": [],
+        "closed_at": "11/02/2026 13:27",
+        "final_total": 110.00000000000001,
+        "discount": 0.0,
+        "payments": []
+    },
+    {
+        "id": "201",
+        "status": "open",
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 100.0,
+                "qty": 1,
+                "total": 100.0
+            }
+        ],
+        "total": 100.0,
+        "total_paid": 50.0,
+        "partial_payments": [],
+        "closed_at": "11/02/2026 13:27",
+        "final_total": 110.00000000000001,
+        "discount": 0.0,
+        "payments": [
+            {
+                "id": "e800178a-5309-4032-a80c-8b360cd6c91a",
+                "timestamp": "11/02/2026 13:27",
+                "amount": 100.0,
+                "method": "Dinheiro",
+                "user": "test",
+                "type": "final_payment"
+            }
+        ]
+    },
+    {
+        "id": "202",
+        "status": "open",
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 10.0,
+                "qty": 1,
+                "total": 10.0
+            }
+        ],
+        "total": 10.0,
+        "total_paid": 0.0,
+        "partial_payments": [],
+        "closed_at": "11/02/2026 13:27",
+        "final_total": 11.0,
+        "discount": 0.0,
+        "payments": [
+            {
+                "id": "302bc672-a101-4ba4-af07-160045f13b1b",
+                "timestamp": "11/02/2026 13:27",
+                "amount": 1000.0,
+                "method": "Dinheiro",
+                "user": "test",
+                "type": "final_payment"
+            }
+        ]
+    },
+    {
+        "id": "203",
+        "status": "open",
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 14.32,
+                "qty": 1,
+                "total": 14.32
+            }
+        ],
+        "total": 14.32,
+        "total_paid": 0.0,
+        "partial_payments": [],
+        "closed_at": "11/02/2026 13:27",
+        "final_total": 15.752000000000002,
+        "discount": 0.0,
+        "payments": [
+            {
+                "id": "8c6522fe-8fcf-4e44-aaf6-3867982629c4",
+                "timestamp": "11/02/2026 13:27",
+                "amount": 15.75,
+                "method": "Dinheiro",
+                "user": "test",
+                "type": "final_payment"
+            }
+        ]
+    },
+    {
+        "id": "204",
+        "status": "open",
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 0.0,
+                "qty": 1,
+                "total": 0.0
+            }
+        ],
+        "total": 0.0,
+        "total_paid": 0.0,
+        "partial_payments": [],
+        "closed_at": "11/02/2026 13:27",
+        "final_total": 0.0,
+        "discount": 0.0,
+        "payments": []
+    },
+    {
+        "items": [
+            {
+                "id": "c04c2171-d45d-47bc-ab08-6b847538d4b5",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Espumante Chandon Reserve Brut",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 180.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "2 Taças"
+                ],
+                "category": "Vinhos",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "henrique",
+                "created_at": "11/02/2026 11:17"
+            }
+        ],
+        "total": 180.0,
+        "status": "open",
+        "opened_at": "11/02/2026 11:17",
+        "num_adults": 2,
+        "customer_type": "hospede",
+        "customer_name": "",
+        "room_number": "22",
+        "waiter": null,
+        "staff_name": null,
+        "partial_payments": [],
+        "total_paid": 0.0,
+        "closed_at": "11/02/2026 14:00",
+        "final_total": 198.00000000000003,
+        "discount": 0.0,
+        "payments": [
+            {
+                "id": "e055b198-9fe7-4819-b36c-523b534ca4f0",
+                "timestamp": "11/02/2026 14:00",
+                "amount": 198.0,
+                "method": null,
+                "user": "Angelo",
+                "type": "final_payment"
+            }
+        ]
+    },
+    {
+        "items": [
+            {
+                "id": "29cdf266-de23-444a-bd8a-9653636fabca",
+                "printed": false,
+                "print_status": "error",
+                "name": "Batata Frita",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 24.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Entradas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "leo",
+                "created_at": "08/02/2026 13:50"
+            },
+            {
+                "id": "c4533c9e-fe26-4261-854c-7a3f00051e64",
+                "printed": false,
+                "print_status": "error",
+                "name": "Rolha Bebida Quente",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 70.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Bebidas Quentes Garrafas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "leo",
+                "created_at": "08/02/2026 13:50"
+            },
+            {
+                "id": "5a9db3c6-b364-4dc0-8a2c-a1dc9df84660",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Peixe na farofa de Castanha (Individual)",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 99.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "Com arroz branco"
+                ],
+                "category": "Pratos",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "leo",
+                "created_at": "08/02/2026 14:21"
+            }
+        ],
+        "total": 194.8,
+        "created_at": "11/02/2026 14:17",
+        "opened_at": "11/02/2026 14:17",
+        "status": "open",
+        "waiter": "leo",
+        "customer_type": "hospede",
+        "room_number": "17",
+        "partial_payments": [],
+        "total_paid": 0.0,
+        "closed_at": "11/02/2026 14:17",
+        "payment_method": "Room Charge",
+        "room_charge": "17"
+    },
+    {
+        "items": [
+            {
+                "id": "e8b789b9-16d7-4f81-8cd7-7f4734c99f3a",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Coca-Cola 350ml",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 8.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "Gelo e Limão"
+                    }
+                ],
+                "observations": [
+                    "1 cp"
+                ],
+                "category": "Refrigerante",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "adailton",
+                "created_at": "11/02/2026 12:28"
+            },
+            {
+                "id": "a704ca20-d81b-4d46-af5a-cddad11fc523",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Heineken Long Neck",
+                "flavor": null,
+                "qty": 2.0,
+                "price": 16.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "2 cp"
+                ],
+                "category": "Cervejas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "adailton",
+                "created_at": "11/02/2026 12:28"
+            },
+            {
+                "id": "54c54330-dec4-4424-83e4-049c93362a24",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Casquinha de Aratu",
+                "flavor": null,
+                "qty": 2.0,
+                "price": 49.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Entradas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "adailton",
+                "created_at": "11/02/2026 12:30"
+            },
+            {
+                "id": "ff35b035-1b40-419b-ac8a-c5cc0dbf9206",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Curry de Camarão (Individual)",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 82.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Pratos",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "adailton",
+                "created_at": "11/02/2026 12:30"
+            },
+            {
+                "id": "3ee6ffc5-9025-4215-9a8a-b478621a1e69",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Moqueca de Camarão (Individual)",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 89.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Pratos",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "adailton",
+                "created_at": "11/02/2026 12:30"
+            },
+            {
+                "id": "e14f1654-2f4c-41f1-a938-fc03964805be",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Mexilhões ao Molho de Vinho Branco",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 34.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Entradas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "adailton",
+                "created_at": "11/02/2026 12:30"
+            },
+            {
+                "id": "43821519-3408-4903-b9ff-05d1826db9c6",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Cachaca Seleta",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 18.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "Manda limão e abacaxi"
+                ],
+                "category": "Doses",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "adailton",
+                "created_at": "11/02/2026 12:30"
+            }
+        ],
+        "total": 369.09999999999997,
+        "status": "open",
+        "opened_at": "11/02/2026 12:26",
+        "num_adults": "3",
+        "customer_type": "passante",
+        "customer_name": "",
+        "room_number": null,
+        "waiter": null,
+        "staff_name": null,
+        "partial_payments": [],
+        "total_paid": 0.0,
+        "closed_at": "11/02/2026 15:46",
+        "final_total": 406.01,
+        "discount": 0.0,
+        "payments": [
+            {
+                "id": "3ff51255-c477-43d7-9fea-e98eeb073e32",
+                "timestamp": "11/02/2026 15:46",
+                "amount": 100.0,
+                "method": null,
+                "user": "Angelo",
+                "type": "final_payment"
+            },
+            {
+                "id": "61141083-d053-4eae-ac1f-74994da54b4d",
+                "timestamp": "11/02/2026 15:46",
+                "amount": 2.5,
+                "method": null,
+                "user": "Angelo",
+                "type": "final_payment"
+            },
+            {
+                "id": "3bdf5a45-4947-4282-b292-a62a5b79c1a4",
+                "timestamp": "11/02/2026 15:46",
+                "amount": 303.51,
+                "method": null,
+                "user": "Angelo",
+                "type": "final_payment"
+            }
+        ]
+    }
+]

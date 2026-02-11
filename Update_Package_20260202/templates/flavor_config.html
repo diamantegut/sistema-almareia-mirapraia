@@ -1,0 +1,241 @@
+{% extends 'base.html' %}
+
+{% block title %}Gerenciar Sabores{% endblock %}
+
+{% block content %}
+<div class="service-page">
+    <div class="service-header" style="background-color: #f1c40f; color: #fff;">
+        <span class="service-icon"><i class="bi bi-ui-checks-grid"></i></span>
+        <h2>Gerenciar Grupos de Sabores</h2>
+    </div>
+
+    <div style="margin-bottom: 20px;">
+        <a href="{{ url_for('menu_management') }}" class="action-btn" style="background-color: #95a5a6; text-decoration: none;"><i class="bi bi-arrow-left"></i> Voltar para Produtos</a>
+    </div>
+
+    <!-- Novo Grupo -->
+    <div class="card" style="margin-bottom: 20px;">
+        <h3>Criar Novo Grupo</h3>
+        <form method="POST" action="{{ url_for('flavor_config_add_group') }}" style="display: flex; gap: 10px; align-items: flex-end;">
+            <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                <label>ID do Grupo (Sem espaços):</label>
+                <input type="text" name="group_id" placeholder="ex: pizzas_salgadas" required pattern="[a-zA-Z0-9_]+" title="Apenas letras, números e underline">
+            </div>
+            <div class="form-group" style="flex: 2; margin-bottom: 0;">
+                <label>Nome de Exibição:</label>
+                <input type="text" name="group_name" placeholder="ex: Pizzas Salgadas" required>
+            </div>
+            <button type="submit" class="action-btn" style="background-color: #2ecc71; margin-bottom: 0;">+ Criar Grupo</button>
+        </form>
+    </div>
+
+    <!-- Lista de Grupos -->
+    <div class="row" style="display: flex; flex-wrap: wrap; gap: 20px;">
+        {% for group in flavor_groups %}
+        <div class="card" style="flex: 1; min-width: 300px; max-width: 45%;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">
+                <h4 style="margin: 0;">{{ group.name }} <small style="color: #999; font-size: 0.7em;">({{ group.id }})</small></h4>
+                <form method="POST" action="{{ url_for('flavor_config_delete_group') }}" onsubmit="return confirm('Tem certeza? Isso afetará produtos que usam este grupo.');">
+                    <input type="hidden" name="group_id" value="{{ group.id }}">
+                    <button type="submit" class="action-btn" style="background-color: #e74c3c; padding: 5px 10px; font-size: 0.8em;"><i class="bi bi-trash"></i></button>
+                </form>
+            </div>
+
+            <!-- Adicionar Item ao Grupo -->
+            <form method="POST" action="{{ url_for('flavor_config_add_item') }}" style="background: #f9f9f9; padding: 10px; border-radius: 5px; margin-bottom: 15px;">
+                <input type="hidden" name="group_id" value="{{ group.id }}">
+                <label style="font-size: 0.9em; font-weight: bold;">Adicionar Sabor:</label>
+                <div style="display: flex; gap: 5px;">
+                    <select name="product_id" required style="flex: 1; padding: 5px;" class="flavor-select">
+                        <option value="">Selecione um Insumo...</option>
+                        {% for item in insumos %}
+                        <option value="{{ item.id }}">{{ item.name }} ({{ item.unit }})</option>
+                        {% endfor %}
+                    </select>
+                    <input type="number" name="qty" step="0.001" placeholder="Qtd Baixa" style="width: 80px; padding: 5px;" value="1.0">
+                    <button type="submit" class="action-btn" style="padding: 5px 10px; margin: 0;">+</button>
+                </div>
+                <small class="text-muted">A quantidade será abatida do estoque ao selecionar este sabor.</small>
+            </form>
+
+            <!-- Lista de Itens do Grupo -->
+            <table class="table" style="font-size: 0.9em;">
+                <thead>
+                    <tr>
+                        <th>Sabor (Produto)</th>
+                        <th style="text-align: center;" title="Marque para indicar que este produto não requer escolha de sabor (pula a seleção).">SIMPLES <i class="bi bi-info-circle" style="font-size: 0.8em;"></i></th>
+                        <th>Qtd Baixa</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in group['items'] %}
+                    <tr>
+                        <td>{{ item.name }}</td>
+                        <td style="text-align: center;">
+                            <input type="checkbox" 
+                                   {% if item.is_simple %}checked{% endif %} 
+                                   onchange="toggleSimple('{{ group.id }}', '{{ item.id }}', this)"
+                                   title="Marque para pular a seleção de sabor">
+                        </td>
+                        <td>{{ item.qty }}</td>
+                        <td>
+                            <form method="POST" action="{{ url_for('flavor_config_delete_item') }}">
+                                <input type="hidden" name="group_id" value="{{ group.id }}">
+                                <input type="hidden" name="item_id" value="{{ item.id }}">
+                                <button type="submit" style="background: none; border: none; color: #e74c3c; cursor: pointer;"><i class="bi bi-x-circle-fill"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="3" class="text-center text-muted">Nenhum sabor cadastrado.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div style="width: 100%; text-align: center; padding: 40px; color: #7f8c8d;">
+            <p>Nenhum grupo de sabores cadastrado.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Configuração de Produtos -->
+    <div class="card" style="margin-top: 30px; margin-bottom: 20px;">
+        <h3><i class="bi bi-sliders"></i> Limites de Sabores por Produto</h3>
+        <p class="text-muted">Defina quantos sabores o cliente pode escolher para cada produto que utiliza grupos de sabores.</p>
+        
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Produto</th>
+                    <th>Grupo de Sabores</th>
+                    <th>Máx. Sabores</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in menu_items %}
+                    {% if item.flavor_group_id %}
+                    <tr>
+                        <td>{{ item.name }}</td>
+                        <td>
+                            {% set group = flavor_groups|selectattr('id', 'equalto', item.flavor_group_id)|first %}
+                            {{ group.name if group else item.flavor_group_id }}
+                        </td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <input type="number" 
+                                       class="form-control" 
+                                       style="width: 80px;" 
+                                       value="{{ item.max_flavors|default(1) }}" 
+                                       min="1" 
+                                       onchange="updateProductLimit('{{ item.id }}', this)">
+                                <span style="display: none;"></span>
+                            </div>
+                        </td>
+                        <td>
+                            {% if item.active %}
+                            <span class="badge bg-success">Ativo</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Inativo</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.flavor-select').forEach(function(el) {
+            new TomSelect(el, {
+                create: false,
+                sortField: {
+                    field: "text",
+                    direction: "asc"
+                },
+                placeholder: "Busque por nome..."
+            });
+        });
+    });
+
+    function updateProductLimit(productId, input) {
+        const val = parseInt(input.value);
+        const statusIcon = input.nextElementSibling;
+        
+        if (val < 1) {
+            alert('O limite deve ser pelo menos 1.');
+            input.value = 1;
+            return;
+        }
+
+        statusIcon.style.display = 'none';
+        input.disabled = true;
+
+        fetch('/config/flavors/product/update_limit', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                product_id: productId,
+                max_flavors: val
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            input.disabled = false;
+            statusIcon.style.display = 'inline';
+            if (data.success) {
+                statusIcon.innerHTML = '<i class="bi bi-check-circle-fill" style="color: #2ecc71;"></i>';
+                setTimeout(() => { statusIcon.style.display = 'none'; }, 2000);
+            } else {
+                statusIcon.innerHTML = '<i class="bi bi-x-circle-fill" style="color: #e74c3c;"></i>';
+                alert('Erro ao salvar: ' + data.message);
+            }
+        })
+        .catch(error => {
+            input.disabled = false;
+            statusIcon.style.display = 'inline';
+            statusIcon.innerHTML = '<i class="bi bi-x-circle-fill" style="color: #e74c3c;"></i>';
+            console.error('Error:', error);
+            alert('Erro de conexão ao salvar.');
+        });
+    }
+
+    function toggleSimple(groupId, itemId, checkbox) {
+        checkbox.disabled = true;
+        fetch('/config/flavors/toggle_simple', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                group_id: groupId,
+                item_id: itemId,
+                is_simple: checkbox.checked
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            checkbox.disabled = false;
+            if (!data.success) {
+                checkbox.checked = !checkbox.checked;
+                alert('Erro ao salvar: ' + (data.message || 'Erro desconhecido'));
+            }
+        })
+        .catch(error => {
+            checkbox.disabled = false;
+            checkbox.checked = !checkbox.checked;
+            console.error('Error:', error);
+            alert('Erro de conexão.');
+        });
+    }
+</script>
+{% endblock %}

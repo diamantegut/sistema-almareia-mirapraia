@@ -1,0 +1,364 @@
+2026-02-09 13:28:27,356 - NgrokManager - INFO - Checking if port 5001 is active...
+2026-02-09 13:28:27,359 - NgrokManager - INFO - Port 5001 is active.
+2026-02-09 13:28:27,359 - NgrokManager - INFO - Killing existing ngrok tunnels...
+2026-02-09 13:28:27,359 - NgrokManager - INFO - Starting tunnel 'pre-checkin' (Pré-Checkin Digital) -> checkinalmareia.ngrok.app on port 5001...
+2026-02-09 13:28:27,360 - pyngrok.ngrok - INFO - Opening tunnel named: pre-checkin
+2026-02-09 13:28:27,397 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:28:27-0300 lvl=info msg="no configuration paths supplied"
+2026-02-09 13:28:27,398 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:28:27-0300 lvl=info msg="using configuration at default config path" path="C:\\Users\\Angelo Diamante\\AppData\\Local/ngrok/ngrok.yml"
+2026-02-09 13:28:27,398 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:28:27-0300 lvl=info msg="open config file" path="C:\\Users\\Angelo Diamante\\AppData\\Local\\ngrok\\ngrok.yml" err=nil
+2026-02-09 13:28:27,398 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:28:27-0300 lvl=info msg="FIPS 140 mode" enabled=false
+2026-02-09 13:28:27,412 - pyngrok.process.ngrok - WARNING - t=2026-02-09T13:28:27-0300 lvl=warn msg="can't bind default web address, trying alternatives" obj=web addr=127.0.0.1:4040
+2026-02-09 13:28:27,412 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:28:27-0300 lvl=info msg="starting web service" obj=web addr=127.0.0.1:4041 allow_hosts=[]
+2026-02-09 13:28:28,940 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:28:28-0300 lvl=info msg="client session established" obj=tunnels.session
+2026-02-09 13:28:28,940 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:28:28-0300 lvl=info msg="tunnel session started" obj=tunnels.session
+2026-02-09 13:28:28,971 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:28:28-0300 lvl=info msg=start pg=/api/tunnels id=444b1c93490da57b
+2026-02-09 13:28:28,972 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:28:28-0300 lvl=info msg=end pg=/api/tunnels id=444b1c93490da57b status=200 dur=0s
+2026-02-09 13:28:28,972 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:28:28-0300 lvl=info msg=start pg=/api/tunnels id=1e02f341c72bda13
+2026-02-09 13:28:28,972 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:28:28-0300 lvl=info msg=end pg=/api/tunnels id=1e02f341c72bda13 status=200 dur=0s
+2026-02-09 13:28:28,973 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:28:28-0300 lvl=info msg=start pg=/api/tunnels id=6921d5d5af6f320c
+2026-02-09 13:28:28,973 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:28:28-0300 lvl=info msg=end pg=/api/tunnels id=6921d5d5af6f320c status=200 dur=0s
+2026-02-09 13:28:28,973 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:28:28-0300 lvl=info msg=start pg=/api/tunnels id=a8d1c4e5e9ff36b0
+2026-02-09 13:28:29,031 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:28:29-0300 lvl=info msg="update available" obj=updater
+2026-02-09 13:28:29,336 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:28:29-0300 lvl=info msg="started tunnel" obj=tunnels name=pre-checkin addr=http://localhost:5001 url=https://checkinalmareia.ngrok.app
+2026-02-09 13:28:29,336 - NgrokManager - INFO -  [OK] pre-checkin active: https://checkinalmareia.ngrok.app
+2026-02-09 13:28:29,336 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:28:29-0300 lvl=info msg=end pg=/api/tunnels id=a8d1c4e5e9ff36b0 status=201 dur=361.9016ms
+2026-02-09 13:28:29,336 - NgrokManager - INFO - Starting tunnel 'survey' (Pesquisa de Satisfação) -> pesquisa.almareia.ngrok.app on port 5001...
+2026-02-09 13:28:29,337 - pyngrok.ngrok - INFO - Opening tunnel named: survey
+2026-02-09 13:28:29,337 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:28:29-0300 lvl=info msg=start pg=/api/tunnels id=df4ac8c996602943
+2026-02-09 13:28:29,694 - pyngrok.process.ngrok - WARNING - t=2026-02-09T13:28:29-0300 lvl=warn msg="failed to start tunnel" pg=/api/tunnels id=df4ac8c996602943 err="failed to start tunnel: You have exceeded the maximum number of concurrent endpoints allowed for this account. Log into https://dashboard.ngrok.com/billing to review your usage and https://dashboard.ngrok.com/billing/choose-a-plan to view your subscription options.\r\n\r\nERR_NGROK_18021\r\n"
+2026-02-09 13:28:29,694 - NgrokManager - ERROR -  [FAILED] survey: ngrok client exception, API returned 502: {"error_code":103,"status_code":502,"msg":"failed to start tunnel","details":{"err":"failed to start tunnel: You have exceeded the maximum number of concurrent endpoints allowed for this account. Log into https://dashboard.ngrok.com/billing to review your usage and https://dashboard.ngrok.com/billing/choose-a-plan to view your subscription options.\r\n\r\nERR_NGROK_18021\r\n"}}
+
+2026-02-09 13:28:29,694 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:28:29-0300 lvl=info msg=end pg=/api/tunnels id=df4ac8c996602943 status=502 dur=355.6291ms
+2026-02-09 13:28:29,694 - NgrokManager - INFO - Starting tunnel 'whatsapp' (Webhook WhatsApp) -> mirapraiawhatts.ngrok.app on port 5001...
+2026-02-09 13:28:29,695 - pyngrok.ngrok - INFO - Opening tunnel named: whatsapp
+2026-02-09 13:28:29,695 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:28:29-0300 lvl=info msg=start pg=/api/tunnels id=66e0a58802901e17
+2026-02-09 13:28:30,080 - pyngrok.process.ngrok - WARNING - t=2026-02-09T13:28:30-0300 lvl=warn msg="failed to start tunnel" pg=/api/tunnels id=66e0a58802901e17 err="failed to start tunnel: You have exceeded the maximum number of concurrent endpoints allowed for this account. Log into https://dashboard.ngrok.com/billing to review your usage and https://dashboard.ngrok.com/billing/choose-a-plan to view your subscription options.\r\n\r\nERR_NGROK_18021\r\n"
+2026-02-09 13:28:30,080 - NgrokManager - ERROR -  [FAILED] whatsapp: ngrok client exception, API returned 502: {"error_code":103,"status_code":502,"msg":"failed to start tunnel","details":{"err":"failed to start tunnel: You have exceeded the maximum number of concurrent endpoints allowed for this account. Log into https://dashboard.ngrok.com/billing to review your usage and https://dashboard.ngrok.com/billing/choose-a-plan to view your subscription options.\r\n\r\nERR_NGROK_18021\r\n"}}
+
+2026-02-09 13:28:30,080 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:28:30-0300 lvl=info msg=end pg=/api/tunnels id=66e0a58802901e17 status=502 dur=384.0447ms
+2026-02-09 13:28:30,080 - NgrokManager - INFO - Starting tunnel 'staff' (Acesso Colaboradores) -> almareia.mirapraia.ngrok.app on port 5001...
+2026-02-09 13:28:30,081 - pyngrok.ngrok - INFO - Opening tunnel named: staff
+2026-02-09 13:28:30,081 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:28:30-0300 lvl=info msg=start pg=/api/tunnels id=e352fc21867f7a68
+2026-02-09 13:28:30,218 - pyngrok.process.ngrok - WARNING - t=2026-02-09T13:28:30-0300 lvl=warn msg="failed to start tunnel" pg=/api/tunnels id=e352fc21867f7a68 err="failed to start tunnel: The endpoint 'https://almareia.mirapraia.ngrok.app' is already online. Either\n1. stop your existing endpoint first, or\n2. start both endpoints with `--pooling-enabled` to load balance between them.\r\n\r\nERR_NGROK_334\r\n"
+2026-02-09 13:28:30,218 - NgrokManager - ERROR -  [FAILED] staff: ngrok client exception, API returned 502: {"error_code":103,"status_code":502,"msg":"failed to start tunnel","details":{"err":"failed to start tunnel: The endpoint 'https://almareia.mirapraia.ngrok.app' is already online. Either\n1. stop your existing endpoint first, or\n2. start both endpoints with `--pooling-enabled` to load balance between them.\r\n\r\nERR_NGROK_334\r\n"}}
+
+2026-02-09 13:28:30,218 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:28:30-0300 lvl=info msg=end pg=/api/tunnels id=e352fc21867f7a68 status=502 dur=136.8525ms
+2026-02-09 13:28:30,218 - NgrokManager - INFO - Starting tunnel 'queue' (Fila de Espera) -> fila.mirapraia.ngrok.app on port 5001...
+2026-02-09 13:28:30,219 - pyngrok.ngrok - INFO - Opening tunnel named: queue
+2026-02-09 13:28:30,219 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:28:30-0300 lvl=info msg=start pg=/api/tunnels id=87a825b3b6c3eddd
+2026-02-09 13:28:30,351 - pyngrok.process.ngrok - WARNING - t=2026-02-09T13:28:30-0300 lvl=warn msg="failed to start tunnel" pg=/api/tunnels id=87a825b3b6c3eddd err="failed to start tunnel: The endpoint 'https://fila.mirapraia.ngrok.app' is already online. Either\n1. stop your existing endpoint first, or\n2. start both endpoints with `--pooling-enabled` to load balance between them.\r\n\r\nERR_NGROK_334\r\n"
+2026-02-09 13:28:30,352 - NgrokManager - ERROR -  [FAILED] queue: ngrok client exception, API returned 502: {"error_code":103,"status_code":502,"msg":"failed to start tunnel","details":{"err":"failed to start tunnel: The endpoint 'https://fila.mirapraia.ngrok.app' is already online. Either\n1. stop your existing endpoint first, or\n2. start both endpoints with `--pooling-enabled` to load balance between them.\r\n\r\nERR_NGROK_334\r\n"}}
+
+2026-02-09 13:28:30,352 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:28:30-0300 lvl=info msg=end pg=/api/tunnels id=87a825b3b6c3eddd status=502 dur=132.6535ms
+2026-02-09 13:28:30,352 - NgrokManager - INFO - Starting tunnel 'menu' (Cardápio Digital) -> menu.mirapraia.ngrok.app on port 5001...
+2026-02-09 13:28:30,352 - pyngrok.ngrok - INFO - Opening tunnel named: menu
+2026-02-09 13:28:30,353 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:28:30-0300 lvl=info msg=start pg=/api/tunnels id=675df31310960c14
+2026-02-09 13:28:30,744 - pyngrok.process.ngrok - WARNING - t=2026-02-09T13:28:30-0300 lvl=warn msg="failed to start tunnel" pg=/api/tunnels id=675df31310960c14 err="failed to start tunnel: You have exceeded the maximum number of concurrent endpoints allowed for this account. Log into https://dashboard.ngrok.com/billing to review your usage and https://dashboard.ngrok.com/billing/choose-a-plan to view your subscription options.\r\n\r\nERR_NGROK_18021\r\n"
+2026-02-09 13:28:30,745 - NgrokManager - ERROR -  [FAILED] menu: ngrok client exception, API returned 502: {"error_code":103,"status_code":502,"msg":"failed to start tunnel","details":{"err":"failed to start tunnel: You have exceeded the maximum number of concurrent endpoints allowed for this account. Log into https://dashboard.ngrok.com/billing to review your usage and https://dashboard.ngrok.com/billing/choose-a-plan to view your subscription options.\r\n\r\nERR_NGROK_18021\r\n"}}
+
+2026-02-09 13:28:30,745 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:28:30-0300 lvl=info msg=end pg=/api/tunnels id=675df31310960c14 status=502 dur=391.1737ms
+2026-02-09 13:28:30,745 - NgrokManager - INFO - All tunnels processed. Ngrok is running in the background.
+2026-02-09 13:28:30,746 - NgrokManager - INFO - Keep this script running to maintain tunnels (if not using autostart).
+2026-02-09 13:29:24,928 - NgrokManager - INFO - Checking if port 5001 is active...
+2026-02-09 13:29:24,931 - NgrokManager - INFO - Port 5001 is active.
+2026-02-09 13:29:24,931 - NgrokManager - INFO - Killing existing ngrok tunnels...
+2026-02-09 13:29:24,931 - NgrokManager - INFO - Starting tunnel 'pre-checkin' (Pré-Checkin Digital) -> checkinalmareia.ngrok.app on port 5001...
+2026-02-09 13:29:24,931 - pyngrok.ngrok - INFO - Opening tunnel named: pre-checkin
+2026-02-09 13:29:24,963 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:29:24-0300 lvl=info msg="no configuration paths supplied"
+2026-02-09 13:29:24,964 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:29:24-0300 lvl=info msg="using configuration at default config path" path="C:\\Users\\Angelo Diamante\\AppData\\Local/ngrok/ngrok.yml"
+2026-02-09 13:29:24,964 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:29:24-0300 lvl=info msg="open config file" path="C:\\Users\\Angelo Diamante\\AppData\\Local\\ngrok\\ngrok.yml" err=nil
+2026-02-09 13:29:24,964 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:29:24-0300 lvl=info msg="FIPS 140 mode" enabled=false
+2026-02-09 13:29:24,977 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:29:24-0300 lvl=info msg="starting web service" obj=web addr=127.0.0.1:4040 allow_hosts=[]
+2026-02-09 13:29:25,391 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:29:25-0300 lvl=info msg="client session established" obj=tunnels.session
+2026-02-09 13:29:25,392 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:29:25-0300 lvl=info msg="tunnel session started" obj=tunnels.session
+2026-02-09 13:29:25,423 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:29:25-0300 lvl=info msg=start pg=/api/tunnels id=11242519ae91dafe
+2026-02-09 13:29:25,423 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:29:25-0300 lvl=info msg=end pg=/api/tunnels id=11242519ae91dafe status=200 dur=0s
+2026-02-09 13:29:25,424 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:29:25-0300 lvl=info msg=start pg=/api/tunnels id=5e76bb42994d720b
+2026-02-09 13:29:25,424 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:29:25-0300 lvl=info msg=end pg=/api/tunnels id=5e76bb42994d720b status=200 dur=0s
+2026-02-09 13:29:25,424 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:29:25-0300 lvl=info msg=start pg=/api/tunnels id=edc9a39c96c3aa11
+2026-02-09 13:29:25,425 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:29:25-0300 lvl=info msg=end pg=/api/tunnels id=edc9a39c96c3aa11 status=200 dur=0s
+2026-02-09 13:29:25,425 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:29:25-0300 lvl=info msg=start pg=/api/tunnels id=1f8dd0703e4524e6
+2026-02-09 13:29:25,579 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:29:25-0300 lvl=info msg="update available" obj=updater
+2026-02-09 13:29:25,830 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:29:25-0300 lvl=info msg="started tunnel" obj=tunnels name=pre-checkin addr=http://localhost:5001 url=https://checkinalmareia.ngrok.app
+2026-02-09 13:29:25,830 - NgrokManager - INFO -  [OK] pre-checkin active: https://checkinalmareia.ngrok.app
+2026-02-09 13:29:25,831 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:29:25-0300 lvl=info msg=end pg=/api/tunnels id=1f8dd0703e4524e6 status=201 dur=404.0885ms
+2026-02-09 13:29:25,831 - NgrokManager - INFO - Starting tunnel 'survey' (Pesquisa de Satisfação) -> pesquisa.almareia.ngrok.app on port 5001...
+2026-02-09 13:29:25,831 - pyngrok.ngrok - INFO - Opening tunnel named: survey
+2026-02-09 13:29:25,832 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:29:25-0300 lvl=info msg=start pg=/api/tunnels id=98524e74c0834fb5
+2026-02-09 13:29:26,228 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:29:26-0300 lvl=info msg="started tunnel" obj=tunnels name=survey addr=http://localhost:5001 url=https://pesquisa.almareia.ngrok.app
+2026-02-09 13:29:26,228 - NgrokManager - INFO -  [OK] survey active: https://pesquisa.almareia.ngrok.app
+2026-02-09 13:29:26,228 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:29:26-0300 lvl=info msg=end pg=/api/tunnels id=98524e74c0834fb5 status=201 dur=395.496ms
+2026-02-09 13:29:26,228 - NgrokManager - INFO - Starting tunnel 'whatsapp' (Webhook WhatsApp) -> mirapraiawhatts.ngrok.app on port 5001...
+2026-02-09 13:29:26,229 - pyngrok.ngrok - INFO - Opening tunnel named: whatsapp
+2026-02-09 13:29:26,229 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:29:26-0300 lvl=info msg=start pg=/api/tunnels id=56a9f4c4d4065d02
+2026-02-09 13:29:26,609 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:29:26-0300 lvl=info msg="started tunnel" obj=tunnels name=whatsapp addr=http://localhost:5001 url=https://mirapraiawhatts.ngrok.app
+2026-02-09 13:29:26,609 - NgrokManager - INFO -  [OK] whatsapp active: https://mirapraiawhatts.ngrok.app
+2026-02-09 13:29:26,610 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:29:26-0300 lvl=info msg=end pg=/api/tunnels id=56a9f4c4d4065d02 status=201 dur=379.434ms
+2026-02-09 13:29:26,610 - NgrokManager - INFO - Starting tunnel 'staff' (Acesso Colaboradores) -> almareia.mirapraia.ngrok.app on port 5001...
+2026-02-09 13:29:26,610 - pyngrok.ngrok - INFO - Opening tunnel named: staff
+2026-02-09 13:29:26,610 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:29:26-0300 lvl=info msg=start pg=/api/tunnels id=9162848669884f40
+2026-02-09 13:29:26,980 - pyngrok.process.ngrok - WARNING - t=2026-02-09T13:29:26-0300 lvl=warn msg="failed to start tunnel" pg=/api/tunnels id=9162848669884f40 err="failed to start tunnel: You have exceeded the maximum number of concurrent endpoints allowed for this account. Log into https://dashboard.ngrok.com/billing to review your usage and https://dashboard.ngrok.com/billing/choose-a-plan to view your subscription options.\r\n\r\nERR_NGROK_18021\r\n"
+2026-02-09 13:29:26,980 - NgrokManager - ERROR -  [FAILED] staff: ngrok client exception, API returned 502: {"error_code":103,"status_code":502,"msg":"failed to start tunnel","details":{"err":"failed to start tunnel: You have exceeded the maximum number of concurrent endpoints allowed for this account. Log into https://dashboard.ngrok.com/billing to review your usage and https://dashboard.ngrok.com/billing/choose-a-plan to view your subscription options.\r\n\r\nERR_NGROK_18021\r\n"}}
+
+2026-02-09 13:29:26,981 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:29:26-0300 lvl=info msg=end pg=/api/tunnels id=9162848669884f40 status=502 dur=368.5303ms
+2026-02-09 13:29:26,981 - NgrokManager - INFO - Starting tunnel 'queue' (Fila de Espera) -> fila.mirapraia.ngrok.app on port 5001...
+2026-02-09 13:29:26,981 - pyngrok.ngrok - INFO - Opening tunnel named: queue
+2026-02-09 13:29:26,982 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:29:26-0300 lvl=info msg=start pg=/api/tunnels id=5fea2067ef411119
+2026-02-09 13:29:27,353 - pyngrok.process.ngrok - WARNING - t=2026-02-09T13:29:27-0300 lvl=warn msg="failed to start tunnel" pg=/api/tunnels id=5fea2067ef411119 err="failed to start tunnel: You have exceeded the maximum number of concurrent endpoints allowed for this account. Log into https://dashboard.ngrok.com/billing to review your usage and https://dashboard.ngrok.com/billing/choose-a-plan to view your subscription options.\r\n\r\nERR_NGROK_18021\r\n"
+2026-02-09 13:29:27,353 - NgrokManager - ERROR -  [FAILED] queue: ngrok client exception, API returned 502: {"error_code":103,"status_code":502,"msg":"failed to start tunnel","details":{"err":"failed to start tunnel: You have exceeded the maximum number of concurrent endpoints allowed for this account. Log into https://dashboard.ngrok.com/billing to review your usage and https://dashboard.ngrok.com/billing/choose-a-plan to view your subscription options.\r\n\r\nERR_NGROK_18021\r\n"}}
+
+2026-02-09 13:29:27,354 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:29:27-0300 lvl=info msg=end pg=/api/tunnels id=5fea2067ef411119 status=502 dur=371.0001ms
+2026-02-09 13:29:27,354 - NgrokManager - INFO - Starting tunnel 'menu' (Cardápio Digital) -> menu.mirapraia.ngrok.app on port 5001...
+2026-02-09 13:29:27,354 - pyngrok.ngrok - INFO - Opening tunnel named: menu
+2026-02-09 13:29:27,355 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:29:27-0300 lvl=info msg=start pg=/api/tunnels id=82ce2868ff06f56b
+2026-02-09 13:29:27,747 - pyngrok.process.ngrok - WARNING - t=2026-02-09T13:29:27-0300 lvl=warn msg="failed to start tunnel" pg=/api/tunnels id=82ce2868ff06f56b err="failed to start tunnel: You have exceeded the maximum number of concurrent endpoints allowed for this account. Log into https://dashboard.ngrok.com/billing to review your usage and https://dashboard.ngrok.com/billing/choose-a-plan to view your subscription options.\r\n\r\nERR_NGROK_18021\r\n"
+2026-02-09 13:29:27,748 - NgrokManager - ERROR -  [FAILED] menu: ngrok client exception, API returned 502: {"error_code":103,"status_code":502,"msg":"failed to start tunnel","details":{"err":"failed to start tunnel: You have exceeded the maximum number of concurrent endpoints allowed for this account. Log into https://dashboard.ngrok.com/billing to review your usage and https://dashboard.ngrok.com/billing/choose-a-plan to view your subscription options.\r\n\r\nERR_NGROK_18021\r\n"}}
+
+2026-02-09 13:29:27,748 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:29:27-0300 lvl=info msg=end pg=/api/tunnels id=82ce2868ff06f56b status=502 dur=392.9121ms
+2026-02-09 13:29:27,748 - NgrokManager - INFO - All tunnels processed. Ngrok is running in the background.
+2026-02-09 13:30:08,871 - NgrokManager - INFO - Shutting down ngrok manager...
+2026-02-09 13:30:47,914 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:30:47-0300 lvl=info msg="join connections" obj=join id=b2cd57510985 l=127.0.0.1:5001 r=[2a03:2880:22ff::]:64068
+2026-02-09 13:32:37,419 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:32:37-0300 lvl=info msg="join connections" obj=join id=233d61a80158 l=127.0.0.1:5001 r=[2a03:2880:22ff:7::]:47738
+2026-02-09 13:40:12,657 - NgrokManager - INFO - Checking if port 5001 is active...
+2026-02-09 13:40:12,659 - NgrokManager - INFO - Port 5001 is active.
+2026-02-09 13:40:12,660 - NgrokManager - INFO - Killing existing ngrok tunnels...
+2026-02-09 13:40:12,660 - NgrokManager - INFO - Starting tunnel 'pre-checkin' (Pré-Checkin Digital) -> checkinalmareia.ngrok.app on port 5001...
+2026-02-09 13:40:12,661 - pyngrok.ngrok - INFO - Opening tunnel named: pre-checkin
+2026-02-09 13:40:12,691 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:12-0300 lvl=info msg="no configuration paths supplied"
+2026-02-09 13:40:12,692 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:12-0300 lvl=info msg="using configuration at default config path" path="C:\\Users\\Angelo Diamante\\AppData\\Local/ngrok/ngrok.yml"
+2026-02-09 13:40:12,692 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:12-0300 lvl=info msg="open config file" path="C:\\Users\\Angelo Diamante\\AppData\\Local\\ngrok\\ngrok.yml" err=nil
+2026-02-09 13:40:12,692 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:12-0300 lvl=info msg="FIPS 140 mode" enabled=false
+2026-02-09 13:40:12,705 - pyngrok.process.ngrok - WARNING - t=2026-02-09T13:40:12-0300 lvl=warn msg="can't bind default web address, trying alternatives" obj=web addr=127.0.0.1:4040
+2026-02-09 13:40:12,705 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:12-0300 lvl=info msg="starting web service" obj=web addr=127.0.0.1:4041 allow_hosts=[]
+2026-02-09 13:40:13,193 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:13-0300 lvl=info msg="client session established" obj=tunnels.session
+2026-02-09 13:40:13,193 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:13-0300 lvl=info msg="tunnel session started" obj=tunnels.session
+2026-02-09 13:40:13,224 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:13-0300 lvl=info msg=start pg=/api/tunnels id=2e7af20a4539003a
+2026-02-09 13:40:13,224 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:13-0300 lvl=info msg=end pg=/api/tunnels id=2e7af20a4539003a status=200 dur=0s
+2026-02-09 13:40:13,225 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:13-0300 lvl=info msg=start pg=/api/tunnels id=e3bfd7ad4211f7b6
+2026-02-09 13:40:13,225 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:13-0300 lvl=info msg=end pg=/api/tunnels id=e3bfd7ad4211f7b6 status=200 dur=0s
+2026-02-09 13:40:13,225 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:13-0300 lvl=info msg=start pg=/api/tunnels id=bb2546d263ac899d
+2026-02-09 13:40:13,226 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:13-0300 lvl=info msg=end pg=/api/tunnels id=bb2546d263ac899d status=200 dur=0s
+2026-02-09 13:40:13,226 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:13-0300 lvl=info msg=start pg=/api/tunnels id=fe454741bff1ef16
+2026-02-09 13:40:13,297 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:13-0300 lvl=info msg="update available" obj=updater
+2026-02-09 13:40:13,359 - pyngrok.process.ngrok - WARNING - t=2026-02-09T13:40:13-0300 lvl=warn msg="failed to start tunnel" pg=/api/tunnels id=fe454741bff1ef16 err="failed to start tunnel: The endpoint 'https://checkinalmareia.ngrok.app' is already online. Either\n1. stop your existing endpoint first, or\n2. start both endpoints with `--pooling-enabled` to load balance between them.\r\n\r\nERR_NGROK_334\r\n"
+2026-02-09 13:40:13,359 - NgrokManager - ERROR -  [FAILED] pre-checkin: ngrok client exception, API returned 502: {"error_code":103,"status_code":502,"msg":"failed to start tunnel","details":{"err":"failed to start tunnel: The endpoint 'https://checkinalmareia.ngrok.app' is already online. Either\n1. stop your existing endpoint first, or\n2. start both endpoints with `--pooling-enabled` to load balance between them.\r\n\r\nERR_NGROK_334\r\n"}}
+
+2026-02-09 13:40:13,359 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:13-0300 lvl=info msg=end pg=/api/tunnels id=fe454741bff1ef16 status=502 dur=133.2362ms
+2026-02-09 13:40:13,359 - NgrokManager - INFO - Starting tunnel 'survey' (Pesquisa de Satisfação) -> pesquisa.almareia.ngrok.app on port 5001...
+2026-02-09 13:40:13,360 - pyngrok.ngrok - INFO - Opening tunnel named: survey
+2026-02-09 13:40:13,360 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:13-0300 lvl=info msg=start pg=/api/tunnels id=9e360d2b4e904357
+2026-02-09 13:40:13,496 - pyngrok.process.ngrok - WARNING - t=2026-02-09T13:40:13-0300 lvl=warn msg="failed to start tunnel" pg=/api/tunnels id=9e360d2b4e904357 err="failed to start tunnel: The endpoint 'https://pesquisa.almareia.ngrok.app' is already online. Either\n1. stop your existing endpoint first, or\n2. start both endpoints with `--pooling-enabled` to load balance between them.\r\n\r\nERR_NGROK_334\r\n"
+2026-02-09 13:40:13,497 - NgrokManager - ERROR -  [FAILED] survey: ngrok client exception, API returned 502: {"error_code":103,"status_code":502,"msg":"failed to start tunnel","details":{"err":"failed to start tunnel: The endpoint 'https://pesquisa.almareia.ngrok.app' is already online. Either\n1. stop your existing endpoint first, or\n2. start both endpoints with `--pooling-enabled` to load balance between them.\r\n\r\nERR_NGROK_334\r\n"}}
+
+2026-02-09 13:40:13,497 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:13-0300 lvl=info msg=end pg=/api/tunnels id=9e360d2b4e904357 status=502 dur=136.5042ms
+2026-02-09 13:40:13,497 - NgrokManager - INFO - Starting tunnel 'whatsapp' (Webhook WhatsApp) -> mirapraiawhatts.ngrok.app on port 5001...
+2026-02-09 13:40:13,498 - pyngrok.ngrok - INFO - Opening tunnel named: whatsapp
+2026-02-09 13:40:13,498 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:13-0300 lvl=info msg=start pg=/api/tunnels id=7a3f98682b7f7b2d
+2026-02-09 13:40:13,630 - pyngrok.process.ngrok - WARNING - t=2026-02-09T13:40:13-0300 lvl=warn msg="failed to start tunnel" pg=/api/tunnels id=7a3f98682b7f7b2d err="failed to start tunnel: The endpoint 'https://mirapraiawhatts.ngrok.app' is already online. Either\n1. stop your existing endpoint first, or\n2. start both endpoints with `--pooling-enabled` to load balance between them.\r\n\r\nERR_NGROK_334\r\n"
+2026-02-09 13:40:13,630 - NgrokManager - ERROR -  [FAILED] whatsapp: ngrok client exception, API returned 502: {"error_code":103,"status_code":502,"msg":"failed to start tunnel","details":{"err":"failed to start tunnel: The endpoint 'https://mirapraiawhatts.ngrok.app' is already online. Either\n1. stop your existing endpoint first, or\n2. start both endpoints with `--pooling-enabled` to load balance between them.\r\n\r\nERR_NGROK_334\r\n"}}
+
+2026-02-09 13:40:13,631 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:13-0300 lvl=info msg=end pg=/api/tunnels id=7a3f98682b7f7b2d status=502 dur=131.1117ms
+2026-02-09 13:40:13,631 - NgrokManager - INFO - Starting tunnel 'staff' (Acesso Colaboradores) -> almareia.mirapraia.ngrok.app on port 5001...
+2026-02-09 13:40:13,631 - pyngrok.ngrok - INFO - Opening tunnel named: staff
+2026-02-09 13:40:13,632 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:13-0300 lvl=info msg=start pg=/api/tunnels id=7d6206220c335672
+2026-02-09 13:40:13,986 - pyngrok.process.ngrok - WARNING - t=2026-02-09T13:40:13-0300 lvl=warn msg="failed to start tunnel" pg=/api/tunnels id=7d6206220c335672 err="failed to start tunnel: You have exceeded the maximum number of concurrent endpoints allowed for this account. Log into https://dashboard.ngrok.com/billing to review your usage and https://dashboard.ngrok.com/billing/choose-a-plan to view your subscription options.\r\n\r\nERR_NGROK_18021\r\n"
+2026-02-09 13:40:13,986 - NgrokManager - ERROR -  [FAILED] staff: ngrok client exception, API returned 502: {"error_code":103,"status_code":502,"msg":"failed to start tunnel","details":{"err":"failed to start tunnel: You have exceeded the maximum number of concurrent endpoints allowed for this account. Log into https://dashboard.ngrok.com/billing to review your usage and https://dashboard.ngrok.com/billing/choose-a-plan to view your subscription options.\r\n\r\nERR_NGROK_18021\r\n"}}
+
+2026-02-09 13:40:13,986 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:13-0300 lvl=info msg=end pg=/api/tunnels id=7d6206220c335672 status=502 dur=353.815ms
+2026-02-09 13:40:13,987 - NgrokManager - INFO - Starting tunnel 'queue' (Fila de Espera) -> fila.mirapraia.ngrok.app on port 5001...
+2026-02-09 13:40:13,987 - pyngrok.ngrok - INFO - Opening tunnel named: queue
+2026-02-09 13:40:13,988 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:13-0300 lvl=info msg=start pg=/api/tunnels id=b211fd3c0a435e1d
+2026-02-09 13:40:14,361 - pyngrok.process.ngrok - WARNING - t=2026-02-09T13:40:14-0300 lvl=warn msg="failed to start tunnel" pg=/api/tunnels id=b211fd3c0a435e1d err="failed to start tunnel: You have exceeded the maximum number of concurrent endpoints allowed for this account. Log into https://dashboard.ngrok.com/billing to review your usage and https://dashboard.ngrok.com/billing/choose-a-plan to view your subscription options.\r\n\r\nERR_NGROK_18021\r\n"
+2026-02-09 13:40:14,361 - NgrokManager - ERROR -  [FAILED] queue: ngrok client exception, API returned 502: {"error_code":103,"status_code":502,"msg":"failed to start tunnel","details":{"err":"failed to start tunnel: You have exceeded the maximum number of concurrent endpoints allowed for this account. Log into https://dashboard.ngrok.com/billing to review your usage and https://dashboard.ngrok.com/billing/choose-a-plan to view your subscription options.\r\n\r\nERR_NGROK_18021\r\n"}}
+
+2026-02-09 13:40:14,362 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:14-0300 lvl=info msg=end pg=/api/tunnels id=b211fd3c0a435e1d status=502 dur=372.2594ms
+2026-02-09 13:40:14,362 - NgrokManager - INFO - Starting tunnel 'menu' (Cardápio Digital) -> menu.mirapraia.ngrok.app on port 5001...
+2026-02-09 13:40:14,362 - pyngrok.ngrok - INFO - Opening tunnel named: menu
+2026-02-09 13:40:14,363 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:14-0300 lvl=info msg=start pg=/api/tunnels id=d77a1b71e9f823f3
+2026-02-09 13:40:14,809 - pyngrok.process.ngrok - WARNING - t=2026-02-09T13:40:14-0300 lvl=warn msg="failed to start tunnel" pg=/api/tunnels id=d77a1b71e9f823f3 err="failed to start tunnel: You have exceeded the maximum number of concurrent endpoints allowed for this account. Log into https://dashboard.ngrok.com/billing to review your usage and https://dashboard.ngrok.com/billing/choose-a-plan to view your subscription options.\r\n\r\nERR_NGROK_18021\r\n"
+2026-02-09 13:40:14,809 - NgrokManager - ERROR -  [FAILED] menu: ngrok client exception, API returned 502: {"error_code":103,"status_code":502,"msg":"failed to start tunnel","details":{"err":"failed to start tunnel: You have exceeded the maximum number of concurrent endpoints allowed for this account. Log into https://dashboard.ngrok.com/billing to review your usage and https://dashboard.ngrok.com/billing/choose-a-plan to view your subscription options.\r\n\r\nERR_NGROK_18021\r\n"}}
+
+2026-02-09 13:40:14,810 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:14-0300 lvl=info msg=end pg=/api/tunnels id=d77a1b71e9f823f3 status=502 dur=446.4519ms
+2026-02-09 13:40:14,810 - NgrokManager - INFO - All tunnels processed. Ngrok is running in the background.
+2026-02-09 13:40:53,450 - NgrokManager - INFO - Checking if port 5001 is active...
+2026-02-09 13:40:53,453 - NgrokManager - INFO - Port 5001 is active.
+2026-02-09 13:40:53,453 - NgrokManager - INFO - Killing existing ngrok tunnels...
+2026-02-09 13:40:53,453 - NgrokManager - INFO - Starting tunnel 'pre-checkin' (Pré-Checkin Digital) -> checkinalmareia.ngrok.app on port 5001...
+2026-02-09 13:40:53,454 - pyngrok.ngrok - INFO - Opening tunnel named: pre-checkin
+2026-02-09 13:40:53,486 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:53-0300 lvl=info msg="no configuration paths supplied"
+2026-02-09 13:40:53,486 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:53-0300 lvl=info msg="using configuration at default config path" path="C:\\Users\\Angelo Diamante\\AppData\\Local/ngrok/ngrok.yml"
+2026-02-09 13:40:53,486 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:53-0300 lvl=info msg="open config file" path="C:\\Users\\Angelo Diamante\\AppData\\Local\\ngrok\\ngrok.yml" err=nil
+2026-02-09 13:40:53,487 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:53-0300 lvl=info msg="FIPS 140 mode" enabled=false
+2026-02-09 13:40:53,500 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:53-0300 lvl=info msg="starting web service" obj=web addr=127.0.0.1:4040 allow_hosts=[]
+2026-02-09 13:40:53,895 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:53-0300 lvl=info msg="client session established" obj=tunnels.session
+2026-02-09 13:40:53,896 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:53-0300 lvl=info msg="tunnel session started" obj=tunnels.session
+2026-02-09 13:40:53,927 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:53-0300 lvl=info msg=start pg=/api/tunnels id=ebf572cbbe2c3ddc
+2026-02-09 13:40:53,928 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:53-0300 lvl=info msg=end pg=/api/tunnels id=ebf572cbbe2c3ddc status=200 dur=0s
+2026-02-09 13:40:53,928 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:53-0300 lvl=info msg=start pg=/api/tunnels id=b88a7775f99dcbe9
+2026-02-09 13:40:53,928 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:53-0300 lvl=info msg=end pg=/api/tunnels id=b88a7775f99dcbe9 status=200 dur=0s
+2026-02-09 13:40:53,929 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:53-0300 lvl=info msg=start pg=/api/tunnels id=5b808452d1431ed5
+2026-02-09 13:40:53,929 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:53-0300 lvl=info msg=end pg=/api/tunnels id=5b808452d1431ed5 status=200 dur=0s
+2026-02-09 13:40:53,929 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:53-0300 lvl=info msg=start pg=/api/tunnels id=ea483a8ac0c3c53d
+2026-02-09 13:40:54,108 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:54-0300 lvl=info msg="update available" obj=updater
+2026-02-09 13:40:54,287 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:54-0300 lvl=info msg="started tunnel" obj=tunnels name=pre-checkin addr=http://localhost:5001 url=https://checkinalmareia.ngrok.app
+2026-02-09 13:40:54,287 - NgrokManager - INFO -  [OK] pre-checkin active: https://checkinalmareia.ngrok.app
+2026-02-09 13:40:54,287 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:54-0300 lvl=info msg=end pg=/api/tunnels id=ea483a8ac0c3c53d status=201 dur=357.8262ms
+2026-02-09 13:40:54,287 - NgrokManager - INFO - Starting tunnel 'survey' (Pesquisa de Satisfação) -> pesquisa.almareia.ngrok.app on port 5001...
+2026-02-09 13:40:54,288 - pyngrok.ngrok - INFO - Opening tunnel named: survey
+2026-02-09 13:40:54,288 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:54-0300 lvl=info msg=start pg=/api/tunnels id=e3f8cd50856dd395
+2026-02-09 13:40:54,646 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:54-0300 lvl=info msg="started tunnel" obj=tunnels name=survey addr=http://localhost:5001 url=https://pesquisa.almareia.ngrok.app
+2026-02-09 13:40:54,646 - NgrokManager - INFO -  [OK] survey active: https://pesquisa.almareia.ngrok.app
+2026-02-09 13:40:54,646 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:54-0300 lvl=info msg=end pg=/api/tunnels id=e3f8cd50856dd395 status=201 dur=357.699ms
+2026-02-09 13:40:54,646 - NgrokManager - INFO - Starting tunnel 'whatsapp' (Webhook WhatsApp) -> mirapraiawhatts.ngrok.app on port 5001...
+2026-02-09 13:40:54,647 - pyngrok.ngrok - INFO - Opening tunnel named: whatsapp
+2026-02-09 13:40:54,647 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:54-0300 lvl=info msg=start pg=/api/tunnels id=561190d78be5b9aa
+2026-02-09 13:40:55,018 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:55-0300 lvl=info msg="started tunnel" obj=tunnels name=whatsapp addr=http://localhost:5001 url=https://mirapraiawhatts.ngrok.app
+2026-02-09 13:40:55,019 - NgrokManager - INFO -  [OK] whatsapp active: https://mirapraiawhatts.ngrok.app
+2026-02-09 13:40:55,019 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:55-0300 lvl=info msg=end pg=/api/tunnels id=561190d78be5b9aa status=201 dur=370.6964ms
+2026-02-09 13:40:55,019 - NgrokManager - INFO - Starting tunnel 'staff' (Acesso Colaboradores) -> almareia.mirapraia.ngrok.app on port 5001...
+2026-02-09 13:40:55,019 - pyngrok.ngrok - INFO - Opening tunnel named: staff
+2026-02-09 13:40:55,020 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:55-0300 lvl=info msg=start pg=/api/tunnels id=80d97193cc86898e
+2026-02-09 13:40:55,403 - pyngrok.process.ngrok - WARNING - t=2026-02-09T13:40:55-0300 lvl=warn msg="failed to start tunnel" pg=/api/tunnels id=80d97193cc86898e err="failed to start tunnel: You have exceeded the maximum number of concurrent endpoints allowed for this account. Log into https://dashboard.ngrok.com/billing to review your usage and https://dashboard.ngrok.com/billing/choose-a-plan to view your subscription options.\r\n\r\nERR_NGROK_18021\r\n"
+2026-02-09 13:40:55,404 - NgrokManager - ERROR -  [FAILED] staff: ngrok client exception, API returned 502: {"error_code":103,"status_code":502,"msg":"failed to start tunnel","details":{"err":"failed to start tunnel: You have exceeded the maximum number of concurrent endpoints allowed for this account. Log into https://dashboard.ngrok.com/billing to review your usage and https://dashboard.ngrok.com/billing/choose-a-plan to view your subscription options.\r\n\r\nERR_NGROK_18021\r\n"}}
+
+2026-02-09 13:40:55,404 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:55-0300 lvl=info msg=end pg=/api/tunnels id=80d97193cc86898e status=502 dur=383.3215ms
+2026-02-09 13:40:55,404 - NgrokManager - INFO - Starting tunnel 'queue' (Fila de Espera) -> fila.mirapraia.ngrok.app on port 5001...
+2026-02-09 13:40:55,404 - pyngrok.ngrok - INFO - Opening tunnel named: queue
+2026-02-09 13:40:55,405 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:55-0300 lvl=info msg=start pg=/api/tunnels id=c5f471428a9f6dd6
+2026-02-09 13:40:55,783 - pyngrok.process.ngrok - WARNING - t=2026-02-09T13:40:55-0300 lvl=warn msg="failed to start tunnel" pg=/api/tunnels id=c5f471428a9f6dd6 err="failed to start tunnel: You have exceeded the maximum number of concurrent endpoints allowed for this account. Log into https://dashboard.ngrok.com/billing to review your usage and https://dashboard.ngrok.com/billing/choose-a-plan to view your subscription options.\r\n\r\nERR_NGROK_18021\r\n"
+2026-02-09 13:40:55,784 - NgrokManager - ERROR -  [FAILED] queue: ngrok client exception, API returned 502: {"error_code":103,"status_code":502,"msg":"failed to start tunnel","details":{"err":"failed to start tunnel: You have exceeded the maximum number of concurrent endpoints allowed for this account. Log into https://dashboard.ngrok.com/billing to review your usage and https://dashboard.ngrok.com/billing/choose-a-plan to view your subscription options.\r\n\r\nERR_NGROK_18021\r\n"}}
+
+2026-02-09 13:40:55,784 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:55-0300 lvl=info msg=end pg=/api/tunnels id=c5f471428a9f6dd6 status=502 dur=378.0921ms
+2026-02-09 13:40:55,784 - NgrokManager - INFO - Starting tunnel 'menu' (Cardápio Digital) -> menu.mirapraia.ngrok.app on port 5001...
+2026-02-09 13:40:55,784 - pyngrok.ngrok - INFO - Opening tunnel named: menu
+2026-02-09 13:40:55,785 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:55-0300 lvl=info msg=start pg=/api/tunnels id=5a96ae696f7865ee
+2026-02-09 13:40:56,144 - pyngrok.process.ngrok - WARNING - t=2026-02-09T13:40:56-0300 lvl=warn msg="failed to start tunnel" pg=/api/tunnels id=5a96ae696f7865ee err="failed to start tunnel: You have exceeded the maximum number of concurrent endpoints allowed for this account. Log into https://dashboard.ngrok.com/billing to review your usage and https://dashboard.ngrok.com/billing/choose-a-plan to view your subscription options.\r\n\r\nERR_NGROK_18021\r\n"
+2026-02-09 13:40:56,144 - NgrokManager - ERROR -  [FAILED] menu: ngrok client exception, API returned 502: {"error_code":103,"status_code":502,"msg":"failed to start tunnel","details":{"err":"failed to start tunnel: You have exceeded the maximum number of concurrent endpoints allowed for this account. Log into https://dashboard.ngrok.com/billing to review your usage and https://dashboard.ngrok.com/billing/choose-a-plan to view your subscription options.\r\n\r\nERR_NGROK_18021\r\n"}}
+
+2026-02-09 13:40:56,144 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:40:56-0300 lvl=info msg=end pg=/api/tunnels id=5a96ae696f7865ee status=502 dur=359.0482ms
+2026-02-09 13:40:56,145 - NgrokManager - INFO - All tunnels processed. Ngrok is running in the background.
+2026-02-09 13:52:23,391 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:52:23-0300 lvl=info msg="join connections" obj=join id=d6433306ad6a l=127.0.0.1:5001 r=[2a03:2880:10ff:71::]:48534
+2026-02-09 13:54:07,618 - pyngrok.process.ngrok - INFO - t=2026-02-09T13:54:07-0300 lvl=info msg="join connections" obj=join id=73961c5fafd3 l=127.0.0.1:5001 r=[2a03:2880:10ff:5a::]:63006
+2026-02-09 14:00:40,174 - NgrokManager - INFO - Checking if port 5001 is active...
+2026-02-09 14:00:40,176 - NgrokManager - INFO - Port 5001 is active.
+2026-02-09 14:00:40,176 - NgrokManager - INFO - Skipping ngrok.kill() to preserve existing tunnels (per user request).
+2026-02-09 14:00:40,177 - NgrokManager - INFO - Starting tunnel 'pre-checkin' (Pré-Checkin Digital) -> checkinalmareia.ngrok.app on port 5001...
+2026-02-09 14:00:40,177 - pyngrok.ngrok - INFO - Opening tunnel named: pre-checkin
+2026-02-09 14:00:40,207 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:00:40-0300 lvl=info msg="no configuration paths supplied"
+2026-02-09 14:00:40,207 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:00:40-0300 lvl=info msg="using configuration at default config path" path="C:\\Users\\Angelo Diamante\\AppData\\Local/ngrok/ngrok.yml"
+2026-02-09 14:00:40,207 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:00:40-0300 lvl=info msg="open config file" path="C:\\Users\\Angelo Diamante\\AppData\\Local\\ngrok\\ngrok.yml" err=nil
+2026-02-09 14:00:40,207 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:00:40-0300 lvl=info msg="FIPS 140 mode" enabled=false
+2026-02-09 14:00:40,220 - pyngrok.process.ngrok - WARNING - t=2026-02-09T14:00:40-0300 lvl=warn msg="can't bind default web address, trying alternatives" obj=web addr=127.0.0.1:4040
+2026-02-09 14:00:40,220 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:00:40-0300 lvl=info msg="starting web service" obj=web addr=127.0.0.1:4042 allow_hosts=[]
+2026-02-09 14:00:40,714 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:00:40-0300 lvl=info msg="client session established" obj=tunnels.session
+2026-02-09 14:00:40,714 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:00:40-0300 lvl=info msg="tunnel session started" obj=tunnels.session
+2026-02-09 14:00:40,745 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:00:40-0300 lvl=info msg=start pg=/api/tunnels id=41b0818372ef8ba1
+2026-02-09 14:00:40,745 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:00:40-0300 lvl=info msg=end pg=/api/tunnels id=41b0818372ef8ba1 status=200 dur=0s
+2026-02-09 14:00:40,746 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:00:40-0300 lvl=info msg=start pg=/api/tunnels id=7bdd50a8ecba3348
+2026-02-09 14:00:40,746 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:00:40-0300 lvl=info msg=end pg=/api/tunnels id=7bdd50a8ecba3348 status=200 dur=0s
+2026-02-09 14:00:40,746 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:00:40-0300 lvl=info msg=start pg=/api/tunnels id=a95a0535c0a7257c
+2026-02-09 14:00:40,747 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:00:40-0300 lvl=info msg=end pg=/api/tunnels id=a95a0535c0a7257c status=200 dur=506.9Âµs
+2026-02-09 14:00:40,747 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:00:40-0300 lvl=info msg=start pg=/api/tunnels id=8b23429f0b763807
+2026-02-09 14:00:40,830 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:00:40-0300 lvl=info msg="update available" obj=updater
+2026-02-09 14:00:40,878 - pyngrok.process.ngrok - WARNING - t=2026-02-09T14:00:40-0300 lvl=warn msg="failed to start tunnel" pg=/api/tunnels id=8b23429f0b763807 err="failed to start tunnel: The endpoint 'https://checkinalmareia.ngrok.app' is already online. Either\n1. stop your existing endpoint first, or\n2. start both endpoints with `--pooling-enabled` to load balance between them.\r\n\r\nERR_NGROK_334\r\n"
+2026-02-09 14:00:40,878 - NgrokManager - ERROR -  [FAILED] pre-checkin: ngrok client exception, API returned 502: {"error_code":103,"status_code":502,"msg":"failed to start tunnel","details":{"err":"failed to start tunnel: The endpoint 'https://checkinalmareia.ngrok.app' is already online. Either\n1. stop your existing endpoint first, or\n2. start both endpoints with `--pooling-enabled` to load balance between them.\r\n\r\nERR_NGROK_334\r\n"}}
+
+2026-02-09 14:00:40,878 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:00:40-0300 lvl=info msg=end pg=/api/tunnels id=8b23429f0b763807 status=502 dur=130.884ms
+2026-02-09 14:00:40,879 - NgrokManager - INFO - Starting tunnel 'survey' (Pesquisa de Satisfação) -> pesquisa.almareia.ngrok.app on port 5001...
+2026-02-09 14:00:40,879 - pyngrok.ngrok - INFO - Opening tunnel named: survey
+2026-02-09 14:00:40,880 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:00:40-0300 lvl=info msg=start pg=/api/tunnels id=b322a889b8be8411
+2026-02-09 14:00:41,012 - pyngrok.process.ngrok - WARNING - t=2026-02-09T14:00:41-0300 lvl=warn msg="failed to start tunnel" pg=/api/tunnels id=b322a889b8be8411 err="failed to start tunnel: The endpoint 'https://pesquisa.almareia.ngrok.app' is already online. Either\n1. stop your existing endpoint first, or\n2. start both endpoints with `--pooling-enabled` to load balance between them.\r\n\r\nERR_NGROK_334\r\n"
+2026-02-09 14:00:41,012 - NgrokManager - ERROR -  [FAILED] survey: ngrok client exception, API returned 502: {"error_code":103,"status_code":502,"msg":"failed to start tunnel","details":{"err":"failed to start tunnel: The endpoint 'https://pesquisa.almareia.ngrok.app' is already online. Either\n1. stop your existing endpoint first, or\n2. start both endpoints with `--pooling-enabled` to load balance between them.\r\n\r\nERR_NGROK_334\r\n"}}
+
+2026-02-09 14:00:41,012 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:00:41-0300 lvl=info msg=end pg=/api/tunnels id=b322a889b8be8411 status=502 dur=131.9766ms
+2026-02-09 14:00:41,013 - NgrokManager - INFO - Starting tunnel 'whatsapp' (Webhook WhatsApp) -> mirapraiawhatts.ngrok.app on port 5001...
+2026-02-09 14:00:41,013 - pyngrok.ngrok - INFO - Opening tunnel named: whatsapp
+2026-02-09 14:00:41,014 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:00:41-0300 lvl=info msg=start pg=/api/tunnels id=15196cec5314794d
+2026-02-09 14:00:41,144 - pyngrok.process.ngrok - WARNING - t=2026-02-09T14:00:41-0300 lvl=warn msg="failed to start tunnel" pg=/api/tunnels id=15196cec5314794d err="failed to start tunnel: The endpoint 'https://mirapraiawhatts.ngrok.app' is already online. Either\n1. stop your existing endpoint first, or\n2. start both endpoints with `--pooling-enabled` to load balance between them.\r\n\r\nERR_NGROK_334\r\n"
+2026-02-09 14:00:41,145 - NgrokManager - ERROR -  [FAILED] whatsapp: ngrok client exception, API returned 502: {"error_code":103,"status_code":502,"msg":"failed to start tunnel","details":{"err":"failed to start tunnel: The endpoint 'https://mirapraiawhatts.ngrok.app' is already online. Either\n1. stop your existing endpoint first, or\n2. start both endpoints with `--pooling-enabled` to load balance between them.\r\n\r\nERR_NGROK_334\r\n"}}
+
+2026-02-09 14:00:41,145 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:00:41-0300 lvl=info msg=end pg=/api/tunnels id=15196cec5314794d status=502 dur=130.829ms
+2026-02-09 14:00:41,145 - NgrokManager - INFO - Starting tunnel 'staff' (Acesso Colaboradores) -> almareia.mirapraia.ngrok.app on port 5001...
+2026-02-09 14:00:41,145 - pyngrok.ngrok - INFO - Opening tunnel named: staff
+2026-02-09 14:00:41,146 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:00:41-0300 lvl=info msg=start pg=/api/tunnels id=70b19d293847c6fa
+2026-02-09 14:00:41,528 - pyngrok.process.ngrok - WARNING - t=2026-02-09T14:00:41-0300 lvl=warn msg="failed to start tunnel" pg=/api/tunnels id=70b19d293847c6fa err="failed to start tunnel: You have exceeded the maximum number of concurrent endpoints allowed for this account. Log into https://dashboard.ngrok.com/billing to review your usage and https://dashboard.ngrok.com/billing/choose-a-plan to view your subscription options.\r\n\r\nERR_NGROK_18021\r\n"
+2026-02-09 14:00:41,528 - NgrokManager - ERROR -  [FAILED] staff: ngrok client exception, API returned 502: {"error_code":103,"status_code":502,"msg":"failed to start tunnel","details":{"err":"failed to start tunnel: You have exceeded the maximum number of concurrent endpoints allowed for this account. Log into https://dashboard.ngrok.com/billing to review your usage and https://dashboard.ngrok.com/billing/choose-a-plan to view your subscription options.\r\n\r\nERR_NGROK_18021\r\n"}}
+
+2026-02-09 14:00:41,529 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:00:41-0300 lvl=info msg=end pg=/api/tunnels id=70b19d293847c6fa status=502 dur=381.6522ms
+2026-02-09 14:00:41,529 - NgrokManager - INFO - Starting tunnel 'queue' (Fila de Espera) -> fila.mirapraia.ngrok.app on port 5001...
+2026-02-09 14:00:41,529 - pyngrok.ngrok - INFO - Opening tunnel named: queue
+2026-02-09 14:00:41,530 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:00:41-0300 lvl=info msg=start pg=/api/tunnels id=fe50af397457b0b1
+2026-02-09 14:00:41,906 - pyngrok.process.ngrok - WARNING - t=2026-02-09T14:00:41-0300 lvl=warn msg="failed to start tunnel" pg=/api/tunnels id=fe50af397457b0b1 err="failed to start tunnel: You have exceeded the maximum number of concurrent endpoints allowed for this account. Log into https://dashboard.ngrok.com/billing to review your usage and https://dashboard.ngrok.com/billing/choose-a-plan to view your subscription options.\r\n\r\nERR_NGROK_18021\r\n"
+2026-02-09 14:00:41,906 - NgrokManager - ERROR -  [FAILED] queue: ngrok client exception, API returned 502: {"error_code":103,"status_code":502,"msg":"failed to start tunnel","details":{"err":"failed to start tunnel: You have exceeded the maximum number of concurrent endpoints allowed for this account. Log into https://dashboard.ngrok.com/billing to review your usage and https://dashboard.ngrok.com/billing/choose-a-plan to view your subscription options.\r\n\r\nERR_NGROK_18021\r\n"}}
+
+2026-02-09 14:00:41,906 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:00:41-0300 lvl=info msg=end pg=/api/tunnels id=fe50af397457b0b1 status=502 dur=375.5271ms
+2026-02-09 14:00:41,907 - NgrokManager - INFO - Starting tunnel 'menu' (Cardápio Digital) -> menu.mirapraia.ngrok.app on port 5001...
+2026-02-09 14:00:41,907 - pyngrok.ngrok - INFO - Opening tunnel named: menu
+2026-02-09 14:00:41,908 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:00:41-0300 lvl=info msg=start pg=/api/tunnels id=675a779071e89aa2
+2026-02-09 14:00:42,262 - pyngrok.process.ngrok - WARNING - t=2026-02-09T14:00:42-0300 lvl=warn msg="failed to start tunnel" pg=/api/tunnels id=675a779071e89aa2 err="failed to start tunnel: You have exceeded the maximum number of concurrent endpoints allowed for this account. Log into https://dashboard.ngrok.com/billing to review your usage and https://dashboard.ngrok.com/billing/choose-a-plan to view your subscription options.\r\n\r\nERR_NGROK_18021\r\n"
+2026-02-09 14:00:42,262 - NgrokManager - ERROR -  [FAILED] menu: ngrok client exception, API returned 502: {"error_code":103,"status_code":502,"msg":"failed to start tunnel","details":{"err":"failed to start tunnel: You have exceeded the maximum number of concurrent endpoints allowed for this account. Log into https://dashboard.ngrok.com/billing to review your usage and https://dashboard.ngrok.com/billing/choose-a-plan to view your subscription options.\r\n\r\nERR_NGROK_18021\r\n"}}
+
+2026-02-09 14:00:42,262 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:00:42-0300 lvl=info msg=end pg=/api/tunnels id=675a779071e89aa2 status=502 dur=354.3208ms
+2026-02-09 14:00:42,263 - NgrokManager - INFO - All tunnels processed. Ngrok is running in the background.
+2026-02-09 14:25:17,868 - NgrokManager - INFO - Checking if port 5001 is active...
+2026-02-09 14:25:17,871 - NgrokManager - INFO - Port 5001 is active.
+2026-02-09 14:25:17,871 - NgrokManager - INFO - Skipping ngrok.kill() to preserve existing tunnels (per user request).
+2026-02-09 14:25:17,871 - NgrokManager - INFO - Starting tunnel 'pre-checkin' (Pré-Checkin Digital) -> checkinalmareia.ngrok.app on port 5001...
+2026-02-09 14:25:17,872 - pyngrok.ngrok - INFO - Opening tunnel named: pre-checkin
+2026-02-09 14:25:17,905 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:25:17-0300 lvl=info msg="no configuration paths supplied"
+2026-02-09 14:25:17,905 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:25:17-0300 lvl=info msg="using configuration at default config path" path="C:\\Users\\Angelo Diamante\\AppData\\Local/ngrok/ngrok.yml"
+2026-02-09 14:25:17,905 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:25:17-0300 lvl=info msg="open config file" path="C:\\Users\\Angelo Diamante\\AppData\\Local\\ngrok\\ngrok.yml" err=nil
+2026-02-09 14:25:17,906 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:25:17-0300 lvl=info msg="FIPS 140 mode" enabled=false
+2026-02-09 14:25:17,919 - pyngrok.process.ngrok - WARNING - t=2026-02-09T14:25:17-0300 lvl=warn msg="can't bind default web address, trying alternatives" obj=web addr=127.0.0.1:4040
+2026-02-09 14:25:17,919 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:25:17-0300 lvl=info msg="starting web service" obj=web addr=127.0.0.1:4042 allow_hosts=[]
+2026-02-09 14:25:18,411 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:25:18-0300 lvl=info msg="client session established" obj=tunnels.session
+2026-02-09 14:25:18,411 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:25:18-0300 lvl=info msg="tunnel session started" obj=tunnels.session
+2026-02-09 14:25:18,443 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:25:18-0300 lvl=info msg=start pg=/api/tunnels id=b08bc312f99bcede
+2026-02-09 14:25:18,443 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:25:18-0300 lvl=info msg=end pg=/api/tunnels id=b08bc312f99bcede status=200 dur=0s
+2026-02-09 14:25:18,443 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:25:18-0300 lvl=info msg=start pg=/api/tunnels id=7dbb502cf7b38773
+2026-02-09 14:25:18,443 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:25:18-0300 lvl=info msg=end pg=/api/tunnels id=7dbb502cf7b38773 status=200 dur=0s
+2026-02-09 14:25:18,444 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:25:18-0300 lvl=info msg=start pg=/api/tunnels id=fe640c4d3349bf77
+2026-02-09 14:25:18,444 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:25:18-0300 lvl=info msg=end pg=/api/tunnels id=fe640c4d3349bf77 status=200 dur=0s
+2026-02-09 14:25:18,444 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:25:18-0300 lvl=info msg=start pg=/api/tunnels id=b17fe810fefa2003
+2026-02-09 14:25:18,518 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:25:18-0300 lvl=info msg="update available" obj=updater
+2026-02-09 14:25:18,574 - pyngrok.process.ngrok - WARNING - t=2026-02-09T14:25:18-0300 lvl=warn msg="failed to start tunnel" pg=/api/tunnels id=b17fe810fefa2003 err="failed to start tunnel: The endpoint 'https://checkinalmareia.ngrok.app' is already online. Either\n1. stop your existing endpoint first, or\n2. start both endpoints with `--pooling-enabled` to load balance between them.\r\n\r\nERR_NGROK_334\r\n"
+2026-02-09 14:25:18,574 - NgrokManager - ERROR -  [FAILED] pre-checkin: ngrok client exception, API returned 502: {"error_code":103,"status_code":502,"msg":"failed to start tunnel","details":{"err":"failed to start tunnel: The endpoint 'https://checkinalmareia.ngrok.app' is already online. Either\n1. stop your existing endpoint first, or\n2. start both endpoints with `--pooling-enabled` to load balance between them.\r\n\r\nERR_NGROK_334\r\n"}}
+
+2026-02-09 14:25:18,574 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:25:18-0300 lvl=info msg=end pg=/api/tunnels id=b17fe810fefa2003 status=502 dur=129.4171ms
+2026-02-09 14:25:18,575 - NgrokManager - INFO - Starting tunnel 'survey' (Pesquisa de Satisfação) -> pesquisa.almareia.ngrok.app on port 5001...
+2026-02-09 14:25:18,575 - pyngrok.ngrok - INFO - Opening tunnel named: survey
+2026-02-09 14:25:18,576 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:25:18-0300 lvl=info msg=start pg=/api/tunnels id=ce1f31f5f8ef62d2
+2026-02-09 14:25:18,706 - pyngrok.process.ngrok - WARNING - t=2026-02-09T14:25:18-0300 lvl=warn msg="failed to start tunnel" pg=/api/tunnels id=ce1f31f5f8ef62d2 err="failed to start tunnel: The endpoint 'https://pesquisa.almareia.ngrok.app' is already online. Either\n1. stop your existing endpoint first, or\n2. start both endpoints with `--pooling-enabled` to load balance between them.\r\n\r\nERR_NGROK_334\r\n"
+2026-02-09 14:25:18,707 - NgrokManager - ERROR -  [FAILED] survey: ngrok client exception, API returned 502: {"error_code":103,"status_code":502,"msg":"failed to start tunnel","details":{"err":"failed to start tunnel: The endpoint 'https://pesquisa.almareia.ngrok.app' is already online. Either\n1. stop your existing endpoint first, or\n2. start both endpoints with `--pooling-enabled` to load balance between them.\r\n\r\nERR_NGROK_334\r\n"}}
+
+2026-02-09 14:25:18,707 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:25:18-0300 lvl=info msg=end pg=/api/tunnels id=ce1f31f5f8ef62d2 status=502 dur=131.2215ms
+2026-02-09 14:25:18,707 - NgrokManager - INFO - Starting tunnel 'whatsapp' (Webhook WhatsApp) -> mirapraiawhatts.ngrok.app on port 5001...
+2026-02-09 14:25:18,707 - pyngrok.ngrok - INFO - Opening tunnel named: whatsapp
+2026-02-09 14:25:18,708 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:25:18-0300 lvl=info msg=start pg=/api/tunnels id=a9e0101381c7ed3b
+2026-02-09 14:25:18,834 - pyngrok.process.ngrok - WARNING - t=2026-02-09T14:25:18-0300 lvl=warn msg="failed to start tunnel" pg=/api/tunnels id=a9e0101381c7ed3b err="failed to start tunnel: The endpoint 'https://mirapraiawhatts.ngrok.app' is already online. Either\n1. stop your existing endpoint first, or\n2. start both endpoints with `--pooling-enabled` to load balance between them.\r\n\r\nERR_NGROK_334\r\n"
+2026-02-09 14:25:18,835 - NgrokManager - ERROR -  [FAILED] whatsapp: ngrok client exception, API returned 502: {"error_code":103,"status_code":502,"msg":"failed to start tunnel","details":{"err":"failed to start tunnel: The endpoint 'https://mirapraiawhatts.ngrok.app' is already online. Either\n1. stop your existing endpoint first, or\n2. start both endpoints with `--pooling-enabled` to load balance between them.\r\n\r\nERR_NGROK_334\r\n"}}
+
+2026-02-09 14:25:18,835 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:25:18-0300 lvl=info msg=end pg=/api/tunnels id=a9e0101381c7ed3b status=502 dur=125.2293ms
+2026-02-09 14:25:18,835 - NgrokManager - INFO - Starting tunnel 'staff' (Acesso Colaboradores) -> almareia.mirapraia.ngrok.app on port 5001...
+2026-02-09 14:25:18,835 - pyngrok.ngrok - INFO - Opening tunnel named: staff
+2026-02-09 14:25:18,836 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:25:18-0300 lvl=info msg=start pg=/api/tunnels id=eb52446a10644153
+2026-02-09 14:25:19,208 - pyngrok.process.ngrok - WARNING - t=2026-02-09T14:25:19-0300 lvl=warn msg="failed to start tunnel" pg=/api/tunnels id=eb52446a10644153 err="failed to start tunnel: You have exceeded the maximum number of concurrent endpoints allowed for this account. Log into https://dashboard.ngrok.com/billing to review your usage and https://dashboard.ngrok.com/billing/choose-a-plan to view your subscription options.\r\n\r\nERR_NGROK_18021\r\n"
+2026-02-09 14:25:19,208 - NgrokManager - ERROR -  [FAILED] staff: ngrok client exception, API returned 502: {"error_code":103,"status_code":502,"msg":"failed to start tunnel","details":{"err":"failed to start tunnel: You have exceeded the maximum number of concurrent endpoints allowed for this account. Log into https://dashboard.ngrok.com/billing to review your usage and https://dashboard.ngrok.com/billing/choose-a-plan to view your subscription options.\r\n\r\nERR_NGROK_18021\r\n"}}
+
+2026-02-09 14:25:19,208 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:25:19-0300 lvl=info msg=end pg=/api/tunnels id=eb52446a10644153 status=502 dur=372.2268ms
+2026-02-09 14:25:19,209 - NgrokManager - INFO - Starting tunnel 'queue' (Fila de Espera) -> fila.mirapraia.ngrok.app on port 5001...
+2026-02-09 14:25:19,209 - pyngrok.ngrok - INFO - Opening tunnel named: queue
+2026-02-09 14:25:19,210 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:25:19-0300 lvl=info msg=start pg=/api/tunnels id=9eb4a143858772d4
+2026-02-09 14:25:19,572 - pyngrok.process.ngrok - WARNING - t=2026-02-09T14:25:19-0300 lvl=warn msg="failed to start tunnel" pg=/api/tunnels id=9eb4a143858772d4 err="failed to start tunnel: You have exceeded the maximum number of concurrent endpoints allowed for this account. Log into https://dashboard.ngrok.com/billing to review your usage and https://dashboard.ngrok.com/billing/choose-a-plan to view your subscription options.\r\n\r\nERR_NGROK_18021\r\n"
+2026-02-09 14:25:19,572 - NgrokManager - ERROR -  [FAILED] queue: ngrok client exception, API returned 502: {"error_code":103,"status_code":502,"msg":"failed to start tunnel","details":{"err":"failed to start tunnel: You have exceeded the maximum number of concurrent endpoints allowed for this account. Log into https://dashboard.ngrok.com/billing to review your usage and https://dashboard.ngrok.com/billing/choose-a-plan to view your subscription options.\r\n\r\nERR_NGROK_18021\r\n"}}
+
+2026-02-09 14:25:19,573 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:25:19-0300 lvl=info msg=end pg=/api/tunnels id=9eb4a143858772d4 status=502 dur=362.836ms
+2026-02-09 14:25:19,573 - NgrokManager - INFO - Starting tunnel 'menu' (Cardápio Digital) -> menu.mirapraia.ngrok.app on port 5001...
+2026-02-09 14:25:19,573 - pyngrok.ngrok - INFO - Opening tunnel named: menu
+2026-02-09 14:25:19,574 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:25:19-0300 lvl=info msg=start pg=/api/tunnels id=1c9fac817c2308da
+2026-02-09 14:25:19,944 - pyngrok.process.ngrok - WARNING - t=2026-02-09T14:25:19-0300 lvl=warn msg="failed to start tunnel" pg=/api/tunnels id=1c9fac817c2308da err="failed to start tunnel: You have exceeded the maximum number of concurrent endpoints allowed for this account. Log into https://dashboard.ngrok.com/billing to review your usage and https://dashboard.ngrok.com/billing/choose-a-plan to view your subscription options.\r\n\r\nERR_NGROK_18021\r\n"
+2026-02-09 14:25:19,944 - NgrokManager - ERROR -  [FAILED] menu: ngrok client exception, API returned 502: {"error_code":103,"status_code":502,"msg":"failed to start tunnel","details":{"err":"failed to start tunnel: You have exceeded the maximum number of concurrent endpoints allowed for this account. Log into https://dashboard.ngrok.com/billing to review your usage and https://dashboard.ngrok.com/billing/choose-a-plan to view your subscription options.\r\n\r\nERR_NGROK_18021\r\n"}}
+
+2026-02-09 14:25:19,944 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:25:19-0300 lvl=info msg=end pg=/api/tunnels id=1c9fac817c2308da status=502 dur=368.9265ms
+2026-02-09 14:25:19,945 - NgrokManager - INFO - All tunnels processed. Ngrok is running in the background.
+2026-02-09 14:39:55,802 - pyngrok.process.ngrok - INFO - t=2026-02-09T14:39:55-0300 lvl=info msg="received stop request" obj=app stopReq="{err:<nil> restart:false}"

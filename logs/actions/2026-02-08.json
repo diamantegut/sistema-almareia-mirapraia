@@ -1,0 +1,1562 @@
+[
+    {
+        "id": "LOG_20260208090234_0",
+        "timestamp": "08/02/2026 09:02:34",
+        "user": "Angelo",
+        "department": "Recepção",
+        "action": "Transferência Caixa",
+        "details": "Recepção -> restaurant_service: R$ 50.00"
+    },
+    {
+        "id": "LOG_20260208090335_1",
+        "timestamp": "08/02/2026 09:03:35",
+        "user": "Angelo",
+        "department": "Restaurante",
+        "action": "Transação Caixa",
+        "details": "Restaurante: deposit de R$ 10000.00 - teste"
+    },
+    {
+        "id": "LOG_20260208090347_2",
+        "timestamp": "08/02/2026 09:03:47",
+        "user": "Angelo",
+        "department": "Restaurante",
+        "action": "Transferência Caixa",
+        "details": "Restaurante -> reception: R$ 50.00"
+    },
+    {
+        "id": "LOG_20260208095111_3",
+        "timestamp": "08/02/2026 09:51:11",
+        "user": "Angelo",
+        "department": "Recepção",
+        "action": "Transferência Caixa",
+        "details": "Recepção -> restaurant_service: R$ 80.00"
+    },
+    {
+        "id": "LOG_20260208095501_4",
+        "timestamp": "08/02/2026 09:55:01",
+        "user": "Admin User",
+        "department": "Restaurante",
+        "action": "Transação Caixa",
+        "details": "Restaurante: withdrawal de R$ 50.00 - Sangria Autorizada"
+    },
+    {
+        "id": "LOG_20260208100016_5",
+        "timestamp": "08/02/2026 10:00:16",
+        "user": "Admin User",
+        "department": "Restaurante",
+        "action": "Transação Caixa",
+        "details": "Restaurante: withdrawal de R$ 50.00 - Sangria Autorizada"
+    },
+    {
+        "id": "LOG_20260208103542_6",
+        "timestamp": "08/02/2026 10:35:42",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208103542_7",
+        "timestamp": "08/02/2026 10:35:42",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208103543_8",
+        "timestamp": "08/02/2026 10:35:43",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208103543_9",
+        "timestamp": "08/02/2026 10:35:43",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208103543_10",
+        "timestamp": "08/02/2026 10:35:43",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Conta Fechada",
+        "details": "Mesa 50 fechada. Total: R$ 0.00 (Dinheiro)"
+    },
+    {
+        "id": "LOG_20260208103720_11",
+        "timestamp": "08/02/2026 10:37:20",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208103720_12",
+        "timestamp": "08/02/2026 10:37:20",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208103720_13",
+        "timestamp": "08/02/2026 10:37:20",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208103720_14",
+        "timestamp": "08/02/2026 10:37:20",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Conta Fechada",
+        "details": "Mesa 50 fechada. Total: R$ 0.00 (Dinheiro)"
+    },
+    {
+        "id": "LOG_20260208103758_15",
+        "timestamp": "08/02/2026 10:37:58",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208103758_16",
+        "timestamp": "08/02/2026 10:37:58",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208103758_17",
+        "timestamp": "08/02/2026 10:37:58",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208103758_18",
+        "timestamp": "08/02/2026 10:37:58",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Conta Fechada",
+        "details": "Mesa 50 fechada. Total: R$ 0.00 (Dinheiro)"
+    },
+    {
+        "id": "LOG_20260208104330_19",
+        "timestamp": "08/02/2026 10:43:30",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208104330_20",
+        "timestamp": "08/02/2026 10:43:30",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208104330_21",
+        "timestamp": "08/02/2026 10:43:30",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208104330_22",
+        "timestamp": "08/02/2026 10:43:30",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208104330_23",
+        "timestamp": "08/02/2026 10:43:30",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208104330_24",
+        "timestamp": "08/02/2026 10:43:30",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208104330_25",
+        "timestamp": "08/02/2026 10:43:30",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Conta Fechada",
+        "details": "Mesa 50 fechada. Total: R$ 0.00 (Dinheiro)"
+    },
+    {
+        "id": "LOG_20260208104358_26",
+        "timestamp": "08/02/2026 10:43:58",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208104358_27",
+        "timestamp": "08/02/2026 10:43:58",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208104358_28",
+        "timestamp": "08/02/2026 10:43:58",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208104358_29",
+        "timestamp": "08/02/2026 10:43:58",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208104358_30",
+        "timestamp": "08/02/2026 10:43:58",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208104358_31",
+        "timestamp": "08/02/2026 10:43:58",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208104358_32",
+        "timestamp": "08/02/2026 10:43:58",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Conta Fechada",
+        "details": "Mesa 50 fechada. Total: R$ 0.00 (Dinheiro)"
+    },
+    {
+        "id": "LOG_20260208104532_33",
+        "timestamp": "08/02/2026 10:45:32",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208104532_34",
+        "timestamp": "08/02/2026 10:45:32",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208104532_35",
+        "timestamp": "08/02/2026 10:45:32",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208104532_36",
+        "timestamp": "08/02/2026 10:45:32",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208104532_37",
+        "timestamp": "08/02/2026 10:45:32",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208104532_38",
+        "timestamp": "08/02/2026 10:45:32",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208104532_39",
+        "timestamp": "08/02/2026 10:45:32",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Conta Fechada",
+        "details": "Mesa 50 fechada. Total: R$ 0.00 (Dinheiro)"
+    },
+    {
+        "id": "LOG_20260208105043_40",
+        "timestamp": "08/02/2026 10:50:43",
+        "user": "Sistema",
+        "department": "Sistema",
+        "action": "Sync Fiscal",
+        "details": "Recebido registro fiscal 75367436-9fe6-4797-9cc1-a8fe2c4e9ca1 via API."
+    },
+    {
+        "id": "LOG_20260208105059_41",
+        "timestamp": "08/02/2026 10:50:59",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208105059_42",
+        "timestamp": "08/02/2026 10:50:59",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208105059_43",
+        "timestamp": "08/02/2026 10:50:59",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208105059_44",
+        "timestamp": "08/02/2026 10:50:59",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208105059_45",
+        "timestamp": "08/02/2026 10:50:59",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208105059_46",
+        "timestamp": "08/02/2026 10:50:59",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208105059_47",
+        "timestamp": "08/02/2026 10:50:59",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Conta Fechada",
+        "details": "Mesa 50 fechada. Total: R$ 0.00 (Dinheiro)"
+    },
+    {
+        "id": "LOG_20260208105640_48",
+        "timestamp": "08/02/2026 10:56:40",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208105640_49",
+        "timestamp": "08/02/2026 10:56:40",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208105641_50",
+        "timestamp": "08/02/2026 10:56:41",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208105641_51",
+        "timestamp": "08/02/2026 10:56:41",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208105641_52",
+        "timestamp": "08/02/2026 10:56:41",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208105641_53",
+        "timestamp": "08/02/2026 10:56:41",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208105641_54",
+        "timestamp": "08/02/2026 10:56:41",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Conta Fechada",
+        "details": "Mesa 50 fechada. Total: R$ 0.00 (Dinheiro)"
+    },
+    {
+        "id": "LOG_20260208105702_55",
+        "timestamp": "08/02/2026 10:57:02",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208105702_56",
+        "timestamp": "08/02/2026 10:57:02",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208105703_57",
+        "timestamp": "08/02/2026 10:57:03",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208105703_58",
+        "timestamp": "08/02/2026 10:57:03",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208105703_59",
+        "timestamp": "08/02/2026 10:57:03",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208105703_60",
+        "timestamp": "08/02/2026 10:57:03",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208105703_61",
+        "timestamp": "08/02/2026 10:57:03",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Conta Fechada",
+        "details": "Mesa 50 fechada. Total: R$ 0.00 (Dinheiro)"
+    },
+    {
+        "id": "LOG_20260208105730_62",
+        "timestamp": "08/02/2026 10:57:30",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208105730_63",
+        "timestamp": "08/02/2026 10:57:30",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208105730_64",
+        "timestamp": "08/02/2026 10:57:30",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208105730_65",
+        "timestamp": "08/02/2026 10:57:30",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208105730_66",
+        "timestamp": "08/02/2026 10:57:30",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208105730_67",
+        "timestamp": "08/02/2026 10:57:30",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208105730_68",
+        "timestamp": "08/02/2026 10:57:30",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Conta Fechada",
+        "details": "Mesa 50 fechada. Total: R$ 0.00 (Dinheiro)"
+    },
+    {
+        "id": "LOG_20260208105806_69",
+        "timestamp": "08/02/2026 10:58:06",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208105806_70",
+        "timestamp": "08/02/2026 10:58:06",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208105806_71",
+        "timestamp": "08/02/2026 10:58:06",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208105806_72",
+        "timestamp": "08/02/2026 10:58:06",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208105806_73",
+        "timestamp": "08/02/2026 10:58:06",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208105806_74",
+        "timestamp": "08/02/2026 10:58:06",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208105806_75",
+        "timestamp": "08/02/2026 10:58:06",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Conta Fechada",
+        "details": "Mesa 50 fechada. Total: R$ 0.00 (Dinheiro)"
+    },
+    {
+        "id": "LOG_20260208105832_76",
+        "timestamp": "08/02/2026 10:58:32",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208105832_77",
+        "timestamp": "08/02/2026 10:58:32",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208105832_78",
+        "timestamp": "08/02/2026 10:58:32",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208105832_79",
+        "timestamp": "08/02/2026 10:58:32",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208105832_80",
+        "timestamp": "08/02/2026 10:58:32",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208105832_81",
+        "timestamp": "08/02/2026 10:58:32",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208105832_82",
+        "timestamp": "08/02/2026 10:58:32",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Conta Fechada",
+        "details": "Mesa 50 fechada. Total: R$ 0.00 (Dinheiro)"
+    },
+    {
+        "id": "LOG_20260208110601_83",
+        "timestamp": "08/02/2026 11:06:01",
+        "user": "Sistema",
+        "department": "Sistema",
+        "action": "Sync Fiscal",
+        "details": "Recebido registro fiscal 8d85801e-0779-4564-97b4-ac1faeaa5752 via API."
+    },
+    {
+        "id": "LOG_20260208110655_84",
+        "timestamp": "08/02/2026 11:06:55",
+        "user": "Sistema",
+        "department": "Sistema",
+        "action": "Sync Fiscal",
+        "details": "Recebido registro fiscal d3f5fa03-be9b-4448-837e-d6403ffd7682 via API."
+    },
+    {
+        "id": "LOG_20260208114847_85",
+        "timestamp": "08/02/2026 11:48:47",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208114847_86",
+        "timestamp": "08/02/2026 11:48:47",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208114847_87",
+        "timestamp": "08/02/2026 11:48:47",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208114847_88",
+        "timestamp": "08/02/2026 11:48:47",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208114847_89",
+        "timestamp": "08/02/2026 11:48:47",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208114847_90",
+        "timestamp": "08/02/2026 11:48:47",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208114847_91",
+        "timestamp": "08/02/2026 11:48:47",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Conta Fechada",
+        "details": "Mesa 50 fechada. Total: R$ 0.00 (Dinheiro)"
+    },
+    {
+        "id": "LOG_20260208115232_92",
+        "timestamp": "08/02/2026 11:52:32",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208115232_93",
+        "timestamp": "08/02/2026 11:52:32",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208115232_94",
+        "timestamp": "08/02/2026 11:52:32",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208115232_95",
+        "timestamp": "08/02/2026 11:52:32",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208115233_96",
+        "timestamp": "08/02/2026 11:52:33",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208115233_97",
+        "timestamp": "08/02/2026 11:52:33",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208115233_98",
+        "timestamp": "08/02/2026 11:52:33",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Conta Fechada",
+        "details": "Mesa 50 fechada. Total: R$ 0.00 (Dinheiro)"
+    },
+    {
+        "id": "LOG_20260208115506_99",
+        "timestamp": "08/02/2026 11:55:06",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208115506_100",
+        "timestamp": "08/02/2026 11:55:06",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208115507_101",
+        "timestamp": "08/02/2026 11:55:07",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208115507_102",
+        "timestamp": "08/02/2026 11:55:07",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208115507_103",
+        "timestamp": "08/02/2026 11:55:07",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208115507_104",
+        "timestamp": "08/02/2026 11:55:07",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208115507_105",
+        "timestamp": "08/02/2026 11:55:07",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Conta Fechada",
+        "details": "Mesa 50 fechada. Total: R$ 0.00 (Dinheiro)"
+    },
+    {
+        "id": "LOG_20260208115558_106",
+        "timestamp": "08/02/2026 11:55:58",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208115558_107",
+        "timestamp": "08/02/2026 11:55:58",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208115559_108",
+        "timestamp": "08/02/2026 11:55:59",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208115559_109",
+        "timestamp": "08/02/2026 11:55:59",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208115559_110",
+        "timestamp": "08/02/2026 11:55:59",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208115559_111",
+        "timestamp": "08/02/2026 11:55:59",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208115559_112",
+        "timestamp": "08/02/2026 11:55:59",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Conta Fechada",
+        "details": "Mesa 50 fechada. Total: R$ 0.00 (Dinheiro)"
+    },
+    {
+        "id": "LOG_20260208115744_113",
+        "timestamp": "08/02/2026 11:57:44",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208115744_114",
+        "timestamp": "08/02/2026 11:57:44",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208115745_115",
+        "timestamp": "08/02/2026 11:57:45",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208115745_116",
+        "timestamp": "08/02/2026 11:57:45",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208115745_117",
+        "timestamp": "08/02/2026 11:57:45",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208115745_118",
+        "timestamp": "08/02/2026 11:57:45",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208115745_119",
+        "timestamp": "08/02/2026 11:57:45",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Conta Fechada",
+        "details": "Mesa 50 fechada. Total: R$ 0.00 (Dinheiro)"
+    },
+    {
+        "id": "LOG_20260208120644_120",
+        "timestamp": "08/02/2026 12:06:44",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208120644_121",
+        "timestamp": "08/02/2026 12:06:44",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208120644_122",
+        "timestamp": "08/02/2026 12:06:44",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208120644_123",
+        "timestamp": "08/02/2026 12:06:44",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208120644_124",
+        "timestamp": "08/02/2026 12:06:44",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208120644_125",
+        "timestamp": "08/02/2026 12:06:44",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208120644_126",
+        "timestamp": "08/02/2026 12:06:44",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Conta Fechada",
+        "details": "Mesa 50 fechada. Total: R$ 0.00 (Dinheiro)"
+    },
+    {
+        "id": "LOG_20260208121230_127",
+        "timestamp": "08/02/2026 12:12:30",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208121230_128",
+        "timestamp": "08/02/2026 12:12:30",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208121230_129",
+        "timestamp": "08/02/2026 12:12:30",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208121230_130",
+        "timestamp": "08/02/2026 12:12:30",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208121230_131",
+        "timestamp": "08/02/2026 12:12:30",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208121230_132",
+        "timestamp": "08/02/2026 12:12:30",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 0 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208121230_133",
+        "timestamp": "08/02/2026 12:12:30",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Conta Fechada",
+        "details": "Mesa 50 fechada. Total: R$ 0.00 (Dinheiro)"
+    },
+    {
+        "id": "LOG_20260208121403_134",
+        "timestamp": "08/02/2026 12:14:03",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208121403_135",
+        "timestamp": "08/02/2026 12:14:03",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 1 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208121403_136",
+        "timestamp": "08/02/2026 12:14:03",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Pagamento Parcial",
+        "details": "Mesa 50: R$ 50.00 (Dinheiro)"
+    },
+    {
+        "id": "LOG_20260208121403_137",
+        "timestamp": "08/02/2026 12:14:03",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208121403_138",
+        "timestamp": "08/02/2026 12:14:03",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 1 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208121403_139",
+        "timestamp": "08/02/2026 12:14:03",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208121403_140",
+        "timestamp": "08/02/2026 12:14:03",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 1 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208121403_141",
+        "timestamp": "08/02/2026 12:14:03",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Pagamento Parcial",
+        "details": "Mesa 50: R$ 50.00 (Dinheiro)"
+    },
+    {
+        "id": "LOG_20260208121403_142",
+        "timestamp": "08/02/2026 12:14:03",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Conta Fechada",
+        "details": "Mesa 50 fechada. Total: R$ 110.00 (Dinheiro)"
+    },
+    {
+        "id": "LOG_20260208121543_143",
+        "timestamp": "08/02/2026 12:15:43",
+        "user": "Sistema",
+        "department": "Sistema",
+        "action": "Sync Fiscal",
+        "details": "Recebido registro fiscal 05aa4715-dcc2-4230-b553-1a18c13184f2 via API."
+    },
+    {
+        "id": "LOG_20260208121633_144",
+        "timestamp": "08/02/2026 12:16:33",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208121633_145",
+        "timestamp": "08/02/2026 12:16:33",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 1 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208121633_146",
+        "timestamp": "08/02/2026 12:16:33",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Pagamento Parcial",
+        "details": "Mesa 50: R$ 50.00 (Dinheiro)"
+    },
+    {
+        "id": "LOG_20260208121634_147",
+        "timestamp": "08/02/2026 12:16:34",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208121634_148",
+        "timestamp": "08/02/2026 12:16:34",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 1 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208121634_149",
+        "timestamp": "08/02/2026 12:16:34",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208121634_150",
+        "timestamp": "08/02/2026 12:16:34",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 1 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208121634_151",
+        "timestamp": "08/02/2026 12:16:34",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Pagamento Parcial",
+        "details": "Mesa 50: R$ 50.00 (Dinheiro)"
+    },
+    {
+        "id": "LOG_20260208121634_152",
+        "timestamp": "08/02/2026 12:16:34",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Conta Fechada",
+        "details": "Mesa 50 fechada. Total: R$ 110.00 (Dinheiro)"
+    },
+    {
+        "id": "LOG_20260208121634_153",
+        "timestamp": "08/02/2026 12:16:34",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208121634_154",
+        "timestamp": "08/02/2026 12:16:34",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 1 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208121634_155",
+        "timestamp": "08/02/2026 12:16:34",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Pagamento Parcial",
+        "details": "Mesa 50: R$ 50.00 (Dinheiro)"
+    },
+    {
+        "id": "LOG_20260208122047_156",
+        "timestamp": "08/02/2026 12:20:47",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208122047_157",
+        "timestamp": "08/02/2026 12:20:47",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 1 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208122047_158",
+        "timestamp": "08/02/2026 12:20:47",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Pagamento Parcial",
+        "details": "Mesa 50: R$ 50.00 (Dinheiro)"
+    },
+    {
+        "id": "LOG_20260208122047_159",
+        "timestamp": "08/02/2026 12:20:47",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208122047_160",
+        "timestamp": "08/02/2026 12:20:47",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 1 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208122047_161",
+        "timestamp": "08/02/2026 12:20:47",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208122047_162",
+        "timestamp": "08/02/2026 12:20:47",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 1 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208122047_163",
+        "timestamp": "08/02/2026 12:20:47",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Pagamento Parcial",
+        "details": "Mesa 50: R$ 50.00 (Dinheiro)"
+    },
+    {
+        "id": "LOG_20260208122047_164",
+        "timestamp": "08/02/2026 12:20:47",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Conta Fechada",
+        "details": "Mesa 50 fechada. Total: R$ 110.00 (Dinheiro)"
+    },
+    {
+        "id": "LOG_20260208122047_165",
+        "timestamp": "08/02/2026 12:20:47",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208122047_166",
+        "timestamp": "08/02/2026 12:20:47",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 1 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208122047_167",
+        "timestamp": "08/02/2026 12:20:47",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Pagamento Parcial",
+        "details": "Mesa 50: R$ 50.00 (Dinheiro)"
+    },
+    {
+        "id": "LOG_20260208122259_168",
+        "timestamp": "08/02/2026 12:22:59",
+        "user": "Angelo",
+        "department": "",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 1 itens. Garçom: Angelo"
+    },
+    {
+        "id": "LOG_20260208122330_169",
+        "timestamp": "08/02/2026 12:23:30",
+        "user": "Angelo",
+        "department": "",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 1 itens. Garçom: Angelo"
+    },
+    {
+        "id": "LOG_20260208122538_170",
+        "timestamp": "08/02/2026 12:25:38",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208122538_171",
+        "timestamp": "08/02/2026 12:25:38",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 1 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208122538_172",
+        "timestamp": "08/02/2026 12:25:38",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Pagamento Parcial",
+        "details": "Mesa 50: R$ 50.00 (Dinheiro)"
+    },
+    {
+        "id": "LOG_20260208122538_173",
+        "timestamp": "08/02/2026 12:25:38",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208122538_174",
+        "timestamp": "08/02/2026 12:25:38",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 1 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208122538_175",
+        "timestamp": "08/02/2026 12:25:38",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208122538_176",
+        "timestamp": "08/02/2026 12:25:38",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 1 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208122538_177",
+        "timestamp": "08/02/2026 12:25:38",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Pagamento Parcial",
+        "details": "Mesa 50: R$ 50.00 (Dinheiro)"
+    },
+    {
+        "id": "LOG_20260208122538_178",
+        "timestamp": "08/02/2026 12:25:38",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Conta Fechada",
+        "details": "Mesa 50 fechada. Total: R$ 110.00 (Dinheiro)"
+    },
+    {
+        "id": "LOG_20260208122538_179",
+        "timestamp": "08/02/2026 12:25:38",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208122538_180",
+        "timestamp": "08/02/2026 12:25:38",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 1 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208122538_181",
+        "timestamp": "08/02/2026 12:25:38",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Pagamento Parcial",
+        "details": "Mesa 50: R$ 50.00 (Dinheiro)"
+    },
+    {
+        "id": "LOG_20260208122630_182",
+        "timestamp": "08/02/2026 12:26:30",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208122630_183",
+        "timestamp": "08/02/2026 12:26:30",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 1 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208122630_184",
+        "timestamp": "08/02/2026 12:26:30",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Pagamento Parcial",
+        "details": "Mesa 50: R$ 50.00 (Dinheiro)"
+    },
+    {
+        "id": "LOG_20260208122630_185",
+        "timestamp": "08/02/2026 12:26:30",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208122630_186",
+        "timestamp": "08/02/2026 12:26:30",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 1 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208122631_187",
+        "timestamp": "08/02/2026 12:26:31",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208122631_188",
+        "timestamp": "08/02/2026 12:26:31",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 1 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208122631_189",
+        "timestamp": "08/02/2026 12:26:31",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Pagamento Parcial",
+        "details": "Mesa 50: R$ 50.00 (Dinheiro)"
+    },
+    {
+        "id": "LOG_20260208122631_190",
+        "timestamp": "08/02/2026 12:26:31",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Conta Fechada",
+        "details": "Mesa 50 fechada. Total: R$ 110.00 (Dinheiro)"
+    },
+    {
+        "id": "LOG_20260208122631_191",
+        "timestamp": "08/02/2026 12:26:31",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 2 adultos (passante). Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208122631_192",
+        "timestamp": "08/02/2026 12:26:31",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 1 itens. Garçom: Garçom 1"
+    },
+    {
+        "id": "LOG_20260208122631_193",
+        "timestamp": "08/02/2026 12:26:31",
+        "user": "admin",
+        "department": "Geral",
+        "action": "Pagamento Parcial",
+        "details": "Mesa 50: R$ 50.00 (Dinheiro)"
+    },
+    {
+        "id": "LOG_20260208163524_194",
+        "timestamp": "08/02/2026 16:35:24",
+        "user": "Sistema",
+        "department": "Sistema",
+        "action": "Sync Fiscal",
+        "details": "Recebido registro fiscal 50e32124-5a3b-4f19-80d7-1ee07d06101e via API."
+    }
+]

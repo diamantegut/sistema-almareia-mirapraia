@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Documentos de RH{% endblock %}
+
+{% block content %}
+<div class="service-container">
+    <div class="header-section">
+        <h1>📄 Documentos de RH</h1>
+        <p>Gerenciamento e assinatura de documentos.</p>
+    </div>
+
+    <div style="margin-bottom: 20px;">
+        <a href="{{ url_for('service_page', service_id='rh') if is_rh else url_for('index') }}" class="action-btn" style="background-color: #6c757d; text-decoration: none;">← Voltar</a>
+    </div>
+
+    {% if is_rh %}
+    <!-- Upload Section for RH -->
+    <div class="card" style="margin-bottom: 30px;">
+        <h3>Novo Documento</h3>
+        <form method="POST" enctype="multipart/form-data">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Título do Documento:</label>
+                    <input type="text" name="title" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Funcionário:</label>
+                    <select name="assigned_to" class="form-control" required>
+                        <option value="">Selecione...</option>
+                        {% for user in users %}
+                        <option value="{{ user }}">{{ user }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Arquivo (PDF):</label>
+                    <input type="file" name="file" class="form-control" accept=".pdf" required>
+                </div>
+            </div>
+            <button type="submit" class="action-btn" style="background-color: #27ae60;">Enviar Documento</button>
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- Documents List -->
+    <div class="card">
+        <h3>Meus Documentos</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Título</th>
+                    {% if is_rh %}<th>Funcionário</th>{% endif %}
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for doc in documents %}
+                <tr>
+                    <td>{{ doc.created_at }}</td>
+                    <td>{{ doc.title }}</td>
+                    {% if is_rh %}<td>{{ doc.assigned_to }}</td>{% endif %}
+                    <td>
+                        {% if doc.status == 'pending' %}
+                        <span class="badge bg-warning text-dark" style="background-color: #f39c12; color: white; padding: 5px 10px; border-radius: 4px;">Pendente</span>
+                        {% else %}
+                        <span class="badge bg-success" style="background-color: #27ae60; color: white; padding: 5px 10px; border-radius: 4px;">Assinado</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ url_for('hr.rh_view_document', doc_id=doc.id) }}" class="action-btn" style="background-color: #3498db; text-decoration: none; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" aria-label="Visualizar"><i class="bi bi-eye-fill"></i> Visualizar</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

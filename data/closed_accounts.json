@@ -1,0 +1,899 @@
+[
+    {
+        "id": "CLOSED_20260205094249_TEST_001",
+        "timestamp": "05/02/2026 09:42:49",
+        "origin": "test_origin",
+        "original_id": "TEST_001",
+        "total": 100.0,
+        "items": [
+            {
+                "name": "Test Item",
+                "price": 100.0
+            }
+        ],
+        "payments": [
+            {
+                "method": "Credit",
+                "amount": 100.0
+            }
+        ],
+        "user": "admin_test",
+        "details": {
+            "note": "Test auto-generated"
+        }
+    },
+    {
+        "id": "CLOSED_20260205094356_TEST_001",
+        "timestamp": "05/02/2026 09:43:56",
+        "origin": "test_origin",
+        "original_id": "TEST_001",
+        "total": 100.0,
+        "items": [
+            {
+                "name": "Test Item",
+                "price": 100.0
+            }
+        ],
+        "payments": [
+            {
+                "method": "Credit",
+                "amount": 100.0
+            }
+        ],
+        "user": "admin_test",
+        "details": {
+            "note": "Test auto-generated"
+        }
+    },
+    {
+        "id": "CLOSED_20260205094647_TEST_001",
+        "timestamp": "05/02/2026 09:46:47",
+        "origin": "test_origin",
+        "original_id": "TEST_001",
+        "total": 100.0,
+        "items": [
+            {
+                "name": "Test Item",
+                "price": 100.0
+            }
+        ],
+        "payments": [
+            {
+                "method": "Credit",
+                "amount": 100.0
+            }
+        ],
+        "user": "admin_test",
+        "details": {
+            "note": "Test auto-generated"
+        }
+    },
+    {
+        "id": "CLOSED_20260205094816_TEST_99",
+        "timestamp": "05/02/2026 09:48:16",
+        "origin": "restaurant_table",
+        "original_id": "TEST_99",
+        "total": 100.0,
+        "items": [
+            {
+                "name": "Test Item",
+                "price": 100.0
+            }
+        ],
+        "payments": [
+            {
+                "method": "Credit",
+                "amount": 100.0
+            }
+        ],
+        "user": "admin_test",
+        "details": {
+            "note": "Test auto-generated"
+        }
+    },
+    {
+        "id": "CLOSED_20260205095252_TEST_99",
+        "timestamp": "05/02/2026 09:52:52",
+        "origin": "restaurant_table",
+        "original_id": "TEST_99",
+        "total": 100.0,
+        "items": [
+            {
+                "name": "Test Item",
+                "price": 100.0
+            }
+        ],
+        "payments": [
+            {
+                "method": "Credit",
+                "amount": 100.0
+            }
+        ],
+        "user": "admin_test",
+        "details": {
+            "note": "Test auto-generated"
+        }
+    },
+    {
+        "id": "CLOSED_20260205095317_TEST_4380",
+        "timestamp": "05/02/2026 09:53:17",
+        "origin": "restaurant_table",
+        "original_id": "TEST_4380",
+        "total": 100.0,
+        "items": [
+            {
+                "name": "Test Item",
+                "price": 100.0
+            }
+        ],
+        "payments": [
+            {
+                "method": "Credit",
+                "amount": 100.0
+            }
+        ],
+        "user": "admin_test",
+        "details": {
+            "note": "Test auto-generated"
+        },
+        "status": "reopened",
+        "reopened_by": "admin_test",
+        "reopen_reason": "Testing reopen flow",
+        "reopened_at": "05/02/2026 09:53:17"
+    },
+    {
+        "id": "CLOSED_20260205095544_TEST_3448",
+        "timestamp": "05/02/2026 09:55:44",
+        "origin": "restaurant_table",
+        "original_id": "TEST_3448",
+        "total": 100.0,
+        "items": [
+            {
+                "name": "Test Item",
+                "price": 100.0
+            }
+        ],
+        "payments": [
+            {
+                "method": "Credit",
+                "amount": 100.0
+            }
+        ],
+        "user": "admin_test",
+        "details": {
+            "note": "Test auto-generated"
+        },
+        "status": "reopened",
+        "reopened_by": "admin_test",
+        "reopen_reason": "Testing reopen flow",
+        "reopened_at": "05/02/2026 09:55:44"
+    },
+    {
+        "id": "CLOSED_20260205095546_101",
+        "timestamp": "05/02/2026 09:55:46",
+        "origin": "reception_room",
+        "original_id": "101",
+        "total": 10.0,
+        "items": [
+            {
+                "id": "charge_1",
+                "date": "",
+                "time": "",
+                "source": "Restaurante",
+                "line_items": [
+                    {
+                        "name": "Coke",
+                        "qty": 2,
+                        "unit_price": 5.0,
+                        "total": 10.0
+                    }
+                ],
+                "service_fee": 0.0,
+                "total": 10.0
+            }
+        ],
+        "payments": [
+            {
+                "method": "credit_card",
+                "amount": 10.0
+            }
+        ],
+        "user": "test_user",
+        "details": {
+            "guest_name": "John Doe",
+            "charges_ids": [
+                "charge_1"
+            ],
+            "checkin_date": "01/01/2026",
+            "checkout_date": "05/01/2026"
+        }
+    },
+    {
+        "id": "CLOSED_20260205142229_21_CHARGE_60_20260202203959_aac5fe_REST",
+        "timestamp": "05/02/2026 14:22:29",
+        "origin": "reception_charge",
+        "original_id": "21_CHARGE_60_20260202203959_aac5fe_REST",
+        "total": 130.35,
+        "items": [
+            {
+                "name": "Agua sem Gás 275ml",
+                "qty": 1,
+                "unit_price": 9.9,
+                "total": 9.9
+            },
+            {
+                "name": "Caipiroska Absolut (Escolha o sabor)",
+                "qty": 1,
+                "unit_price": 34.9,
+                "total": 34.9
+            },
+            {
+                "name": "Caipiroska Absolut (Escolha o sabor)",
+                "qty": 1,
+                "unit_price": 34.9,
+                "total": 34.9
+            },
+            {
+                "name": "Agua com Gás 275ml",
+                "qty": 1,
+                "unit_price": 9.9,
+                "total": 9.9
+            },
+            {
+                "name": "Pasteis de Queijo coalho  (6 unidades)",
+                "qty": 1,
+                "unit_price": 28.9,
+                "total": 28.9
+            }
+        ],
+        "payments": [
+            {
+                "method": "Credito Almareia Rede",
+                "amount": 130.35
+            }
+        ],
+        "user": "Angelo",
+        "details": {
+            "room_number": "21",
+            "charge_id": "CHARGE_60_20260202203959_aac5fe_REST",
+            "notes": "Pagamento Individual"
+        }
+    },
+    {
+        "id": "CLOSED_20260205142305_21_CHARGE_99_20260202215107_5d00b5_REST",
+        "timestamp": "05/02/2026 14:23:05",
+        "origin": "reception_charge",
+        "original_id": "21_CHARGE_99_20260202215107_5d00b5_REST",
+        "total": 171.16000000000003,
+        "items": [
+            {
+                "name": "Guaraná 350ml",
+                "qty": 1,
+                "unit_price": 8.9,
+                "total": 8.9
+            },
+            {
+                "name": "Moqueca de Camarão (Individual)",
+                "qty": 1,
+                "unit_price": 89.9,
+                "total": 89.9
+            },
+            {
+                "name": "Ceviche Tropical (Individual)",
+                "qty": 1,
+                "unit_price": 47.9,
+                "total": 47.9
+            },
+            {
+                "name": "Guaraná 350ml",
+                "qty": 1,
+                "unit_price": 8.9,
+                "total": 8.9
+            }
+        ],
+        "payments": [
+            {
+                "method": "Credito Angelo",
+                "amount": 171.16000000000003
+            }
+        ],
+        "user": "Angelo",
+        "details": {
+            "room_number": "21",
+            "charge_id": "CHARGE_99_20260202215107_5d00b5_REST",
+            "notes": "Pagamento Individual"
+        }
+    },
+    {
+        "id": "CLOSED_20260205151101_101_CHARGE_1",
+        "timestamp": "05/02/2026 15:11:01",
+        "origin": "reception_charge",
+        "original_id": "101_CHARGE_1",
+        "total": 100.0,
+        "items": [
+            {
+                "name": "Item 1",
+                "qty": 1,
+                "unit_price": 100.0,
+                "total": 100.0
+            }
+        ],
+        "payments": [
+            {
+                "method": "Pix",
+                "amount": 50.0
+            },
+            {
+                "method": "Dinheiro",
+                "amount": 50.0
+            }
+        ],
+        "user": "admin",
+        "details": {
+            "room_number": "101",
+            "charge_id": "CHARGE_1",
+            "notes": "Pagamento Individual"
+        }
+    },
+    {
+        "id": "CLOSED_20260205151102_102_CHARGE_2",
+        "timestamp": "05/02/2026 15:11:02",
+        "origin": "reception_charge",
+        "original_id": "102_CHARGE_2",
+        "total": 200.0,
+        "items": [
+            {
+                "name": "Stay",
+                "qty": 1,
+                "unit_price": 200.0,
+                "total": 200.0
+            }
+        ],
+        "payments": [
+            {
+                "method": "Pix",
+                "amount": 100.0
+            },
+            {
+                "method": "Dinheiro",
+                "amount": 100.0
+            }
+        ],
+        "user": "admin",
+        "details": {
+            "room_number": "102",
+            "charge_id": "CHARGE_2",
+            "notes": "Pagamento Individual"
+        }
+    },
+    {
+        "id": "CLOSED_20260205151136_101_CHARGE_1",
+        "timestamp": "05/02/2026 15:11:36",
+        "origin": "reception_charge",
+        "original_id": "101_CHARGE_1",
+        "total": 100.0,
+        "items": [
+            {
+                "name": "Item 1",
+                "qty": 1,
+                "unit_price": 100.0,
+                "total": 100.0
+            }
+        ],
+        "payments": [
+            {
+                "method": "Pix",
+                "amount": 50.0
+            },
+            {
+                "method": "Dinheiro",
+                "amount": 50.0
+            }
+        ],
+        "user": "admin",
+        "details": {
+            "room_number": "101",
+            "charge_id": "CHARGE_1",
+            "notes": "Pagamento Individual"
+        }
+    },
+    {
+        "id": "CLOSED_20260205151136_102_CHARGE_2",
+        "timestamp": "05/02/2026 15:11:36",
+        "origin": "reception_charge",
+        "original_id": "102_CHARGE_2",
+        "total": 200.0,
+        "items": [
+            {
+                "name": "Stay",
+                "qty": 1,
+                "unit_price": 200.0,
+                "total": 200.0
+            }
+        ],
+        "payments": [
+            {
+                "method": "Pix",
+                "amount": 100.0
+            },
+            {
+                "method": "Dinheiro",
+                "amount": 100.0
+            }
+        ],
+        "user": "admin",
+        "details": {
+            "room_number": "102",
+            "charge_id": "CHARGE_2",
+            "notes": "Pagamento Individual"
+        }
+    },
+    {
+        "id": "CLOSED_20260205152051_101_CHARGE_1",
+        "timestamp": "05/02/2026 15:20:51",
+        "origin": "reception_charge",
+        "original_id": "101_CHARGE_1",
+        "total": 100.0,
+        "items": [
+            {
+                "name": "Item 1",
+                "qty": 1,
+                "unit_price": 100.0,
+                "total": 100.0
+            }
+        ],
+        "payments": [
+            {
+                "method": "Pix",
+                "amount": 50.0
+            },
+            {
+                "method": "Dinheiro",
+                "amount": 50.0
+            }
+        ],
+        "user": "admin",
+        "details": {
+            "room_number": "101",
+            "charge_id": "CHARGE_1",
+            "notes": "Pagamento Individual"
+        }
+    },
+    {
+        "id": "CLOSED_20260205152051_102_CHARGE_2",
+        "timestamp": "05/02/2026 15:20:51",
+        "origin": "reception_charge",
+        "original_id": "102_CHARGE_2",
+        "total": 200.0,
+        "items": [
+            {
+                "name": "Stay",
+                "qty": 1,
+                "unit_price": 200.0,
+                "total": 200.0
+            }
+        ],
+        "payments": [
+            {
+                "method": "Pix",
+                "amount": 100.0
+            },
+            {
+                "method": "Dinheiro",
+                "amount": 100.0
+            }
+        ],
+        "user": "admin",
+        "details": {
+            "room_number": "102",
+            "charge_id": "CHARGE_2",
+            "notes": "Pagamento Individual"
+        }
+    },
+    {
+        "id": "CLOSED_20260205152533_25_CHARGE_95_20260201142948_d561a7_REST",
+        "timestamp": "05/02/2026 15:25:33",
+        "origin": "reception_charge",
+        "original_id": "25_CHARGE_95_20260201142948_d561a7_REST",
+        "total": 399.3,
+        "items": [
+            {
+                "name": "Heineken Long Neck",
+                "qty": 4,
+                "unit_price": 16.9,
+                "total": 67.6
+            },
+            {
+                "name": "Macaxeira Frita",
+                "qty": 1,
+                "unit_price": 24.9,
+                "total": 24.9
+            },
+            {
+                "name": "Isca de peixe empanado (Gurjões de peixe)",
+                "qty": 1,
+                "unit_price": 89.9,
+                "total": 89.9
+            },
+            {
+                "name": "Aperol Spritz",
+                "qty": 1,
+                "unit_price": 38.9,
+                "total": 38.9
+            },
+            {
+                "name": "Guaraná Zero 350ml",
+                "qty": 1,
+                "unit_price": 8.9,
+                "total": 8.9
+            },
+            {
+                "name": "Peixe na farofa de Castanha (Individual)",
+                "qty": 1,
+                "unit_price": 99.9,
+                "total": 99.9
+            },
+            {
+                "name": "Cocada de forno da casa",
+                "qty": 1,
+                "unit_price": 32.9,
+                "total": 32.9
+            }
+        ],
+        "payments": [
+            {
+                "method": "Credito Angelo",
+                "amount": 399.3
+            }
+        ],
+        "user": "Angelo",
+        "details": {
+            "room_number": "25",
+            "charge_id": "CHARGE_95_20260201142948_d561a7_REST",
+            "notes": "Pagamento Individual"
+        }
+    },
+    {
+        "id": "CLOSED_20260205152549_25_CHARGE_GOV_25_20260201143016_4cfbe0",
+        "timestamp": "05/02/2026 15:25:49",
+        "origin": "reception_charge",
+        "original_id": "25_CHARGE_GOV_25_20260201143016_4cfbe0",
+        "total": 15.8,
+        "items": [
+            {
+                "name": "Capsulas (Hospedes)",
+                "qty": 2,
+                "unit_price": 7.9,
+                "total": 15.8
+            }
+        ],
+        "payments": [
+            {
+                "method": "Credito Angelo",
+                "amount": 15.8
+            }
+        ],
+        "user": "Angelo",
+        "details": {
+            "room_number": "25",
+            "charge_id": "CHARGE_GOV_25_20260201143016_4cfbe0",
+            "notes": "Pagamento Individual"
+        }
+    },
+    {
+        "id": "CLOSED_20260205152607_25",
+        "timestamp": "05/02/2026 15:26:07",
+        "origin": "reception_room",
+        "original_id": "25",
+        "total": 221.10000000000002,
+        "items": [
+            {
+                "id": "CHARGE_45_20260201154911_e069aa_REST",
+                "date": "01/02/2026 15:49",
+                "time": "",
+                "source": "restaurant",
+                "line_items": [
+                    {
+                        "name": "Heineken Long Neck",
+                        "qty": 1,
+                        "unit_price": 16.9,
+                        "total": 16.9
+                    },
+                    {
+                        "name": "Caipiroska (Escolha o Sabor)",
+                        "qty": 1,
+                        "unit_price": 34.9,
+                        "total": 34.9
+                    },
+                    {
+                        "name": "Heineken Long Neck",
+                        "qty": 1,
+                        "unit_price": 16.9,
+                        "total": 16.9
+                    },
+                    {
+                        "name": "Pasteis de Queijo coalho  (6 unidades)",
+                        "qty": 1,
+                        "unit_price": 28.9,
+                        "total": 28.9
+                    },
+                    {
+                        "name": "Heineken Long Neck",
+                        "qty": 1,
+                        "unit_price": 16.9,
+                        "total": 16.9
+                    },
+                    {
+                        "name": "Batata Frita",
+                        "qty": 1,
+                        "unit_price": 24.9,
+                        "total": 24.9
+                    },
+                    {
+                        "name": "Heineken Long Neck",
+                        "qty": 1,
+                        "unit_price": 16.9,
+                        "total": 16.9
+                    },
+                    {
+                        "name": "Heineken Long Neck",
+                        "qty": 1,
+                        "unit_price": 16.9,
+                        "total": 16.9
+                    }
+                ],
+                "service_fee": 17.32,
+                "total": 190.52
+            },
+            {
+                "id": "CHARGE_72_20260202134340_88a625_REST",
+                "date": "02/02/2026 13:43",
+                "time": "",
+                "source": "restaurant",
+                "line_items": [
+                    {
+                        "name": "Água de Coco",
+                        "qty": 1,
+                        "unit_price": 10.9,
+                        "total": 10.9
+                    },
+                    {
+                        "name": "Heineken Long Neck",
+                        "qty": 1,
+                        "unit_price": 16.9,
+                        "total": 16.9
+                    }
+                ],
+                "service_fee": 2.78,
+                "total": 30.58
+            }
+        ],
+        "payments": [
+            {
+                "method": "Credito Grasi",
+                "amount": 100.0
+            },
+            {
+                "method": "Credito Angelo",
+                "amount": 121.1
+            }
+        ],
+        "user": "Angelo",
+        "details": {
+            "guest_name": "Luciano Ferragut e Célia Pereira",
+            "charges_ids": [
+                "CHARGE_45_20260201154911_e069aa_REST",
+                "CHARGE_72_20260202134340_88a625_REST"
+            ],
+            "checkin_date": "31/01/2026",
+            "checkout_date": "05/02/2026"
+        }
+    },
+    {
+        "id": "CLOSED_20260205152639_26_CHARGE_40_20260201153114_ebdbea_REST",
+        "timestamp": "05/02/2026 15:26:39",
+        "origin": "reception_charge",
+        "original_id": "26_CHARGE_40_20260201153114_ebdbea_REST",
+        "total": 473.66,
+        "items": [
+            {
+                "name": "Camarão na manteiga de alho",
+                "qty": 1,
+                "unit_price": 89.9,
+                "total": 89.9
+            },
+            {
+                "name": "Panelinha Nordestina",
+                "qty": 1,
+                "unit_price": 39.9,
+                "total": 39.9
+            },
+            {
+                "name": "Batata Frita",
+                "qty": 1,
+                "unit_price": 24.9,
+                "total": 24.9
+            },
+            {
+                "name": "Heineken Long Neck",
+                "qty": 1,
+                "unit_price": 16.9,
+                "total": 16.9
+            },
+            {
+                "name": "Coca Cola Zero 350ml",
+                "qty": 2,
+                "unit_price": 8.9,
+                "total": 17.8
+            },
+            {
+                "name": "Guaraná Zero 350ml",
+                "qty": 1,
+                "unit_price": 8.9,
+                "total": 8.9
+            },
+            {
+                "name": "Coca Cola Zero 350ml",
+                "qty": 1,
+                "unit_price": 8.9,
+                "total": 8.9
+            },
+            {
+                "name": "Camarão na manteiga de alho",
+                "qty": 1,
+                "unit_price": 89.9,
+                "total": 89.9
+            },
+            {
+                "name": "Heineken Long Neck",
+                "qty": 1,
+                "unit_price": 16.9,
+                "total": 16.9
+            },
+            {
+                "name": "Coca Cola Zero 350ml",
+                "qty": 1,
+                "unit_price": 8.9,
+                "total": 8.9
+            },
+            {
+                "name": "Guaraná Zero 350ml",
+                "qty": 2,
+                "unit_price": 8.9,
+                "total": 17.8
+            },
+            {
+                "name": "Isca de peixe empanado (Gurjões de peixe)",
+                "qty": 1,
+                "unit_price": 89.9,
+                "total": 89.9
+            }
+        ],
+        "payments": [
+            {
+                "method": "Credito Grasi",
+                "amount": 473.66
+            }
+        ],
+        "user": "Angelo",
+        "details": {
+            "room_number": "26",
+            "charge_id": "CHARGE_40_20260201153114_ebdbea_REST",
+            "notes": "Pagamento Individual"
+        }
+    },
+    {
+        "id": "CLOSED_20260206082646_01",
+        "timestamp": "06/02/2026 08:26:46",
+        "origin": "reception_room",
+        "original_id": "01",
+        "total": 322.41,
+        "items": [
+            {
+                "id": "CHARGE_62_20260205193300_093175_REST",
+                "date": "05/02/2026 19:33",
+                "time": "",
+                "source": "restaurant",
+                "line_items": [
+                    {
+                        "name": "Red Blue",
+                        "qty": 1,
+                        "unit_price": 32.9,
+                        "total": 32.9
+                    },
+                    {
+                        "name": "Pasteis de Queijo coalho  (6 unidades)",
+                        "qty": 1,
+                        "unit_price": 28.9,
+                        "total": 28.9
+                    },
+                    {
+                        "name": "Agua com Gás 275ml",
+                        "qty": 1,
+                        "unit_price": 9.9,
+                        "total": 9.9
+                    }
+                ],
+                "service_fee": 7.170000000000001,
+                "total": 78.87
+            },
+            {
+                "id": "CHARGE_86_20260205205420_baf4f2_REST",
+                "date": "05/02/2026 20:54",
+                "time": "",
+                "source": "restaurant",
+                "line_items": [
+                    {
+                        "name": "Caipiroska Absolut (Escolha o sabor)",
+                        "qty": 1,
+                        "unit_price": 34.9,
+                        "total": 34.9
+                    },
+                    {
+                        "name": "Isca de peixe empanado (Gurjões de peixe)",
+                        "qty": 1,
+                        "unit_price": 89.9,
+                        "total": 89.9
+                    },
+                    {
+                        "name": "Salada da Chef de Salmão",
+                        "qty": 1,
+                        "unit_price": 45.9,
+                        "total": 45.9
+                    },
+                    {
+                        "name": "Corona Long Neck",
+                        "qty": 1,
+                        "unit_price": 16.9,
+                        "total": 16.9
+                    },
+                    {
+                        "name": "Corona Long Neck",
+                        "qty": 1,
+                        "unit_price": 16.9,
+                        "total": 16.9
+                    }
+                ],
+                "service_fee": 20.450000000000003,
+                "total": 224.95000000000005
+            },
+            {
+                "id": "CHARGE_85_20260205220234_6dfafb_REST",
+                "date": "05/02/2026 22:02",
+                "time": "",
+                "source": "restaurant",
+                "line_items": [
+                    {
+                        "name": "Corona Long Neck",
+                        "qty": 1,
+                        "unit_price": 16.9,
+                        "total": 16.9
+                    }
+                ],
+                "service_fee": 1.69,
+                "total": 18.59
+            }
+        ],
+        "payments": [
+            {
+                "method": "Credito Angelo",
+                "amount": 200.0
+            },
+            {
+                "method": "Credito Grasi",
+                "amount": 122.41
+            }
+        ],
+        "user": "Angelo",
+        "details": {
+            "guest_name": "Lorena Araujo E GUILHERME FERRAZ",
+            "charges_ids": [
+                "CHARGE_62_20260205193300_093175_REST",
+                "CHARGE_86_20260205205420_baf4f2_REST",
+                "CHARGE_85_20260205220234_6dfafb_REST"
+            ],
+            "checkin_date": "05/02/2026",
+            "checkout_date": "08/02/2026"
+        }
+    }
+]

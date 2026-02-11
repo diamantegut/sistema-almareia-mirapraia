@@ -1,0 +1,1478 @@
+[
+    {
+        "id": "ORD_20260131083232006328",
+        "timestamp": "31/01/2026 08:32:32",
+        "timestamp_iso": "2026-01-31T08:32:32.006351",
+        "action": "add_items",
+        "user": "Angelo",
+        "order_id": "batch_1769859151924_p00z0sc9m",
+        "table": "41",
+        "waiter": "Angelo",
+        "items": [
+            {
+                "id": "b8eda0d9-ad26-436d-8fbc-a2e14443ac0c",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Banoffe",
+                "flavor": null,
+                "qty": 3.0,
+                "price": 22.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "Não Imprimir"
+                ],
+                "category": "Sobremesas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "Angelo",
+                "created_at": "31/01/2026 08:32"
+            }
+        ],
+        "total": 68.69999999999999,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260131083403507199",
+        "timestamp": "31/01/2026 08:34:03",
+        "timestamp_iso": "2026-01-31T08:34:03.507224",
+        "action": "add_items",
+        "user": "Angelo",
+        "order_id": "batch_1769859243422_cna8icbrt",
+        "table": "42",
+        "waiter": "Angelo",
+        "items": [
+            {
+                "id": "5647e3a7-6492-4afa-89af-eeba018a1140",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Banoffe",
+                "flavor": null,
+                "qty": 4.0,
+                "price": 22.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "Não Imprimir"
+                ],
+                "category": "Sobremesas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "Angelo",
+                "created_at": "31/01/2026 08:34"
+            }
+        ],
+        "total": 91.6,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260131083455587946",
+        "timestamp": "31/01/2026 08:34:55",
+        "timestamp_iso": "2026-01-31T08:34:55.587969",
+        "action": "add_items",
+        "user": "Angelo",
+        "order_id": "batch_1769859295506_h4y6xdzso",
+        "table": "43",
+        "waiter": "Angelo",
+        "items": [
+            {
+                "id": "2d26ae0b-5499-4805-8cfe-c81e4bb2fbad",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Banoffe",
+                "flavor": null,
+                "qty": 3.0,
+                "price": 22.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "Não Imprimir"
+                ],
+                "category": "Sobremesas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "Angelo",
+                "created_at": "31/01/2026 08:34"
+            }
+        ],
+        "total": 68.69999999999999,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260131083617145685",
+        "timestamp": "31/01/2026 08:36:17",
+        "timestamp_iso": "2026-01-31T08:36:17.145697",
+        "action": "close_table",
+        "user": "Angelo",
+        "order_id": null,
+        "table": "42",
+        "waiter": "Angelo",
+        "items": [
+            {
+                "id": "5647e3a7-6492-4afa-89af-eeba018a1140",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Banoffe",
+                "flavor": null,
+                "qty": 4.0,
+                "price": 22.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "Não Imprimir"
+                ],
+                "category": "Sobremesas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "Angelo",
+                "created_at": "31/01/2026 08:34"
+            }
+        ],
+        "total": 100.75999999999999,
+        "status": "closed"
+    },
+    {
+        "id": "ORD_20260131083920693126",
+        "timestamp": "31/01/2026 08:39:20",
+        "timestamp_iso": "2026-01-31T08:39:20.693150",
+        "action": "add_items",
+        "user": "admin",
+        "order_id": "batch_test_1",
+        "table": "40",
+        "waiter": "GarcomY",
+        "items": [
+            {
+                "id": "574ff8f5-5677-4369-9a56-acaf948a7970",
+                "printed": false,
+                "print_status": "pending",
+                "name": "Burger",
+                "flavor": null,
+                "qty": 2.0,
+                "price": 20.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": null,
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "GarcomY",
+                "created_at": "31/01/2026 08:39"
+            }
+        ],
+        "total": 40.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260131083921144518",
+        "timestamp": "31/01/2026 08:39:21",
+        "timestamp_iso": "2026-01-31T08:39:21.144530",
+        "action": "add_items",
+        "user": "admin",
+        "order_id": "BATCH_083921",
+        "table": "33",
+        "waiter": "GarcomZ",
+        "items": [
+            {
+                "id": "b1e75771-c7a4-4c32-abd0-f3e575da7be2",
+                "printed": false,
+                "print_status": "pending",
+                "name": "Coca Cola",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 5.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Bebidas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "GarcomZ",
+                "created_at": "31/01/2026 08:39"
+            }
+        ],
+        "total": 5.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260131084136714840",
+        "timestamp": "31/01/2026 08:41:36",
+        "timestamp_iso": "2026-01-31T08:41:36.714863",
+        "action": "add_items",
+        "user": "Angelo",
+        "order_id": "batch_1769859696634_lwz1yno73",
+        "table": "FUNC_TestAdmin",
+        "waiter": "Angelo",
+        "items": [
+            {
+                "id": "cc3cca3b-3dd8-4d86-8ada-80bbe1453818",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Banoffe",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 18.32,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "Não Imprimir"
+                ],
+                "category": "Sobremesas",
+                "service_fee_exempt": true,
+                "source": "restaurant",
+                "waiter": "Angelo",
+                "created_at": "31/01/2026 08:41"
+            }
+        ],
+        "total": 18.32,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260131084712012365",
+        "timestamp": "31/01/2026 08:47:12",
+        "timestamp_iso": "2026-01-31T08:47:12.012378",
+        "action": "close_table",
+        "user": "Angelo",
+        "order_id": null,
+        "table": "41",
+        "waiter": "Angelo",
+        "items": [
+            {
+                "id": "b8eda0d9-ad26-436d-8fbc-a2e14443ac0c",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Banoffe",
+                "flavor": null,
+                "qty": 3.0,
+                "price": 22.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "Não Imprimir"
+                ],
+                "category": "Sobremesas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "Angelo",
+                "created_at": "31/01/2026 08:32"
+            }
+        ],
+        "total": 68.69999999999999,
+        "status": "closed"
+    },
+    {
+        "id": "ORD_20260131101214113109",
+        "timestamp": "31/01/2026 10:12:14",
+        "timestamp_iso": "2026-01-31T10:12:14.113125",
+        "action": "cancel_table",
+        "user": "Angelo",
+        "order_id": null,
+        "table": "43",
+        "waiter": "Angelo",
+        "items": [
+            {
+                "id": "2d26ae0b-5499-4805-8cfe-c81e4bb2fbad",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Banoffe",
+                "flavor": null,
+                "qty": 3.0,
+                "price": 22.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "Não Imprimir"
+                ],
+                "category": "Sobremesas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "Angelo",
+                "created_at": "31/01/2026 08:34"
+            }
+        ],
+        "total": 68.69999999999999,
+        "status": "cancelled"
+    },
+    {
+        "id": "ORD_20260131105840696483",
+        "timestamp": "31/01/2026 10:58:40",
+        "timestamp_iso": "2026-01-31T10:58:40.696510",
+        "action": "add_items",
+        "user": "Angelo",
+        "order_id": "batch_1769867920616_0g5ljt0ft",
+        "table": "41",
+        "waiter": "Angelo",
+        "items": [
+            {
+                "id": "a0ad3ca2-debc-41bf-9e82-921993663efc",
+                "printed": false,
+                "print_status": "pending",
+                "name": "Banoffe",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 22.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Sobremesas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "Angelo",
+                "created_at": "31/01/2026 10:58"
+            }
+        ],
+        "total": 22.9,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260131110152204853",
+        "timestamp": "31/01/2026 11:01:52",
+        "timestamp_iso": "2026-01-31T11:01:52.204877",
+        "action": "add_items",
+        "user": "Angelo",
+        "order_id": "batch_1769868112119_uk264yj6r",
+        "table": "41",
+        "waiter": "Angelo",
+        "items": [
+            {
+                "id": "9cfd864e-d8da-4697-82a1-cc630d2c0dc2",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Banoffe",
+                "flavor": null,
+                "qty": 5.0,
+                "price": 22.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "Não Imprimir"
+                ],
+                "category": "Sobremesas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "Angelo",
+                "created_at": "31/01/2026 11:01"
+            }
+        ],
+        "total": 114.5,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260131112612600939",
+        "timestamp": "31/01/2026 11:26:12",
+        "timestamp_iso": "2026-01-31T11:26:12.600962",
+        "action": "add_items",
+        "user": "Angelo",
+        "order_id": "batch_1769869572515_b8w5zqh2w",
+        "table": "40",
+        "waiter": "Angelo",
+        "items": [
+            {
+                "id": "defe6848-b5b5-4463-93c4-f68980fb0617",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Banoffe",
+                "flavor": null,
+                "qty": 4.0,
+                "price": 22.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "Não Imprimir"
+                ],
+                "category": "Sobremesas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "Angelo",
+                "created_at": "31/01/2026 11:26"
+            }
+        ],
+        "total": 91.6,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260131112613306722",
+        "timestamp": "31/01/2026 11:26:13",
+        "timestamp_iso": "2026-01-31T11:26:13.306742",
+        "action": "add_items",
+        "user": "admin",
+        "order_id": "batch_test_1",
+        "table": "40",
+        "waiter": "GarcomY",
+        "items": [
+            {
+                "id": "bdbeba57-d63b-416b-9ef8-aa08ce6a7f21",
+                "printed": false,
+                "print_status": "pending",
+                "name": "Burger",
+                "flavor": null,
+                "qty": 2.0,
+                "price": 20.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": null,
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "GarcomY",
+                "created_at": "31/01/2026 11:26"
+            }
+        ],
+        "total": 40.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260131112613710291",
+        "timestamp": "31/01/2026 11:26:13",
+        "timestamp_iso": "2026-01-31T11:26:13.710303",
+        "action": "add_items",
+        "user": "admin",
+        "order_id": "BATCH_112613",
+        "table": "33",
+        "waiter": "GarcomZ",
+        "items": [
+            {
+                "id": "23737872-fbb2-4acd-afad-fd044883227e",
+                "printed": false,
+                "print_status": "pending",
+                "name": "Coca Cola",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 5.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Bebidas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "GarcomZ",
+                "created_at": "31/01/2026 11:26"
+            }
+        ],
+        "total": 5.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260131112708120405",
+        "timestamp": "31/01/2026 11:27:08",
+        "timestamp_iso": "2026-01-31T11:27:08.120422",
+        "action": "add_items",
+        "user": "admin",
+        "order_id": "batch_test_1",
+        "table": "40",
+        "waiter": "GarcomY",
+        "items": [
+            {
+                "id": "77b9c7bb-7842-44a7-93c2-700fc29937dd",
+                "printed": false,
+                "print_status": "pending",
+                "name": "Burger",
+                "flavor": null,
+                "qty": 2.0,
+                "price": 20.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": null,
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "GarcomY",
+                "created_at": "31/01/2026 11:27"
+            }
+        ],
+        "total": 40.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260131112708316076",
+        "timestamp": "31/01/2026 11:27:08",
+        "timestamp_iso": "2026-01-31T11:27:08.316090",
+        "action": "add_items",
+        "user": "admin",
+        "order_id": "BATCH_112708",
+        "table": "33",
+        "waiter": "GarcomZ",
+        "items": [
+            {
+                "id": "3c4b18c2-a63e-46c1-b199-d6c50ce06b69",
+                "printed": false,
+                "print_status": "pending",
+                "name": "Coca Cola",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 5.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Bebidas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "GarcomZ",
+                "created_at": "31/01/2026 11:27"
+            }
+        ],
+        "total": 5.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260131114057704639",
+        "timestamp": "31/01/2026 11:40:57",
+        "timestamp_iso": "2026-01-31T11:40:57.704663",
+        "action": "add_items",
+        "user": "Angelo",
+        "order_id": "batch_1769870457620_qi0ywaxcf",
+        "table": "40",
+        "waiter": "Angelo",
+        "items": [
+            {
+                "id": "f84c0ee7-8dcd-42e5-9427-cc426f468065",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Banoffe",
+                "flavor": null,
+                "qty": 4.0,
+                "price": 22.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "Não Imprimir"
+                ],
+                "category": "Sobremesas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "Angelo",
+                "created_at": "31/01/2026 11:40"
+            }
+        ],
+        "total": 91.6,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260131123334369659",
+        "timestamp": "31/01/2026 12:33:34",
+        "timestamp_iso": "2026-01-31T12:33:34.369680",
+        "action": "add_items",
+        "user": "Angelo",
+        "order_id": "batch_1769873614295_m44u0abeu",
+        "table": "41",
+        "waiter": "Angelo",
+        "items": [
+            {
+                "id": "9b3a771b-f8f5-470a-b9b6-b5dcc24d7e4e",
+                "printed": false,
+                "print_status": "pending",
+                "name": "Banoffe",
+                "flavor": null,
+                "qty": 3.0,
+                "price": 22.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Sobremesas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "Angelo",
+                "created_at": "31/01/2026 12:33"
+            }
+        ],
+        "total": 68.69999999999999,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260131131112421526",
+        "timestamp": "31/01/2026 13:11:12",
+        "timestamp_iso": "2026-01-31T13:11:12.421545",
+        "action": "add_items",
+        "user": "jose",
+        "order_id": "batch_1769875976513_vfhka4zyg",
+        "table": "100",
+        "waiter": "jose",
+        "items": [
+            {
+                "id": "629a05ff-b8e4-421a-b39f-1d9c2d42863c",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Agulhinha Branca",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 69.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "Não Imprimir"
+                ],
+                "category": "Entradas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "jose",
+                "created_at": "31/01/2026 13:11"
+            }
+        ],
+        "total": 69.9,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260131131141343085",
+        "timestamp": "31/01/2026 13:11:41",
+        "timestamp_iso": "2026-01-31T13:11:41.343106",
+        "action": "add_items",
+        "user": "jose",
+        "order_id": "batch_1769876005680_8gmqkyamm",
+        "table": "100",
+        "waiter": "jose",
+        "items": [
+            {
+                "id": "48fe91c3-7dd2-4133-9e16-f19798f47303",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Agua com Gás 275ml",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 9.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "Nada"
+                    }
+                ],
+                "observations": [
+                    "Não Imprimir"
+                ],
+                "category": "Sucos e Águas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "jose",
+                "created_at": "31/01/2026 13:11"
+            }
+        ],
+        "total": 9.9,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260131131234155754",
+        "timestamp": "31/01/2026 13:12:34",
+        "timestamp_iso": "2026-01-31T13:12:34.155773",
+        "action": "add_items",
+        "user": "jose",
+        "order_id": "batch_1769876058500_m5sxt8e1s",
+        "table": "100",
+        "waiter": "jose",
+        "items": [
+            {
+                "id": "7b7b53a2-50f6-4da7-b865-befe665de447",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Coca Cola Zero 350ml",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 8.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "Nada"
+                    }
+                ],
+                "observations": [
+                    "Não Imprimir"
+                ],
+                "category": "Refrigerante",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "jose",
+                "created_at": "31/01/2026 13:12"
+            }
+        ],
+        "total": 8.9,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260131131248304717",
+        "timestamp": "31/01/2026 13:12:48",
+        "timestamp_iso": "2026-01-31T13:12:48.304735",
+        "action": "add_items",
+        "user": "jose",
+        "order_id": "batch_1769876072642_pbiwwzn37",
+        "table": "100",
+        "waiter": "jose",
+        "items": [
+            {
+                "id": "6ac2e95c-e189-43c5-90e8-bec427423e03",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Coca Cola Zero 350ml",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 8.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "Nada"
+                    }
+                ],
+                "observations": [
+                    "Não Imprimir"
+                ],
+                "category": "Refrigerante",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "jose",
+                "created_at": "31/01/2026 13:12"
+            }
+        ],
+        "total": 8.9,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260131131438736497",
+        "timestamp": "31/01/2026 13:14:38",
+        "timestamp_iso": "2026-01-31T13:14:38.736516",
+        "action": "add_items",
+        "user": "jose",
+        "order_id": "batch_1769876182979_vofyt2q5d",
+        "table": "100",
+        "waiter": "jose",
+        "items": [
+            {
+                "id": "9786a436-137c-42bb-b64e-c5af4850c0d5",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 16.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "Não Imprimir"
+                ],
+                "category": "Cervejas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "jose",
+                "created_at": "31/01/2026 13:14"
+            }
+        ],
+        "total": 16.9,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260131131551242541",
+        "timestamp": "31/01/2026 13:15:51",
+        "timestamp_iso": "2026-01-31T13:15:51.242561",
+        "action": "add_items",
+        "user": "jose",
+        "order_id": "batch_1769876255588_x1swlkvcj",
+        "table": "100",
+        "waiter": "jose",
+        "items": [
+            {
+                "id": "666ee5c6-747c-422b-a1ec-895cf6f63b3c",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Peixe ao Molho de Camarão (Individual)",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 98.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "Não Imprimir"
+                ],
+                "category": "Pratos",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "jose",
+                "created_at": "31/01/2026 13:15"
+            }
+        ],
+        "total": 98.9,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260131131657381597",
+        "timestamp": "31/01/2026 13:16:57",
+        "timestamp_iso": "2026-01-31T13:16:57.381617",
+        "action": "add_items",
+        "user": "jose",
+        "order_id": "batch_1769876321731_pb1kndsjn",
+        "table": "100",
+        "waiter": "jose",
+        "items": [
+            {
+                "id": "0496e1f3-6cb2-4295-a11b-8b323261c72c",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Peixe na farofa de Castanha (Individual)",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 99.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "Não Imprimir"
+                ],
+                "category": "Pratos",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "jose",
+                "created_at": "31/01/2026 13:16"
+            }
+        ],
+        "total": 99.9,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260131131720680076",
+        "timestamp": "31/01/2026 13:17:20",
+        "timestamp_iso": "2026-01-31T13:17:20.680094",
+        "action": "add_items",
+        "user": "jose",
+        "order_id": "batch_1769876345023_g2bmsw0jw",
+        "table": "100",
+        "waiter": "jose",
+        "items": [
+            {
+                "id": "c9d83c09-7fab-43a0-9f56-f5080dda6891",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Agua com Gás 275ml",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 9.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "Nada"
+                    }
+                ],
+                "observations": [
+                    "Não Imprimir"
+                ],
+                "category": "Sucos e Águas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "jose",
+                "created_at": "31/01/2026 13:17"
+            }
+        ],
+        "total": 9.9,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260131131820807436",
+        "timestamp": "31/01/2026 13:18:20",
+        "timestamp_iso": "2026-01-31T13:18:20.807449",
+        "action": "add_items",
+        "user": "jose",
+        "order_id": "batch_1769876405214_7rhco1p2k",
+        "table": "100",
+        "waiter": "jose",
+        "items": [
+            {
+                "id": "5ed6187c-7a0b-4d5e-a263-f212bca686cf",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Café Expresso",
+                "flavor": null,
+                "qty": 2.0,
+                "price": 7.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "Não Imprimir"
+                ],
+                "category": "Sucos e Águas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "jose",
+                "created_at": "31/01/2026 13:18"
+            }
+        ],
+        "total": 15.8,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260131132456885794",
+        "timestamp": "31/01/2026 13:24:56",
+        "timestamp_iso": "2026-01-31T13:24:56.885816",
+        "action": "add_items",
+        "user": "jose",
+        "order_id": "batch_1769876800838_9npqcjkkl",
+        "table": "100",
+        "waiter": "jose",
+        "items": [
+            {
+                "id": "2fbdf9b3-92b5-42c7-8164-b2d71c2d7219",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Ceviche Tropical (Individual)",
+                "flavor": null,
+                "qty": 2.0,
+                "price": 47.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "Não Imprimir"
+                ],
+                "category": "Especiais da Casa",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "jose",
+                "created_at": "31/01/2026 13:24"
+            }
+        ],
+        "total": 95.8,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260131133247201485",
+        "timestamp": "31/01/2026 13:32:47",
+        "timestamp_iso": "2026-01-31T13:32:47.201498",
+        "action": "add_items",
+        "user": "jose",
+        "order_id": "batch_1769877271602_a2jh0b72x",
+        "table": "100",
+        "waiter": "jose",
+        "items": [
+            {
+                "id": "0e7236f7-94cb-4cbc-8cb6-65ef243aaa26",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Caldo (Consultar sabor do dia)",
+                "flavor": "Feijão (Caldo)",
+                "qty": 2.0,
+                "price": 15.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "Não Imprimir"
+                ],
+                "category": "Entradas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "jose",
+                "created_at": "31/01/2026 13:32"
+            }
+        ],
+        "total": 31.8,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260131134027494069",
+        "timestamp": "31/01/2026 13:40:27",
+        "timestamp_iso": "2026-01-31T13:40:27.494093",
+        "action": "add_items",
+        "user": "jose",
+        "order_id": "batch_1769877731851_2m4sbcm0v",
+        "table": "100",
+        "waiter": "jose",
+        "items": [
+            {
+                "id": "18da7141-5093-46ba-b25b-49a560ae9d62",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Agua com Gás 275ml",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 9.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "Nada"
+                    }
+                ],
+                "observations": [
+                    "Não Imprimir"
+                ],
+                "category": "Sucos e Águas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "jose",
+                "created_at": "31/01/2026 13:40"
+            }
+        ],
+        "total": 9.9,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260131134042098523",
+        "timestamp": "31/01/2026 13:40:42",
+        "timestamp_iso": "2026-01-31T13:40:42.098551",
+        "action": "add_items",
+        "user": "Angelo",
+        "order_id": "batch_1769877642007_nm561dauk",
+        "table": "41",
+        "waiter": "Angelo",
+        "items": [
+            {
+                "id": "dbaab95e-f49c-4b9a-952b-015758859db0",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Banoffe",
+                "flavor": null,
+                "qty": 2.0,
+                "price": 22.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "Não Imprimir"
+                ],
+                "category": "Sobremesas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "Angelo",
+                "created_at": "31/01/2026 13:40"
+            }
+        ],
+        "total": 45.8,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260131134049819569",
+        "timestamp": "31/01/2026 13:40:49",
+        "timestamp_iso": "2026-01-31T13:40:49.819596",
+        "action": "add_items",
+        "user": "jose",
+        "order_id": "batch_1769877754143_tqrs7rbln",
+        "table": "100",
+        "waiter": "jose",
+        "items": [
+            {
+                "id": "5cd8be53-afcb-4f26-82a7-21f8faf40b17",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Coca Cola Zero 350ml",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 8.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "Nada"
+                    }
+                ],
+                "observations": [
+                    "Não Imprimir"
+                ],
+                "category": "Refrigerante",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "jose",
+                "created_at": "31/01/2026 13:40"
+            }
+        ],
+        "total": 8.9,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260131134120098554",
+        "timestamp": "31/01/2026 13:41:20",
+        "timestamp_iso": "2026-01-31T13:41:20.098585",
+        "action": "add_items",
+        "user": "jose",
+        "order_id": "batch_1769877784494_mwl5gclfq",
+        "table": "100",
+        "waiter": "jose",
+        "items": [
+            {
+                "id": "5dd438e5-744c-4288-b2cb-4533af99586b",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Café Expresso",
+                "flavor": null,
+                "qty": 2.0,
+                "price": 7.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "Não Imprimir"
+                ],
+                "category": "Sucos e Águas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "jose",
+                "created_at": "31/01/2026 13:41"
+            }
+        ],
+        "total": 15.8,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260131134129262413",
+        "timestamp": "31/01/2026 13:41:29",
+        "timestamp_iso": "2026-01-31T13:41:29.262443",
+        "action": "cancel_table",
+        "user": "Angelo",
+        "order_id": null,
+        "table": "41",
+        "waiter": "Angelo",
+        "items": [
+            {
+                "id": "dbaab95e-f49c-4b9a-952b-015758859db0",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Banoffe",
+                "flavor": null,
+                "qty": 2.0,
+                "price": 22.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "Não Imprimir"
+                ],
+                "category": "Sobremesas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "Angelo",
+                "created_at": "31/01/2026 13:40"
+            }
+        ],
+        "total": 45.8,
+        "status": "cancelled"
+    },
+    {
+        "id": "ORD_20260131134145387149",
+        "timestamp": "31/01/2026 13:41:45",
+        "timestamp_iso": "2026-01-31T13:41:45.387175",
+        "action": "add_items",
+        "user": "Angelo",
+        "order_id": "batch_1769877705293_fks04v7hu",
+        "table": "41",
+        "waiter": "Angelo",
+        "items": [
+            {
+                "id": "ebbc4cfa-5ef8-4a99-88ad-4692ed16ca89",
+                "printed": false,
+                "print_status": "pending",
+                "name": "Banoffe",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 22.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Sobremesas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "Angelo",
+                "created_at": "31/01/2026 13:41"
+            }
+        ],
+        "total": 22.9,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260131134206494903",
+        "timestamp": "31/01/2026 13:42:06",
+        "timestamp_iso": "2026-01-31T13:42:06.494921",
+        "action": "add_items",
+        "user": "jose",
+        "order_id": "batch_1769877830899_aaqb8532h",
+        "table": "100",
+        "waiter": "jose",
+        "items": [
+            {
+                "id": "8eaa5885-b394-4e43-87c7-077ee49c94bd",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Suco Copo (Escolha o Sabor)",
+                "flavor": "Abacaxi",
+                "qty": 1.0,
+                "price": 10.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "Não Imprimir"
+                ],
+                "category": "Sucos e Águas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "jose",
+                "created_at": "31/01/2026 13:42"
+            }
+        ],
+        "total": 10.9,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260131142041212500",
+        "timestamp": "31/01/2026 14:20:41",
+        "timestamp_iso": "2026-01-31T14:20:41.212523",
+        "action": "add_items",
+        "user": "admin",
+        "order_id": "batch_test_1",
+        "table": "40",
+        "waiter": "GarcomY",
+        "items": [
+            {
+                "id": "62c5d138-2119-4479-a21d-99a58a41b3d4",
+                "printed": false,
+                "print_status": "pending",
+                "name": "Burger",
+                "flavor": null,
+                "qty": 2.0,
+                "price": 20.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": null,
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "GarcomY",
+                "created_at": "31/01/2026 14:20"
+            }
+        ],
+        "total": 40.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260131142041372773",
+        "timestamp": "31/01/2026 14:20:41",
+        "timestamp_iso": "2026-01-31T14:20:41.372794",
+        "action": "add_items",
+        "user": "admin",
+        "order_id": "BATCH_142041",
+        "table": "33",
+        "waiter": "GarcomZ",
+        "items": [
+            {
+                "id": "7d870146-5ed2-4a48-bb8d-492ea091c6bc",
+                "printed": false,
+                "print_status": "pending",
+                "name": "Coca Cola",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 5.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Bebidas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "GarcomZ",
+                "created_at": "31/01/2026 14:20"
+            }
+        ],
+        "total": 5.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260131142150747080",
+        "timestamp": "31/01/2026 14:21:50",
+        "timestamp_iso": "2026-01-31T14:21:50.747101",
+        "action": "add_items",
+        "user": "admin",
+        "order_id": "batch_test_1",
+        "table": "40",
+        "waiter": "GarcomY",
+        "items": [
+            {
+                "id": "794eadcd-9a87-423d-bdb4-4227bf606cab",
+                "printed": false,
+                "print_status": "pending",
+                "name": "Burger",
+                "flavor": null,
+                "qty": 2.0,
+                "price": 20.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": null,
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "GarcomY",
+                "created_at": "31/01/2026 14:21"
+            }
+        ],
+        "total": 40.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260131142150871341",
+        "timestamp": "31/01/2026 14:21:50",
+        "timestamp_iso": "2026-01-31T14:21:50.871352",
+        "action": "add_items",
+        "user": "admin",
+        "order_id": "BATCH_142150",
+        "table": "33",
+        "waiter": "GarcomZ",
+        "items": [
+            {
+                "id": "5e1bb9fb-c5cc-4f25-8f28-d06e558af9cd",
+                "printed": false,
+                "print_status": "pending",
+                "name": "Coca Cola",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 5.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Bebidas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "GarcomZ",
+                "created_at": "31/01/2026 14:21"
+            }
+        ],
+        "total": 5.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260131153150574023",
+        "timestamp": "31/01/2026 15:31:50",
+        "timestamp_iso": "2026-01-31T15:31:50.574048",
+        "action": "add_items",
+        "user": "admin",
+        "order_id": "batch_test_1",
+        "table": "40",
+        "waiter": "GarcomY",
+        "items": [
+            {
+                "id": "ca3951b7-3f5c-4110-a401-c3d4fdf73800",
+                "printed": false,
+                "print_status": "pending",
+                "name": "Burger",
+                "flavor": null,
+                "qty": 2.0,
+                "price": 20.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": null,
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "GarcomY",
+                "created_at": "31/01/2026 15:31"
+            }
+        ],
+        "total": 40.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260131153150766186",
+        "timestamp": "31/01/2026 15:31:50",
+        "timestamp_iso": "2026-01-31T15:31:50.766198",
+        "action": "add_items",
+        "user": "admin",
+        "order_id": "BATCH_153150",
+        "table": "33",
+        "waiter": "GarcomZ",
+        "items": [
+            {
+                "id": "f7ab8ce5-e108-43e4-85bc-827d5ab36e7a",
+                "printed": false,
+                "print_status": "pending",
+                "name": "Coca Cola",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 5.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Bebidas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "GarcomZ",
+                "created_at": "31/01/2026 15:31"
+            }
+        ],
+        "total": 5.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260131201445253445",
+        "timestamp": "31/01/2026 20:14:45",
+        "timestamp_iso": "2026-01-31T20:14:45.253469",
+        "action": "cancel_table",
+        "user": "Angelo",
+        "order_id": null,
+        "table": "41",
+        "waiter": "Angelo",
+        "items": [],
+        "total": 0,
+        "status": "cancelled"
+    },
+    {
+        "id": "ORD_20260131202926606908",
+        "timestamp": "31/01/2026 20:29:26",
+        "timestamp_iso": "2026-01-31T20:29:26.606932",
+        "action": "add_items",
+        "user": "Angelo",
+        "order_id": "batch_1769902166427_zpe0rwqp9",
+        "table": "41",
+        "waiter": "Angelo",
+        "items": [
+            {
+                "id": "eece4571-8764-40eb-8663-ce7d3573c520",
+                "printed": false,
+                "print_status": "pending",
+                "name": "Parmegiana de Filé Mignon (Individual)",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 98.99,
+                "complements": [],
+                "accompaniments": [
+                    "Batata Frita",
+                    "Arroz"
+                ],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Pratos",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "Angelo",
+                "created_at": "31/01/2026 20:29"
+            }
+        ],
+        "total": 98.99,
+        "status": "submitted"
+    }
+]

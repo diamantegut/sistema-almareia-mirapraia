@@ -1,0 +1,650 @@
+[
+    {
+        "id": "LOG_20260205073146_0",
+        "timestamp": "05/02/2026 07:31:46",
+        "user": "gov_user",
+        "department": "Governança",
+        "action": "Frigobar Governança",
+        "details": "Lançamento de Frigobar no Quarto 23: 1.0x Água"
+    },
+    {
+        "id": "LOG_20260205073211_1",
+        "timestamp": "05/02/2026 07:32:11",
+        "user": "Admin",
+        "department": "Recepção",
+        "action": "Cancelamento de Consumo",
+        "details": "Consumo TEST_CHARGE_20260205073211 (Quarto 999) cancelado. Motivo: Test Cancellation"
+    },
+    {
+        "id": "LOG_20260205073211_2",
+        "timestamp": "05/02/2026 07:32:11",
+        "user": "test_user",
+        "department": "Recepção",
+        "action": "Caixa Fechado",
+        "details": "Caixa Recepção Restaurante fechado por test_user com saldo final R$ 100.00"
+    },
+    {
+        "id": "LOG_20260205073212_3",
+        "timestamp": "05/02/2026 07:32:12",
+        "user": "Manager",
+        "department": "Recepção",
+        "action": "Edição de Conta",
+        "details": "Conta test_redirect_charge editada: Obs: Original Note -> None, Recálculo Total: 100.00 -> 0.00"
+    },
+    {
+        "id": "LOG_20260205073212_4",
+        "timestamp": "05/02/2026 07:32:12",
+        "user": "Manager",
+        "department": "Recepção",
+        "action": "Edição de Conta",
+        "details": "Conta test_redirect_charge editada: Obs: Original Note -> None, Recálculo Total: 100.00 -> 0.00"
+    },
+    {
+        "id": "LOG_20260205073212_5",
+        "timestamp": "05/02/2026 07:32:12",
+        "user": "admin_user",
+        "department": "Geral",
+        "action": "Conta Fechada",
+        "details": "Mesa 99 fechada. Total: R$ 110.00 (Múltiplos pagamentos)"
+    },
+    {
+        "id": "LOG_20260205073212_6",
+        "timestamp": "05/02/2026 07:32:12",
+        "user": "admin",
+        "department": null,
+        "action": "Mesa Aberta",
+        "details": "Mesa 40 aberta para 1 adultos (None). Garçom: Test"
+    },
+    {
+        "id": "LOG_20260205073212_7",
+        "timestamp": "05/02/2026 07:32:12",
+        "user": "admin",
+        "department": null,
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 40: 1 itens. Garçom: Test"
+    },
+    {
+        "id": "LOG_20260205073212_8",
+        "timestamp": "05/02/2026 07:32:12",
+        "user": "admin",
+        "department": null,
+        "action": "Conta Fechada",
+        "details": "Mesa 40 fechada. Total: R$ 100.00 (Dinheiro)"
+    },
+    {
+        "id": "LOG_20260205073212_9",
+        "timestamp": "05/02/2026 07:32:12",
+        "user": "Sistema",
+        "department": "Sistema",
+        "action": "Sync Fiscal",
+        "details": "Recebido registro fiscal f77b3830-2dd2-4475-9805-cf4d5e1c4eda via API."
+    },
+    {
+        "id": "LOG_20260205073212_10",
+        "timestamp": "05/02/2026 07:32:12",
+        "user": "Sistema",
+        "department": "Sistema",
+        "action": "Sync Fiscal",
+        "details": "Recebido registro fiscal 4d9ecd38-cb25-4465-b829-f6ef7ad99cf2 via API."
+    },
+    {
+        "id": "LOG_20260205073212_11",
+        "timestamp": "05/02/2026 07:32:12",
+        "user": "gov_user",
+        "department": "Governança",
+        "action": "Frigobar Governança",
+        "details": "Lançamento de Frigobar no Quarto 23: 1.0x Água"
+    },
+    {
+        "id": "LOG_20260205073212_12",
+        "timestamp": "05/02/2026 07:32:12",
+        "user": "test_user",
+        "department": "Geral",
+        "action": "Conta Puxada",
+        "details": "Mesa 12 puxada por test_user"
+    },
+    {
+        "id": "LOG_20260205073212_13",
+        "timestamp": "05/02/2026 07:32:12",
+        "user": "test_user",
+        "department": "Geral",
+        "action": "Conta Puxada",
+        "details": "Mesa 11 puxada por test_user"
+    },
+    {
+        "id": "LOG_20260205073212_14",
+        "timestamp": "05/02/2026 07:32:12",
+        "user": "test_user",
+        "department": "Geral",
+        "action": "Conta Puxada",
+        "details": "Mesa 10 puxada por test_user"
+    },
+    {
+        "id": "LOG_20260205073212_15",
+        "timestamp": "05/02/2026 07:32:12",
+        "user": "test_user",
+        "department": "Geral",
+        "action": "Conta Puxada",
+        "details": "Mesa 13 puxada por test_user"
+    },
+    {
+        "id": "LOG_20260205073213_16",
+        "timestamp": "05/02/2026 07:32:13",
+        "user": "TestAdmin",
+        "department": "Restaurante",
+        "action": "Perguntas Produto",
+        "details": "Produto Test Burger: 2 perguntas obrigatórias configuradas."
+    },
+    {
+        "id": "LOG_20260205073213_17",
+        "timestamp": "05/02/2026 07:32:13",
+        "user": "TestAdmin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 99 aberta para 1 adultos (externo). Garçom: Angelo"
+    },
+    {
+        "id": "LOG_20260205073213_18",
+        "timestamp": "05/02/2026 07:32:13",
+        "user": "Angelo",
+        "department": "Restaurante",
+        "action": "Venda Sem Impressão",
+        "details": "Produto 'Test No Print Item' (Qtd: 1.0) na Mesa 99. Config: 'NÃO IMPRIMIR'."
+    },
+    {
+        "id": "LOG_20260205073213_19",
+        "timestamp": "05/02/2026 07:32:13",
+        "user": "TestAdmin",
+        "department": "Geral",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 99: 0 itens. Garçom: Angelo"
+    },
+    {
+        "id": "LOG_20260205073213_20",
+        "timestamp": "05/02/2026 07:32:13",
+        "user": "test_user",
+        "department": "Recepção",
+        "action": "Transação Caixa",
+        "details": "Recepção Restaurante: Sangria de R$ 50.00 - Test Sangria"
+    },
+    {
+        "id": "LOG_20260205073213_21",
+        "timestamp": "05/02/2026 07:32:13",
+        "user": "test_user",
+        "department": "Recepção",
+        "action": "Transação Caixa",
+        "details": "Reservas: Sangria de R$ 100.00 - Res Sangria"
+    },
+    {
+        "id": "LOG_20260205073213_22",
+        "timestamp": "05/02/2026 07:32:13",
+        "user": "test_user",
+        "department": "Restaurante",
+        "action": "Transação Caixa",
+        "details": "Restaurante: withdrawal de R$ 30.00 - Rest Sangria"
+    },
+    {
+        "id": "LOG_20260205073213_23",
+        "timestamp": "05/02/2026 07:32:13",
+        "user": "Admin",
+        "department": "Restaurante",
+        "action": "Transferência de Conta",
+        "details": "Mesa 10 -> Quarto 101 (Restaurante). Total: 22.00"
+    },
+    {
+        "id": "LOG_20260205073214_24",
+        "timestamp": "05/02/2026 07:32:14",
+        "user": "TestAdmin",
+        "department": "Geral",
+        "action": "Mesa Aberta",
+        "details": "Mesa 99 aberta para 1 adultos (passante). Garçom: None"
+    },
+    {
+        "id": "LOG_20260205073214_25",
+        "timestamp": "05/02/2026 07:32:14",
+        "user": "TestAdmin",
+        "department": "Geral",
+        "action": "Item Adicionado",
+        "details": "Mesa 99: 1.0x ItemTesteWorkflow (R$ 100.00)"
+    },
+    {
+        "id": "LOG_20260205073214_26",
+        "timestamp": "05/02/2026 07:32:14",
+        "user": "TestAdmin",
+        "department": "Geral",
+        "action": "Conta Puxada",
+        "details": "Mesa 99 puxada por TestAdmin"
+    },
+    {
+        "id": "LOG_20260205073214_27",
+        "timestamp": "05/02/2026 07:32:14",
+        "user": "TestAdmin",
+        "department": "Geral",
+        "action": "Mesa Reaberta",
+        "details": "Trava de pedidos removida da Mesa 99 por TestAdmin"
+    },
+    {
+        "id": "LOG_20260205073214_28",
+        "timestamp": "05/02/2026 07:32:14",
+        "user": "TestAdmin",
+        "department": "Geral",
+        "action": "Item Removido",
+        "details": "Mesa 99: 1.0x ItemTesteWorkflow (removido por TestAdmin). Motivo: Teste de workflow"
+    },
+    {
+        "id": "LOG_20260205073214_29",
+        "timestamp": "05/02/2026 07:32:14",
+        "user": "TestAdmin",
+        "department": "Geral",
+        "action": "Conta Fechada",
+        "details": "Mesa 99 fechada. Total: R$ 0.00 (Dinheiro)"
+    },
+    {
+        "id": "LOG_20260205074027_30",
+        "timestamp": "05/02/2026 07:40:27",
+        "user": "TestAdmin",
+        "department": "Restaurante",
+        "action": "Perguntas Produto",
+        "details": "Produto Test Burger: 2 perguntas obrigatórias configuradas."
+    },
+    {
+        "id": "LOG_20260205074049_31",
+        "timestamp": "05/02/2026 07:40:49",
+        "user": "gov_user",
+        "department": "Governança",
+        "action": "Frigobar Governança",
+        "details": "Lançamento de Frigobar no Quarto 23: 1.0x Água"
+    },
+    {
+        "id": "LOG_20260205094816_32",
+        "timestamp": "05/02/2026 09:48:16",
+        "user": "admin_test",
+        "department": "Restaurante",
+        "action": "Conta Reaberta",
+        "details": "Mesa TEST_99 reaberta por admin_test. Motivo: Testing reopen flow"
+    },
+    {
+        "id": "LOG_20260205094816_33",
+        "timestamp": "05/02/2026 09:48:16",
+        "user": "admin_test",
+        "department": "Sistema",
+        "action": "Aviso Estorno",
+        "details": "Não foi possível lançar estorno financeiro para reabertura de TEST_99 (Caixa fechado)."
+    },
+    {
+        "id": "LOG_20260205095317_34",
+        "timestamp": "05/02/2026 09:53:17",
+        "user": "admin_test",
+        "department": "Restaurante",
+        "action": "Conta Reaberta",
+        "details": "Mesa TEST_4380 reaberta por admin_test. Motivo: Testing reopen flow"
+    },
+    {
+        "id": "LOG_20260205095317_35",
+        "timestamp": "05/02/2026 09:53:17",
+        "user": "admin_test",
+        "department": "Sistema",
+        "action": "Aviso Estorno",
+        "details": "Não foi possível lançar estorno financeiro para reabertura de TEST_4380 (Caixa fechado)."
+    },
+    {
+        "id": "LOG_20260205095544_36",
+        "timestamp": "05/02/2026 09:55:44",
+        "user": "admin_test",
+        "department": "Restaurante",
+        "action": "Conta Reaberta",
+        "details": "Mesa TEST_3448 reaberta por admin_test. Motivo: Testing reopen flow"
+    },
+    {
+        "id": "LOG_20260205095544_37",
+        "timestamp": "05/02/2026 09:55:44",
+        "user": "admin_test",
+        "department": "Sistema",
+        "action": "Aviso Estorno",
+        "details": "Não foi possível lançar estorno financeiro para reabertura de TEST_3448 (Caixa fechado)."
+    },
+    {
+        "id": "LOG_20260205110044_38",
+        "timestamp": "05/02/2026 11:00:44",
+        "user": "Angelo",
+        "department": "Restaurante",
+        "action": "Caixa Aberto",
+        "details": "Caixa Restaurante Serviço aberto por Angelo com R$ 0.00"
+    },
+    {
+        "id": "LOG_20260205110057_39",
+        "timestamp": "05/02/2026 11:00:57",
+        "user": "Angelo",
+        "department": "Recepção",
+        "action": "Caixa Aberto",
+        "details": "Caixa Recepção Restaurante aberto por Angelo com R$ 0.00"
+    },
+    {
+        "id": "LOG_20260205110109_40",
+        "timestamp": "05/02/2026 11:01:09",
+        "user": "Angelo",
+        "department": "Recepção",
+        "action": "Pagamento Recebido",
+        "details": "Quarto 11: R$ 537.68 via creditomirapraiarede"
+    },
+    {
+        "id": "LOG_20260205110152_41",
+        "timestamp": "05/02/2026 11:01:52",
+        "user": "Angelo",
+        "department": "Recepção",
+        "action": "Transação Caixa",
+        "details": "Recepção Restaurante: Suprimento de R$ 100.00 - troco"
+    },
+    {
+        "id": "LOG_20260205110209_42",
+        "timestamp": "05/02/2026 11:02:09",
+        "user": "Angelo",
+        "department": "Recepção",
+        "action": "Transação Caixa",
+        "details": "Recepção Restaurante: Sangria de R$ 100.00 - troco"
+    },
+    {
+        "id": "LOG_20260205110802_43",
+        "timestamp": "05/02/2026 11:08:02",
+        "user": "Angelo",
+        "department": "Recepção",
+        "action": "Caixa Fechado",
+        "details": "Caixa Recepção Restaurante fechado por Angelo com saldo final R$ 537.68"
+    },
+    {
+        "id": "LOG_20260205110805_44",
+        "timestamp": "05/02/2026 11:08:05",
+        "user": "Angelo",
+        "department": "Recepção",
+        "action": "Caixa Aberto",
+        "details": "Caixa Recepção Restaurante aberto por Angelo com R$ 0.00"
+    },
+    {
+        "id": "LOG_20260205112150_45",
+        "timestamp": "05/02/2026 11:21:50",
+        "user": "Angelo",
+        "department": "Recepção",
+        "action": "Pagamento Recebido",
+        "details": "Quarto 11: R$ 172.36 via creditomirapraiarede"
+    },
+    {
+        "id": "LOG_20260205112206_46",
+        "timestamp": "05/02/2026 11:22:06",
+        "user": "Angelo",
+        "department": "Recepção",
+        "action": "Transação Caixa",
+        "details": "Recepção Restaurante: Suprimento de R$ 100.00 - teste"
+    },
+    {
+        "id": "LOG_20260205143129_47",
+        "timestamp": "05/02/2026 14:31:29",
+        "user": "Angelo",
+        "department": "Recepção",
+        "action": "Pagamento Recebido",
+        "details": "Quarto 22: R$ 5.00 via creditomirapraiarede"
+    },
+    {
+        "id": "LOG_20260205152607_48",
+        "timestamp": "05/02/2026 15:26:07",
+        "user": "Angelo",
+        "department": "Recepção",
+        "action": "Baixa de Conta",
+        "details": "Conta do Quarto 25 fechada por Angelo. Total: R$ 221.10. Pagamentos: Credito Grasi (R$ 100.00), Credito Angelo (R$ 121.10)"
+    },
+    {
+        "id": "LOG_20260205153247_49",
+        "timestamp": "05/02/2026 15:32:47",
+        "user": "Angelo",
+        "department": "Recepção",
+        "action": "Caixa Fechado",
+        "details": "Caixa Recepção Restaurante fechado por Angelo com saldo final R$ 1588.73"
+    },
+    {
+        "id": "LOG_20260205153248_50",
+        "timestamp": "05/02/2026 15:32:48",
+        "user": "Angelo",
+        "department": "Recepção",
+        "action": "Caixa Aberto",
+        "details": "Caixa Recepção Restaurante aberto por Angelo com R$ 0.00"
+    },
+    {
+        "id": "LOG_20260205181919_51",
+        "timestamp": "05/02/2026 18:19:19",
+        "user": "Tester",
+        "department": "Recepção",
+        "action": "Baixa de Conta",
+        "details": "Conta do Quarto 101 fechada por Tester. Total: R$ 150.00. Pagamentos: Dinheiro (R$ 100.00), Pix (R$ 50.00)"
+    },
+    {
+        "id": "LOG_20260205181919_52",
+        "timestamp": "05/02/2026 18:19:19",
+        "user": "Sistema",
+        "department": "Sistema",
+        "action": "Sync Fiscal",
+        "details": "Recebido registro fiscal ad7b244d-ecaa-4f4f-83bf-a67aac9edc29 via API."
+    },
+    {
+        "id": "LOG_20260205181919_53",
+        "timestamp": "05/02/2026 18:19:19",
+        "user": "Sistema",
+        "department": "Sistema",
+        "action": "Sync Fiscal",
+        "details": "Recebido registro fiscal e355a609-fbbe-49b7-bf59-d57ea9ce74ae via API."
+    },
+    {
+        "id": "LOG_20260205184626_54",
+        "timestamp": "05/02/2026 18:46:26",
+        "user": "Tester",
+        "department": "Recepção",
+        "action": "Baixa de Conta",
+        "details": "Conta do Quarto 101 fechada por Tester. Total: R$ 150.00. Pagamentos: Dinheiro (R$ 100.00), Pix (R$ 50.00)"
+    },
+    {
+        "id": "LOG_20260205184626_55",
+        "timestamp": "05/02/2026 18:46:26",
+        "user": "Sistema",
+        "department": "Sistema",
+        "action": "Sync Fiscal",
+        "details": "Recebido registro fiscal 0e0f7561-a3e5-4f89-91af-e5cf288ded51 via API."
+    },
+    {
+        "id": "LOG_20260205184626_56",
+        "timestamp": "05/02/2026 18:46:26",
+        "user": "Sistema",
+        "department": "Sistema",
+        "action": "Sync Fiscal",
+        "details": "Recebido registro fiscal 1f1e7f5b-4dab-4c2b-b67d-dc03c83e89cc via API."
+    },
+    {
+        "id": "LOG_20260205201531_57",
+        "timestamp": "05/02/2026 20:15:31",
+        "user": "Tester",
+        "department": "Recepção",
+        "action": "Baixa de Conta",
+        "details": "Conta do Quarto 101 fechada por Tester. Total: R$ 150.00. Pagamentos: Dinheiro (R$ 100.00), Pix (R$ 50.00)"
+    },
+    {
+        "id": "LOG_20260205201531_58",
+        "timestamp": "05/02/2026 20:15:31",
+        "user": "Sistema",
+        "department": "Sistema",
+        "action": "Sync Fiscal",
+        "details": "Recebido registro fiscal 201d89b9-3ab9-481f-8123-caf928c55c76 via API."
+    },
+    {
+        "id": "LOG_20260205201531_59",
+        "timestamp": "05/02/2026 20:15:31",
+        "user": "Sistema",
+        "department": "Sistema",
+        "action": "Sync Fiscal",
+        "details": "Recebido registro fiscal daabb6b1-2f1b-4cb9-985b-c46a2fdc150a via API."
+    },
+    {
+        "id": "LOG_20260205203118_60",
+        "timestamp": "05/02/2026 20:31:18",
+        "user": "Tester",
+        "department": "Recepção",
+        "action": "Baixa de Conta",
+        "details": "Conta do Quarto 101 fechada por Tester. Total: R$ 150.00. Pagamentos: Dinheiro (R$ 100.00), Pix (R$ 50.00)"
+    },
+    {
+        "id": "LOG_20260205203118_61",
+        "timestamp": "05/02/2026 20:31:18",
+        "user": "Sistema",
+        "department": "Sistema",
+        "action": "Sync Fiscal",
+        "details": "Recebido registro fiscal fc7c4831-8dd5-42bd-84a7-e2a28b3e1f3e via API."
+    },
+    {
+        "id": "LOG_20260205203118_62",
+        "timestamp": "05/02/2026 20:31:18",
+        "user": "Sistema",
+        "department": "Sistema",
+        "action": "Sync Fiscal",
+        "details": "Recebido registro fiscal 5cab5732-a5c8-4095-9675-801b53b16a5d via API."
+    },
+    {
+        "id": "LOG_20260205203619_63",
+        "timestamp": "05/02/2026 20:36:19",
+        "user": "Tester",
+        "department": "Recepção",
+        "action": "Baixa de Conta",
+        "details": "Conta do Quarto 101 fechada por Tester. Total: R$ 150.00. Pagamentos: Dinheiro (R$ 100.00), Pix (R$ 50.00)"
+    },
+    {
+        "id": "LOG_20260205203619_64",
+        "timestamp": "05/02/2026 20:36:19",
+        "user": "Sistema",
+        "department": "Sistema",
+        "action": "Sync Fiscal",
+        "details": "Recebido registro fiscal 34fdb63a-bf03-49c9-a0d0-f7518b50ae31 via API."
+    },
+    {
+        "id": "LOG_20260205203619_65",
+        "timestamp": "05/02/2026 20:36:19",
+        "user": "Sistema",
+        "department": "Sistema",
+        "action": "Sync Fiscal",
+        "details": "Recebido registro fiscal 1d95d44b-3439-4eaa-b559-6af70f6179b2 via API."
+    },
+    {
+        "id": "LOG_20260205204115_66",
+        "timestamp": "05/02/2026 20:41:15",
+        "user": "Tester",
+        "department": "Recepção",
+        "action": "Baixa de Conta",
+        "details": "Conta do Quarto 101 fechada por Tester. Total: R$ 150.00. Pagamentos: Dinheiro (R$ 100.00), Pix (R$ 50.00)"
+    },
+    {
+        "id": "LOG_20260205204115_67",
+        "timestamp": "05/02/2026 20:41:15",
+        "user": "Sistema",
+        "department": "Sistema",
+        "action": "Sync Fiscal",
+        "details": "Recebido registro fiscal fe46d46e-fbeb-4eee-8f1b-d8eb49b88f99 via API."
+    },
+    {
+        "id": "LOG_20260205204115_68",
+        "timestamp": "05/02/2026 20:41:15",
+        "user": "Sistema",
+        "department": "Sistema",
+        "action": "Sync Fiscal",
+        "details": "Recebido registro fiscal f5eb0362-a840-4533-8f2f-4eb023702de3 via API."
+    },
+    {
+        "id": "LOG_20260205204508_69",
+        "timestamp": "05/02/2026 20:45:08",
+        "user": "Tester",
+        "department": "Recepção",
+        "action": "Baixa de Conta",
+        "details": "Conta do Quarto 101 fechada por Tester. Total: R$ 150.00. Pagamentos: Dinheiro (R$ 100.00), Pix (R$ 50.00)"
+    },
+    {
+        "id": "LOG_20260205204508_70",
+        "timestamp": "05/02/2026 20:45:08",
+        "user": "Sistema",
+        "department": "Sistema",
+        "action": "Sync Fiscal",
+        "details": "Recebido registro fiscal 997bff75-8b01-4378-9d8e-f4255f444942 via API."
+    },
+    {
+        "id": "LOG_20260205204508_71",
+        "timestamp": "05/02/2026 20:45:08",
+        "user": "Sistema",
+        "department": "Sistema",
+        "action": "Sync Fiscal",
+        "details": "Recebido registro fiscal 26300e91-78c1-46bc-9b26-9a70d59671d4 via API."
+    },
+    {
+        "id": "LOG_20260205210450_72",
+        "timestamp": "05/02/2026 21:04:50",
+        "user": "Tester",
+        "department": "Recepção",
+        "action": "Baixa de Conta",
+        "details": "Conta do Quarto 101 fechada por Tester. Total: R$ 150.00. Pagamentos: Dinheiro (R$ 100.00), Pix (R$ 50.00)"
+    },
+    {
+        "id": "LOG_20260205210450_73",
+        "timestamp": "05/02/2026 21:04:50",
+        "user": "Sistema",
+        "department": "Sistema",
+        "action": "Sync Fiscal",
+        "details": "Recebido registro fiscal 2f9862a9-9d32-4532-85f8-55cec3b7d9ea via API."
+    },
+    {
+        "id": "LOG_20260205210450_74",
+        "timestamp": "05/02/2026 21:04:50",
+        "user": "Sistema",
+        "department": "Sistema",
+        "action": "Sync Fiscal",
+        "details": "Recebido registro fiscal db6d7a5f-fe62-4bc9-8f40-800b7336ed0f via API."
+    },
+    {
+        "id": "LOG_20260205210630_75",
+        "timestamp": "05/02/2026 21:06:30",
+        "user": "Tester",
+        "department": "Recepção",
+        "action": "Baixa de Conta",
+        "details": "Conta do Quarto 101 fechada por Tester. Total: R$ 150.00. Pagamentos: Dinheiro (R$ 100.00), Pix (R$ 50.00)"
+    },
+    {
+        "id": "LOG_20260205210630_76",
+        "timestamp": "05/02/2026 21:06:30",
+        "user": "Sistema",
+        "department": "Sistema",
+        "action": "Sync Fiscal",
+        "details": "Recebido registro fiscal ebab4e83-1e0e-4aac-9e1a-06091a7c2c69 via API."
+    },
+    {
+        "id": "LOG_20260205210630_77",
+        "timestamp": "05/02/2026 21:06:30",
+        "user": "Sistema",
+        "department": "Sistema",
+        "action": "Sync Fiscal",
+        "details": "Recebido registro fiscal f4053af3-47f1-464f-983f-bd9099a3f0b3 via API."
+    },
+    {
+        "id": "LOG_20260205210700_78",
+        "timestamp": "05/02/2026 21:07:00",
+        "user": "Tester",
+        "department": "Recepção",
+        "action": "Baixa de Conta",
+        "details": "Conta do Quarto 101 fechada por Tester. Total: R$ 150.00. Pagamentos: Dinheiro (R$ 100.00), Pix (R$ 50.00)"
+    },
+    {
+        "id": "LOG_20260205210700_79",
+        "timestamp": "05/02/2026 21:07:00",
+        "user": "Sistema",
+        "department": "Sistema",
+        "action": "Sync Fiscal",
+        "details": "Recebido registro fiscal 6e46fdae-6ed6-4775-85f6-e519875b37d9 via API."
+    },
+    {
+        "id": "LOG_20260205210700_80",
+        "timestamp": "05/02/2026 21:07:00",
+        "user": "Sistema",
+        "department": "Sistema",
+        "action": "Sync Fiscal",
+        "details": "Recebido registro fiscal 6d0bde40-fec3-4213-a28c-2d66206c7897 via API."
+    }
+]

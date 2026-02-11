@@ -1,0 +1,4098 @@
+[
+    {
+        "id": "LOG_20260125080633_0",
+        "timestamp": "25/01/2026 08:06:33",
+        "user": "jose.silva",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 99 aberta para 1 adultos (passante). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125081224_1",
+        "timestamp": "25/01/2026 08:12:24",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 90 aberta para 1 adultos (hospede). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125081232_2",
+        "timestamp": "25/01/2026 08:12:32",
+        "user": "jose.silva",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 99: 3 itens. Garçom: jose.silva"
+    },
+    {
+        "id": "LOG_20260125081359_3",
+        "timestamp": "25/01/2026 08:13:59",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 90: 1 itens. Garçom: guilherme"
+    },
+    {
+        "id": "LOG_20260125081812_4",
+        "timestamp": "25/01/2026 08:18:12",
+        "user": "jose.silva",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 90: 2 itens. Garçom: jose.silva"
+    },
+    {
+        "id": "LOG_20260125082410_5",
+        "timestamp": "25/01/2026 08:24:10",
+        "user": "adailton",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 43 aberta para 1 adultos (hospede). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125082728_6",
+        "timestamp": "25/01/2026 08:27:28",
+        "user": "jose.silva",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 90: 1 itens. Garçom: jose.silva"
+    },
+    {
+        "id": "LOG_20260125082957_7",
+        "timestamp": "25/01/2026 08:29:57",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 60 aberta para 1 adultos (passante). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125083038_8",
+        "timestamp": "25/01/2026 08:30:38",
+        "user": "erique",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 54 aberta para 2 adultos (hospede). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125085159_9",
+        "timestamp": "25/01/2026 08:51:59",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Mesa Transferida",
+        "details": "Transferência da Mesa 43 para Mesa 36"
+    },
+    {
+        "id": "LOG_20260125090750_10",
+        "timestamp": "25/01/2026 09:07:50",
+        "user": "adailton",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 57 aberta para 1 adultos (hospede). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125090854_11",
+        "timestamp": "25/01/2026 09:08:54",
+        "user": "adailton",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 89 aberta para 1 adultos (hospede). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125091233_12",
+        "timestamp": "25/01/2026 09:12:33",
+        "user": "adailton",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 89: 3 itens. Garçom: adailton"
+    },
+    {
+        "id": "LOG_20260125091813_13",
+        "timestamp": "25/01/2026 09:18:13",
+        "user": "adailton",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 53 aberta para 1 adultos (hospede). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125092059_14",
+        "timestamp": "25/01/2026 09:20:59",
+        "user": "adailton",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 53: 4 itens. Garçom: adailton"
+    },
+    {
+        "id": "LOG_20260125093707_15",
+        "timestamp": "25/01/2026 09:37:07",
+        "user": "adailton",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa FUNC_adailton: 3 itens. Garçom: adailton"
+    },
+    {
+        "id": "LOG_20260125105229_16",
+        "timestamp": "25/01/2026 10:52:29",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Mesa Transferida",
+        "details": "Transferência da Mesa 53 para Mesa 36"
+    },
+    {
+        "id": "LOG_20260125105253_17",
+        "timestamp": "25/01/2026 10:52:53",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Mesa Transferida",
+        "details": "Transferência da Mesa 89 para Mesa 36"
+    },
+    {
+        "id": "LOG_20260125105312_18",
+        "timestamp": "25/01/2026 10:53:12",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Mesa Transferida",
+        "details": "Transferência da Mesa 99 para Mesa 36"
+    },
+    {
+        "id": "LOG_20260125105327_19",
+        "timestamp": "25/01/2026 10:53:27",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Mesa Transferida",
+        "details": "Transferência da Mesa 90 para Mesa 36"
+    },
+    {
+        "id": "LOG_20260125114214_20",
+        "timestamp": "25/01/2026 11:42:14",
+        "user": "jose.silva",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 40 aberta para 1 adultos (passante). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125114346_21",
+        "timestamp": "25/01/2026 11:43:46",
+        "user": "jose.silva",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 40: 1 itens. Garçom: jose.silva"
+    },
+    {
+        "id": "LOG_20260125114854_22",
+        "timestamp": "25/01/2026 11:48:54",
+        "user": "jose.silva",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 41 aberta para 1 adultos (passante). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125114959_23",
+        "timestamp": "25/01/2026 11:49:59",
+        "user": "jose.silva",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 41: 2 itens. Garçom: jose.silva"
+    },
+    {
+        "id": "LOG_20260125115612_24",
+        "timestamp": "25/01/2026 11:56:12",
+        "user": "jose.silva",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 73 aberta para 1 adultos (hospede). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125115657_25",
+        "timestamp": "25/01/2026 11:56:57",
+        "user": "jose.silva",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 73: 2 itens. Garçom: jose.silva"
+    },
+    {
+        "id": "LOG_20260125120055_26",
+        "timestamp": "25/01/2026 12:00:55",
+        "user": "jose.silva",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 44 aberta para 1 adultos (passante). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125120412_27",
+        "timestamp": "25/01/2026 12:04:12",
+        "user": "jose.silva",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 44: 4 itens. Garçom: jose.silva"
+    },
+    {
+        "id": "LOG_20260125121359_28",
+        "timestamp": "25/01/2026 12:13:59",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 93 aberta para 2 adultos (passante). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125121458_29",
+        "timestamp": "25/01/2026 12:14:58",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 93: 1 itens. Garçom: guilherme"
+    },
+    {
+        "id": "LOG_20260125121554_30",
+        "timestamp": "25/01/2026 12:15:54",
+        "user": "jose.silva",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 44: 1 itens. Garçom: jose.silva"
+    },
+    {
+        "id": "LOG_20260125121558_31",
+        "timestamp": "25/01/2026 12:15:58",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 93: 1 itens. Garçom: guilherme"
+    },
+    {
+        "id": "LOG_20260125122029_32",
+        "timestamp": "25/01/2026 12:20:29",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 93: 1 itens. Garçom: guilherme"
+    },
+    {
+        "id": "LOG_20260125122035_33",
+        "timestamp": "25/01/2026 12:20:35",
+        "user": "Angelo",
+        "department": "",
+        "action": "Estoque",
+        "details": "Ajuste manual de estoque para SImples: De 0.0 para 20.0. Motivo: ajuste"
+    },
+    {
+        "id": "LOG_20260125123124_34",
+        "timestamp": "25/01/2026 12:31:24",
+        "user": "jose.silva",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 41: 1 itens. Garçom: jose.silva"
+    },
+    {
+        "id": "LOG_20260125123830_35",
+        "timestamp": "25/01/2026 12:38:30",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 93: 1 itens. Garçom: guilherme"
+    },
+    {
+        "id": "LOG_20260125124118_36",
+        "timestamp": "25/01/2026 12:41:18",
+        "user": "Angelo",
+        "department": "",
+        "action": "Mesa Transferida",
+        "details": "Transferência da Mesa 41 para Mesa 45"
+    },
+    {
+        "id": "LOG_20260125124144_37",
+        "timestamp": "25/01/2026 12:41:44",
+        "user": "Angelo",
+        "department": "",
+        "action": "Mesa Cancelada",
+        "details": "Mesa 45 cancelada por Angelo. Itens estornados para o estoque."
+    },
+    {
+        "id": "LOG_20260125124156_38",
+        "timestamp": "25/01/2026 12:41:56",
+        "user": "Angelo",
+        "department": "",
+        "action": "Mesa Transferida",
+        "details": "Transferência da Mesa 41 para Mesa 44"
+    },
+    {
+        "id": "LOG_20260125124417_39",
+        "timestamp": "25/01/2026 12:44:17",
+        "user": "Angelo",
+        "department": "",
+        "action": "Mesa Transferida",
+        "details": "Transferência da Mesa 41 para Mesa 44"
+    },
+    {
+        "id": "LOG_20260125124719_40",
+        "timestamp": "25/01/2026 12:47:19",
+        "user": "Angelo",
+        "department": "",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 41: 1 itens. Garçom: Angelo"
+    },
+    {
+        "id": "LOG_20260125124748_41",
+        "timestamp": "25/01/2026 12:47:48",
+        "user": "Angelo",
+        "department": "",
+        "action": "Item Removido",
+        "details": "Mesa 41: 1.0x Tapioca (Escolha o Sabor até 3 opçoes) (removido por Angelo)"
+    },
+    {
+        "id": "LOG_20260125125528_42",
+        "timestamp": "25/01/2026 12:55:28",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 98 aberta para 2 adultos (hospede). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125125547_43",
+        "timestamp": "25/01/2026 12:55:47",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 98: 1 itens. Garçom: guilherme"
+    },
+    {
+        "id": "LOG_20260125125610_44",
+        "timestamp": "25/01/2026 12:56:10",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 98: 1 itens. Garçom: guilherme"
+    },
+    {
+        "id": "LOG_20260125125945_45",
+        "timestamp": "25/01/2026 12:59:45",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 41: 1 itens. Garçom: guilherme"
+    },
+    {
+        "id": "LOG_20260125130202_46",
+        "timestamp": "25/01/2026 13:02:02",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 44: 1 itens. Garçom: guilherme"
+    },
+    {
+        "id": "LOG_20260125130223_47",
+        "timestamp": "25/01/2026 13:02:23",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 44: 2 itens. Garçom: guilherme"
+    },
+    {
+        "id": "LOG_20260125130251_48",
+        "timestamp": "25/01/2026 13:02:51",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 44: 1 itens. Garçom: guilherme"
+    },
+    {
+        "id": "LOG_20260125130420_49",
+        "timestamp": "25/01/2026 13:04:20",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 40: 1 itens. Garçom: guilherme"
+    },
+    {
+        "id": "LOG_20260125130436_50",
+        "timestamp": "25/01/2026 13:04:36",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 40: 1 itens. Garçom: guilherme"
+    },
+    {
+        "id": "LOG_20260125130511_51",
+        "timestamp": "25/01/2026 13:05:11",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 40: 1 itens. Garçom: guilherme"
+    },
+    {
+        "id": "LOG_20260125130542_52",
+        "timestamp": "25/01/2026 13:05:42",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 40: 1 itens. Garçom: guilherme"
+    },
+    {
+        "id": "LOG_20260125130549_53",
+        "timestamp": "25/01/2026 13:05:49",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 61 aberta para 3 adultos (passante). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125130605_54",
+        "timestamp": "25/01/2026 13:06:05",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 40: 1 itens. Garçom: guilherme"
+    },
+    {
+        "id": "LOG_20260125130701_55",
+        "timestamp": "25/01/2026 13:07:01",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 42 aberta para 2 adultos (hospede). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125130725_56",
+        "timestamp": "25/01/2026 13:07:25",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 42: 1 itens. Garçom: guilherme"
+    },
+    {
+        "id": "LOG_20260125130745_57",
+        "timestamp": "25/01/2026 13:07:45",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 42: 1 itens. Garçom: guilherme"
+    },
+    {
+        "id": "LOG_20260125130926_58",
+        "timestamp": "25/01/2026 13:09:26",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 55 aberta para 5 adultos (passante). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125131117_59",
+        "timestamp": "25/01/2026 13:11:17",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 55: 2 itens. Garçom: filipe"
+    },
+    {
+        "id": "LOG_20260125131133_60",
+        "timestamp": "25/01/2026 13:11:33",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 45 aberta para 1 adultos (hospede). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125131200_61",
+        "timestamp": "25/01/2026 13:12:00",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 45: 1 itens. Garçom: guilherme"
+    },
+    {
+        "id": "LOG_20260125131259_62",
+        "timestamp": "25/01/2026 13:12:59",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 45: 1 itens. Garçom: guilherme"
+    },
+    {
+        "id": "LOG_20260125131304_63",
+        "timestamp": "25/01/2026 13:13:04",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 59 aberta para 2 adultos (hospede). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125131333_64",
+        "timestamp": "25/01/2026 13:13:33",
+        "user": "adailton",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 41 puxada por adailton"
+    },
+    {
+        "id": "LOG_20260125131405_65",
+        "timestamp": "25/01/2026 13:14:05",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 61: 3 itens. Garçom: welington"
+    },
+    {
+        "id": "LOG_20260125131440_66",
+        "timestamp": "25/01/2026 13:14:40",
+        "user": "adailton",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 44: 1 itens. Garçom: adailton"
+    },
+    {
+        "id": "LOG_20260125131604_67",
+        "timestamp": "25/01/2026 13:16:04",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 93 puxada por guilherme"
+    },
+    {
+        "id": "LOG_20260125131710_68",
+        "timestamp": "25/01/2026 13:17:10",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 59: 2 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125131734_69",
+        "timestamp": "25/01/2026 13:17:34",
+        "user": "adailton",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 40: 1 itens. Garçom: adailton"
+    },
+    {
+        "id": "LOG_20260125131933_70",
+        "timestamp": "25/01/2026 13:19:33",
+        "user": "adailton",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 54: 2 itens. Garçom: adailton"
+    },
+    {
+        "id": "LOG_20260125132001_71",
+        "timestamp": "25/01/2026 13:20:01",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 55: 6 itens. Garçom: filipe"
+    },
+    {
+        "id": "LOG_20260125132101_72",
+        "timestamp": "25/01/2026 13:21:01",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 58 aberta para 3 adultos (hospede). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125132138_73",
+        "timestamp": "25/01/2026 13:21:38",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 58: 1 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125132242_74",
+        "timestamp": "25/01/2026 13:22:42",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 58: 2 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125132340_75",
+        "timestamp": "25/01/2026 13:23:40",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 98: 1 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125132604_76",
+        "timestamp": "25/01/2026 13:26:04",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 56 aberta para 2 adultos (hospede). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125132610_77",
+        "timestamp": "25/01/2026 13:26:10",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Conta Fechada",
+        "details": "Mesa 41 fechada. Total: R$ 186.23 (Múltiplos pagamentos)"
+    },
+    {
+        "id": "LOG_20260125132739_78",
+        "timestamp": "25/01/2026 13:27:39",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Conta Fechada",
+        "details": "Mesa 93 fechada. Total: R$ 322.72 (Múltiplos pagamentos)"
+    },
+    {
+        "id": "LOG_20260125132939_79",
+        "timestamp": "25/01/2026 13:29:39",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 74 aberta para 2 adultos (passante). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125132941_80",
+        "timestamp": "25/01/2026 13:29:41",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 56: 7 itens. Garçom: filipe"
+    },
+    {
+        "id": "LOG_20260125133213_81",
+        "timestamp": "25/01/2026 13:32:13",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 53 aberta para 3 adultos (passante). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125133335_82",
+        "timestamp": "25/01/2026 13:33:35",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 74 aberta para 2 adultos (hospede). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125133631_83",
+        "timestamp": "25/01/2026 13:36:31",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 40: 1 itens. Garçom: carlos"
+    },
+    {
+        "id": "LOG_20260125133721_84",
+        "timestamp": "25/01/2026 13:37:21",
+        "user": "adailton",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 55: 1 itens. Garçom: adailton"
+    },
+    {
+        "id": "LOG_20260125133857_85",
+        "timestamp": "25/01/2026 13:38:57",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 74: 3 itens. Garçom: welington"
+    },
+    {
+        "id": "LOG_20260125133930_86",
+        "timestamp": "25/01/2026 13:39:30",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 53: 7 itens. Garçom: filipe"
+    },
+    {
+        "id": "LOG_20260125134142_87",
+        "timestamp": "25/01/2026 13:41:42",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 47 aberta para 5 adultos (passante). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125134319_88",
+        "timestamp": "25/01/2026 13:43:19",
+        "user": "Angelo",
+        "department": "",
+        "action": "Mesa Aberta",
+        "details": "Mesa 41 aberta para 1 adultos (passante). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125134349_89",
+        "timestamp": "25/01/2026 13:43:49",
+        "user": "adailton",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 44: 1 itens. Garçom: adailton"
+    },
+    {
+        "id": "LOG_20260125134536_90",
+        "timestamp": "25/01/2026 13:45:36",
+        "user": "adailton",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 40: 1 itens. Garçom: adailton"
+    },
+    {
+        "id": "LOG_20260125134537_91",
+        "timestamp": "25/01/2026 13:45:37",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 54: 3 itens. Garçom: filipe"
+    },
+    {
+        "id": "LOG_20260125134624_92",
+        "timestamp": "25/01/2026 13:46:24",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 98 puxada por filipe"
+    },
+    {
+        "id": "LOG_20260125134645_93",
+        "timestamp": "25/01/2026 13:46:45",
+        "user": "adailton",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 44 puxada por adailton"
+    },
+    {
+        "id": "LOG_20260125134832_94",
+        "timestamp": "25/01/2026 13:48:32",
+        "user": "adailton",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 45: 1 itens. Garçom: adailton"
+    },
+    {
+        "id": "LOG_20260125134932_95",
+        "timestamp": "25/01/2026 13:49:32",
+        "user": "adailton",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 45: 1 itens. Garçom: adailton"
+    },
+    {
+        "id": "LOG_20260125135138_96",
+        "timestamp": "25/01/2026 13:51:38",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 47: 9 itens. Garçom: welington"
+    },
+    {
+        "id": "LOG_20260125135144_97",
+        "timestamp": "25/01/2026 13:51:44",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Mesa Reaberta",
+        "details": "Trava de pedidos removida da Mesa 44 por filipe"
+    },
+    {
+        "id": "LOG_20260125135144_98",
+        "timestamp": "25/01/2026 13:51:44",
+        "user": "adailton",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 42: 2 itens. Garçom: adailton"
+    },
+    {
+        "id": "LOG_20260125135154_99",
+        "timestamp": "25/01/2026 13:51:54",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Item Removido",
+        "details": "Mesa 44: 1.0x Heineken Long Neck (removido por filipe)"
+    },
+    {
+        "id": "LOG_20260125135203_100",
+        "timestamp": "25/01/2026 13:52:03",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Mesa Reaberta",
+        "details": "Trava de pedidos removida da Mesa 44 por filipe"
+    },
+    {
+        "id": "LOG_20260125135211_101",
+        "timestamp": "25/01/2026 13:52:11",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 44 puxada por filipe"
+    },
+    {
+        "id": "LOG_20260125135358_102",
+        "timestamp": "25/01/2026 13:53:58",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Item Removido",
+        "details": "Mesa 98: 1.0x Corona Long Neck (removido por carlos)"
+    },
+    {
+        "id": "LOG_20260125135402_103",
+        "timestamp": "25/01/2026 13:54:02",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Item Removido",
+        "details": "Mesa 98: 1.0x Cupim na telha (2 Pessoas) (removido por carlos)"
+    },
+    {
+        "id": "LOG_20260125135405_104",
+        "timestamp": "25/01/2026 13:54:05",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Item Removido",
+        "details": "Mesa 98: 1.0x Coca Cola Zero 350ml (removido por carlos)"
+    },
+    {
+        "id": "LOG_20260125135410_105",
+        "timestamp": "25/01/2026 13:54:10",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Mesa Reaberta",
+        "details": "Trava de pedidos removida da Mesa 44 por filipe"
+    },
+    {
+        "id": "LOG_20260125135411_106",
+        "timestamp": "25/01/2026 13:54:11",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Conta Fechada",
+        "details": "Mesa 98 fechada. Total: R$ 0.00 (Múltiplos pagamentos)"
+    },
+    {
+        "id": "LOG_20260125135418_107",
+        "timestamp": "25/01/2026 13:54:18",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Item Removido",
+        "details": "Mesa 44: 1.0x Caldo (removido por filipe)"
+    },
+    {
+        "id": "LOG_20260125135419_108",
+        "timestamp": "25/01/2026 13:54:19",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 44 puxada por filipe"
+    },
+    {
+        "id": "LOG_20260125135436_109",
+        "timestamp": "25/01/2026 13:54:36",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 47: 2 itens. Garçom: welington"
+    },
+    {
+        "id": "LOG_20260125135550_110",
+        "timestamp": "25/01/2026 13:55:50",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Item Removido",
+        "details": "Mesa 47: 1.0x Dadinho de Queijo Coalho ( 4 Uni. ) (removido por filipe)"
+    },
+    {
+        "id": "LOG_20260125135639_111",
+        "timestamp": "25/01/2026 13:56:39",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 58: 6 itens. Garçom: carlos"
+    },
+    {
+        "id": "LOG_20260125135735_112",
+        "timestamp": "25/01/2026 13:57:35",
+        "user": "adailton",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 55: 1 itens. Garçom: adailton"
+    },
+    {
+        "id": "LOG_20260125135737_113",
+        "timestamp": "25/01/2026 13:57:37",
+        "user": "adailton",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 55 puxada por adailton"
+    },
+    {
+        "id": "LOG_20260125140107_114",
+        "timestamp": "25/01/2026 14:01:07",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 99 aberta para 2 adultos (hospede). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125140432_115",
+        "timestamp": "25/01/2026 14:04:32",
+        "user": "adailton",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 56: 2 itens. Garçom: adailton"
+    },
+    {
+        "id": "LOG_20260125140509_116",
+        "timestamp": "25/01/2026 14:05:09",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 58: 1 itens. Garçom: welington"
+    },
+    {
+        "id": "LOG_20260125140844_117",
+        "timestamp": "25/01/2026 14:08:44",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Conta Fechada",
+        "details": "Mesa 44 fechada. Total: R$ 199.21 (Múltiplos pagamentos)"
+    },
+    {
+        "id": "LOG_20260125140933_118",
+        "timestamp": "25/01/2026 14:09:33",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 44 aberta para 2 adultos (passante). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125140935_119",
+        "timestamp": "25/01/2026 14:09:35",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 99: 6 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125141019_120",
+        "timestamp": "25/01/2026 14:10:19",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 99: 1 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125141317_121",
+        "timestamp": "25/01/2026 14:13:17",
+        "user": "adailton",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 54: 1 itens. Garçom: adailton"
+    },
+    {
+        "id": "LOG_20260125141509_122",
+        "timestamp": "25/01/2026 14:15:09",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 44: 3 itens. Garçom: welington"
+    },
+    {
+        "id": "LOG_20260125141712_123",
+        "timestamp": "25/01/2026 14:17:12",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Conta Fechada",
+        "details": "Mesa 55 fechada. Total: R$ 376.75 (Múltiplos pagamentos)"
+    },
+    {
+        "id": "LOG_20260125141756_124",
+        "timestamp": "25/01/2026 14:17:56",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 54: 4 itens. Garçom: filipe"
+    },
+    {
+        "id": "LOG_20260125141823_125",
+        "timestamp": "25/01/2026 14:18:23",
+        "user": "adailton",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 40: 2 itens. Garçom: adailton"
+    },
+    {
+        "id": "LOG_20260125141827_126",
+        "timestamp": "25/01/2026 14:18:27",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 47: 1 itens. Garçom: welington"
+    },
+    {
+        "id": "LOG_20260125142038_127",
+        "timestamp": "25/01/2026 14:20:38",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 47 puxada por filipe"
+    },
+    {
+        "id": "LOG_20260125142040_128",
+        "timestamp": "25/01/2026 14:20:40",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Mesa Reaberta",
+        "details": "Trava de pedidos removida da Mesa 47 por filipe"
+    },
+    {
+        "id": "LOG_20260125142055_129",
+        "timestamp": "25/01/2026 14:20:55",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Item Removido",
+        "details": "Mesa 47: 1.0x Filé em Tiras (removido por filipe)"
+    },
+    {
+        "id": "LOG_20260125142151_130",
+        "timestamp": "25/01/2026 14:21:51",
+        "user": "adailton",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 56: 1 itens. Garçom: adailton"
+    },
+    {
+        "id": "LOG_20260125142514_131",
+        "timestamp": "25/01/2026 14:25:14",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 60: 2 itens. Garçom: filipe"
+    },
+    {
+        "id": "LOG_20260125142518_132",
+        "timestamp": "25/01/2026 14:25:18",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 60 puxada por filipe"
+    },
+    {
+        "id": "LOG_20260125142640_133",
+        "timestamp": "25/01/2026 14:26:40",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 94 aberta para 1 adultos (passante). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125142755_134",
+        "timestamp": "25/01/2026 14:27:55",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 94: 1 itens. Garçom: filipe"
+    },
+    {
+        "id": "LOG_20260125142830_135",
+        "timestamp": "25/01/2026 14:28:30",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Item Removido",
+        "details": "Mesa 94: 1.0x Tapioca (Escolha o Sabor até 3 opçoes) (removido por filipe)"
+    },
+    {
+        "id": "LOG_20260125142848_136",
+        "timestamp": "25/01/2026 14:28:48",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Item Removido",
+        "details": "Mesa 60: 1.0x Caipiroska Absolut (Escolha o sabor) (removido por filipe)"
+    },
+    {
+        "id": "LOG_20260125142928_137",
+        "timestamp": "25/01/2026 14:29:28",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Mesa Reaberta",
+        "details": "Trava de pedidos removida da Mesa 60 por filipe"
+    },
+    {
+        "id": "LOG_20260125142933_138",
+        "timestamp": "25/01/2026 14:29:33",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 60 puxada por filipe"
+    },
+    {
+        "id": "LOG_20260125142949_139",
+        "timestamp": "25/01/2026 14:29:49",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Mesa Reaberta",
+        "details": "Trava de pedidos removida da Mesa 60 por filipe"
+    },
+    {
+        "id": "LOG_20260125143014_140",
+        "timestamp": "25/01/2026 14:30:14",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 60: 1 itens. Garçom: filipe"
+    },
+    {
+        "id": "LOG_20260125143020_141",
+        "timestamp": "25/01/2026 14:30:20",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 60 puxada por filipe"
+    },
+    {
+        "id": "LOG_20260125143140_142",
+        "timestamp": "25/01/2026 14:31:40",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 40 puxada por welington"
+    },
+    {
+        "id": "LOG_20260125143254_143",
+        "timestamp": "25/01/2026 14:32:54",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Conta Fechada",
+        "details": "Mesa 60 fechada. Total: R$ 67.98 (Múltiplos pagamentos)"
+    },
+    {
+        "id": "LOG_20260125143641_144",
+        "timestamp": "25/01/2026 14:36:41",
+        "user": "adailton",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 56: 1 itens. Garçom: adailton"
+    },
+    {
+        "id": "LOG_20260125143654_145",
+        "timestamp": "25/01/2026 14:36:54",
+        "user": "jose.silva",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 46 aberta para 1 adultos (passante). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125143706_146",
+        "timestamp": "25/01/2026 14:37:06",
+        "user": "erique",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 54: 1 itens. Garçom: erique"
+    },
+    {
+        "id": "LOG_20260125143918_147",
+        "timestamp": "25/01/2026 14:39:18",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 53: 2 itens. Garçom: welington"
+    },
+    {
+        "id": "LOG_20260125144058_148",
+        "timestamp": "25/01/2026 14:40:58",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 42: 3 itens. Garçom: filipe"
+    },
+    {
+        "id": "LOG_20260125144139_149",
+        "timestamp": "25/01/2026 14:41:39",
+        "user": "jose.silva",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 46: 5 itens. Garçom: jose.silva"
+    },
+    {
+        "id": "LOG_20260125144548_150",
+        "timestamp": "25/01/2026 14:45:48",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 45: 7 itens. Garçom: filipe"
+    },
+    {
+        "id": "LOG_20260125144629_151",
+        "timestamp": "25/01/2026 14:46:29",
+        "user": "Angelo",
+        "department": "",
+        "action": "Mesa Cancelada",
+        "details": "Mesa 94 cancelada por Angelo. Itens estornados para o estoque."
+    },
+    {
+        "id": "LOG_20260125144637_152",
+        "timestamp": "25/01/2026 14:46:37",
+        "user": "Angelo",
+        "department": "",
+        "action": "Mesa Cancelada",
+        "details": "Mesa 85 cancelada por Angelo. Itens estornados para o estoque."
+    },
+    {
+        "id": "LOG_20260125144754_153",
+        "timestamp": "25/01/2026 14:47:54",
+        "user": "Angelo",
+        "department": "",
+        "action": "Item Removido",
+        "details": "Mesa 40: 1.0x Couvert Artistico (som ao vivo ou dj) (removido por Angelo)"
+    },
+    {
+        "id": "LOG_20260125144758_154",
+        "timestamp": "25/01/2026 14:47:58",
+        "user": "Angelo",
+        "department": "",
+        "action": "Item Removido",
+        "details": "Mesa 40: 1.0x Couvert Artistico (som ao vivo ou dj) (removido por Angelo)"
+    },
+    {
+        "id": "LOG_20260125144800_155",
+        "timestamp": "25/01/2026 14:48:00",
+        "user": "Angelo",
+        "department": "",
+        "action": "Mesa Reaberta",
+        "details": "Trava de pedidos removida da Mesa 40 por Angelo"
+    },
+    {
+        "id": "LOG_20260125145104_156",
+        "timestamp": "25/01/2026 14:51:04",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Mesa Transferida",
+        "details": "Transferência da Mesa 46 para Mesa 43"
+    },
+    {
+        "id": "LOG_20260125145238_157",
+        "timestamp": "25/01/2026 14:52:38",
+        "user": "erique",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 73: 1 itens. Garçom: erique"
+    },
+    {
+        "id": "LOG_20260125145411_158",
+        "timestamp": "25/01/2026 14:54:11",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 59: 4 itens. Garçom: filipe"
+    },
+    {
+        "id": "LOG_20260125145600_159",
+        "timestamp": "25/01/2026 14:56:00",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Item Removido",
+        "details": "Mesa 73: 1.0x Vinho Tinto Finca Wayta Malbec Orgânico (removido por filipe)"
+    },
+    {
+        "id": "LOG_20260125145620_160",
+        "timestamp": "25/01/2026 14:56:20",
+        "user": "Angelo",
+        "department": "",
+        "action": "Conta Puxada",
+        "details": "Mesa 40 puxada por Angelo"
+    },
+    {
+        "id": "LOG_20260125145708_161",
+        "timestamp": "25/01/2026 14:57:08",
+        "user": "jose.silva",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 45: 1 itens. Garçom: jose.silva"
+    },
+    {
+        "id": "LOG_20260125145733_162",
+        "timestamp": "25/01/2026 14:57:33",
+        "user": "adailton",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 58: 1 itens. Garçom: adailton"
+    },
+    {
+        "id": "LOG_20260125145926_163",
+        "timestamp": "25/01/2026 14:59:26",
+        "user": "adailton",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 47: 1 itens. Garçom: adailton"
+    },
+    {
+        "id": "LOG_20260125145927_164",
+        "timestamp": "25/01/2026 14:59:27",
+        "user": "erique",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 73: 1 itens. Garçom: erique"
+    },
+    {
+        "id": "LOG_20260125145943_165",
+        "timestamp": "25/01/2026 14:59:43",
+        "user": "adailton",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 47 puxada por adailton"
+    },
+    {
+        "id": "LOG_20260125150207_166",
+        "timestamp": "25/01/2026 15:02:07",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Mesa Reaberta",
+        "details": "Trava de pedidos removida da Mesa 47 por carlos"
+    },
+    {
+        "id": "LOG_20260125150214_167",
+        "timestamp": "25/01/2026 15:02:14",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Conta Puxada",
+        "details": "Mesa 47 puxada por carlos"
+    },
+    {
+        "id": "LOG_20260125150435_168",
+        "timestamp": "25/01/2026 15:04:35",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Mesa Reaberta",
+        "details": "Trava de pedidos removida da Mesa 47 por carlos"
+    },
+    {
+        "id": "LOG_20260125150443_169",
+        "timestamp": "25/01/2026 15:04:43",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Conta Puxada",
+        "details": "Mesa 47 puxada por carlos"
+    },
+    {
+        "id": "LOG_20260125150458_170",
+        "timestamp": "25/01/2026 15:04:58",
+        "user": "adailton",
+        "department": "Serviço",
+        "action": "Mesa Reaberta",
+        "details": "Trava de pedidos removida da Mesa 47 por adailton"
+    },
+    {
+        "id": "LOG_20260125150459_171",
+        "timestamp": "25/01/2026 15:04:59",
+        "user": "adailton",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 47 puxada por adailton"
+    },
+    {
+        "id": "LOG_20260125150523_172",
+        "timestamp": "25/01/2026 15:05:23",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Item Removido",
+        "details": "Mesa 47: 1.0x Couvert Artistico (som ao vivo ou dj) (removido por carlos)"
+    },
+    {
+        "id": "LOG_20260125150527_173",
+        "timestamp": "25/01/2026 15:05:27",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Mesa Reaberta",
+        "details": "Trava de pedidos removida da Mesa 47 por carlos"
+    },
+    {
+        "id": "LOG_20260125150536_174",
+        "timestamp": "25/01/2026 15:05:36",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 47: 1 itens. Garçom: carlos"
+    },
+    {
+        "id": "LOG_20260125150555_175",
+        "timestamp": "25/01/2026 15:05:55",
+        "user": "jose.silva",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 43: 1 itens. Garçom: jose.silva"
+    },
+    {
+        "id": "LOG_20260125150600_176",
+        "timestamp": "25/01/2026 15:06:00",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Conta Puxada",
+        "details": "Mesa 47 puxada por carlos"
+    },
+    {
+        "id": "LOG_20260125150617_177",
+        "timestamp": "25/01/2026 15:06:17",
+        "user": "adailton",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa FUNC_adailton puxada por adailton"
+    },
+    {
+        "id": "LOG_20260125150644_178",
+        "timestamp": "25/01/2026 15:06:44",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 99 puxada por jose.santos"
+    },
+    {
+        "id": "LOG_20260125150711_179",
+        "timestamp": "25/01/2026 15:07:11",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Item Removido",
+        "details": "Mesa 45: 1.0x Agua com Gás 275ml (removido por carlos)"
+    },
+    {
+        "id": "LOG_20260125150719_180",
+        "timestamp": "25/01/2026 15:07:19",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Item Removido",
+        "details": "Mesa 45: 1.0x Agua com Gás 275ml (removido por carlos)"
+    },
+    {
+        "id": "LOG_20260125150724_181",
+        "timestamp": "25/01/2026 15:07:24",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 73: 4 itens. Garçom: filipe"
+    },
+    {
+        "id": "LOG_20260125150746_182",
+        "timestamp": "25/01/2026 15:07:46",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 45: 1 itens. Garçom: carlos"
+    },
+    {
+        "id": "LOG_20260125150943_183",
+        "timestamp": "25/01/2026 15:09:43",
+        "user": "adailton",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 42: 2 itens. Garçom: adailton"
+    },
+    {
+        "id": "LOG_20260125150944_184",
+        "timestamp": "25/01/2026 15:09:44",
+        "user": "Angelo",
+        "department": "",
+        "action": "Mesa Reaberta",
+        "details": "Trava de pedidos removida da Mesa 47 por Angelo"
+    },
+    {
+        "id": "LOG_20260125150946_185",
+        "timestamp": "25/01/2026 15:09:46",
+        "user": "Angelo",
+        "department": "",
+        "action": "Conta Puxada",
+        "details": "Mesa 47 puxada por Angelo"
+    },
+    {
+        "id": "LOG_20260125151029_186",
+        "timestamp": "25/01/2026 15:10:29",
+        "user": "adailton",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 56: 1 itens. Garçom: adailton"
+    },
+    {
+        "id": "LOG_20260125151311_187",
+        "timestamp": "25/01/2026 15:13:11",
+        "user": "erique",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 53: 1 itens. Garçom: erique"
+    },
+    {
+        "id": "LOG_20260125151434_188",
+        "timestamp": "25/01/2026 15:14:34",
+        "user": "erique",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 73: 1 itens. Garçom: erique"
+    },
+    {
+        "id": "LOG_20260125151626_189",
+        "timestamp": "25/01/2026 15:16:26",
+        "user": "Angelo",
+        "department": "",
+        "action": "Mesa Reaberta",
+        "details": "Trava de pedidos removida da Mesa 40 por Angelo"
+    },
+    {
+        "id": "LOG_20260125151627_190",
+        "timestamp": "25/01/2026 15:16:27",
+        "user": "Angelo",
+        "department": "",
+        "action": "Conta Puxada",
+        "details": "Mesa 40 puxada por Angelo"
+    },
+    {
+        "id": "LOG_20260125151701_191",
+        "timestamp": "25/01/2026 15:17:01",
+        "user": "erique",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 61: 1 itens. Garçom: erique"
+    },
+    {
+        "id": "LOG_20260125151809_192",
+        "timestamp": "25/01/2026 15:18:09",
+        "user": "Angelo",
+        "department": "",
+        "action": "Mesa Reaberta",
+        "details": "Trava de pedidos removida da Mesa 40 por Angelo"
+    },
+    {
+        "id": "LOG_20260125151810_193",
+        "timestamp": "25/01/2026 15:18:10",
+        "user": "Angelo",
+        "department": "",
+        "action": "Conta Puxada",
+        "details": "Mesa 40 puxada por Angelo"
+    },
+    {
+        "id": "LOG_20260125151850_194",
+        "timestamp": "25/01/2026 15:18:50",
+        "user": "Angelo",
+        "department": "",
+        "action": "Mesa Reaberta",
+        "details": "Trava de pedidos removida da Mesa 40 por Angelo"
+    },
+    {
+        "id": "LOG_20260125151851_195",
+        "timestamp": "25/01/2026 15:18:51",
+        "user": "Angelo",
+        "department": "",
+        "action": "Conta Puxada",
+        "details": "Mesa 40 puxada por Angelo"
+    },
+    {
+        "id": "LOG_20260125152101_196",
+        "timestamp": "25/01/2026 15:21:01",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Conta Puxada",
+        "details": "Mesa 44 puxada por carlos"
+    },
+    {
+        "id": "LOG_20260125152148_197",
+        "timestamp": "25/01/2026 15:21:48",
+        "user": "adailton",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 58: 1 itens. Garçom: adailton"
+    },
+    {
+        "id": "LOG_20260125152248_198",
+        "timestamp": "25/01/2026 15:22:48",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Item Removido",
+        "details": "Mesa 41: 1.0x Couvert Artistico (som ao vivo ou dj) (removido por carlos)"
+    },
+    {
+        "id": "LOG_20260125152251_199",
+        "timestamp": "25/01/2026 15:22:51",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Conta Fechada",
+        "details": "Mesa 41 fechada. Total: R$ 0.00 (Múltiplos pagamentos)"
+    },
+    {
+        "id": "LOG_20260125152321_200",
+        "timestamp": "25/01/2026 15:23:21",
+        "user": "Angelo",
+        "department": "",
+        "action": "Mesa Reaberta",
+        "details": "Trava de pedidos removida da Mesa 40 por Angelo"
+    },
+    {
+        "id": "LOG_20260125152322_201",
+        "timestamp": "25/01/2026 15:23:22",
+        "user": "Angelo",
+        "department": "",
+        "action": "Conta Puxada",
+        "details": "Mesa 40 puxada por Angelo"
+    },
+    {
+        "id": "LOG_20260125152358_202",
+        "timestamp": "25/01/2026 15:23:58",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Item Removido",
+        "details": "Mesa 43: 1.0x Couvert Artistico (som ao vivo ou dj) (removido por carlos)"
+    },
+    {
+        "id": "LOG_20260125152404_203",
+        "timestamp": "25/01/2026 15:24:04",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Item Removido",
+        "details": "Mesa 43: 1.0x Couvert Artistico (som ao vivo ou dj) (removido por carlos)"
+    },
+    {
+        "id": "LOG_20260125152418_204",
+        "timestamp": "25/01/2026 15:24:18",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Item Removido",
+        "details": "Mesa 43: 1.0x Couvert Artistico (som ao vivo ou dj) (removido por carlos)"
+    },
+    {
+        "id": "LOG_20260125152701_205",
+        "timestamp": "25/01/2026 15:27:01",
+        "user": "Angelo",
+        "department": "",
+        "action": "Mesa Reaberta",
+        "details": "Trava de pedidos removida da Mesa 40 por Angelo"
+    },
+    {
+        "id": "LOG_20260125152702_206",
+        "timestamp": "25/01/2026 15:27:02",
+        "user": "Angelo",
+        "department": "",
+        "action": "Conta Puxada",
+        "details": "Mesa 40 puxada por Angelo"
+    },
+    {
+        "id": "LOG_20260125153013_207",
+        "timestamp": "25/01/2026 15:30:13",
+        "user": "Angelo",
+        "department": "",
+        "action": "Mesa Reaberta",
+        "details": "Trava de pedidos removida da Mesa 40 por Angelo"
+    },
+    {
+        "id": "LOG_20260125153013_208",
+        "timestamp": "25/01/2026 15:30:13",
+        "user": "Angelo",
+        "department": "",
+        "action": "Conta Puxada",
+        "details": "Mesa 40 puxada por Angelo"
+    },
+    {
+        "id": "LOG_20260125153037_209",
+        "timestamp": "25/01/2026 15:30:37",
+        "user": "Angelo",
+        "department": "",
+        "action": "Mesa Aberta",
+        "details": "Mesa 88 aberta para 1 adultos (passante). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125153049_210",
+        "timestamp": "25/01/2026 15:30:49",
+        "user": "Angelo",
+        "department": "",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 88: 1 itens. Garçom: Angelo"
+    },
+    {
+        "id": "LOG_20260125153202_211",
+        "timestamp": "25/01/2026 15:32:02",
+        "user": "Angelo",
+        "department": "",
+        "action": "Mesa Reaberta",
+        "details": "Trava de pedidos removida da Mesa 40 por Angelo"
+    },
+    {
+        "id": "LOG_20260125153203_212",
+        "timestamp": "25/01/2026 15:32:03",
+        "user": "Angelo",
+        "department": "",
+        "action": "Conta Puxada",
+        "details": "Mesa 40 puxada por Angelo"
+    },
+    {
+        "id": "LOG_20260125153525_213",
+        "timestamp": "25/01/2026 15:35:25",
+        "user": "erique",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 60 aberta para 1 adultos (passante). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125153748_214",
+        "timestamp": "25/01/2026 15:37:48",
+        "user": "Angelo",
+        "department": "",
+        "action": "Mesa Reaberta",
+        "details": "Trava de pedidos removida da Mesa 40 por Angelo"
+    },
+    {
+        "id": "LOG_20260125153749_215",
+        "timestamp": "25/01/2026 15:37:49",
+        "user": "Angelo",
+        "department": "",
+        "action": "Conta Puxada",
+        "details": "Mesa 40 puxada por Angelo"
+    },
+    {
+        "id": "LOG_20260125153814_216",
+        "timestamp": "25/01/2026 15:38:14",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Conta Fechada",
+        "details": "Mesa 40 fechada. Total: R$ 504.57 (Múltiplos pagamentos)"
+    },
+    {
+        "id": "LOG_20260125153839_217",
+        "timestamp": "25/01/2026 15:38:39",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Item Removido",
+        "details": "Mesa 47: 1.0x Couvert Artistico (som ao vivo ou dj) (removido por carlos)"
+    },
+    {
+        "id": "LOG_20260125153955_218",
+        "timestamp": "25/01/2026 15:39:55",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Mesa Reaberta",
+        "details": "Trava de pedidos removida da Mesa 47 por carlos"
+    },
+    {
+        "id": "LOG_20260125154006_219",
+        "timestamp": "25/01/2026 15:40:06",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 47: 1 itens. Garçom: carlos"
+    },
+    {
+        "id": "LOG_20260125154016_220",
+        "timestamp": "25/01/2026 15:40:16",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Conta Fechada",
+        "details": "Mesa 47 fechada. Total: R$ 658.02 (Múltiplos pagamentos)"
+    },
+    {
+        "id": "LOG_20260125154034_221",
+        "timestamp": "25/01/2026 15:40:34",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Conta Fechada",
+        "details": "Mesa 44 fechada. Total: R$ 228.25 (Múltiplos pagamentos)"
+    },
+    {
+        "id": "LOG_20260125154102_222",
+        "timestamp": "25/01/2026 15:41:02",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Conta Fechada",
+        "details": "Mesa 99 fechada. Total: R$ 506.44 (Múltiplos pagamentos)"
+    },
+    {
+        "id": "LOG_20260125154158_223",
+        "timestamp": "25/01/2026 15:41:58",
+        "user": "erique",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 60: 4 itens. Garçom: erique"
+    },
+    {
+        "id": "LOG_20260125154309_224",
+        "timestamp": "25/01/2026 15:43:09",
+        "user": "jose.silva",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 53: 1 itens. Garçom: jose.silva"
+    },
+    {
+        "id": "LOG_20260125154707_225",
+        "timestamp": "25/01/2026 15:47:07",
+        "user": "erique",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 54: 2 itens. Garçom: erique"
+    },
+    {
+        "id": "LOG_20260125155035_226",
+        "timestamp": "25/01/2026 15:50:35",
+        "user": "jose.silva",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 41 aberta para 1 adultos (passante). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125155101_227",
+        "timestamp": "25/01/2026 15:51:01",
+        "user": "jose.silva",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 41: 1 itens. Garçom: jose.silva"
+    },
+    {
+        "id": "LOG_20260125155929_228",
+        "timestamp": "25/01/2026 15:59:29",
+        "user": "erique",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 73: 1 itens. Garçom: erique"
+    },
+    {
+        "id": "LOG_20260125160144_229",
+        "timestamp": "25/01/2026 16:01:44",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 59 puxada por guilherme"
+    },
+    {
+        "id": "LOG_20260125160446_230",
+        "timestamp": "25/01/2026 16:04:46",
+        "user": "erique",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 73: 1 itens. Garçom: erique"
+    },
+    {
+        "id": "LOG_20260125160539_231",
+        "timestamp": "25/01/2026 16:05:39",
+        "user": "erique",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 55 aberta para 1 adultos (passante). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125160622_232",
+        "timestamp": "25/01/2026 16:06:22",
+        "user": "erique",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 55: 1 itens. Garçom: erique"
+    },
+    {
+        "id": "LOG_20260125160625_233",
+        "timestamp": "25/01/2026 16:06:25",
+        "user": "erique",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 55: 1 itens. Garçom: erique"
+    },
+    {
+        "id": "LOG_20260125160731_234",
+        "timestamp": "25/01/2026 16:07:31",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 54 puxada por guilherme"
+    },
+    {
+        "id": "LOG_20260125160806_235",
+        "timestamp": "25/01/2026 16:08:06",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Conta Fechada",
+        "details": "Mesa 57 fechada. Total: R$ 0.00 (Múltiplos pagamentos)"
+    },
+    {
+        "id": "LOG_20260125160918_236",
+        "timestamp": "25/01/2026 16:09:18",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Mesa Aberta",
+        "details": "Mesa 40 aberta para 2 adultos (hospede). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125160938_237",
+        "timestamp": "25/01/2026 16:09:38",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Mesa Transferida",
+        "details": "Transferência da Mesa 54 para Mesa 40"
+    },
+    {
+        "id": "LOG_20260125161227_238",
+        "timestamp": "25/01/2026 16:12:27",
+        "user": "erique",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 41: 3 itens. Garçom: erique"
+    },
+    {
+        "id": "LOG_20260125161252_239",
+        "timestamp": "25/01/2026 16:12:52",
+        "user": "priscila",
+        "department": "Recepção",
+        "action": "Transferência para Quarto",
+        "details": "Mesa 40 transferida para Quarto 14"
+    },
+    {
+        "id": "LOG_20260125161354_240",
+        "timestamp": "25/01/2026 16:13:54",
+        "user": "erique",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 41: 1 itens. Garçom: erique"
+    },
+    {
+        "id": "LOG_20260125161430_241",
+        "timestamp": "25/01/2026 16:14:30",
+        "user": "erique",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 42 puxada por erique"
+    },
+    {
+        "id": "LOG_20260125161618_242",
+        "timestamp": "25/01/2026 16:16:18",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Item Removido",
+        "details": "Mesa 42: 1.0x Água de Coco (removido por guilherme)"
+    },
+    {
+        "id": "LOG_20260125161626_243",
+        "timestamp": "25/01/2026 16:16:26",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Item Removido",
+        "details": "Mesa 42: 1.0x Coca Cola Zero 350ml (removido por guilherme)"
+    },
+    {
+        "id": "LOG_20260125161631_244",
+        "timestamp": "25/01/2026 16:16:31",
+        "user": "jose.silva",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 43: 1 itens. Garçom: jose.silva"
+    },
+    {
+        "id": "LOG_20260125161635_245",
+        "timestamp": "25/01/2026 16:16:35",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Mesa Reaberta",
+        "details": "Trava de pedidos removida da Mesa 42 por guilherme"
+    },
+    {
+        "id": "LOG_20260125161637_246",
+        "timestamp": "25/01/2026 16:16:37",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 42 puxada por guilherme"
+    },
+    {
+        "id": "LOG_20260125161738_247",
+        "timestamp": "25/01/2026 16:17:38",
+        "user": "priscila",
+        "department": "Recepção",
+        "action": "Transferência para Quarto",
+        "details": "Mesa 59 transferida para Quarto 02"
+    },
+    {
+        "id": "LOG_20260125161855_248",
+        "timestamp": "25/01/2026 16:18:55",
+        "user": "erique",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 55: 1 itens. Garçom: erique"
+    },
+    {
+        "id": "LOG_20260125161941_249",
+        "timestamp": "25/01/2026 16:19:41",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Mesa Transferida",
+        "details": "Transferência da Mesa 73 para Mesa 98"
+    },
+    {
+        "id": "LOG_20260125162024_250",
+        "timestamp": "25/01/2026 16:20:24",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 73 aberta para 2 adultos (hospede). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125162041_251",
+        "timestamp": "25/01/2026 16:20:41",
+        "user": "erique",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 60: 1 itens. Garçom: erique"
+    },
+    {
+        "id": "LOG_20260125162134_252",
+        "timestamp": "25/01/2026 16:21:34",
+        "user": "priscila",
+        "department": "Recepção",
+        "action": "Transferência para Quarto",
+        "details": "Mesa 42 transferida para Quarto 16"
+    },
+    {
+        "id": "LOG_20260125162146_253",
+        "timestamp": "25/01/2026 16:21:46",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Mesa Transferida",
+        "details": "Transferência da Mesa 98 para Mesa 98"
+    },
+    {
+        "id": "LOG_20260125162453_254",
+        "timestamp": "25/01/2026 16:24:53",
+        "user": "erique",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 53 puxada por erique"
+    },
+    {
+        "id": "LOG_20260125162700_255",
+        "timestamp": "25/01/2026 16:27:00",
+        "user": "Angelo",
+        "department": "",
+        "action": "Mesa Aberta",
+        "details": "Mesa 98 aberta para 2 adultos (hospede). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125162717_256",
+        "timestamp": "25/01/2026 16:27:17",
+        "user": "jose.silva",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 55: 1 itens. Garçom: jose.silva"
+    },
+    {
+        "id": "LOG_20260125162912_257",
+        "timestamp": "25/01/2026 16:29:12",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Item Removido",
+        "details": "Mesa 53: 1.0x Caipiroska Absolut (Escolha o sabor) (removido por guilherme)"
+    },
+    {
+        "id": "LOG_20260125162944_258",
+        "timestamp": "25/01/2026 16:29:44",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Item Removido",
+        "details": "Mesa 53: 1.0x Gin Tônica (removido por guilherme)"
+    },
+    {
+        "id": "LOG_20260125162952_259",
+        "timestamp": "25/01/2026 16:29:52",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Mesa Reaberta",
+        "details": "Trava de pedidos removida da Mesa 53 por guilherme"
+    },
+    {
+        "id": "LOG_20260125162953_260",
+        "timestamp": "25/01/2026 16:29:53",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 53 puxada por guilherme"
+    },
+    {
+        "id": "LOG_20260125163012_261",
+        "timestamp": "25/01/2026 16:30:12",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Item Removido",
+        "details": "Mesa 53: 1.0x Caipiroska Absolut (Escolha o sabor) (removido por guilherme)"
+    },
+    {
+        "id": "LOG_20260125163018_262",
+        "timestamp": "25/01/2026 16:30:18",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Mesa Reaberta",
+        "details": "Trava de pedidos removida da Mesa 53 por guilherme"
+    },
+    {
+        "id": "LOG_20260125163019_263",
+        "timestamp": "25/01/2026 16:30:19",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 53 puxada por guilherme"
+    },
+    {
+        "id": "LOG_20260125163151_264",
+        "timestamp": "25/01/2026 16:31:51",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Conta Fechada",
+        "details": "Mesa 45 fechada. Total: R$ 412.28 (Múltiplos pagamentos)"
+    },
+    {
+        "id": "LOG_20260125163219_265",
+        "timestamp": "25/01/2026 16:32:19",
+        "user": "erique",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 55: 1 itens. Garçom: erique"
+    },
+    {
+        "id": "LOG_20260125163245_266",
+        "timestamp": "25/01/2026 16:32:45",
+        "user": "Angelo",
+        "department": "",
+        "action": "Mesa Cancelada",
+        "details": "Mesa 88 cancelada por Angelo. Itens estornados para o estoque."
+    },
+    {
+        "id": "LOG_20260125163252_267",
+        "timestamp": "25/01/2026 16:32:52",
+        "user": "Angelo",
+        "department": "",
+        "action": "Mesa Cancelada",
+        "details": "Mesa 98 cancelada por Angelo. Itens estornados para o estoque."
+    },
+    {
+        "id": "LOG_20260125163336_268",
+        "timestamp": "25/01/2026 16:33:36",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 42 aberta para 2 adultos (passante). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125163356_269",
+        "timestamp": "25/01/2026 16:33:56",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Item Removido",
+        "details": "Mesa 55: 1.0x Stella Artois long neck (Sem Glutém) (removido por guilherme)"
+    },
+    {
+        "id": "LOG_20260125163428_270",
+        "timestamp": "25/01/2026 16:34:28",
+        "user": "jose.silva",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 55: 2 itens. Garçom: jose.silva"
+    },
+    {
+        "id": "LOG_20260125163448_271",
+        "timestamp": "25/01/2026 16:34:48",
+        "user": "jose.silva",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 43 puxada por jose.silva"
+    },
+    {
+        "id": "LOG_20260125163610_272",
+        "timestamp": "25/01/2026 16:36:10",
+        "user": "jose.silva",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 55: 1 itens. Garçom: jose.silva"
+    },
+    {
+        "id": "LOG_20260125163812_273",
+        "timestamp": "25/01/2026 16:38:12",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 42: 2 itens. Garçom: welington"
+    },
+    {
+        "id": "LOG_20260125163812_274",
+        "timestamp": "25/01/2026 16:38:12",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Conta Fechada",
+        "details": "Mesa 53 fechada. Total: R$ 572.99 (Múltiplos pagamentos)"
+    },
+    {
+        "id": "LOG_20260125163950_275",
+        "timestamp": "25/01/2026 16:39:50",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Conta Fechada",
+        "details": "Mesa 43 fechada. Total: R$ 387.20 (Múltiplos pagamentos)"
+    },
+    {
+        "id": "LOG_20260125164128_276",
+        "timestamp": "25/01/2026 16:41:28",
+        "user": "Angelo",
+        "department": "",
+        "action": "Mesa Aberta",
+        "details": "Mesa 50 aberta para 1 adultos (passante). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125164144_277",
+        "timestamp": "25/01/2026 16:41:44",
+        "user": "Angelo",
+        "department": "",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 50: 1 itens. Garçom: Angelo"
+    },
+    {
+        "id": "LOG_20260125164159_278",
+        "timestamp": "25/01/2026 16:41:59",
+        "user": "Angelo",
+        "department": "",
+        "action": "Mesa Transferida",
+        "details": "Transferência da Mesa 50 para Mesa 50"
+    },
+    {
+        "id": "LOG_20260125164214_279",
+        "timestamp": "25/01/2026 16:42:14",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 73: 1 itens. Garçom: welington"
+    },
+    {
+        "id": "LOG_20260125164539_280",
+        "timestamp": "25/01/2026 16:45:39",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 73: 1 itens. Garçom: guilherme"
+    },
+    {
+        "id": "LOG_20260125164622_281",
+        "timestamp": "25/01/2026 16:46:22",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 73: 1 itens. Garçom: guilherme"
+    },
+    {
+        "id": "LOG_20260125164939_282",
+        "timestamp": "25/01/2026 16:49:39",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 58: 3 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125164949_283",
+        "timestamp": "25/01/2026 16:49:49",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 73: 1 itens. Garçom: guilherme"
+    },
+    {
+        "id": "LOG_20260125165155_284",
+        "timestamp": "25/01/2026 16:51:55",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 73: 5 itens. Garçom: guilherme"
+    },
+    {
+        "id": "LOG_20260125165241_285",
+        "timestamp": "25/01/2026 16:52:41",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 54 aberta para 2 adultos (hospede). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125165312_286",
+        "timestamp": "25/01/2026 16:53:12",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 54: 1 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125165515_287",
+        "timestamp": "25/01/2026 16:55:15",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 42: 1 itens. Garçom: welington"
+    },
+    {
+        "id": "LOG_20260125165541_288",
+        "timestamp": "25/01/2026 16:55:41",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 44 aberta para 2 adultos (passante). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125165844_289",
+        "timestamp": "25/01/2026 16:58:44",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 44: 2 itens. Garçom: welington"
+    },
+    {
+        "id": "LOG_20260125165942_290",
+        "timestamp": "25/01/2026 16:59:42",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 54: 1 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125170033_291",
+        "timestamp": "25/01/2026 17:00:33",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Mesa Transferida",
+        "details": "Transferência da Mesa 74 para Mesa 47"
+    },
+    {
+        "id": "LOG_20260125170229_292",
+        "timestamp": "25/01/2026 17:02:29",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 58: 2 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125170400_293",
+        "timestamp": "25/01/2026 17:04:00",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 55: 2 itens. Garçom: welington"
+    },
+    {
+        "id": "LOG_20260125171130_294",
+        "timestamp": "25/01/2026 17:11:30",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 55: 1 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125171253_295",
+        "timestamp": "25/01/2026 17:12:53",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 47: 2 itens. Garçom: welington"
+    },
+    {
+        "id": "LOG_20260125171807_296",
+        "timestamp": "25/01/2026 17:18:07",
+        "user": "guilherme",
+        "department": "Serviço",
+        "action": "Item Removido",
+        "details": "Mesa 47: 1.0x Parmegiana de Camarão (Individual) (removido por guilherme)"
+    },
+    {
+        "id": "LOG_20260125171816_297",
+        "timestamp": "25/01/2026 17:18:16",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 60: 1 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125172212_298",
+        "timestamp": "25/01/2026 17:22:12",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 47: 1 itens. Garçom: welington"
+    },
+    {
+        "id": "LOG_20260125172244_299",
+        "timestamp": "25/01/2026 17:22:44",
+        "user": "bruno",
+        "department": "Recepção",
+        "action": "Mesa Aberta",
+        "details": "Mesa 100 aberta para 2 adultos (hospede). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125172322_300",
+        "timestamp": "25/01/2026 17:23:22",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 41: 2 itens. Garçom: welington"
+    },
+    {
+        "id": "LOG_20260125172651_301",
+        "timestamp": "25/01/2026 17:26:51",
+        "user": "priscila",
+        "department": "Recepção",
+        "action": "Mesa Aberta",
+        "details": "Mesa 84 aberta para 2 adultos (hospede). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125172747_302",
+        "timestamp": "25/01/2026 17:27:47",
+        "user": "priscila",
+        "department": "Recepção",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 84: 2 itens. Garçom: priscila"
+    },
+    {
+        "id": "LOG_20260125172826_303",
+        "timestamp": "25/01/2026 17:28:26",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 58: 1 itens. Garçom: welington"
+    },
+    {
+        "id": "LOG_20260125172959_304",
+        "timestamp": "25/01/2026 17:29:59",
+        "user": "bruno",
+        "department": "Recepção",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 100: 18 itens. Garçom: bruno"
+    },
+    {
+        "id": "LOG_20260125173322_305",
+        "timestamp": "25/01/2026 17:33:22",
+        "user": "andrea",
+        "department": "Governança",
+        "action": "Transferência para Quarto",
+        "details": "Mesa 84 transferida para Quarto 32"
+    },
+    {
+        "id": "LOG_20260125173429_306",
+        "timestamp": "25/01/2026 17:34:29",
+        "user": "bruno",
+        "department": "Recepção",
+        "action": "Transferência para Quarto",
+        "details": "Mesa 100 transferida para Quarto 34"
+    },
+    {
+        "id": "LOG_20260125173702_307",
+        "timestamp": "25/01/2026 17:37:02",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 44: 2 itens. Garçom: filipe"
+    },
+    {
+        "id": "LOG_20260125173841_308",
+        "timestamp": "25/01/2026 17:38:41",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 73 puxada por filipe"
+    },
+    {
+        "id": "LOG_20260125174010_309",
+        "timestamp": "25/01/2026 17:40:10",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Mesa Reaberta",
+        "details": "Trava de pedidos removida da Mesa 73 por filipe"
+    },
+    {
+        "id": "LOG_20260125174016_310",
+        "timestamp": "25/01/2026 17:40:16",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Item Removido",
+        "details": "Mesa 73: 1.0x Vinho Rosé Milani Pinot Grigio (removido por filipe)"
+    },
+    {
+        "id": "LOG_20260125174019_311",
+        "timestamp": "25/01/2026 17:40:19",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 73 puxada por filipe"
+    },
+    {
+        "id": "LOG_20260125174440_312",
+        "timestamp": "25/01/2026 17:44:40",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 55: 1 itens. Garçom: welington"
+    },
+    {
+        "id": "LOG_20260125174501_313",
+        "timestamp": "25/01/2026 17:45:01",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 60 puxada por welington"
+    },
+    {
+        "id": "LOG_20260125174742_314",
+        "timestamp": "25/01/2026 17:47:42",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 42 puxada por welington"
+    },
+    {
+        "id": "LOG_20260125175013_315",
+        "timestamp": "25/01/2026 17:50:13",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 55: 2 itens. Garçom: welington"
+    },
+    {
+        "id": "LOG_20260125175136_316",
+        "timestamp": "25/01/2026 17:51:36",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 55: 2 itens. Garçom: welington"
+    },
+    {
+        "id": "LOG_20260125175320_317",
+        "timestamp": "25/01/2026 17:53:20",
+        "user": "priscila",
+        "department": "Recepção",
+        "action": "Transferência para Quarto",
+        "details": "Mesa 73 transferida para Quarto 17"
+    },
+    {
+        "id": "LOG_20260125175520_318",
+        "timestamp": "25/01/2026 17:55:20",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 44 puxada por welington"
+    },
+    {
+        "id": "LOG_20260125180043_319",
+        "timestamp": "25/01/2026 18:00:43",
+        "user": "priscila",
+        "department": "Recepção",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 17: 7 itens. Garçom: priscila"
+    },
+    {
+        "id": "LOG_20260125180103_320",
+        "timestamp": "25/01/2026 18:01:03",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 41 puxada por welington"
+    },
+    {
+        "id": "LOG_20260125180146_321",
+        "timestamp": "25/01/2026 18:01:46",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 83 aberta para 1 adultos (hospede). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125180232_322",
+        "timestamp": "25/01/2026 18:02:32",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 83: 2 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125180319_323",
+        "timestamp": "25/01/2026 18:03:19",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Conta Fechada",
+        "details": "Mesa 60 fechada. Total: R$ 280.61 (Múltiplos pagamentos)"
+    },
+    {
+        "id": "LOG_20260125180425_324",
+        "timestamp": "25/01/2026 18:04:25",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Conta Fechada",
+        "details": "Mesa 42 fechada. Total: R$ 227.37 (Múltiplos pagamentos)"
+    },
+    {
+        "id": "LOG_20260125180539_325",
+        "timestamp": "25/01/2026 18:05:39",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Conta Fechada",
+        "details": "Mesa 41 fechada. Total: R$ 301.51 (Múltiplos pagamentos)"
+    },
+    {
+        "id": "LOG_20260125180709_326",
+        "timestamp": "25/01/2026 18:07:09",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Conta Fechada",
+        "details": "Mesa 44 fechada. Total: R$ 235.94 (Múltiplos pagamentos)"
+    },
+    {
+        "id": "LOG_20260125180934_327",
+        "timestamp": "25/01/2026 18:09:34",
+        "user": "bruno",
+        "department": "Recepção",
+        "action": "Item Removido",
+        "details": "Mesa 17: 1.0x Agua Com Gás Pet 500ml (removido por bruno)"
+    },
+    {
+        "id": "LOG_20260125180939_328",
+        "timestamp": "25/01/2026 18:09:39",
+        "user": "bruno",
+        "department": "Recepção",
+        "action": "Item Removido",
+        "details": "Mesa 17: 1.0x Vinho Branco Paço do Conde Herdade (removido por bruno)"
+    },
+    {
+        "id": "LOG_20260125180943_329",
+        "timestamp": "25/01/2026 18:09:43",
+        "user": "bruno",
+        "department": "Recepção",
+        "action": "Item Removido",
+        "details": "Mesa 17: 1.0x Dadinho de Queijo Coalho ( 4 Uni. ) (removido por bruno)"
+    },
+    {
+        "id": "LOG_20260125180953_330",
+        "timestamp": "25/01/2026 18:09:53",
+        "user": "bruno",
+        "department": "Recepção",
+        "action": "Item Removido",
+        "details": "Mesa 17: 1.0x Batata Frita (removido por bruno)"
+    },
+    {
+        "id": "LOG_20260125180957_331",
+        "timestamp": "25/01/2026 18:09:57",
+        "user": "bruno",
+        "department": "Recepção",
+        "action": "Item Removido",
+        "details": "Mesa 17: 1.0x Agua Com Gás Pet 500ml (removido por bruno)"
+    },
+    {
+        "id": "LOG_20260125181001_332",
+        "timestamp": "25/01/2026 18:10:01",
+        "user": "bruno",
+        "department": "Recepção",
+        "action": "Item Removido",
+        "details": "Mesa 17: 1.0x Agua sem Gás 275ml (removido por bruno)"
+    },
+    {
+        "id": "LOG_20260125181005_333",
+        "timestamp": "25/01/2026 18:10:05",
+        "user": "bruno",
+        "department": "Recepção",
+        "action": "Item Removido",
+        "details": "Mesa 17: 1.0x Espumante Chandon Reserve Rosé (removido por bruno)"
+    },
+    {
+        "id": "LOG_20260125181009_334",
+        "timestamp": "25/01/2026 18:10:09",
+        "user": "bruno",
+        "department": "Recepção",
+        "action": "Item Removido",
+        "details": "Mesa 17: 1.0x Espumante Chandon Reserve Rosé (removido por bruno)"
+    },
+    {
+        "id": "LOG_20260125181013_335",
+        "timestamp": "25/01/2026 18:10:13",
+        "user": "bruno",
+        "department": "Recepção",
+        "action": "Pagamento Parcial",
+        "details": "Mesa 17 pagamento parcial de R$ 0.00. Total pago: R$ 0.00"
+    },
+    {
+        "id": "LOG_20260125181626_336",
+        "timestamp": "25/01/2026 18:16:26",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 83: 1 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125181810_337",
+        "timestamp": "25/01/2026 18:18:10",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 55: 1 itens. Garçom: welington"
+    },
+    {
+        "id": "LOG_20260125182923_338",
+        "timestamp": "25/01/2026 18:29:23",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 83 puxada por jose.santos"
+    },
+    {
+        "id": "LOG_20260125183541_339",
+        "timestamp": "25/01/2026 18:35:41",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 55 puxada por welington"
+    },
+    {
+        "id": "LOG_20260125183608_340",
+        "timestamp": "25/01/2026 18:36:08",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 84 aberta para 1 adultos (hospede). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125183633_341",
+        "timestamp": "25/01/2026 18:36:33",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 84: 2 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125184013_342",
+        "timestamp": "25/01/2026 18:40:13",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Mesa Reaberta",
+        "details": "Trava de pedidos removida da Mesa 55 por filipe"
+    },
+    {
+        "id": "LOG_20260125184031_343",
+        "timestamp": "25/01/2026 18:40:31",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Item Removido",
+        "details": "Mesa 55: 1.0x Espumante Casa Perini Charmat Brut (removido por filipe)"
+    },
+    {
+        "id": "LOG_20260125184034_344",
+        "timestamp": "25/01/2026 18:40:34",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 55 puxada por filipe"
+    },
+    {
+        "id": "LOG_20260125184537_345",
+        "timestamp": "25/01/2026 18:45:37",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 54 puxada por welington"
+    },
+    {
+        "id": "LOG_20260125184649_346",
+        "timestamp": "25/01/2026 18:46:49",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 56 puxada por welington"
+    },
+    {
+        "id": "LOG_20260125184917_347",
+        "timestamp": "25/01/2026 18:49:17",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Conta Fechada",
+        "details": "Mesa 55 fechada. Total: R$ 650.32 (Múltiplos pagamentos)"
+    },
+    {
+        "id": "LOG_20260125191116_348",
+        "timestamp": "25/01/2026 19:11:16",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 84: 2 itens. Garçom: welington"
+    },
+    {
+        "id": "LOG_20260125191843_349",
+        "timestamp": "25/01/2026 19:18:43",
+        "user": "priscila",
+        "department": "Recepção",
+        "action": "Transferência para Quarto",
+        "details": "Mesa 56 transferida para Quarto 23"
+    },
+    {
+        "id": "LOG_20260125191916_350",
+        "timestamp": "25/01/2026 19:19:16",
+        "user": "priscila",
+        "department": "Recepção",
+        "action": "Transferência para Quarto",
+        "details": "Mesa 54 transferida para Quarto 26"
+    },
+    {
+        "id": "LOG_20260125192131_351",
+        "timestamp": "25/01/2026 19:21:31",
+        "user": "priscila",
+        "department": "Recepção",
+        "action": "Mesa Aberta",
+        "details": "Mesa 41 aberta para 2 adultos (hospede). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125192229_352",
+        "timestamp": "25/01/2026 19:22:29",
+        "user": "priscila",
+        "department": "Recepção",
+        "action": "Mesa Transferida",
+        "details": "Transferência da Mesa 83 para Mesa 41"
+    },
+    {
+        "id": "LOG_20260125192251_353",
+        "timestamp": "25/01/2026 19:22:51",
+        "user": "priscila",
+        "department": "Recepção",
+        "action": "Mesa Transferida",
+        "details": "Transferência da Mesa 41 para Mesa 83"
+    },
+    {
+        "id": "LOG_20260125192303_354",
+        "timestamp": "25/01/2026 19:23:03",
+        "user": "priscila",
+        "department": "Recepção",
+        "action": "Transferência para Quarto",
+        "details": "Mesa 83 transferida para Quarto 32"
+    },
+    {
+        "id": "LOG_20260125192541_355",
+        "timestamp": "25/01/2026 19:25:41",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 60 aberta para 2 adultos (passante). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125192825_356",
+        "timestamp": "25/01/2026 19:28:25",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 60: 3 itens. Garçom: welington"
+    },
+    {
+        "id": "LOG_20260125192946_357",
+        "timestamp": "25/01/2026 19:29:46",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 81 aberta para 3 adultos (hospede). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125193033_358",
+        "timestamp": "25/01/2026 19:30:33",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 81: 1 itens. Garçom: welington"
+    },
+    {
+        "id": "LOG_20260125193214_359",
+        "timestamp": "25/01/2026 19:32:14",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 80 aberta para 2 adultos (hospede). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125193303_360",
+        "timestamp": "25/01/2026 19:33:03",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 80: 1 itens. Garçom: welington"
+    },
+    {
+        "id": "LOG_20260125193531_361",
+        "timestamp": "25/01/2026 19:35:31",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 80: 1 itens. Garçom: welington"
+    },
+    {
+        "id": "LOG_20260125193803_362",
+        "timestamp": "25/01/2026 19:38:03",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 56 aberta para 2 adultos (hospede). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125193949_363",
+        "timestamp": "25/01/2026 19:39:49",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 93 aberta para 2 adultos (hospede). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125194000_364",
+        "timestamp": "25/01/2026 19:40:00",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 56: 3 itens. Garçom: welington"
+    },
+    {
+        "id": "LOG_20260125194021_365",
+        "timestamp": "25/01/2026 19:40:21",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 93: 1 itens. Garçom: filipe"
+    },
+    {
+        "id": "LOG_20260125194058_366",
+        "timestamp": "25/01/2026 19:40:58",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 60: 1 itens. Garçom: welington"
+    },
+    {
+        "id": "LOG_20260125194114_367",
+        "timestamp": "25/01/2026 19:41:14",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 47 puxada por welington"
+    },
+    {
+        "id": "LOG_20260125194429_368",
+        "timestamp": "25/01/2026 19:44:29",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Mesa Transferida",
+        "details": "Transferência da Mesa 80 para Mesa 91"
+    },
+    {
+        "id": "LOG_20260125194649_369",
+        "timestamp": "25/01/2026 19:46:49",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Mesa Reaberta",
+        "details": "Trava de pedidos removida da Mesa 47 por filipe"
+    },
+    {
+        "id": "LOG_20260125194704_370",
+        "timestamp": "25/01/2026 19:47:04",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 47: 1 itens. Garçom: filipe"
+    },
+    {
+        "id": "LOG_20260125194706_371",
+        "timestamp": "25/01/2026 19:47:06",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 47 puxada por filipe"
+    },
+    {
+        "id": "LOG_20260125194750_372",
+        "timestamp": "25/01/2026 19:47:50",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 93: 1 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125194807_373",
+        "timestamp": "25/01/2026 19:48:07",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 93: 1 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125194830_374",
+        "timestamp": "25/01/2026 19:48:30",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 92 aberta para 2 adultos (hospede). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125194856_375",
+        "timestamp": "25/01/2026 19:48:56",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 92: 2 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125194932_376",
+        "timestamp": "25/01/2026 19:49:32",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 55 aberta para 9 adultos (passante). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125194956_377",
+        "timestamp": "25/01/2026 19:49:56",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 90 aberta para 1 adultos (hospede). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125195059_378",
+        "timestamp": "25/01/2026 19:50:59",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 90: 2 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125195253_379",
+        "timestamp": "25/01/2026 19:52:53",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 93: 2 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125195306_380",
+        "timestamp": "25/01/2026 19:53:06",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 55: 6 itens. Garçom: welington"
+    },
+    {
+        "id": "LOG_20260125195318_381",
+        "timestamp": "25/01/2026 19:53:18",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Item Removido",
+        "details": "Mesa 56: 1.0x Suco Jarra (Escolha o Sabor) (removido por filipe)"
+    },
+    {
+        "id": "LOG_20260125195327_382",
+        "timestamp": "25/01/2026 19:53:27",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 89 aberta para 1 adultos (hospede). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125195345_383",
+        "timestamp": "25/01/2026 19:53:45",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 89: 1 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125195439_384",
+        "timestamp": "25/01/2026 19:54:39",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 93: 2 itens. Garçom: filipe"
+    },
+    {
+        "id": "LOG_20260125195821_385",
+        "timestamp": "25/01/2026 19:58:21",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 78 aberta para 1 adultos (hospede). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125195841_386",
+        "timestamp": "25/01/2026 19:58:41",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Conta Puxada",
+        "details": "Mesa 56 puxada por carlos"
+    },
+    {
+        "id": "LOG_20260125195859_387",
+        "timestamp": "25/01/2026 19:58:59",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 78: 1 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125195936_388",
+        "timestamp": "25/01/2026 19:59:36",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 77 aberta para 1 adultos (hospede). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125200008_389",
+        "timestamp": "25/01/2026 20:00:08",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 77: 1 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125200133_390",
+        "timestamp": "25/01/2026 20:01:33",
+        "user": "bruno",
+        "department": "Recepção",
+        "action": "Transferência para Quarto",
+        "details": "Mesa 56 transferida para Quarto 02"
+    },
+    {
+        "id": "LOG_20260125200233_391",
+        "timestamp": "25/01/2026 20:02:33",
+        "user": "priscila",
+        "department": "Recepção",
+        "action": "Transferência para Quarto",
+        "details": "Mesa 47 transferida para Quarto 03"
+    },
+    {
+        "id": "LOG_20260125200359_392",
+        "timestamp": "25/01/2026 20:03:59",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 89: 3 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125200508_393",
+        "timestamp": "25/01/2026 20:05:08",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 93: 1 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125200630_394",
+        "timestamp": "25/01/2026 20:06:30",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 78: 2 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125200916_395",
+        "timestamp": "25/01/2026 20:09:16",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 89: 1 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125201606_396",
+        "timestamp": "25/01/2026 20:16:06",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 92: 1 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125201850_397",
+        "timestamp": "25/01/2026 20:18:50",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 93: 1 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125202012_398",
+        "timestamp": "25/01/2026 20:20:12",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 81: 1 itens. Garçom: filipe"
+    },
+    {
+        "id": "LOG_20260125202116_399",
+        "timestamp": "25/01/2026 20:21:16",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Mesa Aberta",
+        "details": "Mesa 80 aberta para 2 adultos (hospede). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125202134_400",
+        "timestamp": "25/01/2026 20:21:34",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 80: 1 itens. Garçom: filipe"
+    },
+    {
+        "id": "LOG_20260125202242_401",
+        "timestamp": "25/01/2026 20:22:42",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 77: 2 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125202247_402",
+        "timestamp": "25/01/2026 20:22:47",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 77: 2 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125202248_403",
+        "timestamp": "25/01/2026 20:22:48",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 77: 2 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125202402_404",
+        "timestamp": "25/01/2026 20:24:02",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Item Removido",
+        "details": "Mesa 77: 1.0x Realeza Marinha (removido por filipe)"
+    },
+    {
+        "id": "LOG_20260125202412_405",
+        "timestamp": "25/01/2026 20:24:12",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Item Removido",
+        "details": "Mesa 77: 1.0x Peixada Pernambucana  (Individual) (removido por filipe)"
+    },
+    {
+        "id": "LOG_20260125202420_406",
+        "timestamp": "25/01/2026 20:24:20",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Item Removido",
+        "details": "Mesa 77: 1.0x Peixada Pernambucana  (Individual) (removido por filipe)"
+    },
+    {
+        "id": "LOG_20260125202434_407",
+        "timestamp": "25/01/2026 20:24:34",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 80: 1 itens. Garçom: welington"
+    },
+    {
+        "id": "LOG_20260125202436_408",
+        "timestamp": "25/01/2026 20:24:36",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Item Removido",
+        "details": "Mesa 77: 1.0x Realeza Marinha (removido por filipe)"
+    },
+    {
+        "id": "LOG_20260125202540_409",
+        "timestamp": "25/01/2026 20:25:40",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 89: 1 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125202717_410",
+        "timestamp": "25/01/2026 20:27:17",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Item Removido",
+        "details": "Mesa 81: 1.0x Filé em Tiras (removido por filipe)"
+    },
+    {
+        "id": "LOG_20260125202730_411",
+        "timestamp": "25/01/2026 20:27:30",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 84 puxada por welington"
+    },
+    {
+        "id": "LOG_20260125202824_412",
+        "timestamp": "25/01/2026 20:28:24",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 93: 1 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125203114_413",
+        "timestamp": "25/01/2026 20:31:14",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 78: 2 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125203224_414",
+        "timestamp": "25/01/2026 20:32:24",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 80 puxada por filipe"
+    },
+    {
+        "id": "LOG_20260125203337_415",
+        "timestamp": "25/01/2026 20:33:37",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 89: 1 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125203408_416",
+        "timestamp": "25/01/2026 20:34:08",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 55: 1 itens. Garçom: filipe"
+    },
+    {
+        "id": "LOG_20260125203558_417",
+        "timestamp": "25/01/2026 20:35:58",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 81: 1 itens. Garçom: welington"
+    },
+    {
+        "id": "LOG_20260125203625_418",
+        "timestamp": "25/01/2026 20:36:25",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 60 puxada por welington"
+    },
+    {
+        "id": "LOG_20260125203659_419",
+        "timestamp": "25/01/2026 20:36:59",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Item Removido",
+        "details": "Mesa 91: 1.0x Campari  (removido por carlos)"
+    },
+    {
+        "id": "LOG_20260125203703_420",
+        "timestamp": "25/01/2026 20:37:03",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Item Removido",
+        "details": "Mesa 91: 1.0x Cachaça Germana (removido por carlos)"
+    },
+    {
+        "id": "LOG_20260125203706_421",
+        "timestamp": "25/01/2026 20:37:06",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 92: 2 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125203709_422",
+        "timestamp": "25/01/2026 20:37:09",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Conta Fechada",
+        "details": "Mesa 91 fechada. Total: R$ 0.00 (Múltiplos pagamentos)"
+    },
+    {
+        "id": "LOG_20260125203734_423",
+        "timestamp": "25/01/2026 20:37:34",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 92: 1 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125204007_424",
+        "timestamp": "25/01/2026 20:40:07",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 77: 1 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125204053_425",
+        "timestamp": "25/01/2026 20:40:53",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Conta Fechada",
+        "details": "Mesa 60 fechada. Total: R$ 297.66 (Múltiplos pagamentos)"
+    },
+    {
+        "id": "LOG_20260125204416_426",
+        "timestamp": "25/01/2026 20:44:16",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 89: 1 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125204507_427",
+        "timestamp": "25/01/2026 20:45:07",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa FUNC_jose.silva: 1 itens. Garçom: carlos"
+    },
+    {
+        "id": "LOG_20260125204544_428",
+        "timestamp": "25/01/2026 20:45:44",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa FUNC_erique: 1 itens. Garçom: carlos"
+    },
+    {
+        "id": "LOG_20260125204555_429",
+        "timestamp": "25/01/2026 20:45:55",
+        "user": "priscila",
+        "department": "Recepção",
+        "action": "Transferência para Quarto",
+        "details": "Mesa 80 transferida para Quarto 16"
+    },
+    {
+        "id": "LOG_20260125204625_430",
+        "timestamp": "25/01/2026 20:46:25",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 92: 1 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125204719_431",
+        "timestamp": "25/01/2026 20:47:19",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 78: 1 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125204814_432",
+        "timestamp": "25/01/2026 20:48:14",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 89: 2 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125204815_433",
+        "timestamp": "25/01/2026 20:48:15",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 55: 4 itens. Garçom: welington"
+    },
+    {
+        "id": "LOG_20260125204844_434",
+        "timestamp": "25/01/2026 20:48:44",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 93: 1 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125204908_435",
+        "timestamp": "25/01/2026 20:49:08",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 55: 1 itens. Garçom: welington"
+    },
+    {
+        "id": "LOG_20260125204918_436",
+        "timestamp": "25/01/2026 20:49:18",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 78: 1 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125205548_437",
+        "timestamp": "25/01/2026 20:55:48",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 55: 7 itens. Garçom: welington"
+    },
+    {
+        "id": "LOG_20260125210420_438",
+        "timestamp": "25/01/2026 21:04:20",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 93: 1 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125210500_439",
+        "timestamp": "25/01/2026 21:05:00",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 90: 1 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125210705_440",
+        "timestamp": "25/01/2026 21:07:05",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa FUNC_elenilda: 1 itens. Garçom: carlos"
+    },
+    {
+        "id": "LOG_20260125210918_441",
+        "timestamp": "25/01/2026 21:09:18",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa FUNC_josenice: 1 itens. Garçom: carlos"
+    },
+    {
+        "id": "LOG_20260125210947_442",
+        "timestamp": "25/01/2026 21:09:47",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa FUNC_clebio: 1 itens. Garçom: carlos"
+    },
+    {
+        "id": "LOG_20260125211011_443",
+        "timestamp": "25/01/2026 21:10:11",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 89: 1 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125211022_444",
+        "timestamp": "25/01/2026 21:10:22",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa FUNC_bartolomeu: 1 itens. Garçom: carlos"
+    },
+    {
+        "id": "LOG_20260125211127_445",
+        "timestamp": "25/01/2026 21:11:27",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa FUNC_welington: 1 itens. Garçom: carlos"
+    },
+    {
+        "id": "LOG_20260125211131_446",
+        "timestamp": "25/01/2026 21:11:31",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Mesa Transferida",
+        "details": "Transferência da Mesa 90 para Mesa 89"
+    },
+    {
+        "id": "LOG_20260125211155_447",
+        "timestamp": "25/01/2026 21:11:55",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Item Removido",
+        "details": "Mesa 78: 1.0x Agua sem Gás 275ml (removido por filipe)"
+    },
+    {
+        "id": "LOG_20260125211236_448",
+        "timestamp": "25/01/2026 21:12:36",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 78: 1 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125211253_449",
+        "timestamp": "25/01/2026 21:12:53",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa FUNC_jose.santos: 2 itens. Garçom: carlos"
+    },
+    {
+        "id": "LOG_20260125211347_450",
+        "timestamp": "25/01/2026 21:13:47",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 92: 1 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125211428_451",
+        "timestamp": "25/01/2026 21:14:28",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa FUNC_iraquitan: 1 itens. Garçom: carlos"
+    },
+    {
+        "id": "LOG_20260125211458_452",
+        "timestamp": "25/01/2026 21:14:58",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa FUNC_danilo: 1 itens. Garçom: carlos"
+    },
+    {
+        "id": "LOG_20260125211619_453",
+        "timestamp": "25/01/2026 21:16:19",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa FUNC_cicera: 1 itens. Garçom: carlos"
+    },
+    {
+        "id": "LOG_20260125211738_454",
+        "timestamp": "25/01/2026 21:17:38",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa FUNC_filipe: 1 itens. Garçom: carlos"
+    },
+    {
+        "id": "LOG_20260125211822_455",
+        "timestamp": "25/01/2026 21:18:22",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 93: 1 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125211841_456",
+        "timestamp": "25/01/2026 21:18:41",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Item Removido",
+        "details": "Mesa FUNC_adailton: 1.0x Ovos (Omelete,Mexido,Pochê,cozido ou frito) (removido por carlos)"
+    },
+    {
+        "id": "LOG_20260125211846_457",
+        "timestamp": "25/01/2026 21:18:46",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Item Removido",
+        "details": "Mesa FUNC_adailton: 1.0x Cuscuz Recheado (removido por carlos)"
+    },
+    {
+        "id": "LOG_20260125211848_458",
+        "timestamp": "25/01/2026 21:18:48",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Mesa Reaberta",
+        "details": "Trava de pedidos removida da Mesa FUNC_adailton por carlos"
+    },
+    {
+        "id": "LOG_20260125211851_459",
+        "timestamp": "25/01/2026 21:18:51",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Item Removido",
+        "details": "Mesa FUNC_adailton: 1.0x Cuscuz Recheado (removido por carlos)"
+    },
+    {
+        "id": "LOG_20260125211854_460",
+        "timestamp": "25/01/2026 21:18:54",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Item Removido",
+        "details": "Mesa FUNC_adailton: 1.0x Tapioca (Escolha o Sabor até 3 opçoes) (removido por carlos)"
+    },
+    {
+        "id": "LOG_20260125211856_461",
+        "timestamp": "25/01/2026 21:18:56",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Item Removido",
+        "details": "Mesa FUNC_adailton: 1.0x Ovos (Omelete,Mexido,Pochê,cozido ou frito) (removido por carlos)"
+    },
+    {
+        "id": "LOG_20260125211918_462",
+        "timestamp": "25/01/2026 21:19:18",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa FUNC_adailton: 2 itens. Garçom: carlos"
+    },
+    {
+        "id": "LOG_20260125212140_463",
+        "timestamp": "25/01/2026 21:21:40",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 78: 1 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125213910_464",
+        "timestamp": "25/01/2026 21:39:10",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 55: 2 itens. Garçom: welington"
+    },
+    {
+        "id": "LOG_20260125213913_465",
+        "timestamp": "25/01/2026 21:39:13",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 78 puxada por jose.santos"
+    },
+    {
+        "id": "LOG_20260125214104_466",
+        "timestamp": "25/01/2026 21:41:04",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 89 puxada por jose.santos"
+    },
+    {
+        "id": "LOG_20260125214304_467",
+        "timestamp": "25/01/2026 21:43:04",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 77 puxada por jose.santos"
+    },
+    {
+        "id": "LOG_20260125214322_468",
+        "timestamp": "25/01/2026 21:43:22",
+        "user": "priscila",
+        "department": "Recepção",
+        "action": "Transferência para Quarto",
+        "details": "Mesa 89 transferida para Quarto 22"
+    },
+    {
+        "id": "LOG_20260125214348_469",
+        "timestamp": "25/01/2026 21:43:48",
+        "user": "priscila",
+        "department": "Recepção",
+        "action": "Transferência para Quarto",
+        "details": "Mesa 78 transferida para Quarto 26"
+    },
+    {
+        "id": "LOG_20260125214359_470",
+        "timestamp": "25/01/2026 21:43:59",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 92 puxada por jose.santos"
+    },
+    {
+        "id": "LOG_20260125214445_471",
+        "timestamp": "25/01/2026 21:44:45",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 93 puxada por jose.santos"
+    },
+    {
+        "id": "LOG_20260125214512_472",
+        "timestamp": "25/01/2026 21:45:12",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Mesa Reaberta",
+        "details": "Trava de pedidos removida da Mesa 93 por jose.santos"
+    },
+    {
+        "id": "LOG_20260125214515_473",
+        "timestamp": "25/01/2026 21:45:15",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 93 puxada por jose.santos"
+    },
+    {
+        "id": "LOG_20260125215005_474",
+        "timestamp": "25/01/2026 21:50:05",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 55: 2 itens. Garçom: welington"
+    },
+    {
+        "id": "LOG_20260125215116_475",
+        "timestamp": "25/01/2026 21:51:16",
+        "user": "bruno",
+        "department": "Recepção",
+        "action": "Transferência para Quarto",
+        "details": "Mesa 77 transferida para Quarto 23"
+    },
+    {
+        "id": "LOG_20260125215501_476",
+        "timestamp": "25/01/2026 21:55:01",
+        "user": "bruno",
+        "department": "Recepção",
+        "action": "Transferência para Quarto",
+        "details": "Mesa 93 transferida para Quarto 14"
+    },
+    {
+        "id": "LOG_20260125215515_477",
+        "timestamp": "25/01/2026 21:55:15",
+        "user": "bruno",
+        "department": "Recepção",
+        "action": "Transferência para Quarto",
+        "details": "Mesa 92 transferida para Quarto 12"
+    },
+    {
+        "id": "LOG_20260125215938_478",
+        "timestamp": "25/01/2026 21:59:38",
+        "user": "priscila",
+        "department": "Recepção",
+        "action": "Mesa Aberta",
+        "details": "Mesa 89 aberta para 2 adultos (hospede). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125220224_479",
+        "timestamp": "25/01/2026 22:02:24",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 81: 1 itens. Garçom: jose.santos"
+    },
+    {
+        "id": "LOG_20260125220322_480",
+        "timestamp": "25/01/2026 22:03:22",
+        "user": "jose.santos",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 81 puxada por jose.santos"
+    },
+    {
+        "id": "LOG_20260125220839_481",
+        "timestamp": "25/01/2026 22:08:39",
+        "user": "welington",
+        "department": "Serviço",
+        "action": "Conta Puxada",
+        "details": "Mesa 55 puxada por welington"
+    },
+    {
+        "id": "LOG_20260125220839_482",
+        "timestamp": "25/01/2026 22:08:39",
+        "user": "priscila",
+        "department": "Recepção",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 89: 14 itens. Garçom: priscila"
+    },
+    {
+        "id": "LOG_20260125220949_483",
+        "timestamp": "25/01/2026 22:09:49",
+        "user": "priscila",
+        "department": "Recepção",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 89: 1 itens. Garçom: priscila"
+    },
+    {
+        "id": "LOG_20260125221311_484",
+        "timestamp": "25/01/2026 22:13:11",
+        "user": "priscila",
+        "department": "Recepção",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 89: 2 itens. Garçom: priscila"
+    },
+    {
+        "id": "LOG_20260125221444_485",
+        "timestamp": "25/01/2026 22:14:44",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Item Removido",
+        "details": "Mesa 89: 1.0x Agua sem Gás 275ml (removido por carlos)"
+    },
+    {
+        "id": "LOG_20260125221449_486",
+        "timestamp": "25/01/2026 22:14:49",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Item Removido",
+        "details": "Mesa 89: 1.0x Agua sem Gás 275ml (removido por carlos)"
+    },
+    {
+        "id": "LOG_20260125221452_487",
+        "timestamp": "25/01/2026 22:14:52",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Item Removido",
+        "details": "Mesa 89: 1.0x Agua sem Gás 275ml (removido por carlos)"
+    },
+    {
+        "id": "LOG_20260125221457_488",
+        "timestamp": "25/01/2026 22:14:57",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Item Removido",
+        "details": "Mesa 89: 1.0x Agua sem Gás 275ml (removido por carlos)"
+    },
+    {
+        "id": "LOG_20260125221538_489",
+        "timestamp": "25/01/2026 22:15:38",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Transferência para Quarto",
+        "details": "Mesa 89 transferida para Quarto 16"
+    },
+    {
+        "id": "LOG_20260125221939_490",
+        "timestamp": "25/01/2026 22:19:39",
+        "user": "priscila",
+        "department": "Recepção",
+        "action": "Mesa Aberta",
+        "details": "Mesa 70 aberta para 2 adultos (hospede). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125222633_491",
+        "timestamp": "25/01/2026 22:26:33",
+        "user": "TestSupervisor",
+        "department": "Recepção",
+        "action": "Edição de Conta",
+        "details": "Conta TEST_CHARGE_EDIT_001 (Quarto 99) editada por TestSupervisor: Data: 25/01/2026 10:00 -> 25/01/2026 12:00, Valor: 100.0 -> 150.5, Status: pending -> paid, Obs: Original Note -> Updated Note by Supervisor"
+    },
+    {
+        "id": "LOG_20260125222903_492",
+        "timestamp": "25/01/2026 22:29:03",
+        "user": "Angelo",
+        "department": "Recepção",
+        "action": "Caixa Aberto",
+        "details": "Caixa Recepção Restaurante aberto por Angelo com R$ 0.00"
+    },
+    {
+        "id": "LOG_20260125223022_493",
+        "timestamp": "25/01/2026 22:30:22",
+        "user": "priscila",
+        "department": "Recepção",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 70: 10 itens. Garçom: priscila"
+    },
+    {
+        "id": "LOG_20260125223047_494",
+        "timestamp": "25/01/2026 22:30:47",
+        "user": "priscila",
+        "department": "Recepção",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 70: 1 itens. Garçom: priscila"
+    },
+    {
+        "id": "LOG_20260125223120_495",
+        "timestamp": "25/01/2026 22:31:20",
+        "user": "filipe",
+        "department": "Serviço",
+        "action": "Conta Fechada",
+        "details": "Mesa 55 fechada. Total: R$ 1202.08 (Múltiplos pagamentos)"
+    },
+    {
+        "id": "LOG_20260125223151_496",
+        "timestamp": "25/01/2026 22:31:51",
+        "user": "Angelo",
+        "department": "Geral",
+        "action": "Mesa Transferida",
+        "details": "Transferência da Mesa 999 para Mesa 999"
+    },
+    {
+        "id": "LOG_20260125223225_497",
+        "timestamp": "25/01/2026 22:32:25",
+        "user": "Angelo",
+        "department": "Restaurante",
+        "action": "Erro Transferência",
+        "details": "Tentativa de transferir mesa 999 para si mesma."
+    },
+    {
+        "id": "LOG_20260125223301_498",
+        "timestamp": "25/01/2026 22:33:01",
+        "user": "Angelo",
+        "department": "Geral",
+        "action": "Mesa Transferida",
+        "details": "Transferência da Mesa 998 para Mesa 997"
+    },
+    {
+        "id": "LOG_20260125223301_499",
+        "timestamp": "25/01/2026 22:33:01",
+        "user": "Angelo",
+        "department": "Restaurante",
+        "action": "Erro Transferência",
+        "details": "Tentativa de transferir mesa 998 para si mesma."
+    },
+    {
+        "id": "LOG_20260125223322_500",
+        "timestamp": "25/01/2026 22:33:22",
+        "user": "priscila",
+        "department": "Recepção",
+        "action": "Transferência para Quarto",
+        "details": "Mesa 70 transferida para Quarto 03"
+    },
+    {
+        "id": "LOG_20260125223357_501",
+        "timestamp": "25/01/2026 22:33:57",
+        "user": "priscila",
+        "department": "Recepção",
+        "action": "Mesa Aberta",
+        "details": "Mesa 70 aberta para 2 adultos (hospede). Garçom: None"
+    },
+    {
+        "id": "LOG_20260125223554_502",
+        "timestamp": "25/01/2026 22:35:54",
+        "user": "Angelo",
+        "department": "Geral",
+        "action": "Mesa Transferida",
+        "details": "Transferência da Mesa 998 para Mesa 997"
+    },
+    {
+        "id": "LOG_20260125223554_503",
+        "timestamp": "25/01/2026 22:35:54",
+        "user": "Angelo",
+        "department": "Restaurante",
+        "action": "Erro Transferência",
+        "details": "Tentativa de transferir mesa 998 para si mesma."
+    },
+    {
+        "id": "LOG_20260125223732_504",
+        "timestamp": "25/01/2026 22:37:32",
+        "user": "Manager",
+        "department": "Recepção",
+        "action": "Edição de Conta",
+        "details": "Conta test_charge_123 (Quarto 101) editada por Manager: Valor: 100.0 -> 150.5, Status: pending -> paid, Obs: Original Note -> Updated Note"
+    },
+    {
+        "id": "LOG_20260125223827_505",
+        "timestamp": "25/01/2026 22:38:27",
+        "user": "priscila",
+        "department": "Recepção",
+        "action": "Itens Adicionados (Lote)",
+        "details": "Mesa 70: 10 itens. Garçom: priscila"
+    },
+    {
+        "id": "LOG_20260125223936_506",
+        "timestamp": "25/01/2026 22:39:36",
+        "user": "priscila",
+        "department": "Recepção",
+        "action": "Transferência para Quarto",
+        "details": "Mesa 70 transferida para Quarto 02"
+    },
+    {
+        "id": "LOG_20260125224211_507",
+        "timestamp": "25/01/2026 22:42:11",
+        "user": "priscila",
+        "department": "Recepção",
+        "action": "Transferência para Quarto",
+        "details": "Mesa 81 transferida para Quarto 21"
+    },
+    {
+        "id": "LOG_20260125225209_508",
+        "timestamp": "25/01/2026 22:52:09",
+        "user": "Manager",
+        "department": "Recepção",
+        "action": "Edição de Conta",
+        "details": "Conta test_charge_123 editada: Obs: Original Note -> None, Item Adicionado: Açaí (x2.0), Recálculo Total: 100.00 -> 43.78"
+    },
+    {
+        "id": "LOG_20260125225210_509",
+        "timestamp": "25/01/2026 22:52:10",
+        "user": "Manager",
+        "department": "Recepção",
+        "action": "Edição de Conta",
+        "details": "Conta test_charge_123 editada: Item Removido: Açaí (x2.0), Recálculo Total: 43.78 -> 0.00"
+    },
+    {
+        "id": "LOG_20260125225945_510",
+        "timestamp": "25/01/2026 22:59:45",
+        "user": "carlos",
+        "department": "Restaurante",
+        "action": "Caixa Fechado",
+        "details": "Caixa Restaurante Serviço fechado por carlos com saldo final R$ 7618.13"
+    },
+    {
+        "id": "LOG_20260125230007_511",
+        "timestamp": "25/01/2026 23:00:07",
+        "user": "carlos",
+        "department": "Estoque",
+        "action": "Conta Puxada",
+        "details": "Mesa 61 puxada por carlos"
+    }
+]

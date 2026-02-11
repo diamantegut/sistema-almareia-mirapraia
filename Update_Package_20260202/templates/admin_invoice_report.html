@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-file-earmark-spreadsheet"></i> Relatório de Pagamentos - Diretoria</h2>
+        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+    </div>
+
+    <!-- Filter Form -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">Filtros</h5>
+        </div>
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Data Início</label>
+                    <input type="date" class="form-control" name="start_date" value="{{ request.args.get('start_date', '') }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Data Fim</label>
+                    <input type="date" class="form-control" name="end_date" value="{{ request.args.get('end_date', '') }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Forma de Pagamento</label>
+                    <select class="form-select" name="payment_method">
+                        <option value="">Todas</option>
+                        {% for method in payment_methods %}
+                        <option value="{{ method.name }}" {{ 'selected' if request.args.get('payment_method') == method.name else '' }}>
+                            {{ method.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Nota Fiscal?</label>
+                    <select class="form-select" name="invoice_status">
+                        <option value="all">Todos</option>
+                        <option value="yes" {{ 'selected' if request.args.get('invoice_status') == 'yes' else '' }}>Sim (Emitir)</option>
+                        <option value="no" {{ 'selected' if request.args.get('invoice_status') == 'no' else '' }}>Não</option>
+                    </select>
+                </div>
+                <div class="col-12 text-end">
+                    <a href="{{ url_for('admin_invoice_report') }}" class="btn btn-outline-secondary me-2">Limpar Filtros</a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search"></i> Filtrar Relatório
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Results Table -->
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Data/Hora</th>
+                            <th>Descrição</th>
+                            <th>Forma de Pagamento</th>
+                            <th class="text-center">Nota Fiscal?</th>
+                            <th class="text-end">Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% set total_val = namespace(value=0) %}
+                        {% for t in report_data %}
+                        {% set total_val.value = total_val.value + (t.amount|float) %}
+                        <tr>
+                            <td>{{ t.timestamp }}</td>
+                            <td>{{ t.description }}</td>
+                            <td>
+                                <span class="badge bg-secondary">{{ t.payment_method }}</span>
+                            </td>
+                            <td class="text-center">
+                                {% if t.emit_invoice %}
+                                <span class="badge bg-success"><i class="bi bi-check-circle"></i> Sim</span>
+                                {% else %}
+                                <span class="badge bg-light text-muted border">Não</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end fw-bold">
+                                R$ {{ "%.2f"|format(t.amount|float) }}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-5">
+                                <i class="bi bi-inbox fs-1"></i>
+                                <p class="mt-2">Nenhum registro encontrado com os filtros selecionados.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot class="table-light">
+                        <tr class="fw-bold fs-5">
+                            <td colspan="4" class="text-end">TOTAL:</td>
+                            <td class="text-end text-primary">R$ {{ "%.2f"|format(total_val.value) }}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

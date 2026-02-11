@@ -1,0 +1,1589 @@
+[
+    {
+        "id": "ORD_20260203145240359967",
+        "timestamp": "03/02/2026 14:52:40",
+        "timestamp_iso": "2026-02-03T14:52:40.359990",
+        "action": "close_table",
+        "user": "TestAdmin",
+        "order_id": null,
+        "table": "99",
+        "waiter": null,
+        "items": [],
+        "total": 0.0,
+        "status": "closed"
+    },
+    {
+        "id": "ORD_20260203145346053297",
+        "timestamp": "03/02/2026 14:53:46",
+        "timestamp_iso": "2026-02-03T14:53:46.053314",
+        "action": "close_table",
+        "user": "TestAdmin",
+        "order_id": null,
+        "table": "99",
+        "waiter": null,
+        "items": [],
+        "total": 0.0,
+        "status": "closed"
+    },
+    {
+        "id": "ORD_20260203145458237974",
+        "timestamp": "03/02/2026 14:54:58",
+        "timestamp_iso": "2026-02-03T14:54:58.237993",
+        "action": "close_table",
+        "user": "TestAdmin",
+        "order_id": null,
+        "table": "99",
+        "waiter": null,
+        "items": [],
+        "total": 0.0,
+        "status": "closed"
+    },
+    {
+        "id": "ORD_20260203152058748187",
+        "timestamp": "03/02/2026 15:20:58",
+        "timestamp_iso": "2026-02-03T15:20:58.748198",
+        "action": "close_table",
+        "user": "admin_user",
+        "order_id": null,
+        "table": "99",
+        "waiter": "admin_user",
+        "items": [
+            {
+                "name": "Pizza",
+                "price": 100.0,
+                "qty": 1,
+                "category": "Alimentacao"
+            }
+        ],
+        "total": 110.0,
+        "status": "closed"
+    },
+    {
+        "id": "ORD_20260203152059439819",
+        "timestamp": "03/02/2026 15:20:59",
+        "timestamp_iso": "2026-02-03T15:20:59.439831",
+        "action": "add_items",
+        "user": "TestAdmin",
+        "order_id": "BATCH_152059",
+        "table": "99",
+        "waiter": "Angelo",
+        "items": [
+            {
+                "id": "9681fd98-ac98-4d7a-8930-3425c48141d4",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Test No Print Item",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 10.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Test",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "Angelo",
+                "created_at": "03/02/2026 15:20"
+            }
+        ],
+        "total": 10.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260203152059916248",
+        "timestamp": "03/02/2026 15:20:59",
+        "timestamp_iso": "2026-02-03T15:20:59.916271",
+        "action": "close_table",
+        "user": "TestAdmin",
+        "order_id": null,
+        "table": "99",
+        "waiter": null,
+        "items": [],
+        "total": 0.0,
+        "status": "closed"
+    },
+    {
+        "id": "ORD_20260203153127807331",
+        "timestamp": "03/02/2026 15:31:27",
+        "timestamp_iso": "2026-02-03T15:31:27.807352",
+        "action": "add_items",
+        "user": "admin",
+        "order_id": "batch_test_1",
+        "table": "40",
+        "waiter": "GarcomY",
+        "items": [
+            {
+                "id": "6c9554f7-f9fa-4221-9018-a693e9076116",
+                "printed": false,
+                "print_status": "pending",
+                "name": "Burger",
+                "flavor": null,
+                "qty": 2.0,
+                "price": 20.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": null,
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "GarcomY",
+                "created_at": "03/02/2026 15:31"
+            }
+        ],
+        "total": 40.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260203153128150878",
+        "timestamp": "03/02/2026 15:31:28",
+        "timestamp_iso": "2026-02-03T15:31:28.150891",
+        "action": "add_items",
+        "user": "admin",
+        "order_id": "BATCH_153128",
+        "table": "33",
+        "waiter": "GarcomZ",
+        "items": [
+            {
+                "id": "912ae08d-5492-41e5-805a-d16e077f12c6",
+                "printed": false,
+                "print_status": "pending",
+                "name": "Coca Cola",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 5.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Bebidas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "GarcomZ",
+                "created_at": "03/02/2026 15:31"
+            }
+        ],
+        "total": 5.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260203153128533063",
+        "timestamp": "03/02/2026 15:31:28",
+        "timestamp_iso": "2026-02-03T15:31:28.533074",
+        "action": "close_table",
+        "user": "admin_user",
+        "order_id": null,
+        "table": "99",
+        "waiter": "admin_user",
+        "items": [
+            {
+                "name": "Pizza",
+                "price": 100.0,
+                "qty": 1,
+                "category": "Alimentacao"
+            }
+        ],
+        "total": 110.0,
+        "status": "closed"
+    },
+    {
+        "id": "ORD_20260203153129321386",
+        "timestamp": "03/02/2026 15:31:29",
+        "timestamp_iso": "2026-02-03T15:31:29.321401",
+        "action": "add_items",
+        "user": "TestAdmin",
+        "order_id": "BATCH_153129",
+        "table": "99",
+        "waiter": "Angelo",
+        "items": [
+            {
+                "id": "1fefe0d3-2199-422b-bc9f-85b209930ded",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Test No Print Item",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 10.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Test",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "Angelo",
+                "created_at": "03/02/2026 15:31"
+            }
+        ],
+        "total": 10.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260203153130023663",
+        "timestamp": "03/02/2026 15:31:30",
+        "timestamp_iso": "2026-02-03T15:31:30.023678",
+        "action": "close_table",
+        "user": "TestAdmin",
+        "order_id": null,
+        "table": "99",
+        "waiter": null,
+        "items": [],
+        "total": 0.0,
+        "status": "closed"
+    },
+    {
+        "id": "ORD_20260203153554761895",
+        "timestamp": "03/02/2026 15:35:54",
+        "timestamp_iso": "2026-02-03T15:35:54.761916",
+        "action": "add_items",
+        "user": "admin",
+        "order_id": "batch_test_1",
+        "table": "40",
+        "waiter": "GarcomY",
+        "items": [
+            {
+                "id": "32799388-01f8-40d6-8067-c78034a0af60",
+                "printed": false,
+                "print_status": "pending",
+                "name": "Burger",
+                "flavor": null,
+                "qty": 2.0,
+                "price": 20.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": null,
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "GarcomY",
+                "created_at": "03/02/2026 15:35"
+            }
+        ],
+        "total": 40.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260203153555077110",
+        "timestamp": "03/02/2026 15:35:55",
+        "timestamp_iso": "2026-02-03T15:35:55.077122",
+        "action": "add_items",
+        "user": "admin",
+        "order_id": "BATCH_153555",
+        "table": "33",
+        "waiter": "GarcomZ",
+        "items": [
+            {
+                "id": "bd13e4ed-a5a6-4d76-be9f-7c232d3219c7",
+                "printed": false,
+                "print_status": "pending",
+                "name": "Coca Cola",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 5.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Bebidas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "GarcomZ",
+                "created_at": "03/02/2026 15:35"
+            }
+        ],
+        "total": 5.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260203153555464877",
+        "timestamp": "03/02/2026 15:35:55",
+        "timestamp_iso": "2026-02-03T15:35:55.464890",
+        "action": "close_table",
+        "user": "admin_user",
+        "order_id": null,
+        "table": "99",
+        "waiter": "admin_user",
+        "items": [
+            {
+                "name": "Pizza",
+                "price": 100.0,
+                "qty": 1,
+                "category": "Alimentacao"
+            }
+        ],
+        "total": 110.0,
+        "status": "closed"
+    },
+    {
+        "id": "ORD_20260203153556485955",
+        "timestamp": "03/02/2026 15:35:56",
+        "timestamp_iso": "2026-02-03T15:35:56.485965",
+        "action": "add_items",
+        "user": "TestAdmin",
+        "order_id": "BATCH_153556",
+        "table": "99",
+        "waiter": "Angelo",
+        "items": [
+            {
+                "id": "5f044c63-4ac9-401c-97b0-6ca8097cd8bb",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Test No Print Item",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 10.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Test",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "Angelo",
+                "created_at": "03/02/2026 15:35"
+            }
+        ],
+        "total": 10.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260203153557140174",
+        "timestamp": "03/02/2026 15:35:57",
+        "timestamp_iso": "2026-02-03T15:35:57.140188",
+        "action": "close_table",
+        "user": "TestAdmin",
+        "order_id": null,
+        "table": "99",
+        "waiter": null,
+        "items": [],
+        "total": 0.0,
+        "status": "closed"
+    },
+    {
+        "id": "ORD_20260203154821791782",
+        "timestamp": "03/02/2026 15:48:21",
+        "timestamp_iso": "2026-02-03T15:48:21.791810",
+        "action": "add_items",
+        "user": "admin",
+        "order_id": "batch_test_1",
+        "table": "40",
+        "waiter": "GarcomY",
+        "items": [
+            {
+                "id": "369378a5-719f-4a1d-b195-e01c867ced65",
+                "printed": false,
+                "print_status": "pending",
+                "name": "Burger",
+                "flavor": null,
+                "qty": 2.0,
+                "price": 20.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": null,
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "GarcomY",
+                "created_at": "03/02/2026 15:48"
+            }
+        ],
+        "total": 40.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260203154822092020",
+        "timestamp": "03/02/2026 15:48:22",
+        "timestamp_iso": "2026-02-03T15:48:22.092031",
+        "action": "add_items",
+        "user": "admin",
+        "order_id": "BATCH_154822",
+        "table": "33",
+        "waiter": "GarcomZ",
+        "items": [
+            {
+                "id": "69455bc1-fa79-463e-971a-9d466d1e2506",
+                "printed": false,
+                "print_status": "pending",
+                "name": "Coca Cola",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 5.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Bebidas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "GarcomZ",
+                "created_at": "03/02/2026 15:48"
+            }
+        ],
+        "total": 5.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260203154822456931",
+        "timestamp": "03/02/2026 15:48:22",
+        "timestamp_iso": "2026-02-03T15:48:22.456942",
+        "action": "close_table",
+        "user": "admin_user",
+        "order_id": null,
+        "table": "99",
+        "waiter": "admin_user",
+        "items": [
+            {
+                "name": "Pizza",
+                "price": 100.0,
+                "qty": 1,
+                "category": "Alimentacao"
+            }
+        ],
+        "total": 110.0,
+        "status": "closed"
+    },
+    {
+        "id": "ORD_20260203154823228192",
+        "timestamp": "03/02/2026 15:48:23",
+        "timestamp_iso": "2026-02-03T15:48:23.228207",
+        "action": "add_items",
+        "user": "TestAdmin",
+        "order_id": "BATCH_154823",
+        "table": "99",
+        "waiter": "Angelo",
+        "items": [
+            {
+                "id": "82236f60-73f7-4641-b7dd-50e62b331257",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Test No Print Item",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 10.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Test",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "Angelo",
+                "created_at": "03/02/2026 15:48"
+            }
+        ],
+        "total": 10.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260203154823996433",
+        "timestamp": "03/02/2026 15:48:23",
+        "timestamp_iso": "2026-02-03T15:48:23.996446",
+        "action": "close_table",
+        "user": "TestAdmin",
+        "order_id": null,
+        "table": "99",
+        "waiter": null,
+        "items": [],
+        "total": 0.0,
+        "status": "closed"
+    },
+    {
+        "id": "ORD_20260203164445702633",
+        "timestamp": "03/02/2026 16:44:45",
+        "timestamp_iso": "2026-02-03T16:44:45.702654",
+        "action": "add_items",
+        "user": "admin",
+        "order_id": "batch_test_1",
+        "table": "40",
+        "waiter": "GarcomY",
+        "items": [
+            {
+                "id": "06937fe5-a14c-4616-ac29-ac6463e657a7",
+                "printed": false,
+                "print_status": "pending",
+                "name": "Burger",
+                "flavor": null,
+                "qty": 2.0,
+                "price": 20.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": null,
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "GarcomY",
+                "created_at": "03/02/2026 16:44"
+            }
+        ],
+        "total": 40.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260203164445865754",
+        "timestamp": "03/02/2026 16:44:45",
+        "timestamp_iso": "2026-02-03T16:44:45.865766",
+        "action": "add_items",
+        "user": "admin",
+        "order_id": "BATCH_164445",
+        "table": "33",
+        "waiter": "GarcomZ",
+        "items": [
+            {
+                "id": "8e318082-94b0-49bd-b104-28e5bf9b05e4",
+                "printed": false,
+                "print_status": "pending",
+                "name": "Coca Cola",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 5.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Bebidas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "GarcomZ",
+                "created_at": "03/02/2026 16:44"
+            }
+        ],
+        "total": 5.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260203164446259003",
+        "timestamp": "03/02/2026 16:44:46",
+        "timestamp_iso": "2026-02-03T16:44:46.259013",
+        "action": "close_table",
+        "user": "admin_user",
+        "order_id": null,
+        "table": "99",
+        "waiter": "admin_user",
+        "items": [
+            {
+                "name": "Pizza",
+                "price": 100.0,
+                "qty": 1,
+                "category": "Alimentacao"
+            }
+        ],
+        "total": 110.0,
+        "status": "closed"
+    },
+    {
+        "id": "ORD_20260203164447259289",
+        "timestamp": "03/02/2026 16:44:47",
+        "timestamp_iso": "2026-02-03T16:44:47.259305",
+        "action": "add_items",
+        "user": "TestAdmin",
+        "order_id": "BATCH_164447",
+        "table": "99",
+        "waiter": "Angelo",
+        "items": [
+            {
+                "id": "989513f4-650b-446c-b04f-63442e59190f",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Test No Print Item",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 10.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Test",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "Angelo",
+                "created_at": "03/02/2026 16:44"
+            }
+        ],
+        "total": 10.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260203164448083553",
+        "timestamp": "03/02/2026 16:44:48",
+        "timestamp_iso": "2026-02-03T16:44:48.083570",
+        "action": "close_table",
+        "user": "TestAdmin",
+        "order_id": null,
+        "table": "99",
+        "waiter": null,
+        "items": [],
+        "total": 0.0,
+        "status": "closed"
+    },
+    {
+        "id": "ORD_20260203164741570547",
+        "timestamp": "03/02/2026 16:47:41",
+        "timestamp_iso": "2026-02-03T16:47:41.570573",
+        "action": "add_items",
+        "user": "admin",
+        "order_id": "batch_test_1",
+        "table": "40",
+        "waiter": "GarcomY",
+        "items": [
+            {
+                "id": "8746bbc4-5778-4237-ad42-2e71a1a6a632",
+                "printed": false,
+                "print_status": "pending",
+                "name": "Burger",
+                "flavor": null,
+                "qty": 2.0,
+                "price": 20.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": null,
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "GarcomY",
+                "created_at": "03/02/2026 16:47"
+            }
+        ],
+        "total": 40.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260203164741846591",
+        "timestamp": "03/02/2026 16:47:41",
+        "timestamp_iso": "2026-02-03T16:47:41.846604",
+        "action": "add_items",
+        "user": "admin",
+        "order_id": "BATCH_164741",
+        "table": "33",
+        "waiter": "GarcomZ",
+        "items": [
+            {
+                "id": "0e490857-a1ef-4b8a-8d67-643fbe94f57c",
+                "printed": false,
+                "print_status": "pending",
+                "name": "Coca Cola",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 5.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Bebidas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "GarcomZ",
+                "created_at": "03/02/2026 16:47"
+            }
+        ],
+        "total": 5.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260203164742592590",
+        "timestamp": "03/02/2026 16:47:42",
+        "timestamp_iso": "2026-02-03T16:47:42.592604",
+        "action": "close_table",
+        "user": "admin_user",
+        "order_id": null,
+        "table": "99",
+        "waiter": "admin_user",
+        "items": [
+            {
+                "name": "Pizza",
+                "price": 100.0,
+                "qty": 1,
+                "category": "Alimentacao"
+            }
+        ],
+        "total": 110.0,
+        "status": "closed"
+    },
+    {
+        "id": "ORD_20260203164743699478",
+        "timestamp": "03/02/2026 16:47:43",
+        "timestamp_iso": "2026-02-03T16:47:43.699492",
+        "action": "add_items",
+        "user": "TestAdmin",
+        "order_id": "BATCH_164743",
+        "table": "99",
+        "waiter": "Angelo",
+        "items": [
+            {
+                "id": "1758a508-b2de-4a64-87e2-057391a5b07f",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Test No Print Item",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 10.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Test",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "Angelo",
+                "created_at": "03/02/2026 16:47"
+            }
+        ],
+        "total": 10.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260203164744633630",
+        "timestamp": "03/02/2026 16:47:44",
+        "timestamp_iso": "2026-02-03T16:47:44.633647",
+        "action": "close_table",
+        "user": "TestAdmin",
+        "order_id": null,
+        "table": "99",
+        "waiter": null,
+        "items": [],
+        "total": 0.0,
+        "status": "closed"
+    },
+    {
+        "id": "ORD_20260203165200195392",
+        "timestamp": "03/02/2026 16:52:00",
+        "timestamp_iso": "2026-02-03T16:52:00.195418",
+        "action": "add_items",
+        "user": "admin",
+        "order_id": "batch_test_1",
+        "table": "40",
+        "waiter": "GarcomY",
+        "items": [
+            {
+                "id": "22c60a2e-c781-444a-9218-502ff5bb3c3e",
+                "printed": false,
+                "print_status": "pending",
+                "name": "Burger",
+                "flavor": null,
+                "qty": 2.0,
+                "price": 20.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": null,
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "GarcomY",
+                "created_at": "03/02/2026 16:52"
+            }
+        ],
+        "total": 40.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260203165200365448",
+        "timestamp": "03/02/2026 16:52:00",
+        "timestamp_iso": "2026-02-03T16:52:00.365462",
+        "action": "add_items",
+        "user": "admin",
+        "order_id": "BATCH_165200",
+        "table": "33",
+        "waiter": "GarcomZ",
+        "items": [
+            {
+                "id": "9e0fc13e-5b3e-4d1f-9f94-1e31bfabc436",
+                "printed": false,
+                "print_status": "pending",
+                "name": "Coca Cola",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 5.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Bebidas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "GarcomZ",
+                "created_at": "03/02/2026 16:52"
+            }
+        ],
+        "total": 5.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260203165200775508",
+        "timestamp": "03/02/2026 16:52:00",
+        "timestamp_iso": "2026-02-03T16:52:00.775520",
+        "action": "close_table",
+        "user": "admin_user",
+        "order_id": null,
+        "table": "99",
+        "waiter": "admin_user",
+        "items": [
+            {
+                "name": "Pizza",
+                "price": 100.0,
+                "qty": 1,
+                "category": "Alimentacao"
+            }
+        ],
+        "total": 110.0,
+        "status": "closed"
+    },
+    {
+        "id": "ORD_20260203165200935375",
+        "timestamp": "03/02/2026 16:52:00",
+        "timestamp_iso": "2026-02-03T16:52:00.935388",
+        "action": "add_items",
+        "user": "admin",
+        "order_id": "BATCH_165200",
+        "table": "40",
+        "waiter": "Test",
+        "items": [
+            {
+                "id": "875c127a-e1db-4173-97a5-31c402e1fb58",
+                "printed": false,
+                "print_status": "pending",
+                "name": "Item1",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 100.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Food",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "Test",
+                "created_at": "03/02/2026 16:52"
+            }
+        ],
+        "total": 100.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260203165200977001",
+        "timestamp": "03/02/2026 16:52:00",
+        "timestamp_iso": "2026-02-03T16:52:00.977014",
+        "action": "close_table",
+        "user": "admin",
+        "order_id": null,
+        "table": "40",
+        "waiter": "Test",
+        "items": [
+            {
+                "id": "875c127a-e1db-4173-97a5-31c402e1fb58",
+                "printed": false,
+                "print_status": "error",
+                "name": "Item1",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 100.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Food",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "Test",
+                "created_at": "03/02/2026 16:52"
+            }
+        ],
+        "total": 100.0,
+        "status": "closed"
+    },
+    {
+        "id": "ORD_20260203165201633056",
+        "timestamp": "03/02/2026 16:52:01",
+        "timestamp_iso": "2026-02-03T16:52:01.633068",
+        "action": "add_items",
+        "user": "TestAdmin",
+        "order_id": "BATCH_165201",
+        "table": "99",
+        "waiter": "Angelo",
+        "items": [
+            {
+                "id": "fac6877c-db83-427b-bd09-536cf61f6136",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Test No Print Item",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 10.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Test",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "Angelo",
+                "created_at": "03/02/2026 16:52"
+            }
+        ],
+        "total": 10.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260203165202496277",
+        "timestamp": "03/02/2026 16:52:02",
+        "timestamp_iso": "2026-02-03T16:52:02.496291",
+        "action": "close_table",
+        "user": "TestAdmin",
+        "order_id": null,
+        "table": "99",
+        "waiter": null,
+        "items": [],
+        "total": 0.0,
+        "status": "closed"
+    },
+    {
+        "id": "ORD_20260203171806110778",
+        "timestamp": "03/02/2026 17:18:06",
+        "timestamp_iso": "2026-02-03T17:18:06.110792",
+        "action": "close_table",
+        "user": "admin_user",
+        "order_id": null,
+        "table": "99",
+        "waiter": "admin_user",
+        "items": [
+            {
+                "name": "Pizza",
+                "price": 100.0,
+                "qty": 1,
+                "category": "Alimentacao"
+            }
+        ],
+        "total": 110.0,
+        "status": "closed"
+    },
+    {
+        "id": "ORD_20260203171806288915",
+        "timestamp": "03/02/2026 17:18:06",
+        "timestamp_iso": "2026-02-03T17:18:06.288925",
+        "action": "add_items",
+        "user": "admin",
+        "order_id": "BATCH_171806",
+        "table": "40",
+        "waiter": "Test",
+        "items": [
+            {
+                "id": "6130b382-58bf-42d7-a7b8-1aab45419bc1",
+                "printed": false,
+                "print_status": "pending",
+                "name": "Item1",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 100.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Food",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "Test",
+                "created_at": "03/02/2026 17:18"
+            }
+        ],
+        "total": 100.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260203171806335717",
+        "timestamp": "03/02/2026 17:18:06",
+        "timestamp_iso": "2026-02-03T17:18:06.335738",
+        "action": "close_table",
+        "user": "admin",
+        "order_id": null,
+        "table": "40",
+        "waiter": "Test",
+        "items": [
+            {
+                "id": "6130b382-58bf-42d7-a7b8-1aab45419bc1",
+                "printed": false,
+                "print_status": "error",
+                "name": "Item1",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 100.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Food",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "Test",
+                "created_at": "03/02/2026 17:18"
+            }
+        ],
+        "total": 100.0,
+        "status": "closed"
+    },
+    {
+        "id": "ORD_20260203171807065214",
+        "timestamp": "03/02/2026 17:18:07",
+        "timestamp_iso": "2026-02-03T17:18:07.065229",
+        "action": "add_items",
+        "user": "TestAdmin",
+        "order_id": "BATCH_171807",
+        "table": "99",
+        "waiter": "Angelo",
+        "items": [
+            {
+                "id": "c1c20878-4a61-4ca9-9b5e-0c456b263b2b",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Test No Print Item",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 10.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Test",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "Angelo",
+                "created_at": "03/02/2026 17:18"
+            }
+        ],
+        "total": 10.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260203171807645613",
+        "timestamp": "03/02/2026 17:18:07",
+        "timestamp_iso": "2026-02-03T17:18:07.645635",
+        "action": "close_table",
+        "user": "TestAdmin",
+        "order_id": null,
+        "table": "99",
+        "waiter": null,
+        "items": [],
+        "total": 0.0,
+        "status": "closed"
+    },
+    {
+        "id": "ORD_20260203174413564819",
+        "timestamp": "03/02/2026 17:44:13",
+        "timestamp_iso": "2026-02-03T17:44:13.564835",
+        "action": "close_table",
+        "user": "admin_user",
+        "order_id": null,
+        "table": "99",
+        "waiter": "admin_user",
+        "items": [
+            {
+                "name": "Pizza",
+                "price": 100.0,
+                "qty": 1,
+                "category": "Alimentacao"
+            }
+        ],
+        "total": 110.0,
+        "status": "closed"
+    },
+    {
+        "id": "ORD_20260203174413765219",
+        "timestamp": "03/02/2026 17:44:13",
+        "timestamp_iso": "2026-02-03T17:44:13.765233",
+        "action": "add_items",
+        "user": "admin",
+        "order_id": "BATCH_174413",
+        "table": "40",
+        "waiter": "Test",
+        "items": [
+            {
+                "id": "a3577c73-7558-4af5-8dd4-208822056064",
+                "printed": false,
+                "print_status": "pending",
+                "name": "Item1",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 100.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Food",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "Test",
+                "created_at": "03/02/2026 17:44"
+            }
+        ],
+        "total": 100.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260203174413821738",
+        "timestamp": "03/02/2026 17:44:13",
+        "timestamp_iso": "2026-02-03T17:44:13.821757",
+        "action": "close_table",
+        "user": "admin",
+        "order_id": null,
+        "table": "40",
+        "waiter": "Test",
+        "items": [
+            {
+                "id": "a3577c73-7558-4af5-8dd4-208822056064",
+                "printed": false,
+                "print_status": "error",
+                "name": "Item1",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 100.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Food",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "Test",
+                "created_at": "03/02/2026 17:44"
+            }
+        ],
+        "total": 100.0,
+        "status": "closed"
+    },
+    {
+        "id": "ORD_20260203174414825623",
+        "timestamp": "03/02/2026 17:44:14",
+        "timestamp_iso": "2026-02-03T17:44:14.825635",
+        "action": "add_items",
+        "user": "TestAdmin",
+        "order_id": "BATCH_174414",
+        "table": "99",
+        "waiter": "Angelo",
+        "items": [
+            {
+                "id": "c5a8c05d-8abf-48df-bf54-822976c1798f",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Test No Print Item",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 10.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Test",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "Angelo",
+                "created_at": "03/02/2026 17:44"
+            }
+        ],
+        "total": 10.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260203174415602121",
+        "timestamp": "03/02/2026 17:44:15",
+        "timestamp_iso": "2026-02-03T17:44:15.602145",
+        "action": "close_table",
+        "user": "TestAdmin",
+        "order_id": null,
+        "table": "99",
+        "waiter": null,
+        "items": [],
+        "total": 0.0,
+        "status": "closed"
+    },
+    {
+        "id": "ORD_20260203180213526391",
+        "timestamp": "03/02/2026 18:02:13",
+        "timestamp_iso": "2026-02-03T18:02:13.526403",
+        "action": "close_table",
+        "user": "admin_user",
+        "order_id": null,
+        "table": "99",
+        "waiter": "admin_user",
+        "items": [
+            {
+                "name": "Pizza",
+                "price": 100.0,
+                "qty": 1,
+                "category": "Alimentacao"
+            }
+        ],
+        "total": 110.0,
+        "status": "closed"
+    },
+    {
+        "id": "ORD_20260203180213816114",
+        "timestamp": "03/02/2026 18:02:13",
+        "timestamp_iso": "2026-02-03T18:02:13.816126",
+        "action": "add_items",
+        "user": "admin",
+        "order_id": "BATCH_180213",
+        "table": "40",
+        "waiter": "Test",
+        "items": [
+            {
+                "id": "6264dd97-3e0b-4848-8f8d-5312d3356358",
+                "printed": false,
+                "print_status": "pending",
+                "name": "Item1",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 100.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Food",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "Test",
+                "created_at": "03/02/2026 18:02"
+            }
+        ],
+        "total": 100.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260203180213862103",
+        "timestamp": "03/02/2026 18:02:13",
+        "timestamp_iso": "2026-02-03T18:02:13.862122",
+        "action": "close_table",
+        "user": "admin",
+        "order_id": null,
+        "table": "40",
+        "waiter": "Test",
+        "items": [
+            {
+                "id": "6264dd97-3e0b-4848-8f8d-5312d3356358",
+                "printed": false,
+                "print_status": "error",
+                "name": "Item1",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 100.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Food",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "Test",
+                "created_at": "03/02/2026 18:02"
+            }
+        ],
+        "total": 100.0,
+        "status": "closed"
+    },
+    {
+        "id": "ORD_20260203180214622595",
+        "timestamp": "03/02/2026 18:02:14",
+        "timestamp_iso": "2026-02-03T18:02:14.622616",
+        "action": "add_items",
+        "user": "TestAdmin",
+        "order_id": "BATCH_180214",
+        "table": "99",
+        "waiter": "Angelo",
+        "items": [
+            {
+                "id": "a99a1d37-161f-4e32-851f-8c0124eb568e",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Test No Print Item",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 10.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Test",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "Angelo",
+                "created_at": "03/02/2026 18:02"
+            }
+        ],
+        "total": 10.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260203180215332784",
+        "timestamp": "03/02/2026 18:02:15",
+        "timestamp_iso": "2026-02-03T18:02:15.332801",
+        "action": "close_table",
+        "user": "TestAdmin",
+        "order_id": null,
+        "table": "99",
+        "waiter": null,
+        "items": [],
+        "total": 0.0,
+        "status": "closed"
+    },
+    {
+        "id": "ORD_20260203181801806815",
+        "timestamp": "03/02/2026 18:18:01",
+        "timestamp_iso": "2026-02-03T18:18:01.806827",
+        "action": "close_table",
+        "user": "admin_user",
+        "order_id": null,
+        "table": "99",
+        "waiter": "admin_user",
+        "items": [
+            {
+                "name": "Pizza",
+                "price": 100.0,
+                "qty": 1,
+                "category": "Alimentacao"
+            }
+        ],
+        "total": 110.0,
+        "status": "closed"
+    },
+    {
+        "id": "ORD_20260203181801980652",
+        "timestamp": "03/02/2026 18:18:01",
+        "timestamp_iso": "2026-02-03T18:18:01.980662",
+        "action": "add_items",
+        "user": "admin",
+        "order_id": "BATCH_181801",
+        "table": "40",
+        "waiter": "Test",
+        "items": [
+            {
+                "id": "a7f01875-9b79-4f06-aeed-1d2241755eb9",
+                "printed": false,
+                "print_status": "pending",
+                "name": "Item1",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 100.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Food",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "Test",
+                "created_at": "03/02/2026 18:18"
+            }
+        ],
+        "total": 100.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260203181802016742",
+        "timestamp": "03/02/2026 18:18:02",
+        "timestamp_iso": "2026-02-03T18:18:02.016756",
+        "action": "close_table",
+        "user": "admin",
+        "order_id": null,
+        "table": "40",
+        "waiter": "Test",
+        "items": [
+            {
+                "id": "a7f01875-9b79-4f06-aeed-1d2241755eb9",
+                "printed": false,
+                "print_status": "error",
+                "name": "Item1",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 100.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Food",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "Test",
+                "created_at": "03/02/2026 18:18"
+            }
+        ],
+        "total": 100.0,
+        "status": "closed"
+    },
+    {
+        "id": "ORD_20260203181802642882",
+        "timestamp": "03/02/2026 18:18:02",
+        "timestamp_iso": "2026-02-03T18:18:02.642898",
+        "action": "add_items",
+        "user": "TestAdmin",
+        "order_id": "BATCH_181802",
+        "table": "99",
+        "waiter": "Angelo",
+        "items": [
+            {
+                "id": "ecdc6816-c456-41a3-a1d4-f9e8206805c0",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Test No Print Item",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 10.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Test",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "Angelo",
+                "created_at": "03/02/2026 18:18"
+            }
+        ],
+        "total": 10.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260203181803146667",
+        "timestamp": "03/02/2026 18:18:03",
+        "timestamp_iso": "2026-02-03T18:18:03.146684",
+        "action": "close_table",
+        "user": "TestAdmin",
+        "order_id": null,
+        "table": "99",
+        "waiter": null,
+        "items": [],
+        "total": 0.0,
+        "status": "closed"
+    },
+    {
+        "id": "ORD_20260203184553131644",
+        "timestamp": "03/02/2026 18:45:53",
+        "timestamp_iso": "2026-02-03T18:45:53.131656",
+        "action": "close_table",
+        "user": "admin_user",
+        "order_id": null,
+        "table": "99",
+        "waiter": "admin_user",
+        "items": [
+            {
+                "name": "Pizza",
+                "price": 100.0,
+                "qty": 1,
+                "category": "Alimentacao"
+            }
+        ],
+        "total": 110.0,
+        "status": "closed"
+    },
+    {
+        "id": "ORD_20260203184553307626",
+        "timestamp": "03/02/2026 18:45:53",
+        "timestamp_iso": "2026-02-03T18:45:53.307646",
+        "action": "add_items",
+        "user": "admin",
+        "order_id": "BATCH_184553",
+        "table": "40",
+        "waiter": "Test",
+        "items": [
+            {
+                "id": "4df7b252-cbb4-4216-ac01-341181c31b2b",
+                "printed": false,
+                "print_status": "pending",
+                "name": "Item1",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 100.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Food",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "Test",
+                "created_at": "03/02/2026 18:45"
+            }
+        ],
+        "total": 100.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260203184553354637",
+        "timestamp": "03/02/2026 18:45:53",
+        "timestamp_iso": "2026-02-03T18:45:53.354657",
+        "action": "close_table",
+        "user": "admin",
+        "order_id": null,
+        "table": "40",
+        "waiter": "Test",
+        "items": [
+            {
+                "id": "4df7b252-cbb4-4216-ac01-341181c31b2b",
+                "printed": false,
+                "print_status": "error",
+                "name": "Item1",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 100.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Food",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "Test",
+                "created_at": "03/02/2026 18:45"
+            }
+        ],
+        "total": 100.0,
+        "status": "closed"
+    },
+    {
+        "id": "ORD_20260203184554063739",
+        "timestamp": "03/02/2026 18:45:54",
+        "timestamp_iso": "2026-02-03T18:45:54.063757",
+        "action": "add_items",
+        "user": "TestAdmin",
+        "order_id": "BATCH_184554",
+        "table": "99",
+        "waiter": "Angelo",
+        "items": [
+            {
+                "id": "8b5f56fd-f1ee-49e3-aa08-a049db443e53",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Test No Print Item",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 10.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Test",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "Angelo",
+                "created_at": "03/02/2026 18:45"
+            }
+        ],
+        "total": 10.0,
+        "status": "submitted"
+    },
+    {
+        "id": "ORD_20260203184554784690",
+        "timestamp": "03/02/2026 18:45:54",
+        "timestamp_iso": "2026-02-03T18:45:54.784706",
+        "action": "close_table",
+        "user": "TestAdmin",
+        "order_id": null,
+        "table": "99",
+        "waiter": null,
+        "items": [],
+        "total": 0.0,
+        "status": "closed"
+    }
+]

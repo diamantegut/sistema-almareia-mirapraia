@@ -1,0 +1,435 @@
+{% extends 'base.html' %}
+
+{% block title %}Nova Conferência - Back of the House{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2><i class="bi bi-clipboard-plus"></i> Nova Conferência de Estoque</h2>
+    
+    <form method="POST" action="{{ url_for('stock.new_conference') }}">
+        <input type="hidden" name="preset_name" id="preset_name">
+        <div class="form-group">
+            <label for="department">Departamento:</label>
+            <select id="department" name="department" class="form-control" required {% if locked_dept %}readonly{% endif %}>
+                <option value="">Selecione...</option>
+                {% for dept in departments %}
+                    <option value="{{ dept }}" {% if locked_dept == dept %}selected{% endif %}>{{ dept }}</option>
+                {% endfor %}
+            </select>
+            {% if locked_dept %}
+            <input type="hidden" name="department" value="{{ locked_dept }}">
+            <small>Você só pode iniciar conferências para seu departamento.</small>
+            {% endif %}
+        </div>
+
+        <div id="presets-container" style="margin-bottom: 20px; display: none;">
+            <label>Modelos Salvos:</label>
+            <div id="dept-alert" style="display: none; background-color: #f8d7da; color: #721c24; padding: 10px; margin-bottom: 10px; border: 1px solid #f5c6cb; border-radius: 4px;">
+                <strong>Atenção:</strong> Existem conferências atrasadas neste departamento! Verifique os itens em vermelho.
+            </div>
+            <div id="presets-list" style="display: flex; gap: 5px; flex-wrap: wrap;">
+                <!-- Preset buttons injected by JS -->
+            </div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <button type="submit" class="action-btn" style="background-color: #2ecc71; width: 100%;"><i class="bi bi-play-circle-fill"></i> Iniciar Contagem</button>
+        </div>
+
+        <div class="form-group" id="category-group" style="display: none;">
+            <label>Categorias (Opcional): <small id="cat-count" style="color: #666;"></small></label>
+            
+            <div id="category-container" style="max-height: 200px; overflow-y: auto; border: 1px solid #ced4da; border-radius: 4px; padding: 10px; background: white;">
+                <!-- Checkboxes injected by JS -->
+            </div>
+            
+            <div style="margin-top: 5px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <button type="button" onclick="toggleAllCategories(true)" style="font-size: 12px; padding: 2px 5px; cursor: pointer;">Selecionar Todas</button>
+                    <button type="button" onclick="toggleAllCategories(false)" style="font-size: 12px; padding: 2px 5px; cursor: pointer;">Limpar Seleção</button>
+                </div>
+                <div>
+                <button type="button" onclick="openSavePresetModal()" style="font-size: 12px; padding: 2px 5px; cursor: pointer; background-color: #1e3a8a; color: white; border: none; border-radius: 3px;"><i class="bi bi-save"></i> Salvar Seleção como Modelo</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ url_for('index') }}" class="action-btn" style="background-color: #95a5a6; text-decoration: none;"><i class="bi bi-x-circle"></i> Cancelar</a>
+        </div>
+    </form>
+</div>
+
+    <div id="savePresetModal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <span class="close" onclick="closeSavePresetModal()">&times;</span>
+            <h2>Salvar Modelo de Conferência</h2>
+            <p>Dê um nome para este conjunto de categorias selecionadas:</p>
+            <input type="text" id="presetName" class="form-control" placeholder="Ex: Contagem Semanal, Inventário Frios..." style="margin-bottom: 15px;">
+            
+            <p>Frequência Esperada:</p>
+            <input type="hidden" id="presetFreq" value="Semanal">
+            <div id="freqButtons" style="margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 5px;">
+                <button type="button" class="freq-btn active" onclick="selectFreq(this, 'Semanal')" data-value="Semanal">Semanal</button>
+                <button type="button" class="freq-btn" onclick="selectFreq(this, 'Quinzenal')" data-value="Quinzenal">Quinzenal</button>
+                <button type="button" class="freq-btn" onclick="selectFreq(this, 'Mensal')" data-value="Mensal">Mensal</button>
+                <button type="button" class="freq-btn" onclick="selectFreq(this, 'Trimestral')" data-value="Trimestral">Trimestral</button>
+                <button type="button" class="freq-btn" onclick="selectFreq(this, 'Semestral')" data-value="Semestral">Semestral</button>
+            </div>
+            <style>
+                .freq-btn {
+                    padding: 8px 12px;
+                    border: 1px solid #ddd;
+                    border-radius: 4px;
+                    background: #f8f9fa;
+                    cursor: pointer;
+                    font-size: 14px;
+                    transition: all 0.2s;
+                }
+                .freq-btn.active {
+                    background-color: #1e3a8a;
+                    color: white;
+                    border-color: #111827;
+                }
+            </style>
+
+            <div style="text-align: right;">
+                <button type="button" class="btn-cancel" onclick="closeSavePresetModal()">Cancelar</button>
+                <button type="button" class="btn-confirm" onclick="savePreset()">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .preset-btn {
+            transition: all 0.2s;
+        }
+        .preset-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .preset-btn.active {
+            background-color: #1e3a8a !important;
+            color: white !important;
+            border-color: #2980b9 !important;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.3);
+            position: relative;
+        }
+        .preset-btn.active::after {
+            content: ' ✓';
+            font-weight: bold;
+        }
+    </style>
+
+    <script type="application/json" id="dept-categories-data">
+        {{ dept_categories | tojson | default('{}') }}
+    </script>
+    <script type="application/json" id="dept-presets-data">
+        {{ dept_presets | tojson | default('{}') }}
+    </script>
+
+    <script>
+    var deptCategoriesDataEl = document.getElementById('dept-categories-data');
+    var deptCategories = deptCategoriesDataEl ? JSON.parse(deptCategoriesDataEl.textContent || '{}') : {};
+    var deptPresetsDataEl = document.getElementById('dept-presets-data');
+    var deptPresets = deptPresetsDataEl ? JSON.parse(deptPresetsDataEl.textContent || '{}') : {};
+    var deptSelect = document.getElementById('department');
+    var catContainer = document.getElementById('category-container');
+    var catGroup = document.getElementById('category-group');
+    var catCount = document.getElementById('cat-count');
+    var presetsContainer = document.getElementById('presets-container');
+    var presetsList = document.getElementById('presets-list');
+    var deptAlert = document.getElementById('dept-alert');
+    var modal = document.getElementById('savePresetModal');
+
+    function selectFreq(btn, value) {
+        document.getElementById('presetFreq').value = value;
+        var buttons = document.getElementById('freqButtons').getElementsByClassName('freq-btn');
+        for (var i = 0; i < buttons.length; i++) {
+            buttons[i].classList.remove('active');
+        }
+        btn.classList.add('active');
+    }
+
+    function updateCategories() {
+        var selectedDept = deptSelect.value;
+        
+        // Clear existing
+        catContainer.innerHTML = '';
+        catCount.textContent = '';
+        presetsList.innerHTML = '';
+        document.getElementById('preset_name').value = ''; // Clear preset on dept change
+        
+        if (selectedDept && deptCategories[selectedDept]) {
+            var categories = deptCategories[selectedDept];
+            
+            if (categories.length > 0) {
+                var html = '';
+                
+                for (var i = 0; i < categories.length; i++) {
+                    var cat = categories[i];
+                    html += '<div style="margin-bottom: 5px;">';
+                    html += '<input type="checkbox" id="cat_' + i + '" name="categories" value="' + cat + '">';
+                    html += '<label for="cat_' + i + '" style="margin-left: 5px; font-weight: normal; cursor: pointer;">' + cat + '</label>';
+                    html += '</div>';
+                }
+                
+                catContainer.innerHTML = html;
+                catGroup.style.display = 'block';
+                catCount.textContent = '(' + categories.length + ')';
+                
+                // Show presets for this department
+                updatePresetsList(selectedDept);
+                
+            } else {
+                catGroup.style.display = 'none';
+            }
+        } else {
+            catGroup.style.display = 'none';
+        }
+    }
+    
+    function updatePresetsList(dept) {
+        if (deptPresets && deptPresets[dept] && deptPresets[dept].length > 0) {
+            var html = '';
+            var hasLate = false;
+            
+            deptPresets[dept].forEach(function(preset, index) {
+                var title = (preset.frequency || 'Semanal');
+                var style = 'padding: 5px 10px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 13px;';
+                
+                if (preset.status_info) {
+                    if (preset.status_info.status === 'late') {
+                        title += ' - ATRASADO ' + preset.status_info.days_late + ' dias!';
+                        style += 'background-color: #e74c3c; color: white; border-color: #c0392b; font-weight: bold;';
+                        hasLate = true;
+                    } else if (preset.status_info.status === 'never') {
+                        title += ' - Nunca realizada';
+                        style += 'background-color: #95a5a6; color: white; border-color: #7f8c8d;';
+                    } else {
+                        title += ' - Em dia';
+                        style += 'background: #f8f9fa; color: #333;';
+                    }
+                } else {
+                     style += 'background: #f8f9fa; color: #333;';
+                }
+                
+                html += '<div style="display: inline-flex; align-items: stretch; margin-right: 5px; margin-bottom: 5px;">';
+                // Use index to avoid quote escaping issues
+                html += '<button type="button" id="btn-preset-' + index + '" class="preset-btn" onclick="loadPresetByIndex(\'' + dept + '\', ' + index + ')" title="' + title + '" style="' + style + '; margin-right: 0; margin-bottom: 0; border-top-right-radius: 0; border-bottom-right-radius: 0;">' + preset.name + '</button>';
+                html += '<button type="button" onclick="deletePresetByIndex(\'' + dept + '\', ' + index + ')" title="Excluir Modelo" style="padding: 5px 8px; border: 1px solid #ddd; border-left: none; border-radius: 0 4px 4px 0; cursor: pointer; background-color: #c0392b; color: white; font-size: 13px; margin-bottom: 0; display: flex; align-items: center;">&times;</button>';
+                html += '</div>';
+            });
+            presetsList.innerHTML = html;
+            presetsContainer.style.display = 'block';
+            
+            if (hasLate) {
+                deptAlert.style.display = 'block';
+            } else {
+                deptAlert.style.display = 'none';
+            }
+        } else {
+            presetsContainer.style.display = 'none';
+            deptAlert.style.display = 'none';
+        }
+    }
+    
+    function loadPresetByIndex(dept, index) {
+        if (!deptPresets[dept] || !deptPresets[dept][index]) return;
+        var preset = deptPresets[dept][index];
+        loadPreset(preset.name);
+    }
+
+    function deletePresetByIndex(dept, index) {
+        if (!deptPresets[dept] || !deptPresets[dept][index]) return;
+        var preset = deptPresets[dept][index];
+        deletePreset(preset.name);
+    }
+    
+    function loadPreset(presetName) {
+        var selectedDept = deptSelect.value;
+        var preset = null;
+        if (deptPresets[selectedDept]) {
+            for (var i = 0; i < deptPresets[selectedDept].length; i++) {
+                if (deptPresets[selectedDept][i].name === presetName) {
+                    preset = deptPresets[selectedDept][i];
+                    break;
+                }
+            }
+        }
+        
+        var buttons = presetsList.querySelectorAll('.preset-btn');
+        for (var j = 0; j < buttons.length; j++) {
+            buttons[j].classList.remove('active');
+        }
+
+        if (preset) {
+            document.getElementById('preset_name').value = presetName;
+            
+            toggleAllCategories(false);
+            var checkboxes = catContainer.querySelectorAll('input[type="checkbox"]');
+            var count = 0;
+            
+            for (var k = 0; k < checkboxes.length; k++) {
+                if (preset.categories.indexOf(checkboxes[k].value) !== -1) {
+                    checkboxes[k].checked = true;
+                    count++;
+                }
+            }
+        }
+    }
+
+    function toggleAllCategories(check) {
+        var checkboxes = catContainer.querySelectorAll('input[type="checkbox"]');
+        for (var i = 0; i < checkboxes.length; i++) {
+            checkboxes[i].checked = check;
+        }
+    }
+    
+    function openSavePresetModal() {
+        // Validate if any category is selected
+        var checkboxes = catContainer.querySelectorAll('input[type="checkbox"]:checked');
+        if (checkboxes.length === 0) {
+            alert('Selecione pelo menos uma categoria para salvar como modelo.');
+            return;
+        }
+        document.getElementById('presetName').value = '';
+        
+        // Reset frequency to Semanal
+        var weeklyBtn = document.querySelector('.freq-btn[data-value="Semanal"]');
+        if (weeklyBtn) {
+            selectFreq(weeklyBtn, 'Semanal');
+        }
+
+        modal.style.display = 'block';
+        document.getElementById('presetName').focus();
+    }
+    
+    function closeSavePresetModal() {
+        modal.style.display = 'none';
+    }
+    
+    function deletePreset(name) {
+        if (!confirm('Tem certeza que deseja excluir o modelo "' + name + '"?')) {
+            return;
+        }
+        
+        var selectedDept = deptSelect.value;
+        
+        fetch('/conference/preset/delete', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                name: name,
+                department: selectedDept
+            })
+        })
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
+            if (data.success) {
+                // Remove from local list
+                if (deptPresets[selectedDept]) {
+                    deptPresets[selectedDept] = deptPresets[selectedDept].filter(function(p) {
+                        return p.name !== name;
+                    });
+                    updatePresetsList(selectedDept);
+                }
+            } else {
+                alert('Erro ao excluir: ' + data.message);
+            }
+        })
+        .catch(function(error) {
+            console.error('Error:', error);
+            alert('Erro ao excluir modelo.');
+        });
+    }
+
+    function savePreset() {
+        var name = document.getElementById('presetName').value.trim();
+        var frequency = document.getElementById('presetFreq').value;
+        
+        if (!name) {
+            alert('Por favor, digite um nome para o modelo.');
+            return;
+        }
+        
+        var selectedDept = deptSelect.value;
+        var checkboxes = catContainer.querySelectorAll('input[type="checkbox"]:checked');
+        var categories = [];
+        for (var i = 0; i < checkboxes.length; i++) {
+            categories.push(checkboxes[i].value);
+        }
+        
+        fetch('/conference/preset/save', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                name: name,
+                department: selectedDept,
+                categories: categories,
+                frequency: frequency
+            })
+        })
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
+            if (data.success) {
+                closeSavePresetModal();
+                // Update local list
+                if (!deptPresets[selectedDept]) {
+                    deptPresets[selectedDept] = [];
+                }
+                
+                // Update or add
+                var existingIndex = -1;
+                if (deptPresets[selectedDept] && deptPresets[selectedDept].length > 0) {
+                    for (var idx = 0; idx < deptPresets[selectedDept].length; idx++) {
+                        if (deptPresets[selectedDept][idx].name === name) {
+                            existingIndex = idx;
+                            break;
+                        }
+                    }
+                }
+                if (existingIndex >= 0) {
+                    deptPresets[selectedDept][existingIndex].categories = categories;
+                    deptPresets[selectedDept][existingIndex].frequency = frequency;
+                } else {
+                    deptPresets[selectedDept].push({
+                        name: name,
+                        department: selectedDept,
+                        categories: categories,
+                        frequency: frequency,
+                        status_info: {status: 'never', days_late: 0}
+                    });
+                }
+                
+                updatePresetsList(selectedDept);
+                alert('Modelo salvo com sucesso!');
+            } else {
+                alert('Erro ao salvar: ' + data.message);
+            }
+        })
+        .catch(function(error) {
+            console.error('Error:', error);
+            alert('Erro ao salvar modelo.');
+        });
+    }
+    
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            closeSavePresetModal();
+        }
+    }
+
+    deptSelect.addEventListener('change', updateCategories);
+
+    // Run on load if department is already selected (e.g. locked_dept)
+    if (deptSelect.value) {
+        updateCategories();
+    }
+</script>
+{% endblock %}
