@@ -2,10 +2,10 @@
     "integrations": [
         {
             "provider": "nuvem_fiscal",
-            "environment": "production",
+            "environment": "homologation",
             "api_token": "",
-            "client_id": "IvcdLqKE9xNJAEAlEnr7",
-            "client_secret": "CRSg2yMXvsKZiAI5DqIP0Rifr9efu08o3UXazJdP",
+            "client_id": "1t5mSZm3Gz0MGkC6AkR5",
+            "client_secret": "1rr3b29iClj6XZ65gnXvg6Tf13Y9ajbgXPjuu7wU",
             "cnpj_emitente": "28952732000109",
             "ie_emitente": "074353209",
             "csc_token": "0B97FF6D-2F38-48A1-AF33-F7B89ABA62E0",
@@ -30,5 +30,6 @@
             "xml_storage_path": "fiscal_documents/xmls_almareia",
             "description": "Almareia - Reservas (NFS-e)"
         }
-    ]
+    ],
+    "environment": "homologation"
 }
