@@ -12,42 +12,45 @@
     <div class="card shadow-sm">
         <div class="card-body">
             <form method="POST">
-                <h5 class="card-title mb-4">Credenciais NFC-e</h5>
+                <h5 class="card-title mb-4">Credenciais Nuvem Fiscal API</h5>
                 
                 <div class="mb-3">
                     <label class="form-label">Ambiente</label>
-                    <select name="environment" class="form-select">
-                        <option value="2" {% if settings.get('environment') == '2' %}selected{% endif %}>Homologação (Testes)</option>
-                        <option value="1" {% if settings.get('environment') == '1' %}selected{% endif %}>Produção</option>
+                    <select name="environment" id="environmentSelector" class="form-select" onchange="updateCredentials()">
+                        <option value="2" {% if settings.get('integrations', [{}])[0].get('environment') == 'homologation' or settings.get('environment') == '2' %}selected{% endif %}>Homologação (Sandbox)</option>
+                        <option value="1" {% if settings.get('integrations', [{}])[0].get('environment') == 'production' or settings.get('environment') == '1' %}selected{% endif %}>Produção</option>
                     </select>
                 </div>
 
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">CSC ID (Token ID)</label>
-                        <input type="text" name="csc_id" class="form-control" value="{{ settings.get('csc_id', '') }}" required>
-                        <div class="form-text">Ex: 000001</div>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">CSC Token (Código de Segurança)</label>
-                        <input type="text" name="csc_token" class="form-control" value="{{ settings.get('csc_token', '') }}" required>
-                    </div>
+                <div class="mb-3">
+                    <label class="form-label">Client ID</label>
+                    <input type="text" name="client_id" id="clientId" class="form-control" value="{{ settings.get('integrations', [{}])[0].get('client_id', '') }}" required>
                 </div>
 
-                <h5 class="card-title mt-4 mb-3">Certificado Digital</h5>
+                <div class="mb-3">
+                    <label class="form-label">Client Secret</label>
+                    <input type="text" name="client_secret" id="clientSecret" class="form-control" value="{{ settings.get('integrations', [{}])[0].get('client_secret', '') }}" required>
+                </div>
                 
-                <div class="mb-3">
-                    <label class="form-label">Caminho do Certificado (.pfx)</label>
-                    <input type="text" name="certificate_path" class="form-control" value="{{ settings.get('certificate_path', '') }}">
-                    <div class="form-text">Caminho absoluto no servidor ou relativo à pasta raiz.</div>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Senha do Certificado</label>
-                    <input type="password" name="certificate_password" class="form-control" value="{{ settings.get('certificate_password', '') }}">
+                <div class="d-flex justify-content-end mb-3">
+                    <button type="button" class="btn btn-outline-info" onclick="testConnection()">
+                        <i class="bi bi-lightning-charge"></i> Testar Conexão
+                    </button>
                 </div>
 
                 <hr class="my-4">
+                
+                <h5 class="card-title mb-3">Configuração NFC-e</h5>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">CSC ID (Token ID)</label>
+                        <input type="text" name="csc_id" class="form-control" value="{{ settings.get('integrations', [{}])[0].get('csc_id', '') }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">CSC Token (Código de Segurança)</label>
+                        <input type="text" name="csc_token" class="form-control" value="{{ settings.get('integrations', [{}])[0].get('csc_token', '') }}">
+                    </div>
+                </div>
 
                 <div class="d-flex justify-content-end gap-2">
                     <a href="{{ url_for('main.index') }}" class="btn btn-secondary">Cancelar</a>
@@ -57,4 +60,71 @@
         </div>
     </div>
 </div>
+
+<script>
+    const credentials = {
+        sandbox: {
+            clientId: '1t5mSZm3Gz0MGkC6AkR5',
+            clientSecret: '1rr3b29iClj6XZ65gnXvg6Tf13Y9ajbgXPjuu7wU'
+        },
+        production: {
+            clientId: '5Wybc2u3jcQkyePmMLkr',
+            clientSecret: 'uoDwLfMsNDAyb3g07o1hq43N0Lf7poEgFLaPdBq7'
+        }
+    };
+
+    function updateCredentials() {
+        const env = document.getElementById('environmentSelector').value;
+        const clientIdInput = document.getElementById('clientId');
+        const clientSecretInput = document.getElementById('clientSecret');
+        
+        // Only auto-fill if fields are empty or match known defaults to avoid overwriting custom
+        // But user requested specific values, so let's just fill them when switched.
+        if (env === '2') { // Homologation
+            clientIdInput.value = credentials.sandbox.clientId;
+            clientSecretInput.value = credentials.sandbox.clientSecret;
+        } else { // Production
+            clientIdInput.value = credentials.production.clientId;
+            clientSecretInput.value = credentials.production.clientSecret;
+        }
+    }
+
+    function testConnection() {
+        const clientId = document.getElementById('clientId').value;
+        const clientSecret = document.getElementById('clientSecret').value;
+        const env = document.getElementById('environmentSelector').value;
+        
+        const btn = event.target.closest('button');
+        const originalHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Testando...';
+
+        fetch('/admin/fiscal/test_connection', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                client_id: clientId,
+                client_secret: clientSecret,
+                environment: env
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Conexão bem sucedida! Token obtido.');
+            } else {
+                alert('Falha na conexão: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('Erro ao testar conexão: ' + error);
+        })
+        .finally(() => {
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+        });
+    }
+</script>
 {% endblock %}

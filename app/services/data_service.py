@@ -153,7 +153,10 @@ def load_payment_methods():
     valid_methods = []
     
     # Valid categories
-    VALID_CATEGORIES = {'restaurant', 'reception', 'reservations'}
+    VALID_CATEGORIES = {
+        'restaurant', 'reception', 'reservations', 
+        'caixa_restaurante', 'caixa_recepcao', 'caixa_reservas'
+    }
     
     for method in methods:
         try:

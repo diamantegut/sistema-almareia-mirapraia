@@ -386,25 +386,37 @@
                                         {% for p in items %}
                                         {% if p.product_type != 'accompaniment_only' or p.category in ['Doses', 'Drinks', 'Café da Manhã'] %}
                                         <div class="col">
-                                            {% if p.paused %}
-                                            <button type="button" 
-                                                    class="btn btn-light w-100 h-100 p-2 text-start d-flex flex-column justify-content-between shadow-sm border"
-                                                    disabled
-                                                    style="opacity: 0.7; cursor: not-allowed;">
-                                                <div class="d-flex justify-content-between align-items-start w-100">
-                                                    <span class="fw-bold lh-sm mb-1 text-muted text-break" style="font-size: 0.85rem; overflow-wrap: break-word; text-decoration: line-through;">{{ p.name }}</span>
-                                                    <span class="badge bg-danger ms-1" style="font-size: 0.6em;">PAUSADO</span>
-                                                </div>
-                                                <span class="badge bg-light text-muted border align-self-start mt-1" style="font-size: 0.75em;">R$ {{ "%.2f"|format(p.price|default(0)) }}</span>
-                                            </button>
-                                            {% else %}
-                                            <button type="button" 
-                                                    class="btn btn-outline-secondary w-100 h-100 p-2 product-btn text-start d-flex flex-column justify-content-between shadow-sm"
-                                                    onclick="selectProductFromId('{{ p.id }}', this)">
-                                                <span class="fw-bold lh-sm mb-1 text-break" style="font-size: 0.85rem; overflow-wrap: break-word;">{{ p.name }}</span>
-                                                <span class="badge bg-light text-dark border align-self-start mt-1" style="font-size: 0.75em;">R$ {{ "%.2f"|format(p.price|default(0)) }}</span>
-                                            </button>
-                                            {% endif %}
+                                            <div class="position-relative h-100">
+                                                {% if p.paused %}
+                                                <button type="button" 
+                                                        class="btn btn-light w-100 h-100 p-2 text-start d-flex flex-column justify-content-between shadow-sm border"
+                                                        disabled
+                                                        style="opacity: 0.7; cursor: not-allowed;">
+                                                    <div class="d-flex justify-content-between align-items-start w-100">
+                                                        <span class="fw-bold lh-sm mb-1 text-muted text-break" style="font-size: 0.85rem; overflow-wrap: break-word; text-decoration: line-through;">{{ p.name }}</span>
+                                                        <span class="badge bg-danger ms-1" style="font-size: 0.6em;">PAUSADO</span>
+                                                    </div>
+                                                    <span class="badge bg-light text-muted border align-self-start mt-1" style="font-size: 0.75em;">R$ {{ "%.2f"|format(p.price|default(0)) }}</span>
+                                                </button>
+                                                {% else %}
+                                                <button type="button" 
+                                                        class="btn btn-outline-secondary w-100 h-100 p-2 product-btn text-start d-flex flex-column justify-content-between shadow-sm"
+                                                        onclick="selectProductFromId('{{ p.id }}', this)">
+                                                    <span class="fw-bold lh-sm mb-1 text-break" style="font-size: 0.85rem; overflow-wrap: break-word;">{{ p.name }}</span>
+                                                    <span class="badge bg-light text-dark border align-self-start mt-1" style="font-size: 0.75em;">R$ {{ "%.2f"|format(p.price|default(0)) }}</span>
+                                                </button>
+                                                {% endif %}
+
+                                                {% if can_manage_items %}
+                                                <button type="button" 
+                                                        class="btn btn-sm {{ 'btn-success' if p.paused else 'btn-danger' }} position-absolute top-0 end-0 m-1 p-0 px-1 shadow-sm"
+                                                        style="z-index: 10; width: 24px; height: 24px; line-height: 1;"
+                                                        onclick="toggleProductPause('{{ p.id }}', event)"
+                                                        title="{{ 'Ativar' if p.paused else 'Pausar' }}">
+                                                    <i class="bi {{ 'bi-play-fill' if p.paused else 'bi-pause-fill' }}"></i>
+                                                </button>
+                                                {% endif %}
+                                            </div>
                                         </div>
                                         {% endif %}
                                         {% endfor %}
@@ -612,7 +624,16 @@
                                         </form>
                                         {% endif %}
 
-                                        {% if session.get('role') in ['admin', 'gerente', 'supervisor'] %}
+                                        {% if can_manage_items %}
+                                        <button type="button" class="btn btn-sm btn-outline-primary me-1" title="Editar Item"
+                                                data-id="{{ item.ids[-1] }}"
+                                                data-name="{{ item.name }}"
+                                                data-qty="{{ item.qty }}"
+                                                data-obs="{{ item.observations|join(', ') }}"
+                                                onclick="openEditItemModal(this)">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </button>
+                                        
                                         {% set unit_price = item.total / item.qty %}
                                         <div class="input-group input-group-sm mb-1 d-inline-flex w-auto cancel-group">
                                             <input type="text" class="form-control form-control-sm cancel-reason" placeholder="Motivo" style="width: 100px;">

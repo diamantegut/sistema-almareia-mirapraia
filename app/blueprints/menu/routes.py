@@ -21,7 +21,13 @@ import traceback
 @menu_bp.route('/api/menu/digital-category-order', methods=['POST'])
 @login_required
 def save_digital_menu_order():
-    if session.get('role') not in ['super', 'admin', 'gerente', 'recepcao']:
+    user_role = session.get('role')
+    user_perms = session.get('permissions', [])
+    
+    # Allow if role is authorized OR if user has specific permissions
+    if user_role not in ['super', 'admin', 'gerente', 'recepcao', 'supervisor'] and \
+       'restaurante_full_access' not in user_perms and \
+       'recepcao' not in user_perms:
         return jsonify({'success': False, 'error': 'Acesso negado'}), 403
         
     try:
@@ -132,7 +138,15 @@ def admin_rescue_menu_items_fiscal():
 def menu_management():
     current_app.logger.debug(f"Entering menu_management. User: {session.get('user_id')}, Role: {session.get('role')}")
     
-    if session.get('role') not in ['super', 'admin', 'gerente', 'recepcao', 'supervisor']:
+    user_role = session.get('role')
+    user_perms = session.get('permissions', [])
+    
+    # Allow if role is authorized OR if user has specific permissions
+    # 'restaurante_full_access' covers service collaborators
+    # 'recepcao' covers reception staff who might have 'colaborador' role
+    if user_role not in ['super', 'admin', 'gerente', 'recepcao', 'supervisor'] and \
+       'restaurante_full_access' not in user_perms and \
+       'recepcao' not in user_perms:
          flash('Acesso restrito.')
          return redirect(url_for('main.index'))
          
@@ -605,7 +619,12 @@ def menu_management():
 @menu_bp.route('/config/categories', methods=['GET', 'POST'])
 @login_required
 def config_categories():
-    if session.get('role') not in ['super', 'admin', 'gerente']:
+    user_role = session.get('role')
+    user_perms = session.get('permissions', [])
+    
+    if user_role not in ['super', 'admin', 'gerente', 'recepcao', 'supervisor'] and \
+       'restaurante_full_access' not in user_perms and \
+       'recepcao' not in user_perms:
         flash('Acesso restrito.')
         return redirect(url_for('menu.menu_management'))
     
@@ -649,7 +668,12 @@ def config_categories():
 @menu_bp.route('/menu/delete/<item_id>', methods=['POST'])
 @login_required
 def delete_menu_item(item_id):
-    if session.get('role') not in ['super', 'admin', 'gerente']:
+    user_role = session.get('role')
+    user_perms = session.get('permissions', [])
+    
+    if user_role not in ['super', 'admin', 'gerente', 'recepcao', 'supervisor'] and \
+       'restaurante_full_access' not in user_perms and \
+       'recepcao' not in user_perms:
         flash('Acesso restrito.')
         return redirect(url_for('main.index'))
         
@@ -807,7 +831,12 @@ def diff_menu_backup(filename):
 @menu_bp.route('/menu/toggle-active/<item_id>', methods=['POST'])
 @login_required
 def toggle_menu_item_active(item_id):
-    if session.get('role') not in ['super', 'admin', 'gerente']:
+    user_role = session.get('role')
+    user_perms = session.get('permissions', [])
+    
+    if user_role not in ['super', 'admin', 'gerente', 'recepcao', 'supervisor'] and \
+       'restaurante_full_access' not in user_perms and \
+       'recepcao' not in user_perms:
         return jsonify({'success': False, 'message': 'Acesso restrito'}), 403
     menu_items = load_menu_items()
     for item in menu_items:
@@ -831,7 +860,12 @@ def toggle_menu_item_active(item_id):
 @menu_bp.route('/config/flavors', methods=['GET'], endpoint='flavor_config_endpoint')
 @login_required
 def flavor_config():
-    if session.get('role') not in ['super', 'admin', 'gerente']:
+    user_role = session.get('role')
+    user_perms = session.get('permissions', [])
+    
+    if user_role not in ['super', 'admin', 'gerente', 'recepcao', 'supervisor'] and \
+       'restaurante_full_access' not in user_perms and \
+       'recepcao' not in user_perms:
         flash('Acesso restrito.')
         return redirect(url_for('menu.menu_management'))
         
@@ -870,7 +904,12 @@ def flavor_config_toggle_simple():
 @menu_bp.route('/config/flavors/product/update_limit', methods=['POST'])
 @login_required
 def flavor_config_update_product_limit():
-    if session.get('role') not in ['super', 'admin', 'gerente']:
+    user_role = session.get('role')
+    user_perms = session.get('permissions', [])
+    
+    if user_role not in ['super', 'admin', 'gerente', 'recepcao', 'supervisor'] and \
+       'restaurante_full_access' not in user_perms and \
+       'recepcao' not in user_perms:
         return jsonify({'success': False, 'message': 'Acesso negado'}), 403
         
     try:
@@ -902,7 +941,12 @@ def flavor_config_update_product_limit():
 @menu_bp.route('/config/flavors/add', methods=['POST'])
 @login_required
 def flavor_config_add_group():
-    if session.get('role') not in ['super', 'admin', 'gerente']:
+    user_role = session.get('role')
+    user_perms = session.get('permissions', [])
+    
+    if user_role not in ['super', 'admin', 'gerente', 'recepcao', 'supervisor'] and \
+       'restaurante_full_access' not in user_perms and \
+       'recepcao' not in user_perms:
         return redirect(url_for('main.index'))
         
     group_id = request.form.get('group_id')
@@ -926,7 +970,12 @@ def flavor_config_add_group():
 @menu_bp.route('/config/flavors/delete', methods=['POST'])
 @login_required
 def flavor_config_delete_group():
-    if session.get('role') not in ['super', 'admin', 'gerente']:
+    user_role = session.get('role')
+    user_perms = session.get('permissions', [])
+    
+    if user_role not in ['super', 'admin', 'gerente', 'recepcao', 'supervisor'] and \
+       'restaurante_full_access' not in user_perms and \
+       'recepcao' not in user_perms:
         return redirect(url_for('main.index'))
         
     group_id = request.form.get('group_id')
@@ -942,7 +991,12 @@ def flavor_config_delete_group():
 @menu_bp.route('/config/flavors/item/add', methods=['POST'])
 @login_required
 def flavor_config_add_item():
-    if session.get('role') not in ['super', 'admin', 'gerente']:
+    user_role = session.get('role')
+    user_perms = session.get('permissions', [])
+    
+    if user_role not in ['super', 'admin', 'gerente', 'recepcao', 'supervisor'] and \
+       'restaurante_full_access' not in user_perms and \
+       'recepcao' not in user_perms:
         return redirect(url_for('main.index'))
         
     group_id = request.form.get('group_id')
@@ -976,7 +1030,12 @@ def flavor_config_add_item():
 @menu_bp.route('/config/flavors/item/delete', methods=['POST'])
 @login_required
 def flavor_config_delete_item():
-    if session.get('role') not in ['super', 'admin', 'gerente']:
+    user_role = session.get('role')
+    user_perms = session.get('permissions', [])
+    
+    if user_role not in ['super', 'admin', 'gerente', 'recepcao', 'supervisor'] and \
+       'restaurante_full_access' not in user_perms and \
+       'recepcao' not in user_perms:
         return redirect(url_for('main.index'))
         
     group_id = request.form.get('group_id')

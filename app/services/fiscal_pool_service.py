@@ -36,22 +36,40 @@ class FiscalPoolService:
         """
         pool = FiscalPoolService._load_pool()
         
-        # Determine fiscal type
+        # Determine fiscal type and issuer CNPJ
         fiscal_type = 'nfce' # Default (Product)
+        cnpj_emitente = '28952732000109' # Default: Mirapraia
+        
         if origin == 'daily_rates':
             fiscal_type = 'nfse' # Service
+            cnpj_emitente = '46500590000112' # Almareia
         elif origin == 'reception':
             # Check items for services
             if any(item.get('is_service') for item in items):
                 fiscal_type = 'nfse'
-                # Ideally we should split mixed carts, but for now flag as service if present? 
-                # Or maybe default to nfce unless it's pure service?
-                # Let's assume daily_rates handles the service part.
+                # Ideally mixed carts should be split, but if service is present, 
+                # we might treat as service or daily rate if it's accommodation.
+                # If it's pure consumption at reception (minibar), it stays NFC-e Mirapraia.
+                # If it's accommodation payment at reception, it goes to Almareia.
+                # We need a flag in items or check categories.
+                # Simple heuristic: If "Diária" or "Hospedagem" in item name -> Almareia
+                is_accommodation = any(
+                    'diaria' in str(item.get('name', '')).lower() or 
+                    'hospedagem' in str(item.get('name', '')).lower() 
+                    for item in items
+                )
+                if is_accommodation:
+                    cnpj_emitente = '46500590000112' # Almareia
+        
+        # Override if specific fiscal_cnpj in payment methods (Legacy support)
+        # Only if all payments point to the same CNPJ distinct from default
+        # (This logic can be refined, but for now we stick to Origin-based rules as requested)
         
         entry = {
             'id': str(uuid.uuid4()),
             'origin': origin,
             'fiscal_type': fiscal_type,
+            'cnpj_emitente': cnpj_emitente,
             'original_id': str(original_id),
             'closed_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
             'closed_by': user,
