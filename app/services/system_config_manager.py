@@ -220,7 +220,7 @@ SALES_EXCEL_PATH = os.path.join(SALES_DIR, 'Produtos.xlsx')
 
 DEPARTMENTS = [
     'Recepção', 'Restaurante', 'Cozinha', 'Governança', 
-    'Lavanderia', 'Manutencao', 'Admin', 'RH'
+    'Lavanderia', 'Manutenção', 'Admin', 'RH', 'Serviço', 'Estoque'
 ]
 
 # Constants

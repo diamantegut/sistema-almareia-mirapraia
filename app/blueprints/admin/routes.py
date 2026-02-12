@@ -10,7 +10,7 @@ from . import admin_bp
 from app.utils.decorators import login_required
 from app.services.logger_service import LoggerService
 from app.services.system_config_manager import DEPARTMENTS
-from app.services.data_service import load_users, save_users, load_ex_employees
+from app.services.data_service import load_users, save_users, load_ex_employees, normalize_text
 from app.services.rh_service import load_reset_requests
 from app.services.backup_service import backup_service
 from app.services.logging_service import get_logs, export_logs_to_csv
@@ -270,14 +270,14 @@ def admin_users():
     for dept in DEPARTMENTS:
         # Case insensitive match. EXCLUDE ADMINS (already in Diretoria)
         group_users = {u: d for u, d in users.items() 
-                       if d.get('department') and str(d.get('department')).strip().lower() == dept.lower() and d.get('role') != 'admin'}
+                       if d.get('department') and normalize_text(str(d.get('department'))) == normalize_text(dept) and d.get('role') != 'admin'}
         if group_users:
              dept_groups.append({'name': dept, 'users': group_users})
     
     # 2. Outros / Sem departamento
-    dept_names_lower = [d.lower() for d in DEPARTMENTS]
+    dept_names_normalized = [normalize_text(d) for d in DEPARTMENTS]
     other_users = {u: d for u, d in users.items() 
-                   if (not d.get('department') or str(d.get('department')).strip().lower() not in dept_names_lower) and d.get('role') != 'admin'}
+                   if (not d.get('department') or normalize_text(str(d.get('department'))) not in dept_names_normalized) and d.get('role') != 'admin'}
     if other_users:
         dept_groups.append({'name': 'Outros / Sem Departamento', 'users': other_users})
 
