@@ -2146,7 +2146,8 @@
         "waiter": null,
         "staff_name": null,
         "partial_payments": [],
-        "total_paid": 0.0
+        "total_paid": 0.0,
+        "locked": true
     },
     "25": {
         "items": [],
@@ -2156,5 +2157,25 @@
         "num_adults": 2,
         "customer_type": "hospede",
         "room_number": "25"
+    },
+    "94": {
+        "items": [],
+        "total": 0,
+        "status": "open",
+        "opened_at": "12/02/2026 08:46",
+        "num_adults": 2,
+        "customer_type": "hospede",
+        "customer_name": "",
+        "room_number": "17",
+        "waiter": "",
+        "staff_name": null,
+        "is_breakfast": true,
+        "partial_payments": [],
+        "total_paid": 0.0,
+        "last_transfer": {
+            "source_table": "40",
+            "timestamp": "12/02/2026 08:46",
+            "user": "dudu"
+        }
     }
 }
