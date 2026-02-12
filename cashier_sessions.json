@@ -4495,6 +4495,146 @@
                     "total_payment_group_amount": 406.01,
                     "payment_method_code": ""
                 }
+            },
+            {
+                "id": "TX_20260211215602_ebab19",
+                "type": "sale",
+                "amount": 15.900000000000002,
+                "description": "Venda Mesa 40 - ",
+                "payment_method": "",
+                "timestamp": "11/02/2026 21:56",
+                "user": "Angelo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260211215616_a68d28",
+                "type": "sale",
+                "amount": 17.49,
+                "description": "Venda Mesa 47 - ",
+                "payment_method": "",
+                "timestamp": "11/02/2026 21:56",
+                "user": "Angelo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260211224907_8b6632",
+                "type": "sale",
+                "amount": 92.95,
+                "description": "Venda Mesa 40 - ",
+                "payment_method": "",
+                "timestamp": "11/02/2026 22:49",
+                "user": "Angelo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260211224908_a18a1e",
+                "type": "sale",
+                "amount": 92.95,
+                "description": "Venda Mesa 40 - ",
+                "payment_method": "",
+                "timestamp": "11/02/2026 22:49",
+                "user": "Angelo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260211224911_753c2a",
+                "type": "sale",
+                "amount": 92.95,
+                "description": "Venda Mesa 40 - ",
+                "payment_method": "",
+                "timestamp": "11/02/2026 22:49",
+                "user": "Angelo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260211224911_21f352",
+                "type": "sale",
+                "amount": 92.95,
+                "description": "Venda Mesa 40 - ",
+                "payment_method": "",
+                "timestamp": "11/02/2026 22:49",
+                "user": "Angelo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260211224912_c11b84",
+                "type": "sale",
+                "amount": 92.95,
+                "description": "Venda Mesa 40 - ",
+                "payment_method": "",
+                "timestamp": "11/02/2026 22:49",
+                "user": "Angelo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260211224917_81d2ee",
+                "type": "sale",
+                "amount": 92.95,
+                "description": "Venda Mesa 40 - ",
+                "payment_method": "",
+                "timestamp": "11/02/2026 22:49",
+                "user": "Angelo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260211224918_ab18ea",
+                "type": "sale",
+                "amount": 92.95,
+                "description": "Venda Mesa 40 - ",
+                "payment_method": "",
+                "timestamp": "11/02/2026 22:49",
+                "user": "Angelo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260211224919_b259f7",
+                "type": "sale",
+                "amount": 92.95,
+                "description": "Venda Mesa 40 - ",
+                "payment_method": "",
+                "timestamp": "11/02/2026 22:49",
+                "user": "Angelo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260211224945_aa05de",
+                "type": "sale",
+                "amount": 92.95,
+                "description": "Venda Mesa 40 - ",
+                "payment_method": "",
+                "timestamp": "11/02/2026 22:49",
+                "user": "Angelo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260211224945_ff31ab",
+                "type": "sale",
+                "amount": 92.95,
+                "description": "Venda Mesa 40 - ",
+                "payment_method": "",
+                "timestamp": "11/02/2026 22:49",
+                "user": "Angelo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260211224946_33a550",
+                "type": "sale",
+                "amount": 92.95,
+                "description": "Venda Mesa 40 - ",
+                "payment_method": "",
+                "timestamp": "11/02/2026 22:49",
+                "user": "Angelo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260211232730_98e850",
+                "type": "sale",
+                "amount": 36.08,
+                "description": "Venda Mesa 59 - PIX Maquininha CNPJ",
+                "payment_method": "PIX Maquininha CNPJ",
+                "timestamp": "11/02/2026 23:27",
+                "user": "Angelo",
+                "details": {}
             }
         ]
     },
@@ -5230,7 +5370,363 @@
         "entity": "Hotel Almareia",
         "opened_at": "11/02/2026 17:37",
         "opening_balance": 0.0,
-        "transactions": [],
+        "transactions": [
+            {
+                "id": "TRANS_20260211181442_15",
+                "type": "in",
+                "category": "Pagamento de Conta",
+                "description": "Pagamento Quarto 26 (Dinheiro)",
+                "amount": 0.15,
+                "payment_method": "Dinheiro",
+                "emit_invoice": false,
+                "timestamp": "11/02/2026 18:14",
+                "time": "18:14",
+                "waiter": "welington",
+                "waiter_breakdown": {
+                    "welington": 31.79
+                },
+                "service_fee_removed": false,
+                "related_charge_id": "CHARGE_81_20260206192453_64ec0d_REST",
+                "details": {
+                    "payment_group_id": "7f161d48-f62a-496c-a7ad-5c30918108e9",
+                    "total_payment_group_amount": 31.79,
+                    "payment_method_code": "Dinheiro"
+                }
+            },
+            {
+                "id": "TRANS_20260211181442_3164",
+                "type": "in",
+                "category": "Pagamento de Conta",
+                "description": "Pagamento Quarto 26 (PIX Email Almareia)",
+                "amount": 31.64,
+                "payment_method": "PIX Email Almareia",
+                "emit_invoice": false,
+                "timestamp": "11/02/2026 18:14",
+                "time": "18:14",
+                "waiter": "welington",
+                "waiter_breakdown": {
+                    "welington": 31.79
+                },
+                "service_fee_removed": false,
+                "related_charge_id": "CHARGE_81_20260206192453_64ec0d_REST",
+                "details": {
+                    "payment_group_id": "7f161d48-f62a-496c-a7ad-5c30918108e9",
+                    "total_payment_group_amount": 31.79,
+                    "payment_method_code": "PIX Email Almareia"
+                }
+            },
+            {
+                "id": "TX_20260211181509_194408",
+                "type": "in",
+                "amount": 250.0,
+                "description": "teste",
+                "payment_method": "Dinheiro",
+                "timestamp": "11/02/2026 18:15",
+                "user": "Angelo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260211181511_f0aea1",
+                "type": "in",
+                "amount": 250.0,
+                "description": "teste",
+                "payment_method": "Dinheiro",
+                "timestamp": "11/02/2026 18:15",
+                "user": "Angelo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260211181512_07c4b8",
+                "type": "in",
+                "amount": 250.0,
+                "description": "teste",
+                "payment_method": "Dinheiro",
+                "timestamp": "11/02/2026 18:15",
+                "user": "Angelo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260211181512_a798ba",
+                "type": "in",
+                "amount": 250.0,
+                "description": "teste",
+                "payment_method": "Dinheiro",
+                "timestamp": "11/02/2026 18:15",
+                "user": "Angelo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260211181512_adaa49",
+                "type": "in",
+                "amount": 250.0,
+                "description": "teste",
+                "payment_method": "Dinheiro",
+                "timestamp": "11/02/2026 18:15",
+                "user": "Angelo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260211181512_970eaa",
+                "type": "in",
+                "amount": 250.0,
+                "description": "teste",
+                "payment_method": "Dinheiro",
+                "timestamp": "11/02/2026 18:15",
+                "user": "Angelo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260211181513_a8b353",
+                "type": "in",
+                "amount": 250.0,
+                "description": "teste",
+                "payment_method": "Dinheiro",
+                "timestamp": "11/02/2026 18:15",
+                "user": "Angelo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260211181514_7b1cb5",
+                "type": "in",
+                "amount": 250.0,
+                "description": "teste",
+                "payment_method": "Dinheiro",
+                "timestamp": "11/02/2026 18:15",
+                "user": "Angelo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260211181514_ed95e9",
+                "type": "in",
+                "amount": 250.0,
+                "description": "teste",
+                "payment_method": "Dinheiro",
+                "timestamp": "11/02/2026 18:15",
+                "user": "Angelo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260211182146_145cb5",
+                "type": "in",
+                "amount": 250.0,
+                "description": "teste",
+                "payment_method": "Dinheiro",
+                "timestamp": "11/02/2026 18:21",
+                "user": "Angelo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260211182147_f53076",
+                "type": "in",
+                "amount": 250.0,
+                "description": "teste",
+                "payment_method": "Dinheiro",
+                "timestamp": "11/02/2026 18:21",
+                "user": "Angelo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260211182147_fbbe65",
+                "type": "in",
+                "amount": 250.0,
+                "description": "teste",
+                "payment_method": "Dinheiro",
+                "timestamp": "11/02/2026 18:21",
+                "user": "Angelo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260211182147_d82bae",
+                "type": "in",
+                "amount": 250.0,
+                "description": "teste",
+                "payment_method": "Dinheiro",
+                "timestamp": "11/02/2026 18:21",
+                "user": "Angelo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260211183250_ae9830",
+                "type": "in",
+                "amount": 1.5,
+                "description": "teste",
+                "payment_method": "Dinheiro",
+                "timestamp": "11/02/2026 18:32",
+                "user": "Angelo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260211184904_239243",
+                "type": "in",
+                "amount": 1.0,
+                "description": "teste",
+                "payment_method": "Dinheiro",
+                "timestamp": "11/02/2026 18:49",
+                "user": "Angelo",
+                "details": {}
+            }
+        ],
+        "status": "closed",
+        "closed_at": "12/02/2026 00:50",
+        "closing_balance": 3284.29,
+        "difference": 31.639999999999873,
+        "closed_by": "Angelo"
+    },
+    {
+        "id": "SESSION_GUEST_CONSUMPTION_20260212005012_Angelo",
+        "user": "Angelo",
+        "type": "guest_consumption",
+        "entity": "Hotel Almareia",
+        "opened_at": "12/02/2026 00:50",
+        "opening_balance": 0.0,
+        "transactions": [
+            {
+                "id": "TRANS_20260212005019_978",
+                "type": "in",
+                "category": "Pagamento de Conta",
+                "description": "Pagamento Quarto 17 (PIX Email Almareia)",
+                "amount": 9.79,
+                "payment_method": "PIX Email Almareia",
+                "emit_invoice": false,
+                "timestamp": "12/02/2026 00:50",
+                "time": "00:50",
+                "waiter": "filipe",
+                "waiter_breakdown": {
+                    "filipe": 9.790000000000001
+                },
+                "service_fee_removed": false,
+                "related_charge_id": "CHARGE_49_20260210210957_07cadb_REST",
+                "details": {}
+            },
+            {
+                "id": "TRANS_20260212005030_9180",
+                "type": "in",
+                "category": "Pagamento de Conta",
+                "description": "Pagamento Quarto 11 (Credito Angelo)",
+                "amount": 91.8,
+                "payment_method": "Credito Angelo",
+                "emit_invoice": false,
+                "timestamp": "12/02/2026 00:50",
+                "time": "00:50",
+                "waiter": null,
+                "waiter_breakdown": null,
+                "service_fee_removed": false,
+                "related_charge_id": "CHARGE_GOV_11_20260212004710_6027b6",
+                "details": {}
+            },
+            {
+                "id": "TRANS_20260212005036_2670",
+                "type": "in",
+                "category": "Pagamento de Conta",
+                "description": "Pagamento Quarto 24 (Debito Angelo)",
+                "amount": 26.7,
+                "payment_method": "Debito Angelo",
+                "emit_invoice": false,
+                "timestamp": "12/02/2026 00:50",
+                "time": "00:50",
+                "waiter": null,
+                "waiter_breakdown": null,
+                "service_fee_removed": false,
+                "related_charge_id": "CHARGE_GOV_24_20260211105600_14a519",
+                "details": {}
+            },
+            {
+                "id": "TRANS_20260212005054_10000",
+                "type": "in",
+                "category": "Pagamento de Conta",
+                "description": "Pagamento Quarto 26 (PIX Email Almareia)",
+                "amount": 100.0,
+                "payment_method": "PIX Email Almareia",
+                "emit_invoice": false,
+                "timestamp": "12/02/2026 00:50",
+                "time": "00:50",
+                "waiter": "edson",
+                "waiter_breakdown": {
+                    "henrique": 23.98,
+                    "edson": 74.46999999999998,
+                    "erique": 54.88999999999999
+                },
+                "service_fee_removed": false,
+                "related_charge_id": "CHARGE_50_20260210153729_aa2e5a_REST",
+                "details": {
+                    "payment_group_id": "365002c2-f77f-46c1-a348-b687d1582033",
+                    "total_payment_group_amount": 153.34,
+                    "payment_method_code": "PIX Email Almareia"
+                }
+            },
+            {
+                "id": "TRANS_20260212005054_5334",
+                "type": "in",
+                "category": "Pagamento de Conta",
+                "description": "Pagamento Quarto 26 (PIX Email Almareia)",
+                "amount": 53.34,
+                "payment_method": "PIX Email Almareia",
+                "emit_invoice": false,
+                "timestamp": "12/02/2026 00:50",
+                "time": "00:50",
+                "waiter": "edson",
+                "waiter_breakdown": {
+                    "henrique": 23.98,
+                    "edson": 74.46999999999998,
+                    "erique": 54.88999999999999
+                },
+                "service_fee_removed": false,
+                "related_charge_id": "CHARGE_50_20260210153729_aa2e5a_REST",
+                "details": {
+                    "payment_group_id": "365002c2-f77f-46c1-a348-b687d1582033",
+                    "total_payment_group_amount": 153.34,
+                    "payment_method_code": "PIX Email Almareia"
+                }
+            },
+            {
+                "id": "TRANS_20260212005957_40000",
+                "type": "in",
+                "category": "Pagamento de Conta",
+                "description": "Pagamento Quarto 26 (Dinheiro)",
+                "amount": 400.0,
+                "payment_method": "Dinheiro",
+                "emit_invoice": false,
+                "timestamp": "12/02/2026 00:59",
+                "time": "00:59",
+                "waiter": "henrique",
+                "waiter_breakdown": {
+                    "henrique": 466.62000000000006,
+                    "erique": 186.78000000000003,
+                    "leo": 228.66800000000003
+                },
+                "service_fee_removed": false,
+                "related_charge_id": "CHARGE_50_20260209191802_81e52e_REST",
+                "details": {
+                    "payment_group_id": "ebd101c4-ed84-482a-b136-8977783cfd88",
+                    "total_payment_group_amount": 882.068,
+                    "payment_method_code": "Dinheiro"
+                }
+            },
+            {
+                "id": "TRANS_20260212005957_48206",
+                "type": "in",
+                "category": "Pagamento de Conta",
+                "description": "Pagamento Quarto 26 (PIX Email Almareia)",
+                "amount": 482.068,
+                "payment_method": "PIX Email Almareia",
+                "emit_invoice": false,
+                "timestamp": "12/02/2026 00:59",
+                "time": "00:59",
+                "waiter": "henrique",
+                "waiter_breakdown": {
+                    "henrique": 466.62000000000006,
+                    "erique": 186.78000000000003,
+                    "leo": 228.66800000000003
+                },
+                "service_fee_removed": false,
+                "related_charge_id": "CHARGE_50_20260209191802_81e52e_REST",
+                "details": {
+                    "payment_group_id": "ebd101c4-ed84-482a-b136-8977783cfd88",
+                    "total_payment_group_amount": 882.068,
+                    "payment_method_code": "PIX Email Almareia"
+                }
+            }
+        ],
         "status": "open",
         "closed_at": null,
         "closing_balance": null,

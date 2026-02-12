@@ -24959,5 +24959,3437 @@
         "notes": null,
         "fiscal_doc_uuid": null,
         "history": []
+    },
+    {
+        "id": "035dd0ca-0797-41af-a852-fb10ab676bb3",
+        "origin": "reception_charge",
+        "fiscal_type": "nfce",
+        "original_id": "CHARGE_CHARGE_81_20260206192453_64ec0d_REST",
+        "closed_at": "2026-02-11 18:14:42",
+        "closed_by": "Angelo",
+        "total_amount": 31.79,
+        "items": [
+            {
+                "id": "ce3d86c7-e3dc-4931-b834-a0fb4d948028",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Caipirinha de Pitú",
+                "flavor": "Morango",
+                "qty": 1.0,
+                "price": 28.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Drinks",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "welington",
+                "created_at": "06/02/2026 18:29"
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 0.15,
+                "is_fiscal": false
+            },
+            {
+                "method": "PIX Email Almareia",
+                "amount": 31.64,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "room_number": "26",
+            "guest_name": "ANA ELISABETH E MARIA ISABEL"
+        },
+        "status": "pending",
+        "notes": null,
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "de350920-4f8d-49d2-b77c-5fbf1dcec8ef",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602112156",
+        "closed_at": "2026-02-11 21:56:02",
+        "closed_by": "Angelo",
+        "total_amount": 15.9,
+        "items": [
+            {
+                "id": "80217568-0cfd-4a2e-b242-304e88237578",
+                "product_id": "265",
+                "name": "Caldo (Consultar sabor do dia)",
+                "price": 15.9,
+                "qty": 1.0,
+                "category": "Entradas",
+                "created_at": "11/02/2026 21:52",
+                "waiter": "Angelo",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "Nordestino (Caldo)",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": null,
+                "amount": 15.900000000000002,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "name": "",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "174b4063-a7b1-463f-a4a1-9a8e2af4344e",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_47_202602112156",
+        "closed_at": "2026-02-11 21:56:16",
+        "closed_by": "Angelo",
+        "total_amount": 15.9,
+        "items": [
+            {
+                "id": "2e03337a-f525-49d2-99a2-ec816deecd1e",
+                "product_id": "265",
+                "name": "Caldo (Consultar sabor do dia)",
+                "price": 15.9,
+                "qty": 1.0,
+                "category": "Entradas",
+                "created_at": "11/02/2026 21:52",
+                "waiter": "Angelo",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [
+                    "Não Imprimir",
+                    "Transf de Mesa 40"
+                ],
+                "accompaniments": [],
+                "flavor": "Feijão (Caldo)",
+                "questions_answers": [],
+                "transferred_from": "40",
+                "transferred_at": "11/02/2026 21:55",
+                "transferred_by": "Angelo"
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": null,
+                "amount": 17.49,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "name": "Transferencia",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 47",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "4283c9ca-99ba-42f9-a2c0-fa11372382f4",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602112250",
+        "closed_at": "2026-02-11 22:50:17",
+        "closed_by": "Angelo",
+        "total_amount": 92.95,
+        "items": [
+            {
+                "id": "809c605a-0f0b-4c22-9555-b84849c3c16a",
+                "product_id": "160",
+                "name": "Corona Long Neck",
+                "price": 16.9,
+                "qty": 5.0,
+                "category": "Cervejas",
+                "created_at": "11/02/2026 22:48",
+                "waiter": "Angelo",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [
+                    "Não Imprimir",
+                    "5 cp"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": null,
+                "amount": 92.95,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "name": "",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "fd3f9d70-6c2a-4729-868c-594972b0fcea",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602112250",
+        "closed_at": "2026-02-11 22:50:22",
+        "closed_by": "Angelo",
+        "total_amount": 92.95,
+        "items": [
+            {
+                "id": "809c605a-0f0b-4c22-9555-b84849c3c16a",
+                "product_id": "160",
+                "name": "Corona Long Neck",
+                "price": 16.9,
+                "qty": 5.0,
+                "category": "Cervejas",
+                "created_at": "11/02/2026 22:48",
+                "waiter": "Angelo",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [
+                    "Não Imprimir",
+                    "5 cp"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": null,
+                "amount": 92.95,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "name": "",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "98bafcd4-0a8a-402d-b4d7-7c0d266cf54d",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602112250",
+        "closed_at": "2026-02-11 22:50:57",
+        "closed_by": "Angelo",
+        "total_amount": 92.95,
+        "items": [
+            {
+                "id": "809c605a-0f0b-4c22-9555-b84849c3c16a",
+                "product_id": "160",
+                "name": "Corona Long Neck",
+                "price": 16.9,
+                "qty": 5.0,
+                "category": "Cervejas",
+                "created_at": "11/02/2026 22:48",
+                "waiter": "Angelo",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [
+                    "Não Imprimir",
+                    "5 cp"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": null,
+                "amount": 92.95,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "name": "",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "3a3a3e30-ab7e-430b-bff4-c89761386a27",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602112251",
+        "closed_at": "2026-02-11 22:51:02",
+        "closed_by": "Angelo",
+        "total_amount": 92.95,
+        "items": [
+            {
+                "id": "809c605a-0f0b-4c22-9555-b84849c3c16a",
+                "product_id": "160",
+                "name": "Corona Long Neck",
+                "price": 16.9,
+                "qty": 5.0,
+                "category": "Cervejas",
+                "created_at": "11/02/2026 22:48",
+                "waiter": "Angelo",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [
+                    "Não Imprimir",
+                    "5 cp"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": null,
+                "amount": 92.95,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "name": "",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "94421518-a6f0-4991-950e-c39f096a791a",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602112251",
+        "closed_at": "2026-02-11 22:51:07",
+        "closed_by": "Angelo",
+        "total_amount": 92.95,
+        "items": [
+            {
+                "id": "809c605a-0f0b-4c22-9555-b84849c3c16a",
+                "product_id": "160",
+                "name": "Corona Long Neck",
+                "price": 16.9,
+                "qty": 5.0,
+                "category": "Cervejas",
+                "created_at": "11/02/2026 22:48",
+                "waiter": "Angelo",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [
+                    "Não Imprimir",
+                    "5 cp"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": null,
+                "amount": 92.95,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "name": "",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "c6da14b2-3caa-457e-9ceb-f033ca40d447",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602112251",
+        "closed_at": "2026-02-11 22:51:27",
+        "closed_by": "Angelo",
+        "total_amount": 92.95,
+        "items": [
+            {
+                "id": "809c605a-0f0b-4c22-9555-b84849c3c16a",
+                "product_id": "160",
+                "name": "Corona Long Neck",
+                "price": 16.9,
+                "qty": 5.0,
+                "category": "Cervejas",
+                "created_at": "11/02/2026 22:48",
+                "waiter": "Angelo",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [
+                    "Não Imprimir",
+                    "5 cp"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": null,
+                "amount": 92.95,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "name": "",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "227c1cd4-4348-463e-90fb-97e5873ae509",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602112251",
+        "closed_at": "2026-02-11 22:51:32",
+        "closed_by": "Angelo",
+        "total_amount": 92.95,
+        "items": [
+            {
+                "id": "809c605a-0f0b-4c22-9555-b84849c3c16a",
+                "product_id": "160",
+                "name": "Corona Long Neck",
+                "price": 16.9,
+                "qty": 5.0,
+                "category": "Cervejas",
+                "created_at": "11/02/2026 22:48",
+                "waiter": "Angelo",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [
+                    "Não Imprimir",
+                    "5 cp"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": null,
+                "amount": 92.95,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "name": "",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "46958bcd-286f-496d-a13c-ad4a319317c1",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602112251",
+        "closed_at": "2026-02-11 22:51:37",
+        "closed_by": "Angelo",
+        "total_amount": 92.95,
+        "items": [
+            {
+                "id": "809c605a-0f0b-4c22-9555-b84849c3c16a",
+                "product_id": "160",
+                "name": "Corona Long Neck",
+                "price": 16.9,
+                "qty": 5.0,
+                "category": "Cervejas",
+                "created_at": "11/02/2026 22:48",
+                "waiter": "Angelo",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [
+                    "Não Imprimir",
+                    "5 cp"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": null,
+                "amount": 92.95,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "name": "",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "0b05254c-bad7-42b3-a67f-649a0175e49e",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602112251",
+        "closed_at": "2026-02-11 22:51:42",
+        "closed_by": "Angelo",
+        "total_amount": 92.95,
+        "items": [
+            {
+                "id": "809c605a-0f0b-4c22-9555-b84849c3c16a",
+                "product_id": "160",
+                "name": "Corona Long Neck",
+                "price": 16.9,
+                "qty": 5.0,
+                "category": "Cervejas",
+                "created_at": "11/02/2026 22:48",
+                "waiter": "Angelo",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [
+                    "Não Imprimir",
+                    "5 cp"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": null,
+                "amount": 92.95,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "name": "",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "649573b1-c488-4499-98e1-38e1a26aa2b6",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602112251",
+        "closed_at": "2026-02-11 22:51:47",
+        "closed_by": "Angelo",
+        "total_amount": 92.95,
+        "items": [
+            {
+                "id": "809c605a-0f0b-4c22-9555-b84849c3c16a",
+                "product_id": "160",
+                "name": "Corona Long Neck",
+                "price": 16.9,
+                "qty": 5.0,
+                "category": "Cervejas",
+                "created_at": "11/02/2026 22:48",
+                "waiter": "Angelo",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [
+                    "Não Imprimir",
+                    "5 cp"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": null,
+                "amount": 92.95,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "name": "",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "cc019330-d3c4-4fe5-9f44-dc1a94ffd9f9",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602112251",
+        "closed_at": "2026-02-11 22:51:52",
+        "closed_by": "Angelo",
+        "total_amount": 92.95,
+        "items": [
+            {
+                "id": "809c605a-0f0b-4c22-9555-b84849c3c16a",
+                "product_id": "160",
+                "name": "Corona Long Neck",
+                "price": 16.9,
+                "qty": 5.0,
+                "category": "Cervejas",
+                "created_at": "11/02/2026 22:48",
+                "waiter": "Angelo",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [
+                    "Não Imprimir",
+                    "5 cp"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": null,
+                "amount": 92.95,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "name": "",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "73dabc7c-3f81-4bdc-83e6-a048f1020402",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_202_202602112300",
+        "closed_at": "2026-02-11 23:00:04",
+        "closed_by": "admin",
+        "total_amount": 11.0,
+        "items": [
+            {
+                "id": "ee717e07-e89a-40fb-9ff9-4cdd829d0df6",
+                "product_id": "1",
+                "name": "Agua Mineral",
+                "price": 5.0,
+                "qty": 2.0,
+                "category": "Bebidas",
+                "created_at": "11/02/2026 23:00",
+                "waiter": "Garçom Teste",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [
+                    "Sem gelo"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 11.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "name": "Test Client",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 202",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "c4416583-0fe3-4553-800e-fe0f117df67c",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_201_202602112300",
+        "closed_at": "2026-02-11 23:00:04",
+        "closed_by": "admin",
+        "total_amount": 11.0,
+        "items": [
+            {
+                "id": "824deaac-1ee9-4803-adb8-d23f00951fd5",
+                "product_id": "1",
+                "name": "Agua Mineral",
+                "price": 5.0,
+                "qty": 2.0,
+                "category": "Bebidas",
+                "created_at": "11/02/2026 23:00",
+                "waiter": "Garçom Teste",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [
+                    "Sem gelo"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 11.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "name": "Test Client",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 201",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "31714cca-1656-4b7f-a14c-8d66c755b806",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_99_202602112300",
+        "closed_at": "2026-02-11 23:00:05",
+        "closed_by": "admin",
+        "total_amount": 11.0,
+        "items": [
+            {
+                "id": "469b32f3-d649-48b2-acb5-e0f42dda62ee",
+                "product_id": "1",
+                "name": "Agua Mineral",
+                "price": 5.0,
+                "qty": 2.0,
+                "category": "Bebidas",
+                "created_at": "11/02/2026 23:00",
+                "waiter": "Garçom Teste",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [
+                    "Sem gelo"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 11.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "name": "Test Client",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 99",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "cec6a211-eb96-4ffe-acf2-6362fd7abc3f",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_82_202602112300",
+        "closed_at": "2026-02-11 23:00:06",
+        "closed_by": "admin",
+        "total_amount": 5.0,
+        "items": [
+            {
+                "id": "754a51cc-8bc2-4bc5-8890-4ce2f4980b48",
+                "product_id": "1",
+                "name": "Agua Mineral",
+                "price": 5.0,
+                "qty": 1.0,
+                "category": "Bebidas",
+                "created_at": "11/02/2026 23:00",
+                "waiter": "admin",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 5.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "name": "",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 82",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "d9a4fca4-895b-45da-87d2-f2bfd6934658",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_202_202602112301",
+        "closed_at": "2026-02-11 23:01:44",
+        "closed_by": "admin",
+        "total_amount": 11.0,
+        "items": [
+            {
+                "id": "0d4c0f0f-cb3e-4d17-9f6a-9e43397da927",
+                "product_id": "1",
+                "name": "Agua Mineral",
+                "price": 5.0,
+                "qty": 2.0,
+                "category": "Bebidas",
+                "created_at": "11/02/2026 23:01",
+                "waiter": "Garçom Teste",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [
+                    "Sem gelo"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 11.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "name": "Test Client",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 202",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "7749c91a-f51d-4852-aabd-2bd12db3850a",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_201_202602112301",
+        "closed_at": "2026-02-11 23:01:44",
+        "closed_by": "admin",
+        "total_amount": 11.0,
+        "items": [
+            {
+                "id": "248ed5bc-a79c-4fcb-9ccc-6bfbc4b4a3c0",
+                "product_id": "1",
+                "name": "Agua Mineral",
+                "price": 5.0,
+                "qty": 2.0,
+                "category": "Bebidas",
+                "created_at": "11/02/2026 23:01",
+                "waiter": "Garçom Teste",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [
+                    "Sem gelo"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 11.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "name": "Test Client",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 201",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "df51690a-c21b-48de-9859-50ee10101b89",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_99_202602112301",
+        "closed_at": "2026-02-11 23:01:44",
+        "closed_by": "admin",
+        "total_amount": 11.0,
+        "items": [
+            {
+                "id": "5d9719a6-5445-4c4c-abaa-4c36920462c0",
+                "product_id": "1",
+                "name": "Agua Mineral",
+                "price": 5.0,
+                "qty": 2.0,
+                "category": "Bebidas",
+                "created_at": "11/02/2026 23:01",
+                "waiter": "Garçom Teste",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [
+                    "Sem gelo"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 11.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "name": "Test Client",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 99",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "52284702-e70b-4f44-96e8-796ae3a9f535",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_82_202602112301",
+        "closed_at": "2026-02-11 23:01:46",
+        "closed_by": "admin",
+        "total_amount": 5.0,
+        "items": [
+            {
+                "id": "d0210073-e50d-43b9-8432-15aababd5e3d",
+                "product_id": "1",
+                "name": "Agua Mineral",
+                "price": 5.0,
+                "qty": 1.0,
+                "category": "Bebidas",
+                "created_at": "11/02/2026 23:01",
+                "waiter": "admin",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 5.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "name": "",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 82",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "5faba0ff-4663-4a71-991a-aee5cb44f966",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_202_202602112309",
+        "closed_at": "2026-02-11 23:09:16",
+        "closed_by": "admin",
+        "total_amount": 11.0,
+        "items": [
+            {
+                "id": "11b27cfa-d673-46af-b94c-708be0d27551",
+                "product_id": "1",
+                "name": "Agua Mineral",
+                "price": 5.0,
+                "qty": 2.0,
+                "category": "Bebidas",
+                "created_at": "11/02/2026 23:09",
+                "waiter": "Garçom Teste",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [
+                    "Sem gelo"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 11.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "name": "Test Client",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 202",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "1dfc1fdf-2e06-4cff-b690-d3bb505d784e",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_201_202602112309",
+        "closed_at": "2026-02-11 23:09:16",
+        "closed_by": "admin",
+        "total_amount": 11.0,
+        "items": [
+            {
+                "id": "8ebaa64c-adcb-4f5d-a252-05ed2e6723fb",
+                "product_id": "1",
+                "name": "Agua Mineral",
+                "price": 5.0,
+                "qty": 2.0,
+                "category": "Bebidas",
+                "created_at": "11/02/2026 23:09",
+                "waiter": "Garçom Teste",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [
+                    "Sem gelo"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 11.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "name": "Test Client",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 201",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "0379fea2-738b-4967-bed4-ef2293509c1b",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_99_202602112309",
+        "closed_at": "2026-02-11 23:09:17",
+        "closed_by": "admin",
+        "total_amount": 11.0,
+        "items": [
+            {
+                "id": "9b7dba07-0333-4762-927e-4032332da36b",
+                "product_id": "1",
+                "name": "Agua Mineral",
+                "price": 5.0,
+                "qty": 2.0,
+                "category": "Bebidas",
+                "created_at": "11/02/2026 23:09",
+                "waiter": "Garçom Teste",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [
+                    "Sem gelo"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 11.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "name": "Test Client",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 99",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "3d294964-b6c4-4d06-9570-8d70533ebc09",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_82_202602112309",
+        "closed_at": "2026-02-11 23:09:18",
+        "closed_by": "admin",
+        "total_amount": 5.0,
+        "items": [
+            {
+                "id": "92f7b694-f596-4682-a0e1-d27b8b2eda8c",
+                "product_id": "1",
+                "name": "Agua Mineral",
+                "price": 5.0,
+                "qty": 1.0,
+                "category": "Bebidas",
+                "created_at": "11/02/2026 23:09",
+                "waiter": "admin",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 5.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "name": "",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 82",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "587ac8d6-244e-4f82-853c-6c82fe3a49c3",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_202_202602112309",
+        "closed_at": "2026-02-11 23:09:43",
+        "closed_by": "admin",
+        "total_amount": 11.0,
+        "items": [
+            {
+                "id": "fb980c8e-085d-442c-a701-813bf63f607d",
+                "product_id": "1",
+                "name": "Agua Mineral",
+                "price": 5.0,
+                "qty": 2.0,
+                "category": "Bebidas",
+                "created_at": "11/02/2026 23:09",
+                "waiter": "Garçom Teste",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [
+                    "Sem gelo"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 11.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "name": "Test Client",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 202",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "85c5f6f3-4170-4d60-abbf-2b8af276ac7d",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_201_202602112309",
+        "closed_at": "2026-02-11 23:09:44",
+        "closed_by": "admin",
+        "total_amount": 11.0,
+        "items": [
+            {
+                "id": "ed769c88-48dc-4446-bbd8-af8221397714",
+                "product_id": "1",
+                "name": "Agua Mineral",
+                "price": 5.0,
+                "qty": 2.0,
+                "category": "Bebidas",
+                "created_at": "11/02/2026 23:09",
+                "waiter": "Garçom Teste",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [
+                    "Sem gelo"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 11.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "name": "Test Client",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 201",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "4bc19b2d-ced4-4a23-90a2-01a7baf4db4d",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_99_202602112309",
+        "closed_at": "2026-02-11 23:09:44",
+        "closed_by": "admin",
+        "total_amount": 11.0,
+        "items": [
+            {
+                "id": "1e707d18-1e86-41bd-b6ea-7d2f955c4ef2",
+                "product_id": "1",
+                "name": "Agua Mineral",
+                "price": 5.0,
+                "qty": 2.0,
+                "category": "Bebidas",
+                "created_at": "11/02/2026 23:09",
+                "waiter": "Garçom Teste",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [
+                    "Sem gelo"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 11.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "name": "Test Client",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 99",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "1bd6e64f-0052-4eea-a011-86453d65cb49",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_82_202602112309",
+        "closed_at": "2026-02-11 23:09:45",
+        "closed_by": "admin",
+        "total_amount": 5.0,
+        "items": [
+            {
+                "id": "351354dc-106f-49ab-82dc-09a3aee8ce60",
+                "product_id": "1",
+                "name": "Agua Mineral",
+                "price": 5.0,
+                "qty": 1.0,
+                "category": "Bebidas",
+                "created_at": "11/02/2026 23:09",
+                "waiter": "admin",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 5.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "name": "",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 82",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "16d7c991-73d7-45da-913e-fb929c9f0e92",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_10_202602112324",
+        "closed_at": "2026-02-11 23:24:08",
+        "closed_by": "admin",
+        "total_amount": 110.00000000000001,
+        "items": [
+            {
+                "name": "Item 1",
+                "qty": 1,
+                "price": 100.0
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Pix",
+                "amount": 40.0,
+                "is_fiscal": false
+            },
+            {
+                "method": "Dinheiro",
+                "amount": 70.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "name": null,
+            "type": null
+        },
+        "status": "pending",
+        "notes": "Mesa 10",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "8e288ed1-4500-401b-a5dc-745393f79656",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_10_202602112325",
+        "closed_at": "2026-02-11 23:25:27",
+        "closed_by": "admin",
+        "total_amount": 110.00000000000001,
+        "items": [
+            {
+                "name": "Item 1",
+                "qty": 1,
+                "price": 100.0
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Pix",
+                "amount": 40.0,
+                "is_fiscal": false
+            },
+            {
+                "method": "Dinheiro",
+                "amount": 70.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "name": null,
+            "type": null
+        },
+        "status": "pending",
+        "notes": "Mesa 10",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "aef79740-0dc9-4575-a4df-65d6d31b5445",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_59_202602112327",
+        "closed_at": "2026-02-11 23:27:30",
+        "closed_by": "Angelo",
+        "total_amount": 36.08,
+        "items": [
+            {
+                "id": "26f37721-757d-43a8-b734-79a5636f36cb",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Água de Coco",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 10.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Sucos e Águas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "henrique",
+                "created_at": "11/02/2026 10:53"
+            },
+            {
+                "id": "40cf0fdf-f054-4376-81d1-a5dbae88cbb4",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Suco Jarra",
+                "flavor": "Morango",
+                "qty": 1.0,
+                "price": 21.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "4 cp",
+                    "Sem açúcar sem coar mandar um balde de gelo"
+                ],
+                "category": "Sucos e Águas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "adailton",
+                "created_at": "11/02/2026 12:37"
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "PIX Maquininha CNPJ",
+                "amount": 36.08,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "",
+            "type": "hospede"
+        },
+        "status": "pending",
+        "notes": "Mesa 59",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "2d89247d-c19c-45d5-a604-e760aeb13930",
+        "origin": "reception_charge",
+        "fiscal_type": "nfce",
+        "original_id": "CHARGE_CHARGE_49_20260210210957_07cadb_REST",
+        "closed_at": "2026-02-12 00:50:19",
+        "closed_by": "Angelo",
+        "total_amount": 9.790000000000001,
+        "items": [
+            {
+                "id": "9a3cd4d2-d579-400c-9716-822c3df1d801",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Café Capuccino",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 8.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [
+                    {
+                        "question": "Tipo",
+                        "answer": "Especial"
+                    }
+                ],
+                "observations": [
+                    "Não Imprimir"
+                ],
+                "category": "Sucos e Águas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "filipe",
+                "created_at": "10/02/2026 21:08"
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "PIX Email Almareia",
+                "amount": 9.79,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "room_number": "17",
+            "guest_name": "KATIA E RITA"
+        },
+        "status": "pending",
+        "notes": null,
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "b0473067-9d17-40bf-ae7f-6dc2d6ecaea0",
+        "origin": "reception_charge",
+        "fiscal_type": "nfce",
+        "original_id": "CHARGE_CHARGE_GOV_11_20260212004710_6027b6",
+        "closed_at": "2026-02-12 00:50:30",
+        "closed_by": "Angelo",
+        "total_amount": 91.8,
+        "items": [
+            {
+                "id": "45",
+                "name": "Água com gás LATA FRIGOBAR",
+                "price": 9.9,
+                "qty": 2.0,
+                "category": "Frigobar",
+                "added_at": "00:47:10",
+                "added_by": "Angelo"
+            },
+            {
+                "id": "49",
+                "name": "Bolsinha Personalizada (Cortesia Hospedes)",
+                "price": 1.0,
+                "qty": 2.0,
+                "category": "Frigobar",
+                "added_at": "00:47:10",
+                "added_by": "Angelo"
+            },
+            {
+                "id": "51",
+                "name": "Chapeu (Cortesia Hospedes)",
+                "price": 35.0,
+                "qty": 2.0,
+                "category": "Frigobar",
+                "added_at": "00:47:10",
+                "added_by": "Angelo"
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Credito Angelo",
+                "amount": 91.8,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "room_number": "11",
+            "guest_name": "Hóspede"
+        },
+        "status": "pending",
+        "notes": null,
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "cad01da1-cf9d-4f85-a15f-6e497a96d1ee",
+        "origin": "reception_charge",
+        "fiscal_type": "nfce",
+        "original_id": "CHARGE_CHARGE_GOV_24_20260211105600_14a519",
+        "closed_at": "2026-02-12 00:50:36",
+        "closed_by": "Angelo",
+        "total_amount": 26.700000000000003,
+        "items": [
+            {
+                "id": "48",
+                "name": "Agua Sem Gás Pet FRIGOBAR",
+                "price": 8.9,
+                "qty": 3.0,
+                "category": "Frigobar",
+                "added_at": "10:56:00",
+                "added_by": "generina"
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Debito Angelo",
+                "amount": 26.7,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "room_number": "24",
+            "guest_name": "SAMUEL E MAYKON"
+        },
+        "status": "pending",
+        "notes": null,
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "6938f77f-3b5f-4d0e-a689-d20d4b9d0fed",
+        "origin": "reception_charge",
+        "fiscal_type": "nfce",
+        "original_id": "CHARGE_CHARGE_50_20260210153729_aa2e5a_REST",
+        "closed_at": "2026-02-12 00:50:54",
+        "closed_by": "Angelo",
+        "total_amount": 153.34,
+        "items": [
+            {
+                "id": "06a4f3cf-459d-424d-80ed-422d25dafc35",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Água de Coco",
+                "flavor": null,
+                "qty": 2.0,
+                "price": 10.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Sucos e Águas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "henrique",
+                "created_at": "10/02/2026 13:14"
+            },
+            {
+                "id": "ac378070-b34d-4842-abdc-b00cfba054ae",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Pasteis de Queijo coalho  (6 unidades)",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 28.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Entradas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "edson",
+                "created_at": "10/02/2026 14:16"
+            },
+            {
+                "id": "b61bcad2-a34c-4f05-9a22-5f998d2ab126",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Suco Jarra",
+                "flavor": "Morango",
+                "qty": 1.0,
+                "price": 21.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "Sem ser cuado"
+                ],
+                "category": "Sucos e Águas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "edson",
+                "created_at": "10/02/2026 14:16"
+            },
+            {
+                "id": "9d5cb8af-6424-4516-bcba-5a26a4fbba7c",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 16.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "Estela com um copo gelado"
+                ],
+                "category": "Cervejas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "edson",
+                "created_at": "10/02/2026 14:16"
+            },
+            {
+                "id": "ea394a8e-acd9-4274-a26c-c10066afdca1",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Curry Mirathai (Individual Vegano)",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 49.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Pratos",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "erique",
+                "created_at": "10/02/2026 14:52"
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "PIX Email Almareia",
+                "amount": 100.0,
+                "is_fiscal": false
+            },
+            {
+                "method": "PIX Email Almareia",
+                "amount": 53.34,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "room_number": "26",
+            "guest_name": "ANA ELISABETH E MARIA ISABEL"
+        },
+        "status": "pending",
+        "notes": null,
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "70cc7060-b84a-49bc-ae8e-d834555bef47",
+        "origin": "reception_charge",
+        "fiscal_type": "nfce",
+        "original_id": "CHARGE_CHARGE_50_20260209191802_81e52e_REST",
+        "closed_at": "2026-02-12 00:59:57",
+        "closed_by": "Angelo",
+        "total_amount": 882.068,
+        "items": [
+            {
+                "id": "f45051fb-b17c-4747-ab22-bda55b3ecb1b",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Aperol Spritz",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 38.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Drinks",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "henrique",
+                "created_at": "09/02/2026 11:23"
+            },
+            {
+                "id": "afd92bcf-b4d8-4ac0-9c43-365e2872d9f3",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Espumante Miolo Cuvee Brut Nature",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 159.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Vinhos",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "erique",
+                "created_at": "09/02/2026 13:03"
+            },
+            {
+                "id": "b695c225-8e3d-4edb-b6a2-78b71f7fc6b1",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Agua sem Gás 275ml",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 9.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "Gelo"
+                    }
+                ],
+                "observations": [],
+                "category": "Sucos e Águas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "erique",
+                "created_at": "09/02/2026 13:08"
+            },
+            {
+                "id": "2e336424-5531-4035-8fd7-8587bd1e206e",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Espumante Miolo Cuvee Brut Nature",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 159.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "4 Taças"
+                ],
+                "category": "Vinhos",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "henrique",
+                "created_at": "09/02/2026 14:02"
+            },
+            {
+                "id": "97f89bd4-7adc-4734-9a56-5cc79f275f6c",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Agua sem Gás 275ml",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 9.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "Gelo"
+                    }
+                ],
+                "observations": [
+                    "3 cp"
+                ],
+                "category": "Sucos e Águas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "henrique",
+                "created_at": "09/02/2026 14:02"
+            },
+            {
+                "id": "5a5877af-ea18-4a92-ab82-0413ff323579",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Agua com Gás 275ml",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 9.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "Gelo"
+                    }
+                ],
+                "observations": [],
+                "category": "Sucos e Águas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "henrique",
+                "created_at": "09/02/2026 14:02"
+            },
+            {
+                "id": "5ea9bcf0-9b5a-4747-accd-a12b381cc47e",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Batata Frita",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 24.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Entradas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "henrique",
+                "created_at": "09/02/2026 14:02"
+            },
+            {
+                "id": "a8176eef-ded8-4add-a2af-53921823deb1",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Espumante Miolo Cuvee Brut Nature",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 159.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "4 Taças"
+                ],
+                "category": "Vinhos",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "henrique",
+                "created_at": "09/02/2026 15:50"
+            },
+            {
+                "id": "2dc4be69-99d2-4cb3-9f83-5e4b938f666a",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Agua com Gás 275ml",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 9.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "Gelo"
+                    }
+                ],
+                "observations": [
+                    "1 cp"
+                ],
+                "category": "Sucos e Águas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "henrique",
+                "created_at": "09/02/2026 15:50"
+            },
+            {
+                "id": "b165e171-959d-49ea-ae98-39eac6f88b12",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Água de Coco",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 10.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Sucos e Águas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "henrique",
+                "created_at": "09/02/2026 15:50"
+            },
+            {
+                "id": "228be4f4-8735-43ce-b2db-33121fa81b08",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Parmegiana de Filé Mignon (Individual)",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 98.99,
+                "complements": [],
+                "accompaniments": [
+                    "Batata Frita",
+                    "Arroz"
+                ],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Pratos",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "leo",
+                "created_at": "09/02/2026 17:56"
+            },
+            {
+                "id": "e4df916e-e7ed-4183-94e7-0e10cb9b795b",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Parmegiana de Filé Mignon (Individual)",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 98.99,
+                "complements": [],
+                "accompaniments": [
+                    "Batata Frita",
+                    "Arroz"
+                ],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Pratos",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "leo",
+                "created_at": "09/02/2026 18:20"
+            },
+            {
+                "id": "e5136e36-aca0-49e8-af60-2ef0499206ba",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Agua com Gás 275ml",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 9.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "Gelo e Limão"
+                    }
+                ],
+                "observations": [
+                    "1 cp",
+                    "Sumo de limao"
+                ],
+                "category": "Sucos e Águas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "leo",
+                "created_at": "09/02/2026 18:49"
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 400.0,
+                "is_fiscal": false
+            },
+            {
+                "method": "PIX Email Almareia",
+                "amount": 482.068,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "room_number": "26",
+            "guest_name": "ANA ELISABETH E MARIA ISABEL"
+        },
+        "status": "pending",
+        "notes": null,
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "36690368-528d-4c13-af9d-e4e8597a9506",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602120123",
+        "closed_at": "2026-02-12 01:23:05",
+        "closed_by": "admin_tester",
+        "total_amount": 44.0,
+        "items": [
+            {
+                "id": "a2744ff8-9ecd-4552-a74c-d35a789be1d1",
+                "product_id": "3",
+                "name": "Pizza",
+                "price": 40.0,
+                "qty": 1.0,
+                "category": "Refeição",
+                "created_at": "12/02/2026 01:23",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 20.0,
+                "is_fiscal": false
+            },
+            {
+                "method": "Cartão Crédito",
+                "amount": 24.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "a413e881-5bff-43b5-af0b-42b88edf22be",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602120123",
+        "closed_at": "2026-02-12 01:23:06",
+        "closed_by": "admin_tester",
+        "total_amount": 55.00000000000001,
+        "items": [
+            {
+                "id": "0e900dea-f1f1-414c-8d37-7bd120069c26",
+                "product_id": "1",
+                "name": "Água",
+                "price": 5.0,
+                "qty": 10.0,
+                "category": "Bebidas",
+                "created_at": "12/02/2026 01:23",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 55.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "7d7dc1cc-56d4-4512-9587-6e160473e2b4",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602120123",
+        "closed_at": "2026-02-12 01:23:50",
+        "closed_by": "admin_tester",
+        "total_amount": 44.0,
+        "items": [
+            {
+                "id": "5096c591-4570-46fa-bd4c-ab2597238282",
+                "product_id": "3",
+                "name": "Pizza",
+                "price": 40.0,
+                "qty": 1.0,
+                "category": "Refeição",
+                "created_at": "12/02/2026 01:23",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 20.0,
+                "is_fiscal": true
+            },
+            {
+                "method": "Cartão Crédito",
+                "amount": 24.0,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "d13cbcb0-d2a2-454b-b457-b6bab8f317b9",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602120123",
+        "closed_at": "2026-02-12 01:23:52",
+        "closed_by": "admin_tester",
+        "total_amount": 55.00000000000001,
+        "items": [
+            {
+                "id": "97631b2c-1e29-40cb-a8b7-5384867139c8",
+                "product_id": "1",
+                "name": "Água",
+                "price": 5.0,
+                "qty": 10.0,
+                "category": "Bebidas",
+                "created_at": "12/02/2026 01:23",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 55.0,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "25fccc8d-7643-41f8-96f9-48d3f6848122",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602120125",
+        "closed_at": "2026-02-12 01:25:39",
+        "closed_by": "admin_tester",
+        "total_amount": 44.0,
+        "items": [
+            {
+                "id": "bd43808d-943e-44df-ab57-90e42fcd196b",
+                "product_id": "3",
+                "name": "Pizza",
+                "price": 40.0,
+                "qty": 1.0,
+                "category": "Refeição",
+                "created_at": "12/02/2026 01:25",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 20.0,
+                "is_fiscal": true
+            },
+            {
+                "method": "Cartão Crédito",
+                "amount": 24.0,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "ba9e67e6-f958-41ec-b419-151515403114",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602120125",
+        "closed_at": "2026-02-12 01:25:40",
+        "closed_by": "admin_tester",
+        "total_amount": 55.00000000000001,
+        "items": [
+            {
+                "id": "ebf37eeb-10c3-4144-a106-65389da64a7b",
+                "product_id": "1",
+                "name": "Água",
+                "price": 5.0,
+                "qty": 10.0,
+                "category": "Bebidas",
+                "created_at": "12/02/2026 01:25",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 55.0,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "5d2a25a3-0949-40ce-bec4-e8a3dd2b561a",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602120129",
+        "closed_at": "2026-02-12 01:29:47",
+        "closed_by": "admin_tester",
+        "total_amount": 44.0,
+        "items": [
+            {
+                "id": "d28c96af-3a5a-4a99-90bf-943e46f1f146",
+                "product_id": "3",
+                "name": "Pizza",
+                "price": 40.0,
+                "qty": 1.0,
+                "category": "Refeição",
+                "created_at": "12/02/2026 01:29",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 20.0,
+                "is_fiscal": true
+            },
+            {
+                "method": "Cartão Crédito",
+                "amount": 24.0,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "c706db13-a138-4095-90de-bd88eff755e9",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602120129",
+        "closed_at": "2026-02-12 01:29:48",
+        "closed_by": "admin_tester",
+        "total_amount": 44.0,
+        "items": [
+            {
+                "id": "f0904309-e6c2-49e8-84bc-904462b118f5",
+                "product_id": "3",
+                "name": "Pizza",
+                "price": 40.0,
+                "qty": 1.0,
+                "category": "Refeição",
+                "created_at": "12/02/2026 01:29",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 20.0,
+                "is_fiscal": true
+            },
+            {
+                "method": "Dinheiro",
+                "amount": 24.0,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "3a2351e0-acea-48b6-a2fa-c1d6c3f1b405",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602120129",
+        "closed_at": "2026-02-12 01:29:48",
+        "closed_by": "admin_tester",
+        "total_amount": 40.0,
+        "items": [
+            {
+                "id": "7cb76271-8dc3-4e9d-b638-12ea1ca0cb79",
+                "product_id": "3",
+                "name": "Pizza",
+                "price": 40.0,
+                "qty": 1.0,
+                "category": "Refeição",
+                "created_at": "12/02/2026 01:29",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 40.0,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "ab0d0f56-b7f9-45e7-8764-969b82aa6d53",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602120129",
+        "closed_at": "2026-02-12 01:29:48",
+        "closed_by": "admin_tester",
+        "total_amount": 55.00000000000001,
+        "items": [
+            {
+                "id": "028b9b45-9fdb-4a80-b755-aeec00427a84",
+                "product_id": "1",
+                "name": "Água",
+                "price": 5.0,
+                "qty": 10.0,
+                "category": "Bebidas",
+                "created_at": "12/02/2026 01:29",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 55.0,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "9fa40a59-9dd5-49eb-a791-c4a4e4f3c522",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602120131",
+        "closed_at": "2026-02-12 01:31:06",
+        "closed_by": "admin_tester",
+        "total_amount": 44.0,
+        "items": [
+            {
+                "id": "0484b382-083e-4c9e-984a-96de249ebd14",
+                "product_id": "3",
+                "name": "Pizza",
+                "price": 40.0,
+                "qty": 1.0,
+                "category": "Refeição",
+                "created_at": "12/02/2026 01:31",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 20.0,
+                "is_fiscal": true
+            },
+            {
+                "method": "Cartão Crédito",
+                "amount": 24.0,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "37572d75-9eaf-45c6-8d08-af0222507b97",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602120131",
+        "closed_at": "2026-02-12 01:31:06",
+        "closed_by": "admin_tester",
+        "total_amount": 44.0,
+        "items": [
+            {
+                "id": "2baeed9d-22eb-46c3-a65c-27cb5f5dfcea",
+                "product_id": "3",
+                "name": "Pizza",
+                "price": 40.0,
+                "qty": 1.0,
+                "category": "Refeição",
+                "created_at": "12/02/2026 01:31",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 20.0,
+                "is_fiscal": true
+            },
+            {
+                "method": "Dinheiro",
+                "amount": 24.0,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "38363a54-52ed-4132-af6a-f96d3e5430d3",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602120131",
+        "closed_at": "2026-02-12 01:31:07",
+        "closed_by": "admin_tester",
+        "total_amount": 40.0,
+        "items": [
+            {
+                "id": "85599ef0-a469-4add-a2af-013a407c20c0",
+                "product_id": "3",
+                "name": "Pizza",
+                "price": 40.0,
+                "qty": 1.0,
+                "category": "Refeição",
+                "created_at": "12/02/2026 01:31",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 40.0,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "a907b6e2-6446-4b0b-b7e2-c770be2bd887",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602120131",
+        "closed_at": "2026-02-12 01:31:07",
+        "closed_by": "admin_tester",
+        "total_amount": 55.00000000000001,
+        "items": [
+            {
+                "id": "3b331094-304f-4480-bbf3-a6e452ecd080",
+                "product_id": "1",
+                "name": "Água",
+                "price": 5.0,
+                "qty": 10.0,
+                "category": "Bebidas",
+                "created_at": "12/02/2026 01:31",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 55.0,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "7f634d14-33d1-4754-9acf-cf4589b29771",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602120131",
+        "closed_at": "2026-02-12 01:31:51",
+        "closed_by": "admin_tester",
+        "total_amount": 44.0,
+        "items": [
+            {
+                "id": "9271f3c7-f946-44e4-8001-e9454f0f11f9",
+                "product_id": "3",
+                "name": "Pizza",
+                "price": 40.0,
+                "qty": 1.0,
+                "category": "Refeição",
+                "created_at": "12/02/2026 01:31",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 20.0,
+                "is_fiscal": true
+            },
+            {
+                "method": "Cartão Crédito",
+                "amount": 24.0,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "017708ca-6c94-4a8f-93ec-4768633ace83",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602120131",
+        "closed_at": "2026-02-12 01:31:51",
+        "closed_by": "admin_tester",
+        "total_amount": 44.0,
+        "items": [
+            {
+                "id": "09cfad46-4991-48d5-affd-5cdbf1051765",
+                "product_id": "3",
+                "name": "Pizza",
+                "price": 40.0,
+                "qty": 1.0,
+                "category": "Refeição",
+                "created_at": "12/02/2026 01:31",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 20.0,
+                "is_fiscal": true
+            },
+            {
+                "method": "Dinheiro",
+                "amount": 24.0,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "32ff310c-2ecc-45ea-928c-f58fe29cf55b",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602120131",
+        "closed_at": "2026-02-12 01:31:52",
+        "closed_by": "admin_tester",
+        "total_amount": 40.0,
+        "items": [
+            {
+                "id": "fe6368a6-1247-42a7-9cfa-a07ff90c04a8",
+                "product_id": "3",
+                "name": "Pizza",
+                "price": 40.0,
+                "qty": 1.0,
+                "category": "Refeição",
+                "created_at": "12/02/2026 01:31",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 40.0,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "adfc3e5e-a0f7-4f12-afdc-bbda1056495d",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602120131",
+        "closed_at": "2026-02-12 01:31:52",
+        "closed_by": "admin_tester",
+        "total_amount": 55.00000000000001,
+        "items": [
+            {
+                "id": "a59eee01-bb4b-4a7a-b711-1e94a761ed3d",
+                "product_id": "1",
+                "name": "Água",
+                "price": 5.0,
+                "qty": 10.0,
+                "category": "Bebidas",
+                "created_at": "12/02/2026 01:31",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 55.0,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "f6dbb202-9608-4da0-a53b-c369ba5879c5",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602120132",
+        "closed_at": "2026-02-12 01:32:48",
+        "closed_by": "admin_tester",
+        "total_amount": 44.0,
+        "items": [
+            {
+                "id": "d66cc94e-1efc-4fad-8116-f3ae9f430ec1",
+                "product_id": "3",
+                "name": "Pizza",
+                "price": 40.0,
+                "qty": 1.0,
+                "category": "Refeição",
+                "created_at": "12/02/2026 01:32",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 20.0,
+                "is_fiscal": true
+            },
+            {
+                "method": "Cartão Crédito",
+                "amount": 24.0,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "dcf5803b-1c46-4bf7-abd4-16438b1b9f6b",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602120132",
+        "closed_at": "2026-02-12 01:32:49",
+        "closed_by": "admin_tester",
+        "total_amount": 44.0,
+        "items": [
+            {
+                "id": "1901ce83-7c93-4937-88ab-5eb6b77d3279",
+                "product_id": "3",
+                "name": "Pizza",
+                "price": 40.0,
+                "qty": 1.0,
+                "category": "Refeição",
+                "created_at": "12/02/2026 01:32",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 20.0,
+                "is_fiscal": true
+            },
+            {
+                "method": "Dinheiro",
+                "amount": 24.0,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "f99a3f60-7584-4b40-9a5b-f2b5c0b29141",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602120132",
+        "closed_at": "2026-02-12 01:32:49",
+        "closed_by": "admin_tester",
+        "total_amount": 40.0,
+        "items": [
+            {
+                "id": "7d29639f-10a7-499d-a57d-1b20554f5745",
+                "product_id": "3",
+                "name": "Pizza",
+                "price": 40.0,
+                "qty": 1.0,
+                "category": "Refeição",
+                "created_at": "12/02/2026 01:32",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 40.0,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "14290901-1c6c-4ae8-bb2e-d448a210b1ab",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602120132",
+        "closed_at": "2026-02-12 01:32:50",
+        "closed_by": "admin_tester",
+        "total_amount": 55.00000000000001,
+        "items": [
+            {
+                "id": "6f1d356b-4f54-49f6-8ad7-683ac2142d9c",
+                "product_id": "1",
+                "name": "Água",
+                "price": 5.0,
+                "qty": 10.0,
+                "category": "Bebidas",
+                "created_at": "12/02/2026 01:32",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 55.0,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "d27f5414-a7ba-4f55-bac0-54db00958247",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602120136",
+        "closed_at": "2026-02-12 01:36:09",
+        "closed_by": "admin_tester",
+        "total_amount": 44.0,
+        "items": [
+            {
+                "id": "a9320a4e-941a-47f9-bf90-2dc2c0c0b1a1",
+                "product_id": "3",
+                "name": "Pizza",
+                "price": 40.0,
+                "qty": 1.0,
+                "category": "Refeição",
+                "created_at": "12/02/2026 01:36",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 20.0,
+                "is_fiscal": true
+            },
+            {
+                "method": "Cartão Crédito",
+                "amount": 24.0,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "7fa8cd7d-1f02-4bac-b8cf-5d6dde669083",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602120136",
+        "closed_at": "2026-02-12 01:36:10",
+        "closed_by": "admin_tester",
+        "total_amount": 44.0,
+        "items": [
+            {
+                "id": "3dba95e7-5a52-43e4-b071-1cd8d858742f",
+                "product_id": "3",
+                "name": "Pizza",
+                "price": 40.0,
+                "qty": 1.0,
+                "category": "Refeição",
+                "created_at": "12/02/2026 01:36",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 20.0,
+                "is_fiscal": true
+            },
+            {
+                "method": "Dinheiro",
+                "amount": 24.0,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "a91e16bf-2ae7-4422-90cb-2a64a93cb617",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602120136",
+        "closed_at": "2026-02-12 01:36:10",
+        "closed_by": "admin_tester",
+        "total_amount": 40.0,
+        "items": [
+            {
+                "id": "6980d868-61c2-4418-ada9-09e55416071c",
+                "product_id": "3",
+                "name": "Pizza",
+                "price": 40.0,
+                "qty": 1.0,
+                "category": "Refeição",
+                "created_at": "12/02/2026 01:36",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 40.0,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "eb0aff05-ec54-49f2-b926-955e4946f71f",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602120136",
+        "closed_at": "2026-02-12 01:36:11",
+        "closed_by": "admin_tester",
+        "total_amount": 55.00000000000001,
+        "items": [
+            {
+                "id": "44692049-a3fe-4e7b-96b2-3495615eea32",
+                "product_id": "1",
+                "name": "Água",
+                "price": 5.0,
+                "qty": 10.0,
+                "category": "Bebidas",
+                "created_at": "12/02/2026 01:36",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 55.0,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "16e8d93b-3d6b-4924-9659-175e28bd6cd7",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602120139",
+        "closed_at": "2026-02-12 01:39:34",
+        "closed_by": "admin_tester",
+        "total_amount": 44.0,
+        "items": [
+            {
+                "id": "17563ec1-c1c4-401f-bef8-4c9ebb8ed696",
+                "product_id": "3",
+                "name": "Pizza",
+                "price": 40.0,
+                "qty": 1.0,
+                "category": "Refeição",
+                "created_at": "12/02/2026 01:39",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 20.0,
+                "is_fiscal": true
+            },
+            {
+                "method": "Cartão Crédito",
+                "amount": 24.0,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "95b1a7d8-a236-4efb-8476-3eeb08c390d4",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602120139",
+        "closed_at": "2026-02-12 01:39:34",
+        "closed_by": "admin_tester",
+        "total_amount": 44.0,
+        "items": [
+            {
+                "id": "645d8cde-41b3-49b9-ad26-fc5288926328",
+                "product_id": "3",
+                "name": "Pizza",
+                "price": 40.0,
+                "qty": 1.0,
+                "category": "Refeição",
+                "created_at": "12/02/2026 01:39",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 20.0,
+                "is_fiscal": true
+            },
+            {
+                "method": "Dinheiro",
+                "amount": 24.0,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "c842b22c-b7ee-4a9e-8231-e7f79772fe98",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602120139",
+        "closed_at": "2026-02-12 01:39:35",
+        "closed_by": "admin_tester",
+        "total_amount": 40.0,
+        "items": [
+            {
+                "id": "2f54a708-25e9-4487-a5c0-27ac89563a16",
+                "product_id": "3",
+                "name": "Pizza",
+                "price": 40.0,
+                "qty": 1.0,
+                "category": "Refeição",
+                "created_at": "12/02/2026 01:39",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 40.0,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "c6730981-a3d7-4b7a-83c6-f03fb044ff4a",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "original_id": "MESA_40_202602120139",
+        "closed_at": "2026-02-12 01:39:35",
+        "closed_by": "admin_tester",
+        "total_amount": 55.00000000000001,
+        "items": [
+            {
+                "id": "9aa98c8c-641a-48f9-b52a-d0499b0489ea",
+                "product_id": "1",
+                "name": "Água",
+                "price": 5.0,
+                "qty": 10.0,
+                "category": "Bebidas",
+                "created_at": "12/02/2026 01:39",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 55.0,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
     }
 ]
