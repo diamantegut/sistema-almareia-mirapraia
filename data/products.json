@@ -10495,5 +10495,85 @@
             "farmaggio"
         ],
         "is_internal": false
+    },
+    {
+        "id": "800",
+        "name": "Açucar",
+        "department": "Estoque",
+        "unit": "Litros",
+        "price": 3.14,
+        "category": "Estoque Principal - cozinha",
+        "min_stock": 30.0,
+        "package_size": 1.0,
+        "purchase_unit": "fardo",
+        "frequency": "Semanal",
+        "suppliers": [
+            "atacamax"
+        ],
+        "is_internal": false
+    },
+    {
+        "id": "801",
+        "name": "Farinha de Trigo",
+        "department": "Estoque",
+        "unit": "Kilogramas",
+        "price": 4.32,
+        "category": "Estoque Principal - cozinha",
+        "min_stock": 30.0,
+        "package_size": 1.0,
+        "purchase_unit": "fardo",
+        "frequency": "Semanal",
+        "suppliers": [
+            "atacamax"
+        ],
+        "is_internal": false
+    },
+    {
+        "id": "802",
+        "name": "leite de coco",
+        "department": "Estoque",
+        "unit": "Litros",
+        "price": 21.49,
+        "category": "Estoque Principal - cozinha",
+        "min_stock": 36.0,
+        "package_size": 1.0,
+        "purchase_unit": "caixa",
+        "frequency": "Semanal",
+        "suppliers": [
+            "atacamax"
+        ],
+        "is_internal": false
+    },
+    {
+        "id": "803",
+        "name": "Sal Grosso",
+        "department": "Estoque",
+        "unit": "Litros",
+        "price": 1.78,
+        "category": "Estoque Principal - cozinha",
+        "min_stock": 30.0,
+        "package_size": 1.0,
+        "purchase_unit": "fardo",
+        "frequency": "Semanal",
+        "suppliers": [
+            "atacamax"
+        ],
+        "is_internal": false
+    },
+    {
+        "id": "804",
+        "name": "Peito de boi",
+        "department": "Cozinha",
+        "unit": "Litros",
+        "price": 28.99,
+        "category": "Bruto Carnes",
+        "min_stock": 20.0,
+        "package_size": 1.0,
+        "purchase_unit": "kilograma",
+        "frequency": "Quinzenal",
+        "suppliers": [
+            "Friboi"
+        ],
+        "is_internal": false
     }
 ]

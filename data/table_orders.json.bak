@@ -1270,9 +1270,27 @@
                 "source": "restaurant",
                 "waiter": "henrique",
                 "created_at": "11/02/2026 10:42"
+            },
+            {
+                "id": "e6c9646f-4ed6-49a1-811b-768db509d791",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Suco Copo",
+                "flavor": "Limão",
+                "qty": 1.0,
+                "price": 8.72,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Sucos e Águas",
+                "service_fee_exempt": true,
+                "source": "restaurant",
+                "waiter": "henrique",
+                "created_at": "11/02/2026 14:02"
             }
         ],
-        "total": 7.920000000000001,
+        "total": 16.64,
         "partial_payments": [],
         "total_paid": 0.0
     },
@@ -2049,391 +2067,6 @@
         "customer_type": "hospede",
         "room_number": "24"
     },
-    "100": {
-        "items": [
-            {
-                "id": "55b47c4a-8b58-487b-b948-a3f14450fc34",
-                "printed": true,
-                "print_status": "printed",
-                "name": "Cupim na telha (2 Pessoas)",
-                "flavor": null,
-                "qty": 1.0,
-                "price": 179.9,
-                "complements": [],
-                "accompaniments": [
-                    "Macaxeira Frita"
-                ],
-                "questions_answers": [],
-                "observations": [],
-                "category": "Pratos",
-                "service_fee_exempt": false,
-                "source": "restaurant",
-                "waiter": "erique",
-                "created_at": "10/02/2026 16:30"
-            },
-            {
-                "id": "295d1d21-b654-48cf-ac24-b08d8c60354e",
-                "printed": true,
-                "print_status": "printed",
-                "name": "Vinho Branco Vista Calma Torrontés",
-                "flavor": null,
-                "qty": 1.0,
-                "price": 139.0,
-                "complements": [],
-                "accompaniments": [],
-                "questions_answers": [],
-                "observations": [],
-                "category": "Vinhos",
-                "service_fee_exempt": false,
-                "source": "restaurant",
-                "waiter": "erique",
-                "created_at": "10/02/2026 16:31"
-            },
-            {
-                "id": "99a0d0b9-f0ba-46b9-a708-fa73da9b9dba",
-                "printed": true,
-                "print_status": "printed",
-                "name": "Agua sem Gás 275ml",
-                "flavor": null,
-                "qty": 1.0,
-                "price": 9.9,
-                "complements": [],
-                "accompaniments": [],
-                "questions_answers": [
-                    {
-                        "question": "Copo",
-                        "answer": "Gelo"
-                    }
-                ],
-                "observations": [],
-                "category": "Sucos e Águas",
-                "service_fee_exempt": false,
-                "source": "restaurant",
-                "waiter": "erique",
-                "created_at": "10/02/2026 16:31"
-            },
-            {
-                "id": "336907b6-2a21-427d-ac04-9e8722d85da3",
-                "printed": true,
-                "print_status": "printed",
-                "name": "Caipiroska Absolut (Escolha o sabor)",
-                "flavor": "Limão",
-                "qty": 1.0,
-                "price": 34.9,
-                "complements": [],
-                "accompaniments": [],
-                "questions_answers": [],
-                "observations": [],
-                "category": "Drinks",
-                "service_fee_exempt": false,
-                "source": "restaurant",
-                "waiter": "edson",
-                "created_at": "10/02/2026 17:15"
-            }
-        ],
-        "total": 363.69999999999993,
-        "status": "open",
-        "opened_at": "11/02/2026 08:28",
-        "num_adults": "2",
-        "customer_type": "passante",
-        "room_number": null,
-        "waiter": null,
-        "staff_name": null,
-        "last_transfer": {
-            "source_table": "42",
-            "items": [
-                {
-                    "id": "55b47c4a-8b58-487b-b948-a3f14450fc34",
-                    "printed": true,
-                    "print_status": "printed",
-                    "name": "Cupim na telha (2 Pessoas)",
-                    "flavor": null,
-                    "qty": 1.0,
-                    "price": 179.9,
-                    "complements": [],
-                    "accompaniments": [
-                        "Macaxeira Frita"
-                    ],
-                    "questions_answers": [],
-                    "observations": [],
-                    "category": "Pratos",
-                    "service_fee_exempt": false,
-                    "source": "restaurant",
-                    "waiter": "erique",
-                    "created_at": "10/02/2026 16:30"
-                },
-                {
-                    "id": "295d1d21-b654-48cf-ac24-b08d8c60354e",
-                    "printed": true,
-                    "print_status": "printed",
-                    "name": "Vinho Branco Vista Calma Torrontés",
-                    "flavor": null,
-                    "qty": 1.0,
-                    "price": 139.0,
-                    "complements": [],
-                    "accompaniments": [],
-                    "questions_answers": [],
-                    "observations": [],
-                    "category": "Vinhos",
-                    "service_fee_exempt": false,
-                    "source": "restaurant",
-                    "waiter": "erique",
-                    "created_at": "10/02/2026 16:31"
-                },
-                {
-                    "id": "99a0d0b9-f0ba-46b9-a708-fa73da9b9dba",
-                    "printed": true,
-                    "print_status": "printed",
-                    "name": "Agua sem Gás 275ml",
-                    "flavor": null,
-                    "qty": 1.0,
-                    "price": 9.9,
-                    "complements": [],
-                    "accompaniments": [],
-                    "questions_answers": [
-                        {
-                            "question": "Copo",
-                            "answer": "Gelo"
-                        }
-                    ],
-                    "observations": [],
-                    "category": "Sucos e Águas",
-                    "service_fee_exempt": false,
-                    "source": "restaurant",
-                    "waiter": "erique",
-                    "created_at": "10/02/2026 16:31"
-                },
-                {
-                    "id": "336907b6-2a21-427d-ac04-9e8722d85da3",
-                    "printed": true,
-                    "print_status": "printed",
-                    "name": "Caipiroska Absolut (Escolha o sabor)",
-                    "flavor": "Limão",
-                    "qty": 1.0,
-                    "price": 34.9,
-                    "complements": [],
-                    "accompaniments": [],
-                    "questions_answers": [],
-                    "observations": [],
-                    "category": "Drinks",
-                    "service_fee_exempt": false,
-                    "source": "restaurant",
-                    "waiter": "edson",
-                    "created_at": "10/02/2026 17:15"
-                }
-            ],
-            "timestamp": "20260211082839",
-            "transferred_by": "Angelo"
-        }
-    },
-    "74": {
-        "items": [
-            {
-                "id": "35e5cb5e-1d54-4ddc-af6e-bdce3aa4d36e",
-                "printed": true,
-                "print_status": "printed",
-                "name": "Caipirinha de Pitú",
-                "flavor": "Limão",
-                "qty": 2.0,
-                "price": 28.9,
-                "complements": [],
-                "accompaniments": [],
-                "questions_answers": [],
-                "observations": [],
-                "category": "Drinks",
-                "service_fee_exempt": false,
-                "source": "restaurant",
-                "waiter": "henrique",
-                "created_at": "11/02/2026 10:40"
-            },
-            {
-                "id": "a88a3cf3-2b54-4e6e-8169-06085ba05462",
-                "printed": true,
-                "print_status": "printed",
-                "name": "Caipirinha de Pitú",
-                "flavor": "Limão",
-                "qty": 1.0,
-                "price": 28.9,
-                "complements": [],
-                "accompaniments": [],
-                "questions_answers": [],
-                "observations": [],
-                "category": "Drinks",
-                "service_fee_exempt": false,
-                "source": "restaurant",
-                "waiter": "henrique",
-                "created_at": "11/02/2026 11:52"
-            }
-        ],
-        "total": 86.69999999999999,
-        "status": "open",
-        "opened_at": "11/02/2026 10:40",
-        "num_adults": 2,
-        "customer_type": "hospede",
-        "customer_name": "",
-        "room_number": "24",
-        "waiter": null,
-        "staff_name": null,
-        "partial_payments": [],
-        "total_paid": 0.0
-    },
-    "59": {
-        "items": [
-            {
-                "id": "26f37721-757d-43a8-b734-79a5636f36cb",
-                "printed": true,
-                "print_status": "printed",
-                "name": "Água de Coco",
-                "flavor": null,
-                "qty": 1.0,
-                "price": 10.9,
-                "complements": [],
-                "accompaniments": [],
-                "questions_answers": [],
-                "observations": [],
-                "category": "Sucos e Águas",
-                "service_fee_exempt": false,
-                "source": "restaurant",
-                "waiter": "henrique",
-                "created_at": "11/02/2026 10:53"
-            }
-        ],
-        "total": 10.9,
-        "status": "open",
-        "opened_at": "11/02/2026 10:53",
-        "num_adults": "2",
-        "customer_type": "hospede",
-        "customer_name": "",
-        "room_number": "17",
-        "waiter": null,
-        "staff_name": null,
-        "partial_payments": [],
-        "total_paid": 0.0
-    },
-    "50": {
-        "items": [
-            {
-                "id": "c04c2171-d45d-47bc-ab08-6b847538d4b5",
-                "printed": true,
-                "print_status": "printed",
-                "name": "Espumante Chandon Reserve Brut",
-                "flavor": null,
-                "qty": 1.0,
-                "price": 180.0,
-                "complements": [],
-                "accompaniments": [],
-                "questions_answers": [],
-                "observations": [
-                    "2 Taças"
-                ],
-                "category": "Vinhos",
-                "service_fee_exempt": false,
-                "source": "restaurant",
-                "waiter": "henrique",
-                "created_at": "11/02/2026 11:17"
-            }
-        ],
-        "total": 180.0,
-        "status": "open",
-        "opened_at": "11/02/2026 11:17",
-        "num_adults": 2,
-        "customer_type": "hospede",
-        "customer_name": "",
-        "room_number": "22",
-        "waiter": null,
-        "staff_name": null,
-        "partial_payments": [],
-        "total_paid": 0.0
-    },
-    "80": {
-        "items": [
-            {
-                "id": "40b65968-a97f-4dd5-9d5b-3b6434d4c27b",
-                "printed": true,
-                "print_status": "printed",
-                "name": "Daiquiri frozen",
-                "flavor": null,
-                "qty": 1.0,
-                "price": 32.9,
-                "complements": [],
-                "accompaniments": [],
-                "questions_answers": [],
-                "observations": [],
-                "category": "Drinks",
-                "service_fee_exempt": false,
-                "source": "restaurant",
-                "waiter": "henrique",
-                "created_at": "11/02/2026 11:25"
-            }
-        ],
-        "total": 32.9,
-        "status": "open",
-        "opened_at": "11/02/2026 11:25",
-        "num_adults": "1",
-        "customer_type": "hospede",
-        "customer_name": "",
-        "room_number": "31",
-        "waiter": null,
-        "staff_name": null,
-        "partial_payments": [],
-        "total_paid": 0.0
-    },
-    "60": {
-        "items": [
-            {
-                "id": "af697cef-85de-45c4-97ca-3da9251a3a78",
-                "printed": true,
-                "print_status": "printed",
-                "name": "Corona Long Neck",
-                "flavor": null,
-                "qty": 1.0,
-                "price": 16.9,
-                "complements": [],
-                "accompaniments": [],
-                "questions_answers": [],
-                "observations": [
-                    "1 cp",
-                    "Com limão"
-                ],
-                "category": "Cervejas",
-                "service_fee_exempt": false,
-                "source": "restaurant",
-                "waiter": "guilherme",
-                "created_at": "11/02/2026 11:56"
-            },
-            {
-                "id": "ee3ab2fa-121a-4a3d-9d67-0fea84fc9082",
-                "printed": true,
-                "print_status": "printed",
-                "name": "Espumante Chandon Reserve Brut",
-                "flavor": null,
-                "qty": 1.0,
-                "price": 180.0,
-                "complements": [],
-                "accompaniments": [],
-                "questions_answers": [],
-                "observations": [
-                    "2 Taças"
-                ],
-                "category": "Vinhos",
-                "service_fee_exempt": false,
-                "source": "restaurant",
-                "waiter": "henrique",
-                "created_at": "11/02/2026 11:58"
-            }
-        ],
-        "total": 196.9,
-        "status": "open",
-        "opened_at": "11/02/2026 11:55",
-        "num_adults": "2",
-        "customer_type": "hospede",
-        "customer_name": "",
-        "room_number": "15",
-        "waiter": null,
-        "staff_name": null,
-        "partial_payments": [],
-        "total_paid": 0.0
-    },
     "36": {
         "items": [],
         "total": 0,
@@ -2446,78 +2079,91 @@
         "waiter": null,
         "staff_name": null
     },
-    "57": {
+    "62": {
         "items": [
             {
-                "id": "18f7aa17-3cf8-40a1-9df4-210e7a35d03f",
+                "id": "fba1ad6a-3e54-4d19-ab24-c0307d094fe2",
                 "printed": true,
                 "print_status": "printed",
-                "name": "Ceviche Tropical (Individual)",
+                "name": "Parmegiana de Filé Mignon (Individual)",
                 "flavor": null,
                 "qty": 1.0,
-                "price": 47.9,
-                "complements": [],
-                "accompaniments": [],
-                "questions_answers": [],
-                "observations": [],
-                "category": "Especiais da Casa",
-                "service_fee_exempt": false,
-                "source": "restaurant",
-                "waiter": "adailton",
-                "created_at": "11/02/2026 12:11"
-            },
-            {
-                "id": "c5ac80ab-738e-4509-94f4-34a036dd2f17",
-                "printed": false,
-                "print_status": "pending",
-                "name": "Cupim na telha (2 Pessoas)",
-                "flavor": null,
-                "qty": 1.0,
-                "price": 179.9,
+                "price": 98.99,
                 "complements": [],
                 "accompaniments": [
-                    "Batata Frita"
+                    "Batata Frita",
+                    "Macarrão"
                 ],
                 "questions_answers": [],
-                "observations": [],
+                "observations": [
+                    "Entregar na mesa 59"
+                ],
                 "category": "Pratos",
                 "service_fee_exempt": false,
                 "source": "restaurant",
                 "waiter": "adailton",
-                "created_at": "11/02/2026 12:12"
+                "created_at": "11/02/2026 14:12"
             },
             {
-                "id": "4a569c21-99ae-4a50-9ada-ec59d249829a",
-                "printed": false,
-                "print_status": "pending",
-                "name": "Guaraná 350ml",
+                "id": "84e1acc0-3665-4134-a14c-366ec84f7ae9",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Salada da Chef de Salmão",
                 "flavor": null,
                 "qty": 1.0,
-                "price": 8.9,
+                "price": 45.9,
                 "complements": [],
                 "accompaniments": [],
                 "questions_answers": [],
                 "observations": [
-                    "1 cp",
-                    "Gelo e laranja assim q o almoço ser liberado"
+                    "Entregar na mesa 59"
                 ],
-                "category": "Refrigerante",
+                "category": "Entradas",
                 "service_fee_exempt": false,
                 "source": "restaurant",
                 "waiter": "adailton",
-                "created_at": "11/02/2026 12:12"
+                "created_at": "11/02/2026 14:12"
+            },
+            {
+                "id": "e0eb9f1e-da8e-4b31-bd2e-a93229064ddc",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Vinho Branco Lupo Nero",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 130.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "4 Taças"
+                ],
+                "category": "Vinhos",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "adailton",
+                "created_at": "11/02/2026 14:15"
             }
         ],
-        "total": 236.70000000000002,
+        "total": 274.89,
         "status": "open",
-        "opened_at": "11/02/2026 12:11",
+        "opened_at": "11/02/2026 14:10",
         "num_adults": "2",
-        "customer_type": "passante",
+        "customer_type": "hospede",
         "customer_name": "",
-        "room_number": null,
+        "room_number": "26",
         "waiter": null,
         "staff_name": null,
         "partial_payments": [],
         "total_paid": 0.0
+    },
+    "25": {
+        "items": [],
+        "total": 0,
+        "status": "open",
+        "opened_at": "11/02/2026 19:18",
+        "num_adults": 2,
+        "customer_type": "hospede",
+        "room_number": "25"
     }
 }
