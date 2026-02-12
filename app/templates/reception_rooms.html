@@ -45,9 +45,13 @@
                         <div class="card-header d-flex justify-content-between align-items-center {{ 'bg-primary text-white' if data else 'bg-light' }}">
                             <h5 class="mb-0">Quarto {{ room_num }}</h5>
                             {% if data %}
-                            <span class="badge bg-white text-primary">Ocupado</span>
+                                <span class="badge bg-white text-primary">Ocupado</span>
                             {% else %}
-                            <span class="badge bg-secondary">Livre</span>
+                                {% if upcoming_checkins and room_num in upcoming_checkins %}
+                                    <span class="badge bg-warning text-dark">Pré-alocado</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Livre</span>
+                                {% endif %}
                             {% endif %}
                         </div>
                         <div class="card-body">
@@ -218,6 +222,12 @@
                                         <i class="bi bi-person-plus"></i> Check-in Bloqueado
                                     </button>
                                 {% elif status == 'inspected' %}
+                                    {% if upcoming_checkins and room_num in upcoming_checkins %}
+                                        <div class="alert alert-warning py-2 small mb-2 text-center border-warning">
+                                            <strong>Próximo:</strong> {{ upcoming_checkins[room_num]['guest'] }}<br>
+                                            <small>{{ upcoming_checkins[room_num]['checkin'] }}</small>
+                                        </div>
+                                    {% endif %}
                                     <div class="alert alert-success py-2 small mb-2 text-center">
                                         <i class="bi bi-check-circle-fill"></i> Pronto para Hóspede
                                     </div>

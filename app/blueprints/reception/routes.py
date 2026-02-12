@@ -27,6 +27,7 @@ from app.services.transfer_service import return_charge_to_restaurant, TableOccu
 from app.services.cashier_service import CashierService
 from app.services.fiscal_pool_service import FiscalPoolService
 from app.services import waiting_list_service
+from app.services.reservation_service import ReservationService
 from app.services.whatsapp_chat_service import WhatsAppChatService
 chat_service = WhatsAppChatService()
 from app.services.whatsapp_service import WhatsAppService
@@ -118,6 +119,16 @@ def reception_rooms():
     cleaning_status = load_cleaning_status()
     checklist_items = load_checklist_items()
     
+    # Pre-allocation integration
+    upcoming_checkins = {}
+    try:
+        res_service = ReservationService()
+        upcoming_list = res_service.get_upcoming_checkins()
+        for item in upcoming_list:
+            upcoming_checkins[item['room']] = item
+    except Exception as e:
+        print(f"Error loading upcoming checkins: {e}")
+
     if request.method == 'POST':
         action = request.form.get('action')
 
@@ -679,6 +690,7 @@ def reception_rooms():
                            pending_rooms=pending_rooms,
                            payment_methods=payment_methods,
                            products=products,
+                           upcoming_checkins=upcoming_checkins,
                            today=datetime.now().strftime('%Y-%m-%d'))
 
 @reception_bp.route('/reception/cashier', methods=['GET', 'POST'])
@@ -1216,19 +1228,165 @@ def reception_cashier():
                          total_balance=total_balance,
                          current_totals=current_totals)
 
+@reception_bp.route('/api/reception/move_reservation', methods=['POST'])
+@login_required
+def api_move_reservation():
+    try:
+        data = request.json
+        res_id = data.get('reservation_id')
+        new_room = data.get('new_room')
+        price_adj = data.get('price_adjustment') # dict {type, amount}
+        
+        if not res_id or not new_room:
+            return jsonify({'success': False, 'error': 'Dados incompletos'}), 400
+            
+        service = ReservationService()
+        occupancy = load_room_occupancy()
+        
+        service.save_manual_allocation(
+            reservation_id=res_id,
+            room_number=new_room,
+            price_adjustment=price_adj,
+            occupancy_data=occupancy
+        )
+        
+        return jsonify({'success': True})
+    except ValueError as e:
+         return jsonify({'success': False, 'error': str(e)}), 400
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@reception_bp.route('/api/reception/resize_reservation', methods=['POST'])
+@login_required
+def api_resize_reservation():
+    try:
+        data = request.json
+        res_id = data.get('reservation_id')
+        checkin = data.get('checkin')
+        checkout = data.get('checkout')
+        room_number = data.get('room_number')
+        price_adj = data.get('price_adjustment')
+        
+        if not res_id or not checkin or not checkout:
+             return jsonify({'success': False, 'error': 'Dados incompletos'}), 400
+             
+        service = ReservationService()
+        occupancy = load_room_occupancy()
+        
+        service.save_manual_allocation(
+            reservation_id=res_id,
+            room_number=room_number,
+            checkin=checkin,
+            checkout=checkout,
+            price_adjustment=price_adj,
+            occupancy_data=occupancy
+        )
+        return jsonify({'success': True})
+    except ValueError as e:
+         return jsonify({'success': False, 'error': str(e)}), 400
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@reception_bp.route('/api/reception/upload_reservations', methods=['POST'])
+@login_required
+def api_upload_reservations():
+    try:
+        file = request.files.get('file')
+        if not file or not file.filename:
+             return jsonify({'success': False, 'error': 'Arquivo inválido'}), 400
+             
+        filename = file.filename.lower()
+        if not (filename.endswith('.xlsx') or filename.endswith('.csv')):
+             return jsonify({'success': False, 'error': 'Formato não suportado. Use Excel (.xlsx) ou CSV.'}), 400
+        
+        target_dir = r"F:\Reservas FEV"
+        os.makedirs(target_dir, exist_ok=True)
+        
+        save_path = os.path.join(target_dir, f"upload_{datetime.now().strftime('%Y%m%d%H%M%S')}_{file.filename}")
+        file.save(save_path)
+        
+        return jsonify({'success': True, 'message': 'Arquivo carregado com sucesso.'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@reception_bp.route('/api/reception/create_manual_reservation', methods=['POST'])
+@login_required
+def api_create_manual_reservation():
+    try:
+        data = request.json
+        if not data.get('guest_name') or not data.get('checkin') or not data.get('checkout'):
+             return jsonify({'success': False, 'error': 'Dados obrigatórios faltando.'}), 400
+             
+        service = ReservationService()
+        new_res = service.create_manual_reservation(data)
+        
+        # Trigger pre-allocation immediately?
+        service.auto_pre_allocate(window_hours=48)
+        
+        return jsonify({'success': True, 'reservation': new_res})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@reception_bp.route('/api/reception/auto_pre_allocate', methods=['POST'])
+@login_required
+def api_run_pre_allocation():
+    try:
+        service = ReservationService()
+        actions = service.auto_pre_allocate(window_hours=24)
+        return jsonify({'success': True, 'actions': actions})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 @reception_bp.route('/reception/reservations')
 @login_required
 def reception_reservations():
-    # Placeholder
-    start_date = datetime.now()
+    from datetime import timedelta
+    service = ReservationService()
+    
+    start_date_str = request.args.get('start_date')
+    if start_date_str:
+        try:
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+        except ValueError:
+            start_date = datetime.now()
+    else:
+        start_date = datetime.now()
+        
+    # Reset time to midnight
+    start_date = datetime(start_date.year, start_date.month, start_date.day)
+    
+    num_days = 31
+    
+    occupancy = load_room_occupancy()
+    reservations = service.get_february_reservations()
+    
+    grid = service.get_occupancy_grid(occupancy, start_date, num_days)
+    grid = service.allocate_reservations(grid, reservations, start_date, num_days)
+    segments = service.get_gantt_segments(grid, start_date, num_days)
+    
     days = []
+    curr = start_date
+    for i in range(num_days):
+        days.append({
+            'day': curr.day,
+            'weekday': curr.strftime('%a'),
+            'is_weekend': curr.weekday() >= 5
+        })
+        curr += timedelta(days=1)
+        
+    mapping = service.get_room_mapping()
     grouped_rooms = []
-    segments = {}
+    for cat, rooms in mapping.items():
+        grouped_rooms.append({'category': cat, 'rooms': rooms})
+        
     return render_template('reception_reservations.html',
                           start_date=start_date,
                           days=days,
                           grouped_rooms=grouped_rooms,
-                          segments=segments)
+                          segments=segments,
+                          grid=grid,
+                          year=start_date.year,
+                          month=start_date.month)
 
 @reception_bp.route('/reception/surveys')
 @login_required
@@ -3008,6 +3166,101 @@ def cancel_consumption():
     except Exception as e:
         print(f"Error cancelling consumption: {e}")
         return jsonify({'success': False, 'message': str(e)}), 500
+
+@reception_bp.route('/api/guest/details/<reservation_id>')
+@login_required
+def api_guest_details(reservation_id):
+    try:
+        service = ReservationService()
+        
+        # 1. Get Basic Info
+        res = service.get_reservation_by_id(reservation_id)
+        if not res:
+            res = {}
+
+        # 2. Get Extended Info
+        details = service.get_guest_details(reservation_id)
+        
+        return jsonify({
+            'success': True,
+            'data': {
+                'guest': details,
+                'reservation': res
+            }
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@reception_bp.route('/api/guest/update', methods=['POST'])
+@login_required
+def api_guest_update():
+    try:
+        data = request.json
+        res_id = data.get('reservation_id')
+        if not res_id:
+            return jsonify({'success': False, 'error': 'ID da reserva necessário'}), 400
+            
+        service = ReservationService()
+        service.update_guest_details(res_id, data)
+        
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@reception_bp.route('/api/guest/upload_document', methods=['POST'])
+@login_required
+def api_guest_upload_document():
+    try:
+        res_id = request.form.get('reservation_id')
+        file = request.files.get('document_photo')
+        
+        if not res_id or not file:
+            return jsonify({'success': False, 'error': 'Dados incompletos'}), 400
+            
+        filename = f"doc_{res_id}_{datetime.now().strftime('%Y%m%d%H%M%S')}_{file.filename}"
+        target_dir = os.path.join(current_app.root_path, 'static', 'uploads', 'documents')
+        os.makedirs(target_dir, exist_ok=True)
+        
+        path = os.path.join(target_dir, filename)
+        file.save(path)
+        
+        # Update details with path
+        service = ReservationService()
+        details = service.get_guest_details(res_id)
+        if 'personal_info' not in details: details['personal_info'] = {}
+        details['personal_info']['document_photo_path'] = filename
+        service.update_guest_details(res_id, {'personal_info': details['personal_info']})
+        
+        return jsonify({'success': True, 'filename': filename})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@reception_bp.route('/api/reception/generate_pre_checkin', methods=['POST'])
+@login_required
+def api_generate_pre_checkin():
+    try:
+        data = request.json
+        res_id = data.get('reservation_id')
+        guest_name = data.get('guest_name')
+        send_wa = data.get('send_whatsapp')
+        
+        # Generate Link (Placeholder)
+        # In a real app, this would generate a unique token
+        token = f"{res_id}" # Simple for now
+        # Check if 'public' blueprint exists, otherwise use absolute string
+        try:
+            link = url_for('public.pre_checkin', token=token, _external=True)
+        except:
+            link = f"http://{request.host}/pre-checkin/{token}"
+        
+        wa_result = None
+        if send_wa:
+            # Send WA logic
+            pass
+            
+        return jsonify({'success': True, 'link': link, 'whatsapp_result': wa_result})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @reception_bp.route('/reception/print_individual_bills', methods=['POST'])
 @login_required

@@ -11,6 +11,7 @@
 
     <div style="margin-bottom: 20px;">
         <a href="{{ url_for('main.index') }}" class="action-btn" style="background-color: #6c757d; text-decoration: none;"><i class="bi bi-arrow-left"></i> Voltar</a>
+        <a href="{{ url_for('admin.admin_export_users') }}" class="action-btn" style="background-color: #1e3a8a; text-decoration: none; margin-left: 10px;"><i class="bi bi-file-earmark-excel"></i> Exportar para Excel</a>
     </div>
 
     {% if password_requests %}

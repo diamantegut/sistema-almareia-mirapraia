@@ -342,7 +342,7 @@
                                 {% for category, items in grouped_products %}
                                 {% set cat_safe = category if category else 'Outros' %}
                                 {% set cat_color = category_colors.get(cat_safe) if category_colors else None %}
-                                {% set is_visible = (cat_safe not in ['Frigobar', 'Geral']) or (session.get('role') in ['admin', 'gerente', 'supervisor']) %}
+                                {% set is_visible = (cat_safe not in ['Frigobar', 'Geral']) or can_manage_items or session.get('department') == 'Serviço' %}
                                 
                                 {% if is_visible %}
                                     {% if cat_color %}
@@ -407,7 +407,7 @@
                                                 </button>
                                                 {% endif %}
 
-                                                {% if can_manage_items %}
+                                                {% if can_manage_items and false %}
                                                 <button type="button" 
                                                         class="btn btn-sm {{ 'btn-success' if p.paused else 'btn-danger' }} position-absolute top-0 end-0 m-1 p-0 px-1 shadow-sm"
                                                         style="z-index: 10; width: 24px; height: 24px; line-height: 1;"

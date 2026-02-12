@@ -6445,5 +6445,399 @@
         "notes": "Recovered from Cashier Session (Missing in Closed Accounts)",
         "fiscal_doc_uuid": null,
         "history": []
+    },
+    {
+        "id": "1234567890",
+        "status": "processed",
+        "timestamp": "2026-02-06T12:34:56Z",
+        "details": {
+            "type": "NFe",
+            "issuer": {
+                "name": "Empresa Exemplo Ltda",
+                "cnpj": "12345678000195"
+            },
+            "value": 1500.75,
+            "items": [
+                {
+                    "item_code": "ABC123",
+                    "quantity": 1,
+                    "price": 1500.75
+                }
+            ],
+            "protocol_number": "1357924680"
+        },
+        "closed_at": "2026-02-12 13:58:18",
+        "fiscal_amount": 0.0
+    },
+    {
+        "id": "38a494ce-1565-497c-b28f-50f42a60ee80",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "MESA_50_202602121400",
+        "closed_at": "2026-02-12 14:00:58",
+        "closed_by": "dudu",
+        "total_amount": 29.370000000000005,
+        "fiscal_amount": 29.37,
+        "items": [
+            {
+                "id": "a44bde60-4e1d-49c2-b418-4b0d364158f9",
+                "product_id": "47",
+                "name": "Agua Sem Gás Pet",
+                "price": 8.9,
+                "qty": 3.0,
+                "category": "Sucos e Águas",
+                "created_at": "12/02/2026 13:51",
+                "waiter": "dudu",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "PIX Maquininha CNPJ",
+                "amount": 21.78,
+                "is_fiscal": true
+            },
+            {
+                "method": "Debito Mirapraia Pagseguro",
+                "amount": 7.59,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 50",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "84b56599-4a23-4033-b342-753754bb4a39",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "MESA_93_202602121421",
+        "closed_at": "2026-02-12 14:21:39",
+        "closed_by": "filipe",
+        "total_amount": 111.65,
+        "fiscal_amount": 111.65,
+        "items": [
+            {
+                "id": "8da3f661-7170-432a-ad1a-1781acacdfda",
+                "product_id": "265",
+                "name": "Caldo (Consultar sabor do dia)",
+                "price": 15.9,
+                "qty": 1.0,
+                "category": "Entradas",
+                "created_at": "12/02/2026 13:49",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "Feijão (Caldo)",
+                "questions_answers": []
+            },
+            {
+                "id": "3bebd56e-f0bd-49b2-a8cf-0f339e02286b",
+                "product_id": "40",
+                "name": "Ceviche Tropical (Individual)",
+                "price": 47.9,
+                "qty": 1.0,
+                "category": "Especiais da Casa",
+                "created_at": "12/02/2026 13:51",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "63e120f2-c7e9-41d3-bee7-bca69a9f91bb",
+                "product_id": "274",
+                "name": "Cachacas Salinas ",
+                "price": 18.9,
+                "qty": 1.0,
+                "category": "Doses",
+                "created_at": "12/02/2026 14:00",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "77f6b3be-9a8f-4b30-824f-ce2241662ddf",
+                "product_id": "133",
+                "name": "Agua com Gás 275ml",
+                "price": 9.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "12/02/2026 14:02",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Não mandar"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "Um copo"
+                    }
+                ]
+            },
+            {
+                "id": "467f7b35-7824-4dbf-9518-d97c75e251f3",
+                "product_id": "148",
+                "name": "Coca Cola Zero 350ml",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Refrigerante",
+                "created_at": "12/02/2026 14:09",
+                "waiter": "edson",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "1 cp"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "1copo"
+                    }
+                ]
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Credito MIrapraia Pagseguro",
+                "amount": 111.65,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 93",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "03dc3c5e-0b5a-4fa9-8a2a-4ca1988580b7",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "MESA_50_202602121518",
+        "closed_at": "2026-02-12 15:18:45",
+        "closed_by": "filipe",
+        "total_amount": 49.28,
+        "fiscal_amount": 49.28,
+        "items": [
+            {
+                "id": "bd7b8d0e-e445-4aa4-a01f-9e0f2fff3fe6",
+                "product_id": "2006",
+                "name": "Caipiroska Absolut (Escolha o sabor)",
+                "price": 34.9,
+                "qty": 1.0,
+                "category": "Drinks",
+                "created_at": "12/02/2026 14:48",
+                "waiter": "filipe",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "Caju",
+                "questions_answers": []
+            },
+            {
+                "id": "d4d18edb-f91b-41ec-a930-31581f306315",
+                "product_id": "133",
+                "name": "Agua com Gás 275ml",
+                "price": 9.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "12/02/2026 14:48",
+                "waiter": "filipe",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Sem gelo"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "1"
+                    }
+                ]
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "PIX Maquininha CNPJ",
+                "amount": 49.28,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 50",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "d8ed4f4f-4b46-4080-b63d-195e470dbf05",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "MESA_58_202602121519",
+        "closed_at": "2026-02-12 15:19:05",
+        "closed_by": "filipe",
+        "total_amount": 292.05,
+        "fiscal_amount": 292.05,
+        "items": [
+            {
+                "id": "b15fc4fe-e445-4b6b-b825-0496a09b914e",
+                "product_id": "33",
+                "name": "Gin Tonica",
+                "price": 36.9,
+                "qty": 1.0,
+                "category": "Drinks",
+                "created_at": "12/02/2026 14:10",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "380ba174-8a45-420f-993b-79d8a1cba51d",
+                "product_id": "60",
+                "name": "Brusqueta de Salmão com pão artesanal da  casa (3un.)",
+                "price": 39.9,
+                "qty": 1.0,
+                "category": "Entradas",
+                "created_at": "12/02/2026 14:10",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Crocância",
+                        "answer": "Normal"
+                    }
+                ]
+            },
+            {
+                "id": "c44e3e07-0c21-4f0c-8b6e-6dade265291a",
+                "product_id": "149",
+                "name": "Coca-Cola 350ml",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Refrigerante",
+                "created_at": "12/02/2026 14:10",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "1 cp"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "Com gelo e limao"
+                    }
+                ]
+            },
+            {
+                "id": "7af4c006-3456-4c66-9b02-c6b4814f135b",
+                "product_id": "118",
+                "name": "Arroz de Polvo (Individual)",
+                "price": 89.9,
+                "qty": 1.0,
+                "category": "Pratos",
+                "created_at": "12/02/2026 14:20",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "cc7a72ff-0597-4a7b-8195-88644c2b8faf",
+                "product_id": "115",
+                "name": "Salmão com Spaghetti ao molho pesto (Individual)",
+                "price": 89.9,
+                "qty": 1.0,
+                "category": "Pratos",
+                "created_at": "12/02/2026 14:20",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Debito Mirapraia Pagseguro",
+                "amount": 292.05,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 58",
+        "fiscal_doc_uuid": null,
+        "history": []
     }
 ]

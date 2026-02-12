@@ -3,30 +3,67 @@
 {% block title %}Mapa de Reservas - Recepção{% endblock %}
 
 {% block content %}
-<div class="container-fluid mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div class="d-flex align-items-center gap-3">
-            <h2><i class="bi bi-calendar-week-fill"></i> Mapa de Reservas</h2>
-            
-            <form action="{{ url_for('reception.reception_reservations') }}" method="get" class="d-flex align-items-center gap-2">
-                <input type="date" name="start_date" class="form-control" value="{{ start_date.strftime('%Y-%m-%d') }}" onchange="this.form.submit()">
-                <a href="{{ url_for('reception.reception_reservations') }}" class="btn btn-outline-primary" title="Ir para Hoje">
-                    Hoje
-                </a>
-            </form>
+<div class="container-fluid px-4 py-4 bg-light min-vh-100">
+    <!-- Header Section -->
+    <div class="row align-items-center mb-4 g-3">
+        <!-- Title & Date Nav -->
+        <div class="col-lg-5 col-md-6">
+            <div class="d-flex align-items-center gap-3">
+                <div class="bg-white p-2 rounded shadow-sm">
+                    <i class="bi bi-calendar-week-fill text-primary fs-4"></i>
+                </div>
+                <div>
+                    <h4 class="mb-0 fw-bold text-dark">Mapa de Reservas</h4>
+                    <small class="text-muted">{{ start_date.strftime('%B %Y')|capitalize }}</small>
+                </div>
+                
+                <div class="vr mx-2 text-muted"></div>
+                
+                <form action="{{ url_for('reception.reception_reservations') }}" method="get" class="d-flex align-items-center gap-2 bg-white p-1 rounded shadow-sm border">
+                    <button type="submit" class="btn btn-sm btn-link text-dark text-decoration-none" onclick="document.querySelector('input[name=start_date]').stepDown(7);"><i class="bi bi-chevron-left"></i></button>
+                    <input type="date" name="start_date" class="form-control form-control-sm border-0 bg-transparent fw-bold text-center" style="width: 130px;" value="{{ start_date.strftime('%Y-%m-%d') }}" onchange="this.form.submit()">
+                    <button type="submit" class="btn btn-sm btn-link text-dark text-decoration-none" onclick="document.querySelector('input[name=start_date]').stepUp(7);"><i class="bi bi-chevron-right"></i></button>
+                    <div class="vr mx-1"></div>
+                    <a href="{{ url_for('reception.reception_reservations') }}" class="btn btn-sm btn-primary px-3 rounded-pill" title="Ir para Hoje">Hoje</a>
+                </form>
+            </div>
         </div>
-        <div>
-            <a href="{{ url_for('reception.reception_dashboard') }}" class="btn btn-secondary">
-                <i class="bi bi-arrow-left"></i> Voltar
-            </a>
+
+        <!-- Action Toolbar -->
+        <div class="col-lg-7 col-md-6">
+            <div class="d-flex justify-content-md-end gap-2 flex-wrap">
+                <!-- Main Actions -->
+                <div class="bg-white p-1 rounded shadow-sm d-flex gap-1 border">
+                    <button class="btn btn-light btn-sm fw-medium d-flex align-items-center gap-2 action-btn" onclick="openNewReservationModal()" data-bs-toggle="tooltip" title="Criar nova reserva manualmente">
+                        <i class="bi bi-plus-circle-fill text-primary"></i> <span class="d-none d-xl-inline">Nova Reserva</span>
+                    </button>
+                    <div class="vr my-1"></div>
+                    <button class="btn btn-light btn-sm fw-medium d-flex align-items-center gap-2 action-btn" onclick="document.getElementById('fileUploadInput').click()" data-bs-toggle="tooltip" title="Importar planilha de reservas">
+                        <i class="bi bi-cloud-upload-fill text-secondary"></i> <span class="d-none d-xl-inline">Importar</span>
+                    </button>
+                    <div class="vr my-1"></div>
+                    <button class="btn btn-light btn-sm fw-medium d-flex align-items-center gap-2 action-btn" onclick="runPreAllocation()" data-bs-toggle="tooltip" title="Executar algoritmo de pré-alocação">
+                        <i class="bi bi-magic text-warning"></i> <span class="d-none d-xl-inline">Pré-alocação</span>
+                    </button>
+                </div>
+                
+                <input type="file" id="fileUploadInput" class="d-none" accept=".xlsx, .csv" onchange="uploadReservationsFile(this)">
+
+                <!-- Navigation & Cashier -->
+                <a href="{{ url_for('reception.reception_reservations_cashier') }}" class="btn btn-success btn-sm shadow-sm d-flex align-items-center gap-2 px-3 fw-bold">
+                    <i class="bi bi-wallet2"></i> Caixa
+                </a>
+                
+                <a href="{{ url_for('reception.reception_dashboard') }}" class="btn btn-outline-secondary btn-sm shadow-sm d-flex align-items-center gap-2 px-3">
+                    <i class="bi bi-arrow-return-left"></i> Voltar
+                </a>
+            </div>
         </div>
     </div>
 
     <!-- Gantt Chart Card -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0"><i class="bi bi-grid-3x3"></i> Ocupação dos Quartos</h5>
-        </div>
+    <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+        <!-- Optional: Filter Bar inside Card Header could go here -->
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-bordered table-sm mb-0" style="font-size: 0.75rem; table-layout: fixed; width: 100%;">
@@ -88,21 +125,26 @@
                                     </td>
                                 {% else %}
                                     {% set cell = segment.data %}
-                                    {% set bg_class = 'bg-primary' if segment.type == 'occupied' else 'bg-warning' %}
-                                    {% set text_class = 'text-white' if segment.type == 'occupied' else 'text-dark' %}
+                                    {% set bg_class = 'bg-occupied' if segment.type == 'occupied' else 'bg-reserved' %}
+                                    {% set text_class = '' %} <!-- Text color handled by CSS now -->
                                     {% set is_draggable = segment.type == 'reserved' %}
                                     
-                                    <td colspan="{{ segment.length }}" class="{{ bg_class }} {{ text_class }} text-center p-0 position-relative {{ border_class }}" 
-                                        style="cursor: pointer;"
+                                    <td colspan="{{ segment.length }}" class="text-center p-0 position-relative {{ border_class }}" 
+                                        style="vertical-align: middle;"
                                         title="{{ cell.guest }} ({{ cell.checkin }} - {{ cell.checkout }})"
-                                        draggable="{{ 'true' if is_draggable else 'false' }}"
-                                        ondragstart="drag(event)"
                                         data-res-id="{{ cell.id }}"
                                         data-room="{{ room }}"
                                         data-guest="{{ cell.guest }}"
+                                        data-checkin="{{ cell.checkin }}"
+                                        data-checkout="{{ cell.checkout }}"
+                                        data-category="{{ cell.category }}"
+                                        data-status="{{ cell.payment_status }}"
+                                        data-channel="{{ cell.channel }}"
+                                        data-amount="{{ cell.amount }}"
+                                        data-paid="{{ cell.paid_amount }}"
+                                        data-to-receive="{{ cell.to_receive }}"
                                         data-days="{{ segment.length }}"
-                                        data-start-day="{{ segment.data.start_day }}"
-                                        onclick="openReservationModal('{{ cell.guest }}', '{{ cell.checkin }}', '{{ cell.checkout }}', '{{ cell.category }}', '{{ cell.payment_status }}', '{{ cell.channel }}', '{{ cell.amount }}', '{{ cell.paid_amount }}', '{{ cell.to_receive }}', '{{ cell.id }}', '{{ segment.type }}')">
+                                        data-start-day="{{ segment.data.start_day }}">
                                         
                                         <!-- Handles -->
                                         {% if is_draggable %}
@@ -110,9 +152,13 @@
                                         <div class="resize-handle resize-end" onmousedown="startResize(event, 'end', '{{ cell.id }}', Number('{{ segment.data.start_day }}'), Number('{{ segment.length }}'), '{{ room }}')"></div>
                                         {% endif %}
                                         
-                                        <div class="d-flex align-items-center justify-content-between px-1 res-bar-content">
+                                        <div class="d-flex align-items-center justify-content-between px-2 res-bar-content {{ bg_class }}" 
+                                             draggable="{{ 'true' if is_draggable else 'false' }}"
+                                             ondragstart="drag(event)"
+                                             onclick="handleResClick(event, this)" 
+                                             style="cursor: grab;">
                                             <!-- Channel Icon (Left) -->
-                                            <div class="me-1 small">
+                                            <div class="me-1 small opacity-75">
                                                 {% set channel = (cell.channel or '')|lower %}
                                                 {% if 'booking' in channel %}
                                                     <i class="bi bi-calendar-check" title="Booking.com"></i>
@@ -130,14 +176,14 @@
                                             </div>
 
                                             <!-- Guest Name (Center/Truncated) -->
-                                            <span class="fw-bold text-truncate flex-grow-1 text-start" style="font-size: 0.75rem;">{{ cell.guest }}</span>
+                                            <span class="fw-bold text-truncate flex-grow-1 text-start px-1" style="font-size: 0.75rem;">{{ cell.guest }}</span>
 
                                             <!-- Status Icon (Right) -->
                                             <div class="ms-1 small">
                                                 {% if cell.payment_status == 'Pago' %}
-                                                    <i class="bi bi-check-circle-fill text-light" title="Pago"></i>
+                                                    <i class="bi bi-check-circle-fill text-white" title="Pago"></i>
                                                 {% elif cell.payment_status == 'Parcial' %}
-                                                    <i class="bi bi-pie-chart-fill text-warning" title="Parcial" style="filter: brightness(0.8);"></i>
+                                                    <i class="bi bi-pie-chart-fill text-dark" title="Parcial" style="opacity: 0.6;"></i>
                                                 {% else %}
                                                     <i class="bi bi-exclamation-circle-fill text-danger" title="Pendente"></i>
                                                 {% endif %}
@@ -157,53 +203,80 @@
 </div>
 
 <style>
-    .cat-areia { background-color: #fcf8e3; border-left: 4px solid #f0ad4e; }
-    .cat-mar-familia { background-color: #d9edf7; border-left: 4px solid #5bc0de; }
-    .cat-mar { background-color: #e8f4fd; border-left: 4px solid #007bff; }
-    .cat-alma-banheira { background-color: #f2dede; border-left: 4px solid #d9534f; }
-    .cat-alma { background-color: #f9f2f4; border-left: 4px solid #c7254e; }
-    .cat-master { background-color: #e6e6e6; border-left: 4px solid #333; }
-
-    .border-midnight {
-        border-right: 2px solid #aaa !important;
+    /* Modern UI Tweaks */
+    .action-btn {
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
     }
-    .border-noon {
-        border-right: 1px dashed #ddd !important;
+    .action-btn:hover {
+        background-color: #f8f9fa;
+        border-color: #dee2e6;
+        transform: translateY(-1px);
+    }
+    .action-btn:active {
+        transform: translateY(0);
+    }
+    
+    /* Category Colors - Soft Pastels with Strong Borders */
+    .cat-areia { background-color: #fff8e1; border-left: 4px solid #ffc107; }
+    .cat-mar-familia { background-color: #e3f2fd; border-left: 4px solid #0dcaf0; }
+    .cat-mar { background-color: #e8f4fd; border-left: 4px solid #0d6efd; }
+    .cat-alma-banheira { background-color: #f8d7da; border-left: 4px solid #dc3545; }
+    .cat-alma { background-color: #f2dae2; border-left: 4px solid #d63384; }
+    .cat-master { background-color: #e9ecef; border-left: 4px solid #212529; }
+
+    /* Grid Lines */
+    .border-midnight { border-right: 1px solid #adb5bd !important; } /* Stronger line for day separation */
+    .border-noon { border-right: 1px dashed #dee2e6 !important; } /* Softer line for noon */
+
+    /* Reservation Bars */
+    .res-bar-content {
+        height: 28px; /* Slightly taller */
+        width: 100%; 
+        font-size: 0.7rem; 
+        line-height: 28px; 
+        overflow: hidden; 
+        white-space: nowrap; 
+        text-overflow: ellipsis;
+        border-radius: 4px; /* Rounded bars */
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1); /* Subtle shadow */
+    }
+    
+    .res-bar-content:active {
+        cursor: grabbing !important;
+    }
+    
+    /* Occupied vs Reserved Colors */
+    .bg-occupied { background: linear-gradient(135deg, #0d6efd, #0b5ed7); color: white; }
+    .bg-reserved { background: linear-gradient(135deg, #ffc107, #ffca2c); color: #212529; }
+    
+    /* Table Header Sticky Fixes */
+    thead.sticky-top th {
+        box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+        z-index: 10;
     }
     
     .droppable-cell.drag-over {
-        background-color: #e2e6ea !important;
-        outline: 2px dashed #007bff;
+        background-color: rgba(13, 110, 253, 0.1) !important;
+        outline: 2px dashed #0d6efd;
+        z-index: 5;
     }
     
     .resize-handle {
         position: absolute;
         top: 0;
         bottom: 0;
-        width: 10px;
+        width: 12px; /* Wider handle area */
         cursor: col-resize;
-        z-index: 5;
+        z-index: 20;
         opacity: 0;
         transition: opacity 0.2s;
-        background-color: rgba(0,0,0,0.2);
     }
     
-    td:hover .resize-handle {
-        opacity: 1;
-    }
-    
+    td:hover .resize-handle { opacity: 1; }
+    .resize-handle:hover { background-color: rgba(0,0,0,0.1); }
     .resize-start { left: 0; }
     .resize-end { right: 0; }
-    
-    .res-bar-content {
-        height: 24px; 
-        width: 100%; 
-        font-size: 0.75rem; 
-        line-height: 24px; 
-        overflow: hidden; 
-        white-space: nowrap; 
-        text-overflow: ellipsis;
-    }
 </style>
 
 <script id="grid-data" type="application/json">{{ grid|tojson }}</script>
@@ -217,19 +290,33 @@
     
     // Move Logic
     function drag(ev) {
-        ev.dataTransfer.setData("resId", ev.target.dataset.resId);
-        ev.dataTransfer.setData("guest", ev.target.dataset.guest);
-        ev.dataTransfer.setData("days", ev.target.dataset.days);
-        ev.dataTransfer.setData("startDay", ev.target.dataset.startDay);
+        // Ensure we are dragging the div, but get data from the parent TD
+        var td = ev.target.closest('td');
+        if (!td) return;
+        
+        ev.dataTransfer.setData("resId", td.dataset.resId);
+        ev.dataTransfer.setData("guest", td.dataset.guest);
+        ev.dataTransfer.setData("days", td.dataset.days);
+        ev.dataTransfer.setData("startDay", td.dataset.startDay);
+        
+        // Visual feedback
+        ev.target.style.opacity = '0.5';
         
         // Fallback for some browsers
         draggedData = {
-            resId: ev.target.dataset.resId,
-            guest: ev.target.dataset.guest,
-            days: parseInt(ev.target.dataset.days),
-            startDay: parseInt(ev.target.dataset.startDay)
+            resId: td.dataset.resId,
+            guest: td.dataset.guest,
+            days: parseInt(td.dataset.days),
+            startDay: parseInt(td.dataset.startDay)
         };
     }
+    
+    // Reset opacity on dragend
+    document.addEventListener('dragend', function(ev) {
+        if (ev.target.classList.contains('res-bar-content')) {
+            ev.target.style.opacity = '1';
+        }
+    });
 
     function allowDrop(ev) {
         ev.preventDefault();
@@ -572,8 +659,32 @@
         }
     }
 
+    // Explicit Click Handler
+    function handleResClick(ev, el) {
+        // If it was a drag, we shouldn't trigger click. 
+        // But usually click fires only if mouseup happens on same element without drag.
+        console.log('Click detected on reservation bar');
+        ev.stopPropagation(); 
+        var td = el.closest('td');
+        if(td) openReservationModalFromData(td);
+    }
+
     // Guest Details & Upload (Existing functions)
+    // Global Click Listener REMOVED - Using inline onclick for robustness against Drag & Drop
+    
+    window.openReservationModalFromData = function(el) {
+        console.log('Opening reservation modal for:', el.dataset.guest);
+        try {
+            var d = el.dataset;
+            openReservationModal(d.guest, d.checkin, d.checkout, d.category, d.status, d.channel, d.amount, d.paid, d.toReceive, d.resId, 'reserved');
+        } catch (e) {
+            console.error('Error opening modal:', e);
+        }
+    };
+
     function openReservationModal(guest, checkin, checkout, category, status, channel, amount, paid, to_receive, id, type) {
+        console.log('openReservationModal called', {guest, id});
+        
         // Default to Guest Tab (Cadastro) as requested
         var guestTabEl = document.querySelector('#resTab button[data-bs-target="#guest"]');
         if(guestTabEl) {
@@ -581,9 +692,9 @@
             guestTab.show();
         }
         
-        document.getElementById('modalGuestName').textContent = guest;
-        document.getElementById('modalDates').textContent = checkin + ' até ' + checkout;
-        document.getElementById('modalCategory').textContent = category;
+        document.getElementById('modalGuestName').textContent = guest || 'Hóspede';
+        document.getElementById('modalDates').textContent = (checkin || '') + ' até ' + (checkout || '');
+        document.getElementById('modalCategory').textContent = category || '';
         document.getElementById('modalChannel').textContent = channel || 'Direto';
         document.getElementById('modalStatus').textContent = status || 'N/A';
         document.getElementById('modalAmount').textContent = amount ? 'R$ ' + amount : '-';
@@ -591,11 +702,13 @@
         document.getElementById('modalToReceive').textContent = to_receive ? 'R$ ' + to_receive : '-';
         
         var guestIdField = document.getElementById('guestResId');
-        if(guestIdField) guestIdField.value = id;
+        if(guestIdField) guestIdField.value = id || '';
         
         const statusBadge = document.getElementById('modalStatusBadge');
-        statusBadge.textContent = status || 'N/A';
-        statusBadge.className = 'badge ' + (status === 'Pago' ? 'bg-success' : 'bg-warning text-dark');
+        if (statusBadge) {
+            statusBadge.textContent = status || 'N/A';
+            statusBadge.className = 'badge ' + (status === 'Pago' ? 'bg-success' : 'bg-warning text-dark');
+        }
         
         if(document.getElementById('guestPhone')) {
             // Reset fields
@@ -626,68 +739,78 @@
             document.getElementById('docPreview').innerHTML = '';
             document.getElementById('modalAvgDaily').textContent = 'Carregando...';
             
-            fetch('/api/guest/details/' + id)
-                .then(res => res.json())
-                .then(data => {
-                    if(data.success) {
-                        if(data.data.reservation && data.data.reservation.avg_daily_paid) {
-                            document.getElementById('modalAvgDaily').textContent = 'R$ ' + data.data.reservation.avg_daily_paid.toFixed(2);
-                        } else {
-                            document.getElementById('modalAvgDaily').textContent = 'R$ 0.00';
-                        }
-                        
-                        var guestData = data.data.guest;
-                        if(guestData) {
-                            // Personal Info
-                            if (guestData.personal_info) {
-                                var info = guestData.personal_info;
-                                document.getElementById('guestPhone').value = info.phone || '';
-                                document.getElementById('guestEmail').value = info.email || '';
-                                document.getElementById('guestDob').value = info.dob || '';
-                                document.getElementById('guestDocId').value = info.doc_id || '';
-                                document.getElementById('guestAddress').value = info.address || '';
+            if (id) {
+                fetch('/api/guest/details/' + id)
+                    .then(res => res.json())
+                    .then(data => {
+                        if(data.success) {
+                            if(data.data.reservation && data.data.reservation.avg_daily_paid) {
+                                document.getElementById('modalAvgDaily').textContent = 'R$ ' + data.data.reservation.avg_daily_paid.toFixed(2);
+                            } else {
+                                document.getElementById('modalAvgDaily').textContent = 'R$ 0.00';
+                            }
+                            
+                            var guestData = data.data.guest;
+                            if(guestData) {
+                                // Personal Info
+                                if (guestData.personal_info) {
+                                    var info = guestData.personal_info;
+                                    document.getElementById('guestPhone').value = info.phone || '';
+                                    document.getElementById('guestEmail').value = info.email || '';
+                                    document.getElementById('guestDob').value = info.dob || '';
+                                    document.getElementById('guestDocId').value = info.doc_id || '';
+                                    document.getElementById('guestAddress').value = info.address || '';
+                                    
+                                    if(info.document_photo_path) {
+                                        document.getElementById('docPreview').innerHTML = 
+                                            '<div class="alert alert-success py-1"><i class="bi bi-check-circle"></i> Documento enviado</div>';
+                                    }
+                                }
                                 
-                                if(info.document_photo_path) {
-                                    document.getElementById('docPreview').innerHTML = 
-                                        '<div class="alert alert-success py-1"><i class="bi bi-check-circle"></i> Documento enviado</div>';
+                                // Fiscal Info
+                                if (guestData.fiscal_info) {
+                                    var fiscal = guestData.fiscal_info;
+                                    document.getElementById('fiscalBorrowerType').value = fiscal.borrower_type || 'cpf';
+                                    document.getElementById('fiscalDocNumber').value = fiscal.cpf || fiscal.cnpj || fiscal.foreigner_passport || '';
+                                    document.getElementById('fiscalAddressFull').value = fiscal.address || '';
+                                    document.getElementById('fiscalMunicipality').value = fiscal.municipality || 'Tamandaré';
+                                    document.getElementById('fiscalCountry').value = fiscal.foreigner_country || '';
+                                    toggleFiscalFields();
+                                }
+                                
+                                // Operational Info
+                                if (guestData.operational_info) {
+                                    var op = guestData.operational_info;
+                                    var restrictions = op.dietary_restrictions || [];
+                                    document.getElementById('dietGluten').checked = restrictions.includes('gluten_free');
+                                    document.getElementById('dietLactose').checked = restrictions.includes('lactose_free');
+                                    document.getElementById('dietVegan').checked = restrictions.includes('vegan');
+                                    document.getElementById('dietVegetarian').checked = restrictions.includes('vegetarian');
+                                    
+                                    document.getElementById('opAllergies').value = op.allergies || '';
+                                    document.getElementById('opBreakfastStart').value = op.breakfast_time_start || '';
+                                    document.getElementById('opBreakfastEnd').value = op.breakfast_time_end || '';
+                                    
+                                    var comm = op.commemorative_dates || [];
+                                    document.getElementById('opCommemorative').value = comm.join(', ');
                                 }
                             }
-                            
-                            // Fiscal Info
-                            if (guestData.fiscal_info) {
-                                var fiscal = guestData.fiscal_info;
-                                document.getElementById('fiscalBorrowerType').value = fiscal.borrower_type || 'cpf';
-                                document.getElementById('fiscalDocNumber').value = fiscal.cpf || fiscal.cnpj || fiscal.foreigner_passport || '';
-                                document.getElementById('fiscalAddressFull').value = fiscal.address || '';
-                                document.getElementById('fiscalMunicipality').value = fiscal.municipality || 'Tamandaré';
-                                document.getElementById('fiscalCountry').value = fiscal.foreigner_country || '';
-                                toggleFiscalFields();
-                            }
-                            
-                            // Operational Info
-                            if (guestData.operational_info) {
-                                var op = guestData.operational_info;
-                                var restrictions = op.dietary_restrictions || [];
-                                document.getElementById('dietGluten').checked = restrictions.includes('gluten_free');
-                                document.getElementById('dietLactose').checked = restrictions.includes('lactose_free');
-                                document.getElementById('dietVegan').checked = restrictions.includes('vegan');
-                                document.getElementById('dietVegetarian').checked = restrictions.includes('vegetarian');
-                                
-                                document.getElementById('opAllergies').value = op.allergies || '';
-                                document.getElementById('opBreakfastStart').value = op.breakfast_time_start || '';
-                                document.getElementById('opBreakfastEnd').value = op.breakfast_time_end || '';
-                                
-                                var comm = op.commemorative_dates || [];
-                                document.getElementById('opCommemorative').value = comm.join(', ');
-                            }
                         }
-                    }
-                })
-                .catch(err => console.error(err));
+                    })
+                    .catch(err => console.error('Error fetching details:', err));
+            }
         }
 
-        var myModal = new bootstrap.Modal(document.getElementById('reservationModal'));
-        myModal.show();
+        var modalEl = document.getElementById('reservationModal');
+        if (modalEl) {
+            var myModal = bootstrap.Modal.getInstance(modalEl);
+            if (!myModal) {
+                myModal = new bootstrap.Modal(modalEl);
+            }
+            myModal.show();
+        } else {
+            console.error('Modal element #reservationModal not found');
+        }
     }
 
     function saveGuestData() {
@@ -786,6 +909,211 @@
             } else {
                 alert('Erro ao enviar: ' + data.error);
             }
+        });
+    }
+</script>
+
+<!-- New Reservation Modal -->
+<div class="modal fade" id="newReservationModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Nova Reserva Manual</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="newResForm">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Hóspede (Responsável)</label>
+                            <input type="text" class="form-control" name="guest_name" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Categoria</label>
+                            <select class="form-select" name="category">
+                                <option value="Suíte Areia">Suíte Areia</option>
+                                <option value="Suíte Mar">Suíte Mar</option>
+                                <option value="Suíte Mar Família">Suíte Mar Família</option>
+                                <option value="Suíte Alma">Suíte Alma</option>
+                                <option value="Suíte Alma c/ Banheira">Suíte Alma c/ Banheira</option>
+                                <option value="Suíte Master Diamante">Suíte Master Diamante</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Check-in</label>
+                            <input type="date" class="form-control" name="checkin" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Check-out</label>
+                            <input type="date" class="form-control" name="checkout" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Valor Total (R$)</label>
+                            <input type="number" step="0.01" class="form-control" name="amount" value="0.00">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Pago (R$)</label>
+                            <input type="number" step="0.01" class="form-control" name="paid_amount" value="0.00">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">A Receber (R$)</label>
+                            <input type="number" step="0.01" class="form-control" name="to_receive" value="0.00">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                         <div class="col-md-6">
+                             <label class="form-label">Canal</label>
+                             <select class="form-select" name="channel">
+                                 <option value="Direto">Direto (Balcão/Telefone)</option>
+                                 <option value="WhatsApp">WhatsApp</option>
+                                 <option value="Booking.com">Booking.com</option>
+                                 <option value="Airbnb">Airbnb</option>
+                                 <option value="Expedia">Expedia</option>
+                             </select>
+                         </div>
+                         <div class="col-md-6">
+                             <label class="form-label">Status Pagamento</label>
+                             <select class="form-select" name="status">
+                                 <option value="Pendente">Pendente</option>
+                                 <option value="Parcial">Parcial</option>
+                                 <option value="Pago">Pago</option>
+                             </select>
+                         </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="submitNewReservation()">Salvar Reserva</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- File Upload ---
+    function uploadReservationsFile(input) {
+        if (!input.files || !input.files[0]) return;
+        
+        var formData = new FormData();
+        formData.append('file', input.files[0]);
+        
+        // Show loading state on button
+        var btn = input.previousElementSibling;
+        var originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Enviando...';
+        
+        fetch('/api/reception/upload_reservations', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert("Erro: " + data.error);
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Erro de conexão.");
+        })
+        .finally(() => {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+            input.value = ''; // Reset
+        });
+    }
+
+    // --- New Reservation ---
+    function openNewReservationModal() {
+        var modal = new bootstrap.Modal(document.getElementById('newReservationModal'));
+        modal.show();
+    }
+    
+    function submitNewReservation() {
+        var form = document.getElementById('newResForm');
+        var formData = new FormData(form);
+        var data = Object.fromEntries(formData.entries());
+        
+        // Format dates to DD/MM/YYYY
+        if (data.checkin) {
+            var d = new Date(data.checkin);
+            // Fix timezone offset issue by treating as UTC or appending time
+            d = new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+            data.checkin = d.toLocaleDateString('pt-BR');
+        }
+        if (data.checkout) {
+            var d = new Date(data.checkout);
+            d = new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+            data.checkout = d.toLocaleDateString('pt-BR');
+        }
+        
+        var btn = document.querySelector('#newReservationModal .btn-primary');
+        btn.disabled = true;
+        btn.innerHTML = 'Salvando...';
+        
+        fetch('/api/reception/create_manual_reservation', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        })
+        .then(res => res.json())
+        .then(resData => {
+            if (resData.success) {
+                alert("Reserva criada com sucesso!");
+                location.reload();
+            } else {
+                alert("Erro: " + resData.error);
+                btn.disabled = false;
+                btn.innerHTML = 'Salvar Reserva';
+            }
+        })
+        .catch(err => {
+            alert("Erro de comunicação.");
+            btn.disabled = false;
+            btn.innerHTML = 'Salvar Reserva';
+        });
+    }
+    
+    // --- Pre-Allocation ---
+    function runPreAllocation() {
+        var btn = document.querySelector('button[onclick="runPreAllocation()"]');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Processando...';
+        
+        fetch('/api/reception/auto_pre_allocate', {
+            method: 'POST'
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                var count = data.actions.length;
+                if (count > 0) {
+                    alert(`${count} reservas foram pré-alocadas!\n\n` + data.actions.join('\n'));
+                    location.reload();
+                } else {
+                    alert("Nenhuma nova pré-alocação necessária no momento.");
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-magic"></i> Pré-alocação';
+                }
+            } else {
+                alert("Erro: " + data.error);
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-magic"></i> Pré-alocação';
+            }
+        })
+        .catch(err => {
+            alert("Erro de comunicação.");
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-magic"></i> Pré-alocação';
         });
     }
 </script>
