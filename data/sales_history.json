@@ -1,93 +1,155 @@
-{
-    "last_processed_date": "09/01/2026",
-    "history": [
-        {
-            "date_uploaded": "27/12/2025 13:51",
-            "start_date": "01/09/2024",
-            "end_date": "30/09/2024",
-            "items_processed": 9136.0,
-            "filename": "setembro.xlsx",
-            "note": "Importação Histórica Automática"
+[
+    {
+        "items": [
+            {
+                "id": "fba1ad6a-3e54-4d19-ab24-c0307d094fe2",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Parmegiana de Filé Mignon (Individual)",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 98.99,
+                "complements": [],
+                "accompaniments": [
+                    "Batata Frita",
+                    "Macarrão"
+                ],
+                "questions_answers": [],
+                "observations": [
+                    "Entregar na mesa 59"
+                ],
+                "category": "Pratos",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "adailton",
+                "created_at": "11/02/2026 14:12"
+            },
+            {
+                "id": "84e1acc0-3665-4134-a14c-366ec84f7ae9",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Salada da Chef de Salmão",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 45.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "Entregar na mesa 59"
+                ],
+                "category": "Entradas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "adailton",
+                "created_at": "11/02/2026 14:12"
+            },
+            {
+                "id": "e0eb9f1e-da8e-4b31-bd2e-a93229064ddc",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Vinho Branco Lupo Nero",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 130.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "4 Taças"
+                ],
+                "category": "Vinhos",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "adailton",
+                "created_at": "11/02/2026 14:15"
+            }
+        ],
+        "total": 274.89,
+        "status": "open",
+        "opened_at": "11/02/2026 14:10",
+        "num_adults": "2",
+        "customer_type": "hospede",
+        "customer_name": "",
+        "room_number": "26",
+        "waiter": null,
+        "staff_name": null,
+        "partial_payments": [],
+        "total_paid": 0.0,
+        "closed_at": "12/02/2026 08:57",
+        "payment_method": "Room Charge",
+        "room_charge": "26",
+        "final_total": 302.37899999999996
+    },
+    {
+        "items": [],
+        "total": 0,
+        "status": "closed",
+        "opened_at": "08/02/2026 18:12",
+        "num_adults": "2",
+        "customer_type": "passante",
+        "room_number": null,
+        "waiter": null,
+        "staff_name": null,
+        "last_transfer": {
+            "source_table": "66",
+            "items": [
+                {
+                    "id": "036f1588-ae1c-48e1-b0d6-fcf47b87836f",
+                    "printed": true,
+                    "print_status": "printed",
+                    "name": "Caldo (Consultar sabor do dia)",
+                    "flavor": "Feijão (Caldo)",
+                    "qty": 1.0,
+                    "price": 15.9,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [],
+                    "observations": [
+                        "Cantor"
+                    ],
+                    "category": "Entradas",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "dudu",
+                    "created_at": "08/02/2026 14:34"
+                },
+                {
+                    "id": "42796e7f-227c-40e3-94af-a044a3a85d78",
+                    "printed": true,
+                    "print_status": "printed",
+                    "name": "Coca-Cola 350ml",
+                    "flavor": null,
+                    "qty": 1.0,
+                    "price": 8.9,
+                    "complements": [],
+                    "accompaniments": [],
+                    "questions_answers": [
+                        {
+                            "question": "Copo",
+                            "answer": "Gelo"
+                        }
+                    ],
+                    "observations": [
+                        "1 cp"
+                    ],
+                    "category": "Refrigerante",
+                    "service_fee_exempt": false,
+                    "source": "restaurant",
+                    "waiter": "dudu",
+                    "created_at": "08/02/2026 14:35"
+                }
+            ],
+            "timestamp": "20260208181249",
+            "transferred_by": "dudu"
         },
-        {
-            "date_uploaded": "27/12/2025 13:51",
-            "start_date": "01/10/2024",
-            "end_date": "31/10/2024",
-            "items_processed": 10957.0,
-            "filename": "outubro.xlsx",
-            "note": "Importação Histórica Automática"
-        },
-        {
-            "date_uploaded": "27/12/2025 13:51",
-            "start_date": "01/11/2024",
-            "end_date": "30/11/2024",
-            "items_processed": 10530.0,
-            "filename": "novembro.xlsx",
-            "note": "Importação Histórica Automática"
-        },
-        {
-            "date_uploaded": "27/12/2025 13:51",
-            "start_date": "01/12/2024",
-            "end_date": "26/12/2024",
-            "items_processed": 7909.0,
-            "filename": "01-26 de dezembro.xlsx",
-            "note": "Importação Histórica Automática"
-        },
-        {
-            "date_uploaded": "29/12/2025 11:12",
-            "start_date": "26/12/2025",
-            "end_date": "28/12/2025",
-            "items_processed": 1896.0,
-            "filename": "26-28.xlsx",
-            "note": "Importado via Script"
-        },
-        {
-            "date_uploaded": "29/12/2025 12:29",
-            "start_date": "28/12/2025",
-            "end_date": "28/12/2025",
-            "items_processed": 820.0,
-            "filename": "2025-12-28.xlsx",
-            "note": "Importado via Script"
-        },
-        {
-            "date_uploaded": "30/12/2025 12:45",
-            "start_date": "29/12/2025",
-            "end_date": "29/12/2025",
-            "items_processed": 650.0,
-            "filename": "2025-12-29.xlsx",
-            "note": "Importado via Script"
-        },
-        {
-            "date_uploaded": "07/01/2026 17:00",
-            "start_date": "06/01/2026",
-            "end_date": "06/01/2026",
-            "items_processed": 357.0,
-            "filename": "2026-01-06.xlsx",
-            "note": "Importado via Script"
-        },
-        {
-            "date_uploaded": "08/01/2026 06:00",
-            "start_date": "07/01/2026",
-            "end_date": "07/01/2026",
-            "items_processed": 404.0,
-            "filename": "2026-01-07.xlsx",
-            "note": "Importado via Script"
-        },
-        {
-            "date_uploaded": "09/01/2026 12:00",
-            "start_date": "08/01/2026",
-            "end_date": "08/01/2026",
-            "items_processed": 373.0,
-            "filename": "2026-01-08.xlsx",
-            "note": "Importado via Script"
-        },
-        {
-            "date_uploaded": "10/01/2026 12:00",
-            "start_date": "09/01/2026",
-            "end_date": "09/01/2026",
-            "items_processed": 424.0,
-            "filename": "2026-01-09.xlsx",
-            "note": "Importado via Script"
-        }
-    ]
-}
+        "partial_payments": [],
+        "total_paid": 0.0,
+        "closed_at": "12/02/2026 08:58",
+        "final_total": 0.0,
+        "discount": 0.0,
+        "closed_by": "dudu",
+        "close_id": "CLOSE_20260212085838_68_0b1d70",
+        "payments": []
+    }
+]

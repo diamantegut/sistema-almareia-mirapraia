@@ -1868,115 +1868,6 @@
         "customer_type": "hospede",
         "room_number": "17"
     },
-    "68": {
-        "items": [
-            {
-                "id": "036f1588-ae1c-48e1-b0d6-fcf47b87836f",
-                "printed": true,
-                "print_status": "printed",
-                "name": "Caldo (Consultar sabor do dia)",
-                "flavor": "Feijão (Caldo)",
-                "qty": 1.0,
-                "price": 15.9,
-                "complements": [],
-                "accompaniments": [],
-                "questions_answers": [],
-                "observations": [
-                    "Cantor"
-                ],
-                "category": "Entradas",
-                "service_fee_exempt": false,
-                "source": "restaurant",
-                "waiter": "dudu",
-                "created_at": "08/02/2026 14:34"
-            },
-            {
-                "id": "42796e7f-227c-40e3-94af-a044a3a85d78",
-                "printed": true,
-                "print_status": "printed",
-                "name": "Coca-Cola 350ml",
-                "flavor": null,
-                "qty": 1.0,
-                "price": 8.9,
-                "complements": [],
-                "accompaniments": [],
-                "questions_answers": [
-                    {
-                        "question": "Copo",
-                        "answer": "Gelo"
-                    }
-                ],
-                "observations": [
-                    "1 cp"
-                ],
-                "category": "Refrigerante",
-                "service_fee_exempt": false,
-                "source": "restaurant",
-                "waiter": "dudu",
-                "created_at": "08/02/2026 14:35"
-            }
-        ],
-        "total": 24.8,
-        "status": "open",
-        "opened_at": "08/02/2026 18:12",
-        "num_adults": "2",
-        "customer_type": "passante",
-        "room_number": null,
-        "waiter": null,
-        "staff_name": null,
-        "last_transfer": {
-            "source_table": "66",
-            "items": [
-                {
-                    "id": "036f1588-ae1c-48e1-b0d6-fcf47b87836f",
-                    "printed": true,
-                    "print_status": "printed",
-                    "name": "Caldo (Consultar sabor do dia)",
-                    "flavor": "Feijão (Caldo)",
-                    "qty": 1.0,
-                    "price": 15.9,
-                    "complements": [],
-                    "accompaniments": [],
-                    "questions_answers": [],
-                    "observations": [
-                        "Cantor"
-                    ],
-                    "category": "Entradas",
-                    "service_fee_exempt": false,
-                    "source": "restaurant",
-                    "waiter": "dudu",
-                    "created_at": "08/02/2026 14:34"
-                },
-                {
-                    "id": "42796e7f-227c-40e3-94af-a044a3a85d78",
-                    "printed": true,
-                    "print_status": "printed",
-                    "name": "Coca-Cola 350ml",
-                    "flavor": null,
-                    "qty": 1.0,
-                    "price": 8.9,
-                    "complements": [],
-                    "accompaniments": [],
-                    "questions_answers": [
-                        {
-                            "question": "Copo",
-                            "answer": "Gelo"
-                        }
-                    ],
-                    "observations": [
-                        "1 cp"
-                    ],
-                    "category": "Refrigerante",
-                    "service_fee_exempt": false,
-                    "source": "restaurant",
-                    "waiter": "dudu",
-                    "created_at": "08/02/2026 14:35"
-                }
-            ],
-            "timestamp": "20260208181249",
-            "transferred_by": "dudu"
-        }
-    },
     "FUNC_henrique": {
         "status": "open",
         "opened_at": "09/02/2026 13:16",
@@ -2070,84 +1961,6 @@
         "waiter": null,
         "staff_name": null
     },
-    "62": {
-        "items": [
-            {
-                "id": "fba1ad6a-3e54-4d19-ab24-c0307d094fe2",
-                "printed": true,
-                "print_status": "printed",
-                "name": "Parmegiana de Filé Mignon (Individual)",
-                "flavor": null,
-                "qty": 1.0,
-                "price": 98.99,
-                "complements": [],
-                "accompaniments": [
-                    "Batata Frita",
-                    "Macarrão"
-                ],
-                "questions_answers": [],
-                "observations": [
-                    "Entregar na mesa 59"
-                ],
-                "category": "Pratos",
-                "service_fee_exempt": false,
-                "source": "restaurant",
-                "waiter": "adailton",
-                "created_at": "11/02/2026 14:12"
-            },
-            {
-                "id": "84e1acc0-3665-4134-a14c-366ec84f7ae9",
-                "printed": true,
-                "print_status": "printed",
-                "name": "Salada da Chef de Salmão",
-                "flavor": null,
-                "qty": 1.0,
-                "price": 45.9,
-                "complements": [],
-                "accompaniments": [],
-                "questions_answers": [],
-                "observations": [
-                    "Entregar na mesa 59"
-                ],
-                "category": "Entradas",
-                "service_fee_exempt": false,
-                "source": "restaurant",
-                "waiter": "adailton",
-                "created_at": "11/02/2026 14:12"
-            },
-            {
-                "id": "e0eb9f1e-da8e-4b31-bd2e-a93229064ddc",
-                "printed": true,
-                "print_status": "printed",
-                "name": "Vinho Branco Lupo Nero",
-                "flavor": null,
-                "qty": 1.0,
-                "price": 130.0,
-                "complements": [],
-                "accompaniments": [],
-                "questions_answers": [],
-                "observations": [
-                    "4 Taças"
-                ],
-                "category": "Vinhos",
-                "service_fee_exempt": false,
-                "source": "restaurant",
-                "waiter": "adailton",
-                "created_at": "11/02/2026 14:15"
-            }
-        ],
-        "total": 274.89,
-        "status": "open",
-        "opened_at": "11/02/2026 14:10",
-        "num_adults": "2",
-        "customer_type": "hospede",
-        "customer_name": "",
-        "room_number": "26",
-        "waiter": null,
-        "staff_name": null,
-        "partial_payments": [],
-        "total_paid": 0.0
-    },
     "25": {
         "items": [],
         "total": 0,
@@ -2157,32 +1970,37 @@
         "customer_type": "hospede",
         "room_number": "25"
     },
-    "40": {
+    "94": {
         "items": [
             {
-                "id": "846a277d-71c8-4d57-a8f8-1fcea1be09cb",
-                "product_id": "6",
-                "name": "Cuscuz Recheado",
-                "price": 11.9,
+                "id": "84320e08-60b0-4dce-81bf-dff18c2d4146",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
                 "qty": 1.0,
                 "category": "Café da manhã",
-                "created_at": "12/02/2026 08:44",
-                "waiter": "Angelo",
-                "printed": false,
-                "print_status": "error",
+                "created_at": "12/02/2026 08:55",
+                "waiter": "dudu",
+                "printed": true,
+                "print_status": "printed",
                 "complements": [],
                 "observations": [
-                    "Sem cebola"
+                    "já foi"
                 ],
                 "accompaniments": [],
-                "flavor": "Queijo Coalho + Cebola Branca + Ovos (Omelete,Mexido,Pochê,cozido ou frito)",
-                "questions_answers": []
+                "flavor": "Tomate + Queijo Coalho",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Omelete"
+                    }
+                ]
             }
         ],
-        "total": 11.9,
+        "total": 8.9,
         "status": "open",
-        "opened_at": "12/02/2026 08:32",
-        "num_adults": 1,
+        "opened_at": "12/02/2026 08:55",
+        "num_adults": 2,
         "customer_type": "hospede",
         "customer_name": "",
         "room_number": "17",
@@ -2191,5 +2009,155 @@
         "is_breakfast": true,
         "partial_payments": [],
         "total_paid": 0.0
+    },
+    "68": {
+        "items": [
+            {
+                "id": "fcf69bb4-29ec-4cc5-b049-e1d5e4aee591",
+                "product_id": "265",
+                "name": "Caldo (Consultar sabor do dia)",
+                "price": 15.9,
+                "qty": 1.0,
+                "category": "Entradas",
+                "created_at": "12/02/2026 08:59",
+                "waiter": "dudu",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "DERICK"
+                ],
+                "accompaniments": [],
+                "flavor": "Feijão (Caldo)",
+                "questions_answers": []
+            },
+            {
+                "id": "dd54b67d-3fcd-46c3-a443-14bce53eb410",
+                "product_id": "148",
+                "name": "Coca Cola Zero 350ml",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Refrigerante",
+                "created_at": "12/02/2026 08:59",
+                "waiter": "dudu",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Não Imprimir"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "1"
+                    }
+                ]
+            }
+        ],
+        "total": 24.8,
+        "status": "open",
+        "opened_at": "12/02/2026 08:58",
+        "num_adults": 1,
+        "customer_type": "passante",
+        "customer_name": "CORTESIAS",
+        "room_number": null,
+        "waiter": "",
+        "staff_name": null,
+        "is_breakfast": true,
+        "partial_payments": [],
+        "total_paid": 0.0
+    },
+    "99": {
+        "items": [
+            {
+                "id": "25c35227-c767-453f-afe3-df8a6d09d74d",
+                "product_id": "10",
+                "name": "Misto Quente",
+                "price": 14.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "12/02/2026 09:14",
+                "waiter": "dudu",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 90"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "6b41964a-e03c-4c01-9543-45365db81ae4",
+                "product_id": "2002",
+                "name": "Tapioca",
+                "price": 10.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "12/02/2026 09:14",
+                "waiter": "dudu",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 90"
+                ],
+                "accompaniments": [],
+                "flavor": "Presunto + Tomate + Queijo Coalho",
+                "questions_answers": []
+            },
+            {
+                "id": "b56cf61e-bcb1-4034-886d-e346344e07da",
+                "product_id": "267",
+                "name": "Toast (Consultar Sabor do Dia)",
+                "price": 24.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "12/02/2026 09:14",
+                "waiter": "dudu",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 90"
+                ],
+                "accompaniments": [],
+                "flavor": "Parma",
+                "questions_answers": []
+            }
+        ],
+        "total": 49.8,
+        "status": "open",
+        "opened_at": "12/02/2026 09:16",
+        "num_adults": 1,
+        "customer_type": "hospede",
+        "customer_name": "",
+        "room_number": "31",
+        "waiter": "",
+        "staff_name": null,
+        "is_breakfast": true,
+        "partial_payments": [],
+        "total_paid": 0.0,
+        "last_transfer": {
+            "source_table": "90",
+            "timestamp": "12/02/2026 09:16",
+            "user": "dudu"
+        }
+    },
+    "40": {
+        "items": [],
+        "total": 0,
+        "status": "open",
+        "opened_at": "12/02/2026 09:48",
+        "num_adults": 1,
+        "customer_type": "passante",
+        "customer_name": "",
+        "room_number": null,
+        "waiter": "",
+        "staff_name": null,
+        "is_breakfast": true
     }
 }
