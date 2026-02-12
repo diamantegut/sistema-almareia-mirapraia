@@ -452,10 +452,11 @@ def restaurant_tables():
     # Permission Check
     user_role = session.get('role')
     user_perms = session.get('permissions', [])
+    user_dept = session.get('department')
     
     has_restaurant_access = any('restaurante' in p for p in user_perms)
     
-    if user_role not in ['admin', 'gerente', 'supervisor'] and not has_restaurant_access and 'recepcao' not in user_perms:
+    if user_role not in ['admin', 'gerente', 'supervisor'] and not has_restaurant_access and 'recepcao' not in user_perms and user_dept != 'Serviço':
         flash('Acesso restrito.')
         return redirect(url_for('main.index'))
 

@@ -24,9 +24,11 @@
         "last_cleaned_at": "08/01/2026 12:12"
     },
     "11": {
-        "status": "clean",
+        "status": "inspected",
         "last_cleaned_by": "dina",
-        "last_cleaned_at": "12/02/2026 09:09"
+        "last_cleaned_at": "12/02/2026 09:09",
+        "inspected_at": "12/02/2026 12:20",
+        "inspected_by": "iraquitan"
     },
     "101": {
         "status": "inspected",
@@ -74,46 +76,34 @@
         "inspected_by": "iraquitan"
     },
     "22": {
-        "status": "dirty",
-        "last_cleaned_by": "generina",
-        "last_cleaned_at": "11/02/2026 12:49",
-        "last_update": "11/02/2026 20:42:20",
-        "system_note": "Limpeza Diária (Automático)"
+        "status": "dirty_checkout",
+        "marked_at": "12/02/2026 11:16",
+        "last_guest": "FILIPE E SANDRO"
     },
     "21": {
-        "status": "dirty",
-        "last_cleaned_by": "dina",
-        "last_cleaned_at": "11/02/2026 15:43",
-        "last_update": "11/02/2026 20:42:20",
-        "system_note": "Limpeza Diária (Automático)"
+        "status": "dirty_checkout",
+        "marked_at": "12/02/2026 11:59",
+        "last_guest": "JULIANA E CLAUDIO"
     },
     "17": {
-        "status": "dirty",
+        "status": "inspected",
         "last_cleaned_by": "dina",
-        "last_cleaned_at": "11/02/2026 12:07",
-        "last_update": "11/02/2026 20:42:20",
-        "system_note": "Limpeza Diária (Automático)"
+        "last_cleaned_at": "12/02/2026 11:15"
     },
     "24": {
-        "status": "dirty",
+        "status": "clean",
         "last_cleaned_by": "generina",
-        "last_cleaned_at": "11/02/2026 10:56",
-        "last_update": "11/02/2026 20:42:20",
-        "system_note": "Limpeza Diária (Automático)"
+        "last_cleaned_at": "12/02/2026 12:48"
     },
     "25": {
         "status": "inspected",
         "last_cleaned_by": "generina",
-        "last_cleaned_at": "11/02/2026 09:54",
-        "inspected_at": "11/02/2026 11:11",
-        "inspected_by": "iraquitan"
+        "last_cleaned_at": "12/02/2026 11:14"
     },
     "26": {
-        "status": "in_progress",
-        "previous_status": "dirty",
-        "maid": "generina",
-        "start_time": "12/02/2026 10:23:07",
-        "last_update": "12/02/2026 10:23"
+        "status": "inspected",
+        "last_cleaned_by": "generina",
+        "last_cleaned_at": "12/02/2026 10:43"
     },
     "31": {
         "status": "dirty_checkout",
