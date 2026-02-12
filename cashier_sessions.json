@@ -4386,5 +4386,45 @@
         "closing_balance": 100.0,
         "difference": 0.0,
         "closed_by": "Angelo"
+    },
+    {
+        "id": "SESSION_GUEST_CONSUMPTION_20260212085623_jose",
+        "user": "jose",
+        "type": "guest_consumption",
+        "entity": "Hotel Almareia",
+        "opened_at": "12/02/2026 08:56",
+        "opening_balance": 0.0,
+        "transactions": [],
+        "status": "open",
+        "closed_at": null,
+        "closing_balance": null,
+        "difference": null
+    },
+    {
+        "id": "SESSION_RESTAURANT_20260212085648_dudu",
+        "user": "dudu",
+        "type": "restaurant",
+        "entity": "Restaurante Mirapraia",
+        "opened_at": "12/02/2026 08:56",
+        "opening_balance": 0.0,
+        "transactions": [],
+        "status": "closed",
+        "closed_at": "12/02/2026 08:56",
+        "closing_balance": 0.0,
+        "difference": 0.0,
+        "closed_by": "dudu"
+    },
+    {
+        "id": "SESSION_RESTAURANT_20260212085718_dudu",
+        "user": "dudu",
+        "type": "restaurant",
+        "entity": "Restaurante Mirapraia",
+        "opened_at": "12/02/2026 08:57",
+        "opening_balance": 803.75,
+        "transactions": [],
+        "status": "open",
+        "closed_at": null,
+        "closing_balance": null,
+        "difference": null
     }
 ]
