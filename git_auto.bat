@@ -20,10 +20,25 @@ if "%opcao%"=="4" goto sair
 :pull
 echo.
 echo === Atualizando repositorio... ===
-git pull origin main
+
+echo Salvando alteracoes locais automaticamente...
+git add .
+git commit -m "Auto-backup local changes before pull"
+
+echo.
+echo Buscando atualizacoes...
+git pull origin main --strategy-option=theirs
+
 if %errorlevel% neq 0 (
     echo.
-    echo [ERRO] Falha ao atualizar. Verifique conflitos.
+    echo [ALERTA] Houve conflitos no merge automatico.
+    echo Tentando resolver usando versao remota para arquivos conflitantes...
+    git checkout --theirs .
+    git add .
+    git commit -m "Auto-resolved merge conflicts using remote version"
+    
+    echo Verificando se restaram pendencias...
+    git status
 ) else (
     echo.
     echo [SUCESSO] Repositorio atualizado!
@@ -34,19 +49,14 @@ goto menu
 :push
 echo.
 echo === Preparando envio... ===
-git status
-echo.
-set /p confirm=Deseja adicionar TODOS os arquivos listados acima? (S/N): 
-if /i "%confirm%" neq "S" goto menu
-
-set /p msg=Digite a mensagem do commit: 
-if "%msg%"=="" (
-    echo [ERRO] Mensagem obrigatoria!
-    pause
-    goto menu
-)
-
+echo Adicionando todos os arquivos automaticamente...
 git add .
+
+echo.
+set msg=
+set /p msg=Digite a mensagem do commit (Enter para "Atualizacao Automatica"): 
+if "%msg%"=="" set msg=Atualizacao Automatica
+
 git commit -m "%msg%"
 echo.
 echo === Enviando para o GitHub... ===

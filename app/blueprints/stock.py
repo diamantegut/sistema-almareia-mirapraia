@@ -353,15 +353,58 @@ def stock_products():
 
     products = load_products()
     balances = get_product_balances()
+    
+    # --- 1. Calcular saldos e valores (Necessário para filtros) ---
     for p in products:
         p['balance'] = balances.get(p['name'], 0.0)
         p['total_value'] = p['balance'] * p.get('price', 0.0)
-
+        
+    # --- 2. Preparar listas auxiliares antes de filtrar (para dropdowns) ---
     all_categories = sorted(list(set(p.get('category', 'Outros') for p in products if p.get('category'))))
     dept_options = ['Geral'] + DEPARTMENTS
     existing_suppliers = load_suppliers()
 
-    return render_template('stock_products.html', products=products, departments=dept_options, suppliers=existing_suppliers, categories=all_categories)
+    # --- 3. Aplicar Filtros (Request Args) ---
+    filtered_products = products
+    
+    # Filtro: Departamento
+    dept_filter = request.args.get('department')
+    if dept_filter and dept_filter != 'Todos':
+        filtered_products = [p for p in filtered_products if p.get('department') == dept_filter]
+        
+    # Filtro: Categoria
+    cat_filter = request.args.get('category')
+    if cat_filter and cat_filter != 'Todas':
+        filtered_products = [p for p in filtered_products if p.get('category') == cat_filter]
+        
+    # Filtro: Busca (Nome)
+    search_query = request.args.get('search')
+    if search_query:
+        search_query = search_query.lower()
+        filtered_products = [p for p in filtered_products if search_query in p.get('name', '').lower()]
+        
+    # Filtro Especial: Baixo Estoque / Críticos
+    special_filter = request.args.get('filter')
+    if special_filter == 'low_stock':
+        filtered_products = [p for p in filtered_products if p.get('balance', 0) <= p.get('min_stock', 0)]
+        
+    # --- 4. Ordenação ---
+    sort_option = request.args.get('sort', 'name')
+    
+    if sort_option == 'department':
+        filtered_products.sort(key=lambda x: (x.get('department', ''), x.get('name', '')))
+    elif sort_option == 'category':
+        filtered_products.sort(key=lambda x: (x.get('category', ''), x.get('name', '')))
+    elif sort_option == 'stock_asc':
+        filtered_products.sort(key=lambda x: x.get('balance', 0))
+    elif sort_option == 'stock_desc':
+        filtered_products.sort(key=lambda x: x.get('balance', 0), reverse=True)
+    elif sort_option == 'price':
+        filtered_products.sort(key=lambda x: x.get('price', 0), reverse=True)
+    else: # Default: name
+        filtered_products.sort(key=lambda x: x.get('name', ''))
+
+    return render_template('stock_products.html', products=filtered_products, departments=dept_options, suppliers=existing_suppliers, categories=all_categories)
 
 @stock_bp.route('/stock/categories')
 @login_required
