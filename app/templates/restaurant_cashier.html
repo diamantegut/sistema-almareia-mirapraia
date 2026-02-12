@@ -130,8 +130,8 @@
                                 <th class="text-end">Valor</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            {% for t in displayed_transactions|reverse %}
+                        <tbody id="transactions-body">
+                            {% for t in displayed_transactions %}
                             <tr>
                                 <td>{{ t.timestamp.split(' ')[1] if t.timestamp else t.time }}</td>
                                 <td>
@@ -213,7 +213,7 @@
                                 </td>
                             </tr>
                             {% else %}
-                            <tr>
+                            <tr id="no-transactions-row">
                                 <td colspan="5" class="text-center py-4 text-muted">
                                     Nenhuma movimentação registrada.
                                 </td>
@@ -221,6 +221,17 @@
                             {% endfor %}
                         </tbody>
                     </table>
+                    
+                    {% if has_more %}
+                    <div class="text-center p-3" id="loading-more-container">
+                        <button id="load-more-btn" class="btn btn-outline-primary" onclick="loadMoreTransactions()">
+                            Carregar Mais
+                        </button>
+                        <div id="loading-spinner" class="spinner-border text-primary d-none" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -236,10 +247,11 @@
                     <h5 class="modal-title">Realizar Sangria (Retirada)</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <form method="POST">
+                <form id="sangriaForm" onsubmit="handleTransaction(event, 'sangriaModal')">
                     <div class="modal-body">
                         <input type="hidden" name="action" value="add_transaction">
                         <input type="hidden" name="type" value="withdrawal">
+                        <input type="hidden" name="idempotency_key" class="idempotency-key">
                         <div class="mb-3">
                             <label class="form-label">Valor (R$)</label>
                             <input type="tel" class="form-control" name="amount" required onfocus="this.select()" oninput="formatCurrency(this)">
@@ -251,7 +263,10 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-danger">Confirmar Sangria</button>
+                        <button type="submit" class="btn btn-danger">
+                            <span class="spinner-border spinner-border-sm d-none me-2" role="status" aria-hidden="true"></span>
+                            Confirmar Sangria
+                        </button>
                     </div>
                 </form>
             </div>
@@ -266,10 +281,11 @@
                     <h5 class="modal-title">Realizar Suprimento (Entrada)</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <form method="POST">
+                <form id="suprimentoForm" onsubmit="handleTransaction(event, 'suprimentoModal')">
                     <div class="modal-body">
                         <input type="hidden" name="action" value="add_transaction">
                         <input type="hidden" name="type" value="deposit">
+                        <input type="hidden" name="idempotency_key" class="idempotency-key" id="suprimentoIdempotencyKey">
                         <div class="mb-3">
                             <label class="form-label">Valor (R$)</label>
                             <input type="tel" class="form-control" name="amount" required onfocus="this.select()" oninput="formatCurrency(this)">
@@ -281,7 +297,10 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-success">Confirmar Suprimento</button>
+                        <button type="submit" class="btn btn-success" id="btnConfirmSuprimento">
+                            <span class="spinner-border spinner-border-sm d-none me-2" role="status" aria-hidden="true"></span>
+                            Confirmar Suprimento
+                        </button>
                     </div>
                 </form>
             </div>
@@ -296,9 +315,10 @@
                     <h5 class="modal-title">Realizar Transferência</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <form method="POST">
+                <form id="transferForm" onsubmit="handleTransaction(event, 'transferModal')">
                     <input type="hidden" name="action" value="add_transaction">
                     <input type="hidden" name="type" value="transfer">
+                    <input type="hidden" name="idempotency_key" class="idempotency-key">
                     <div class="modal-body">
                         <div class="mb-3">
                             <label class="form-label">Caixa de Destino</label>
@@ -318,7 +338,10 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Realizar Transferência</button>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="spinner-border spinner-border-sm d-none me-2" role="status" aria-hidden="true"></span>
+                            Realizar Transferência
+                        </button>
                     </div>
                 </form>
             </div>
@@ -357,6 +380,146 @@
     {% endif %}
 </div>
 <script>
+    let currentPage = {{ current_page|default(1) }};
+    let isLoading = false;
+    let hasMore = {{ 'true' if has_more else 'false' }};
+
+    function loadMoreTransactions() {
+        if (isLoading || !hasMore) return;
+
+        isLoading = true;
+        document.getElementById('load-more-btn').classList.add('d-none');
+        document.getElementById('loading-spinner').classList.remove('d-none');
+
+        const nextPage = currentPage + 1;
+        
+        fetch(`${window.location.pathname}?page=${nextPage}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const tbody = document.getElementById('transactions-body');
+            const noTxRow = document.getElementById('no-transactions-row');
+            if (noTxRow) noTxRow.remove();
+
+            data.transactions.forEach(t => {
+                const row = document.createElement('tr');
+                
+                // Determine badges
+                let typeBadge = '';
+                if (t.type === 'sale') typeBadge = '<span class="badge bg-success">Venda</span>';
+                else if (t.type === 'deposit') typeBadge = '<span class="badge bg-info text-dark">Suprimento</span>';
+                else if (t.type === 'withdrawal') typeBadge = '<span class="badge bg-danger">Sangria</span>';
+                else if (t.type === 'in') typeBadge = '<span class="badge bg-success">Recebimento</span>';
+                else if (t.type === 'out') typeBadge = '<span class="badge bg-danger">Saída</span>';
+                else typeBadge = `<span class="badge bg-secondary">${t.type}</span>`;
+
+                // Determine Payment Method Column
+                let paymentCol = '';
+                if (t.is_group && t.payment_method === 'Múltiplo') {
+                    // Note: Dynamically creating modals for legacy items loaded via AJAX might be complex.
+                    // Simplified: Just show "Múltiplo" or simple list.
+                    // For full fidelity, we'd need to append the modal HTML too.
+                    // For now, let's just show "Múltiplo" with a tooltip or simple text to avoid DOM bloat.
+                    paymentCol = '<span class="text-primary"><i class="bi bi-wallet2"></i> Múltiplo</span>';
+                } else {
+                    paymentCol = (t.payment_method || '-');
+                    // Capitalize first letter
+                    paymentCol = paymentCol.charAt(0).toUpperCase() + paymentCol.slice(1);
+                }
+
+                // Amount Class
+                const amountClass = ['withdrawal', 'out'].includes(t.type) ? 'text-danger' : 'text-success';
+                const prefix = ['withdrawal', 'out'].includes(t.type) ? '-' : '';
+
+                row.innerHTML = `
+                    <td>${t.timestamp ? t.timestamp.split(' ')[1] : t.time}</td>
+                    <td>${typeBadge}</td>
+                    <td>${t.description}</td>
+                    <td>${paymentCol}</td>
+                    <td class="text-end fw-bold ${amountClass}">
+                        ${prefix} R$ ${parseFloat(t.amount).toFixed(2)}
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            currentPage = data.current_page;
+            hasMore = data.has_more;
+
+            if (!hasMore) {
+                const container = document.getElementById('loading-more-container');
+                if (container) container.remove();
+            } else {
+                document.getElementById('load-more-btn').classList.remove('d-none');
+                document.getElementById('loading-spinner').classList.add('d-none');
+            }
+        })
+        .catch(err => {
+            console.error('Error loading transactions:', err);
+            alert('Erro ao carregar mais transações.');
+            document.getElementById('load-more-btn').classList.remove('d-none');
+            document.getElementById('loading-spinner').classList.add('d-none');
+        })
+        .finally(() => {
+            isLoading = false;
+        });
+    }
+
+    // Generic Async Transaction Handler
+    async function handleTransaction(event, modalId) {
+        event.preventDefault();
+        
+        const form = event.target;
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const spinner = submitBtn.querySelector('.spinner-border');
+        
+        // Disable UI
+        submitBtn.disabled = true;
+        if (spinner) spinner.classList.remove('d-none');
+        
+        const formData = new FormData(form);
+        
+        try {
+            const response = await fetch(window.location.href, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            
+            const result = await response.json();
+            
+            if (result.success || (result.message && !result.error)) {
+                // Success
+                const modalEl = document.getElementById(modalId);
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                modal.hide();
+                form.reset();
+                
+                // Regenerate UUID for next time
+                const keyInput = form.querySelector('.idempotency-key');
+                if (keyInput) keyInput.value = generateUUID();
+                
+                // Reload to show new data
+                window.location.reload(); 
+            } else {
+                // Error
+                alert(result.error || result.message || 'Erro ao processar transação.');
+                submitBtn.disabled = false;
+                if (spinner) spinner.classList.add('d-none');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            // If response is not JSON (e.g. standard redirect), reload
+            window.location.reload();
+        }
+    }
+
+
     window.formatCurrency = function(input) {
         let value = input.value.replace(/\D/g, '');
         if (value === '') {
@@ -366,6 +529,35 @@
         let floatVal = parseInt(value) / 100;
         input.value = floatVal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     };
+
+    function generateUUID() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+
+    const suprimentoModal = document.getElementById('suprimentoModal');
+    if (suprimentoModal) {
+        suprimentoModal.addEventListener('show.bs.modal', function () {
+            const keyInput = document.getElementById('suprimentoIdempotencyKey');
+            if (keyInput) keyInput.value = generateUUID();
+        });
+    }
+
+    // Initialize UUIDs on Modal Show (All Modals)
+    document.addEventListener('DOMContentLoaded', function() {
+        ['suprimentoModal', 'sangriaModal', 'transferModal'].forEach(id => {
+            const modal = document.getElementById(id);
+            if (modal) {
+                modal.addEventListener('show.bs.modal', function () {
+                    const form = modal.querySelector('form');
+                    const keyInput = form.querySelector('.idempotency-key');
+                    if (keyInput) keyInput.value = generateUUID();
+                });
+            }
+        });
+    });
 </script>
 
 {% endblock %}

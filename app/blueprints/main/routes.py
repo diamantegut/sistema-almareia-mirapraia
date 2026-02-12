@@ -1,4 +1,4 @@
-from flask import render_template, session, redirect, url_for, request, flash
+from flask import render_template, session, redirect, url_for, request, flash, jsonify, current_app
 from . import main_bp
 from datetime import datetime
 import traceback
@@ -73,7 +73,7 @@ SERVICE_PAGES = [
             {'name': 'Caixa Recepção', 'url': 'reception.reception_cashier', 'icon': 'bi bi-cash-stack'},
             {'name': 'Relatório de Fechamentos', 'url': 'finance.finance_cashier_reports', 'icon': 'bi bi-bar-chart'},
             {'name': 'Balanços', 'url': 'finance.finance_balances', 'icon': 'bi bi-clipboard-data'},
-            {'name': 'Formas de Pagamento', 'url': 'restaurant.payment_methods', 'icon': 'bi bi-credit-card-2-front'},
+            {'name': 'Formas de Pagamento', 'url': 'main.payment_methods', 'icon': 'bi bi-credit-card-2-front'},
             {'name': 'Conciliação de Cartões', 'url': 'finance.finance_reconciliation', 'icon': 'bi bi-arrows-shuffle'},
             {'name': 'Ranking de Comissões', 'url': 'finance.commission_ranking', 'icon': 'bi bi-award'},
             {'name': 'Portal Contabilidade', 'url': 'finance.accounting_dashboard', 'icon': 'bi bi-journal-richtext'}
@@ -344,6 +344,9 @@ def assets(filename):
 @login_required
 def service_page(service_id):
     try:
+        current_app.logger.info(
+            f"Service page access: service_id={service_id}, user={session.get('user')}, role={session.get('role')}, department={session.get('department')}, permissions={session.get('permissions')}"
+        )
         service = next((s for s in SERVICE_PAGES if s['id'] == service_id), None)
         if service:
             if service_id == 'recepcao':
@@ -427,17 +430,31 @@ def service_page(service_id):
                             'threshold': threshold_desc
                         })
 
-            return render_template('service.html', 
+            response = render_template('service.html', 
                                    service=service, 
                                    is_manager=is_manager,
                                    purchase_alerts=purchase_alerts)
+            current_app.logger.info(
+                f"Service page rendered: service_id={service_id}, user={session.get('user')}, role={session.get('role')}"
+            )
+            return response
         else:
             return "Serviço não encontrado", 404
             
     except Exception as e:
-        print(f"Erro service page: {e}")
+        current_app.logger.exception(f"Erro service page: {e}")
         traceback.print_exc()
         return redirect(url_for('main.index'))
+
+@main_bp.route('/service-click', methods=['POST'])
+@login_required
+def service_click():
+    payload = request.get_json(silent=True) or {}
+    service_id = payload.get('service_id')
+    current_app.logger.info(
+        f"Service card click: service_id={service_id}, user={session.get('user')}, role={session.get('role')}, department={session.get('department')}, ua={request.headers.get('User-Agent')}, ref={request.referrer}"
+    )
+    return jsonify({'success': True})
 
 @main_bp.route('/service/<service_id>/log')
 @login_required

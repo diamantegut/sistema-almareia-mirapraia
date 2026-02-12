@@ -242,6 +242,18 @@ def print_cashier_ticket(printer_config, type_str, amount, user, reason):
         print(f"Error printing cashier ticket: {e}")
         return False, str(e)
 
+def print_cashier_ticket_async(printer_config, type_str, amount, user, reason):
+    """
+    Wraps print_cashier_ticket in a thread to prevent blocking the UI.
+    """
+    from threading import Thread
+    try:
+        Thread(target=print_cashier_ticket, args=(printer_config, type_str, amount, user, reason), daemon=True).start()
+        return True
+    except Exception as e:
+        print(f"Failed to start async print: {e}")
+        return False
+
 def format_ticket(table_id, waiter_name, items, printer_name):
     """
     Formats the ticket content for thermal printing (80mm).

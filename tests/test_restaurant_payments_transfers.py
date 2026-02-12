@@ -121,7 +121,7 @@ class TestRestaurantPaymentsTransfers(unittest.TestCase):
                 'total_paid': 90.0,
                 'status': 'open'
             },
-            '11': {
+            '50': {
                 'items': [],
                 'total': 0.0,
                 'status': 'open'
@@ -131,7 +131,7 @@ class TestRestaurantPaymentsTransfers(unittest.TestCase):
         
         data = {
             'source_table_id': '10',
-            'target_table_id': '11',
+            'target_table_id': '50',
             'item_index': 0,
             'qty': 1
         }
