@@ -18,13 +18,9 @@ from app.services.system_config_manager import (
     BREAKFAST_HISTORY_FILE, FLAVOR_GROUPS_FILE,
     RESTAURANT_TABLE_SETTINGS_FILE, RESTAURANT_SETTINGS_FILE,
     CHECKLIST_ITEMS_FILE, INSPECTION_LOGS_FILE, CLEANING_STATUS_FILE,
-    ARCHIVED_ORDERS_FILE, AUDIT_LOGS_FILE, USERS_FILE, EX_EMPLOYEES_FILE
+    ARCHIVED_ORDERS_FILE, AUDIT_LOGS_FILE, USERS_FILE, EX_EMPLOYEES_FILE,
+    DEPARTMENTS
 )
-
-DEPARTMENTS = [
-    'Recepção', 'Restaurante', 'Cozinha', 'Governança', 
-    'Lavanderia', 'Manutencao', 'Admin', 'RH'
-]
 
 def format_room_number(room_num):
     """

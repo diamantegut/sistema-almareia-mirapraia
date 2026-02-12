@@ -1890,48 +1890,51 @@
                      const group = allFlavorGroups.find(g => g.id === product.flavor_group_id);
                      
                      if (group && group.items && group.items.length > 0) {
-                     // Check for SIMPLES marker
-                     const simpleItem = group.items.find(i => i.is_simple);
-                     
-                     if (simpleItem) {
-                         // Auto-select SIMPLES flavor and hide container
-                         flavorContainer.style.display = 'none';
-                         const div = document.createElement('div');
-                         div.innerHTML = `<input type="hidden" name="selected_flavor" value="${simpleItem.id}">`;
-                         flavorList.appendChild(div);
-                     } else {
-                         flavorContainer.style.display = 'block';
-                         
-                         // Determine input type based on max_flavors
-                         const maxFlavors = product.max_flavors || 1;
-                         const inputType = maxFlavors > 1 ? 'checkbox' : 'radio';
-                         const inputName = maxFlavors > 1 ? 'selected_flavors' : 'selected_flavor';
-                         
-                         // Add instructions
-                         if (maxFlavors > 1) {
-                             const instruction = document.createElement('div');
-                             instruction.className = 'alert alert-info py-1 px-2 mb-2 small';
-                             instruction.innerHTML = `<i class="bi bi-info-circle"></i> Escolha até <b>${maxFlavors}</b> sabores.`;
-                             flavorList.appendChild(instruction);
-                         }
+                        // Check if SINGLE item and SIMPLE
+                        const simpleItem = group.items.find(i => i.is_simple);
+                        
+                        if (group.items.length === 1 && simpleItem) {
+                            // Auto-select ONLY if it is the ONLY option
+                            flavorContainer.style.display = 'none';
+                            const div = document.createElement('div');
+                            div.innerHTML = `<input type="hidden" name="selected_flavor" value="${simpleItem.id}">`;
+                            flavorList.appendChild(div);
+                        } else {
+                            flavorContainer.style.display = 'block';
+                            
+                            // Determine input type based on max_flavors
+                            const maxFlavors = product.max_flavors || 1;
+                            const inputType = maxFlavors > 1 ? 'checkbox' : 'radio';
+                            const inputName = maxFlavors > 1 ? 'selected_flavors' : 'selected_flavor';
+                            
+                            // Add instructions
+                            if (maxFlavors > 1) {
+                                const instruction = document.createElement('div');
+                                instruction.className = 'alert alert-info py-1 px-2 mb-2 small';
+                                instruction.innerHTML = `<i class="bi bi-info-circle"></i> Escolha até <b>${maxFlavors}</b> sabores.`;
+                                flavorList.appendChild(instruction);
+                            }
 
-                         group.items.forEach(flavor => {
-                             const div = document.createElement('div');
-                             div.className = 'form-check mb-2';
-                             
-                             // Onclick handler for limits
-                             const clickHandler = maxFlavors > 1 ? `onclick="handleFlavorLimit(this, ${maxFlavors})"` : '';
+                            group.items.forEach((flavor, idx) => {
+                                const div = document.createElement('div');
+                                div.className = 'form-check mb-2';
+                                
+                                // Onclick handler for limits
+                                const clickHandler = maxFlavors > 1 ? `onclick="handleFlavorLimit(this, ${maxFlavors})"` : '';
 
-                             div.innerHTML = `
-                                <input class="form-check-input flavor-check" type="${inputType}" name="${inputName}" value="${flavor.id}" id="flavor_${flavor.id}" data-name="${flavor.name}" ${clickHandler}>
-                                <label class="form-check-label w-100" for="flavor_${flavor.id}" style="cursor: pointer;">
-                                    ${flavor.name}
-                                </label>
-                             `;
-                             flavorList.appendChild(div);
-                         });
-                     }
-                }
+                                // Auto-check the first simple item if it's a radio group (default selection)
+                                const isChecked = (inputType === 'radio' && idx === 0) ? 'checked' : '';
+
+                                div.innerHTML = `
+                                   <input class="form-check-input flavor-check" type="${inputType}" name="${inputName}" value="${flavor.id}" id="flavor_${flavor.id}" data-name="${flavor.name}" ${clickHandler} ${isChecked}>
+                                   <label class="form-check-label w-100" for="flavor_${flavor.id}" style="cursor: pointer;">
+                                       ${flavor.name}
+                                   </label>
+                                `;
+                                flavorList.appendChild(div);
+                            });
+                        }
+                   }
                 }
             }
         

@@ -3,16 +3,11 @@ import json
 import hashlib
 import unicodedata
 from werkzeug.utils import secure_filename
-from app.services.system_config_manager import get_data_path
+from app.services.system_config_manager import get_data_path, DEPARTMENTS
 
 USERS_FILE = get_data_path('users.json')
 EX_EMPLOYEES_FILE = get_data_path('ex_employees.json')
 PASSWORD_RESET_REQUESTS_FILE = get_data_path('password_reset_requests.json')
-
-DEPARTMENTS = [
-    'Recepção', 'Restaurante', 'Cozinha', 'Governanca', 
-    'Lavanderia', 'Manutencao', 'Admin', 'RH'
-]
 
 def load_users():
     if not os.path.exists(USERS_FILE):
