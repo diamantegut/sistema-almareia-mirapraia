@@ -23201,24 +23201,8 @@
         },
         "service_fee_removed": false,
         "date": "06/02/2026 19:24",
-        "status": "paid",
-        "type": "restaurant",
-        "source": "restaurant",
-        "paid_at": "11/02/2026 18:14",
-        "reception_cashier_id": "SESSION_GUEST_CONSUMPTION_20260211173754_Angelo",
-        "payment_method": "Múltiplos",
-        "payment_details": [
-            {
-                "method_id": "dinheiro",
-                "method_name": "Dinheiro",
-                "amount": 0.15
-            },
-            {
-                "method_id": "pixemailalmareia",
-                "method_name": "PIX Email Almareia",
-                "amount": 31.64
-            }
-        ]
+        "status": "pending",
+        "type": "restaurant"
     },
     {
         "id": "CHARGE_40_20260206194646_7a65b0_REST",
@@ -23278,8 +23262,7 @@
         "service_fee_removed": false,
         "date": "06/02/2026 19:46",
         "status": "pending",
-        "type": "restaurant",
-        "source": "restaurant"
+        "type": "restaurant"
     },
     {
         "id": "CHARGE_97_20260206195534_619ce2_REST",
@@ -25128,8 +25111,7 @@
         "service_fee_removed": false,
         "date": "07/02/2026 10:07",
         "status": "pending",
-        "type": "restaurant",
-        "source": "restaurant"
+        "type": "restaurant"
     },
     {
         "id": "CHARGE_GOV_14_20260207101154_d660bc",
@@ -26893,8 +26875,7 @@
         "flags": [],
         "date": "07/02/2026 18:25",
         "status": "pending",
-        "type": "minibar",
-        "source": "minibar"
+        "type": "minibar"
     },
     {
         "id": "CHARGE_50_20260207182858_c95741_REST",
@@ -28307,8 +28288,7 @@
         "service_fee_removed": false,
         "date": "07/02/2026 21:45",
         "status": "pending",
-        "type": "restaurant",
-        "source": "restaurant"
+        "type": "restaurant"
     },
     {
         "id": "CHARGE_96_20260207215220_c1c744_REST",
@@ -28728,8 +28708,7 @@
         "service_fee_removed": false,
         "date": "07/02/2026 21:56",
         "status": "pending",
-        "type": "restaurant",
-        "source": "restaurant"
+        "type": "restaurant"
     },
     {
         "id": "CHARGE_72_20260207215640_52c022_REST",
@@ -28977,8 +28956,7 @@
         "flags": [],
         "date": "08/02/2026 10:15",
         "status": "pending",
-        "type": "minibar",
-        "source": "minibar"
+        "type": "minibar"
     },
     {
         "id": "CHARGE_GOV_33_20260208102102_d66738",
@@ -29172,8 +29150,7 @@
         "flags": [],
         "date": "08/02/2026 14:39",
         "status": "pending",
-        "type": "minibar",
-        "source": "minibar"
+        "type": "minibar"
     },
     {
         "id": "CHARGE_72_20260208144814_642478_REST",
@@ -29228,8 +29205,7 @@
         "service_fee_removed": false,
         "date": "08/02/2026 14:48",
         "status": "pending",
-        "type": "restaurant",
-        "source": "restaurant"
+        "type": "restaurant"
     },
     {
         "id": "CHARGE_41_20260208145519_41b305_REST",
@@ -29798,8 +29774,7 @@
         "service_fee_removed": false,
         "date": "08/02/2026 15:28",
         "status": "pending",
-        "type": "restaurant",
-        "source": "restaurant"
+        "type": "restaurant"
     },
     {
         "id": "CHARGE_53_20260208152942_f0fde5_REST",
@@ -30501,6 +30476,119 @@
         "closed_by": "jose",
         "payment_method": "creditoangelo",
         "notes": " [Baixa Total por jose em 08/02/2026 16:09]"
+    },
+    {
+        "id": "CHARGE_59_20260208162800_416c00_REST",
+        "room_number": "17",
+        "table_id": "59",
+        "total": 250.25,
+        "items": [
+            {
+                "id": "27052877-b48f-4d09-82d1-85732bd1fe84",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Água de Coco",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 10.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Sucos e Águas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "edson",
+                "created_at": "08/02/2026 12:22"
+            },
+            {
+                "id": "7a18d541-61fe-4592-a996-bcb6bfb60452",
+                "printed": false,
+                "print_status": "error",
+                "name": "Água de Coco",
+                "flavor": null,
+                "qty": 2.0,
+                "price": 10.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Sucos e Águas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "welington",
+                "created_at": "08/02/2026 13:21"
+            },
+            {
+                "id": "29cdf266-de23-444a-bd8a-9653636fabca",
+                "printed": false,
+                "print_status": "error",
+                "name": "Batata Frita",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 24.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Entradas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "leo",
+                "created_at": "08/02/2026 13:50"
+            },
+            {
+                "id": "c4533c9e-fe26-4261-854c-7a3f00051e64",
+                "printed": false,
+                "print_status": "error",
+                "name": "Rolha Bebida Quente",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 70.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Bebidas Quentes Garrafas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "leo",
+                "created_at": "08/02/2026 13:50"
+            },
+            {
+                "id": "5a9db3c6-b364-4dc0-8a2c-a1dc9df84660",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Peixe na farofa de Castanha (Individual)",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 99.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "Com arroz branco"
+                ],
+                "category": "Pratos",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "leo",
+                "created_at": "08/02/2026 14:21"
+            }
+        ],
+        "service_fee": 22.75,
+        "discount": 0,
+        "flags": [],
+        "waiter": "leo",
+        "waiter_breakdown": {
+            "edson": 11.99,
+            "welington": 23.98,
+            "leo": 214.28
+        },
+        "service_fee_removed": false,
+        "date": "08/02/2026 16:28",
+        "status": "pending",
+        "type": "restaurant"
     },
     {
         "id": "CHARGE_89_20260208173302_7645f5_REST",
@@ -31740,8 +31828,7 @@
         "flags": [],
         "date": "09/02/2026 11:14",
         "status": "pending",
-        "type": "minibar",
-        "source": "minibar"
+        "type": "minibar"
     },
     {
         "id": "CHARGE_GOV_24_20260209121515_997fa6",
@@ -31791,8 +31878,7 @@
         "flags": [],
         "date": "09/02/2026 12:51",
         "status": "pending",
-        "type": "minibar",
-        "source": "minibar"
+        "type": "minibar"
     },
     {
         "id": "CHARGE_GOV_32_20260209132746_153282",
@@ -31868,12 +31954,8 @@
         "discount": 0,
         "flags": [],
         "date": "09/02/2026 14:07",
-        "status": "paid",
-        "type": "minibar",
-        "paid_at": "11/02/2026 14:08",
-        "closed_by": "Angelo",
-        "payment_method": "creditoangelo",
-        "notes": " [Baixa Total por Angelo em 11/02/2026 14:08]"
+        "status": "pending",
+        "type": "minibar"
     },
     {
         "id": "CHARGE_GOV_11_20260209144443_17af3a",
@@ -31959,8 +32041,7 @@
         "service_fee_removed": false,
         "date": "09/02/2026 16:38",
         "status": "pending",
-        "type": "restaurant",
-        "source": "restaurant"
+        "type": "restaurant"
     },
     {
         "id": "CHARGE_60_20260209163853_0c141f_REST",
@@ -32098,12 +32179,8 @@
         },
         "service_fee_removed": false,
         "date": "09/02/2026 16:38",
-        "status": "paid",
-        "type": "restaurant",
-        "paid_at": "11/02/2026 14:08",
-        "closed_by": "Angelo",
-        "payment_method": "creditoangelo",
-        "notes": " [Baixa Total por Angelo em 11/02/2026 14:08]"
+        "status": "pending",
+        "type": "restaurant"
     },
     {
         "id": "CHARGE_74_20260209165259_96c77f_REST",
@@ -33030,24 +33107,8 @@
         },
         "service_fee_removed": false,
         "date": "09/02/2026 19:18",
-        "status": "paid",
-        "type": "restaurant",
-        "source": "restaurant",
-        "paid_at": "12/02/2026 00:59",
-        "reception_cashier_id": "SESSION_GUEST_CONSUMPTION_20260212005012_Angelo",
-        "payment_method": "Múltiplos",
-        "payment_details": [
-            {
-                "method_id": "dinheiro",
-                "method_name": "Dinheiro",
-                "amount": 400.0
-            },
-            {
-                "method_id": "pixemailalmareia",
-                "method_name": "PIX Email Almareia",
-                "amount": 482.068
-            }
-        ]
+        "status": "pending",
+        "type": "restaurant"
     },
     {
         "id": "CHARGE_73_20260209191817_c6ad78_REST",
@@ -33161,16 +33222,8 @@
         },
         "service_fee_removed": false,
         "date": "09/02/2026 19:18",
-        "status": "paid",
-        "type": "restaurant",
-        "paid_at": "11/02/2026 15:01",
-        "reception_cashier_id": "SESSION_GUEST_CONSUMPTION_20260211150055_Angelo",
-        "payment_details": [
-            {
-                "method": "creditoalmareiarede",
-                "amount": 409.75
-            }
-        ]
+        "status": "pending",
+        "type": "restaurant"
     },
     {
         "id": "CHARGE_88_20260209191843_12f087_REST",
@@ -33525,16 +33578,8 @@
         },
         "service_fee_removed": false,
         "date": "09/02/2026 20:58",
-        "status": "paid",
-        "type": "restaurant",
-        "paid_at": "11/02/2026 15:01",
-        "reception_cashier_id": "SESSION_GUEST_CONSUMPTION_20260211150055_Angelo",
-        "payment_details": [
-            {
-                "method": "creditolinkdepagamento",
-                "amount": 92.39
-            }
-        ]
+        "status": "pending",
+        "type": "restaurant"
     },
     {
         "id": "CHARGE_47_20260209212050_436ad3_REST",
@@ -33652,12 +33697,8 @@
         },
         "service_fee_removed": false,
         "date": "09/02/2026 21:20",
-        "status": "paid",
-        "type": "restaurant",
-        "paid_at": "11/02/2026 14:08",
-        "closed_by": "Angelo",
-        "payment_method": "creditoangelo",
-        "notes": " [Baixa Total por Angelo em 11/02/2026 14:08]"
+        "status": "pending",
+        "type": "restaurant"
     },
     {
         "id": "CHARGE_42_20260209212212_20b178_REST",
@@ -33980,8 +34021,7 @@
         "flags": [],
         "date": "10/02/2026 10:22",
         "status": "pending",
-        "type": "minibar",
-        "source": "minibar"
+        "type": "minibar"
     },
     {
         "id": "CHARGE_GOV_12_20260210105638_93fc74",
@@ -34108,8 +34148,7 @@
         "service_fee_removed": false,
         "date": "10/02/2026 13:56",
         "status": "pending",
-        "type": "restaurant",
-        "source": "restaurant"
+        "type": "restaurant"
     },
     {
         "id": "CHARGE_GOV_35_20260210135734_687df1",
@@ -34140,9 +34179,12 @@
         "discount": 0,
         "flags": [],
         "date": "10/02/2026 13:57",
-        "status": "pending",
+        "status": "paid",
         "type": "minibar",
-        "source": "minibar"
+        "paid_at": "11/02/2026 22:09",
+        "closed_by": "bruno",
+        "payment_method": "debitoangelo",
+        "notes": " [Baixa Total por bruno em 11/02/2026 22:09]"
     },
     {
         "id": "CHARGE_76_20260210135911_aa56b9_REST",
@@ -34268,8 +34310,7 @@
         "service_fee_removed": false,
         "date": "10/02/2026 13:59",
         "status": "pending",
-        "type": "restaurant",
-        "source": "restaurant"
+        "type": "restaurant"
     },
     {
         "id": "CHARGE_GOV_34_20260210141251_c2db3d",
@@ -34292,8 +34333,7 @@
         "flags": [],
         "date": "10/02/2026 14:12",
         "status": "pending",
-        "type": "minibar",
-        "source": "minibar"
+        "type": "minibar"
     },
     {
         "id": "CHARGE_GOV_32_20260210143613_c7d21e",
@@ -34351,18 +34391,14 @@
         "discount": 0,
         "flags": [],
         "date": "10/02/2026 14:56",
-        "status": "paid",
-        "type": "minibar",
-        "paid_at": "11/02/2026 14:08",
-        "closed_by": "Angelo",
-        "payment_method": "creditoangelo",
-        "notes": " [Baixa Total por Angelo em 11/02/2026 14:08]"
+        "status": "pending",
+        "type": "minibar"
     },
     {
         "id": "CHARGE_GOV_17_20260210152732_8fb0e5",
         "room_number": "17",
         "table_id": "GOV",
-        "total": 51.260000000000005,
+        "total": 26.700000000000003,
         "items": [
             {
                 "id": "48",
@@ -34372,39 +34408,14 @@
                 "category": "Frigobar",
                 "added_at": "15:27:32",
                 "added_by": "jaqueline"
-            },
-            {
-                "id": "18f864a6-83b3-42f3-a692-110187e4fb6d",
-                "name": "Acai",
-                "qty": 1.0,
-                "price": 19.9,
-                "category": "Sobremesas",
-                "source": "reception_edit",
-                "added_at": "11/02/2026 15:02",
-                "added_by": "Angelo"
             }
         ],
-        "service_fee": 4.66,
+        "service_fee": 0,
         "discount": 0,
         "flags": [],
         "date": "10/02/2026 15:27",
-        "status": "paid",
-        "type": "minibar",
-        "audit_log": [
-            {
-                "timestamp": "11/02/2026 15:02:09",
-                "user": "Angelo",
-                "changes": [
-                    "Item Adicionado: Acai (x1.0)",
-                    "Recálculo Total: 26.70 -> 51.26"
-                ],
-                "justification": "teste"
-            }
-        ],
-        "source": "minibar",
-        "paid_at": "11/02/2026 15:31",
-        "reception_cashier_id": "SESSION_GUEST_CONSUMPTION_20260211153029_Angelo",
-        "payment_method": "debitoangelo"
+        "status": "pending",
+        "type": "minibar"
     },
     {
         "id": "CHARGE_50_20260210153729_aa2e5a_REST",
@@ -34518,24 +34529,8 @@
         },
         "service_fee_removed": false,
         "date": "10/02/2026 15:37",
-        "status": "paid",
-        "type": "restaurant",
-        "source": "restaurant",
-        "paid_at": "12/02/2026 00:50",
-        "reception_cashier_id": "SESSION_GUEST_CONSUMPTION_20260212005012_Angelo",
-        "payment_method": "Múltiplos",
-        "payment_details": [
-            {
-                "method_id": "pixemailalmareia",
-                "method_name": "PIX Email Almareia",
-                "amount": 100.0
-            },
-            {
-                "method_id": "pixemailalmareia",
-                "method_name": "PIX Email Almareia",
-                "amount": 53.34
-            }
-        ]
+        "status": "pending",
+        "type": "restaurant"
     },
     {
         "id": "CHARGE_58_20260210154044_586d2c_REST",
@@ -35100,9 +35095,12 @@
         },
         "service_fee_removed": false,
         "date": "10/02/2026 15:50",
-        "status": "pending",
+        "status": "paid",
         "type": "restaurant",
-        "source": "restaurant"
+        "paid_at": "11/02/2026 22:09",
+        "closed_by": "bruno",
+        "payment_method": "debitoangelo",
+        "notes": " [Baixa Total por bruno em 11/02/2026 22:09]"
     },
     {
         "id": "CHARGE_43_20260210180218_569b34_REST",
@@ -35196,12 +35194,8 @@
         },
         "service_fee_removed": false,
         "date": "10/02/2026 18:02",
-        "status": "paid",
-        "type": "restaurant",
-        "source": "restaurant",
-        "paid_at": "11/02/2026 15:31",
-        "reception_cashier_id": "SESSION_GUEST_CONSUMPTION_20260211153029_Angelo",
-        "payment_method": "dinheiro"
+        "status": "pending",
+        "type": "restaurant"
     },
     {
         "id": "CHARGE_50_20260210180230_3b0ac7_REST",
@@ -35243,8 +35237,7 @@
         "service_fee_removed": false,
         "date": "10/02/2026 18:02",
         "status": "pending",
-        "type": "restaurant",
-        "source": "restaurant"
+        "type": "restaurant"
     },
     {
         "id": "CHARGE_47_20260210182211_1eb08a_REST",
@@ -35308,12 +35301,8 @@
         },
         "service_fee_removed": false,
         "date": "10/02/2026 18:22",
-        "status": "paid",
-        "type": "restaurant",
-        "paid_at": "11/02/2026 14:08",
-        "closed_by": "Angelo",
-        "payment_method": "creditoangelo",
-        "notes": " [Baixa Total por Angelo em 11/02/2026 14:08]"
+        "status": "pending",
+        "type": "restaurant"
     },
     {
         "id": "CHARGE_49_20260210210957_07cadb_REST",
@@ -35356,12 +35345,8 @@
         },
         "service_fee_removed": false,
         "date": "10/02/2026 21:09",
-        "status": "paid",
-        "type": "restaurant",
-        "source": "restaurant",
-        "paid_at": "12/02/2026 00:50",
-        "reception_cashier_id": "SESSION_GUEST_CONSUMPTION_20260212005012_Angelo",
-        "payment_method": "pixemailalmareia"
+        "status": "pending",
+        "type": "restaurant"
     },
     {
         "id": "CHARGE_82_20260210213212_f20b8e_REST",
@@ -35568,8 +35553,7 @@
         "flags": [],
         "date": "11/02/2026 10:28",
         "status": "pending",
-        "type": "minibar",
-        "source": "minibar"
+        "type": "minibar"
     },
     {
         "id": "CHARGE_GOV_24_20260211105600_14a519",
@@ -35591,12 +35575,8 @@
         "discount": 0,
         "flags": [],
         "date": "11/02/2026 10:56",
-        "status": "paid",
-        "type": "minibar",
-        "source": "minibar",
-        "paid_at": "12/02/2026 00:50",
-        "reception_cashier_id": "SESSION_GUEST_CONSUMPTION_20260212005012_Angelo",
-        "payment_method": "debitoangelo"
+        "status": "pending",
+        "type": "minibar"
     },
     {
         "id": "CHARGE_GOV_31_20260211114516_924a9c",
@@ -35628,15 +35608,91 @@
         "flags": [],
         "date": "11/02/2026 11:45",
         "status": "pending",
-        "type": "minibar",
-        "source": "minibar"
+        "type": "minibar"
     },
     {
-        "id": "0f1998c4-d520-44a6-b692-dcccafec6cac",
+        "id": "CHARGE_GOV_34_20260211122100_5c14dc",
+        "room_number": "34",
+        "table_id": "GOV",
+        "total": 17.8,
+        "items": [
+            {
+                "id": "48",
+                "name": "Agua Sem Gás Pet FRIGOBAR",
+                "price": 8.9,
+                "qty": 2.0,
+                "category": "Frigobar",
+                "added_at": "12:21:00",
+                "added_by": "generina"
+            }
+        ],
+        "service_fee": 0,
+        "discount": 0,
+        "flags": [],
+        "date": "11/02/2026 12:21",
+        "status": "pending",
+        "type": "minibar"
+    },
+    {
+        "id": "CHARGE_GOV_15_20260211123812_389fec",
         "room_number": "15",
-        "date": "11/02/2026",
-        "description": "Restaurante Mesa 60",
-        "total": 228.58000000000004,
+        "table_id": "GOV",
+        "total": 17.8,
+        "items": [
+            {
+                "id": "48",
+                "name": "Agua Sem Gás Pet FRIGOBAR",
+                "price": 8.9,
+                "qty": 2.0,
+                "category": "Frigobar",
+                "added_at": "12:38:12",
+                "added_by": "dina"
+            }
+        ],
+        "service_fee": 0,
+        "discount": 0,
+        "flags": [],
+        "date": "11/02/2026 12:38",
+        "status": "pending",
+        "type": "minibar"
+    },
+    {
+        "id": "CHARGE_GOV_22_20260211124943_c68e04",
+        "room_number": "22",
+        "table_id": "GOV",
+        "total": 18.8,
+        "items": [
+            {
+                "id": "45",
+                "name": "Água com gás LATA FRIGOBAR",
+                "price": 9.9,
+                "qty": 1.0,
+                "category": "Frigobar",
+                "added_at": "12:49:43",
+                "added_by": "generina"
+            },
+            {
+                "id": "48",
+                "name": "Agua Sem Gás Pet FRIGOBAR",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Frigobar",
+                "added_at": "12:49:43",
+                "added_by": "generina"
+            }
+        ],
+        "service_fee": 0,
+        "discount": 0,
+        "flags": [],
+        "date": "11/02/2026 12:49",
+        "status": "pending",
+        "type": "minibar"
+    },
+    {
+        "id": "CHARGE_60_20260211143739_93775c_REST",
+        "room_number": "15",
+        "table_id": "60",
+        "total": 394.55899999999997,
         "items": [
             {
                 "id": "af697cef-85de-45c4-97ca-3da9251a3a78",
@@ -35651,9 +35707,7 @@
                 "questions_answers": [],
                 "observations": [
                     "1 cp",
-                    "Com limão",
-                    "Transf de Mesa 60",
-                    "Estorno de Mesa 59"
+                    "Com limão"
                 ],
                 "category": "Cervejas",
                 "service_fee_exempt": false,
@@ -35673,9 +35727,7 @@
                 "accompaniments": [],
                 "questions_answers": [],
                 "observations": [
-                    "2 Taças",
-                    "Transf de Mesa 60",
-                    "Estorno de Mesa 59"
+                    "2 Taças"
                 ],
                 "category": "Vinhos",
                 "service_fee_exempt": false,
@@ -35684,51 +35736,217 @@
                 "created_at": "11/02/2026 11:58"
             },
             {
-                "id": "26f37721-757d-43a8-b734-79a5636f36cb",
+                "id": "2d91fdfc-11e3-4130-9a42-7d496121f4d9",
                 "printed": true,
                 "print_status": "printed",
-                "name": "Água de Coco",
+                "name": "Corona Long Neck",
                 "flavor": null,
+                "qty": 1.0,
+                "price": 16.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "Com limão"
+                ],
+                "category": "Cervejas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "adailton",
+                "created_at": "11/02/2026 12:25"
+            },
+            {
+                "id": "8f06417c-23fe-4c24-a241-a75023ffd56e",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Casquinha de Aratu",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 49.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Entradas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "adailton",
+                "created_at": "11/02/2026 13:33"
+            },
+            {
+                "id": "49efb86e-d906-4f0b-b914-9769d85ae60b",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Medalhão com risotto de champignon e molho especial (Individual)",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 94.99,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [
+                    {
+                        "question": "Ponto da Carne",
+                        "answer": "Ao ponto para mal"
+                    },
+                    {
+                        "question": "Ponto do Arroz",
+                        "answer": "Al Dente"
+                    }
+                ],
+                "observations": [
+                    "Sem coentro"
+                ],
+                "category": "Pratos",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "adailton",
+                "created_at": "11/02/2026 13:33"
+            }
+        ],
+        "service_fee": 35.869,
+        "discount": 0,
+        "flags": [],
+        "waiter": "henrique",
+        "waiter_breakdown": {
+            "guilherme": 18.589999999999996,
+            "henrique": 198.0,
+            "adailton": 177.969
+        },
+        "service_fee_removed": false,
+        "date": "11/02/2026 14:37",
+        "status": "pending",
+        "type": "restaurant"
+    },
+    {
+        "id": "CHARGE_GOV_21_20260211154321_d3f99e",
+        "room_number": "21",
+        "table_id": "GOV",
+        "total": 17.8,
+        "items": [
+            {
+                "id": "48",
+                "name": "Agua Sem Gás Pet FRIGOBAR",
+                "price": 8.9,
+                "qty": 2.0,
+                "category": "Frigobar",
+                "added_at": "15:43:21",
+                "added_by": "dina"
+            }
+        ],
+        "service_fee": 0,
+        "discount": 0,
+        "flags": [],
+        "date": "11/02/2026 15:43",
+        "status": "pending",
+        "type": "minibar"
+    },
+    {
+        "id": "CHARGE_72_20260211155021_c5de89_REST",
+        "room_number": "34",
+        "table_id": "72",
+        "total": 61.16,
+        "items": [
+            {
+                "id": "e5e3a74a-63ce-4984-b644-ff8212f2e08a",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Suco Copo",
+                "flavor": "Maracujá",
                 "qty": 1.0,
                 "price": 10.9,
                 "complements": [],
                 "accompaniments": [],
                 "questions_answers": [],
                 "observations": [
-                    "Transf de Mesa 59",
-                    "Estorno de Mesa 56",
-                    "Transf de Mesa 59",
-                    "Estorno de Mesa 58",
-                    "Transf de Mesa 60",
-                    "Estorno de Mesa 59"
+                    "Pouco gelo"
                 ],
                 "category": "Sucos e Águas",
                 "service_fee_exempt": false,
                 "source": "restaurant",
-                "waiter": "henrique",
-                "created_at": "11/02/2026 10:53"
+                "waiter": "adailton",
+                "created_at": "11/02/2026 12:24"
+            },
+            {
+                "id": "ef5e5f7b-4a5c-43e0-98ac-96b7302ee663",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Heineken Long Neck",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 16.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "1 cp"
+                ],
+                "category": "Cervejas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "adailton",
+                "created_at": "11/02/2026 12:25"
+            },
+            {
+                "id": "55d4bfe9-d41e-4167-9fef-30c3b67b05a2",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Heineken Long Neck",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 16.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Cervejas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "adailton",
+                "created_at": "11/02/2026 13:14"
+            },
+            {
+                "id": "f3a391ec-8d46-4d9f-802a-f745a0d717c4",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Suco Copo",
+                "flavor": "Caju",
+                "qty": 1.0,
+                "price": 10.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "Com açúcar"
+                ],
+                "category": "Sucos e Águas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "adailton",
+                "created_at": "11/02/2026 13:14"
             }
         ],
-        "source": "restaurant",
-        "status": "paid",
-        "waiter": null,
-        "table_id": "60",
-        "paid_at": "11/02/2026 14:08",
-        "closed_by": "Angelo",
-        "payment_method": "creditoangelo",
-        "notes": " [Baixa Total por Angelo em 11/02/2026 14:08]"
+        "service_fee": 5.56,
+        "discount": 0,
+        "flags": [],
+        "waiter": "adailton",
+        "waiter_breakdown": {
+            "adailton": 61.16
+        },
+        "service_fee_removed": false,
+        "date": "11/02/2026 15:50",
+        "status": "pending",
+        "type": "restaurant"
     },
     {
-        "id": "6c2dd4c1-9ab0-40e3-b52f-5e239ba8a94b",
-        "room_number": "17",
-        "date": "11/02/2026",
-        "description": "Restaurante Mesa 67",
-        "total": 214.28000000000003,
+        "id": "CHARGE_43_20260211163205_dfc6cd_REST",
+        "room_number": "31",
+        "table_id": "43",
+        "total": 82.16999999999999,
         "items": [
             {
-                "id": "29cdf266-de23-444a-bd8a-9653636fabca",
-                "printed": false,
-                "print_status": "error",
+                "id": "4c0cdd19-5011-45a6-8cb6-af1165cb6436",
+                "printed": true,
+                "print_status": "printed",
                 "name": "Batata Frita",
                 "flavor": null,
                 "qty": 1.0,
@@ -35740,156 +35958,1459 @@
                 "category": "Entradas",
                 "service_fee_exempt": false,
                 "source": "restaurant",
-                "waiter": "leo",
-                "created_at": "08/02/2026 13:50"
+                "waiter": "adailton",
+                "created_at": "11/02/2026 15:11"
             },
             {
-                "id": "c4533c9e-fe26-4261-854c-7a3f00051e64",
-                "printed": false,
-                "print_status": "error",
-                "name": "Rolha Bebida Quente",
+                "id": "19be50e8-9158-462f-a1a3-dc36416cb12d",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
                 "flavor": null,
                 "qty": 1.0,
-                "price": 70.0,
+                "price": 16.9,
                 "complements": [],
                 "accompaniments": [],
                 "questions_answers": [],
                 "observations": [],
-                "category": "Bebidas Quentes Garrafas",
+                "category": "Cervejas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "adailton",
+                "created_at": "11/02/2026 15:11"
+            },
+            {
+                "id": "40b65968-a97f-4dd5-9d5b-3b6434d4c27b",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Daiquiri frozen",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 32.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Drinks",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "henrique",
+                "created_at": "11/02/2026 11:25"
+            }
+        ],
+        "service_fee": 7.469999999999999,
+        "discount": 0,
+        "flags": [],
+        "waiter": "adailton",
+        "waiter_breakdown": {
+            "adailton": 45.98,
+            "henrique": 36.19
+        },
+        "service_fee_removed": false,
+        "date": "11/02/2026 16:32",
+        "status": "pending",
+        "type": "restaurant"
+    },
+    {
+        "id": "CHARGE_59_20260211163221_550b5c_REST",
+        "room_number": "17",
+        "table_id": "59",
+        "total": 232.75,
+        "items": [
+            {
+                "id": "26f37721-757d-43a8-b734-79a5636f36cb",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Água de Coco",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 10.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Sucos e Águas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "henrique",
+                "created_at": "11/02/2026 10:53"
+            },
+            {
+                "id": "40cf0fdf-f054-4376-81d1-a5dbae88cbb4",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Suco Jarra",
+                "flavor": "Morango",
+                "qty": 1.0,
+                "price": 21.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "4 cp",
+                    "Sem açúcar sem coar mandar um balde de gelo"
+                ],
+                "category": "Sucos e Águas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "adailton",
+                "created_at": "11/02/2026 12:37"
+            },
+            {
+                "id": "3cab8d19-9a73-44e4-b54d-fda16e60f071",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Água de Coco",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 10.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Sucos e Águas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "adailton",
+                "created_at": "11/02/2026 12:37"
+            },
+            {
+                "id": "29b969ea-a6ba-436c-bbcc-8e345802215e",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Parmegiana de Peixe (Individual)",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 109.9,
+                "complements": [],
+                "accompaniments": [
+                    "Batata Frita",
+                    "Arroz"
+                ],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Pratos",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "adailton",
+                "created_at": "11/02/2026 14:09"
+            },
+            {
+                "id": "07c8245f-10c1-44e3-8522-634b269cdf1f",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Panelinha Nordestina",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 39.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Entradas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "adailton",
+                "created_at": "11/02/2026 14:10"
+            },
+            {
+                "id": "ed5b15f9-a775-45ea-89c3-52d0b028700a",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Acai",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 19.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Sobremesas",
+                "service_fee_exempt": true,
+                "source": "restaurant",
+                "waiter": "henrique",
+                "created_at": "11/02/2026 16:17"
+            }
+        ],
+        "service_fee": 19.35,
+        "discount": 0,
+        "flags": [],
+        "waiter": "adailton",
+        "waiter_breakdown": {
+            "henrique": 33.592783505154635,
+            "adailton": 199.15721649484536
+        },
+        "service_fee_removed": false,
+        "date": "11/02/2026 16:32",
+        "status": "pending",
+        "type": "restaurant"
+    },
+    {
+        "id": "CHARGE_61_20260211201237_0dd1de_REST",
+        "room_number": "35",
+        "table_id": "61",
+        "total": 65.67,
+        "items": [
+            {
+                "id": "7d3f12b6-447d-4a31-a5b9-f24add5ef411",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Cocada de forno da casa",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 32.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "2 colheres"
+                ],
+                "category": "Sobremesas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "edson",
+                "created_at": "11/02/2026 18:39"
+            },
+            {
+                "id": "85030baa-aec7-4e4b-80fd-b05938fa6895",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Caldo (Consultar sabor do dia)",
+                "flavor": "Nordestino (Caldo)",
+                "qty": 1.0,
+                "price": 15.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Entradas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "edson",
+                "created_at": "11/02/2026 18:39"
+            },
+            {
+                "id": "0bb2cc1d-e1f4-4fc3-b6f8-ba6745312c1f",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Água de Coco",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 10.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Sucos e Águas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "edson",
+                "created_at": "11/02/2026 18:39"
+            }
+        ],
+        "service_fee": 5.970000000000001,
+        "discount": 0,
+        "flags": [],
+        "waiter": "edson",
+        "waiter_breakdown": {
+            "edson": 65.67
+        },
+        "service_fee_removed": false,
+        "date": "11/02/2026 20:12",
+        "status": "paid",
+        "type": "restaurant",
+        "paid_at": "11/02/2026 22:09",
+        "closed_by": "bruno",
+        "payment_method": "debitoangelo",
+        "notes": " [Baixa Total por bruno em 11/02/2026 22:09]"
+    },
+    {
+        "id": "CHARGE_50_20260211201344_f6f693_REST",
+        "room_number": "22",
+        "table_id": "50",
+        "total": 459.58000000000004,
+        "items": [
+            {
+                "id": "c04c2171-d45d-47bc-ab08-6b847538d4b5",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Espumante Chandon Reserve Brut",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 180.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "2 Taças"
+                ],
+                "category": "Vinhos",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "henrique",
+                "created_at": "11/02/2026 11:17"
+            },
+            {
+                "id": "70225cf6-f639-4853-8327-9adbc42a3ca5",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Caipirinha de Pitú",
+                "flavor": "Limão",
+                "qty": 1.0,
+                "price": 28.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Drinks",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "henrique",
+                "created_at": "11/02/2026 13:28"
+            },
+            {
+                "id": "840f6e20-2fe6-4dd1-865b-e2f2ab1e32b9",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Espumante Chandon Reserve Brut",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 180.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "Não Imprimir"
+                ],
+                "category": "Vinhos",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "dudu",
+                "created_at": "11/02/2026 17:22"
+            },
+            {
+                "id": "4a1e75b2-1a4d-49b9-bd6c-a8cde96c5092",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Caipirinha de Pitú",
+                "flavor": "Limão",
+                "qty": 1.0,
+                "price": 28.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "Não Imprimir"
+                ],
+                "category": "Drinks",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "dudu",
+                "created_at": "11/02/2026 17:22"
+            }
+        ],
+        "service_fee": 41.78,
+        "discount": 0,
+        "flags": [],
+        "waiter": "henrique",
+        "waiter_breakdown": {
+            "henrique": 229.79000000000008,
+            "dudu": 229.79000000000008
+        },
+        "service_fee_removed": false,
+        "date": "11/02/2026 20:13",
+        "status": "pending",
+        "type": "restaurant"
+    },
+    {
+        "id": "CHARGE_51_20260211202226_4277dc_REST",
+        "room_number": "21",
+        "table_id": "51",
+        "total": 253.76999999999998,
+        "items": [
+            {
+                "id": "d3375de4-02b6-4a28-8cbe-3945a69a045f",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 16.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Cervejas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "adailton",
+                "created_at": "11/02/2026 13:11"
+            },
+            {
+                "id": "b633ca36-c7a9-4b17-967f-7a84c9b3c09c",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 16.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Cervejas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "henrique",
+                "created_at": "11/02/2026 15:25"
+            },
+            {
+                "id": "18aa353f-86fd-46e6-90e0-9bb9008cb0fc",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 16.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Cervejas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "guilherme",
+                "created_at": "11/02/2026 16:20"
+            },
+            {
+                "id": "e1c3cd07-eb62-4961-b324-b740ba50328c",
+                "printed": true,
+                "print_status": "skipped",
+                "name": "Espumante Chandon Reserve Rosé",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 180.0,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "Não Imprimir"
+                ],
+                "category": "Vinhos",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "dudu",
+                "created_at": "11/02/2026 17:23"
+            }
+        ],
+        "service_fee": 23.07,
+        "discount": 0,
+        "flags": [],
+        "waiter": "dudu",
+        "waiter_breakdown": {
+            "adailton": 18.59,
+            "henrique": 18.59,
+            "guilherme": 18.59,
+            "dudu": 198.0
+        },
+        "service_fee_removed": false,
+        "date": "11/02/2026 20:22",
+        "status": "pending",
+        "type": "restaurant"
+    },
+    {
+        "id": "CHARGE_83_20260211202239_0f57e5_REST",
+        "room_number": "24",
+        "table_id": "83",
+        "total": 754.1600000000001,
+        "items": [
+            {
+                "id": "35e5cb5e-1d54-4ddc-af6e-bdce3aa4d36e",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Caipirinha de Pitú",
+                "flavor": "Limão",
+                "qty": 2.0,
+                "price": 28.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Drinks",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "henrique",
+                "created_at": "11/02/2026 10:40"
+            },
+            {
+                "id": "a88a3cf3-2b54-4e6e-8169-06085ba05462",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Caipirinha de Pitú",
+                "flavor": "Limão",
+                "qty": 1.0,
+                "price": 28.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Drinks",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "henrique",
+                "created_at": "11/02/2026 11:52"
+            },
+            {
+                "id": "4a6589f3-046e-4357-aa6a-9f0629c1f933",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Heineken Long Neck",
+                "flavor": null,
+                "qty": 2.0,
+                "price": 16.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Cervejas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "adailton",
+                "created_at": "11/02/2026 12:32"
+            },
+            {
+                "id": "2f7e2825-070e-42b1-b0cc-20b3552cb043",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
+                "flavor": null,
+                "qty": 2.0,
+                "price": 16.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Cervejas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "henrique",
+                "created_at": "11/02/2026 13:29"
+            },
+            {
+                "id": "cd22c47b-1b6e-49c6-a385-2ddd5d2f8f2f",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Batata Frita",
+                "flavor": null,
+                "qty": 2.0,
+                "price": 24.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Entradas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "henrique",
+                "created_at": "11/02/2026 14:05"
+            },
+            {
+                "id": "11270026-48da-4c77-bcb5-64219e92c77f",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
+                "flavor": null,
+                "qty": 2.0,
+                "price": 16.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Cervejas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "henrique",
+                "created_at": "11/02/2026 14:05"
+            },
+            {
+                "id": "04b903c6-1aa5-4694-8d41-7142452655fd",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 16.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Cervejas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "welington",
+                "created_at": "11/02/2026 14:28"
+            },
+            {
+                "id": "41965231-42d6-41de-ace4-840780a7c96d",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
+                "flavor": null,
+                "qty": 2.0,
+                "price": 16.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Cervejas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "welington",
+                "created_at": "11/02/2026 14:46"
+            },
+            {
+                "id": "f5dea981-f948-481d-b062-8c295b4eb65b",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Macaxeira Frita",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 24.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Entradas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "adailton",
+                "created_at": "11/02/2026 15:01"
+            },
+            {
+                "id": "43f9f7c9-61b8-4492-a18d-c8f0391a2128",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Camarão na manteiga de alho",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 89.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Entradas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "adailton",
+                "created_at": "11/02/2026 15:01"
+            },
+            {
+                "id": "daf3ff9a-24fd-4aee-9863-8bedc87811e1",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Isca de peixe empanado (Gurjões de peixe)",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 89.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [
+                    {
+                        "question": "Crocância",
+                        "answer": "Normal"
+                    }
+                ],
+                "observations": [],
+                "category": "Entradas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "adailton",
+                "created_at": "11/02/2026 15:01"
+            },
+            {
+                "id": "077c8c51-bea2-495f-8c2d-927a9cb74049",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
+                "flavor": null,
+                "qty": 2.0,
+                "price": 16.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Cervejas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "guilherme",
+                "created_at": "11/02/2026 15:18"
+            },
+            {
+                "id": "ee0af7ba-6114-40e7-ab5b-c05f9596c85b",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Agua sem Gás 275ml",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 9.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "Gelo"
+                    }
+                ],
+                "observations": [
+                    "2 cp"
+                ],
+                "category": "Sucos e Águas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "henrique",
+                "created_at": "11/02/2026 15:24"
+            },
+            {
+                "id": "9dde510b-d224-4464-9e5f-5ad2106bfcb0",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Isca de peixe empanado (Gurjões de peixe)",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 89.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [
+                    {
+                        "question": "Crocância",
+                        "answer": "Bem Crocante"
+                    }
+                ],
+                "observations": [],
+                "category": "Entradas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "henrique",
+                "created_at": "11/02/2026 15:24"
+            },
+            {
+                "id": "20cb8416-ce9f-4fc5-9a9d-9164c6a17f35",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Macaxeira Frita",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 24.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Entradas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "henrique",
+                "created_at": "11/02/2026 15:24"
+            },
+            {
+                "id": "b0ca038d-5321-4072-b85f-fe260d46d95a",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
+                "flavor": null,
+                "qty": 2.0,
+                "price": 16.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Cervejas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "guilherme",
+                "created_at": "11/02/2026 16:20"
+            }
+        ],
+        "service_fee": 68.56,
+        "discount": 0,
+        "flags": [],
+        "waiter": "henrique",
+        "waiter_breakdown": {
+            "henrique": 361.6800000000001,
+            "adailton": 262.35000000000014,
+            "welington": 55.77000000000002,
+            "guilherme": 74.36000000000003
+        },
+        "service_fee_removed": false,
+        "date": "11/02/2026 20:22",
+        "status": "pending",
+        "type": "restaurant"
+    },
+    {
+        "id": "CHARGE_46_20260211204523_7f2ab9_REST",
+        "room_number": "26",
+        "table_id": "46",
+        "total": 10.89,
+        "items": [
+            {
+                "id": "294c4f2d-4739-498e-902f-a3914aba2cc8",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Agua sem Gás 275ml",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 9.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "Gelo"
+                    }
+                ],
+                "observations": [
+                    "1 cp"
+                ],
+                "category": "Sucos e Águas",
                 "service_fee_exempt": false,
                 "source": "restaurant",
                 "waiter": "leo",
-                "created_at": "08/02/2026 13:50"
-            },
+                "created_at": "11/02/2026 20:22"
+            }
+        ],
+        "service_fee": 0.9900000000000001,
+        "discount": 0,
+        "flags": [],
+        "waiter": "leo",
+        "waiter_breakdown": {
+            "leo": 10.89
+        },
+        "service_fee_removed": false,
+        "date": "11/02/2026 20:45",
+        "status": "pending",
+        "type": "restaurant"
+    },
+    {
+        "id": "CHARGE_45_20260211213306_cfd74b_REST",
+        "room_number": "17",
+        "table_id": "45",
+        "total": 9.790000000000001,
+        "items": [
             {
-                "id": "5a9db3c6-b364-4dc0-8a2c-a1dc9df84660",
+                "id": "f5a55672-cf1a-4fb8-9af7-ae91c3852e27",
                 "printed": true,
                 "print_status": "printed",
-                "name": "Peixe na farofa de Castanha (Individual)",
+                "name": "Café Capuccino",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 8.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [
+                    {
+                        "question": "Tipo",
+                        "answer": "Classic"
+                    }
+                ],
+                "observations": [],
+                "category": "Sucos e Águas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "leo",
+                "created_at": "11/02/2026 20:51"
+            }
+        ],
+        "service_fee": 0.8900000000000001,
+        "discount": 0,
+        "flags": [],
+        "waiter": "leo",
+        "waiter_breakdown": {
+            "leo": 9.790000000000001
+        },
+        "service_fee_removed": false,
+        "date": "11/02/2026 21:33",
+        "status": "pending",
+        "type": "restaurant"
+    },
+    {
+        "id": "CHARGE_57_20260211215623_b825a0_REST",
+        "room_number": "35",
+        "table_id": "57",
+        "total": 62.260000000000005,
+        "items": [
+            {
+                "id": "cabad48a-4a65-4b26-8ed6-0fb4b3f7a151",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Caldo (Consultar sabor do dia)",
+                "flavor": "Peixe (Caldo)",
+                "qty": 1.0,
+                "price": 15.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Entradas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "henrique",
+                "created_at": "11/02/2026 13:41"
+            },
+            {
+                "id": "24375fe0-2bc6-4996-8a82-722e6c42212a",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Caldo (Consultar sabor do dia)",
+                "flavor": "Feijão (Caldo)",
+                "qty": 1.0,
+                "price": 15.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Entradas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "henrique",
+                "created_at": "11/02/2026 13:43"
+            },
+            {
+                "id": "a321b4e8-1f64-44a5-aa7f-d88e447057f1",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Caldo (Consultar sabor do dia)",
+                "flavor": "Feijão (Caldo)",
+                "qty": 1.0,
+                "price": 15.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Entradas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "adailton",
+                "created_at": "11/02/2026 13:49"
+            },
+            {
+                "id": "6f404227-3107-44a5-a5ed-cb1e22d7a411",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Coca Cola Zero 350ml",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 8.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "Gelo e Limão"
+                    }
+                ],
+                "observations": [
+                    "1 cp"
+                ],
+                "category": "Refrigerante",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "adailton",
+                "created_at": "11/02/2026 13:55"
+            }
+        ],
+        "service_fee": 5.66,
+        "discount": 0,
+        "flags": [],
+        "waiter": "henrique",
+        "waiter_breakdown": {
+            "henrique": 34.980000000000004,
+            "adailton": 27.28
+        },
+        "service_fee_removed": false,
+        "date": "11/02/2026 21:56",
+        "status": "paid",
+        "type": "restaurant",
+        "paid_at": "11/02/2026 22:09",
+        "closed_by": "bruno",
+        "payment_method": "debitoangelo",
+        "notes": " [Baixa Total por bruno em 11/02/2026 22:09]"
+    },
+    {
+        "id": "CHARGE_55_20260211220844_541658_REST",
+        "room_number": "22",
+        "table_id": "55",
+        "total": 315.7,
+        "items": [
+            {
+                "id": "52d176d1-7982-4510-9f27-a2e81f6a96fc",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Café Capuccino",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 8.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [
+                    {
+                        "question": "Tipo",
+                        "answer": "Classic"
+                    }
+                ],
+                "observations": [],
+                "category": "Sucos e Águas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "welington",
+                "created_at": "11/02/2026 20:09"
+            },
+            {
+                "id": "eead9893-a925-4493-88ab-a8fcff181d7b",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Coca Cola Zero 350ml",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 8.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "Gelo e Limão"
+                    }
+                ],
+                "observations": [
+                    "1 cp"
+                ],
+                "category": "Refrigerante",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "welington",
+                "created_at": "11/02/2026 20:09"
+            },
+            {
+                "id": "2fe28c39-a32c-48e8-b0b0-a644448df649",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Peixada Pernambucana  (Individual)",
                 "flavor": null,
                 "qty": 1.0,
                 "price": 99.9,
                 "complements": [],
                 "accompaniments": [],
                 "questions_answers": [],
-                "observations": [
-                    "Com arroz branco"
-                ],
+                "observations": [],
                 "category": "Pratos",
                 "service_fee_exempt": false,
                 "source": "restaurant",
-                "waiter": "leo",
-                "created_at": "08/02/2026 14:21"
-            }
-        ],
-        "source": "restaurant",
-        "status": "paid",
-        "waiter": "leo",
-        "table_id": "67",
-        "paid_at": "11/02/2026 15:44",
-        "reception_cashier_id": "SESSION_GUEST_CONSUMPTION_20260211154307_Angelo",
-        "payment_method": "dinheiro"
-    },
-    {
-        "id": "CHARGE_GOV_11_20260212004710_6027b6",
-        "room_number": "11",
-        "table_id": "GOV",
-        "total": 91.8,
-        "items": [
-            {
-                "id": "45",
-                "name": "Água com gás LATA FRIGOBAR",
-                "price": 9.9,
-                "qty": 2.0,
-                "category": "Frigobar",
-                "added_at": "00:47:10",
-                "added_by": "Angelo"
+                "waiter": "welington",
+                "created_at": "11/02/2026 20:51"
             },
             {
-                "id": "49",
-                "name": "Bolsinha Personalizada (Cortesia Hospedes)",
-                "price": 1.0,
-                "qty": 2.0,
-                "category": "Frigobar",
-                "added_at": "00:47:10",
-                "added_by": "Angelo"
+                "id": "e29fdd5d-b1e4-4ee3-9824-d1d1a328e7de",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Moqueca de Camarão (Individual)",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 89.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Pratos",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "welington",
+                "created_at": "11/02/2026 20:51"
             },
             {
-                "id": "51",
-                "name": "Chapeu (Cortesia Hospedes)",
-                "price": 35.0,
-                "qty": 2.0,
-                "category": "Frigobar",
-                "added_at": "00:47:10",
-                "added_by": "Angelo"
-            }
-        ],
-        "service_fee": 0,
-        "discount": 0,
-        "flags": [],
-        "date": "12/02/2026 00:47",
-        "status": "paid",
-        "type": "minibar",
-        "source": "minibar",
-        "paid_at": "12/02/2026 00:50",
-        "reception_cashier_id": "SESSION_GUEST_CONSUMPTION_20260212005012_Angelo",
-        "payment_method": "creditoangelo"
-    },
-    {
-        "id": "CHARGE_GOV_21_20260212010248_0a4044",
-        "room_number": "21",
-        "table_id": "GOV",
-        "total": 23.98,
-        "items": [
-            {
-                "id": "45",
-                "name": "Água com gás LATA FRIGOBAR",
-                "price": 9.9,
-                "qty": 2.0,
-                "category": "Frigobar",
-                "added_at": "01:02:48",
-                "added_by": "Angelo"
-            },
-            {
-                "id": "49",
-                "name": "Bolsinha Personalizada (Cortesia Hospedes)",
-                "price": 1.0,
-                "qty": 2.0,
-                "category": "Frigobar",
-                "added_at": "01:02:48",
-                "added_by": "Angelo"
-            }
-        ],
-        "service_fee": 2.18,
-        "discount": 0,
-        "flags": [],
-        "date": "12/02/2026 01:02",
-        "status": "pending",
-        "type": "minibar",
-        "removed_items": [
-            {
-                "id": "48",
-                "name": "Agua Sem Gás Pet FRIGOBAR",
-                "price": 8.9,
-                "qty": 2.0,
-                "category": "Frigobar",
-                "added_at": "01:02:48",
-                "added_by": "Angelo",
-                "removed_at": "2026-02-12 01:04:47",
-                "removed_by": "Angelo",
-                "removal_justification": "teste"
-            }
-        ],
-        "audit_log": [
-            {
-                "timestamp": "12/02/2026 01:04:47",
-                "user": "Angelo",
-                "changes": [
-                    "Item Removido: Agua Sem Gás Pet FRIGOBAR (x2.0) - Justificativa: teste",
-                    "Recálculo Total: 39.60 -> 23.98"
+                "id": "f5567106-265d-49fe-ac1b-1414eeff8ab5",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Caldos 11/02",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 15.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [
+                    {
+                        "question": "Opção do dia",
+                        "answer": "Feijão"
+                    }
                 ],
-                "justification": "teste"
+                "observations": [],
+                "category": "Entradas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "welington",
+                "created_at": "11/02/2026 21:00"
+            },
+            {
+                "id": "2149ac3f-a6f9-41c2-9831-71d3b5f9604f",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Caldos 11/02",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 15.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [
+                    {
+                        "question": "Opção do dia",
+                        "answer": "Nordestino"
+                    }
+                ],
+                "observations": [],
+                "category": "Entradas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "welington",
+                "created_at": "11/02/2026 21:00"
+            },
+            {
+                "id": "d6d872df-6794-4d9a-a256-ead5af5e144f",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Coca Cola Zero 350ml",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 8.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "1"
+                    }
+                ],
+                "observations": [
+                    "Sem gelo",
+                    "1 cp",
+                    "Já foi"
+                ],
+                "category": "Refrigerante",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "welington",
+                "created_at": "11/02/2026 21:05"
+            },
+            {
+                "id": "465e4ffd-1864-41d0-8661-1d76bbec29e4",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Coca Cola Zero 350ml",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 8.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "1"
+                    }
+                ],
+                "observations": [
+                    "1 cp"
+                ],
+                "category": "Refrigerante",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "welington",
+                "created_at": "11/02/2026 21:27"
+            },
+            {
+                "id": "a59bd74e-d0b6-488e-a3bf-7f89b3e8c7dc",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Arroz",
+                "flavor": null,
+                "qty": 2.0,
+                "price": 14.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Porções",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "welington",
+                "created_at": "11/02/2026 21:30"
             }
-        ]
+        ],
+        "service_fee": 28.700000000000003,
+        "discount": 0,
+        "flags": [],
+        "waiter": "welington",
+        "waiter_breakdown": {
+            "welington": 315.7
+        },
+        "service_fee_removed": false,
+        "date": "11/02/2026 22:08",
+        "status": "pending",
+        "type": "restaurant"
+    },
+    {
+        "id": "CHARGE_56_20260211220855_56dc4d_REST",
+        "room_number": "21",
+        "table_id": "56",
+        "total": 175.34,
+        "items": [
+            {
+                "id": "690d8df4-b7e6-40ba-a3fb-0fd444c295db",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Agua com Gás 275ml",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 9.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "Gelo"
+                    }
+                ],
+                "observations": [
+                    "1 cp",
+                    "Sumo de limão à parte"
+                ],
+                "category": "Sucos e Águas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "welington",
+                "created_at": "11/02/2026 20:22"
+            },
+            {
+                "id": "e61992a3-da76-490c-acdc-97b25fcff073",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 16.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "Stella"
+                ],
+                "category": "Cervejas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "leo",
+                "created_at": "11/02/2026 20:36"
+            },
+            {
+                "id": "04428f8a-4280-4e30-aa2f-276834a39033",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 16.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Cervejas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "leo",
+                "created_at": "11/02/2026 20:36"
+            },
+            {
+                "id": "e590f4a3-8a93-41db-8589-87d1bd7e8174",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Moqueca de Camarão (Individual)",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 89.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Pratos",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "welington",
+                "created_at": "11/02/2026 20:48"
+            },
+            {
+                "id": "a34947e8-f767-4664-824a-969b773951ed",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Arroz",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 14.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Porções",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "welington",
+                "created_at": "11/02/2026 21:26"
+            },
+            {
+                "id": "55317c9f-be23-4d01-a3b5-02786ec49c2a",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Suco copo 11/02",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 10.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [
+                    "abacaxi"
+                ],
+                "category": "Sucos e Águas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "Angelo",
+                "created_at": "11/02/2026 21:33"
+            }
+        ],
+        "service_fee": 15.940000000000001,
+        "discount": 0,
+        "flags": [],
+        "waiter": "welington",
+        "waiter_breakdown": {
+            "welington": 126.17000000000002,
+            "leo": 37.18,
+            "Angelo": 11.99
+        },
+        "service_fee_removed": false,
+        "date": "11/02/2026 22:08",
+        "status": "pending",
+        "type": "restaurant"
+    },
+    {
+        "id": "CHARGE_54_20260211220905_c0243d_REST",
+        "room_number": "24",
+        "table_id": "54",
+        "total": 346.61,
+        "items": [
+            {
+                "id": "515e629a-3686-4b74-9334-e28a81a8a6e6",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
+                "flavor": null,
+                "qty": 2.0,
+                "price": 16.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Cervejas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "welington",
+                "created_at": "11/02/2026 20:21"
+            },
+            {
+                "id": "eab70f7e-e917-4da8-b5ff-b4353165db22",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Terra e Mar: Do Mar ao Sertão(Individual)",
+                "flavor": null,
+                "qty": 2.0,
+                "price": 99.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Pratos",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "welington",
+                "created_at": "11/02/2026 20:49"
+            },
+            {
+                "id": "c30a6257-e096-401f-9f3c-471fca92bd71",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Caldos 11/02",
+                "flavor": null,
+                "qty": 1.0,
+                "price": 15.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [
+                    {
+                        "question": "Opção do dia",
+                        "answer": "Feijão"
+                    }
+                ],
+                "observations": [],
+                "category": "Entradas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "welington",
+                "created_at": "11/02/2026 21:01"
+            },
+            {
+                "id": "cd92fd67-b8c4-4e3c-8a3b-fc67eb75b851",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Caldos 11/02",
+                "flavor": null,
+                "qty": 2.0,
+                "price": 15.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [
+                    {
+                        "question": "Opção do dia",
+                        "answer": "Nordestino"
+                    }
+                ],
+                "observations": [],
+                "category": "Entradas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "welington",
+                "created_at": "11/02/2026 21:01"
+            },
+            {
+                "id": "13b2d671-e0de-40a8-a552-94d1da11e7c1",
+                "printed": true,
+                "print_status": "printed",
+                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
+                "flavor": null,
+                "qty": 2.0,
+                "price": 16.9,
+                "complements": [],
+                "accompaniments": [],
+                "questions_answers": [],
+                "observations": [],
+                "category": "Cervejas",
+                "service_fee_exempt": false,
+                "source": "restaurant",
+                "waiter": "welington",
+                "created_at": "11/02/2026 21:26"
+            }
+        ],
+        "service_fee": 31.510000000000005,
+        "discount": 0,
+        "flags": [],
+        "waiter": "welington",
+        "waiter_breakdown": {
+            "welington": 346.61
+        },
+        "service_fee_removed": false,
+        "date": "11/02/2026 22:09",
+        "status": "pending",
+        "type": "restaurant"
     }
 ]

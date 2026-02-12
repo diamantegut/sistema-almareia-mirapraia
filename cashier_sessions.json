@@ -4196,45 +4196,41 @@
                 }
             },
             {
-                "id": "TRANS_20260211140113_IN",
-                "document_id": "20260211140113",
-                "type": "in",
-                "category": "Transferência Recebida",
-                "amount": 100.0,
-                "description": "Transferência de restaurant: teste",
-                "payment_method": "Transferência",
-                "timestamp": "11/02/2026 14:01",
-                "time": "14:01",
-                "user": "Angelo"
-            },
-            {
-                "id": "TRANS_20260211140124_IN",
-                "document_id": "20260211140124",
-                "type": "in",
-                "category": "Transferência Recebida",
-                "amount": 100.0,
-                "description": "Transferência de restaurant: teste",
-                "payment_method": "Transferência",
-                "timestamp": "11/02/2026 14:01",
-                "time": "14:01",
-                "user": "Angelo"
+                "id": "TX_20260211220946_37b28b",
+                "type": "sale",
+                "amount": 946.2799999999999,
+                "description": "Fechamento Conta Quarto 35 - Dyexon Oliveira e Cristiane Gomes",
+                "payment_method": "Debito Angelo",
+                "timestamp": "11/02/2026 22:09",
+                "user": "bruno",
+                "details": {
+                    "room_number": "35",
+                    "guest_name": "Dyexon Oliveira e Cristiane Gomes",
+                    "category": "Baixa de Conta",
+                    "waiter_breakdown": {
+                        "erique": 447.4800000000002,
+                        "adailton": 325.27,
+                        "henrique": 52.470000000000006,
+                        "edson": 76.56
+                    }
+                }
             }
         ],
         "status": "closed",
-        "closed_at": "11/02/2026 14:04",
-        "closing_balance": 100.0,
-        "difference": -100.0,
-        "closed_by": "Angelo"
+        "closed_at": "11/02/2026 22:23",
+        "closing_balance": 2318.08,
+        "difference": 0.0,
+        "closed_by": "bruno"
     },
     {
         "id": "CASHIER_REST_20260211084229_guilherme",
         "user": "guilherme",
         "type": "restaurant_service",
-        "status": "open",
+        "status": "closed",
         "opened_at": "11/02/2026 08:42",
-        "closed_at": null,
+        "closed_at": "11/02/2026 22:12",
         "opening_balance": 827.0,
-        "closing_balance": 0.0,
+        "closing_balance": 3257.16,
         "transactions": [
             {
                 "id": "TRANS_20260211084341",
@@ -4253,1483 +4249,128 @@
                 "timestamp": "11/02/2026 10:57"
             },
             {
-                "id": "TX_20260211122426_83ebc8",
+                "id": "TX_20260211133851_65c0dd",
                 "type": "sale",
-                "amount": 95.37,
-                "description": "Pagamento Parcial Mesa 74",
-                "payment_method": "Credito MIrapraia Pagseguro",
-                "timestamp": "11/02/2026 12:24",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211122448_053f3b",
-                "type": "out",
-                "amount": 95.37,
-                "description": "ESTORNO Pagto Parcial Mesa 74",
-                "payment_method": "Credito MIrapraia Pagseguro",
-                "timestamp": "11/02/2026 12:24",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211122457_97f6bc",
-                "type": "sale",
-                "amount": 95.37,
-                "description": "Pagamento Parcial Mesa 74",
-                "payment_method": "PIX Maquininha CNPJ",
-                "timestamp": "11/02/2026 12:24",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211122501_43386d",
-                "type": "out",
-                "amount": 95.37,
-                "description": "ESTORNO Pagto Parcial Mesa 74",
-                "payment_method": "PIX Maquininha CNPJ",
-                "timestamp": "11/02/2026 12:25",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211131755_56ce66",
-                "type": "sale",
-                "amount": 100.0,
-                "description": "Pagamento Parcial Mesa 50",
-                "payment_method": "Dinheiro",
-                "timestamp": "11/02/2026 13:17",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211131810_e5766a",
-                "type": "sale",
-                "amount": 98.0,
-                "description": "Pagamento Parcial Mesa 50",
-                "payment_method": "Credito MIrapraia Pagseguro",
-                "timestamp": "11/02/2026 13:18",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211133052_501853",
-                "type": "sale",
-                "amount": 98.0,
-                "description": "Pagamento Parcial Mesa 50",
-                "payment_method": "Credito MIrapraia Pagseguro",
-                "timestamp": "11/02/2026 13:30",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211133108_520e66",
-                "type": "out",
-                "amount": 100.0,
-                "description": "ESTORNO Pagto Parcial Mesa 50",
-                "payment_method": "Dinheiro",
-                "timestamp": "11/02/2026 13:31",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211133111_6df5b4",
-                "type": "out",
-                "amount": 98.0,
-                "description": "ESTORNO Pagto Parcial Mesa 50",
-                "payment_method": "Credito MIrapraia Pagseguro",
-                "timestamp": "11/02/2026 13:31",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211133113_5f0067",
-                "type": "out",
-                "amount": 98.0,
-                "description": "ESTORNO Pagto Parcial Mesa 50",
-                "payment_method": "Credito MIrapraia Pagseguro",
-                "timestamp": "11/02/2026 13:31",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211140011_56ed11",
-                "type": "sale",
-                "amount": 198.0,
-                "description": "Venda Mesa 50 - ",
-                "payment_method": "",
-                "timestamp": "11/02/2026 14:00",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211140055_63468a",
-                "type": "out",
-                "amount": 100.0,
-                "description": "teste",
-                "payment_method": "dinheiro",
-                "timestamp": "11/02/2026 14:00",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211140103_6a6380",
-                "type": "in",
-                "amount": 300.0,
-                "description": "teste",
-                "payment_method": "dinheiro",
-                "timestamp": "11/02/2026 14:01",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TRANS_20260211140113_OUT",
-                "document_id": "20260211140113",
-                "type": "out",
-                "category": "Transferência Enviada",
-                "amount": 100.0,
-                "description": "Transferência para reception: teste",
-                "payment_method": "Transferência",
-                "timestamp": "11/02/2026 14:01",
-                "time": "14:01",
-                "user": "Angelo"
-            },
-            {
-                "id": "TRANS_20260211140124_OUT",
-                "document_id": "20260211140124",
-                "type": "out",
-                "category": "Transferência Enviada",
-                "amount": 100.0,
-                "description": "Transferência para reception: teste",
-                "payment_method": "Transferência",
-                "timestamp": "11/02/2026 14:01",
-                "time": "14:01",
-                "user": "Angelo"
-            },
-            {
-                "id": "TRANS_20260211140551_IN",
-                "document_id": "20260211140551",
-                "type": "in",
-                "category": "Transferência Recebida",
-                "amount": 250.0,
-                "description": "Transferência de guest_consumption: teste",
-                "payment_method": "Transferência",
-                "timestamp": "11/02/2026 14:05",
-                "time": "14:05",
-                "user": "Angelo"
-            },
-            {
-                "id": "TRANS_20260211140609_OUT",
-                "document_id": "20260211140609",
-                "type": "out",
-                "category": "Transferência Enviada",
-                "amount": 110.0,
-                "description": "Transferência para reception: teste",
-                "payment_method": "Transferência",
-                "timestamp": "11/02/2026 14:06",
-                "time": "14:06",
-                "user": "Angelo"
-            },
-            {
-                "id": "TRANS_20260211151914_IN",
-                "document_id": "20260211151914",
-                "type": "in",
-                "category": "Transferência Recebida",
-                "amount": 100.0,
-                "description": "Transferência de guest_consumption: teste",
-                "payment_method": "Transferência",
-                "timestamp": "11/02/2026 15:19",
-                "time": "15:19",
-                "user": "Angelo"
-            },
-            {
-                "id": "TRANS_20260211153102_IN",
-                "document_id": "20260211153102",
-                "type": "in",
-                "category": "Transferência Recebida",
-                "amount": 100.0,
-                "description": "Transferência de guest_consumption: teste",
-                "payment_method": "Transferência",
-                "timestamp": "11/02/2026 15:31",
-                "time": "15:31",
-                "user": "Angelo"
-            },
-            {
-                "id": "TX_20260211154649_16d8cc",
-                "type": "sale",
-                "amount": 100.0,
-                "description": "Venda Mesa 55 - ",
-                "payment_method": "",
-                "timestamp": "11/02/2026 15:46",
-                "user": "Angelo",
+                "amount": 271.26,
+                "description": "Venda Mesa 57 (Debito Mirapraia Pagseguro)",
+                "payment_method": "Debito Mirapraia Pagseguro",
+                "timestamp": "11/02/2026 13:38",
+                "user": "guilherme",
                 "details": {
-                    "payment_group_id": "5abf3012-f6ba-47f3-8c3c-97ec1e92832b",
-                    "total_payment_group_amount": 406.01,
-                    "payment_method_code": ""
-                }
-            },
-            {
-                "id": "TX_20260211154649_7bcdc9",
-                "type": "sale",
-                "amount": 2.5,
-                "description": "Venda Mesa 55 - ",
-                "payment_method": "",
-                "timestamp": "11/02/2026 15:46",
-                "user": "Angelo",
-                "details": {
-                    "payment_group_id": "5abf3012-f6ba-47f3-8c3c-97ec1e92832b",
-                    "total_payment_group_amount": 406.01,
-                    "payment_method_code": ""
-                }
-            },
-            {
-                "id": "TX_20260211154649_329f23",
-                "type": "sale",
-                "amount": 303.51,
-                "description": "Venda Mesa 55 - ",
-                "payment_method": "",
-                "timestamp": "11/02/2026 15:46",
-                "user": "Angelo",
-                "details": {
-                    "payment_group_id": "5abf3012-f6ba-47f3-8c3c-97ec1e92832b",
-                    "total_payment_group_amount": 406.01,
-                    "payment_method_code": ""
-                }
-            },
-            {
-                "id": "TX_20260211215602_ebab19",
-                "type": "sale",
-                "amount": 15.900000000000002,
-                "description": "Venda Mesa 40 - ",
-                "payment_method": "",
-                "timestamp": "11/02/2026 21:56",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211215616_a68d28",
-                "type": "sale",
-                "amount": 17.49,
-                "description": "Venda Mesa 47 - ",
-                "payment_method": "",
-                "timestamp": "11/02/2026 21:56",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211224907_8b6632",
-                "type": "sale",
-                "amount": 92.95,
-                "description": "Venda Mesa 40 - ",
-                "payment_method": "",
-                "timestamp": "11/02/2026 22:49",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211224908_a18a1e",
-                "type": "sale",
-                "amount": 92.95,
-                "description": "Venda Mesa 40 - ",
-                "payment_method": "",
-                "timestamp": "11/02/2026 22:49",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211224911_753c2a",
-                "type": "sale",
-                "amount": 92.95,
-                "description": "Venda Mesa 40 - ",
-                "payment_method": "",
-                "timestamp": "11/02/2026 22:49",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211224911_21f352",
-                "type": "sale",
-                "amount": 92.95,
-                "description": "Venda Mesa 40 - ",
-                "payment_method": "",
-                "timestamp": "11/02/2026 22:49",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211224912_c11b84",
-                "type": "sale",
-                "amount": 92.95,
-                "description": "Venda Mesa 40 - ",
-                "payment_method": "",
-                "timestamp": "11/02/2026 22:49",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211224917_81d2ee",
-                "type": "sale",
-                "amount": 92.95,
-                "description": "Venda Mesa 40 - ",
-                "payment_method": "",
-                "timestamp": "11/02/2026 22:49",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211224918_ab18ea",
-                "type": "sale",
-                "amount": 92.95,
-                "description": "Venda Mesa 40 - ",
-                "payment_method": "",
-                "timestamp": "11/02/2026 22:49",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211224919_b259f7",
-                "type": "sale",
-                "amount": 92.95,
-                "description": "Venda Mesa 40 - ",
-                "payment_method": "",
-                "timestamp": "11/02/2026 22:49",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211224945_aa05de",
-                "type": "sale",
-                "amount": 92.95,
-                "description": "Venda Mesa 40 - ",
-                "payment_method": "",
-                "timestamp": "11/02/2026 22:49",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211224945_ff31ab",
-                "type": "sale",
-                "amount": 92.95,
-                "description": "Venda Mesa 40 - ",
-                "payment_method": "",
-                "timestamp": "11/02/2026 22:49",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211224946_33a550",
-                "type": "sale",
-                "amount": 92.95,
-                "description": "Venda Mesa 40 - ",
-                "payment_method": "",
-                "timestamp": "11/02/2026 22:49",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211232730_98e850",
-                "type": "sale",
-                "amount": 36.08,
-                "description": "Venda Mesa 59 - PIX Maquininha CNPJ",
-                "payment_method": "PIX Maquininha CNPJ",
-                "timestamp": "11/02/2026 23:27",
-                "user": "Angelo",
-                "details": {}
-            }
-        ]
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260211140457_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "11/02/2026 14:04",
-        "opening_balance": 100.0,
-        "transactions": [],
-        "status": "closed",
-        "closed_at": "11/02/2026 14:05",
-        "closing_balance": 100.0,
-        "difference": 0.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260211140523_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "11/02/2026 14:05",
-        "opening_balance": 0.0,
-        "transactions": [
-            {
-                "id": "TX_20260211140535_838787",
-                "type": "in",
-                "amount": 1500.0,
-                "description": "teste",
-                "payment_method": "Dinheiro",
-                "timestamp": "11/02/2026 14:05",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211140541_6d3f02",
-                "type": "out",
-                "amount": 250.0,
-                "description": "teste",
-                "payment_method": "Dinheiro",
-                "timestamp": "11/02/2026 14:05",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TRANS_20260211140551_OUT",
-                "document_id": "20260211140551",
-                "type": "out",
-                "category": "Transferência Enviada",
-                "amount": 250.0,
-                "description": "Transferência para restaurant_service: teste",
-                "payment_method": "Transferência",
-                "timestamp": "11/02/2026 14:05",
-                "time": "14:05",
-                "user": "Angelo"
-            },
-            {
-                "id": "TRANS_20260211140609_IN",
-                "document_id": "20260211140609",
-                "type": "in",
-                "category": "Transferência Recebida",
-                "amount": 110.0,
-                "description": "Transferência de restaurant: teste",
-                "payment_method": "Transferência",
-                "timestamp": "11/02/2026 14:06",
-                "time": "14:06",
-                "user": "Angelo"
-            },
-            {
-                "id": "TX_20260211140812_97c5e4",
-                "type": "sale",
-                "amount": 1065.368,
-                "description": "Fechamento Conta Quarto 15 - Rodrigo Escudeiro e Catalina Javiera",
-                "payment_method": "Credito Angelo",
-                "timestamp": "11/02/2026 14:08",
-                "user": "Angelo",
-                "details": {
-                    "room_number": "15",
-                    "guest_name": "Rodrigo Escudeiro e Catalina Javiera",
-                    "category": "Baixa de Conta",
+                    "table_id": "57",
+                    "emit_invoice": false,
+                    "staff_name": null,
                     "waiter_breakdown": {
-                        "henrique": 347.27000000000004,
-                        "erique": 174.66899999999998,
-                        "welington": 156.96,
-                        "filipe": 104.489
+                        "adailton": 271.26
+                    }
+                }
+            },
+            {
+                "id": "TX_20260211142857_800083",
+                "type": "sale",
+                "amount": 481.58,
+                "description": "Venda Mesa 55 (Credito MIrapraia Pagseguro)",
+                "payment_method": "Credito MIrapraia Pagseguro",
+                "timestamp": "11/02/2026 14:28",
+                "user": "dudu",
+                "details": {
+                    "table_id": "55",
+                    "emit_invoice": false,
+                    "staff_name": null,
+                    "waiter_breakdown": {
+                        "adailton": 481.58
+                    }
+                }
+            },
+            {
+                "id": "TX_20260211145711_dac155",
+                "type": "sale",
+                "amount": 295.45,
+                "description": "Venda Mesa 42 (Credito MIrapraia Pagseguro)",
+                "payment_method": "Credito MIrapraia Pagseguro",
+                "timestamp": "11/02/2026 14:57",
+                "user": "dudu",
+                "details": {
+                    "table_id": "42",
+                    "emit_invoice": false,
+                    "staff_name": null,
+                    "waiter_breakdown": {
+                        "adailton": 276.85993707881903,
+                        "welington": 18.590062921180984
+                    }
+                }
+            },
+            {
+                "id": "TX_20260211151417_efca39",
+                "type": "sale",
+                "amount": 180.94,
+                "description": "Venda Mesa 89 (Credito MIrapraia Pagseguro)",
+                "payment_method": "Credito MIrapraia Pagseguro",
+                "timestamp": "11/02/2026 15:14",
+                "user": "dudu",
+                "details": {
+                    "table_id": "89",
+                    "emit_invoice": false,
+                    "staff_name": null,
+                    "waiter_breakdown": {
+                        "guilherme": 180.94
+                    }
+                }
+            },
+            {
+                "id": "TX_20260211155518_68feee",
+                "type": "sale",
+                "amount": 638.76,
+                "description": "Venda Mesa 54 (Debito Mirapraia Pagseguro)",
+                "payment_method": "Debito Mirapraia Pagseguro",
+                "timestamp": "11/02/2026 15:55",
+                "user": "guilherme",
+                "details": {
+                    "table_id": "54",
+                    "emit_invoice": false,
+                    "staff_name": null,
+                    "waiter_breakdown": {
+                        "adailton": 98.14424034334766,
+                        "leo": 464.18387639484996,
+                        "welington": 18.532264377682406,
+                        "henrique": 57.89961888412018
+                    }
+                }
+            },
+            {
+                "id": "TX_20260211161325_9a5a50",
+                "type": "sale",
+                "amount": 255.86,
+                "description": "Venda Mesa 58 (Credito MIrapraia Pagseguro)",
+                "payment_method": "Credito MIrapraia Pagseguro",
+                "timestamp": "11/02/2026 16:13",
+                "user": "guilherme",
+                "details": {
+                    "table_id": "58",
+                    "emit_invoice": false,
+                    "staff_name": null,
+                    "waiter_breakdown": {
+                        "henrique": 255.86
+                    }
+                }
+            },
+            {
+                "id": "TX_20260211220455_636c55",
+                "type": "sale",
+                "amount": 329.56,
+                "description": "Venda Mesa 58 (Credito MIrapraia Pagseguro)",
+                "payment_method": "Credito MIrapraia Pagseguro",
+                "timestamp": "11/02/2026 22:04",
+                "user": "Angelo",
+                "details": {
+                    "table_id": "58",
+                    "emit_invoice": false,
+                    "staff_name": null,
+                    "waiter_breakdown": {
+                        "guilherme": 329.56
                     }
                 }
             }
-        ],
-        "status": "closed",
-        "closed_at": "11/02/2026 14:13",
-        "closing_balance": 100.0,
-        "difference": -1010.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_RECEPTION_RESERVATIONS_20260211140700_Angelo",
-        "user": "Angelo",
-        "type": "reception_reservations",
-        "entity": "Hotel Almareia",
-        "opened_at": "11/02/2026 14:07",
-        "opening_balance": 0.0,
-        "transactions": [
-            {
-                "id": "TX_20260211140712_b919aa",
-                "type": "deposit",
-                "amount": 150.0,
-                "description": "teste",
-                "payment_method": "Dinheiro",
-                "timestamp": "11/02/2026 14:07",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211140721_3d7b69",
-                "type": "withdrawal",
-                "amount": 40.0,
-                "description": "teste",
-                "payment_method": "Dinheiro",
-                "timestamp": "11/02/2026 14:07",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TRANS_20260211151914_OUT",
-                "document_id": "20260211151914",
-                "type": "out",
-                "category": "Transferência Enviada",
-                "amount": 100.0,
-                "description": "Transferência para restaurant_service: teste",
-                "payment_method": "Transferência",
-                "timestamp": "11/02/2026 15:19",
-                "time": "15:19",
-                "user": "Angelo"
-            }
-        ],
-        "status": "open",
-        "closed_at": null,
-        "closing_balance": null,
-        "difference": null
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260211142113_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "11/02/2026 14:21",
-        "opening_balance": 100.0,
-        "transactions": [],
-        "status": "closed",
-        "closed_at": "11/02/2026 14:21",
-        "closing_balance": 100.0,
-        "difference": 0.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260211142608_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "11/02/2026 14:26",
-        "opening_balance": 100.0,
-        "transactions": [],
-        "status": "closed",
-        "closed_at": "11/02/2026 14:26",
-        "closing_balance": 100.0,
-        "difference": 0.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260211142808_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "11/02/2026 14:28",
-        "opening_balance": 100.0,
-        "transactions": [],
-        "status": "closed",
-        "closed_at": "11/02/2026 14:28",
-        "closing_balance": 100.0,
-        "difference": 0.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260211142935_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "11/02/2026 14:29",
-        "opening_balance": 100.0,
-        "transactions": [],
-        "status": "closed",
-        "closed_at": "11/02/2026 14:29",
-        "closing_balance": 100.0,
-        "difference": 0.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260211143948_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "11/02/2026 14:39",
-        "opening_balance": 100.0,
-        "transactions": [],
-        "status": "closed",
-        "closed_at": "11/02/2026 14:39",
-        "closing_balance": 100.0,
-        "difference": 0.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260211144908_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "11/02/2026 14:49",
-        "opening_balance": 100.0,
-        "transactions": [],
-        "status": "closed",
-        "closed_at": "11/02/2026 14:49",
-        "closing_balance": 100.0,
-        "difference": 0.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260211145116_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "11/02/2026 14:51",
-        "opening_balance": 100.0,
-        "transactions": [],
-        "status": "closed",
-        "closed_at": "11/02/2026 14:51",
-        "closing_balance": 100.0,
-        "difference": 0.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260211145214_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "11/02/2026 14:52",
-        "opening_balance": 100.0,
-        "transactions": [],
-        "status": "closed",
-        "closed_at": "11/02/2026 14:52",
-        "closing_balance": 100.0,
-        "difference": 0.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260211145501_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "11/02/2026 14:55",
-        "opening_balance": 0.0,
-        "transactions": [],
-        "status": "closed",
-        "closed_at": "11/02/2026 14:59",
-        "closing_balance": 100.0,
-        "difference": 100.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260211150055_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "11/02/2026 15:00",
-        "opening_balance": 0.0,
-        "transactions": [
-            {
-                "id": "PAY_20260211150116_2887",
-                "type": "in",
-                "category": "Pagamento Item",
-                "description": "Pagamento Item Quarto 17 (Credito Almareia Rede)",
-                "amount": 409.75,
-                "payment_method": "Credito Almareia Rede",
-                "timestamp": "11/02/2026 15:01",
-                "user": "Angelo",
-                "related_charge_id": "CHARGE_73_20260209191817_c6ad78_REST"
-            },
-            {
-                "id": "PAY_20260211150128_6555",
-                "type": "in",
-                "category": "Pagamento Item",
-                "description": "Pagamento Item Quarto 17 (Credito Link de Pagamento)",
-                "amount": 92.39,
-                "payment_method": "Credito Link de Pagamento",
-                "timestamp": "11/02/2026 15:01",
-                "user": "Angelo",
-                "related_charge_id": "CHARGE_50_20260209205841_889dba_REST"
-            },
-            {
-                "id": "TX_20260211150706_60db35",
-                "type": "out",
-                "amount": 100.0,
-                "description": "teste",
-                "payment_method": "Dinheiro",
-                "timestamp": "11/02/2026 15:07",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211150736_2e3084",
-                "type": "out",
-                "amount": 402.0,
-                "description": "teste",
-                "payment_method": "Dinheiro",
-                "timestamp": "11/02/2026 15:07",
-                "user": "Angelo",
-                "details": {}
-            }
-        ],
-        "status": "closed",
-        "closed_at": "11/02/2026 15:11",
-        "closing_balance": 100.0,
-        "difference": 602.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260211151845_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "11/02/2026 15:18",
-        "opening_balance": 0.0,
-        "transactions": [
-            {
-                "id": "TX_20260211151857_dee2fe",
-                "type": "in",
-                "amount": 100.0,
-                "description": "teste",
-                "payment_method": "Dinheiro",
-                "timestamp": "11/02/2026 15:18",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211151906_b30afb",
-                "type": "out",
-                "amount": 100.0,
-                "description": "teste",
-                "payment_method": "Dinheiro",
-                "timestamp": "11/02/2026 15:19",
-                "user": "Angelo",
-                "details": {}
-            }
-        ],
-        "status": "closed",
-        "closed_at": "11/02/2026 15:24",
-        "closing_balance": 100.0,
-        "difference": 100.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260211153029_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "11/02/2026 15:30",
-        "opening_balance": 0.0,
-        "transactions": [
-            {
-                "id": "TX_20260211153041_d0c0e8",
-                "type": "in",
-                "amount": 150.0,
-                "description": "teste",
-                "payment_method": "Dinheiro",
-                "timestamp": "11/02/2026 15:30",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TRANS_20260211153102_OUT",
-                "document_id": "20260211153102",
-                "type": "out",
-                "category": "Transferência Enviada",
-                "amount": 100.0,
-                "description": "Transferência para restaurant_service: teste",
-                "payment_method": "Transferência",
-                "timestamp": "11/02/2026 15:31",
-                "time": "15:31",
-                "user": "Angelo"
-            },
-            {
-                "id": "TRANS_20260211153126_24255",
-                "type": "in",
-                "category": "Pagamento de Conta",
-                "description": "Pagamento Quarto 17 (Dinheiro)",
-                "amount": 242.55,
-                "payment_method": "Dinheiro",
-                "emit_invoice": false,
-                "timestamp": "11/02/2026 15:31",
-                "time": "15:31",
-                "waiter": "edson",
-                "waiter_breakdown": {
-                    "henrique": 23.979999999999997,
-                    "edson": 193.38,
-                    "welington": 25.189999999999998
-                },
-                "service_fee_removed": false,
-                "related_charge_id": "CHARGE_43_20260210180218_569b34_REST"
-            },
-            {
-                "id": "TRANS_20260211153144_5126",
-                "type": "in",
-                "category": "Pagamento de Conta",
-                "description": "Pagamento Quarto 17 (Debito Angelo)",
-                "amount": 51.26,
-                "payment_method": "Debito Angelo",
-                "emit_invoice": false,
-                "timestamp": "11/02/2026 15:31",
-                "time": "15:31",
-                "waiter": null,
-                "waiter_breakdown": null,
-                "service_fee_removed": false,
-                "related_charge_id": "CHARGE_GOV_17_20260210152732_8fb0e5"
-            }
-        ],
-        "status": "closed",
-        "closed_at": "11/02/2026 15:36",
-        "closing_balance": 100.0,
-        "difference": -192.55,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260211153849_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "11/02/2026 15:38",
-        "opening_balance": 100.0,
-        "transactions": [],
-        "status": "closed",
-        "closed_at": "11/02/2026 15:38",
-        "closing_balance": 100.0,
-        "difference": 0.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260211153957_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "11/02/2026 15:39",
-        "opening_balance": 100.0,
-        "transactions": [],
-        "status": "closed",
-        "closed_at": "11/02/2026 15:40",
-        "closing_balance": 100.0,
-        "difference": 0.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260211154307_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "11/02/2026 15:43",
-        "opening_balance": 0.0,
-        "transactions": [
-            {
-                "id": "TRANS_20260211154436_21428",
-                "type": "in",
-                "category": "Pagamento de Conta",
-                "description": "Pagamento Quarto 17 (Dinheiro)",
-                "amount": 214.28,
-                "payment_method": "Dinheiro",
-                "emit_invoice": false,
-                "timestamp": "11/02/2026 15:44",
-                "time": "15:44",
-                "waiter": "leo",
-                "waiter_breakdown": null,
-                "service_fee_removed": false,
-                "related_charge_id": "6c2dd4c1-9ab0-40e3-b52f-5e239ba8a94b",
-                "details": {}
-            }
-        ],
-        "status": "closed",
-        "closed_at": "11/02/2026 16:15",
-        "closing_balance": 100.0,
-        "difference": -114.28,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260211161939_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "11/02/2026 16:19",
-        "opening_balance": 0.0,
-        "transactions": [],
-        "status": "closed",
-        "closed_at": "11/02/2026 16:19",
-        "closing_balance": 100.0,
-        "difference": 100.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260211162239_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "11/02/2026 16:22",
-        "opening_balance": 0.0,
-        "transactions": [],
-        "status": "closed",
-        "closed_at": "11/02/2026 16:23",
-        "closing_balance": 100.0,
-        "difference": 100.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260211162756_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "11/02/2026 16:27",
-        "opening_balance": 100.0,
-        "transactions": [],
-        "status": "closed",
-        "closed_at": "11/02/2026 16:28",
-        "closing_balance": 100.0,
-        "difference": 0.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260211162951_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "11/02/2026 16:29",
-        "opening_balance": 100.0,
-        "transactions": [],
-        "status": "closed",
-        "closed_at": "11/02/2026 16:29",
-        "closing_balance": 100.0,
-        "difference": 0.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260211163138_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "11/02/2026 16:31",
-        "opening_balance": 100.0,
-        "transactions": [],
-        "status": "closed",
-        "closed_at": "11/02/2026 16:31",
-        "closing_balance": 100.0,
-        "difference": 0.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260211163315_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "11/02/2026 16:33",
-        "opening_balance": 100.0,
-        "transactions": [],
-        "status": "closed",
-        "closed_at": "11/02/2026 16:33",
-        "closing_balance": 100.0,
-        "difference": 0.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260211163523_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "11/02/2026 16:35",
-        "opening_balance": 0.0,
-        "transactions": [],
-        "status": "closed",
-        "closed_at": "11/02/2026 16:40",
-        "closing_balance": 100.0,
-        "difference": 100.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260211164138_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "11/02/2026 16:41",
-        "opening_balance": 100.0,
-        "transactions": [],
-        "status": "closed",
-        "closed_at": "11/02/2026 16:41",
-        "closing_balance": 100.0,
-        "difference": 0.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260211164414_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "11/02/2026 16:44",
-        "opening_balance": 100.0,
-        "transactions": [],
-        "status": "closed",
-        "closed_at": "11/02/2026 16:44",
-        "closing_balance": 100.0,
-        "difference": 0.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260211165611_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "11/02/2026 16:56",
-        "opening_balance": 100.0,
-        "transactions": [],
-        "status": "closed",
-        "closed_at": "11/02/2026 16:56",
-        "closing_balance": 100.0,
-        "difference": 0.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260211165717_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "11/02/2026 16:57",
-        "opening_balance": 100.0,
-        "transactions": [],
-        "status": "closed",
-        "closed_at": "11/02/2026 16:57",
-        "closing_balance": 100.0,
-        "difference": 0.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260211165823_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "11/02/2026 16:58",
-        "opening_balance": 100.0,
-        "transactions": [],
-        "status": "closed",
-        "closed_at": "11/02/2026 16:58",
-        "closing_balance": 100.0,
-        "difference": 0.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260211170100_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "11/02/2026 17:01",
-        "opening_balance": 100.0,
-        "transactions": [],
-        "status": "closed",
-        "closed_at": "11/02/2026 17:01",
-        "closing_balance": 100.0,
-        "difference": 0.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260211170923_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "11/02/2026 17:09",
-        "opening_balance": 100.0,
-        "transactions": [],
-        "status": "closed",
-        "closed_at": "11/02/2026 17:09",
-        "closing_balance": 100.0,
-        "difference": 0.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260211171509_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "11/02/2026 17:15",
-        "opening_balance": 100.0,
-        "transactions": [],
-        "status": "closed",
-        "closed_at": "11/02/2026 17:15",
-        "closing_balance": 100.0,
-        "difference": 0.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260211171920_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "11/02/2026 17:19",
-        "opening_balance": 100.0,
-        "transactions": [],
-        "status": "closed",
-        "closed_at": "11/02/2026 17:19",
-        "closing_balance": 100.0,
-        "difference": 0.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260211172244_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "11/02/2026 17:22",
-        "opening_balance": 100.0,
-        "transactions": [],
-        "status": "closed",
-        "closed_at": "11/02/2026 17:22",
-        "closing_balance": 100.0,
-        "difference": 0.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260211173754_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "11/02/2026 17:37",
-        "opening_balance": 0.0,
-        "transactions": [
-            {
-                "id": "TRANS_20260211181442_15",
-                "type": "in",
-                "category": "Pagamento de Conta",
-                "description": "Pagamento Quarto 26 (Dinheiro)",
-                "amount": 0.15,
-                "payment_method": "Dinheiro",
-                "emit_invoice": false,
-                "timestamp": "11/02/2026 18:14",
-                "time": "18:14",
-                "waiter": "welington",
-                "waiter_breakdown": {
-                    "welington": 31.79
-                },
-                "service_fee_removed": false,
-                "related_charge_id": "CHARGE_81_20260206192453_64ec0d_REST",
-                "details": {
-                    "payment_group_id": "7f161d48-f62a-496c-a7ad-5c30918108e9",
-                    "total_payment_group_amount": 31.79,
-                    "payment_method_code": "Dinheiro"
-                }
-            },
-            {
-                "id": "TRANS_20260211181442_3164",
-                "type": "in",
-                "category": "Pagamento de Conta",
-                "description": "Pagamento Quarto 26 (PIX Email Almareia)",
-                "amount": 31.64,
-                "payment_method": "PIX Email Almareia",
-                "emit_invoice": false,
-                "timestamp": "11/02/2026 18:14",
-                "time": "18:14",
-                "waiter": "welington",
-                "waiter_breakdown": {
-                    "welington": 31.79
-                },
-                "service_fee_removed": false,
-                "related_charge_id": "CHARGE_81_20260206192453_64ec0d_REST",
-                "details": {
-                    "payment_group_id": "7f161d48-f62a-496c-a7ad-5c30918108e9",
-                    "total_payment_group_amount": 31.79,
-                    "payment_method_code": "PIX Email Almareia"
-                }
-            },
-            {
-                "id": "TX_20260211181509_194408",
-                "type": "in",
-                "amount": 250.0,
-                "description": "teste",
-                "payment_method": "Dinheiro",
-                "timestamp": "11/02/2026 18:15",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211181511_f0aea1",
-                "type": "in",
-                "amount": 250.0,
-                "description": "teste",
-                "payment_method": "Dinheiro",
-                "timestamp": "11/02/2026 18:15",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211181512_07c4b8",
-                "type": "in",
-                "amount": 250.0,
-                "description": "teste",
-                "payment_method": "Dinheiro",
-                "timestamp": "11/02/2026 18:15",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211181512_a798ba",
-                "type": "in",
-                "amount": 250.0,
-                "description": "teste",
-                "payment_method": "Dinheiro",
-                "timestamp": "11/02/2026 18:15",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211181512_adaa49",
-                "type": "in",
-                "amount": 250.0,
-                "description": "teste",
-                "payment_method": "Dinheiro",
-                "timestamp": "11/02/2026 18:15",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211181512_970eaa",
-                "type": "in",
-                "amount": 250.0,
-                "description": "teste",
-                "payment_method": "Dinheiro",
-                "timestamp": "11/02/2026 18:15",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211181513_a8b353",
-                "type": "in",
-                "amount": 250.0,
-                "description": "teste",
-                "payment_method": "Dinheiro",
-                "timestamp": "11/02/2026 18:15",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211181514_7b1cb5",
-                "type": "in",
-                "amount": 250.0,
-                "description": "teste",
-                "payment_method": "Dinheiro",
-                "timestamp": "11/02/2026 18:15",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211181514_ed95e9",
-                "type": "in",
-                "amount": 250.0,
-                "description": "teste",
-                "payment_method": "Dinheiro",
-                "timestamp": "11/02/2026 18:15",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211182146_145cb5",
-                "type": "in",
-                "amount": 250.0,
-                "description": "teste",
-                "payment_method": "Dinheiro",
-                "timestamp": "11/02/2026 18:21",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211182147_f53076",
-                "type": "in",
-                "amount": 250.0,
-                "description": "teste",
-                "payment_method": "Dinheiro",
-                "timestamp": "11/02/2026 18:21",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211182147_fbbe65",
-                "type": "in",
-                "amount": 250.0,
-                "description": "teste",
-                "payment_method": "Dinheiro",
-                "timestamp": "11/02/2026 18:21",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211182147_d82bae",
-                "type": "in",
-                "amount": 250.0,
-                "description": "teste",
-                "payment_method": "Dinheiro",
-                "timestamp": "11/02/2026 18:21",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211183250_ae9830",
-                "type": "in",
-                "amount": 1.5,
-                "description": "teste",
-                "payment_method": "Dinheiro",
-                "timestamp": "11/02/2026 18:32",
-                "user": "Angelo",
-                "details": {}
-            },
-            {
-                "id": "TX_20260211184904_239243",
-                "type": "in",
-                "amount": 1.0,
-                "description": "teste",
-                "payment_method": "Dinheiro",
-                "timestamp": "11/02/2026 18:49",
-                "user": "Angelo",
-                "details": {}
-            }
-        ],
-        "status": "closed",
-        "closed_at": "12/02/2026 00:50",
-        "closing_balance": 3284.29,
-        "difference": 31.639999999999873,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260212005012_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "12/02/2026 00:50",
-        "opening_balance": 0.0,
-        "transactions": [
-            {
-                "id": "TRANS_20260212005019_978",
-                "type": "in",
-                "category": "Pagamento de Conta",
-                "description": "Pagamento Quarto 17 (PIX Email Almareia)",
-                "amount": 9.79,
-                "payment_method": "PIX Email Almareia",
-                "emit_invoice": false,
-                "timestamp": "12/02/2026 00:50",
-                "time": "00:50",
-                "waiter": "filipe",
-                "waiter_breakdown": {
-                    "filipe": 9.790000000000001
-                },
-                "service_fee_removed": false,
-                "related_charge_id": "CHARGE_49_20260210210957_07cadb_REST",
-                "details": {}
-            },
-            {
-                "id": "TRANS_20260212005030_9180",
-                "type": "in",
-                "category": "Pagamento de Conta",
-                "description": "Pagamento Quarto 11 (Credito Angelo)",
-                "amount": 91.8,
-                "payment_method": "Credito Angelo",
-                "emit_invoice": false,
-                "timestamp": "12/02/2026 00:50",
-                "time": "00:50",
-                "waiter": null,
-                "waiter_breakdown": null,
-                "service_fee_removed": false,
-                "related_charge_id": "CHARGE_GOV_11_20260212004710_6027b6",
-                "details": {}
-            },
-            {
-                "id": "TRANS_20260212005036_2670",
-                "type": "in",
-                "category": "Pagamento de Conta",
-                "description": "Pagamento Quarto 24 (Debito Angelo)",
-                "amount": 26.7,
-                "payment_method": "Debito Angelo",
-                "emit_invoice": false,
-                "timestamp": "12/02/2026 00:50",
-                "time": "00:50",
-                "waiter": null,
-                "waiter_breakdown": null,
-                "service_fee_removed": false,
-                "related_charge_id": "CHARGE_GOV_24_20260211105600_14a519",
-                "details": {}
-            },
-            {
-                "id": "TRANS_20260212005054_10000",
-                "type": "in",
-                "category": "Pagamento de Conta",
-                "description": "Pagamento Quarto 26 (PIX Email Almareia)",
-                "amount": 100.0,
-                "payment_method": "PIX Email Almareia",
-                "emit_invoice": false,
-                "timestamp": "12/02/2026 00:50",
-                "time": "00:50",
-                "waiter": "edson",
-                "waiter_breakdown": {
-                    "henrique": 23.98,
-                    "edson": 74.46999999999998,
-                    "erique": 54.88999999999999
-                },
-                "service_fee_removed": false,
-                "related_charge_id": "CHARGE_50_20260210153729_aa2e5a_REST",
-                "details": {
-                    "payment_group_id": "365002c2-f77f-46c1-a348-b687d1582033",
-                    "total_payment_group_amount": 153.34,
-                    "payment_method_code": "PIX Email Almareia"
-                }
-            },
-            {
-                "id": "TRANS_20260212005054_5334",
-                "type": "in",
-                "category": "Pagamento de Conta",
-                "description": "Pagamento Quarto 26 (PIX Email Almareia)",
-                "amount": 53.34,
-                "payment_method": "PIX Email Almareia",
-                "emit_invoice": false,
-                "timestamp": "12/02/2026 00:50",
-                "time": "00:50",
-                "waiter": "edson",
-                "waiter_breakdown": {
-                    "henrique": 23.98,
-                    "edson": 74.46999999999998,
-                    "erique": 54.88999999999999
-                },
-                "service_fee_removed": false,
-                "related_charge_id": "CHARGE_50_20260210153729_aa2e5a_REST",
-                "details": {
-                    "payment_group_id": "365002c2-f77f-46c1-a348-b687d1582033",
-                    "total_payment_group_amount": 153.34,
-                    "payment_method_code": "PIX Email Almareia"
-                }
-            },
-            {
-                "id": "TRANS_20260212005957_40000",
-                "type": "in",
-                "category": "Pagamento de Conta",
-                "description": "Pagamento Quarto 26 (Dinheiro)",
-                "amount": 400.0,
-                "payment_method": "Dinheiro",
-                "emit_invoice": false,
-                "timestamp": "12/02/2026 00:59",
-                "time": "00:59",
-                "waiter": "henrique",
-                "waiter_breakdown": {
-                    "henrique": 466.62000000000006,
-                    "erique": 186.78000000000003,
-                    "leo": 228.66800000000003
-                },
-                "service_fee_removed": false,
-                "related_charge_id": "CHARGE_50_20260209191802_81e52e_REST",
-                "details": {
-                    "payment_group_id": "ebd101c4-ed84-482a-b136-8977783cfd88",
-                    "total_payment_group_amount": 882.068,
-                    "payment_method_code": "Dinheiro"
-                }
-            },
-            {
-                "id": "TRANS_20260212005957_48206",
-                "type": "in",
-                "category": "Pagamento de Conta",
-                "description": "Pagamento Quarto 26 (PIX Email Almareia)",
-                "amount": 482.068,
-                "payment_method": "PIX Email Almareia",
-                "emit_invoice": false,
-                "timestamp": "12/02/2026 00:59",
-                "time": "00:59",
-                "waiter": "henrique",
-                "waiter_breakdown": {
-                    "henrique": 466.62000000000006,
-                    "erique": 186.78000000000003,
-                    "leo": 228.66800000000003
-                },
-                "service_fee_removed": false,
-                "related_charge_id": "CHARGE_50_20260209191802_81e52e_REST",
-                "details": {
-                    "payment_group_id": "ebd101c4-ed84-482a-b136-8977783cfd88",
-                    "total_payment_group_amount": 882.068,
-                    "payment_method_code": "PIX Email Almareia"
-                }
-            }
-        ],
-        "status": "open",
-        "closed_at": null,
-        "closing_balance": null,
-        "difference": null
+        ]
     }
 ]
