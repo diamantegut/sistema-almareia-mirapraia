@@ -16,5 +16,418 @@
         "fiscal_doc_uuid": "7b7ed642-e022-409a-8179-0de7185435a5",
         "notes": " | NFSe Emitida com Sucesso",
         "xml_url": "/fiscal/xml/7b7ed642-e022-409a-8179-0de7185435a5.xml"
+    },
+    {
+        "id": "6704b2d6-784f-4758-8ad3-a7ed2b977eec",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "MESA_40_202602121108",
+        "closed_at": "2026-02-12 11:08:23",
+        "closed_by": "dudu",
+        "total_amount": 0.0,
+        "items": [],
+        "payment_methods": [],
+        "customer": {
+            "name": "",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "42cfeb99-b054-4a50-8e18-8b7c0d68f324",
+        "origin": "reception",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "ROOM_22",
+        "closed_at": "2026-02-12 11:16:44",
+        "closed_by": "jose",
+        "total_amount": 811.8799999999999,
+        "items": [
+            {
+                "name": "Água com gás LATA FRIGOBAR",
+                "qty": 1,
+                "unit_price": 9.9,
+                "total": 9.9
+            },
+            {
+                "name": "Agua Sem Gás Pet FRIGOBAR",
+                "qty": 1,
+                "unit_price": 8.9,
+                "total": 8.9
+            },
+            {
+                "name": "Espumante Chandon Reserve Brut",
+                "qty": 1,
+                "unit_price": 180.0,
+                "total": 180.0
+            },
+            {
+                "name": "Caipirinha de Pitú",
+                "qty": 1,
+                "unit_price": 28.9,
+                "total": 28.9
+            },
+            {
+                "name": "Espumante Chandon Reserve Brut",
+                "qty": 1,
+                "unit_price": 180.0,
+                "total": 180.0
+            },
+            {
+                "name": "Caipirinha de Pitú",
+                "qty": 1,
+                "unit_price": 28.9,
+                "total": 28.9
+            },
+            {
+                "name": "Café Capuccino",
+                "qty": 1,
+                "unit_price": 8.9,
+                "total": 8.9
+            },
+            {
+                "name": "Coca Cola Zero 350ml",
+                "qty": 1,
+                "unit_price": 8.9,
+                "total": 8.9
+            },
+            {
+                "name": "Peixada Pernambucana  (Individual)",
+                "qty": 1,
+                "unit_price": 99.9,
+                "total": 99.9
+            },
+            {
+                "name": "Moqueca de Camarão (Individual)",
+                "qty": 1,
+                "unit_price": 89.9,
+                "total": 89.9
+            },
+            {
+                "name": "Caldos 11/02",
+                "qty": 1,
+                "unit_price": 15.9,
+                "total": 15.9
+            },
+            {
+                "name": "Caldos 11/02",
+                "qty": 1,
+                "unit_price": 15.9,
+                "total": 15.9
+            },
+            {
+                "name": "Coca Cola Zero 350ml",
+                "qty": 1,
+                "unit_price": 8.9,
+                "total": 8.9
+            },
+            {
+                "name": "Coca Cola Zero 350ml",
+                "qty": 1,
+                "unit_price": 8.9,
+                "total": 8.9
+            },
+            {
+                "name": "Arroz",
+                "qty": 2,
+                "unit_price": 14.9,
+                "total": 29.8
+            },
+            {
+                "name": "Agua Sem Gás Pet FRIGOBAR",
+                "qty": 1,
+                "unit_price": 8.9,
+                "total": 8.9
+            },
+            {
+                "name": "Agua Com Gás Pet",
+                "qty": 1,
+                "unit_price": 8.9,
+                "total": 8.9
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Credito Angelo",
+                "amount": 811.8799999999999,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "room_number": "22",
+            "guest_name": "FILIPE E SANDRO"
+        },
+        "status": "pending",
+        "notes": null,
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "9686af54-946e-4acb-bd98-6bd960b37ac1",
+        "origin": "reception",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "ROOM_24",
+        "closed_at": "2026-02-12 11:21:38",
+        "closed_by": "jose",
+        "total_amount": 1163.0699999999997,
+        "items": [
+            {
+                "name": "Agua Sem Gás Pet FRIGOBAR",
+                "qty": 3,
+                "unit_price": 8.9,
+                "total": 26.700000000000003
+            },
+            {
+                "name": "Caipirinha de Pitú",
+                "qty": 2,
+                "unit_price": 28.9,
+                "total": 57.8
+            },
+            {
+                "name": "Caipirinha de Pitú",
+                "qty": 1,
+                "unit_price": 28.9,
+                "total": 28.9
+            },
+            {
+                "name": "Heineken Long Neck",
+                "qty": 2,
+                "unit_price": 16.9,
+                "total": 33.8
+            },
+            {
+                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
+                "qty": 2,
+                "unit_price": 16.9,
+                "total": 33.8
+            },
+            {
+                "name": "Batata Frita",
+                "qty": 2,
+                "unit_price": 24.9,
+                "total": 49.8
+            },
+            {
+                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
+                "qty": 2,
+                "unit_price": 16.9,
+                "total": 33.8
+            },
+            {
+                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
+                "qty": 1,
+                "unit_price": 16.9,
+                "total": 16.9
+            },
+            {
+                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
+                "qty": 2,
+                "unit_price": 16.9,
+                "total": 33.8
+            },
+            {
+                "name": "Macaxeira Frita",
+                "qty": 1,
+                "unit_price": 24.9,
+                "total": 24.9
+            },
+            {
+                "name": "Camarão na manteiga de alho",
+                "qty": 1,
+                "unit_price": 89.9,
+                "total": 89.9
+            },
+            {
+                "name": "Isca de peixe empanado (Gurjões de peixe)",
+                "qty": 1,
+                "unit_price": 89.9,
+                "total": 89.9
+            },
+            {
+                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
+                "qty": 2,
+                "unit_price": 16.9,
+                "total": 33.8
+            },
+            {
+                "name": "Agua sem Gás 275ml",
+                "qty": 1,
+                "unit_price": 9.9,
+                "total": 9.9
+            },
+            {
+                "name": "Isca de peixe empanado (Gurjões de peixe)",
+                "qty": 1,
+                "unit_price": 89.9,
+                "total": 89.9
+            },
+            {
+                "name": "Macaxeira Frita",
+                "qty": 1,
+                "unit_price": 24.9,
+                "total": 24.9
+            },
+            {
+                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
+                "qty": 2,
+                "unit_price": 16.9,
+                "total": 33.8
+            },
+            {
+                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
+                "qty": 2,
+                "unit_price": 16.9,
+                "total": 33.8
+            },
+            {
+                "name": "Terra e Mar: Do Mar ao Sertão(Individual)",
+                "qty": 2,
+                "unit_price": 99.9,
+                "total": 199.8
+            },
+            {
+                "name": "Caldos 11/02",
+                "qty": 1,
+                "unit_price": 15.9,
+                "total": 15.9
+            },
+            {
+                "name": "Caldos 11/02",
+                "qty": 2,
+                "unit_price": 15.9,
+                "total": 31.8
+            },
+            {
+                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
+                "qty": 2,
+                "unit_price": 16.9,
+                "total": 33.8
+            },
+            {
+                "name": "Agua Sem Gás Pet FRIGOBAR",
+                "qty": 4,
+                "unit_price": 8.9,
+                "total": 35.6
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Credito Angelo",
+                "amount": 1163.0699999999997,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "room_number": "24",
+            "guest_name": "SAMUEL E MAYKON"
+        },
+        "status": "pending",
+        "notes": null,
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "6040bd40-df71-469d-8af7-22abbe448fe7",
+        "origin": "reception",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "ROOM_21",
+        "closed_at": "2026-02-12 11:47:07",
+        "closed_by": "jose",
+        "total_amount": 482.51,
+        "items": [
+            {
+                "name": "Agua Sem Gás Pet FRIGOBAR",
+                "qty": 2,
+                "unit_price": 8.9,
+                "total": 17.8
+            },
+            {
+                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
+                "qty": 1,
+                "unit_price": 16.9,
+                "total": 16.9
+            },
+            {
+                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
+                "qty": 1,
+                "unit_price": 16.9,
+                "total": 16.9
+            },
+            {
+                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
+                "qty": 1,
+                "unit_price": 16.9,
+                "total": 16.9
+            },
+            {
+                "name": "Espumante Chandon Reserve Rosé",
+                "qty": 1,
+                "unit_price": 180.0,
+                "total": 180.0
+            },
+            {
+                "name": "Agua com Gás 275ml",
+                "qty": 1,
+                "unit_price": 9.9,
+                "total": 9.9
+            },
+            {
+                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
+                "qty": 1,
+                "unit_price": 16.9,
+                "total": 16.9
+            },
+            {
+                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
+                "qty": 1,
+                "unit_price": 16.9,
+                "total": 16.9
+            },
+            {
+                "name": "Moqueca de Camarão (Individual)",
+                "qty": 1,
+                "unit_price": 89.9,
+                "total": 89.9
+            },
+            {
+                "name": "Arroz",
+                "qty": 1,
+                "unit_price": 14.9,
+                "total": 14.9
+            },
+            {
+                "name": "Suco copo 11/02",
+                "qty": 1,
+                "unit_price": 10.9,
+                "total": 10.9
+            },
+            {
+                "name": "Agua Sem Gás Pet FRIGOBAR",
+                "qty": 4,
+                "unit_price": 8.9,
+                "total": 35.6
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Credito Angelo",
+                "amount": 482.51,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "room_number": "21",
+            "guest_name": "JULIANA E CLAUDIO"
+        },
+        "status": "pending",
+        "notes": null,
+        "fiscal_doc_uuid": null,
+        "history": []
     }
 ]

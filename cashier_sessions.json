@@ -4394,7 +4394,70 @@
         "entity": "Hotel Almareia",
         "opened_at": "12/02/2026 08:56",
         "opening_balance": 0.0,
-        "transactions": [],
+        "transactions": [
+            {
+                "id": "TX_20260212111644_f9ed4c",
+                "type": "sale",
+                "amount": 811.8799999999999,
+                "description": "Fechamento Conta Quarto 22 - FILIPE E SANDRO",
+                "payment_method": "Credito Angelo",
+                "timestamp": "12/02/2026 11:16",
+                "user": "jose",
+                "details": {
+                    "room_number": "22",
+                    "guest_name": "FILIPE E SANDRO",
+                    "category": "Baixa de Conta",
+                    "waiter_breakdown": {
+                        "henrique": 229.79000000000008,
+                        "dudu": 229.79000000000008,
+                        "welington": 315.7
+                    }
+                }
+            },
+            {
+                "id": "TX_20260212112138_5b778b",
+                "type": "sale",
+                "amount": 1163.0699999999997,
+                "description": "Fechamento Conta Quarto 24 - SAMUEL E MAYKON",
+                "payment_method": "Credito Angelo",
+                "timestamp": "12/02/2026 11:21",
+                "user": "jose",
+                "details": {
+                    "room_number": "24",
+                    "guest_name": "SAMUEL E MAYKON",
+                    "category": "Baixa de Conta",
+                    "waiter_breakdown": {
+                        "henrique": 361.6800000000001,
+                        "adailton": 262.35000000000014,
+                        "welington": 402.38000000000005,
+                        "guilherme": 74.36000000000003
+                    }
+                }
+            },
+            {
+                "id": "TX_20260212114707_5d44b7",
+                "type": "sale",
+                "amount": 482.51,
+                "description": "Fechamento Conta Quarto 21 - JULIANA E CLAUDIO",
+                "payment_method": "Credito Angelo",
+                "timestamp": "12/02/2026 11:47",
+                "user": "jose",
+                "details": {
+                    "room_number": "21",
+                    "guest_name": "JULIANA E CLAUDIO",
+                    "category": "Baixa de Conta",
+                    "waiter_breakdown": {
+                        "adailton": 18.59,
+                        "henrique": 18.59,
+                        "guilherme": 18.59,
+                        "dudu": 198.0,
+                        "welington": 126.17000000000002,
+                        "leo": 37.18,
+                        "Angelo": 11.99
+                    }
+                }
+            }
+        ],
         "status": "open",
         "closed_at": null,
         "closing_balance": null,

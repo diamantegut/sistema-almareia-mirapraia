@@ -35575,8 +35575,12 @@
         "discount": 0,
         "flags": [],
         "date": "11/02/2026 10:56",
-        "status": "pending",
-        "type": "minibar"
+        "status": "paid",
+        "type": "minibar",
+        "paid_at": "12/02/2026 11:21",
+        "closed_by": "jose",
+        "payment_method": "creditoangelo",
+        "notes": " [Baixa Total por jose em 12/02/2026 11:21]"
     },
     {
         "id": "CHARGE_GOV_31_20260211114516_924a9c",
@@ -35685,8 +35689,12 @@
         "discount": 0,
         "flags": [],
         "date": "11/02/2026 12:49",
-        "status": "pending",
-        "type": "minibar"
+        "status": "paid",
+        "type": "minibar",
+        "paid_at": "12/02/2026 11:16",
+        "closed_by": "jose",
+        "payment_method": "creditoangelo",
+        "notes": " [Baixa Total por jose em 12/02/2026 11:16]"
     },
     {
         "id": "CHARGE_60_20260211143739_93775c_REST",
@@ -35837,8 +35845,12 @@
         "discount": 0,
         "flags": [],
         "date": "11/02/2026 15:43",
-        "status": "pending",
-        "type": "minibar"
+        "status": "paid",
+        "type": "minibar",
+        "paid_at": "12/02/2026 11:47",
+        "closed_by": "jose",
+        "payment_method": "creditoangelo",
+        "notes": " [Baixa Total por jose em 12/02/2026 11:47]"
     },
     {
         "id": "CHARGE_72_20260211155021_c5de89_REST",
@@ -36319,8 +36331,12 @@
         },
         "service_fee_removed": false,
         "date": "11/02/2026 20:13",
-        "status": "pending",
-        "type": "restaurant"
+        "status": "paid",
+        "type": "restaurant",
+        "paid_at": "12/02/2026 11:16",
+        "closed_by": "jose",
+        "payment_method": "creditoangelo",
+        "notes": " [Baixa Total por jose em 12/02/2026 11:16]"
     },
     {
         "id": "CHARGE_51_20260211202226_4277dc_REST",
@@ -36415,8 +36431,12 @@
         },
         "service_fee_removed": false,
         "date": "11/02/2026 20:22",
-        "status": "pending",
-        "type": "restaurant"
+        "status": "paid",
+        "type": "restaurant",
+        "paid_at": "12/02/2026 11:47",
+        "closed_by": "jose",
+        "payment_method": "creditoangelo",
+        "notes": " [Baixa Total por jose em 12/02/2026 11:47]"
     },
     {
         "id": "CHARGE_83_20260211202239_0f57e5_REST",
@@ -36742,8 +36762,12 @@
         },
         "service_fee_removed": false,
         "date": "11/02/2026 20:22",
-        "status": "pending",
-        "type": "restaurant"
+        "status": "paid",
+        "type": "restaurant",
+        "paid_at": "12/02/2026 11:21",
+        "closed_by": "jose",
+        "payment_method": "creditoangelo",
+        "notes": " [Baixa Total por jose em 12/02/2026 11:21]"
     },
     {
         "id": "CHARGE_46_20260211204523_7f2ab9_REST",
@@ -37150,8 +37174,12 @@
         },
         "service_fee_removed": false,
         "date": "11/02/2026 22:08",
-        "status": "pending",
-        "type": "restaurant"
+        "status": "paid",
+        "type": "restaurant",
+        "paid_at": "12/02/2026 11:16",
+        "closed_by": "jose",
+        "payment_method": "creditoangelo",
+        "notes": " [Baixa Total por jose em 12/02/2026 11:16]"
     },
     {
         "id": "CHARGE_56_20260211220855_56dc4d_REST",
@@ -37291,8 +37319,12 @@
         },
         "service_fee_removed": false,
         "date": "11/02/2026 22:08",
-        "status": "pending",
-        "type": "restaurant"
+        "status": "paid",
+        "type": "restaurant",
+        "paid_at": "12/02/2026 11:47",
+        "closed_by": "jose",
+        "payment_method": "creditoangelo",
+        "notes": " [Baixa Total por jose em 12/02/2026 11:47]"
     },
     {
         "id": "CHARGE_54_20260211220905_c0243d_REST",
@@ -37410,8 +37442,12 @@
         },
         "service_fee_removed": false,
         "date": "11/02/2026 22:09",
-        "status": "pending",
-        "type": "restaurant"
+        "status": "paid",
+        "type": "restaurant",
+        "paid_at": "12/02/2026 11:21",
+        "closed_by": "jose",
+        "payment_method": "creditoangelo",
+        "notes": " [Baixa Total por jose em 12/02/2026 11:21]"
     },
     {
         "id": "CHARGE_62_20260212085741_247065_REST",
@@ -37567,5 +37603,150 @@
         "date": "12/02/2026 09:51",
         "status": "pending",
         "type": "minibar"
+    },
+    {
+        "id": "CHARGE_GOV_26_20260212104330_eae869",
+        "room_number": "26",
+        "table_id": "GOV",
+        "total": 17.8,
+        "items": [
+            {
+                "id": "48",
+                "name": "Agua Sem Gás Pet FRIGOBAR",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Frigobar",
+                "added_at": "10:43:30",
+                "added_by": "generina"
+            },
+            {
+                "id": "52",
+                "name": "Coca cola FRIGOBAR",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Frigobar",
+                "added_at": "10:43:30",
+                "added_by": "generina"
+            }
+        ],
+        "service_fee": 0,
+        "discount": 0,
+        "flags": [],
+        "date": "12/02/2026 10:43",
+        "status": "pending",
+        "type": "minibar"
+    },
+    {
+        "id": "CHARGE_GOV_24_20260212110304_15d194",
+        "room_number": "24",
+        "table_id": "GOV",
+        "total": 35.6,
+        "items": [
+            {
+                "id": "48",
+                "name": "Agua Sem Gás Pet FRIGOBAR",
+                "price": 8.9,
+                "qty": 4.0,
+                "category": "Frigobar",
+                "added_at": "11:03:04",
+                "added_by": "jose"
+            }
+        ],
+        "service_fee": 0,
+        "discount": 0,
+        "flags": [],
+        "date": "12/02/2026 11:03",
+        "status": "paid",
+        "type": "minibar",
+        "paid_at": "12/02/2026 11:21",
+        "closed_by": "jose",
+        "payment_method": "creditoangelo",
+        "notes": " [Baixa Total por jose em 12/02/2026 11:21]"
+    },
+    {
+        "id": "CHARGE_GOV_22_20260212111334_4a5fd9",
+        "room_number": "22",
+        "table_id": "GOV",
+        "total": 17.8,
+        "items": [
+            {
+                "id": "48",
+                "name": "Agua Sem Gás Pet FRIGOBAR",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Frigobar",
+                "added_at": "11:13:34",
+                "added_by": "jose"
+            },
+            {
+                "id": "134",
+                "name": "Agua Com Gás Pet",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Frigobar",
+                "added_at": "11:13:34",
+                "added_by": "jose"
+            }
+        ],
+        "service_fee": 0,
+        "discount": 0,
+        "flags": [],
+        "date": "12/02/2026 11:13",
+        "status": "paid",
+        "type": "minibar",
+        "paid_at": "12/02/2026 11:16",
+        "closed_by": "jose",
+        "payment_method": "creditoangelo",
+        "notes": " [Baixa Total por jose em 12/02/2026 11:16]"
+    },
+    {
+        "id": "CHARGE_GOV_17_20260212111512_5fe1c3",
+        "room_number": "17",
+        "table_id": "GOV",
+        "total": 8.9,
+        "items": [
+            {
+                "id": "134",
+                "name": "Agua Com Gás Pet",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Frigobar",
+                "added_at": "11:15:12",
+                "added_by": "dina"
+            }
+        ],
+        "service_fee": 0,
+        "discount": 0,
+        "flags": [],
+        "date": "12/02/2026 11:15",
+        "status": "pending",
+        "type": "minibar"
+    },
+    {
+        "id": "CHARGE_GOV_21_20260212114525_7cb34f",
+        "room_number": "21",
+        "table_id": "GOV",
+        "total": 35.6,
+        "items": [
+            {
+                "id": "48",
+                "name": "Agua Sem Gás Pet FRIGOBAR",
+                "price": 8.9,
+                "qty": 4.0,
+                "category": "Frigobar",
+                "added_at": "11:45:25",
+                "added_by": "jose"
+            }
+        ],
+        "service_fee": 0,
+        "discount": 0,
+        "flags": [],
+        "date": "12/02/2026 11:45",
+        "status": "paid",
+        "type": "minibar",
+        "paid_at": "12/02/2026 11:47",
+        "closed_by": "jose",
+        "payment_method": "creditoangelo",
+        "notes": " [Baixa Total por jose em 12/02/2026 11:47]"
     }
 ]
