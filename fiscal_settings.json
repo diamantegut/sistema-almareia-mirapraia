@@ -12,7 +12,23 @@
             "csc_id": "1",
             "serie": "8",
             "next_number": "642",
-            "xml_storage_path": "fiscal_documents/xmls"
+            "xml_storage_path": "fiscal_documents/xmls",
+            "description": "Mirapraia - Restaurante e Recepção (NFC-e)"
+        },
+        {
+            "provider": "nuvem_fiscal",
+            "environment": "production",
+            "api_token": "",
+            "client_id": "",
+            "client_secret": "",
+            "cnpj_emitente": "46500590000112",
+            "ie_emitente": "",
+            "csc_token": "",
+            "csc_id": "",
+            "serie": "1",
+            "next_number": "1",
+            "xml_storage_path": "fiscal_documents/xmls_almareia",
+            "description": "Almareia - Reservas (NFS-e)"
         }
     ]
 }
