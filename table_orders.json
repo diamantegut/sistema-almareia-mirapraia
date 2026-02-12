@@ -2156,5 +2156,40 @@
         "num_adults": 2,
         "customer_type": "hospede",
         "room_number": "25"
+    },
+    "40": {
+        "items": [
+            {
+                "id": "846a277d-71c8-4d57-a8f8-1fcea1be09cb",
+                "product_id": "6",
+                "name": "Cuscuz Recheado",
+                "price": 11.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "12/02/2026 08:44",
+                "waiter": "Angelo",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [
+                    "Sem cebola"
+                ],
+                "accompaniments": [],
+                "flavor": "Queijo Coalho + Cebola Branca + Ovos (Omelete,Mexido,Pochê,cozido ou frito)",
+                "questions_answers": []
+            }
+        ],
+        "total": 11.9,
+        "status": "open",
+        "opened_at": "12/02/2026 08:32",
+        "num_adults": 1,
+        "customer_type": "hospede",
+        "customer_name": "",
+        "room_number": "17",
+        "waiter": "",
+        "staff_name": null,
+        "is_breakfast": true,
+        "partial_payments": [],
+        "total_paid": 0.0
     }
 }
