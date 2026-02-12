@@ -566,7 +566,13 @@ def download_xml(nfe_id, settings):
             with open(file_path, 'wb') as f:
                 f.write(response.content)
             
-            return file_path
+            # Validation: Check if file exists and has content
+            if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
+                logger.info(f"XML saved and validated at {file_path}")
+                return file_path
+            else:
+                logger.error(f"XML save failed validation at {file_path}")
+                return None
         else:
             logger.error(f"Error downloading XML: {response.status_code} - {response.text}")
             return None

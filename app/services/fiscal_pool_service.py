@@ -15,7 +15,62 @@ class FiscalPoolService:
             return []
         try:
             with open(FISCAL_POOL_FILE, 'r', encoding='utf-8') as f:
-                return json.load(f)
+                pool = json.load(f)
+                
+            # Migration / Backfill
+            modified = False
+            for entry in pool:
+                # Backfill 'closed_at' if missing
+                if 'closed_at' not in entry:
+                    entry['closed_at'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    modified = True
+                
+                # Check if we need to recalculate fiscal_amount
+                # Scenarios:
+                # 1. Missing 'fiscal_amount'
+                # 2. 'fiscal_amount' is 0 but total > 0, and payments don't have explicit 'is_fiscal' flags (Legacy migration issue)
+                
+                recalc_needed = False
+                if 'fiscal_amount' not in entry:
+                    recalc_needed = True
+                elif entry.get('fiscal_amount', 0) == 0 and entry.get('total_amount', 0) > 0:
+                    # Check if any payment has is_fiscal flag
+                    pms = entry.get('payment_methods') or []
+                    has_explicit_flag = any('is_fiscal' in pm for pm in pms)
+                    if not has_explicit_flag:
+                        recalc_needed = True
+                
+                if recalc_needed:
+                    pms = entry.get('payment_methods') or []
+                    fiscal_val = 0.0
+                    has_fiscal_flag = False
+                    
+                    for pm in pms:
+                        # If flag exists, use it
+                        if pm.get('is_fiscal'):
+                            has_fiscal_flag = True
+                            fiscal_val += float(pm.get('amount', 0.0))
+                    
+                    if has_fiscal_flag:
+                        entry['fiscal_amount'] = round(fiscal_val, 2)
+                    else:
+                        # Fallback for legacy data without flags: assume total is fiscal
+                        # This fixes the migration of old closed accounts
+                        entry['fiscal_amount'] = float(entry.get('total_amount', 0.0))
+                    
+                    # Cap at total
+                    if entry['fiscal_amount'] > float(entry.get('total_amount', 0.0)):
+                        entry['fiscal_amount'] = float(entry.get('total_amount', 0.0))
+                        
+                    modified = True
+            
+            if modified:
+                try:
+                    with open(FISCAL_POOL_FILE, 'w', encoding='utf-8') as f:
+                        json.dump(pool, f, indent=4, ensure_ascii=False)
+                except: pass
+                
+            return pool
         except Exception:
             return []
 
@@ -65,6 +120,16 @@ class FiscalPoolService:
         # Only if all payments point to the same CNPJ distinct from default
         # (This logic can be refined, but for now we stick to Origin-based rules as requested)
         
+        # Calculate Fiscal Amount
+        fiscal_amount = 0.0
+        for pm in payment_methods:
+            if pm.get('is_fiscal'):
+                fiscal_amount += float(pm.get('amount', 0.0))
+        
+        # Ensure we don't exceed total_amount due to rounding
+        if fiscal_amount > float(total_amount):
+            fiscal_amount = float(total_amount)
+            
         entry = {
             'id': str(uuid.uuid4()),
             'origin': origin,
@@ -74,6 +139,7 @@ class FiscalPoolService:
             'closed_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
             'closed_by': user,
             'total_amount': float(total_amount),
+            'fiscal_amount': round(fiscal_amount, 2),
             'items': items,
             'payment_methods': payment_methods,
             'customer': customer_info or {},
@@ -145,9 +211,9 @@ class FiscalPoolService:
         filtered = []
         for entry in pool:
             match = True
-            if filters.get('status') and entry['status'] != filters['status']:
+            if filters.get('status') and filters['status'] != 'all' and entry['status'] != filters['status']:
                 match = False
-            if filters.get('origin') and entry['origin'] != filters['origin']:
+            if filters.get('origin') and filters['origin'] != 'all' and entry['origin'] != filters['origin']:
                 match = False
             if filters.get('date_start'):
                 # Simple string compare works if format is YYYY-MM-DD

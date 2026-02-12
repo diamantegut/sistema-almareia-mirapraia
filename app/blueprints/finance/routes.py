@@ -40,6 +40,264 @@ from app.services.card_reconciliation_service import (
     reconcile_transactions, parse_pagseguro_csv, parse_rede_csv
 )
 
+@finance_bp.route('/accounting/emission')
+@login_required
+def fiscal_emission_page():
+    if session.get('role') not in ['admin', 'gerente', 'financeiro']:
+        flash('Acesso Restrito.')
+        return redirect(url_for('main.index'))
+    return render_template('fiscal_emission.html')
+
+@finance_bp.route('/api/fiscal/pool/list', methods=['GET'])
+@login_required
+def api_fiscal_pool_list():
+    if session.get('role') not in ['admin', 'gerente', 'financeiro']:
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    filters = {
+        'status': request.args.get('status'),
+        'date_start': request.args.get('date_start'),
+        'date_end': request.args.get('date_end'),
+        'fiscal_type': request.args.get('type') # nfce, nfse
+    }
+    
+    # We load raw pool then filter
+    pool = FiscalPoolService.get_pool(filters)
+    
+    # Additional filter for fiscal_type
+    if filters['fiscal_type']:
+        pool = [p for p in pool if p.get('fiscal_type') == filters['fiscal_type']]
+        
+    return jsonify(pool)
+
+@finance_bp.route('/api/fiscal/pool/emit', methods=['POST'])
+@login_required
+def api_fiscal_pool_emit():
+    if session.get('role') not in ['admin', 'gerente', 'financeiro']:
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 403
+        
+    data = request.json or {}
+    entry_id = data.get('entry_id')
+    cpf_cnpj = data.get('cpf_cnpj') # Optional override
+    
+    if not entry_id:
+        return jsonify({'success': False, 'message': 'ID não fornecido'}), 400
+        
+    entry = FiscalPoolService.get_entry(entry_id)
+    if not entry:
+        return jsonify({'success': False, 'message': 'Entrada não encontrada'}), 404
+        
+    if entry['status'] == 'emitted':
+        return jsonify({'success': False, 'message': 'Nota já emitida'}), 400
+        
+    # Prepare Transaction
+    # We use fiscal_amount as the total for the transaction
+    # We might need to select specific items or proration?
+    # For now, we pass the full item list and let 'queue_fiscal_emission' logic handle it?
+    # Actually 'emit_invoice' takes items. 
+    # If fiscal_amount < total_amount, we must adjust items or the emit_invoice logic must handle it.
+    # The current 'emit_invoice' (service) calculates total from items.
+    # So we should probably PRORATE items here before sending to 'emit_invoice'.
+    
+    try:
+        # Load Settings
+        settings = load_fiscal_settings()
+        
+        # Determine Integration
+        target_cnpj = entry.get('cnpj_emitente')
+        integration_settings = get_fiscal_integration(settings, target_cnpj)
+        
+        if not integration_settings:
+            return jsonify({'success': False, 'message': 'Configuração fiscal não encontrada para este CNPJ'}), 400
+            
+        # Prorate Items if Partial
+        items_to_emit = entry.get('items', [])
+        fiscal_total = float(entry.get('fiscal_amount', 0.0))
+        full_total = float(entry.get('total_amount', 0.0))
+        
+        if fiscal_total <= 0:
+             return jsonify({'success': False, 'message': 'Valor fiscal é zero.'}), 400
+             
+        if full_total > 0 and fiscal_total < full_total:
+            ratio = fiscal_total / full_total
+            prorated_items = []
+            for item in items_to_emit:
+                new_item = item.copy()
+                new_item['price'] = round(item['price'] * ratio, 2)
+                prorated_items.append(new_item)
+            items_to_emit = prorated_items
+            
+        # Determine Payment Method Name (Visual only for NFe usually, but good to match)
+        pms = entry.get('payment_methods', [])
+        # Find first fiscal method
+        pm_name = 'Outros'
+        for pm in pms:
+            if pm.get('is_fiscal'):
+                pm_name = pm.get('method')
+                break
+        
+        transaction = {
+            'id': entry['id'], # Use pool ID as transaction ID for tracking
+            'amount': fiscal_total,
+            'payment_method': pm_name
+        }
+        
+        # Use CPF from request if provided, else from entry
+        customer_doc = cpf_cnpj
+        if not customer_doc:
+            customer = entry.get('customer', {})
+            customer_doc = customer.get('cpf_cnpj') or customer.get('doc')
+            
+        # Call Service
+        # We need to import emit_invoice from service (aliased as service_emit_invoice)
+        result = service_emit_invoice(transaction, integration_settings, items_to_emit, customer_doc)
+        
+        if result['success']:
+            nfe_data = result['data']
+            nfe_id = nfe_data.get('id')
+            nfe_serie = nfe_data.get('serie')
+            nfe_number = nfe_data.get('numero')
+            
+            # Update Pool Status
+            FiscalPoolService.update_status(
+                entry_id, 
+                'emitted', 
+                fiscal_doc_uuid=nfe_id, 
+                serie=nfe_serie, 
+                number=nfe_number,
+                user=session.get('user')
+            )
+            
+            # Try download XML
+            try:
+                download_xml(nfe_id, integration_settings)
+            except: pass
+            
+            return jsonify({'success': True})
+        else:
+            # Update Error
+            # We assume update_status can handle storing error? 
+            # The current update_status only sets status. 
+            # We might need a method to set error. 
+            # Or we just set status 'failed' and note the error.
+            # Let's modify update_status or add a set_error method in Service.
+            # For now, let's misuse 'update_status' to set 'failed' and we need a way to save the error message.
+            # FiscalPoolService structure has 'last_error' field?
+            # I checked the code, it has 'notes' but not explicit 'last_error' in 'add_to_pool'.
+            # I should update FiscalPoolService to support saving error.
+            
+            # Let's do a quick manual update for now or add 'notes'
+            pool = FiscalPoolService._load_pool()
+            for e in pool:
+                if e['id'] == entry_id:
+                    e['status'] = 'failed'
+                    e['last_error'] = result['message']
+                    FiscalPoolService._save_pool(pool)
+                    break
+            
+            return jsonify({'success': False, 'message': result['message']})
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@finance_bp.route('/api/fiscal/print', methods=['POST'])
+@login_required
+def api_fiscal_print():
+    if session.get('role') not in ['admin', 'gerente', 'financeiro']:
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 403
+        
+    data = request.json or {}
+    entry_id = data.get('entry_id')
+    
+    if not entry_id:
+        return jsonify({'success': False, 'message': 'ID não fornecido'}), 400
+        
+    entry = FiscalPoolService.get_entry(entry_id)
+    if not entry:
+        return jsonify({'success': False, 'message': 'Entrada não encontrada'}), 404
+        
+    if entry['status'] != 'emitted':
+        return jsonify({'success': False, 'message': 'Nota não emitida ainda'}), 400
+        
+    # We need to construct the transaction-like object expected by print_fiscal_receipt
+    # Or modify print_fiscal_receipt to accept entry.
+    # print_fiscal_receipt expects: transaction_id (for loading data?), or a transaction object?
+    # Actually, print_fiscal_receipt is in app.services.printing_service.
+    # Let's import it first.
+    
+    try:
+        from app.services.printing_service import print_fiscal_receipt
+        
+        # We need to pass enough info. 
+        # print_fiscal_receipt usually takes (transaction_data, printer_id).
+        # Let's check signature of print_fiscal_receipt.
+        # Assuming it takes a transaction dict.
+        
+        # Reconstruct transaction for printing
+        # The print function likely looks for 'fiscal_doc_uuid' or similar in the transaction data 
+        # to find the XML/PDF.
+        
+        transaction = {
+            'id': entry['id'],
+            'fiscal_doc_uuid': entry.get('fiscal_doc_uuid'),
+            'fiscal_serie': entry.get('fiscal_serie'),
+            'fiscal_number': entry.get('fiscal_number'),
+            'amount': entry.get('fiscal_amount'),
+            'total_amount': entry.get('total_amount'),
+            'items': entry.get('items'),
+            'payment_method': 'NFC-e', # Display name
+            'timestamp': entry.get('closed_at'),
+            'customer': entry.get('customer')
+        }
+        
+        # It handles printer lookup internally or we pass it?
+        # Usually printing_service handles it.
+        result = print_fiscal_receipt(transaction)
+        
+        if result:
+            return jsonify({'success': True})
+        else:
+            return jsonify({'success': False, 'message': 'Falha ao enviar para impressora'})
+            
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@finance_bp.route('/api/fiscal/analyze_error', methods=['POST'])
+@login_required
+def api_fiscal_analyze_error():
+    if session.get('role') not in ['admin', 'gerente', 'financeiro']:
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 403
+        
+    data = request.json or {}
+    entry_id = data.get('entry_id')
+    
+    if not entry_id:
+        return jsonify({'success': False, 'message': 'ID não fornecido'}), 400
+        
+    entry = FiscalPoolService.get_entry(entry_id)
+    if not entry:
+        return jsonify({'success': False, 'message': 'Entrada não encontrada'}), 404
+        
+    error_message = entry.get('last_error') or "Erro desconhecido"
+    
+    # Prepare Context Data (strip unnecessary heavy fields)
+    context = {
+        "items": entry.get('items'),
+        "total": entry.get('total_amount'),
+        "fiscal_total": entry.get('fiscal_amount'),
+        "payments": entry.get('payment_methods'),
+        "customer": entry.get('customer'),
+        "origin": entry.get('origin')
+    }
+    
+    try:
+        from app.services.fiscal_ai_service import FiscalAIAnalysisService
+        result = FiscalAIAnalysisService.analyze_error(entry_id, error_message, context)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
 # --- Helpers ---
 
 def get_balance_data(period_type, year, specific_value=None):
