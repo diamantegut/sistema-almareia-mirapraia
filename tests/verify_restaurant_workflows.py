@@ -15,11 +15,14 @@ from app.services.data_service import (
     load_sales_history, save_sales_history,
     load_room_charges, save_room_charges,
     load_stock_logs, load_users,
-    load_menu_items, save_menu_items
+    load_menu_items, save_menu_items,
+    load_payment_methods, save_payment_methods,
+    load_room_occupancy, save_room_occupancy
 )
 from app.services.system_config_manager import (
     TABLE_ORDERS_FILE, CASHIER_SESSIONS_FILE, SALES_HISTORY_FILE,
-    ROOM_CHARGES_FILE, STOCK_LOGS_FILE, MENU_ITEMS_FILE
+    ROOM_CHARGES_FILE, STOCK_LOGS_FILE, MENU_ITEMS_FILE, PAYMENT_METHODS_FILE,
+    ROOM_OCCUPANCY_FILE
 )
 
 class TestRestaurantWorkflows(unittest.TestCase):
@@ -36,7 +39,9 @@ class TestRestaurantWorkflows(unittest.TestCase):
             SALES_HISTORY_FILE,
             ROOM_CHARGES_FILE,
             STOCK_LOGS_FILE,
-            MENU_ITEMS_FILE
+            MENU_ITEMS_FILE,
+            PAYMENT_METHODS_FILE,
+            ROOM_OCCUPANCY_FILE
         ]
         
         self.backups = {}
@@ -50,6 +55,17 @@ class TestRestaurantWorkflows(unittest.TestCase):
         # Clear Orders for clean test
         with open(TABLE_ORDERS_FILE, 'w', encoding='utf-8') as f:
             json.dump({}, f)
+
+        # Initialize room occupancy for transfer test
+        with open(ROOM_OCCUPANCY_FILE, 'w', encoding='utf-8') as f:
+            json.dump({
+                '10': {
+                    'guest': 'Test Guest', 
+                    'checkin': '2024-01-01', 
+                    'checkout': '2024-01-05',
+                    'num_adults': 2
+                }
+            }, f)
         
         # Setup Login
         with self.client.session_transaction() as sess:
@@ -68,6 +84,15 @@ class TestRestaurantWorkflows(unittest.TestCase):
                 "unit": "un"
             })
             save_menu_items(menu)
+
+        methods = load_payment_methods()
+        if not methods:
+            methods.append({
+                "id": "PM_TEST",
+                "name": "Dinheiro",
+                "available_in": ["restaurant"]
+            })
+            save_payment_methods(methods)
 
         # Ensure Cashier is Open
         self.open_cashier()
@@ -103,6 +128,30 @@ class TestRestaurantWorkflows(unittest.TestCase):
         }
         sessions.append(new_session)
         save_cashier_sessions(sessions)
+
+    def create_table_with_item(self, table_id):
+        self.client.post(f'/restaurant/table/{table_id}', data={
+            'action': 'open_table',
+            'num_adults': '2',
+            'customer_type': 'passante',
+            'customer_name': 'Test Client',
+            'waiter': 'Garçom Teste'
+        }, follow_redirects=True)
+        
+        items_json = json.dumps([{
+            "product": "1",
+            "qty": 2,
+            "observations": ["Sem gelo"],
+            "flavor_name": None,
+            "complements": [],
+            "accompaniments": []
+        }])
+        
+        self.client.post(f'/restaurant/table/{table_id}', data={
+            'action': 'add_batch_items',
+            'items_json': items_json,
+            'waiter': 'Garçom Teste'
+        }, follow_redirects=True)
 
     def test_workflow_1_table_lifecycle(self):
         print("\n--- Testing Workflow 1: Table Opening and Closing ---")
@@ -167,6 +216,55 @@ class TestRestaurantWorkflows(unittest.TestCase):
         last_sale = history[-1]
         self.assertEqual(last_sale['final_total'], total)
         print("✓ Table closed successfully")
+
+    def test_close_order_with_payment_name_payload(self):
+        table_id = "201"
+        self.create_table_with_item(table_id)
+        
+        orders = load_table_orders()
+        total = orders[table_id]['total'] * 1.1
+        payment_data = json.dumps([{"name": "Dinheiro", "amount": total}])
+        
+        resp = self.client.post(f'/restaurant/table/{table_id}', data={
+            'action': 'close_order',
+            'payment_data': payment_data,
+            'discount': 0
+        }, follow_redirects=True)
+        
+        self.assertEqual(resp.status_code, 200)
+        orders = load_table_orders()
+        self.assertNotIn(table_id, orders)
+        
+        history = load_sales_history()
+        last_sale = history[-1]
+        self.assertEqual(last_sale.get('status'), 'closed')
+        self.assertEqual(last_sale['final_total'], total)
+
+    def test_close_order_with_payment_id_payload(self):
+        table_id = "202"
+        self.create_table_with_item(table_id)
+        
+        methods = load_payment_methods()
+        method_id = methods[0]['id']
+        
+        orders = load_table_orders()
+        total = orders[table_id]['total'] * 1.1
+        payment_data = json.dumps([{"id": method_id, "amount": total}])
+        
+        resp = self.client.post(f'/restaurant/table/{table_id}', data={
+            'action': 'close_order',
+            'payment_data': payment_data,
+            'discount': 0
+        }, follow_redirects=True)
+        
+        self.assertEqual(resp.status_code, 200)
+        orders = load_table_orders()
+        self.assertNotIn(table_id, orders)
+        
+        history = load_sales_history()
+        last_sale = history[-1]
+        self.assertEqual(last_sale.get('status'), 'closed')
+        self.assertEqual(last_sale['final_total'], total)
 
     def test_workflow_2_transfer_functionality(self):
         print("\n--- Testing Workflow 2: Table Transfer ---")

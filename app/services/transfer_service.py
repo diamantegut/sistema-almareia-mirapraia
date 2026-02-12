@@ -2,10 +2,15 @@
 import json
 import os
 import uuid
+import copy
 from datetime import datetime
 from app.services.logger_service import LoggerService
 from app.services.system_config_manager import get_data_path
-from app.services.data_service import load_table_orders, save_table_orders
+from app.services.data_service import (
+    load_table_orders, save_table_orders,
+    load_sales_history, save_sales_history,
+    load_products, save_stock_entry, log_stock_action
+)
 from app.services.cashier_service import CashierService
 
 # Helper for file locking (simple version)
@@ -310,6 +315,68 @@ def transfer_table_to_room(table_id, raw_room_number, user_name, mode='restauran
             if not save_json('room_charges.json', room_charges):
                 raise TransferError("Falha ao salvar cobranças no quarto. Tente novamente.")
             
+            # --- Archive to Sales History & Deduct Stock ---
+            try:
+                sales_history = load_sales_history()
+                if not isinstance(sales_history, list):
+                    sales_history = []
+                
+                order_to_archive = copy.deepcopy(order)
+                order_to_archive['closed_at'] = datetime.now().strftime('%d/%m/%Y %H:%M')
+                order_to_archive['payment_method'] = 'Room Charge'
+                order_to_archive['room_charge'] = target_key
+                order_to_archive['final_total'] = sum(c['total'] for c in new_charges) # Total transferred
+                
+                sales_history.append(order_to_archive)
+                save_sales_history(sales_history)
+                
+                # Deduct Stock
+                products_db = load_products()
+                for item in order['items']:
+                    product_obj = None
+                    if item.get('product_id'):
+                        product_obj = next((p for p in products_db if str(p['id']) == str(item['product_id'])), None)
+                    if not product_obj:
+                         product_obj = next((p for p in products_db if p['name'] == item['name']), None)
+                         
+                    if product_obj:
+                        qty = float(item.get('qty', 0))
+                        if qty > 0:
+                            log_stock_action(
+                                user=user_name,
+                                action='saida',
+                                product=product_obj['name'],
+                                qty=qty,
+                                details=f"Transferência Quarto {target_key}",
+                                department='Restaurante'
+                            )
+                            save_stock_entry({
+                                'id': str(uuid.uuid4()),
+                                'date': datetime.now().strftime('%d/%m/%Y'),
+                                'product': product_obj['name'],
+                                'qty': -abs(qty),
+                                'unit': product_obj.get('unit', 'un'),
+                                'price': product_obj.get('price', 0),
+                                'supplier': 'Venda',
+                                'invoice': f"Quarto {target_key}",
+                                'user': user_name
+                            })
+            except Exception as e:
+                # Log but don't fail the transfer? 
+                # Or fail and revert?
+                # Failing here is safer to avoid data inconsistency.
+                LoggerService.log_acao(
+                    acao='Erro Transferência', 
+                    entidade='Sistema', 
+                    detalhes={'error': str(e), 'context': 'Stock/History update'},
+                    departamento_id='Restaurante',
+                    colaborador_id=user_name
+                )
+                # We proceed, or raise? 
+                # If we raise, we need to revert room_charges.
+                # Let's raise to trigger the revert block below.
+                raise e
+
             # Now update table
             try:
                 # Determine if we should close or clear based on ID logic

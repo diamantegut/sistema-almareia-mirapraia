@@ -200,6 +200,25 @@
         </a>
         {% endfor %}
     </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.service-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    const href = this.getAttribute('href');
+                    const serviceId = href.split('/').pop();
+                    console.log('Service card clicked:', serviceId);
+                    
+                    // Send async log
+                    fetch('/service-click', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ service_id: serviceId })
+                    }).catch(err => console.error('Log error:', err));
+                });
+            });
+        });
+    </script>
 </div>
 
 <!-- Modal de Verificação (Uniforme e Localização) -->
@@ -310,6 +329,30 @@ function captureAndSubmit() {
     
     document.getElementById('verificationForm').submit();
 }
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const cards = document.querySelectorAll('.service-card');
+    cards.forEach((card) => {
+        card.addEventListener('click', () => {
+            const href = card.getAttribute('href');
+            const serviceId = href ? href.split('/').pop() : null;
+            console.debug('Service card click', { serviceId, href });
+            const payload = JSON.stringify({ service_id: serviceId });
+            if (navigator.sendBeacon) {
+                navigator.sendBeacon('/service-click', payload);
+            } else {
+                fetch('/service-click', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: payload,
+                    keepalive: true
+                }).catch(() => {});
+            }
+        });
+    });
+});
 </script>
 
 {% endblock %}

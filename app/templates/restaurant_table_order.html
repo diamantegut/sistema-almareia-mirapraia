@@ -513,9 +513,14 @@
                             <i class="bi bi-clock-history"></i> Ver Histórico
                         </button>
                         {% set has_pending = false %}
-                        {% for item in order['items'] %}
-                            {% if not item.printed %}{% set has_pending = true %}{% endif %}
-                        {% endfor %}
+                        {% if order is defined and order %}
+                            {% set items_list = order.get('items', []) %}
+                            {% if items_list %}
+                                {% for item in items_list %}
+                                    {% if not item.printed %}{% set has_pending = true %}{% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        {% endif %}
                         
                         {% if has_pending %}
                         <form method="POST" class="d-inline" onsubmit="return confirm('Reenviar TODOS os itens pendentes para impressão?');">
@@ -591,9 +596,9 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="text-center">{{ item.qty|int if item.qty % 1 == 0 else "%.1f"|format(item.qty) }}</td>
+                                    <td class="text-center item-qty">{{ item.qty|int if item.qty % 1 == 0 else "%.1f"|format(item.qty) }}</td>
                                     <td class="text-end">R$ {{ "%.2f"|format(item.price) }}</td>
-                                    <td class="text-end fw-bold">
+                                    <td class="text-end fw-bold item-total">
                                         R$ {{ "%.2f"|format(item.total) }}
                                     </td>
                                     <td class="text-end">
@@ -608,17 +613,17 @@
                                         {% endif %}
 
                                         {% if session.get('role') in ['admin', 'gerente', 'supervisor'] %}
-                                        <form method="POST" style="display: inline;" onsubmit="return confirm('Remover 1 unidade de {{ item.name }}?');">
-                                        <input type="hidden" name="action" value="remove_item">
-                                        <input type="hidden" name="item_id" value="{{ item.ids[-1] }}">
-                                        <input type="hidden" name="product_name" value="{{ item.name }}">
-                                        <div class="input-group input-group-sm mb-1 d-inline-flex w-auto">
-                                            <input type="text" name="cancellation_reason" class="form-control form-control-sm" placeholder="Motivo" required style="width: 100px;">
-                                            <button type="submit" class="btn btn-outline-danger" title="Remover 1 unidade">
+                                        {% set unit_price = item.total / item.qty %}
+                                        <div class="input-group input-group-sm mb-1 d-inline-flex w-auto cancel-group">
+                                            <input type="text" class="form-control form-control-sm cancel-reason" placeholder="Motivo" style="width: 100px;">
+                                            <button type="button" class="btn btn-outline-danger" title="Remover 1 unidade"
+                                                    data-ids='{{ item.ids|tojson }}'
+                                                    data-name="{{ item.name }}"
+                                                    data-price="{{ unit_price }}"
+                                                    onclick="cancelItem(this)">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </div>
-                                    </form>
                                         <button type="button" class="btn btn-sm btn-outline-info ms-1" title="Transferir Item" 
                                                 data-id="{{ item.ids[-1] }}"
                                                 data-name="{{ item.name }}"
@@ -1372,6 +1377,134 @@
         .catch(error => {
             console.error('Error:', error);
             alert('Erro ao processar transferência.');
+        });
+    };
+
+    // Cancel Item Logic (AJAX)
+    window.cancelItem = function(btn) {
+        // Read data attributes
+        const itemName = btn.getAttribute('data-name');
+        const unitPrice = parseFloat(btn.getAttribute('data-price'));
+
+        const group = btn.closest('.cancel-group');
+        const reasonInput = group.querySelector('.cancel-reason');
+        const reason = reasonInput.value.trim();
+
+        if (!reason) {
+            alert('Por favor, informe o motivo do cancelamento.');
+            reasonInput.focus();
+            return;
+        }
+
+        // Get IDs from data attribute
+        let ids = [];
+        try {
+            // Using dataset is safer for JSON
+            const idsData = btn.getAttribute('data-ids');
+            ids = JSON.parse(idsData || '[]');
+        } catch (e) {
+            console.error('Failed to parse IDs', e);
+            alert('Erro interno: IDs inválidos.');
+            return;
+        }
+
+        if (ids.length === 0) {
+            alert('Erro: Nenhum ID disponível para cancelamento neste agrupamento. Atualize a página.');
+            return;
+        }
+
+        // Use the last ID (stack behavior)
+        const itemId = ids[ids.length - 1];
+
+        if (!confirm('Remover 1 unidade de ' + itemName + '?')) {
+            return;
+        }
+
+        // UI Feedback - Spinner
+        const originalHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+
+        const formData = new FormData();
+        formData.append('action', 'remove_item');
+        formData.append('item_id', itemId);
+        formData.append('product_name', itemName);
+        formData.append('cancellation_reason', reason);
+
+        fetch(window.location.href, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update IDs list
+                ids.pop(); // Remove used ID
+                btn.setAttribute('data-ids', JSON.stringify(ids));
+
+                // Update UI
+                const row = btn.closest('tr');
+                const qtyCell = row.querySelector('.item-qty');
+                const totalCell = row.querySelector('.item-total');
+                
+                let currentQty = parseFloat(qtyCell.innerText);
+                let newQty = currentQty - 1;
+
+                if (newQty <= 0.001) { // Floating point safety
+                    row.remove();
+                } else {
+                    qtyCell.innerText = newQty % 1 === 0 ? parseInt(newQty) : newQty.toFixed(1);
+                    
+                    // Update Row Total
+                    let newRowTotal = newQty * unitPrice;
+                    totalCell.innerText = 'R$ ' + newRowTotal.toFixed(2);
+                }
+
+                // Update Grand Total (Footer)
+                const tfoot = document.querySelector('table tfoot');
+                if (tfoot) {
+                    const grandTotalRow = tfoot.querySelector('.table-success');
+                    if (grandTotalRow) {
+                        // The structure is: <td colspan="3" class="text-end">TOTAL GERAL:</td> <td class="text-end">R$ ...</td>
+                        // So it's the 2nd cell (index 1)
+                        const grandTotalCell = grandTotalRow.children[1];
+                        if (grandTotalCell) {
+                             grandTotalCell.innerText = 'R$ ' + parseFloat(data.new_total).toFixed(2);
+                        }
+                    }
+                    
+                    // Also update Subtotal (first row)
+                    const subtotalRow = tfoot.rows[0];
+                    if (subtotalRow) {
+                         const subtotalCell = subtotalRow.children[1];
+                         if (subtotalCell) {
+                             // Approximation: If service fee is fixed/calc server side, we might miss it here.
+                             // But we can assume data.new_total is the grand total. 
+                             // If service fee is 10%, Subtotal = Total / 1.1
+                             // But let's just update Grand Total as it's the most critical.
+                         }
+                    }
+                }
+                
+                // Optional: Show a transient success message instead of alert
+                // alert(data.message); 
+                // Clear input
+                reasonInput.value = '';
+                
+            } else {
+                alert('Erro: ' + (data.error || 'Erro desconhecido'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Erro de conexão ao remover item.');
+        })
+        .finally(() => {
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
         });
     };
 

@@ -8,6 +8,7 @@ from threading import Lock
 import sys
 import time
 from contextlib import contextmanager
+import re
 
 # Add parent directory to path to allow importing system_config_manager
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -708,41 +709,58 @@ class CashierService:
     def prepare_transactions_for_display(transactions):
         """
         Groups transactions with the same payment_group_id into a single displayable item.
+        Also handles Legacy Restaurant Grouping (Venda Mesa X).
         """
         if not transactions:
             return []
             
         processed = []
         seen_groups = set()
+        seen_legacy_groups = set()
         
         # Map group_id to list of transactions
         groups = {}
-        for t in transactions:
-            details = t.get('details', {}) or {}
-            gid = details.get('payment_group_id')
-            if gid:
-                if gid not in groups:
-                    groups[gid] = []
-                groups[gid].append(t)
+        legacy_groups = {}
         
         for t in transactions:
             details = t.get('details', {}) or {}
             gid = details.get('payment_group_id')
             
+            # Priority 1: New Payment Group ID
+            if gid:
+                if gid not in groups:
+                    groups[gid] = []
+                groups[gid].append(t)
+            
+            # Priority 2: Legacy Regex Grouping (Only if no Group ID)
+            elif t.get('type') == 'sale':
+                description = t.get('description', '')
+                # Regex for "Venda Mesa X"
+                match = re.search(r"Venda Mesa (\d+)", description)
+                if match:
+                    table_id = match.group(1)
+                    # Group key: TableID + Timestamp (assuming same second)
+                    # Note: Pagination slicing might split these if they span pages, 
+                    # but usually they are adjacent.
+                    key = f"{table_id}_{t.get('timestamp')}"
+                    
+                    if key not in legacy_groups:
+                        legacy_groups[key] = []
+                    legacy_groups[key].append(t)
+        
+        for t in transactions:
+            details = t.get('details', {}) or {}
+            gid = details.get('payment_group_id')
+            
+            # Handle Payment Group ID
             if gid:
                 if gid in seen_groups:
                     continue
                 
-                # Create Group Transaction
                 group_txs = groups[gid]
-                
-                # Base the group info on the first transaction
                 base_tx = group_txs[0]
-                
-                # Calculate total from the group items
                 total_amount = sum(float(tx.get('amount', 0)) for tx in group_txs)
                 
-                # Collect methods details
                 sub_transactions = []
                 for tx in group_txs:
                     sub_amount = float(tx.get('amount', 0))
@@ -754,15 +772,12 @@ class CashierService:
                         'percent': round(percent, 1)
                     })
                 
-                # Construct display object (copy to avoid modifying original session data)
                 group_obj = base_tx.copy()
                 group_obj['is_group'] = True
                 group_obj['amount'] = total_amount
-                # Simplify description if it follows pattern "Venda ... - Metodo"
                 base_desc = base_tx.get('description', '')
                 if ' - ' in base_desc:
                     parts = base_desc.split(' - ')
-                    # Rejoin all but last part (method)
                     group_obj['description'] = ' - '.join(parts[:-1])
                 
                 group_obj['sub_transactions'] = sub_transactions
@@ -770,10 +785,104 @@ class CashierService:
                 
                 processed.append(group_obj)
                 seen_groups.add(gid)
+                
+            # Handle Legacy Grouping
+            elif t.get('type') == 'sale' and re.search(r"Venda Mesa (\d+)", t.get('description', '')):
+                description = t.get('description', '')
+                match = re.search(r"Venda Mesa (\d+)", description)
+                table_id = match.group(1)
+                key = f"{table_id}_{t.get('timestamp')}"
+                
+                if key in seen_legacy_groups:
+                    continue
+                    
+                group_txs = legacy_groups.get(key, [t])
+                
+                # If only one transaction, treat as normal
+                if len(group_txs) <= 1:
+                    processed.append(t)
+                    seen_legacy_groups.add(key)
+                    continue
+                    
+                # Create Group
+                base_tx = group_txs[0]
+                total_amount = sum(float(tx.get('amount', 0)) for tx in group_txs)
+                
+                sub_transactions = []
+                for tx in group_txs:
+                    sub_amount = float(tx.get('amount', 0))
+                    percent = (sub_amount / total_amount * 100) if total_amount else 0
+                    sub_transactions.append({
+                        'method': tx.get('payment_method', 'Outros'),
+                        'amount': sub_amount,
+                        'timestamp': tx.get('timestamp'),
+                        'percent': round(percent, 1)
+                    })
+                    
+                group_obj = base_tx.copy()
+                group_obj['is_group'] = True
+                group_obj['amount'] = total_amount
+                group_obj['description'] = f"Venda Mesa {table_id}"
+                
+                # Merge notes
+                notes = []
+                for tx in group_txs:
+                    if '[' in tx.get('description', ''):
+                        parts = tx['description'].split('[')
+                        if len(parts) > 1:
+                            note = parts[1].replace(']', '').strip()
+                            if note and note not in notes:
+                                notes.append(note)
+                if notes:
+                    group_obj['description'] += f" [{', '.join(notes)}]"
+                
+                group_obj['sub_transactions'] = sub_transactions
+                group_obj['payment_method'] = "Múltiplo"
+                
+                processed.append(group_obj)
+                seen_legacy_groups.add(key)
+                
             else:
                 processed.append(t)
                 
         return processed
+
+    @staticmethod
+    def get_paginated_transactions(session_id, page=1, per_page=20):
+        """
+        Returns a paginated, reversed (newest first), and prepared list of transactions.
+        Groups transactions BEFORE slicing to prevent splitting groups across pages.
+        """
+        session = CashierService.get_session_by_id(session_id)
+        if not session:
+            return [], False
+
+        all_transactions = session.get('transactions', [])
+        # Reverse to get newest first (Display Order: Newest -> Oldest)
+        reversed_transactions = list(reversed(all_transactions))
+        
+        # Prepare (Group) ALL transactions first to ensure groups aren't broken by pagination slicing
+        # This is slightly more expensive but ensures consistency
+        prepared_all = CashierService.prepare_transactions_for_display(reversed_transactions)
+        
+        total_items = len(prepared_all)
+        start = (page - 1) * per_page
+        end = start + per_page
+        
+        # Slice the prepared list
+        sliced_transactions = prepared_all[start:end]
+        
+        has_more = end < total_items
+        
+        return sliced_transactions, has_more
+
+    @staticmethod
+    def get_session_by_id(session_id):
+        sessions = CashierService._load_sessions()
+        for s in sessions:
+            if s.get('id') == session_id:
+                return s
+        return None
 
     @staticmethod
     def get_history(start_date=None, end_date=None, cashier_type=None):

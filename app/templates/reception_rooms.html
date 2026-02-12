@@ -28,7 +28,7 @@
             <button class="btn btn-outline-info me-2" data-bs-toggle="modal" data-bs-target="#checklistConfigModal">
                 <i class="bi bi-list-check"></i> Gerenciar Checklist
             </button>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#checkinModal">
+            <button class="btn btn-primary" onclick="openCheckinModal()">
                 <i class="bi bi-person-plus"></i> Novo Check-in
             </button>
         </div>
@@ -634,7 +634,7 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Check-in</label>
-                            <input type="text" class="form-control" name="checkin_date" value="{{ today }}" readonly>
+                            <input type="date" class="form-control" name="checkin_date" value="{{ today }}" readonly>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Check-out Previsto</label>
@@ -1476,6 +1476,16 @@
              if (select) select.value = "";
         }
         
+        // Always set check-in date to today (client-side to avoid stale date)
+        const checkinInput = document.querySelector('input[name="checkin_date"]');
+        if (checkinInput) {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            checkinInput.value = `${year}-${month}-${day}`;
+        }
+
         var myModal = new bootstrap.Modal(document.getElementById('checkinModal'));
         myModal.show();
     };
@@ -2070,20 +2080,7 @@
         });
     };
 
-    window.openCheckinModal = function(roomNum) {
-        if (roomNum) {
-            const select = document.getElementById('checkin_room_select');
-            if (select) {
-                select.value = roomNum;
-            }
-        } else {
-             const select = document.getElementById('checkin_room_select');
-             if (select) select.value = "";
-        }
-        
-        var myModal = new bootstrap.Modal(document.getElementById('checkinModal'));
-        myModal.show();
-    };
+
     function openCancelModal(btn) {
         const id = btn.getAttribute('data-id');
         const date = btn.getAttribute('data-date');

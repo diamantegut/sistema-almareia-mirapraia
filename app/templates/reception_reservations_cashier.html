@@ -143,7 +143,7 @@
                                 <th class="text-end">Valor</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="transactions-body">
                             {% for t in displayed_transactions %}
                             <tr>
                                 <td>{{ t.time }}</td>
@@ -163,7 +163,9 @@
                                 <td>{{ t.description }}</td>
                                 <td>
                                     {% if t.payment_method == 'Múltiplos' %}
-                                        <button class="btn btn-sm btn-outline-secondary" onclick="showPaymentDetails({{ t.details.payment_details|tojson|forceescape }})">
+                                        <button class="btn btn-sm btn-outline-secondary" 
+                                                data-payment-details='{{ t.details.payment_details|tojson|safe }}'
+                                                onclick="showPaymentDetails(this)">
                                             <i class="bi bi-info-circle"></i> Múltiplos
                                         </button>
                                     {% else %}
@@ -176,7 +178,7 @@
                                 </td>
                             </tr>
                             {% else %}
-                            <tr>
+                            <tr id="no-transactions-row">
                                 <td colspan="5" class="text-center py-4 text-muted">
                                     Nenhuma movimentação registrada.
                                 </td>
@@ -184,6 +186,17 @@
                             {% endfor %}
                         </tbody>
                     </table>
+                    
+                    {% if has_more %}
+                    <div class="text-center p-3" id="loading-more-container">
+                        <button id="load-more-btn" class="btn btn-outline-primary" onclick="loadMoreTransactions()">
+                            Carregar Mais
+                        </button>
+                        <div id="loading-spinner" class="spinner-border text-primary d-none" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -199,10 +212,11 @@
                     <h5 class="modal-title">Registrar Recebimento (Reserva/Check-in)</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <form method="POST" onsubmit="this.querySelector('button[type=submit]').disabled=true; this.querySelector('button[type=submit]').innerHTML='<span class=\'spinner-border spinner-border-sm me-2\'></span>Processando...';">
+                <form id="saleForm" onsubmit="handleTransaction(event, 'saleModal')">
                     <div class="modal-body">
                         <input type="hidden" name="action" value="add_transaction">
                         <input type="hidden" name="type" value="sale">
+                        <input type="hidden" name="idempotency_key" class="idempotency-key">
                         <div class="mb-3">
                             <label class="form-label">Valor (R$)</label>
                             <input type="tel" class="form-control" name="amount" required onfocus="this.select()" oninput="formatCurrency(this)">
@@ -278,7 +292,10 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-success">Confirmar Recebimento</button>
+                        <button type="submit" class="btn btn-success">
+                            <span class="spinner-border spinner-border-sm d-none me-2" role="status" aria-hidden="true"></span>
+                            Confirmar Recebimento
+                        </button>
                     </div>
                 </form>
             </div>
@@ -293,10 +310,11 @@
                     <h5 class="modal-title">Realizar Sangria (Retirada)</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <form method="POST" onsubmit="this.querySelector('button[type=submit]').disabled=true; this.querySelector('button[type=submit]').innerHTML='<span class=\'spinner-border spinner-border-sm me-2\'></span>Processando...';">
+                <form id="sangriaForm" onsubmit="handleTransaction(event, 'sangriaModal')">
                     <div class="modal-body">
                         <input type="hidden" name="action" value="add_transaction">
                         <input type="hidden" name="type" value="withdrawal">
+                        <input type="hidden" name="idempotency_key" class="idempotency-key">
                         <div class="mb-3">
                             <label class="form-label">Valor (R$)</label>
                             <input type="tel" class="form-control" name="amount" required onfocus="this.select()" oninput="formatCurrency(this)">
@@ -308,7 +326,10 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-danger">Confirmar Sangria</button>
+                        <button type="submit" class="btn btn-danger">
+                            <span class="spinner-border spinner-border-sm d-none me-2" role="status" aria-hidden="true"></span>
+                            Confirmar Sangria
+                        </button>
                     </div>
                 </form>
             </div>
@@ -323,10 +344,11 @@
                     <h5 class="modal-title">Realizar Suprimento (Entrada)</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <form method="POST" onsubmit="this.querySelector('button[type=submit]').disabled=true; this.querySelector('button[type=submit]').innerHTML='<span class=\'spinner-border spinner-border-sm me-2\'></span>Processando...';">
+                <form id="suprimentoForm" onsubmit="handleTransaction(event, 'suprimentoModal')">
                     <div class="modal-body">
                         <input type="hidden" name="action" value="add_transaction">
                         <input type="hidden" name="type" value="deposit">
+                        <input type="hidden" name="idempotency_key" class="idempotency-key">
                         <div class="mb-3">
                             <label class="form-label">Valor (R$)</label>
                             <input type="tel" class="form-control" name="amount" required onfocus="this.select()" oninput="formatCurrency(this)">
@@ -338,7 +360,10 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-success">Confirmar Suprimento</button>
+                        <button type="submit" class="btn btn-success">
+                            <span class="spinner-border spinner-border-sm d-none me-2" role="status" aria-hidden="true"></span>
+                            Confirmar Suprimento
+                        </button>
                     </div>
                 </form>
             </div>
@@ -353,9 +378,10 @@
                     <h5 class="modal-title">Realizar Transferência</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <form method="POST">
+                <form id="transferForm" onsubmit="handleTransaction(event, 'transferModal')">
                     <input type="hidden" name="action" value="add_transaction">
                     <input type="hidden" name="type" value="transfer">
+                    <input type="hidden" name="idempotency_key" class="idempotency-key">
                     <div class="modal-body">
                         <div class="mb-3">
                             <label class="form-label">Caixa de Destino</label>
@@ -375,7 +401,10 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Realizar Transferência</button>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="spinner-border spinner-border-sm d-none me-2" role="status" aria-hidden="true"></span>
+                            Realizar Transferência
+                        </button>
                     </div>
                 </form>
             </div>
@@ -387,10 +416,10 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header bg-dark text-white">
-                    <h5 class="modal-title">Fechar Caixa de Reservas</h5>
+                    <h5 class="modal-title">Fechar Caixa</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <form method="POST" onsubmit="return confirm('ATENÇÃO: Você está prestes a fechar o caixa de reservas. Esta ação é irreversível.\n\nTem certeza que deseja continuar?');">
+                <form method="POST" onsubmit="return confirm('ATENÇÃO: Você está prestes a fechar o caixa de reservas. Esta ação é irreversível e bloqueará novas operações até a reabertura.\n\nTem certeza que conferiu todos os valores e deseja continuar?');">
                     <div class="modal-body">
                         <input type="hidden" name="action" value="close_cashier">
                         <p>Confira os valores antes de fechar.</p>
@@ -399,7 +428,7 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Saldo Final em Gaveta (Real)</label>
-                            <input type="number" step="0.01" class="form-control" name="closing_balance" required value="{{ "%.2f"|format(total_balance) }}">
+                            <input type="tel" class="form-control" name="closing_balance" required value="{{ "%.2f"|format(total_balance)|replace('.', ',') }}" onfocus="this.select()" oninput="formatCurrency(this)">
                             <div class="form-text">Informe o valor contado fisicamente.</div>
                         </div>
                     </div>
@@ -411,28 +440,246 @@
             </div>
         </div>
     </div>
+    {% endif %}
+</div>
 
-    <!-- Payment Details Modal -->
+<!-- Payment Details Modal -->
     <div class="modal fade" id="paymentDetailsModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header bg-info text-white">
-                    <h5 class="modal-title">Detalhes do Pagamento</h5>
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="bi bi-info-circle"></i> Detalhes do Pagamento</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <ul class="list-group" id="paymentDetailsList">
+                <div class="modal-body p-0">
+                    <div class="list-group list-group-flush" id="paymentDetailsList">
                         <!-- Populated by JS -->
-                    </ul>
+                    </div>
+                    <div class="p-3 bg-light border-top">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-bold">Total:</span>
+                            <span class="fw-bold fs-5 text-success" id="paymentDetailsTotal">R$ 0,00</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
                 </div>
             </div>
         </div>
     </div>
-    {% endif %}
-</div>
 
-<script>
-    // Multi-Payment Logic
+    <script>
+    // Infinite Scroll / Pagination Logic
+    let currentPage = parseInt("{{ current_page|default(1) }}");
+    let isLoading = false;
+    let hasMore = "{{ 'true' if has_more else 'false' }}" === "true";
+
+    function showPaymentDetails(btn) {
+        try {
+            const details = JSON.parse(btn.getAttribute('data-payment-details') || '[]');
+            const listEl = document.getElementById('paymentDetailsList');
+            const totalEl = document.getElementById('paymentDetailsTotal');
+            
+            listEl.innerHTML = '';
+            let total = 0;
+            
+            details.forEach(p => {
+                let amount = parseFloat(p.amount || 0);
+                total += amount;
+                
+                // Determine Method Name (handle object or string)
+                let method = p.method || p.method_name || 'Desconhecido';
+                
+                const item = document.createElement('div');
+                item.className = 'list-group-item d-flex justify-content-between align-items-center py-3';
+                item.innerHTML = `
+                    <div>
+                        <div class="fw-bold text-dark">${method}</div>
+                        <small class="text-muted">Parcela de pagamento</small>
+                    </div>
+                    <span class="fw-bold text-primary">R$ ${amount.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                `;
+                listEl.appendChild(item);
+            });
+            
+            totalEl.innerText = 'R$ ' + total.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            
+            const modal = new bootstrap.Modal(document.getElementById('paymentDetailsModal'));
+            modal.show();
+            
+        } catch (e) {
+            console.error('Error parsing payment details', e);
+            alert('Erro ao exibir detalhes: Dados inválidos.');
+        }
+    }
+
+    function loadMoreTransactions() {
+        if (isLoading || !hasMore) return;
+
+        isLoading = true;
+        document.getElementById('load-more-btn').classList.add('d-none');
+        document.getElementById('loading-spinner').classList.remove('d-none');
+
+        const nextPage = currentPage + 1;
+        
+        fetch(`${window.location.pathname}?page=${nextPage}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const tbody = document.getElementById('transactions-body');
+            const noTxRow = document.getElementById('no-transactions-row');
+            if (noTxRow) noTxRow.remove();
+
+            data.transactions.forEach(t => {
+                const row = document.createElement('tr');
+                
+                // Determine badges
+                let typeBadge = '';
+                if (t.type === 'sale') typeBadge = '<span class="badge bg-success">Recebimento</span>';
+                else if (t.category === 'Pagamento de Conta' || t.type === 'in') typeBadge = '<span class="badge bg-success">Recebimento</span>';
+                else if (t.category === 'Suprimento' || t.type === 'deposit') typeBadge = '<span class="badge bg-info text-dark">Suprimento</span>';
+                else if (t.category === 'Sangria' || t.type === 'withdrawal' || t.type === 'out') typeBadge = '<span class="badge bg-danger">Sangria</span>';
+                else typeBadge = `<span class="badge bg-secondary">${t.category || t.type}</span>`;
+
+                // Payment Method
+                let paymentCol = '';
+                if (t.payment_method === 'Múltiplos') {
+                    // Note: simplified for dynamic loading; full modal support would require more complex DOM gen
+                    paymentCol = `<button class="btn btn-sm btn-outline-secondary" onclick='alert("Detalhes de pagamentos múltiplos não disponíveis no carregamento dinâmico simplificado.")'>
+                                    <i class="bi bi-info-circle"></i> Múltiplos
+                                  </button>`;
+                } else {
+                    paymentCol = (t.payment_method || '-');
+                    paymentCol = paymentCol.charAt(0).toUpperCase() + paymentCol.slice(1);
+                }
+
+                // Amount
+                const isNegative = ['out', 'withdrawal'].includes(t.type);
+                const amountClass = isNegative ? 'text-danger' : 'text-success';
+                const prefix = isNegative ? '-' : '';
+
+                row.innerHTML = `
+                    <td>${t.time}</td>
+                    <td>${typeBadge}</td>
+                    <td>${t.description}</td>
+                    <td>${paymentCol}</td>
+                    <td class="text-end fw-bold ${amountClass}">
+                        ${prefix} R$ ${parseFloat(t.amount).toFixed(2)}
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            currentPage = data.current_page;
+            hasMore = data.has_more;
+
+            if (!hasMore) {
+                const container = document.getElementById('loading-more-container');
+                if (container) container.remove();
+            } else {
+                document.getElementById('load-more-btn').classList.remove('d-none');
+                document.getElementById('loading-spinner').classList.add('d-none');
+            }
+        })
+        .catch(err => {
+            console.error('Error loading transactions:', err);
+            alert('Erro ao carregar mais transações.');
+            document.getElementById('load-more-btn').classList.remove('d-none');
+            document.getElementById('loading-spinner').classList.add('d-none');
+        })
+        .finally(() => {
+            isLoading = false;
+        });
+    }
+
+    // Generic Async Transaction Handler
+    async function handleTransaction(event, modalId) {
+        event.preventDefault();
+        
+        const form = event.target;
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const spinner = submitBtn.querySelector('.spinner-border');
+        
+        // Disable UI
+        submitBtn.disabled = true;
+        if (spinner) spinner.classList.remove('d-none');
+        
+        const formData = new FormData(form);
+        
+        try {
+            const response = await fetch(window.location.href, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            
+            const result = await response.json();
+            
+            if (result.success || (result.message && !result.error)) {
+                // Success
+                const modalEl = document.getElementById(modalId);
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                modal.hide();
+                form.reset();
+                
+                // Regenerate UUID for next time
+                const keyInput = form.querySelector('.idempotency-key');
+                if (keyInput) keyInput.value = generateUUID();
+                
+                // Reload to show new data (simpler than appending for now, ensures sync)
+                window.location.reload(); 
+            } else {
+                // Error
+                alert(result.error || result.message || 'Erro ao processar transação.');
+                submitBtn.disabled = false;
+                if (spinner) spinner.classList.add('d-none');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            // If response is not JSON (e.g. standard redirect), reload
+            window.location.reload();
+        }
+    }
+
+    // Helper Functions
+    window.formatCurrency = function(input) {
+        let value = input.value.replace(/\D/g, '');
+        if (value === '') {
+            input.value = '';
+            return;
+        }
+        let floatVal = parseInt(value) / 100;
+        input.value = floatVal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    };
+
+    function generateUUID() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+
+    // Initialize UUIDs on Modal Show
+    document.addEventListener('DOMContentLoaded', function() {
+        ['saleModal', 'suprimentoModal', 'sangriaModal', 'transferModal'].forEach(id => {
+            const modal = document.getElementById(id);
+            if (modal) {
+                modal.addEventListener('show.bs.modal', function () {
+                    const form = modal.querySelector('form');
+                    const keyInput = form.querySelector('.idempotency-key');
+                    if (keyInput) keyInput.value = generateUUID();
+                });
+            }
+        });
+    });
+
+    // Multi-Payment Logic (for Sale Modal)
     let paymentList = [];
 
     function toggleMultiPayment(checkbox) {
@@ -445,7 +692,7 @@
             singleDiv.classList.add('d-none');
             multiDiv.classList.remove('d-none');
             singleSelect.removeAttribute('required');
-            singleSelect.removeAttribute('name'); // Prevent sending this
+            singleSelect.removeAttribute('name'); 
             jsonInput.setAttribute('name', 'payment_list_json');
             updatePaymentCalculations();
         } else {
@@ -508,8 +755,7 @@
     function updatePaymentCalculations() {
         const totalPaid = paymentList.reduce((sum, p) => sum + p.amount, 0);
         
-        // Get Main Amount
-        const mainAmountInput = document.querySelector('input[name="amount"]');
+        const mainAmountInput = document.querySelector('#saleModal input[name="amount"]');
         let mainTotal = 0;
         if (mainAmountInput) {
             mainTotal = parseInt(mainAmountInput.value.replace(/\D/g, '') || '0') / 100;
@@ -531,103 +777,17 @@
              remainingEl.className = 'text-warning';
         }
 
-        // Update JSON
         document.getElementById('paymentListJson').value = JSON.stringify(paymentList);
     }
 
     // Attach listener to main amount input
     document.addEventListener('DOMContentLoaded', function() {
-        const mainAmountInput = document.querySelector('input[name="amount"]');
+        const mainAmountInput = document.querySelector('#saleModal input[name="amount"]');
         if (mainAmountInput) {
             mainAmountInput.addEventListener('input', updatePaymentCalculations);
         }
     });
 
-    function showPaymentDetails(details) {
-        const list = document.getElementById('paymentDetailsList');
-        list.innerHTML = '';
-        
-        if (details && details.length > 0) {
-            details.forEach(p => {
-                const li = document.createElement('li');
-                li.className = 'list-group-item d-flex justify-content-between align-items-center';
-                li.innerHTML = `
-                    ${p.method_name}
-                    <span class="badge bg-primary rounded-pill">R$ ${parseFloat(p.amount).toFixed(2)}</span>
-                `;
-                list.appendChild(li);
-            });
-        } else {
-            list.innerHTML = '<li class="list-group-item">Nenhum detalhe disponível</li>';
-        }
-        
-        const modal = new bootstrap.Modal(document.getElementById('paymentDetailsModal'));
-        modal.show();
-    }
-
-    window.formatCurrency = function(input) {
-        let value = input.value.replace(/\D/g, '');
-        value = (value / 100).toFixed(2) + '';
-        input.value = value;
-    }
 </script>
 
-{% if receipt_transaction %}
-<!-- Receipt Print Template -->
-<div id="receipt-print" class="d-none d-print-block">
-    <div class="text-center mb-4">
-        <h4>Mirapraia Hotel</h4>
-        <h5>Comprovante de Retirada (Sangria)</h5>
-    </div>
-    
-    <div class="mb-4">
-        <p><strong>Data/Hora:</strong> {{ receipt_transaction.timestamp.split(' ')[1] if receipt_transaction.timestamp else receipt_transaction.time }} - {{ receipt_transaction.timestamp.split(' ')[0] if receipt_transaction.timestamp else '' }}</p>
-        <p><strong>Responsável:</strong> {{ receipt_transaction.user|default('Recepção') }}</p>
-        <p><strong>Descrição:</strong> {{ receipt_transaction.description }}</p>
-        <div class="border-top border-bottom py-2 my-2">
-            <h3>Valor: R$ {{ "%.2f"|format(receipt_transaction.amount) }}</h3>
-        </div>
-    </div>
-
-    <div class="mt-5 pt-5 text-center">
-        <div class="border-top border-dark w-75 mx-auto pt-2">
-            <p>Assinatura do Responsável</p>
-        </div>
-    </div>
-    
-    <div class="mt-5 pt-5 text-center">
-        <div class="border-top border-dark w-75 mx-auto pt-2">
-            <p>Assinatura da Gerência / Financeiro</p>
-        </div>
-    </div>
-</div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Trigger print dialog
-        window.print();
-        
-        // Optional: Remove query param after print to avoid re-printing on refresh
-        // But for now, let's keep it simple. User can navigate away.
-    });
-</script>
-
-<style>
-    @media print {
-        body * {
-            visibility: hidden;
-        }
-        #receipt-print, #receipt-print * {
-            visibility: visible;
-        }
-        #receipt-print {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            padding: 20px;
-        }
-    }
-</style>
-{% endif %}
 {% endblock %}

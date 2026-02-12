@@ -23201,9 +23201,24 @@
         },
         "service_fee_removed": false,
         "date": "06/02/2026 19:24",
-        "status": "pending",
+        "status": "paid",
         "type": "restaurant",
-        "source": "restaurant"
+        "source": "restaurant",
+        "paid_at": "11/02/2026 18:14",
+        "reception_cashier_id": "SESSION_GUEST_CONSUMPTION_20260211173754_Angelo",
+        "payment_method": "Múltiplos",
+        "payment_details": [
+            {
+                "method_id": "dinheiro",
+                "method_name": "Dinheiro",
+                "amount": 0.15
+            },
+            {
+                "method_id": "pixemailalmareia",
+                "method_name": "PIX Email Almareia",
+                "amount": 31.64
+            }
+        ]
     },
     {
         "id": "CHARGE_40_20260206194646_7a65b0_REST",
@@ -33015,9 +33030,24 @@
         },
         "service_fee_removed": false,
         "date": "09/02/2026 19:18",
-        "status": "pending",
+        "status": "paid",
         "type": "restaurant",
-        "source": "restaurant"
+        "source": "restaurant",
+        "paid_at": "12/02/2026 00:59",
+        "reception_cashier_id": "SESSION_GUEST_CONSUMPTION_20260212005012_Angelo",
+        "payment_method": "Múltiplos",
+        "payment_details": [
+            {
+                "method_id": "dinheiro",
+                "method_name": "Dinheiro",
+                "amount": 400.0
+            },
+            {
+                "method_id": "pixemailalmareia",
+                "method_name": "PIX Email Almareia",
+                "amount": 482.068
+            }
+        ]
     },
     {
         "id": "CHARGE_73_20260209191817_c6ad78_REST",
@@ -34488,9 +34518,24 @@
         },
         "service_fee_removed": false,
         "date": "10/02/2026 15:37",
-        "status": "pending",
+        "status": "paid",
         "type": "restaurant",
-        "source": "restaurant"
+        "source": "restaurant",
+        "paid_at": "12/02/2026 00:50",
+        "reception_cashier_id": "SESSION_GUEST_CONSUMPTION_20260212005012_Angelo",
+        "payment_method": "Múltiplos",
+        "payment_details": [
+            {
+                "method_id": "pixemailalmareia",
+                "method_name": "PIX Email Almareia",
+                "amount": 100.0
+            },
+            {
+                "method_id": "pixemailalmareia",
+                "method_name": "PIX Email Almareia",
+                "amount": 53.34
+            }
+        ]
     },
     {
         "id": "CHARGE_58_20260210154044_586d2c_REST",
@@ -35311,9 +35356,12 @@
         },
         "service_fee_removed": false,
         "date": "10/02/2026 21:09",
-        "status": "pending",
+        "status": "paid",
         "type": "restaurant",
-        "source": "restaurant"
+        "source": "restaurant",
+        "paid_at": "12/02/2026 00:50",
+        "reception_cashier_id": "SESSION_GUEST_CONSUMPTION_20260212005012_Angelo",
+        "payment_method": "pixemailalmareia"
     },
     {
         "id": "CHARGE_82_20260210213212_f20b8e_REST",
@@ -35543,9 +35591,12 @@
         "discount": 0,
         "flags": [],
         "date": "11/02/2026 10:56",
-        "status": "pending",
+        "status": "paid",
         "type": "minibar",
-        "source": "minibar"
+        "source": "minibar",
+        "paid_at": "12/02/2026 00:50",
+        "reception_cashier_id": "SESSION_GUEST_CONSUMPTION_20260212005012_Angelo",
+        "payment_method": "debitoangelo"
     },
     {
         "id": "CHARGE_GOV_31_20260211114516_924a9c",
@@ -35738,5 +35789,107 @@
         "paid_at": "11/02/2026 15:44",
         "reception_cashier_id": "SESSION_GUEST_CONSUMPTION_20260211154307_Angelo",
         "payment_method": "dinheiro"
+    },
+    {
+        "id": "CHARGE_GOV_11_20260212004710_6027b6",
+        "room_number": "11",
+        "table_id": "GOV",
+        "total": 91.8,
+        "items": [
+            {
+                "id": "45",
+                "name": "Água com gás LATA FRIGOBAR",
+                "price": 9.9,
+                "qty": 2.0,
+                "category": "Frigobar",
+                "added_at": "00:47:10",
+                "added_by": "Angelo"
+            },
+            {
+                "id": "49",
+                "name": "Bolsinha Personalizada (Cortesia Hospedes)",
+                "price": 1.0,
+                "qty": 2.0,
+                "category": "Frigobar",
+                "added_at": "00:47:10",
+                "added_by": "Angelo"
+            },
+            {
+                "id": "51",
+                "name": "Chapeu (Cortesia Hospedes)",
+                "price": 35.0,
+                "qty": 2.0,
+                "category": "Frigobar",
+                "added_at": "00:47:10",
+                "added_by": "Angelo"
+            }
+        ],
+        "service_fee": 0,
+        "discount": 0,
+        "flags": [],
+        "date": "12/02/2026 00:47",
+        "status": "paid",
+        "type": "minibar",
+        "source": "minibar",
+        "paid_at": "12/02/2026 00:50",
+        "reception_cashier_id": "SESSION_GUEST_CONSUMPTION_20260212005012_Angelo",
+        "payment_method": "creditoangelo"
+    },
+    {
+        "id": "CHARGE_GOV_21_20260212010248_0a4044",
+        "room_number": "21",
+        "table_id": "GOV",
+        "total": 23.98,
+        "items": [
+            {
+                "id": "45",
+                "name": "Água com gás LATA FRIGOBAR",
+                "price": 9.9,
+                "qty": 2.0,
+                "category": "Frigobar",
+                "added_at": "01:02:48",
+                "added_by": "Angelo"
+            },
+            {
+                "id": "49",
+                "name": "Bolsinha Personalizada (Cortesia Hospedes)",
+                "price": 1.0,
+                "qty": 2.0,
+                "category": "Frigobar",
+                "added_at": "01:02:48",
+                "added_by": "Angelo"
+            }
+        ],
+        "service_fee": 2.18,
+        "discount": 0,
+        "flags": [],
+        "date": "12/02/2026 01:02",
+        "status": "pending",
+        "type": "minibar",
+        "removed_items": [
+            {
+                "id": "48",
+                "name": "Agua Sem Gás Pet FRIGOBAR",
+                "price": 8.9,
+                "qty": 2.0,
+                "category": "Frigobar",
+                "added_at": "01:02:48",
+                "added_by": "Angelo",
+                "removed_at": "2026-02-12 01:04:47",
+                "removed_by": "Angelo",
+                "removal_justification": "teste"
+            }
+        ],
+        "audit_log": [
+            {
+                "timestamp": "12/02/2026 01:04:47",
+                "user": "Angelo",
+                "changes": [
+                    "Item Removido: Agua Sem Gás Pet FRIGOBAR (x2.0) - Justificativa: teste",
+                    "Recálculo Total: 39.60 -> 23.98"
+                ],
+                "justification": "teste"
+            }
+        ]
     }
 ]

@@ -20,7 +20,7 @@ from app.services.data_service import (
     load_audit_logs, save_audit_logs
 )
 from app.services.printer_manager import load_printers, load_printer_settings, save_printer_settings
-from app.services.printing_service import process_and_print_pending_bills, print_individual_bills_thermal, print_cashier_ticket
+from app.services.printing_service import process_and_print_pending_bills, print_individual_bills_thermal, print_cashier_ticket, print_cashier_ticket_async
 from app.services.logger_service import log_system_action, LoggerService
 from app.utils.logger import log_action
 from app.services.transfer_service import return_charge_to_restaurant, TableOccupiedError, TransferError
@@ -502,6 +502,19 @@ def reception_rooms():
             # Format room number
             room_num = format_room_number(room_num_raw)
             
+            # Validation: Check if room is already occupied
+            if str(room_num) in occupancy:
+                current_guest = occupancy[str(room_num)].get('guest_name', 'Hóspede Desconhecido')
+                # Allow update ONLY if guest name matches exactly (Edit Check-in scenario)
+                # Otherwise, block to prevent overwrite
+                if current_guest.lower() != guest_name.lower():
+                    log_system_action('Checkin Blocked', 'Checkin', f"Attempt to overwrite occupied room {room_num} ({current_guest}) with {guest_name}")
+                    flash(f'Erro: Quarto {room_num} já está ocupado por {current_guest}. Realize o check-out ou verifique o número do quarto.')
+                    return redirect(url_for('reception.reception_rooms'))
+                else:
+                    # It's an update for the same guest
+                    log_system_action('Checkin Update', 'Checkin', f"Updating info for {guest_name} in room {room_num}")
+            
             # Logic continues
             if room_num and guest_name:
                 # Convert dates to DD/MM/YYYY for storage/display
@@ -665,7 +678,8 @@ def reception_rooms():
                            grouped_charges=grouped_charges,
                            pending_rooms=pending_rooms,
                            payment_methods=payment_methods,
-                           products=products)
+                           products=products,
+                           today=datetime.now().strftime('%Y-%m-%d'))
 
 @reception_bp.route('/reception/cashier', methods=['GET', 'POST'])
 @login_required
@@ -978,6 +992,17 @@ def reception_cashier():
             if amount > 0 and description:
                 try:
                     if trans_type == 'transfer':
+                        # Idempotency Check
+                        idempotency_key = request.form.get('idempotency_key')
+                        if idempotency_key and current_session:
+                            for t in current_session.get('transactions', []):
+                                if t.get('details', {}).get('idempotency_key') == idempotency_key:
+                                    current_app.logger.warning(f"Duplicate transaction attempt detected. Key: {idempotency_key}")
+                                    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                                        return jsonify({'success': True, 'message': 'Transação já processada anteriormente.'})
+                                    flash('Transação já processada anteriormente.')
+                                    return redirect(url_for('reception.reception_cashier'))
+
                         target_cashier = request.form.get('target_cashier')
                         source_type = current_session.get('type', 'reception')
                         
@@ -986,10 +1011,9 @@ def reception_cashier():
                             target_type=target_cashier,
                             amount=amount,
                             description=description,
-                            user=current_user
+                            user=current_user,
+                            details={'idempotency_key': idempotency_key} if idempotency_key else None
                         )
-                        flash('Transferência realizada com sucesso.')
-                        log_action('Transferência Caixa', f'Recepção -> {target_cashier}: R$ {amount:.2f}', department='Recepção')
                         
                         try:
                             printers_config = load_printers()
@@ -1002,11 +1026,28 @@ def reception_cashier():
                                 target_printer = printers_config[0]
                             
                             if target_printer:
-                                print_cashier_ticket(target_printer, 'TRANSFERENCIA', amount, session.get('user', 'Sistema'), f"{description} -> {target_cashier}")
+                                print_cashier_ticket_async(target_printer, 'TRANSFERENCIA', amount, session.get('user', 'Sistema'), f"{description} -> {target_cashier}")
                         except Exception as e:
                             print(f"Error printing cashier ticket: {e}")
+
+                        log_action('Transferência Caixa', f'Recepção -> {target_cashier}: R$ {amount:.2f}', department='Recepção')
+                        
+                        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                            return jsonify({'success': True, 'message': 'Transferência realizada com sucesso.'})
+                        flash('Transferência realizada com sucesso.')
                     
                     elif trans_type == 'deposit':
+                        # Idempotency Check
+                        idempotency_key = request.form.get('idempotency_key')
+                        if idempotency_key and current_session:
+                            for t in current_session.get('transactions', []):
+                                if t.get('details', {}).get('idempotency_key') == idempotency_key:
+                                    current_app.logger.warning(f"Duplicate transaction attempt detected. Key: {idempotency_key}")
+                                    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                                        return jsonify({'success': True, 'message': 'Transação já processada anteriormente.'})
+                                    flash('Transação já processada anteriormente.')
+                                    return redirect(url_for('reception.reception_cashier'))
+
                         CashierService.add_transaction(
                             cashier_type=current_session.get('type', 'guest_consumption'),
                             amount=amount,
@@ -1014,10 +1055,10 @@ def reception_cashier():
                             payment_method='Dinheiro',
                             user=current_user,
                             transaction_type='in',
-                            is_withdrawal=False
+                            is_withdrawal=False,
+                            details={'idempotency_key': idempotency_key} if idempotency_key else None
                         )
                         log_action('Transação Caixa', f'Recepção Restaurante: Suprimento de R$ {amount:.2f} - {description}', department='Recepção')
-                        flash('Suprimento registrado com sucesso.')
                         
                         try:
                             printers_config = load_printers()
@@ -1030,11 +1071,27 @@ def reception_cashier():
                                 target_printer = printers_config[0]
                             
                             if target_printer:
-                                print_cashier_ticket(target_printer, 'SUPRIMENTO', amount, session.get('user', 'Sistema'), description)
+                                print_cashier_ticket_async(target_printer, 'SUPRIMENTO', amount, session.get('user', 'Sistema'), description)
                         except Exception as e:
                             print(f"Error printing cashier ticket: {e}")
+
+                        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                            return jsonify({'success': True, 'message': 'Suprimento registrado com sucesso.'})
+
+                        flash('Suprimento registrado com sucesso.')
                         
                     elif trans_type == 'withdrawal':
+                         # Idempotency Check
+                         idempotency_key = request.form.get('idempotency_key')
+                         if idempotency_key and current_session:
+                            for t in current_session.get('transactions', []):
+                                if t.get('details', {}).get('idempotency_key') == idempotency_key:
+                                    current_app.logger.warning(f"Duplicate transaction attempt detected. Key: {idempotency_key}")
+                                    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                                        return jsonify({'success': True, 'message': 'Transação já processada anteriormente.'})
+                                    flash('Transação já processada anteriormente.')
+                                    return redirect(url_for('reception.reception_cashier'))
+
                          CashierService.add_transaction(
                             cashier_type=current_session.get('type', 'guest_consumption'),
                             amount=amount,
@@ -1042,11 +1099,11 @@ def reception_cashier():
                             payment_method='Dinheiro',
                             user=current_user,
                             transaction_type='out',
-                            is_withdrawal=True
+                            is_withdrawal=True,
+                            details={'idempotency_key': idempotency_key} if idempotency_key else None
                         )
                          log_action('Transação Caixa', f'Recepção Restaurante: Sangria de R$ {amount:.2f} - {description}', department='Recepção')
-                         flash('Sangria registrada com sucesso.')
-
+                         
                          try:
                             printers_config = load_printers()
                             target_printer = None
@@ -1058,17 +1115,28 @@ def reception_cashier():
                                 target_printer = printers_config[0]
                             
                             if target_printer:
-                                print_cashier_ticket(target_printer, 'SANGRIA', amount, session.get('user', 'Sistema'), description)
+                                print_cashier_ticket_async(target_printer, 'SANGRIA', amount, session.get('user', 'Sistema'), description)
                          except Exception as e:
                             print(f"Error printing cashier ticket: {e}")
 
+                         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                            return jsonify({'success': True, 'message': 'Sangria registrada com sucesso.'})
+                         flash('Sangria registrada com sucesso.')
+
                 except ValueError as e:
+                    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                        return jsonify({'success': False, 'message': f'Erro: {str(e)}'})
                     flash(f'Erro: {str(e)}')
                 except Exception as e:
-                    flash(f'Erro inesperado: {str(e)}')
                     current_app.logger.error(f"Transaction Error: {e}")
+                    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                        return jsonify({'success': False, 'message': f'Erro inesperado: {str(e)}'})
+                    flash(f'Erro inesperado: {str(e)}')
             else:
-                flash('Valor inválido ou descrição ausente.')
+                msg = 'Valor inválido ou descrição ausente.'
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return jsonify({'success': False, 'message': msg})
+                flash(msg)
             
             return redirect(url_for('reception.reception_cashier'))
 
@@ -1114,12 +1182,31 @@ def reception_cashier():
     printers = load_printers()
     
     displayed_transactions = []
+    has_more = False
+    current_page = 1
+    
     if current_session:
-        displayed_transactions = CashierService.prepare_transactions_for_display(current_session.get('transactions', []))
+        try:
+            current_page = int(request.args.get('page', 1))
+            per_page = int(request.args.get('per_page', 20))
+        except ValueError:
+            current_page = 1
+            per_page = 20
+
+        displayed_transactions, has_more = CashierService.get_paginated_transactions(current_session.get('id'), page=current_page, per_page=per_page)
+
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' and request.method == 'GET':
+            return jsonify({
+                'transactions': displayed_transactions,
+                'has_more': has_more,
+                'current_page': current_page
+            })
 
     return render_template('reception_cashier.html', 
                          cashier=current_session, 
                          displayed_transactions=displayed_transactions,
+                         has_more=has_more,
+                         current_page=current_page,
                          pending_charges=pending_charges,
                          grouped_charges=sorted_rooms,
                          payment_methods=payment_methods,
@@ -1815,6 +1902,17 @@ def reception_reservations_cashier():
                         log_system_action('Transferência Caixa', f'Reservas -> {target_cashier}: R$ {amount:.2f}', department='Recepção')
 
                     elif trans_type == 'sale':
+                        # Idempotency Check
+                        idempotency_key = request.form.get('idempotency_key')
+                        if idempotency_key and current_session:
+                            for t in current_session.get('transactions', []):
+                                if t.get('details', {}).get('idempotency_key') == idempotency_key:
+                                    current_app.logger.warning(f"Duplicate transaction attempt detected. Key: {idempotency_key}")
+                                    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                                        return jsonify({'success': True, 'message': 'Transação já processada anteriormente.'})
+                                    flash('Transação já processada anteriormente.')
+                                    return redirect(url_for('reception.reception_reservations_cashier'))
+
                         payment_list_json = request.form.get('payment_list_json')
                         
                         if payment_list_json:
@@ -1854,11 +1952,16 @@ def reception_reservations_cashier():
                                         user=current_user,
                                         transaction_type='sale',
                                         is_withdrawal=False,
-                                        payment_group_id=group_id
+                                        payment_group_id=group_id,
+                                        details={'idempotency_key': idempotency_key} if idempotency_key else None
                                     )
                                     logging.warning(f"DEBUG: Added transaction for {p_method_name}: {p_amount}")
                                     
                                 log_system_action('Transação Caixa', f'Reservas: Recebimento Múltiplo de R$ {amount:.2f} - {description}', department='Recepção')
+                                
+                                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                                    return jsonify({'success': True, 'message': 'Recebimento múltiplo registrado com sucesso.'})
+
                                 flash('Recebimento múltiplo registrado com sucesso.')
 
                             except json.JSONDecodeError:
@@ -1880,12 +1983,28 @@ def reception_reservations_cashier():
                                 payment_method=method_name,
                                 user=current_user,
                                 transaction_type='sale',
-                                is_withdrawal=False
+                                is_withdrawal=False,
+                                details={'idempotency_key': idempotency_key} if idempotency_key else None
                             )
                             log_system_action('Transação Caixa', f'Reservas: Recebimento de R$ {amount:.2f} - {description}', department='Recepção')
+                            
+                            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                                return jsonify({'success': True, 'message': 'Recebimento registrado com sucesso.'})
+
                             flash('Recebimento registrado com sucesso.')
 
                     elif trans_type == 'deposit':
+                        # Idempotency Check
+                        idempotency_key = request.form.get('idempotency_key')
+                        if idempotency_key and current_session:
+                            for t in current_session.get('transactions', []):
+                                if t.get('details', {}).get('idempotency_key') == idempotency_key:
+                                    current_app.logger.warning(f"Duplicate transaction attempt detected. Key: {idempotency_key}")
+                                    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                                        return jsonify({'success': True, 'message': 'Transação já processada anteriormente.'})
+                                    flash('Transação já processada anteriormente.')
+                                    return redirect(url_for('reception.reception_reservations_cashier'))
+
                         CashierService.add_transaction(
                             cashier_type='reception_reservations',
                             amount=amount,
@@ -1893,9 +2012,14 @@ def reception_reservations_cashier():
                             payment_method='Dinheiro',
                             user=current_user,
                             transaction_type='deposit',
-                            is_withdrawal=False
+                            is_withdrawal=False,
+                            details={'idempotency_key': idempotency_key} if idempotency_key else None
                         )
                         log_system_action('Transação Caixa', f'Reservas: Suprimento de R$ {amount:.2f} - {description}')
+                        
+                        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                            return jsonify({'success': True, 'message': 'Suprimento registrado com sucesso.'})
+
                         flash('Suprimento registrado com sucesso.')
                         
                     elif trans_type == 'withdrawal':
@@ -1909,6 +2033,10 @@ def reception_reservations_cashier():
                             is_withdrawal=True
                         )
                         log_system_action('Transação Caixa', f'Reservas: Sangria de R$ {amount:.2f} - {description}')
+                        
+                        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                            return jsonify({'success': True, 'message': 'Sangria registrada com sucesso.'})
+
                         flash('Sangria registrada com sucesso.')
                 
                 except ValueError as e:
@@ -1940,13 +2068,32 @@ def reception_reservations_cashier():
         if 'opening_balance' not in current_session:
             current_session['opening_balance'] = initial_balance
 
+    # Pagination
+    try:
+        current_page = int(request.args.get('page', 1))
+        per_page = int(request.args.get('per_page', 20))
+    except ValueError:
+        current_page = 1
+        per_page = 20
+
     displayed_transactions = []
+    has_more = False
+    
     if current_session:
-        displayed_transactions = CashierService.prepare_transactions_for_display(current_session.get('transactions', []))
+        displayed_transactions, has_more = CashierService.get_paginated_transactions(current_session.get('id'), page=current_page, per_page=per_page)
+
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' and request.method == 'GET':
+            return jsonify({
+                'transactions': displayed_transactions,
+                'has_more': has_more,
+                'current_page': current_page
+            })
 
     return render_template('reception_reservations_cashier.html', 
                          cashier=current_session, 
                          displayed_transactions=displayed_transactions,
+                         has_more=has_more,
+                         current_page=current_page,
                          payment_methods=payment_methods,
                          total_in=total_in,
                          total_out=total_out,
