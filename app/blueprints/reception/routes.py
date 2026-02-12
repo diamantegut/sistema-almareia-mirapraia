@@ -750,7 +750,7 @@ def reception_cashier():
 
     payment_methods = load_payment_methods()
     # Filter for reception availability
-    payment_methods = [m for m in payment_methods if 'reception' in m.get('available_in', ['restaurant', 'reception'])]
+    payment_methods = [m for m in payment_methods if 'reception' in m.get('available_in', []) or 'caixa_recepcao' in m.get('available_in', [])]
 
     if request.method == 'POST':
         action = request.form.get('action')

@@ -10,7 +10,7 @@
                 <i class="bi bi-cash-coin"></i> <span class="d-none d-sm-inline">Caixa</span>
             </a>
             {% endif %}
-            {% if session.get('role') in ['admin', 'gerente'] %}
+            {% if session.get('role') in ['admin', 'gerente', 'supervisor', 'recepcao'] or 'restaurante_full_access' in session.get('permissions', []) or 'recepcao' in session.get('permissions', []) %}
             <a href="{{ url_for('menu.menu_management') }}" class="btn btn-primary">
                 <i class="bi bi-journal-text"></i> <span class="d-none d-sm-inline">Cardápio</span>
             </a>
@@ -414,6 +414,9 @@
         </div>
     </div>
 </div>
+<script id="breakfast-tables-data" type="application/json">
+    {{ breakfast_tables|default([])|tojson|safe }}
+</script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         checkBreakfastTime();
@@ -436,7 +439,7 @@
         // const isBreakfastTime = true; // For testing
         
         // Backend data about breakfast tables
-        const breakfastTables = {{ breakfast_tables|tojson|default([]) }};
+        const breakfastTables = JSON.parse(document.getElementById('breakfast-tables-data').textContent);
 
         document.querySelectorAll('.table-card').forEach(card => {
             const isGuest = card.classList.contains('is-guest-table') || card.classList.contains('is-room');

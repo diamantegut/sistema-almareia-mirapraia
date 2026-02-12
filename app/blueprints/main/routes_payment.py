@@ -30,9 +30,9 @@ def payment_methods():
             fiscal_cnpj = request.form.get('fiscal_cnpj', '').strip()
             
             available_in = []
-            if av_rest: available_in.append('caixa_restaurante')
-            if av_rec: available_in.append('caixa_recepcao')
-            if av_res: available_in.append('caixa_reservas')
+            if av_rest: available_in.append('restaurant')
+            if av_rec: available_in.append('reception')
+            if av_res: available_in.append('reservations')
             
             if name:
                 method_id = re.sub(r'[^a-z0-9]', '', name.lower())
@@ -61,9 +61,9 @@ def payment_methods():
             fiscal_cnpj = request.form.get('fiscal_cnpj', '').strip()
             
             available_in = []
-            if av_rest: available_in.append('caixa_restaurante')
-            if av_rec: available_in.append('caixa_recepcao')
-            if av_res: available_in.append('caixa_reservas')
+            if av_rest: available_in.append('restaurant')
+            if av_rec: available_in.append('reception')
+            if av_res: available_in.append('reservations')
 
             for m in methods:
                 if m['id'] == method_id:

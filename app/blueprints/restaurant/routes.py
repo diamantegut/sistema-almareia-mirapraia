@@ -452,7 +452,10 @@ def restaurant_tables():
     # Permission Check
     user_role = session.get('role')
     user_perms = session.get('permissions', [])
-    if user_role not in ['admin', 'gerente', 'supervisor'] and 'restaurante' not in user_perms and 'recepcao' not in user_perms:
+    
+    has_restaurant_access = any('restaurante' in p for p in user_perms)
+    
+    if user_role not in ['admin', 'gerente', 'supervisor'] and not has_restaurant_access and 'recepcao' not in user_perms:
         flash('Acesso restrito.')
         return redirect(url_for('main.index'))
 
@@ -1744,8 +1747,14 @@ def restaurant_table_order(table_id):
     
     # Group products by category
     grouped_products_dict = {}
+    
+    # PERMISSION CHECK FOR VIEWING INACTIVE PRODUCTS
+    user_role = session.get('role')
+    user_perms = session.get('permissions', [])
+    can_manage_items = user_role in ['admin', 'gerente', 'supervisor'] or 'restaurante_full_access' in user_perms
+    
     for p in products:
-        if p.get('active', True): # Only show active products
+        if p.get('active', True) or can_manage_items: # Show if active OR can manage
             cat = p.get('category', 'Outros')
             
             # Hide Frigobar in Restaurant Mode
@@ -1903,7 +1912,8 @@ def restaurant_table_order(table_id):
                            payment_methods=payment_methods,
                            category_colors=settings.get('category_colors', {}),
                            all_tables=all_tables,
-                           occupied_tables=occupied_tables)
+                           occupied_tables=occupied_tables,
+                           can_manage_items=can_manage_items)
 
 @restaurant_bp.route('/restaurant/dashboard')
 @login_required
@@ -2244,6 +2254,100 @@ def get_available_tables():
             available.append(t_id)
             
     return jsonify(available)
+
+@restaurant_bp.route('/restaurant/order/edit_item', methods=['POST'])
+@login_required
+def restaurant_edit_order_item():
+    user_role = session.get('role')
+    user_perms = session.get('permissions', [])
+    if user_role not in ['admin', 'gerente', 'supervisor'] and 'restaurante_full_access' not in user_perms:
+        return jsonify({'success': False, 'error': 'Permissão negada.'}), 403
+
+    table_id = request.form.get('table_id')
+    item_id = request.form.get('item_id')
+    new_qty = request.form.get('qty')
+    new_obs = request.form.get('observations')
+
+    if not table_id or not item_id:
+        return jsonify({'success': False, 'error': 'Dados incompletos.'}), 400
+
+    orders = load_table_orders()
+    str_table_id = str(table_id)
+    
+    if str_table_id not in orders:
+        return jsonify({'success': False, 'error': 'Mesa não encontrada.'}), 404
+
+    order = orders[str_table_id]
+    item_found = False
+    
+    for item in order.get('items', []):
+        if str(item.get('id')) == str(item_id):
+            item_found = True
+            if new_qty:
+                try:
+                    qty_val = float(new_qty)
+                    if qty_val > 0:
+                        item['qty'] = qty_val
+                except ValueError:
+                    pass
+            
+            if new_obs is not None:
+                if new_obs.strip():
+                    item['observations'] = [x.strip() for x in new_obs.split(',')]
+                else:
+                    item['observations'] = []
+            
+            # Recalculate total
+            total = 0
+            for i in order['items']:
+                p = i['price']
+                c = sum(cp['price'] for cp in i.get('complements', []))
+                total += i['qty'] * (p + c)
+            order['total'] = total
+            break
+    
+    if not item_found:
+        return jsonify({'success': False, 'error': 'Item não encontrado.'}), 404
+
+    save_table_orders(orders)
+    log_action('Item Editado', f'Item editado na Mesa {table_id} por {session.get("user")}', department='Restaurante')
+    
+    return jsonify({'success': True})
+
+@restaurant_bp.route('/restaurant/product/toggle_active', methods=['POST'])
+@login_required
+def restaurant_toggle_product_active():
+    user_role = session.get('role')
+    user_perms = session.get('permissions', [])
+    if user_role not in ['admin', 'gerente', 'supervisor'] and 'restaurante_full_access' not in user_perms:
+        return jsonify({'success': False, 'error': 'Permissão negada.'}), 403
+        
+    product_id = request.form.get('product_id')
+    if not product_id:
+        return jsonify({'success': False, 'error': 'ID do produto necessário.'}), 400
+        
+    menu_items = load_menu_items()
+    save_menu_items = None
+    from app.services.data_service import save_menu_items as _save_menu_items
+    save_menu_items = _save_menu_items
+    
+    found = False
+    new_status = True
+    
+    for p in menu_items:
+        if str(p['id']) == str(product_id):
+            p['active'] = not p.get('active', True)
+            new_status = p['active']
+            found = True
+            break
+            
+    if found:
+        save_menu_items(menu_items)
+        status_str = "Ativo" if new_status else "Pausado"
+        log_action('Produto Alterado', f'Produto {product_id} alterado para {status_str} por {session.get("user")}', department='Restaurante')
+        return jsonify({'success': True, 'new_status': new_status})
+    else:
+        return jsonify({'success': False, 'error': 'Produto não encontrado.'}), 404
 
 from app.services import waiting_list_service
 from app.services import whatsapp_chat_service as chat_service

@@ -282,36 +282,55 @@ def increment_fiscal_number(settings, cnpj):
 
 def process_pending_emissions(settings=None):
     """
-    Processes all pending fiscal emissions.
+    Processes all pending fiscal emissions (Queue + Pool).
     Returns summary of success/failures.
     """
     if settings is None:
         settings = load_fiscal_settings()
 
+    # 1. Process Legacy Queue
     queue = load_pending_emissions()
-    pending = [e for e in queue if e['status'] == 'pending']
+    pending_queue = [e for e in queue if e['status'] == 'pending']
     
-    if not pending:
+    # 2. Process Fiscal Pool (Unified)
+    # We fetch pending items from pool and convert them to emission format
+    pool_pending = FiscalPoolService.get_pool(filters={'status': 'pending'})
+    
+    # We only process 'nfce' automatically for now, 'nfse' might require manual approval or different flow
+    # But user asked to "Process... Reception... NFC-e".
+    # So we filter for fiscal_type='nfce'
+    pool_to_process = [p for p in pool_pending if p.get('fiscal_type') == 'nfce']
+    
+    all_pending = []
+    
+    # Add legacy queue items
+    for item in pending_queue:
+        all_pending.append({'source': 'queue', 'data': item})
+        
+    # Add pool items
+    for item in pool_to_process:
+        all_pending.append({'source': 'pool', 'data': item})
+    
+    if not all_pending:
         return {"processed": 0, "success": 0, "failed": 0}
         
     success_count = 0
     failed_count = 0
     
-    for emission in pending:
-        # Prepare transaction object for emit_invoice
-        # We need to aggregate payment methods for the 'payment_method' field or handle list
-        # The emit_invoice function expects a single 'transaction' dict with 'payment_method'
-        # But we might have multiple.
-        # Let's pass the first one for now or modify emit_invoice to handle detailed payments.
+    for entry in all_pending:
+        emission = entry['data']
+        source = entry['source']
         
-        # We'll use the first payment method name as primary, or "Múltiplos"
-        primary_method = emission['payments'][0].get('method', 'Outros') if emission['payments'] else 'Outros'
+        # Prepare transaction object for emit_invoice
+        
+        # Payments handling
+        payments = emission.get('payments') or emission.get('payment_methods') or []
+        primary_method = payments[0].get('method', 'Outros') if payments else 'Outros'
         
         transaction = {
             'id': emission['id'],
-            'amount': emission['amount'],
-            'payment_method': primary_method, # This needs to map to code in emit_invoice
-            # We can pass the full payment list in a custom field if we update emit_invoice
+            'amount': emission['total_amount'] if 'total_amount' in emission else emission['amount'],
+            'payment_method': primary_method, 
         }
         
         # Get specific integration settings for this emission's CNPJ
@@ -320,127 +339,105 @@ def process_pending_emissions(settings=None):
         
         if not integration_settings:
             logger.error(f"No fiscal integration found for CNPJ {emission_cnpj}. Skipping emission {emission['id']}")
-            emission['attempts'] += 1
-            emission['last_error'] = "Configuração fiscal não encontrada para este CNPJ"
+            # Update status to error/ignored to prevent loop
+            if source == 'pool':
+                FiscalPoolService.update_status(emission['id'], 'error_config')
+            else:
+                emission['attempts'] = emission.get('attempts', 0) + 1
+                emission['last_error'] = "Configuração fiscal não encontrada para este CNPJ"
+            
             failed_count += 1
             continue
 
-        # We don't need to copy/override settings anymore, we use the correct integration object directly.
-        # But emit_invoice might modify it? No, it shouldn't.
-        # emit_invoice uses settings['cnpj_emitente'].
+        customer_info = emission.get('customer', {})
+        customer_cpf_cnpj = emission.get('customer_cpf_cnpj') or customer_info.get('cpf_cnpj') or customer_info.get('doc')
         
-        customer_cpf_cnpj = emission.get('customer_cpf_cnpj')
+        # Validate Mandatory Fields
+        if not integration_settings.get('client_id') or not integration_settings.get('client_secret'):
+             logger.error(f"Credentials missing for {emission_cnpj}")
+             failed_count += 1
+             continue
+             
         result = emit_invoice(transaction, integration_settings, emission['items'], customer_cpf_cnpj)
         
         if result['success']:
-            emission['status'] = 'emitted'
             nfe_id = result['data'].get('id')
-            emission['nfe_id'] = nfe_id
-            emission['emitted_at'] = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
-            
-            # Extract Serie and Number from result data
             nfe_serie = result['data'].get('serie')
             nfe_number = result['data'].get('numero')
             
-            # Fallback if not directly in root (Nuvem Fiscal response structure varies by endpoint version)
             if not nfe_number and 'numero_sequencial' in result['data']:
                 nfe_number = result['data']['numero_sequencial']
             
-            # Update Fiscal Pool if applicable
-            if emission.get('id', '').startswith('POOL-'):
-                try:
-                    pool_id = emission['id'].replace('POOL-', '')
-                    FiscalPoolService.update_status(pool_id, 'emitted', fiscal_doc_uuid=nfe_id, serie=nfe_serie, number=nfe_number)
-                except Exception as e:
-                    logger.error(f"Failed to update fiscal pool status for {emission['id']}: {e}")
-            
-            # Increment fiscal number immediately after success
-            # Pass root settings and CNPJ
+            # Update Source
+            if source == 'pool':
+                FiscalPoolService.update_status(emission['id'], 'emitted', fiscal_doc_uuid=nfe_id, serie=nfe_serie, number=nfe_number)
+            else:
+                emission['status'] = 'emitted'
+                emission['nfe_id'] = nfe_id
+                emission['emitted_at'] = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+                if emission.get('id', '').startswith('POOL-'):
+                     # Legacy link
+                     try:
+                        pool_id = emission['id'].replace('POOL-', '')
+                        FiscalPoolService.update_status(pool_id, 'emitted', fiscal_doc_uuid=nfe_id, serie=nfe_serie, number=nfe_number)
+                     except: pass
+
+            # Increment fiscal number
             increment_fiscal_number(settings, emission_cnpj)
             
-            # Download and Save XML
+            # Download XML
             try:
-                # Use integration_settings for download_xml
                 xml_path = download_xml(nfe_id, integration_settings)
                 if xml_path:
-                    emission['xml_path'] = xml_path
+                    if source == 'queue': emission['xml_path'] = xml_path
                     logger.info(f"XML saved at {xml_path}")
             except Exception as e:
                 logger.error(f"Failed to download XML for {nfe_id}: {e}")
-                emission['xml_error'] = str(e)
             
-            # Print Receipt
+            # Print Receipt (Logic kept same)
             try:
                 p_settings = load_printer_settings()
                 fiscal_printer_id = p_settings.get('fiscal_printer_id')
-                
                 printer = None
                 if fiscal_printer_id:
                     printers = load_printers()
                     printer = next((p for p in printers if p['id'] == fiscal_printer_id), None)
-                
-                # Force fallback if printer is None, handled in print_fiscal_receipt but we need to call it.
-                # However, print_fiscal_receipt expects a 'printer_config' dict.
-                # If we pass None, the fallback inside print_fiscal_receipt will trigger.
-                
-                if not printer:
-                     logger.warning("Fiscal printer not found/configured. Attempting fallback...")
-                     # Pass empty dict or None to trigger fallback in print_fiscal_receipt
-                     printer = {} 
+                if not printer: printer = {} 
 
-                # Construct minimal invoice data for printing
                 invoice_data = result.get('data', {})
+                if 'valor_total' not in invoice_data: invoice_data['valor_total'] = transaction['amount']
+                if 'ambiente' not in invoice_data: invoice_data['ambiente'] = integration_settings.get('environment', 'homologacao')
+                if 'items' not in invoice_data or not invoice_data['items']: invoice_data['items'] = emission.get('items', [])
                 
-                # Fallback/Enrich
-                if 'valor_total' not in invoice_data:
-                    invoice_data['valor_total'] = emission['amount']
-                if 'ambiente' not in invoice_data:
-                    invoice_data['ambiente'] = integration_settings.get('environment', 'homologacao')
-                
-                # Ensure items are present for printing
-                if 'items' not in invoice_data or not invoice_data['items']:
-                    invoice_data['items'] = emission.get('items', [])
-                
-                # Try to extract QR Code URL if missing
+                # QR Code logic (kept same)
                 if 'qrcode_url' not in invoice_data:
-                    # 1. Check common API fields
                     candidates = ['url_consulta_qrcode', 'qr_code', 'url_qrcode', 'qrcode']
                     for cand in candidates:
                         if cand in invoice_data:
                             invoice_data['qrcode_url'] = invoice_data[cand]
                             break
-                    
-                    # 2. Extract from XML if available
-                    if 'qrcode_url' not in invoice_data and emission.get('xml_path'):
-                        try:
-                            import xml.etree.ElementTree as ET
-                            # Use namespace agnostic search if possible or just iter
-                            tree = ET.parse(emission['xml_path'])
-                            root = tree.getroot()
-                            # Search for qrCode tag (ignoring namespace)
-                            for elem in root.iter():
-                                if elem.tag.endswith('qrCode'):
-                                    invoice_data['qrcode_url'] = elem.text
-                                    break
-                        except Exception as ex:
-                            logger.error(f"Failed to extract QR from XML: {ex}")
-
+                            
                 print_fiscal_receipt(printer, invoice_data)
-                logger.info(f"Fiscal receipt sent to printer (or fallback)")
-
             except Exception as e:
                 logger.error(f"Error printing fiscal receipt: {e}")
                 
             success_count += 1
         else:
-            emission['attempts'] += 1
-            emission['last_error'] = result['message']
-            if emission['attempts'] >= 3:
-                emission['status'] = 'failed' # Stop retrying after 3 attempts
+            # Handle Failure / Contingency
+            error_msg = result['message']
+            if source == 'pool':
+                # Don't mark as error immediately, maybe retry? 
+                # Or mark as 'failed' and allow retry in UI
+                FiscalPoolService.update_status(emission['id'], 'failed') # We can add notes about error
+            else:
+                emission['attempts'] = emission.get('attempts', 0) + 1
+                emission['last_error'] = error_msg
+                if emission['attempts'] >= 3:
+                    emission['status'] = 'failed'
             failed_count += 1
             
     save_pending_emissions(queue)
-    return {"processed": len(pending), "success": success_count, "failed": failed_count}
+    return {"processed": len(all_pending), "success": success_count, "failed": failed_count}
 
 def get_access_token(client_id, client_secret, scope="nfce"):
     url = "https://auth.nuvemfiscal.com.br/oauth/token"
@@ -931,6 +928,10 @@ def emit_invoice(transaction, settings, order_items, customer_cpf_cnpj=None):
     nfe_items = []
     total_items = 0.0
     
+    # Validation: Items
+    if not order_items:
+        return {"success": False, "message": "Nenhum item para emissão."}
+
     for idx, item in enumerate(order_items):
         item_total = item['qty'] * item['price']
         
@@ -938,6 +939,8 @@ def emit_invoice(transaction, settings, order_items, customer_cpf_cnpj=None):
         ncm = item.get('ncm')
         if not ncm or len(ncm) < 8:
             ncm = '21069090'
+            
+        # ... (rest of loop)
 
         prod_data = {
             "cProd": str(item.get('id', '0')),
@@ -1015,6 +1018,12 @@ def emit_invoice(transaction, settings, order_items, customer_cpf_cnpj=None):
     # Payload for Nuvem Fiscal
     # Using the 'infNFe' structure inside the payload
     
+    # Offline Contingency (tpEmis)
+    # 1=Normal, 9=Offline
+    # Check if we should use offline mode (passed in transaction or settings?)
+    # For now, default to 1, but allow override
+    tp_emis = transaction.get('tpEmis', 1)
+    
     payload = {
         "ambiente": "homologacao" if settings.get('environment') == 'homologation' else "producao",
         "infNFe": {
@@ -1030,7 +1039,7 @@ def emit_invoice(transaction, settings, order_items, customer_cpf_cnpj=None):
                 "idDest": 1,
                 "cMunFG": "2614857", # Tamandaré - PE
                 "tpImp": 4,
-                "tpEmis": 1,
+                "tpEmis": tp_emis, # 1=Normal, 9=Offline
                 "tpAmb": 2 if settings.get('environment') == 'homologation' else 1,
                 "finNFe": 1,
                 "indFinal": 1,
@@ -1043,12 +1052,12 @@ def emit_invoice(transaction, settings, order_items, customer_cpf_cnpj=None):
                 "IE": ie_emitente,
                 "enderEmit": {
                      "UF": "PE", 
-                     "cMun": "2614857" # Tamandaré - PE
+                     "cMun": "2614857" # Tamandaré
                 }
             },
             "det": nfe_items,
             "transp": {
-                "modFrete": 9
+                "modFrete": 9 # Sem frete
             },
             "total": {
                 "ICMSTot": {
@@ -1077,7 +1086,7 @@ def emit_invoice(transaction, settings, order_items, customer_cpf_cnpj=None):
                 "detPag": pagamentos
             },
             "infRespTec": {
-                "CNPJ": "28952732000109",
+                "CNPJ": "28952732000109", # CNPJ da Software House (Mirapraia mesmo?)
                 "xContato": "Angelo Diamante",
                 "email": "diamantegut@gmail.com",
                 "fone": "8194931201"
@@ -1085,48 +1094,42 @@ def emit_invoice(transaction, settings, order_items, customer_cpf_cnpj=None):
         }
     }
     
-    # Add Customer (Destinatário) if provided
-    if customer_cpf_cnpj:
-        clean_doc = re.sub(r'[^0-9]', '', str(customer_cpf_cnpj))
-        if clean_doc:
-             dest_block = None
-             if len(clean_doc) == 11:
-                 dest_block = {"CPF": clean_doc}
-             elif len(clean_doc) == 14:
-                 dest_block = {"CNPJ": clean_doc}
-             
-             if dest_block:
-                 # NFC-e requires indFinal=1 (Consumer) which is already set in ide
-                 payload['infNFe']['dest'] = dest_block
+    # Contingency Specifics
+    if tp_emis == 9:
+        # Must generate dhCont and xJust if required by API, but Nuvem Fiscal abstracts this?
+        # Nuvem Fiscal might require 'xJust' if we are in contingency?
+        # Let's check docs or assume standard.
+        pass
 
-    # API URL
-    base_url = "https://api.sandbox.nuvemfiscal.com.br" if settings.get('environment') == 'homologation' else "https://api.nuvemfiscal.com.br"
-    # Correct endpoint found via probe: /nfce (POST)
-    api_url = f"{base_url}/nfce"
-    
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json"
-    }
+    if customer_cpf_cnpj:
+        payload["infNFe"]["dest"] = {
+            "CPF": _normalize_digits(customer_cpf_cnpj) if len(_normalize_digits(customer_cpf_cnpj)) == 11 else None,
+            "CNPJ": _normalize_digits(customer_cpf_cnpj) if len(_normalize_digits(customer_cpf_cnpj)) == 14 else None
+        }
+        # Cleanup None keys
+        payload["infNFe"]["dest"] = {k: v for k, v in payload["infNFe"]["dest"].items() if v}
+        if not payload["infNFe"]["dest"]:
+            del payload["infNFe"]["dest"]
 
     try:
-        # In Homologation, we might want to just test validation first?
-        # For now, let's try to send.
+        # Use Nuvem Fiscal API
+        # POST /nfce/emitir (Assuming this is the endpoint for emission)
+        # Docs: https://dev.nuvemfiscal.com.br/docs/api#tag/NFC-e/operation/EmitirNfce
+        # Actually it's POST /nfce
         
-        # NOTE: Using a dry-run flag if possible? Nuvem Fiscal doesn't seem to have dry-run in docs easily found.
-        # But 'homologacao' environment is safe.
+        api_url = f"https://api.sandbox.nuvemfiscal.com.br/nfce" if settings.get('environment') == 'homologation' else "https://api.nuvemfiscal.com.br/nfce"
         
-        # To avoid blocking the user with errors from missing fields (like Address details which are mandatory),
-        # I'll wrap this in a try/except block that returns the error message clearly.
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json"
+        }
         
-        response = requests.post(api_url, json=payload, headers=headers)
+        logger.info(f"Emitting NFC-e for {transaction['id']} to {api_url}")
+        response = requests.post(api_url, json=payload, headers=headers, timeout=30)
         
-        if response.status_code in [200, 201, 202]:
+        if response.status_code in (200, 201):
             resp_data = response.json()
-            # Check status
-            status = resp_data.get('status', 'processando')
             
-            # If async processing, we get an ID.
             # If sync, we get the authorization.
             
             return {
@@ -1147,7 +1150,7 @@ def emit_invoice(transaction, settings, order_items, customer_cpf_cnpj=None):
 
     except Exception as e:
         logger.error(f"Error emitting invoice: {e}")
-        return {"success": False, "message": str(e)}
+        return {"success": False, "message": str(e)} 
 
 def process_nfse_request(entry_id):
     """

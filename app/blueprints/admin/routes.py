@@ -670,7 +670,7 @@ def admin_security_settings():
 from app.services.printer_manager import load_printers, save_printers, load_printer_settings, save_printer_settings
 from app.services.printing_service import test_printer_connection
 from app.services.data_service import load_menu_items, save_menu_items
-from app.services.fiscal_service import load_fiscal_settings, save_fiscal_settings, FiscalPoolService
+from app.services.fiscal_service import load_fiscal_settings, save_fiscal_settings, FiscalPoolService, get_access_token
 
 @admin_bp.route('/config/printers', methods=['GET', 'POST'])
 @login_required
@@ -836,17 +836,63 @@ def fiscal_config():
         
     settings = load_fiscal_settings()
     
+    # Ensure integrations structure exists
+    if 'integrations' not in settings:
+        settings['integrations'] = []
+    
+    # Get or Create main integration (Nuvem Fiscal)
+    integration = None
+    if settings['integrations']:
+        integration = settings['integrations'][0]
+    else:
+        integration = {"provider": "nuvem_fiscal"}
+        settings['integrations'].append(integration)
+
     if request.method == 'POST':
-        settings['csc_token'] = request.form.get('csc_token')
-        settings['csc_id'] = request.form.get('csc_id')
-        settings['environment'] = request.form.get('environment') # 1=Prod, 2=Homolog
-        settings['certificate_path'] = request.form.get('certificate_path')
-        settings['certificate_password'] = request.form.get('certificate_password')
+        env_val = request.form.get('environment')
+        integration['environment'] = 'homologation' if env_val == '2' else 'production'
+        
+        integration['client_id'] = request.form.get('client_id')
+        integration['client_secret'] = request.form.get('client_secret')
+        integration['csc_id'] = request.form.get('csc_id')
+        integration['csc_token'] = request.form.get('csc_token')
+        
+        # Legacy/Root compatibility (optional, but good for safety if other parts read root)
+        settings['environment'] = integration['environment']
         
         save_fiscal_settings(settings)
         flash('Configurações fiscais salvas.')
         
     return render_template('fiscal_config.html', settings=settings)
+
+@admin_bp.route('/admin/fiscal/test_connection', methods=['POST'])
+@login_required
+def fiscal_test_connection():
+    if session.get('role') != 'admin':
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 403
+        
+    data = request.json or {}
+    client_id = data.get('client_id')
+    client_secret = data.get('client_secret')
+    env_val = data.get('environment') # 1 or 2
+    
+    scope = "nfce" # Default scope for testing connection
+    
+    # We don't really need env_val for get_access_token as auth URL is same?
+    # Actually auth URL is https://auth.nuvemfiscal.com.br/oauth/token for both?
+    # Docs say: https://auth.nuvemfiscal.com.br/oauth/token
+    # Yes, Auth is unified.
+    
+    if not client_id or not client_secret:
+        return jsonify({'success': False, 'message': 'Credenciais ausentes.'}), 400
+        
+    token = get_access_token(client_id, client_secret, scope=scope)
+    
+    if token:
+        return jsonify({'success': True, 'token_preview': f"{token[:10]}..."})
+    else:
+        return jsonify({'success': False, 'message': 'Falha ao obter token. Verifique as credenciais.'})
+
 
 @admin_bp.route('/admin/fiscal/pool')
 @login_required
