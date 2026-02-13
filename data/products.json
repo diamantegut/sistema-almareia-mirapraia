@@ -952,38 +952,53 @@
     {
         "id": "71",
         "name": "Chocolate ao Leite",
-        "department": "Estoques",
+        "department": "Cozinha",
         "unit": "Kilogramas",
         "price": 28.77,
         "suppliers": [
-            "Estoque Inicial"
+            "atacamax",
+            "farmaggio"
         ],
         "category": "Confeitaria",
-        "min_stock": 0.0
+        "min_stock": 5.0,
+        "package_size": 1.0,
+        "purchase_unit": "unidadde",
+        "frequency": "Semanal",
+        "is_internal": false
     },
     {
         "id": "72",
         "name": "Chocolate branco",
-        "department": "Estoques",
+        "department": "Cozinha",
         "unit": "Kilogramas",
-        "price": 27.39,
+        "price": 24.99,
         "suppliers": [
-            "Estoque Inicial"
+            "atacamax",
+            "farmaggio"
         ],
         "category": "Confeitaria",
-        "min_stock": 0.0
+        "min_stock": 5.0,
+        "package_size": 1.0,
+        "purchase_unit": "kilograma",
+        "frequency": "Semanal",
+        "is_internal": false
     },
     {
         "id": "73",
         "name": "Chocolate meio amargo",
-        "department": "Estoques",
+        "department": "Cozinha",
         "unit": "Kilogramas",
-        "price": 28.7,
+        "price": 26.47,
         "suppliers": [
-            "Estoque Inicial"
+            "atacamax",
+            "padeirão"
         ],
         "category": "Confeitaria",
-        "min_stock": 0.0
+        "min_stock": 5.0,
+        "package_size": 1.0,
+        "purchase_unit": "kilograma",
+        "frequency": "Quinzenal",
+        "is_internal": false
     },
     {
         "id": "74",
@@ -1872,14 +1887,18 @@
     {
         "id": "143",
         "name": "Biscoito Maizena",
-        "department": "Estoques",
+        "department": "Cozinha",
         "unit": "Unidades",
-        "price": 0.0,
+        "price": 8.0,
         "suppliers": [
-            "Estoque Inicial"
+            "Mercado"
         ],
         "category": "Mercearia Seca",
-        "min_stock": 0.0
+        "min_stock": 4.0,
+        "package_size": 1.0,
+        "purchase_unit": "pacote",
+        "frequency": "Sem Frequência",
+        "is_internal": false
     },
     {
         "id": "144",
@@ -1949,26 +1968,35 @@
     {
         "id": "148",
         "name": "Chocolate em pó",
-        "department": "Estoques",
+        "department": "Cozinha",
         "unit": "Kilogramas",
         "price": 56.74,
         "suppliers": [
-            "Estoque Inicial"
+            "atacamax",
+            "farmaggio"
         ],
         "category": "Mercearia Seca",
-        "min_stock": 0.0
+        "min_stock": 5.0,
+        "package_size": 1.0,
+        "purchase_unit": "kilograma",
+        "frequency": "Quinzenal",
+        "is_internal": false
     },
     {
         "id": "149",
         "name": "Chocolate quente (Maquina)",
-        "department": "Estoques",
+        "department": "Serviço",
         "unit": "Kilogramas",
         "price": 84.85,
         "suppliers": [
-            "Estoque Inicial"
+            "3 corações"
         ],
         "category": "Mercearia Seca",
-        "min_stock": 0.0
+        "min_stock": 10.0,
+        "package_size": 1.0,
+        "purchase_unit": "kilograma",
+        "frequency": "Semanal",
+        "is_internal": false
     },
     {
         "id": "150",
@@ -3348,13 +3376,14 @@
         "unit": "Unidades",
         "price": 5.15,
         "suppliers": [
-            "Estoque Inicial"
+            "ceasa",
+            "mercado"
         ],
         "category": "Verduras",
         "min_stock": 4.0,
         "package_size": 1.0,
         "purchase_unit": "kilograma",
-        "frequency": "Quinzenal",
+        "frequency": "Semanal",
         "is_internal": false
     },
     {
@@ -3428,14 +3457,19 @@
     {
         "id": "260",
         "name": "Chuchu",
-        "department": "Estoques",
+        "department": "Cozinha",
         "unit": "Kilogramas",
         "price": 0.0,
         "suppliers": [
-            "Estoque Inicial"
+            "ceasa",
+            "Mercado"
         ],
         "category": "Verduras",
-        "min_stock": 0.0
+        "min_stock": 8.0,
+        "package_size": 1.0,
+        "purchase_unit": "kilograma",
+        "frequency": "Semanal",
+        "is_internal": false
     },
     {
         "id": "261",
@@ -3536,14 +3570,19 @@
     {
         "id": "269",
         "name": "Repolho",
-        "department": "Estoques",
-        "unit": "Kilogramas",
-        "price": 0.0,
+        "department": "Cozinha",
+        "unit": "Unidades",
+        "price": 4.69,
         "suppliers": [
-            "Estoque Inicial"
+            "ceasa",
+            "Mercado"
         ],
         "category": "Verduras",
-        "min_stock": 0.0
+        "min_stock": 2.0,
+        "package_size": 1.0,
+        "purchase_unit": "kilograma",
+        "frequency": "Semanal",
+        "is_internal": false
     },
     {
         "id": "270",
@@ -4750,14 +4789,18 @@
     {
         "id": "359",
         "name": "Château Haut Mondain Branco",
-        "department": "Estoques",
+        "department": "Serviço",
         "unit": "Unidades",
-        "price": 83.22,
+        "price": 61.03,
         "suppliers": [
-            "Estoque Inicial"
+            "inga"
         ],
         "category": "Vinhos Brancos",
-        "min_stock": 0.0
+        "min_stock": 6.0,
+        "package_size": 1.0,
+        "purchase_unit": "caixa",
+        "frequency": "Quinzenal",
+        "is_internal": false
     },
     {
         "id": "360",
@@ -5038,14 +5081,18 @@
     {
         "id": "382",
         "name": "Château Haut Mondain Tinto",
-        "department": "Estoques",
+        "department": "Serviço",
         "unit": "Unidades",
         "price": 83.56,
         "suppliers": [
-            "Estoque Inicial"
+            "inga"
         ],
         "category": "Vinhos Tinto",
-        "min_stock": 0.23863636363636365
+        "min_stock": 6.0,
+        "package_size": 1.0,
+        "purchase_unit": "caixa",
+        "frequency": "Quinzenal",
+        "is_internal": false
     },
     {
         "id": "383",
@@ -5932,14 +5979,18 @@
     {
         "id": "447",
         "name": "Cif",
-        "department": "Estoques",
+        "department": "Estoque",
         "unit": "Unidades",
         "price": 16.32,
         "suppliers": [
-            "Estoque Inicial"
+            "P&R"
         ],
         "category": "Produtos de Limpeza",
-        "min_stock": 0.0
+        "min_stock": 6.0,
+        "package_size": 1.0,
+        "purchase_unit": "unidadde",
+        "frequency": "Semanal",
+        "is_internal": false
     },
     {
         "id": "448",
@@ -10573,6 +10624,22 @@
         "frequency": "Quinzenal",
         "suppliers": [
             "Friboi"
+        ],
+        "is_internal": false
+    },
+    {
+        "id": "805",
+        "name": "Casa Perini Aquarela Rosé combo",
+        "department": "Recepção",
+        "unit": "Litros",
+        "price": 47.64,
+        "category": "Espumantes",
+        "min_stock": 6.0,
+        "package_size": 1.0,
+        "purchase_unit": "caixa",
+        "frequency": "Semanal",
+        "suppliers": [
+            "dlp"
         ],
         "is_internal": false
     }

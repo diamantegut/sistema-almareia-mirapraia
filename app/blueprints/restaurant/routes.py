@@ -1759,7 +1759,8 @@ def restaurant_table_order(table_id):
             cat = p.get('category', 'Outros')
             
             # Hide Frigobar in Restaurant Mode
-            if cat == 'Frigobar' and mode != 'minibar':
+            # Exception: Allow for 'Serviço' department (Room Service) or if mode is minibar
+            if cat == 'Frigobar' and mode != 'minibar' and session.get('department') != 'Serviço':
                 continue
                 
             if cat not in grouped_products_dict:
