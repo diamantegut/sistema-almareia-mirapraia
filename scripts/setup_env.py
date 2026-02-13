@@ -1,0 +1,99 @@
+import json
+import os
+import sys
+import argparse
+
+# Constants
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+NGROK_CONFIG_PATH = os.path.join(BASE_DIR, 'data', 'ngrok_config.json')
+SETTINGS_PATH = os.path.join(BASE_DIR, 'data', 'settings.json')
+SYSTEM_CONFIG_PATH = os.path.join(BASE_DIR, 'system_config.json')
+
+def update_system_config(port):
+    if not os.path.exists(SYSTEM_CONFIG_PATH):
+        print(f"[WARN] {SYSTEM_CONFIG_PATH} not found.")
+        return
+
+    try:
+        with open(SYSTEM_CONFIG_PATH, 'r', encoding='utf-8') as f:
+            config = json.load(f)
+        
+        config['server_port'] = int(port)
+        
+        with open(SYSTEM_CONFIG_PATH, 'w', encoding='utf-8') as f:
+            json.dump(config, f, indent=4)
+        print(f"[SUCCESS] Updated system_config.json port to {port}.")
+    except Exception as e:
+        print(f"[ERROR] Failed to update system_config.json: {e}")
+
+def update_ngrok_config(env, port, domain):
+    if not os.path.exists(NGROK_CONFIG_PATH):
+        print(f"[WARN] {NGROK_CONFIG_PATH} not found.")
+        return
+
+    try:
+        with open(NGROK_CONFIG_PATH, 'r', encoding='utf-8') as f:
+            config = json.load(f)
+        
+        if env not in config:
+            print(f"[ERROR] Environment '{env}' not found in ngrok_config.json.")
+            return
+
+        # Update port for the environment
+        config[env]['port'] = int(port)
+
+        # Update staff tunnel domain
+        modified = False
+        for tunnel in config[env]['tunnels']:
+            if tunnel['name'] == 'staff':
+                if tunnel.get('domain') != domain:
+                    tunnel['domain'] = domain
+                    modified = True
+                    print(f"[FIX] Updated {env} 'staff' tunnel domain to {domain}")
+        
+        if modified or config[env]['port'] != int(port):
+            with open(NGROK_CONFIG_PATH, 'w', encoding='utf-8') as f:
+                json.dump(config, f, indent=4)
+            print(f"[SUCCESS] Updated ngrok_config.json for {env}.")
+        else:
+            print(f"[OK] ngrok_config.json for {env} is already correct.")
+
+    except Exception as e:
+        print(f"[ERROR] Failed to update ngrok_config.json: {e}")
+
+def update_settings(domain):
+    if not os.path.exists(SETTINGS_PATH):
+        print(f"[WARN] {SETTINGS_PATH} not found.")
+        return
+
+    try:
+        with open(SETTINGS_PATH, 'r', encoding='utf-8') as f:
+            settings = json.load(f)
+            
+        target_url = f"https://{domain}"
+        
+        if settings.get('external_access_link') != target_url:
+             print(f"[FIX] Updating settings 'external_access_link' to {target_url}")
+             settings['external_access_link'] = target_url
+             with open(SETTINGS_PATH, 'w', encoding='utf-8') as f:
+                json.dump(settings, f, indent=4)
+             print("[SUCCESS] Settings updated.")
+        else:
+            print("[OK] Settings configuration is correct.")
+            
+    except Exception as e:
+        print(f"[ERROR] Failed to update settings.json: {e}")
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Setup environment configuration.')
+    parser.add_argument('--env', required=True, choices=['development', 'production'], help='Environment (development/production)')
+    parser.add_argument('--port', required=True, type=int, help='Server port')
+    parser.add_argument('--domain', required=True, help='Ngrok domain')
+
+    args = parser.parse_args()
+
+    print(f"--- Configuring for {args.env.upper()} (Port: {args.port}, Domain: {args.domain}) ---")
+    update_system_config(args.port)
+    update_ngrok_config(args.env, args.port, args.domain)
+    update_settings(args.domain)
+    print("---------------------------------------------------------------")

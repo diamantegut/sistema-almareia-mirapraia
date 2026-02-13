@@ -120,14 +120,17 @@
                                         data-day-start="{{ segment.data.start_day }}"
                                         data-length="{{ segment.length }}"
                                         ondrop="drop(event)" 
-                                        ondragover="allowDrop(event)">
+                                        ondragover="allowDrop(event)"
+                                        onmousedown="startDraw(event, this)"
+                                        onmouseover="continueDraw(event, this)"
+                                        onmouseup="endDraw(event, this)">
                                         <div style="height: 24px; width: 100%;"></div>
                                     </td>
                                 {% else %}
                                     {% set cell = segment.data %}
                                     {% set bg_class = 'bg-occupied' if segment.type == 'occupied' else 'bg-reserved' %}
                                     {% set text_class = '' %} <!-- Text color handled by CSS now -->
-                                    {% set is_draggable = segment.type == 'reserved' %}
+                                    {% set is_draggable = true %} {# Always draggable if reserved or occupied #}
                                     
                                     <td colspan="{{ segment.length }}" class="text-center p-0 position-relative {{ border_class }}" 
                                         style="vertical-align: middle;"
@@ -155,7 +158,7 @@
                                         <div class="d-flex align-items-center justify-content-between px-2 res-bar-content {{ bg_class }}" 
                                              draggable="{{ 'true' if is_draggable else 'false' }}"
                                              ondragstart="drag(event)"
-                                             onclick="handleResClick(event, this)" 
+                                             ondblclick="handleResDblClick(event, this)" 
                                              style="cursor: grab;">
                                             <!-- Channel Icon (Left) -->
                                             <div class="me-1 small opacity-75">
@@ -288,12 +291,287 @@
     var gridData = JSON.parse(document.getElementById('grid-data').textContent);
     var draggedData = null;
     
+    // --- Helper: Snap to Day Start (PM = Odd index) ---
+    function snapToDayStart(slotIndex) {
+        // Slot 0 = AM, Slot 1 = PM (Check-in).
+        // If even, add 1 to make it PM.
+        if (slotIndex % 2 === 0) return slotIndex + 1;
+        return slotIndex;
+    }
+
+    // --- Helper: Format Date ---
+    var fmtDate = (d) => d.getDate().toString().padStart(2, '0') + '/' + (d.getMonth()+1).toString().padStart(2, '0') + '/' + d.getFullYear();
+
+    // --- Helper: Calculate Date from Slot ---
+    function getDateFromSlot(slotIndex) {
+        var dayIndex = Math.floor(slotIndex / 2);
+        var d = new Date(gridStartDate);
+        d.setDate(gridStartDate.getDate() + dayIndex);
+        return d;
+    }
+    
+    // --- Draw to Create Logic ---
+    var isDrawing = false;
+    var drawRoom = null;
+    var drawStartSlot = null;
+    var drawEndSlot = null;
+    var drawStartCell = null;
+    
+    function startDraw(ev, cell) {
+        if (ev.button !== 0) return; // Only left click
+        isDrawing = true;
+        drawRoom = cell.dataset.room;
+        
+        // Calculate exact slot based on mouse X within the cell
+        var rect = cell.getBoundingClientRect();
+        var cellLength = parseInt(cell.dataset.length);
+        var cellStart = parseInt(cell.dataset.dayStart);
+        var slotWidth = rect.width / cellLength;
+        var clickX = ev.clientX - rect.left;
+        var slotOffset = Math.floor(clickX / slotWidth);
+        
+        drawStartSlot = cellStart + slotOffset;
+        drawEndSlot = drawStartSlot; // Initial single slot
+        drawStartCell = cell;
+        
+        // Visual feedback
+        clearSelection();
+        highlightSelection(drawRoom, drawStartSlot, drawEndSlot);
+        
+        // Prevent default drag behavior if any
+        ev.preventDefault();
+    }
+    
+    function continueDraw(ev, cell) {
+        if (!isDrawing) return;
+        if (cell.dataset.room !== drawRoom) return; // Stay in same room
+        
+        var rect = cell.getBoundingClientRect();
+        var cellLength = parseInt(cell.dataset.length);
+        var cellStart = parseInt(cell.dataset.dayStart);
+        var slotWidth = rect.width / cellLength;
+        var clickX = ev.clientX - rect.left;
+        var slotOffset = Math.floor(clickX / slotWidth);
+        
+        var currentSlot = cellStart + slotOffset;
+        drawEndSlot = currentSlot;
+        
+        highlightSelection(drawRoom, drawStartSlot, drawEndSlot);
+    }
+    
+    function endDraw(ev, cell) {
+        if (!isDrawing) return;
+        isDrawing = false;
+        
+        // Ensure start < end
+        var start = Math.min(drawStartSlot, drawEndSlot);
+        var end = Math.max(drawStartSlot, drawEndSlot);
+        
+        // Snap to days
+        // If we select half-day slots, we probably want full days for new reservation?
+        // Let's check logic:
+        // Slot 0 (AM), 1 (PM).
+        // If start is 0 (AM), Checkin Date AM? Usually Checkin is PM (1).
+        // If start is 1 (PM), Checkin Date PM.
+        
+        // Let's enforce Checkin at PM (Odd) and Checkout at AM (Even)?
+        // Or just map slots to dates.
+        
+        var checkinDate = getDateFromSlot(start);
+        // For checkout, if we selected up to 'end' slot.
+        // If end is AM (even), it includes that morning.
+        // If end is PM (odd), it includes that night.
+        // Checkout date should be the date AFTER the last occupied slot?
+        // Actually, logic: getDateFromSlot(slot) returns the date of that slot.
+        // If I select slots 0, 1 (Day 1 AM, Day 1 PM).
+        // Checkin: Day 1. Checkout: Day 2.
+        // Logic: Checkout = getDateFromSlot(end + 1).
+        
+        var checkoutDate = getDateFromSlot(end + 1);
+        
+        // If only 1 slot selected (click), maybe ignore or default to 1 night?
+        if (start === end) {
+            checkoutDate = getDateFromSlot(start + 2); // Minimum 1 day (2 slots)
+        }
+        
+        var checkinStr = fmtDate(checkinDate);
+        var checkoutStr = fmtDate(checkoutDate);
+        
+        // Open Modal
+        openNewReservationModal(drawRoom, checkinStr, checkoutStr);
+        
+        // Clear selection after a delay or immediately?
+        // Keep it until modal closes?
+        // For now, clear.
+        clearSelection();
+    }
+    
+    function highlightSelection(room, start, end) {
+        clearSelection();
+        var min = Math.min(start, end);
+        var max = Math.max(start, end);
+        
+        // Find all empty cells in this room that overlap with range
+        var row = document.querySelector(`tr td[data-room="${room}"]`).parentNode;
+        var cells = row.querySelectorAll('.droppable-cell');
+        
+        cells.forEach(c => {
+            var cStart = parseInt(c.dataset.dayStart);
+            var cLen = parseInt(c.dataset.length);
+            var cEnd = cStart + cLen - 1;
+            
+            // Check overlap
+            if (cStart <= max && cEnd >= min) {
+                // Calculate overlap relative to cell
+                var selStart = Math.max(min, cStart);
+                var selEnd = Math.min(max, cEnd);
+                
+                var startOffset = selStart - cStart;
+                var endOffset = selEnd - cStart;
+                var len = endOffset - startOffset + 1;
+                
+                // Create highlight div
+                var h = document.createElement('div');
+                h.className = 'selection-highlight';
+                h.style.position = 'absolute';
+                h.style.top = '0';
+                h.style.height = '100%';
+                h.style.backgroundColor = 'rgba(0, 123, 255, 0.3)';
+                h.style.pointerEvents = 'none'; // Click through
+                
+                // Width calculation
+                // We need precise width %
+                var widthPct = (len / cLen) * 100;
+                var leftPct = (startOffset / cLen) * 100;
+                
+                h.style.width = widthPct + '%';
+                h.style.left = leftPct + '%';
+                
+                // Ensure cell is relative
+                if (getComputedStyle(c).position === 'static') {
+                    c.style.position = 'relative';
+                }
+                c.appendChild(h);
+            }
+        });
+    }
+    
+    function clearSelection() {
+        document.querySelectorAll('.selection-highlight').forEach(el => el.remove());
+    }
+    
+    function openNewReservationModal(room, checkin, checkout) {
+        // Log to debug
+        console.log("Opening New Res Modal:", room, checkin, checkout);
+        
+        var modalEl = document.getElementById('newReservationModal');
+        if (modalEl) {
+            // Find inputs inside the form
+            var form = document.getElementById('newResForm');
+            if (form) {
+                // We need to map 'room' to category if possible, or just note it.
+                // The current modal only has 'category', not specific 'room' select?
+                // Wait, manual reservation usually asks for category. 
+                // But if we draw on a specific room row, we should pre-select that category/room.
+                // Looking at the modal HTML: it has 'category' select.
+                
+                // Let's try to infer category from room number if we have the mapping available in JS?
+                // We don't have the mapping explicitly in JS variable, but we can try to guess or add a hidden room field.
+                // For now, let's set dates.
+                
+                // Date inputs are type="date", expecting YYYY-MM-DD
+                // checkin/checkout are DD/MM/YYYY from fmtDate.
+                // Need to convert back.
+                
+                var partsIn = checkin.split('/');
+                var yyyy_mm_dd_in = `${partsIn[2]}-${partsIn[1]}-${partsIn[0]}`;
+                
+                var partsOut = checkout.split('/');
+                var yyyy_mm_dd_out = `${partsOut[2]}-${partsOut[1]}-${partsOut[0]}`;
+                
+                var inInput = form.querySelector('input[name="checkin"]');
+                var outInput = form.querySelector('input[name="checkout"]');
+                
+                if(inInput) inInput.value = yyyy_mm_dd_in;
+                if(outInput) outInput.value = yyyy_mm_dd_out;
+                
+                // Try to set category based on room (heuristic)
+                var catSelect = form.querySelector('select[name="category"]');
+                if (catSelect && room) {
+                    var roomInt = parseInt(room);
+                    var catVal = "";
+                    if ([1,2,3].includes(roomInt)) catVal = "Suíte Areia";
+                    else if (roomInt === 11) catVal = "Suíte Mar Família";
+                    else if ([12,14,15,16,17,21,22,23,24,25,26].includes(roomInt)) catVal = "Suíte Mar";
+                    else if ([31,35].includes(roomInt)) catVal = "Suíte Alma c/ Banheira";
+                    else if ([32,34].includes(roomInt)) catVal = "Suíte Alma";
+                    else if (roomInt === 33) catVal = "Suíte Master Diamante";
+                    
+                    if (catVal) catSelect.value = catVal;
+                    
+                    // Also, we might want to force the specific room assignment?
+                    // The backend create_manual_reservation doesn't seem to take 'room' directly?
+                    // It creates a reservation, then we might need to allocate it.
+                    // Or we can add a hidden 'room' field to the form and handle it in backend?
+                    // Let's check backend: create_manual_reservation just saves to JSON.
+                    // It doesn't allocate.
+                    // So we should probably allocate it immediately after creation?
+                    // Or add 'room' to the payload and have backend handle it.
+                    
+                    // Let's add a hidden input for room if it doesn't exist
+                    var roomInput = form.querySelector('input[name="allocated_room"]');
+                    if (!roomInput) {
+                        roomInput = document.createElement('input');
+                        roomInput.type = 'hidden';
+                        roomInput.name = 'allocated_room';
+                        form.appendChild(roomInput);
+                    }
+                    roomInput.value = room;
+                }
+            }
+            
+            var modal = new bootstrap.Modal(modalEl);
+            modal.show();
+        } else {
+             console.log("New Reservation Modal not found.");
+        }
+    }
+
+    // --- End Draw Logic ---
+
+    // --- Helper: Call Backend Calculation ---
+    function calculateUpdate(resId, newRoom, checkin, checkout, callback) {
+        fetch('/api/reception/calculate_reservation_update', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                reservation_id: resId,
+                new_room: newRoom,
+                new_checkin: checkin,
+                new_checkout: checkout
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.success) {
+                callback(data.data);
+            } else {
+                alert("Erro ao calcular atualização: " + data.error);
+            }
+        })
+        .catch(err => alert("Erro de comunicação ao calcular."));
+    }
+
     // Move Logic
+    var isDragging = false;
+    
     function drag(ev) {
-        // Ensure we are dragging the div, but get data from the parent TD
+        isDragging = true;
         var td = ev.target.closest('td');
         if (!td) return;
         
+        // Calculate and store initial X position for delta calculation
+        ev.dataTransfer.setData("startX", ev.clientX);
         ev.dataTransfer.setData("resId", td.dataset.resId);
         ev.dataTransfer.setData("guest", td.dataset.guest);
         ev.dataTransfer.setData("days", td.dataset.days);
@@ -302,28 +580,31 @@
         // Visual feedback
         ev.target.style.opacity = '0.5';
         
-        // Fallback for some browsers
         draggedData = {
             resId: td.dataset.resId,
             guest: td.dataset.guest,
             days: parseInt(td.dataset.days),
-            startDay: parseInt(td.dataset.startDay)
+            startDay: parseInt(td.dataset.startDay),
+            startX: ev.clientX
         };
     }
     
-    // Reset opacity on dragend
     document.addEventListener('dragend', function(ev) {
         if (ev.target.classList.contains('res-bar-content')) {
             ev.target.style.opacity = '1';
         }
+        // Small delay to prevent click firing immediately after drag
+        setTimeout(() => { isDragging = false; }, 100);
     });
 
     function allowDrop(ev) {
         ev.preventDefault();
-        ev.target.closest('td').classList.add('drag-over');
+        var td = ev.target.closest('td');
+        if(td && td.classList.contains('droppable-cell')) {
+            td.classList.add('drag-over');
+        }
     }
     
-    // Add dragleave to remove highlight
     document.addEventListener('dragleave', function(ev) {
         if (ev.target.classList.contains('droppable-cell')) {
             ev.target.classList.remove('drag-over');
@@ -333,7 +614,6 @@
     function drop(ev) {
         ev.preventDefault();
         
-        // Find the TD element
         var target = ev.target;
         while (target.tagName !== 'TD' && target) {
             target = target.parentNode;
@@ -342,58 +622,97 @@
         if (!target) return;
         target.classList.remove('drag-over');
         
-        var resId = ev.dataTransfer.getData("resId");
-        var guest = ev.dataTransfer.getData("guest");
-        var daysRequired = parseInt(ev.dataTransfer.getData("days"));
-        var originalStartDay = parseInt(ev.dataTransfer.getData("startDay"));
+        // Get Drag Data
+        var resId = ev.dataTransfer.getData("resId") || (draggedData ? draggedData.resId : null);
+        var guest = ev.dataTransfer.getData("guest") || (draggedData ? draggedData.guest : null);
+        var daysRequired = parseInt(ev.dataTransfer.getData("days") || (draggedData ? draggedData.days : 0));
+        var originalStartDay = parseInt(ev.dataTransfer.getData("startDay") || (draggedData ? draggedData.startDay : 0));
+        var startX = parseInt(ev.dataTransfer.getData("startX") || (draggedData ? draggedData.startX : 0));
         
-        if (!resId && draggedData) {
-            resId = draggedData.resId;
-            guest = draggedData.guest;
-            daysRequired = draggedData.days;
-            originalStartDay = draggedData.startDay;
-        }
+        if (!resId) return;
 
-        var room = target.dataset.room;
-        
-        // Calculate Target Start Slot
-        var segmentStart = parseInt(target.dataset.dayStart);
-        var segmentLength = parseInt(target.dataset.length);
+        // Calculate Delta Slots based on horizontal movement
+        // We need to know the width of a slot. 
+        // We can approximate by looking at the target cell width (which is N slots wide)
+        var targetSlotLength = parseInt(target.dataset.length) || 1;
         var rect = target.getBoundingClientRect();
-        var clickX = ev.clientX - rect.left;
-        var cellWidth = rect.width / segmentLength;
-        var slotOffset = Math.floor(clickX / cellWidth);
-        var targetSlot = segmentStart + slotOffset;
+        var slotWidth = rect.width / targetSlotLength;
         
-        // SNAP TO PM (Middle of Day)
-        // Check-in should always be PM (Odd).
-        var targetDayIndex = Math.floor(targetSlot / 2);
-        var newStartSlot = (targetDayIndex * 2) + 1;
+        var deltaX = ev.clientX - startX;
+        var deltaSlots = Math.round(deltaX / slotWidth);
         
-        // For now, we only support changing ROOM, preserving original dates.
-        // So we use originalStartDay for collision check in the NEW room.
-        newStartSlot = originalStartDay;
+        // Determine New Room
+        var newRoom = target.dataset.room;
         
-        if (checkCollision(room, newStartSlot, daysRequired, resId)) {
-             alert("Não é possível mover para este quarto: Conflito de datas.");
-             return;
-        }
-
-        window.pendingMove = {
-            reservation_id: resId,
-            new_room: room
-        };
+        // Determine New Start Slot
+        // If we stayed in the same room, we use delta.
+        // If we changed rooms, we need to map to the new room's timeline.
+        // But drag & drop usually implies visual movement relative to grid.
+        // The grid is aligned vertically (same slots for all rooms).
+        // So dropping at X position corresponds to same time slot regardless of room row.
+        // Thus, we can just use Original Start Slot + Delta Slots.
         
-        // Prepare Modal
-        document.getElementById('moveGuest').textContent = guest;
-        document.getElementById('moveRoom').textContent = room + " (Mantendo datas originais)";
+        var newStartSlot = originalStartDay + deltaSlots;
         
-        // Show Modal
-        var moveModal = new bootstrap.Modal(document.getElementById('moveModal'));
-        moveModal.show();
+        // SNAP: Align to nearest PM slot (Check-in time)
+        // Check-in usually happens in PM (Odd slots: 1, 3, 5...).
+        // Slot 0 = StartDate AM, Slot 1 = StartDate PM.
+        // So we want odd numbers if possible, or consistent with existing logic.
+        // Let's enforce check-in at PM (odd index)
+        if (newStartSlot % 2 === 0) newStartSlot += 1; 
+        
+        // Ensure within bounds
+        if (newStartSlot < 0) newStartSlot = 1; // Minimum valid slot
+        
+        // Calculate New Dates
+        var checkinDate = getDateFromSlot(newStartSlot);
+        var checkoutDate = getDateFromSlot(newStartSlot + daysRequired);
+        
+        var checkinStr = fmtDate(checkinDate);
+        var checkoutStr = fmtDate(checkoutDate);
+        
+        // Call Backend to Calculate/Validate
+        calculateUpdate(resId, newRoom, checkinStr, checkoutStr, function(calcData) {
+            if (!calcData.valid) {
+                alert("Conflito detectado pelo servidor: " + calcData.conflict_message);
+                return;
+            }
+            
+            window.pendingMove = {
+                reservation_id: resId,
+                new_room: newRoom,
+                checkin: checkinStr,
+                checkout: checkoutStr,
+                calc: calcData
+            };
+            
+            // Prepare Modal
+            document.getElementById('moveGuest').textContent = guest;
+            document.getElementById('moveRoom').textContent = newRoom;
+            document.getElementById('moveDates').textContent = checkinStr + ' - ' + checkoutStr;
+            
+            // Price Info
+            var priceHtml = '';
+            if (calcData.diff !== 0) {
+                var diffStr = calcData.diff > 0 ? '+ R$ ' + calcData.diff.toFixed(2) : '- R$ ' + Math.abs(calcData.diff).toFixed(2);
+                priceHtml = `Valor atual: R$ ${calcData.old_total.toFixed(2)}<br>
+                             Novo valor: <strong>R$ ${calcData.new_total.toFixed(2)}</strong> (${diffStr})`;
+                document.getElementById('movePriceInfo').innerHTML = priceHtml;
+                document.getElementById('priceAdjYes').checked = true;
+                togglePriceInput(true);
+                document.getElementById('newPrice').value = calcData.new_total.toFixed(2);
+            } else {
+                document.getElementById('movePriceInfo').innerHTML = "Sem alteração de valor.";
+                document.getElementById('priceAdjNo').checked = true;
+                togglePriceInput(false);
+            }
+            
+            var moveModal = new bootstrap.Modal(document.getElementById('moveModal'));
+            moveModal.show();
+        });
     }
     
-    // Check Collisions
+    // Check Collisions (Client Side)
     function checkCollision(room, startDay, duration, currentResId) {
         if (!gridData[room]) return false;
         
@@ -402,11 +721,19 @@
             var cell = gridData[room][String(day)] || gridData[room][day];
             
             if (cell) {
-                if (cell.status === 'occupied') return true;
+                // Ignore if it's the SAME reservation (checking by ID)
+                // This allows self-overlap (e.g. extending date or moving partially over itself)
+                if (cell.id && String(cell.id) === String(currentResId)) {
+                    continue; 
+                }
+
+                if (cell.status === 'occupied') {
+                    // It's occupied by someone else (ID check failed above)
+                    return true;
+                }
                 if (cell.status === 'reserved') {
-                    if (cell.id && String(cell.id) !== String(currentResId)) {
-                        return true;
-                    }
+                    // It's reserved by someone else (ID check failed above)
+                    return true;
                 }
             }
         }
@@ -420,7 +747,7 @@
             container.classList.remove('d-none');
         } else {
             container.classList.add('d-none');
-            document.getElementById('newPrice').value = '';
+            // document.getElementById('newPrice').value = ''; // Don't clear, keep calc value
         }
     }
 
@@ -432,15 +759,13 @@
         
         var payload = {
             reservation_id: data.reservation_id,
-            new_room: data.new_room
+            new_room: data.new_room,
+            checkin: data.checkin,
+            checkout: data.checkout
         };
         
         if (priceAdjType === 'yes') {
             var amount = document.getElementById('newPrice').value;
-            if (!amount) {
-                alert("Por favor, informe o novo valor.");
-                return;
-            }
             payload.price_adjustment = {
                 type: 'manual',
                 amount: amount
@@ -453,9 +778,7 @@
         
         fetch('/api/reception/move_reservation', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(payload)
         })
         .then(response => response.json())
@@ -470,7 +793,7 @@
         })
         .catch(err => {
             console.error(err);
-            alert("Erro de comunicação com o servidor.");
+            alert("Erro de comunicação.");
             btn.disabled = false;
             btn.textContent = "Confirmar Mudança";
         });
@@ -482,7 +805,7 @@
 
     function startResize(ev, direction, resId, startSlot, length, room) {
         ev.stopPropagation();
-        ev.preventDefault(); // Prevent dragstart
+        ev.preventDefault(); 
         
         resizing = true;
         var td = ev.target.parentNode;
@@ -509,7 +832,7 @@
         var deltaX = ev.clientX - resizeData.startX;
         var deltaSlots = Math.round(deltaX / resizeData.cellWidth);
         
-        // Enforce 2-slot increments (Full Days) to keep PM-in/AM-out alignment
+        // Enforce 2-slot increments (Full Days)
         deltaSlots = Math.round(deltaSlots / 2) * 2;
         
         var newLength = resizeData.length;
@@ -522,11 +845,9 @@
             newStartSlot = resizeData.startSlot + deltaSlots;
         }
         
-        // Validation
-        if (newLength < 2) return; // Min 1 night (2 slots)
-        if (newStartSlot < 0) return; // Cannot start before month begin
+        if (newLength < 2) return; 
+        if (newStartSlot < 0) return; 
         
-        // Visual Preview (Simple width adjustment)
         resizeData.td.style.opacity = 0.7;
         document.body.style.cursor = 'col-resize';
     }
@@ -541,8 +862,6 @@
         
         var deltaX = ev.clientX - resizeData.startX;
         var deltaSlots = Math.round(deltaX / resizeData.cellWidth);
-        
-        // Snap to Full Days (2 slots)
         var deltaDays = Math.round(deltaSlots / 2);
         deltaSlots = deltaDays * 2;
         
@@ -562,52 +881,58 @@
             alert("A estadia mínima é de 1 diária.");
             return;
         }
-
         if (newStartSlot < 0) {
-            alert("Não é possível mover para antes do início do mês.");
+            alert("Data inválida.");
             return;
         }
         
-        // Check Collision for new period
         if (checkCollision(resizeData.room, newStartSlot, newLength, resizeData.resId)) {
-            alert("Conflito de datas com outra reserva ou ocupação.");
+            alert("Conflito de datas com outra reserva.");
             return;
         }
         
-        // Calculate Dates
-        // Slot 0 = Day 1 AM.
-        // Slot 1 = Day 1 PM (Check-in).
-        // Check-in Date:
-        // If newStartSlot is odd (e.g. 1), day is floor(1/2)+1 = 1.
-        // If newStartSlot is even (e.g. 0), day is floor(0/2)+1 = 1.
-        // But system expects Check-in at PM.
-        // If we snap to 2 slots, startSlot should preserve parity (Odd).
+        var checkinDate = getDateFromSlot(newStartSlot);
+        var checkoutDate = getDateFromSlot(newStartSlot + newLength);
+        var checkinStr = fmtDate(checkinDate);
+        var checkoutStr = fmtDate(checkoutDate);
         
-        var startDayIndex = Math.floor(newStartSlot / 2); // 0-based day index relative to grid start
-        
-        var checkinDate = new Date(gridStartDate);
-        checkinDate.setDate(gridStartDate.getDate() + startDayIndex);
-        
-        var checkoutDate = new Date(gridStartDate);
-        var endDayIndex = Math.floor((newStartSlot + newLength) / 2);
-        checkoutDate.setDate(gridStartDate.getDate() + endDayIndex);
-        
-        var fmt = (d) => d.getDate().toString().padStart(2, '0') + '/' + (d.getMonth()+1).toString().padStart(2, '0') + '/' + d.getFullYear();
-        
-        window.pendingResize = {
-            reservation_id: resizeData.resId,
-            checkin: fmt(checkinDate),
-            checkout: fmt(checkoutDate),
-            room_number: resizeData.room
-        };
-        
-        // Show Modal
-        var guestName = resizeData.td.querySelector('.fw-bold').textContent;
-        document.getElementById('resizeGuest').textContent = guestName;
-        document.getElementById('resizeDates').textContent = fmt(checkinDate) + ' - ' + fmt(checkoutDate);
-        
-        var modal = new bootstrap.Modal(document.getElementById('resizeModal'));
-        modal.show();
+        // Call Backend Calculation
+        calculateUpdate(resizeData.resId, resizeData.room, checkinStr, checkoutStr, function(calcData) {
+            if (!calcData.valid) {
+                alert("Conflito detectado pelo servidor: " + calcData.conflict_message);
+                return;
+            }
+            
+            window.pendingResize = {
+                reservation_id: resizeData.resId,
+                checkin: checkinStr,
+                checkout: checkoutStr,
+                room_number: resizeData.room,
+                calc: calcData
+            };
+            
+            var guestName = resizeData.td.querySelector('.fw-bold').textContent;
+            document.getElementById('resizeGuest').textContent = guestName;
+            document.getElementById('resizeDates').textContent = checkinStr + ' - ' + checkoutStr;
+            
+            // Show Calculated Price
+             var priceHtml = '';
+            if (calcData.diff !== 0) {
+                var diffStr = calcData.diff > 0 ? '+ R$ ' + calcData.diff.toFixed(2) : '- R$ ' + Math.abs(calcData.diff).toFixed(2);
+                priceHtml = `<div class="alert alert-info py-2">
+                                Valor atual: R$ ${calcData.old_total.toFixed(2)}<br>
+                                Novo valor sugerido: <strong>R$ ${calcData.new_total.toFixed(2)}</strong> (${diffStr})
+                             </div>`;
+                document.getElementById('resizePriceInfo').innerHTML = priceHtml;
+                document.getElementById('resizePriceAdj').value = calcData.diff.toFixed(2);
+            } else {
+                document.getElementById('resizePriceInfo').innerHTML = "<div class='alert alert-secondary py-2'>Sem alteração de valor calculada.</div>";
+                document.getElementById('resizePriceAdj').value = '';
+            }
+            
+            var modal = new bootstrap.Modal(document.getElementById('resizeModal'));
+            modal.show();
+        });
     }
     
     function confirmResize() {
@@ -659,14 +984,18 @@
         }
     }
 
-    // Explicit Click Handler
-    function handleResClick(ev, el) {
-        // If it was a drag, we shouldn't trigger click. 
-        // But usually click fires only if mouseup happens on same element without drag.
-        console.log('Click detected on reservation bar');
+    // Explicit Double Click Handler
+    function handleResDblClick(ev, el) {
+        if (isDragging) return;
         ev.stopPropagation(); 
+        
+        // Find closest TD that has reservation data
+        // Note: The element 'el' is .res-bar-content, its parent is TD
         var td = el.closest('td');
-        if(td) openReservationModalFromData(td);
+        if(td) {
+            console.log("Double Click Detected. Opening modal for guest:", td.dataset.guest);
+            openReservationModalFromData(td);
+        }
     }
 
     // Guest Details & Upload (Existing functions)
@@ -692,14 +1021,22 @@
             guestTab.show();
         }
         
+        // Helper to format currency
+        var fmtMoney = (val) => {
+            if (val === undefined || val === null || val === '') return '-';
+            var num = parseFloat(val);
+            if (isNaN(num)) return val; // Return original string if not a number
+            return num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        };
+
         document.getElementById('modalGuestName').textContent = guest || 'Hóspede';
         document.getElementById('modalDates').textContent = (checkin || '') + ' até ' + (checkout || '');
         document.getElementById('modalCategory').textContent = category || '';
         document.getElementById('modalChannel').textContent = channel || 'Direto';
         document.getElementById('modalStatus').textContent = status || 'N/A';
-        document.getElementById('modalAmount').textContent = amount ? 'R$ ' + amount : '-';
-        document.getElementById('modalPaid').textContent = paid ? 'R$ ' + paid : '-';
-        document.getElementById('modalToReceive').textContent = to_receive ? 'R$ ' + to_receive : '-';
+        document.getElementById('modalAmount').textContent = fmtMoney(amount);
+        document.getElementById('modalPaid').textContent = fmtMoney(paid);
+        document.getElementById('modalToReceive').textContent = fmtMoney(to_receive);
         
         var guestIdField = document.getElementById('guestResId');
         if(guestIdField) guestIdField.value = id || '';
@@ -1128,8 +1465,11 @@
             </div>
             <div class="modal-body">
                 <p>Mover reserva de <strong><span id="moveGuest"></span></strong> para o quarto <strong><span id="moveRoom"></span></strong>?</p>
+                <p>Novas datas: <strong><span id="moveDates"></span></strong></p>
                 
                 <hr>
+                <div class="mb-3" id="movePriceInfo"></div>
+                
                 <div class="mb-3">
                     <label class="form-label">Haverá ajuste no valor da diária?</label>
                     <div class="form-check">
@@ -1172,6 +1512,8 @@
                 <p>Novo período: <strong><span id="resizeDates"></span></strong></p>
                 
                 <hr>
+                <div id="resizePriceInfo" class="mb-3"></div>
+                
                 <div class="mb-3">
                     <label for="resizePriceAdj" class="form-label">Ajuste de Valor (Opcional)</label>
                     <input type="text" class="form-control" id="resizePriceAdj" placeholder="Ex: +100.00 ou -50.00 ou 1200.00">

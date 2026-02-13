@@ -6,6 +6,7 @@ from app.services.data_service import (
     load_table_orders, load_printers,
     PRODUCT_PHOTOS_DIR
 )
+from app.services.system_config_manager import get_data_path
 from app.services.printing_service import print_system_notification
 from app.services.logger_service import LoggerService
 from app.services.security_service import check_sensitive_access
@@ -124,8 +125,8 @@ def admin_rescue_menu_items_fiscal():
     excel_paths = data.get('excel_paths')
     if not excel_paths:
         excel_paths = [
-            r"F:\info Fiscal\PRODUTOS (250).xlsx",
-            r"F:\info Fiscal\PRODUTOS POR TAMANHO (27).xlsx"
+            get_data_path("PRODUTOS (250).xlsx"),
+            get_data_path("PRODUTOS POR TAMANHO (27).xlsx")
         ]
 
     try:
