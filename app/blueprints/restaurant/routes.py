@@ -863,6 +863,74 @@ def restaurant_table_order(table_id):
             else:
                 flash('Número de pessoas é obrigatório.')
 
+        elif action == 'update_pax':
+            if str_table_id not in orders:
+                flash('Mesa não encontrada.')
+                return redirect(url_for('restaurant.restaurant_tables'))
+            
+            try:
+                # 1. Update Num Adults
+                num_adults_raw = request.form.get('num_adults')
+                num_adults = int(num_adults_raw)
+                if num_adults < 1: raise ValueError
+                
+                # 2. Update Customer Info
+                customer_type = request.form.get('customer_type')
+                
+                # Basic validation
+                if customer_type not in ['passante', 'hospede']:
+                     # If current is funcionario, and user didn't change it (or modal didn't send it correctly), preserve it?
+                     # But modal inputs are radio buttons for passante/hospede.
+                     # If it was funcionario, the radio might default to something or be unchecked?
+                     # The template sets 'checked' if matches. If neither matches (funcionario), none checked.
+                     # If user submits without checking, customer_type is None.
+                     if orders[str_table_id].get('customer_type') == 'funcionario':
+                         # Allow updating only num_adults for staff without changing type
+                         customer_type = 'funcionario'
+                     else:
+                         # Default to passante if missing? Or error?
+                         if not customer_type:
+                             flash('Tipo de cliente inválido.')
+                             return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
+
+                orders[str_table_id]['num_adults'] = num_adults
+                orders[str_table_id]['customer_type'] = customer_type
+                
+                if customer_type == 'hospede':
+                    room_number = request.form.get('room_number')
+                    if not room_number:
+                        flash('Número do quarto é obrigatório para hóspede.')
+                        return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
+                    
+                    room_number = format_room_number(room_number)
+                    if room_number not in room_occupancy:
+                         flash(f'Quarto {room_number} não está ocupado.')
+                         return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
+                    
+                    # Update Info
+                    orders[str_table_id]['room_number'] = room_number
+                    # Update guest name from occupancy to ensure it's current
+                    orders[str_table_id]['customer_name'] = room_occupancy[room_number].get('guest_name', 'Hóspede')
+                    
+                elif customer_type == 'passante':
+                    customer_name = sanitize_input(request.form.get('customer_name'))
+                    orders[str_table_id]['room_number'] = None
+                    orders[str_table_id]['customer_name'] = customer_name
+                
+                # If funcionario, we just updated num_adults, kept other info same
+                
+                save_table_orders(orders)
+                log_action('Mesa Atualizada', f'Mesa {table_id} atualizada por {session.get("user")}. Pax: {num_adults}, Tipo: {customer_type}', department='Restaurante')
+                flash('Informações da mesa atualizadas com sucesso.')
+                
+            except (ValueError, TypeError):
+                flash('Número de adultos inválido.')
+            except Exception as e:
+                current_app.logger.error(f"Erro ao atualizar mesa {table_id}: {e}")
+                flash(f'Erro ao atualizar: {str(e)}')
+            
+            return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
+
         elif action == 'remove_item':
             try:
                 item_id = request.form.get('item_id')
@@ -1011,6 +1079,12 @@ def restaurant_table_order(table_id):
                          errors.append(msg)
                          flash(f"Aviso: {msg}")
                          continue
+
+                    if product.get('paused', False):
+                         msg = f"Produto '{product['name']}' está pausado e não pode ser vendido."
+                         errors.append(msg)
+                         flash(f"Aviso: {msg}")
+                         continue
                         
                     try:
                         qty = float(item_data.get('qty', 1))
@@ -1038,7 +1112,13 @@ def restaurant_table_order(table_id):
                         'observations': [sanitize_input(obs) for obs in item_data.get('observations', []) if obs],
                         'accompaniments': [],
                         'flavor': sanitize_input(item_data.get('flavor_name')),
-                        'questions_answers': item_data.get('questions_answers', []) # Complex structure, leave as is for now
+                        'questions_answers': item_data.get('questions_answers', []),
+                        # Fiscal Data (Copied from Product)
+                        'ncm': product.get('ncm'),
+                        'cest': product.get('cest'),
+                        'cfop': product.get('cfop'),
+                        'origin': product.get('origin', 0),
+                        'tax_info': product.get('tax_info') # Optional
                     }
                     
                     # Complements (Resolve IDs)
@@ -1827,9 +1907,17 @@ def restaurant_table_order(table_id):
     # PERMISSION CHECK FOR VIEWING INACTIVE PRODUCTS
     user_role = session.get('role')
     user_perms = session.get('permissions', [])
+    # Only Admin/Manager can see inactive items, BUT paused items are hidden for everyone in order view
     can_manage_items = user_role in ['admin', 'gerente', 'supervisor'] or 'restaurante_full_access' in user_perms
     
+    hidden_paused_count = 0
+    
     for p in products:
+        is_paused = p.get('paused', False)
+        if is_paused:
+            hidden_paused_count += 1
+            continue # Skip paused items completely
+            
         if p.get('active', True) or can_manage_items: # Show if active OR can manage
             cat = p.get('category', 'Outros')
             
@@ -1841,6 +1929,10 @@ def restaurant_table_order(table_id):
             if cat not in grouped_products_dict:
                 grouped_products_dict[cat] = []
             grouped_products_dict[cat].append(p)
+            
+    if hidden_paused_count > 0:
+        # Log occasionally or if needed
+        pass
             
     # Sort categories based on settings or default to alphabetical
     saved_order = settings.get('category_order', [])
@@ -2345,6 +2437,14 @@ def get_available_tables():
             available.append(t_id)
             
     return jsonify(available)
+
+@restaurant_bp.route('/api/products/paused')
+@login_required
+def get_paused_products():
+    """Returns a list of IDs of paused products."""
+    menu_items = load_menu_items()
+    paused_ids = [str(p['id']) for p in menu_items if p.get('paused', False)]
+    return jsonify({'paused_ids': paused_ids})
 
 @restaurant_bp.route('/restaurant/order/edit_item', methods=['POST'])
 @login_required

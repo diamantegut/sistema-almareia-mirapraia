@@ -44,17 +44,40 @@ def save_digital_menu_order():
         current_app.logger.error(f"Error saving digital menu order: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
+@menu_bp.route('/api/public/products/paused')
+def get_public_paused_products():
+    """Returns a list of IDs of paused products (Public access)."""
+    menu_items = load_menu_items()
+    paused_ids = [str(p['id']) for p in menu_items if p.get('paused', False)]
+    return jsonify({'paused_ids': paused_ids})
+
 @menu_bp.route('/cardapio')
 def client_menu():
     menu_items = load_menu_items()
     # Filter active items, visible in virtual menu, and NOT paused
-    active_items = [i for i in menu_items if i.get('active', True) and i.get('visible_virtual_menu', True) and not i.get('paused', False)]
+    # Log paused items that would otherwise be visible
+    hidden_count = 0
+    visible_items = []
+    
+    for i in menu_items:
+        is_active = i.get('active', True)
+        is_visible = i.get('visible_virtual_menu', True)
+        is_paused = i.get('paused', False)
+        
+        if is_active and is_visible:
+            if is_paused:
+                hidden_count += 1
+            else:
+                visible_items.append(i)
+                
+    if hidden_count > 0:
+        current_app.logger.info(f"Virtual Menu: {hidden_count} paused items hidden from view.")
     
     # Separate Breakfast items
     breakfast_items = []
     other_items = []
     
-    for item in active_items:
+    for item in visible_items:
         # Check if category is "Café da Manhã" (normalized)
         cat_norm = normalize_text(item.get('category', ''))
         if 'cafe da manha' in cat_norm:

@@ -135,20 +135,6 @@
             <div class="col">
                 <div class="card h-100 shadow-sm hover-card">
                     <div class="card-body text-center p-4">
-                        <div class="mb-3 text-danger">
-                            <i class="bi bi-sliders display-4"></i>
-                        </div>
-                        <h4 class="card-title">Estoque Mínimo</h4>
-                        <p class="card-text text-muted">Ajuste os níveis mínimos de estoque para alertas.</p>
-                        <a href="{{ url_for('stock.stock_adjust_min_levels') }}" class="btn btn-outline-danger w-100 stretched-link">
-                            Ajustar
-                        </a>
-                    </div>
-                </div>
-            </div>
-             <div class="col">
-                <div class="card h-100 shadow-sm hover-card">
-                    <div class="card-body text-center p-4">
                         <div class="mb-3 text-secondary">
                             <i class="bi bi-tags display-4"></i>
                         </div>
@@ -156,6 +142,21 @@
                         <p class="card-text text-muted">Gerencie as categorias de produtos.</p>
                         <a href="{{ url_for('stock.stock_categories') }}" class="btn btn-outline-secondary w-100 stretched-link">
                             Gerenciar
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 text-primary">
+                            <i class="bi bi-truck display-4"></i>
+                        </div>
+                        <h4 class="card-title">Fornecedores</h4>
+                        <p class="card-text text-muted">Gerencie o cadastro de fornecedores.</p>
+                        <a href="{{ url_for('suppliers.index') }}" class="btn btn-primary w-100 stretched-link">
+                            Acessar
                         </a>
                     </div>
                 </div>

@@ -5,6 +5,7 @@ import threading
 import requests
 from datetime import datetime
 from app.services.system_config_manager import get_data_path, get_config_value, FISCAL_POOL_FILE
+from app.services.data_service import load_menu_items
 
 # FISCAL_POOL_FILE = get_data_path('fiscal_pool.json')
 
@@ -95,12 +96,65 @@ class FiscalPoolService:
         fiscal_type = 'nfce' # Default (Product)
         cnpj_emitente = '28952732000109' # Default: Mirapraia
         
+        # Load Menu Items for enrichment
+        try:
+            menu_items = load_menu_items()
+            menu_map = {str(m['id']): m for m in menu_items}
+            # Fallback map by name
+            menu_map_name = {m['name'].lower().strip(): m for m in menu_items}
+        except:
+            menu_map = {}
+            menu_map_name = {}
+        
+        enriched_items = []
+        for item in items:
+            # Clone item to avoid modifying original reference if any
+            new_item = item.copy()
+            
+            # Ensure basic fields are correct type
+            try:
+                new_item['qty'] = float(new_item.get('qty', 1))
+                new_item['price'] = float(new_item.get('price', 0))
+                if 'total' in new_item:
+                    new_item['total'] = float(new_item['total'])
+                else:
+                    new_item['total'] = new_item['qty'] * new_item['price']
+            except: pass
+            
+            # Find in menu
+            product = None
+            if 'id' in new_item and str(new_item['id']) in menu_map:
+                product = menu_map[str(new_item['id'])]
+            elif 'name' in new_item and new_item['name'].lower().strip() in menu_map_name:
+                product = menu_map_name[new_item['name'].lower().strip()]
+            
+            if product:
+                # Enrich with fiscal data if missing in item
+                # Priorities: item > product > default
+                if not new_item.get('ncm'): new_item['ncm'] = product.get('ncm')
+                if not new_item.get('cest'): new_item['cest'] = product.get('cest')
+                if not new_item.get('cfop'): new_item['cfop'] = product.get('cfop')
+                if not new_item.get('origin'): new_item['origin'] = product.get('origin')
+                
+                # Tax info
+                if not new_item.get('tax_situation'): new_item['tax_situation'] = product.get('tax_situation')
+                if not new_item.get('icms_rate'): new_item['icms_rate'] = product.get('icms_rate')
+                if not new_item.get('pis_cst'): new_item['pis_cst'] = product.get('pis_cst')
+                if not new_item.get('cofins_cst'): new_item['cofins_cst'] = product.get('cofins_cst')
+            
+            # Default fallback for required fields if still missing
+            if not new_item.get('ncm'): new_item['ncm'] = '00000000' # Invalid but prevents crash? Or better let it fail?
+            # Actually empty NCM causes rejection. But '00000000' also causes rejection.
+            # We leave it empty if not found, validator will catch it.
+            
+            enriched_items.append(new_item)
+
         if origin == 'daily_rates':
             fiscal_type = 'nfse' # Service
             cnpj_emitente = '46500590000112' # Almareia
         elif origin == 'reception':
             # Check items for services
-            if any(item.get('is_service') for item in items):
+            if any(item.get('is_service') for item in enriched_items):
                 fiscal_type = 'nfse'
                 # Ideally mixed carts should be split, but if service is present, 
                 # we might treat as service or daily rate if it's accommodation.
@@ -111,7 +165,7 @@ class FiscalPoolService:
                 is_accommodation = any(
                     'diaria' in str(item.get('name', '')).lower() or 
                     'hospedagem' in str(item.get('name', '')).lower() 
-                    for item in items
+                    for item in enriched_items
                 )
                 if is_accommodation:
                     cnpj_emitente = '46500590000112' # Almareia
@@ -140,7 +194,7 @@ class FiscalPoolService:
             'closed_by': user,
             'total_amount': float(total_amount),
             'fiscal_amount': round(fiscal_amount, 2),
-            'items': items,
+            'items': enriched_items,
             'payment_methods': payment_methods,
             'customer': customer_info or {},
             'status': 'pending', # pending, emitted, ignored
@@ -237,7 +291,7 @@ class FiscalPoolService:
         return None
 
     @staticmethod
-    def update_status(entry_id, new_status, fiscal_doc_uuid=None, user='Sistema', serie=None, number=None):
+    def update_status(entry_id, new_status, fiscal_doc_uuid=None, user='Sistema', serie=None, number=None, error_msg=None):
         pool = FiscalPoolService._load_pool()
         for entry in pool:
             if entry['id'] == entry_id:
@@ -251,12 +305,16 @@ class FiscalPoolService:
                 if number:
                     entry['fiscal_number'] = number
                 
+                if error_msg:
+                    entry['last_error'] = error_msg
+                
                 entry['history'].append({
                     'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                     'action': 'status_change',
                     'from': old_status,
                     'to': new_status,
-                    'user': user
+                    'user': user,
+                    'details': error_msg
                 })
                 
                 FiscalPoolService._save_pool(pool)

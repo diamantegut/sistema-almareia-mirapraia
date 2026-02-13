@@ -322,6 +322,25 @@
                 display: none;
             }
         }
+        
+        .product-card.paused {
+            opacity: 0.6;
+            pointer-events: none;
+            background-color: #f8f9fa;
+        }
+        
+        .paused-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #dc3545;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            z-index: 10;
+            font-size: 0.8rem;
+        }
     </style>
 </head>
 <body>
@@ -367,7 +386,7 @@
                     {% if breakfast_items %}
                         <div class="product-list">
                             {% for item in breakfast_items %}
-                            <div class="product-card {{ 'highlighted' if item.highlight else '' }}">
+                            <div class="product-card product-item-container {{ 'highlighted' if item.highlight else '' }}" data-product-id="{{ item.id }}">
                                 {% if item.highlight %}
                                 <div class="highlight-badge"><i class="fas fa-star"></i> Destaque</div>
                                 {% endif %}
@@ -440,7 +459,7 @@
 
                 <div class="product-list">
                     {% for item in breakfast_items %}
-                    <div class="product-card {{ 'highlighted' if item.highlight else '' }}">
+                    <div class="product-card product-item-container {{ 'highlighted' if item.highlight else '' }}" data-product-id="{{ item.id }}">
                         {% if item.highlight %}
                         <div class="highlight-badge"><i class="fas fa-star"></i> Destaque</div>
                         {% endif %}
@@ -478,7 +497,7 @@
                 <h2 class="category-title">{{ category }}</h2>
                 <div class="product-list">
                     {% for item in items %}
-                    <div class="product-card {{ 'highlighted' if item.highlight else '' }}">
+                    <div class="product-card product-item-container {{ 'highlighted' if item.highlight else '' }}" data-product-id="{{ item.id }}">
                         {% if item.highlight %}
                         <div class="highlight-badge"><i class="fas fa-star"></i> Destaque</div>
                         {% endif %}
@@ -569,6 +588,82 @@
                 }
             });
         });
+
+        // Polling for Paused Products (Real-time update)
+        function checkPausedProducts() {
+            fetch('/api/public/products/paused')
+                .then(response => response.json())
+                .then(data => {
+                    const pausedIds = data.paused_ids;
+                    const productContainers = document.querySelectorAll('.product-item-container');
+                    
+                    productContainers.forEach(container => {
+                        const prodId = container.getAttribute('data-product-id');
+                        
+                        if (pausedIds.includes(prodId)) {
+                            // If it's paused and currently visible, hide it
+                            if (container.style.display !== 'none') {
+                                container.style.display = 'none';
+                                console.log(`[Paused Check] Hiding paused product: ${prodId}`);
+                            }
+                            // Ensure it stays hidden/marked
+                            container.classList.add('paused-hidden');
+                        } else {
+                            // If it's NOT paused
+                            if (container.classList.contains('paused-hidden')) {
+                                container.classList.remove('paused-hidden');
+                                // Show it again (remove inline style)
+                                container.style.display = ''; 
+                                console.log(`[Paused Check] Restoring product: ${prodId}`);
+                            }
+                        }
+                    });
+                    
+                    // Check and hide empty categories if all items are paused
+                    checkEmptyCategories();
+                })
+                .catch(err => console.error('Error checking paused products:', err));
+        }
+
+        function checkEmptyCategories() {
+            // Check standard category sections
+            document.querySelectorAll('.category-section').forEach(section => {
+                const productList = section.querySelector('.product-list');
+                if (productList) {
+                    // Check if there are any visible items (not display: none)
+                    const visibleItems = Array.from(productList.querySelectorAll('.product-item-container')).filter(el => el.style.display !== 'none');
+                    if (visibleItems.length === 0) {
+                        if (section.style.display !== 'none') {
+                            section.style.display = 'none';
+                        }
+                    } else {
+                        if (section.style.display === 'none') {
+                            section.style.display = '';
+                        }
+                    }
+                }
+            });
+            
+            // Check breakfast splash section specially
+            const breakfastSplash = document.getElementById('breakfast-splash');
+            if (breakfastSplash) {
+                 const productList = breakfastSplash.querySelector('.product-list');
+                 if (productList) {
+                    const visibleItems = Array.from(productList.querySelectorAll('.product-item-container')).filter(el => el.style.display !== 'none');
+                    if (visibleItems.length === 0) {
+                        breakfastSplash.style.display = 'none';
+                    } else {
+                         breakfastSplash.style.display = '';
+                    }
+                 }
+            }
+        }
+
+        // Start polling every 10 seconds
+        setInterval(checkPausedProducts, 10000);
+        
+        // Initial check on load
+        document.addEventListener('DOMContentLoaded', checkPausedProducts);
     </script>
 <!-- Lightbox Modal -->
 <div id="lightboxModal" class="lightbox-modal" onclick="closeLightbox()">

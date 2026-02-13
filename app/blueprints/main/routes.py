@@ -3,6 +3,7 @@ from . import main_bp
 from datetime import datetime
 import traceback
 import re
+import requests
 from app.utils.decorators import login_required
 from app.services.data_service import (
     load_maintenance_requests, load_payment_methods, save_payment_methods, load_fiscal_settings
@@ -471,3 +472,58 @@ def service_log(service_id):
     }
     dept = dept_map.get(service_id, 'Geral')
     return redirect(url_for('admin.department_log_view', department=dept))
+
+@main_bp.route('/api/common/cep/<cep>')
+@login_required
+def validate_cep(cep):
+    """
+    Busca informações de CEP usando BrasilAPI com fallback para ViaCEP.
+    """
+    # Remove non-digits
+    clean_cep = ''.join(filter(str.isdigit, cep))
+    
+    if len(clean_cep) != 8:
+        return jsonify({'valid': False, 'message': 'CEP deve ter 8 dígitos.'})
+        
+    try:
+        # 1. Try BrasilAPI (Usually faster and more complete)
+        try:
+            response = requests.get(f'https://brasilapi.com.br/api/cep/v2/{clean_cep}', timeout=3)
+            if response.status_code == 200:
+                data = response.json()
+                return jsonify({
+                    'valid': True,
+                    'data': {
+                        'zip': clean_cep,
+                        'street': data.get('street', ''),
+                        'neighborhood': data.get('neighborhood', ''),
+                        'city': data.get('city', ''),
+                        'state': data.get('state', ''),
+                        'service': 'brasilapi'
+                    }
+                })
+        except Exception:
+            pass # Fallback
+            
+        # 2. Fallback to ViaCEP
+        response = requests.get(f'https://viacep.com.br/ws/{clean_cep}/json/', timeout=3)
+        if response.status_code == 200:
+            data = response.json()
+            if 'erro' not in data:
+                return jsonify({
+                    'valid': True,
+                    'data': {
+                        'zip': clean_cep,
+                        'street': data.get('logradouro', ''),
+                        'neighborhood': data.get('bairro', ''),
+                        'city': data.get('localidade', ''),
+                        'state': data.get('uf', ''),
+                        'service': 'viacep'
+                    }
+                })
+        
+        return jsonify({'valid': False, 'message': 'CEP não encontrado.'})
+            
+    except Exception as e:
+        current_app.logger.error(f"CEP Error: {e}")
+        return jsonify({'valid': False, 'message': 'Erro ao consultar CEP.'})

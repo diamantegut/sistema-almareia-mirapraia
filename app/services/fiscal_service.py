@@ -280,7 +280,7 @@ def increment_fiscal_number(settings, cnpj):
         logger.error(f"Error incrementing fiscal number: {e}")
         return False
 
-def process_pending_emissions(settings=None):
+def process_pending_emissions(settings=None, specific_id=None):
     """
     Processes all pending fiscal emissions (Queue + Pool).
     Returns summary of success/failures.
@@ -288,29 +288,45 @@ def process_pending_emissions(settings=None):
     if settings is None:
         settings = load_fiscal_settings()
 
-    # 1. Process Legacy Queue
-    queue = load_pending_emissions()
-    pending_queue = [e for e in queue if e['status'] == 'pending']
-    
-    # 2. Process Fiscal Pool (Unified)
-    # We fetch pending items from pool and convert them to emission format
-    pool_pending = FiscalPoolService.get_pool(filters={'status': 'pending'})
-    
-    # We only process 'nfce' automatically for now, 'nfse' might require manual approval or different flow
-    # But user asked to "Process... Reception... NFC-e".
-    # So we filter for fiscal_type='nfce'
-    pool_to_process = [p for p in pool_pending if p.get('fiscal_type') == 'nfce']
-    
     all_pending = []
     
-    # Add legacy queue items
-    for item in pending_queue:
-        all_pending.append({'source': 'queue', 'data': item})
+    if specific_id:
+        # Optimized path for single item (supports retry of failed items)
+        found = False
         
-    # Add pool items
-    for item in pool_to_process:
-        all_pending.append({'source': 'pool', 'data': item})
-    
+        # Check Legacy Queue
+        queue = load_pending_emissions()
+        queue_item = next((i for i in queue if i['id'] == specific_id), None)
+        if queue_item:
+             if queue_item.get('status') != 'emitted':
+                 all_pending.append({'source': 'queue', 'data': queue_item})
+                 found = True
+        
+        if not found:
+            # Check Pool (Direct Fetch)
+            pool_entry = FiscalPoolService.get_entry(specific_id)
+            if pool_entry:
+                # Allow retrying 'failed' or 'error_config' items
+                if pool_entry['status'] in ['pending', 'failed', 'error_config']:
+                     if pool_entry.get('fiscal_type') == 'nfce':
+                         all_pending.append({'source': 'pool', 'data': pool_entry})
+    else:
+        # Bulk processing - Only Pending
+        
+        # 1. Process Legacy Queue
+        queue = load_pending_emissions()
+        pending_queue = [e for e in queue if e['status'] == 'pending']
+        
+        # 2. Process Fiscal Pool (Unified)
+        pool_pending = FiscalPoolService.get_pool(filters={'status': 'pending'})
+        pool_to_process = [p for p in pool_pending if p.get('fiscal_type') == 'nfce']
+        
+        for item in pending_queue:
+            all_pending.append({'source': 'queue', 'data': item})
+            
+        for item in pool_to_process:
+            all_pending.append({'source': 'pool', 'data': item})
+
     if not all_pending:
         return {"processed": 0, "success": 0, "failed": 0}
         
@@ -340,11 +356,12 @@ def process_pending_emissions(settings=None):
         if not integration_settings:
             logger.error(f"No fiscal integration found for CNPJ {emission_cnpj}. Skipping emission {emission['id']}")
             # Update status to error/ignored to prevent loop
+            msg = "Configuração fiscal não encontrada para este CNPJ"
             if source == 'pool':
-                FiscalPoolService.update_status(emission['id'], 'error_config')
+                FiscalPoolService.update_status(emission['id'], 'error_config', error_msg=msg)
             else:
                 emission['attempts'] = emission.get('attempts', 0) + 1
-                emission['last_error'] = "Configuração fiscal não encontrada para este CNPJ"
+                emission['last_error'] = msg
             
             failed_count += 1
             continue
@@ -354,7 +371,14 @@ def process_pending_emissions(settings=None):
         
         # Validate Mandatory Fields
         if not integration_settings.get('client_id') or not integration_settings.get('client_secret'):
-             logger.error(f"Credentials missing for {emission_cnpj}")
+             msg = f"Credenciais ausentes para CNPJ {emission_cnpj}"
+             logger.error(msg)
+             if source == 'pool':
+                 FiscalPoolService.update_status(emission['id'], 'error_config', error_msg=msg)
+             else:
+                 emission['attempts'] = emission.get('attempts', 0) + 1
+                 emission['last_error'] = msg
+                 
              failed_count += 1
              continue
              
@@ -428,7 +452,7 @@ def process_pending_emissions(settings=None):
             if source == 'pool':
                 # Don't mark as error immediately, maybe retry? 
                 # Or mark as 'failed' and allow retry in UI
-                FiscalPoolService.update_status(emission['id'], 'failed') # We can add notes about error
+                FiscalPoolService.update_status(emission['id'], 'failed', error_msg=error_msg)
             else:
                 emission['attempts'] = emission.get('attempts', 0) + 1
                 emission['last_error'] = error_msg
@@ -938,68 +962,92 @@ def emit_invoice(transaction, settings, order_items, customer_cpf_cnpj=None):
     if not order_items:
         return {"success": False, "message": "Nenhum item para emissão."}
 
+    nItem = 1
     for idx, item in enumerate(order_items):
-        item_total = item['qty'] * item['price']
+        # Handle Individual Item Emission (Split by Quantity)
+        # Standard behavior: 1 line per product type with Qty > 1
+        # Requested behavior: "emissão individual para cada instância" -> 1 line per unit
         
-        # Determine NCM (Fallback to 21069090 - Preparacoes alimenticias)
-        ncm = item.get('ncm')
-        if not ncm or len(ncm) < 8:
-            ncm = '21069090'
+        qty_to_process = float(item['qty'])
+        price = float(item['price'])
+        
+        # Determine if we should split
+        # Only split if it's an integer quantity (e.g. 2 units, not 1.5kg)
+        is_integer_qty = (qty_to_process % 1 == 0)
+        
+        # If user explicitly requested individual instances, we loop
+        # But we must be careful with performance and API limits (max items 990 usually)
+        
+        iterations = 1
+        qty_per_line = qty_to_process
+        
+        if is_integer_qty and qty_to_process > 1:
+            iterations = int(qty_to_process)
+            qty_per_line = 1.0
             
-        # ... (rest of loop)
-
-        prod_data = {
-            "cProd": str(item.get('id', '0')),
-            "cEAN": "SEM GTIN",
-            "xProd": item.get('name', 'Produto'),
-            "NCM": ncm,
-            "CFOP": item.get('cfop', '5102'),
-            "uCom": "UN",
-            "qCom": item['qty'],
-            "vUnCom": item['price'],
-            "vProd": item_total,
-            "cEANTrib": "SEM GTIN",
-            "uTrib": "UN",
-            "qTrib": item['qty'],
-            "vUnTrib": item['price'],
-            "indTot": 1,
-        }
-        
-        # Only add CEST if it has a valid value (not empty)
-        cest = item.get('cest')
-        if cest and cest.strip():
-             prod_data["CEST"] = cest.strip()
-
-        nfe_item = {
-            "nItem": idx + 1,
-            "prod": prod_data,
-            "imposto": {
-                "ICMS": {
-                     "ICMSSN102": {
-                        "orig": int(item.get('origin', 0)),
-                        "CSOSN": "102"
-                     }
-                },
-                "PIS": {
-                    "PISOutr": {
-                        "CST": "99",
-                        "vBC": 0.00,
-                        "pPIS": 0.00,
-                        "vPIS": 0.00
-                    }
-                },
-                "COFINS": {
-                    "COFINSOutr": {
-                        "CST": "99",
-                        "vBC": 0.00,
-                        "pCOFINS": 0.00,
-                        "vCOFINS": 0.00
+        for _ in range(iterations):
+            item_total = qty_per_line * price
+            
+            # Determine NCM (Fallback to 21069090 - Preparacoes alimenticias)
+            ncm = item.get('ncm')
+            if not ncm or len(ncm) < 8:
+                ncm = '21069090'
+                
+            # ... (rest of loop)
+    
+            prod_data = {
+                "cProd": str(item.get('id', '0')),
+                "cEAN": "SEM GTIN",
+                "xProd": item.get('name', 'Produto'),
+                "NCM": ncm,
+                "CFOP": item.get('cfop', '5102'),
+                "uCom": "UN",
+                "qCom": qty_per_line,
+                "vUnCom": price,
+                "vProd": item_total,
+                "cEANTrib": "SEM GTIN",
+                "uTrib": "UN",
+                "qTrib": qty_per_line,
+                "vUnTrib": price,
+                "indTot": 1,
+            }
+            
+            # Only add CEST if it has a valid value (not empty)
+            cest = item.get('cest')
+            if cest and cest.strip():
+                 prod_data["CEST"] = cest.strip()
+    
+            nfe_item = {
+                "nItem": nItem,
+                "prod": prod_data,
+                "imposto": {
+                    "ICMS": {
+                        "ICMSSN102": {
+                            "orig": int(item.get('origin', 0)),
+                            "CSOSN": "102"
+                        }
+                    },
+                    "PIS": {
+                        "PISOutr": {
+                            "CST": "99",
+                            "vBC": 0.00,
+                            "pPIS": 0.00,
+                            "vPIS": 0.00
+                        }
+                    },
+                    "COFINS": {
+                        "COFINSOutr": {
+                            "CST": "99",
+                            "vBC": 0.00,
+                            "pCOFINS": 0.00,
+                            "vCOFINS": 0.00
+                        }
                     }
                 }
             }
-        }
-        nfe_items.append(nfe_item)
-        total_items += item_total
+            nfe_items.append(nfe_item)
+            total_items += item_total
+            nItem += 1
 
     # Payment info
     payment_map = {

@@ -15,7 +15,7 @@
     <div class="notification-banner" style="background-color: #2980b9; color: white; padding: 15px; border-radius: 5px; margin-bottom: 20px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
         <h3><i class="bi bi-bar-chart-fill"></i> Ajuste de Estoque Mensal</h3>
         <p>Hoje é o primeiro dia do mês. Verifique as sugestões de ajuste de estoque mínimo baseadas no consumo.</p>
-        <a href="{{ url_for('stock.stock_adjust_min_levels') }}" class="action-btn" style="background-color: white; color: #2980b9; display: inline-block; margin-top: 10px;">Ver Sugestões</a>
+        <a href="{{ url_for('stock.stock_products', filter='low_stock') }}" class="action-btn" style="background-color: white; color: #2980b9; display: inline-block; margin-top: 10px;">Ver Estoque</a>
     </div>
     {% endif %}
 

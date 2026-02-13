@@ -3,19 +3,64 @@
 {% block title %}Insumos - Principal{% endblock %}
 
 {% block content %}
+<style>
+    /* Spacing Adjustments */
+    .table-sm td, .table-sm th {
+        padding: 0.5rem 0.5rem !important; /* Reduced padding */
+        vertical-align: middle;
+    }
+    .service-page {
+        padding-bottom: 2rem;
+    }
+    .status-badge {
+        font-size: 0.75rem;
+        padding: 0.25em 0.6em;
+        border-radius: 4px;
+        font-weight: 600;
+    }
+    .supplier-tooltip {
+        position: relative;
+        display: inline-block;
+        cursor: pointer;
+    }
+    /* Collapsible Section Style */
+    .collapsible-header {
+        background-color: #f8f9fa;
+        padding: 10px 15px;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1rem;
+    }
+    .collapsible-content {
+        padding: 15px;
+        border: 1px solid #dee2e6;
+        border-top: none;
+        border-bottom-left-radius: 4px;
+        border-bottom-right-radius: 4px;
+        display: none;
+        background-color: white;
+    }
+    .collapsible-content.show {
+        display: block;
+    }
+</style>
+
 <div class="service-page">
     <div class="service-header">
         <span class="service-icon"><i class="bi bi-clipboard-data"></i></span>
         <h2>Insumos (Estoque) <small style="font-size: 0.5em; color: #7f8c8d;">(Total: {{ products|length }})</small></h2>
     </div>
 
-    <div style="margin-bottom: 20px;">
+    <div style="margin-bottom: 16px;">
         <a href="{{ url_for('stock.stock_inventory') }}" class="action-btn" style="background-color: #34495e; text-decoration: none; margin-left: 10px;"><i class="bi bi-bar-chart"></i> Ver Inventário Detalhado</a>
     </div>
 
-    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+    <div style="display: flex; gap: 10px; margin-bottom: 16px;">
         <button id="toggleFormBtn" class="action-btn" onclick="toggleForm()"><i class="bi bi-plus-lg"></i> Novo Insumo</button>
-        <button id="reviewMinStockBtn" class="action-btn" onclick="openReviewModal()" style="background-color: #f39c12;"><i class="bi bi-lightbulb"></i> Revisar Estoque Mínimo</button>
         <button id="smartSuggestionBtn" class="action-btn" onclick="openSmartReviewModal()" style="background-color: #8e44ad;"><i class="bi bi-stars"></i> Sugestão Inteligente (IA)</button>
         {% if request.args.get('filter') == 'low_stock' %}
         <a href="{{ url_for('stock.stock_products') }}" class="action-btn" style="background-color: #95a5a6; text-decoration: none;"><i class="bi bi-list-ul"></i> Ver Todos</a>
@@ -38,11 +83,6 @@
                 <h4 style="margin-top: 0; color: #4a148c;">Como funciona o cálculo:</h4>
                 <p style="margin-bottom: 5px; font-size: 0.9em;">Análise dos últimos <strong>60 dias</strong> de movimentação. Fórmula:</p>
                 <code style="background: white; padding: 2px 5px; border-radius: 4px;">Estoque Mínimo = (Demanda Média * Lead Time) + Estoque de Segurança</code>
-                <ul style="margin-top: 5px; font-size: 0.9em; margin-bottom: 0;">
-                    <li><strong>Estoque de Segurança:</strong> Baseado na variabilidade (Desvio Padrão) e Nível de Serviço de 95%.</li>
-                    <li><strong>Lead Time:</strong> Inferido da Frequência de Compra (Diário=1d, Semanal=7d, etc).</li>
-                    <li><strong>Regras de Negócio:</strong> Ajustado para não ser inferior a 1% nem superior a 50% da demanda mensal.</li>
-                </ul>
             </div>
             
             <div style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
@@ -85,59 +125,21 @@
         </div>
     </div>
 
-    <!-- Review Modal -->
-    <div id="reviewModal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);">
-        <div class="modal-content" style="background-color: #fefefe; margin: 10% auto; padding: 20px; border: 1px solid #888; width: 80%; border-radius: 8px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2>Revisão de Estoque Mínimo</h2>
-                <span onclick="closeReviewModal()" style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
-            </div>
-            
-            <div style="margin-bottom: 15px;">
-                <p>Abaixo estão listados os produtos com sugestões de ajuste de estoque mínimo baseadas no consumo histórico e frequência de compra.</p>
-                <button onclick="calculateAllSuggestions()" class="action-btn" style="background-color: #1e3a8a; font-size: 0.9em;"><i class="bi bi-arrow-repeat"></i> Recalcular Sugestões</button>
-                <button onclick="applyAllSuggestions()" class="action-btn" style="background-color: #27ae60; font-size: 0.9em; margin-left: 10px;"><i class="bi bi-rocket-takeoff"></i> Atualizar Todos</button>
-            </div>
-
-            <table class="table" style="width: 100%;">
-                 <thead>
-                     <tr>
-                         <th>Produto</th>
-                         <th>Estoque Atual</th>
-                         <th>Mínimo Atual</th>
-                         <th>Consumo Médio (Semanal)</th>
-                         <th>Frequência</th>
-                         <th>Sugestão</th>
-                         <th>Ação</th>
-                     </tr>
-                 </thead>
-                 <tbody id="reviewTableBody">
-                     <tr>
-                         <td colspan="7" style="text-align: center;">Carregando...</td>
-                     </tr>
-                 </tbody>
-             </table>
-            
-            <div style="margin-top: 20px; text-align: right;">
-                 <button onclick="closeReviewModal()" class="action-btn" style="background-color: #95a5a6;">Fechar</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="card" id="productFormCard" style="display: none;">
+    <!-- Product Form -->
+    <div class="card" id="productFormCard" style="display: none; margin-bottom: 16px;">
         <h3 id="formTitle">Adicionar Novo Insumo</h3>
         <form method="POST" class="maintenance-form" style="max-width: 100%;" id="productForm">
             <input type="hidden" id="product_id" name="id">
-            <h4 style="background-color: #e8f6f3; padding: 10px 15px; border-left: 5px solid #1abc9c; color: #2c3e50; margin-top: 0; margin-bottom: 20px; border-radius: 4px; font-size: 1.1em;"><i class="bi bi-box-seam"></i> Informações do Insumo e Estoque</h4>
+            <h4 style="background-color: #e8f6f3; padding: 10px 15px; border-left: 5px solid #1abc9c; color: #2c3e50; margin-top: 0; margin-bottom: 16px; border-radius: 4px; font-size: 1.1em;"><i class="bi bi-box-seam"></i> Informações do Insumo e Estoque</h4>
 
-            <div class="form-row">
+            <div class="form-row" style="margin-bottom: 12px;">
                 <div class="form-group" style="flex: 2;">
                     <label for="name">Nome do Insumo:</label>
-                    <input type="text" id="name" name="name" required placeholder="Ex: Papel A4, Detergente...">
+                    <input type="text" id="name" name="name" required placeholder="Ex: Papel A4, Detergente..." style="padding: 6px;">
                 </div>
                 <div class="form-group" style="flex: 1;">
                     <label for="department">Estoque:</label>
-                    <select id="department" name="department" required>
+                    <select id="department" name="department" required style="padding: 6px;">
                         {% for dept in departments %}
                         <option value="{{ dept }}">{{ dept }}</option>
                         {% endfor %}
@@ -145,14 +147,14 @@
                 </div>
             </div>
 
-            <div class="form-row">
+            <div class="form-row" style="margin-bottom: 12px;">
                 <div class="form-group" style="flex: 1;">
                     <label for="category">Categoria:</label>
-                    <input type="text" id="category" name="category" placeholder="Ex: Limpeza, Perecíveis..." required>
+                    <input type="text" id="category" name="category" placeholder="Ex: Limpeza, Perecíveis..." required style="padding: 6px;">
                 </div>
                 <div class="form-group" style="flex: 1;">
                     <label for="unit">Unidade:</label>
-                    <select id="unit" name="unit" required>
+                    <select id="unit" name="unit" required style="padding: 6px;">
                         <option value="Unidades">Unidades</option>
                         <option value="Litros">Litros</option>
                         <option value="Gramas">Gramas</option>
@@ -162,26 +164,26 @@
                 </div>
                 <div class="form-group" style="flex: 1;">
                     <label for="price">Preço Unitário (R$):</label>
-                    <input type="number" id="price" name="price" step="0.01" min="0" required placeholder="0.00">
+                    <input type="number" id="price" name="price" step="0.01" min="0" required placeholder="0.00" style="padding: 6px;">
                 </div>
             </div>
 
-            <div class="form-row">
+            <div class="form-row" style="margin-bottom: 12px;">
                 <div class="form-group" style="flex: 1;">
                     <label for="min_stock">Estoque Mínimo:</label>
                     <div style="display: flex; gap: 5px;">
-                        <input type="number" id="min_stock" name="min_stock" step="0.01" min="0" required placeholder="0" style="flex: 1;">
+                        <input type="number" id="min_stock" name="min_stock" step="0.01" min="0" required placeholder="0" style="flex: 1; padding: 6px;">
                         <button type="button" onclick="suggestMinStock()" title="Sugerir baseado no consumo médio" style="padding: 0 10px; background: #1e3a8a; color: white; border: none; border-radius: 4px; cursor: pointer;"><i class="bi bi-lightbulb"></i></button>
                     </div>
                 </div>
             </div>
 
-            <h4 style="background-color: #fef9e7; padding: 10px 15px; border-left: 5px solid #f1c40f; color: #2c3e50; margin-top: 30px; margin-bottom: 20px; border-radius: 4px; font-size: 1.1em;"><i class="bi bi-cart"></i> Informações de Compra</h4>
+            <h4 style="background-color: #fef9e7; padding: 10px 15px; border-left: 5px solid #f1c40f; color: #2c3e50; margin-top: 24px; margin-bottom: 16px; border-radius: 4px; font-size: 1.1em;"><i class="bi bi-cart"></i> Informações de Compra</h4>
 
-            <div class="form-row">
+            <div class="form-row" style="margin-bottom: 12px;">
                 <div class="form-group" style="flex: 1;">
                     <label for="frequency">Frequência de Compra:</label>
-                    <select id="frequency" name="frequency">
+                    <select id="frequency" name="frequency" style="padding: 6px;">
                         <option value="Sem Frequência">Sem Frequência</option>
                         <option value="Semanal">Semanal</option>
                         <option value="Quinzenal">Quinzenal</option>
@@ -190,21 +192,19 @@
                 </div>
                 <div class="form-group" style="flex: 1;">
                     <label for="package_size">Tamanho da Embalagem (Qtd/Peso):</label>
-                    <input type="number" id="package_size" name="package_size" step="0.01" min="1" placeholder="Ex: 12 (para caixa com 12)">
-                    <small style="color: #666;">Deixe 1 se comprado por unidade.</small>
+                    <input type="number" id="package_size" name="package_size" step="0.01" min="1" placeholder="Ex: 12" style="padding: 6px;">
                 </div>
                 <div class="form-group" style="flex: 1;">
                     <label for="purchase_unit">Unidade de Compra:</label>
-                    <input type="text" id="purchase_unit" name="purchase_unit" placeholder="Ex: Caixa, Fardo, Pacote">
-                    <small style="color: #666;">Nome da embalagem (Opcional).</small>
+                    <input type="text" id="purchase_unit" name="purchase_unit" placeholder="Ex: Caixa" style="padding: 6px;">
                 </div>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" style="margin-bottom: 12px;">
                 <label>Fornecedores (1 a 3):</label>
                 <div id="suppliersContainer">
                     <div class="supplier-row" style="margin-bottom: 10px; display: flex; gap: 10px;">
-                        <input type="text" name="suppliers[]" list="suppliersList" required placeholder="Nome do Fornecedor 1" style="flex: 1;">
+                        <input type="text" name="suppliers[]" list="suppliersList" required placeholder="Nome do Fornecedor 1" style="flex: 1; padding: 6px;">
                     </div>
                 </div>
                 <button type="button" id="addSupplierBtn" class="action-btn" style="background-color: #95a5a6; font-size: 0.8em; padding: 5px 10px;" onclick="addSupplier()"><i class="bi bi-plus"></i> Adicionar Fornecedor</button>
@@ -215,6 +215,40 @@
                 <option value="{{ supplier.name }}">{{ supplier.name }}</option>
                 {% endfor %}
             </datalist>
+
+            <!-- Collapsible Fiscal Info -->
+            <div class="collapsible-section" style="margin-bottom: 20px;">
+                <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                    <span><i class="bi bi-file-earmark-text"></i> Informações Fiscais de Insumos</span>
+                    <i class="bi bi-chevron-down"></i>
+                </div>
+                <div class="collapsible-content">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">NCM (Nomenclatura Comum do Mercosul)</label>
+                            <input type="text" class="form-control" name="ncm" id="ncm" placeholder="Ex: 0000.00.00">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">CEST (Código Especificador)</label>
+                            <input type="text" class="form-control" name="cest" id="cest" placeholder="Ex: 00.000.00">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Alíquota ICMS (%)</label>
+                            <input type="number" class="form-control" name="icms_rate" id="icms_rate" step="0.01" placeholder="Ex: 18.00">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Código ANP (Combustíveis)</label>
+                            <input type="text" class="form-control" name="anp_code" id="anp_code" placeholder="Opcional">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">CFOP Padrão</label>
+                            <input type="text" class="form-control" name="cfop_default" id="cfop_default" placeholder="Ex: 5102">
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <div class="form-actions" style="justify-content: flex-start; gap: 10px;">
                 <button type="submit" class="action-btn" style="margin-bottom: 0;" id="submitBtn">Salvar Produto</button>
@@ -228,11 +262,11 @@
             <h3>Lista de Insumos</h3>
             
             <form method="GET" action="{{ url_for('stock.stock_products') }}" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
-                <!-- Maintain filter if exists -->
                 {% if request.args.get('filter') %}
                 <input type="hidden" name="filter" value="{{ request.args.get('filter') }}">
                 {% endif %}
 
+                <!-- Multi-select department visual support could be added here, for now keeping select -->
                 <select name="department" class="form-select" style="width: auto; padding: 5px;" onchange="this.form.submit()">
                     <option value="Todos">Todos Depts</option>
                     {% for dept in departments %}
@@ -248,8 +282,8 @@
                 </select>
 
                 <select name="sort" class="form-select" style="width: auto; padding: 5px;" onchange="this.form.submit()">
-                    <option value="department" {% if request.args.get('sort') == 'department' %}selected{% endif %}>Ordenar: Depto</option>
                     <option value="name" {% if request.args.get('sort') == 'name' %}selected{% endif %}>Nome (A-Z)</option>
+                    <option value="department" {% if request.args.get('sort') == 'department' %}selected{% endif %}>Ordenar: Depto</option>
                     <option value="category" {% if request.args.get('sort') == 'category' %}selected{% endif %}>Categoria</option>
                     <option value="stock_asc" {% if request.args.get('sort') == 'stock_asc' %}selected{% endif %}>Estoque (Menor)</option>
                     <option value="stock_desc" {% if request.args.get('sort') == 'stock_desc' %}selected{% endif %}>Estoque (Maior)</option>
@@ -278,108 +312,127 @@
             </div>
         </div>
 
-        <table class="table table-striped table-hover table-sm" style="font-size: 0.8rem;">
-            <thead>
-                <tr>
-                    <th style="width: 40px;"><input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()"></th>
-                    <th>Produto</th>
-                    <th>Depto / Categoria</th>
-                    <th>Unid.</th>
-                    <th>Min</th>
-                    <th>Estoque</th>
-                    <th>Preço</th>
-                    <th>Total</th>
-                    <th>Fornec.</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for product in products %}
-                <tr>
-                    <td><input type="checkbox" class="product-checkbox" value="{{ product.id }}" onchange="updateBulkActionsUI()"></td>
-                    <td>
-                        {{ product.name }}
-                        {% if product.is_internal or product.category == 'Porcionado' %}
-                        <span class="status-badge" style="background-color: #8e44ad; color: white; font-size: 0.7em; padding: 1px 4px; margin-left: 4px;">Interno</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <span class="status-badge {{ 'status-pending' if product.department == 'Geral' else 'status-finished' }}" style="font-size: 0.7em; padding: 1px 4px;">
-                            {{ product.department }}
-                        </span>
-                        <span style="font-size: 0.7em; color: #34495e; margin-left: 4px; display: inline-block; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                            {{ product.category or '-' }}{% if product.frequency %} • {{ product.frequency }}{% endif %}
-                        </span>
-                    </td>
-                    <td>{{ (product.unit or '-')|abbreviate_unit }}</td>
-                    <td>{{ "%.2f"|format(product.min_stock) if product.min_stock is not none else '0.00' }}</td>
-                    <td class="{% if (product.balance or 0) < (product.min_stock or 0) %}text-danger{% else %}text-success{% endif %}" style="font-weight: bold;">
-                        {{ "%.2f"|format(product.balance) if product.balance else '0.00' }}
-                        {% if (product.balance or 0) < (product.min_stock or 0) %}
-                        <span title="Abaixo do Mínimo" style="cursor: help;"><i class="bi bi-exclamation-triangle-fill"></i></span>
-                        {% endif %}
-                    </td>
-                    <td>R$ {{ "%.2f"|format(product.price) if product.price else '0.00' }}</td>
-                    <td>R$ {{ "%.2f"|format(product.total_value) if product.total_value else '0.00' }}</td>
-                    <td style="font-size: 0.8em;">
-                        {% if product.suppliers and 'Estoque Inicial' in product.suppliers %}
-                        <span class="status-badge" style="background-color: #f39c12; color: white; font-size: 0.7em; padding: 1px 4px; margin-right: 4px;">
-                            Atenção: cadastrar fornecedor
-                        </span>
-                        {% endif %}
-                        {% if product.suppliers %}
-                            {{ product.suppliers|join(', ') }}
-                        {% else %}
-                            -
-                        {% endif %}
-                    </td>
-                    <td>
-                        <div class="table-actions">
-                            <button 
-                                data-product="{{ product|tojson|forceescape }}"
-                                onclick="editProduct(JSON.parse(this.dataset.product))" 
-                                class="action-btn" 
-                                style="padding: 5px 10px; font-size: 0.8em; background-color: #f39c12; min-width: 44px; min-height: 44px;" 
-                                title="Editar" aria-label="Editar"><i class="bi bi-pencil"></i></button>
-                            <button 
-                                data-product="{{ product|tojson|forceescape }}"
-                                onclick="openStockEditModal(JSON.parse(this.dataset.product))" 
-                                class="action-btn" 
-                                style="padding: 5px 10px; font-size: 0.8em; background-color: #1e3a8a; min-width: 44px; min-height: 44px;" 
-                                title="Ajuste Rápido de Estoque" aria-label="Ajuste Rápido de Estoque"><i class="bi bi-box-seam"></i></button>
-                            <button 
-                                onclick="viewHistory('{{ product.name }}')" 
-                                class="action-btn" 
-                                style="padding: 5px 10px; font-size: 0.8em; background-color: #34495e; min-width: 44px; min-height: 44px;" 
-                                title="Histórico" aria-label="Histórico"><i class="bi bi-clock-history"></i></button>
-                            <button 
-                                data-id="{{ product.id }}"
-                                data-name="{{ product.name }}"
-                                data-balance="{{ product.balance or 0 }}"
-                                onclick="deleteProduct(this.dataset.id, this.dataset.name, parseFloat(this.dataset.balance))" 
-                                class="action-btn" 
-                                style="padding: 5px 10px; font-size: 0.8em; background-color: #e74c3c; margin-left: 0; min-width: 44px; min-height: 44px;" 
-                                title="Excluir" aria-label="Excluir"><i class="bi bi-trash"></i></button>
-                        </div>
-                    </td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="11" style="text-align: center; padding: 10px; color: #7f8c8d;">
-                        Nenhum produto encontrado na lista.
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover table-sm" style="font-size: 0.8rem;">
+                <thead>
+                    <tr>
+                        <th style="width: 40px;"><input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()"></th>
+                        <th>Produto</th>
+                        <th>Estoque</th>
+                        <th>Categoria</th>
+                        <th>Unid.</th>
+                        <th>Min</th>
+                        <th>Estoque</th>
+                        <th>Preço</th>
+                        <th>Total</th>
+                        <th>Fornec.</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr>
+                        <td><input type="checkbox" class="product-checkbox" value="{{ product.id }}" onchange="updateBulkActionsUI()"></td>
+                        <td>
+                            <div class="fw-bold">{{ product.name }}</div>
+                            {% if product.is_internal or product.category == 'Porcionado' %}
+                            <span class="status-badge" style="background-color: #8e44ad; color: white; font-size: 0.7em; padding: 1px 4px;">Interno</span>
+                            {% endif %}
+                        </td>
+                        <!-- New Split Columns -->
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-box-seam me-1 text-muted"></i>
+                                <span>{{ product.department }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span>{{ product.category or '-' }}</span>
+                        </td>
+                        
+                        <td>{{ (product.unit or '-')|abbreviate_unit }}</td>
+                        <td>{{ "%.2f"|format(product.min_stock) if product.min_stock is not none else '0.00' }}</td>
+                        <td class="{% if (product.balance or 0) < (product.min_stock or 0) %}text-danger{% else %}text-success{% endif %}" style="font-weight: bold;">
+                            {{ "%.2f"|format(product.balance) if product.balance else '0.00' }}
+                            {% if (product.balance or 0) < (product.min_stock or 0) %}
+                            <span title="Abaixo do Mínimo" style="cursor: help;"><i class="bi bi-exclamation-triangle-fill"></i></span>
+                            {% endif %}
+                        </td>
+                        <td>R$ {{ "%.2f"|format(product.price) if product.price else '0.00' }}</td>
+                        <td>R$ {{ "%.2f"|format(product.total_value) if product.total_value else '0.00' }}</td>
+                        
+                        <!-- Improved Supplier Column -->
+                        <td style="font-size: 0.8em;">
+                            {% if product.suppliers %}
+                                {% set first_supplier_name = product.suppliers[0] %}
+                                {% set s_obj = supplier_map.get(first_supplier_name) %}
+                                
+                                <div class="supplier-tooltip" title="{{ 'CNPJ: ' + (s_obj.cnpj or '') if s_obj else 'Sem CNPJ' }}">
+                                    {% if s_obj and s_obj.active %}
+                                        <i class="bi bi-circle-fill text-success" style="font-size: 6px; vertical-align: middle;"></i>
+                                    {% else %}
+                                        <i class="bi bi-circle-fill text-secondary" style="font-size: 6px; vertical-align: middle;"></i>
+                                    {% endif %}
+                                    
+                                    {{ first_supplier_name|truncate(15, True) }}
+                                    
+                                    {% if product.suppliers|length > 1 %}
+                                        <span class="badge bg-secondary rounded-pill" style="font-size: 0.6em; padding: 0.2em 0.4em;" title="Ver todos">+{{ product.suppliers|length - 1 }}</span>
+                                    {% endif %}
+                                </div>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        
+                        <td>
+                            <div class="table-actions">
+                                <button 
+                                    data-product="{{ product|tojson|forceescape }}"
+                                    onclick="editProduct(JSON.parse(this.dataset.product))" 
+                                    class="action-btn" 
+                                    style="padding: 5px 10px; font-size: 0.8em; background-color: #f39c12; min-width: 36px; min-height: 36px;" 
+                                    title="Editar" aria-label="Editar"><i class="bi bi-pencil"></i></button>
+                                <button 
+                                    data-product="{{ product|tojson|forceescape }}"
+                                    onclick="openStockEditModal(JSON.parse(this.dataset.product))" 
+                                    class="action-btn" 
+                                    style="padding: 5px 10px; font-size: 0.8em; background-color: #1e3a8a; min-width: 36px; min-height: 36px;" 
+                                    title="Ajuste Rápido de Estoque" aria-label="Ajuste Rápido de Estoque"><i class="bi bi-box-seam"></i></button>
+                                <button 
+                                    onclick="viewHistory('{{ product.name }}')" 
+                                    class="action-btn" 
+                                    style="padding: 5px 10px; font-size: 0.8em; background-color: #34495e; min-width: 36px; min-height: 36px;" 
+                                    title="Histórico" aria-label="Histórico"><i class="bi bi-clock-history"></i></button>
+                                <button 
+                                    data-id="{{ product.id }}"
+                                    data-name="{{ product.name }}"
+                                    data-balance="{{ product.balance or 0 }}"
+                                    onclick="deleteProduct(this.dataset.id, this.dataset.name, parseFloat(this.dataset.balance))" 
+                                    class="action-btn" 
+                                    style="padding: 5px 10px; font-size: 0.8em; background-color: #e74c3c; margin-left: 0; min-width: 36px; min-height: 36px;" 
+                                    title="Excluir" aria-label="Excluir"><i class="bi bi-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="11" style="text-align: center; padding: 10px; color: #7f8c8d;">
+                            Nenhum produto encontrado na lista.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
-
 
     <div class="form-actions" style="margin-top: 20px;">
         <a href="{{ url_for('main.index') }}" class="cancel-link">Voltar</a>
     </div>
 </div>
 
+<!-- Modals (Keep existing structure but cleaned up) -->
 <!-- Delete Modal -->
 <div id="deleteModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);">
     <div style="background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 400px; border-radius: 8px;">
@@ -435,6 +488,7 @@
     </div>
 </div>
 
+<!-- History Modal -->
 <div id="historyModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);">
     <div style="background-color: #fefefe; margin: 5% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 800px; border-radius: 8px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -484,6 +538,21 @@
 </div>
 
 <script>
+// --- Toggle Collapsible ---
+function toggleCollapsible(header) {
+    header.classList.toggle("active");
+    var content = header.nextElementSibling;
+    if (content.style.display === "block") {
+        content.style.display = "none";
+        header.querySelector('.bi-chevron-down').style.transform = "rotate(0deg)";
+    } else {
+        content.style.display = "block";
+        header.querySelector('.bi-chevron-down').style.transform = "rotate(180deg)";
+    }
+}
+
+// --- Original Scripts (Cleaned) ---
+
 let currentHistoryProduct = '';
 
 function viewHistory(productName) {
@@ -491,7 +560,6 @@ function viewHistory(productName) {
     document.getElementById('historyProductName').innerText = productName;
     document.getElementById('historyModal').style.display = 'block';
     
-    // Default to 30 days if fields are empty
     if (!document.getElementById('historyStartDate').value) {
         const end = new Date();
         const start = new Date();
@@ -650,38 +718,21 @@ function closeDeleteModal() {
     document.getElementById('deleteModal').style.display = 'none';
 }
 
-// Modal functions
-function openReviewModal() {
-    document.getElementById('reviewModal').style.display = 'block';
-    calculateAllSuggestions();
-}
-
-function closeReviewModal() {
-    document.getElementById('reviewModal').style.display = 'none';
-}
-
-// Close modal when clicking outside
 window.onclick = function(event) {
     const deleteModal = document.getElementById('deleteModal');
-    if (event.target == deleteModal) {
-        deleteModal.style.display = "none";
-    }
-    const reviewModal = document.getElementById('reviewModal');
-    if (event.target == reviewModal) {
-        reviewModal.style.display = "none";
-    }
+    if (event.target == deleteModal) deleteModal.style.display = "none";
+    const stockEditModal = document.getElementById('stockEditModal');
+    if (event.target == stockEditModal) stockEditModal.style.display = "none";
+    const historyModal = document.getElementById('historyModal');
+    if (event.target == historyModal) historyModal.style.display = "none";
     const smartReviewModal = document.getElementById('smartReviewModal');
-    if (event.target == smartReviewModal) {
-        smartReviewModal.style.display = "none";
-    }
+    if (event.target == smartReviewModal) smartReviewModal.style.display = "none";
 }
 
 let currentSmartSuggestions = [];
 
 function openSmartReviewModal() {
     document.getElementById('smartReviewModal').style.display = 'block';
-    // Auto calculate on open? Maybe wait for user click to save resources
-    // But user expects "Sugestão" immediately usually.
     calculateSmartSuggestions();
 }
 
@@ -738,12 +789,11 @@ function renderSmartTable() {
         
         if (item.has_history) {
             if (absDiff > 0.01) {
-                // Change detected
                 if (diff > 0) {
-                    diffColor = '#27ae60'; // Green for increase (safety)
+                    diffColor = '#27ae60';
                     rowStyle = 'background-color: #f0f9f4;';
                 } else {
-                    diffColor = '#e74c3c'; // Red for decrease (optimization)
+                    diffColor = '#e74c3c';
                     rowStyle = 'background-color: #fdedec;';
                 }
             }
@@ -811,103 +861,9 @@ function applySmartSuggestions() {
     .then(data => {
         if (data.success) {
             alert(`${data.count} produtos atualizados com sucesso!`);
-            calculateSmartSuggestions(); // Refresh
+            calculateSmartSuggestions();
         } else {
             alert('Erro: ' + data.message);
-        }
-    })
-    .catch(err => alert('Erro na requisição.'));
-}
-
-let currentSuggestions = [];
-
-function calculateAllSuggestions() {
-    const tbody = document.getElementById('reviewTableBody');
-     tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Calculando... Isso pode levar alguns segundos.</td></tr>';
-     
-     fetch('/api/stock/consumption_all')
-         .then(response => response.json())
-         .then(data => {
-             currentSuggestions = data;
-             tbody.innerHTML = '';
-             if (data.length === 0) {
-                 tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Nenhum produto encontrado.</td></tr>';
-                 return;
-             }
-             
-             data.forEach(item => {
-                 // Only show if there is a suggestion different from current min_stock (with some tolerance)
-                 // Or show all? Let's show all for now, but maybe highlight differences.
-                 
-                 const currentMin = parseFloat(item.current_min_stock) || 0;
-                 const suggested = parseFloat(item.suggested_min);
-                 const diff = Math.abs(currentMin - suggested);
-                 const frequency = item.frequency || 'Semanal';
-                 
-                 let rowStyle = '';
-                 if (diff > (currentMin * 0.1) && suggested > 0) {
-                     rowStyle = 'background-color: #fff8e1;'; // Highlight if significant difference
-                 }
-                 
-                 const row = `
-                     <tr style="${rowStyle}">
-                         <td>${item.name}</td>
-                         <td>${item.current_stock} ${abbreviateUnit(item.unit)}</td>
-                         <td>${currentMin}</td>
-                         <td>${item.avg_weekly}</td>
-                         <td>${frequency}</td>
-                         <td style="font-weight: bold; color: ${diff > 0.1 ? '#d35400' : 'inherit'}">${suggested}</td>
-                         <td>
-                             <button onclick="applyMinStock('${item.id}', ${suggested})" class="action-btn" style="padding: 5px 10px; font-size: 0.8em; background-color: #27ae60;">✔ Aplicar</button>
-                         </td>
-                     </tr>
-                 `;
-                 tbody.innerHTML += row;
-             });
-         })
-         .catch(err => {
-             console.error(err);
-             tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: red;">Erro ao carregar dados.</td></tr>';
-         });
- }
-
-function applyAllSuggestions() {
-    if (currentSuggestions.length === 0) {
-        alert('Nenhuma sugestão disponível para aplicar.');
-        return;
-    }
-    
-    // Filter updates where suggestion differs from current (tolerance 0.01)
-    const updates = currentSuggestions.filter(item => {
-        const current = parseFloat(item.current_min_stock) || 0;
-        const suggested = parseFloat(item.suggested_min);
-        return Math.abs(current - suggested) > 0.01;
-    }).map(item => ({
-        id: item.id,
-        min_stock: item.suggested_min
-    }));
-    
-    if (updates.length === 0) {
-        alert('Todos os produtos já estão atualizados com as sugestões.');
-        return;
-    }
-    
-    if (!confirm(`Deseja atualizar o estoque mínimo de ${updates.length} produtos conforme as sugestões?`)) return;
-    
-    fetch('/stock/update_min_stock_bulk', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ updates: updates })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert(`${data.count} produtos atualizados com sucesso!`);
-            calculateAllSuggestions(); // Refresh table
-        } else {
-            alert('Erro ao atualizar: ' + data.message);
         }
     })
     .catch(err => alert('Erro na requisição.'));
@@ -928,9 +884,7 @@ function applyMinStock(productId, newValue) {
     .then(data => {
         if (data.success) {
             alert('Estoque mínimo atualizado!');
-            // Reload table to reflect changes (or just update row visually)
-            calculateAllSuggestions();
-            // Also reload page eventually to update main list if needed, but not strictly necessary immediately
+            calculateSmartSuggestions();
         } else {
             alert('Erro ao atualizar: ' + data.message);
         }
@@ -948,18 +902,16 @@ function toggleForm() {
     if (card.style.display === 'none') {
         card.style.display = 'block';
         btn.innerHTML = '<i class="bi bi-dash-lg"></i> Cancelar';
-        // Reset form
         form.reset();
         idInput.value = '';
-        title.innerText = 'Adicionar Novo Produto';
-        // Reset suppliers
+        title.innerText = 'Adicionar Novo Insumo';
         document.getElementById('suppliersContainer').innerHTML = `
             <div class="supplier-row" style="margin-bottom: 10px; display: flex; gap: 10px;">
-                <input type="text" name="suppliers[]" list="suppliersList" required placeholder="Nome do Fornecedor 1" style="flex: 1;">
+                <input type="text" name="suppliers[]" list="suppliersList" required placeholder="Nome do Fornecedor 1" style="flex: 1; padding: 6px;">
             </div>`;
     } else {
         card.style.display = 'none';
-        btn.innerHTML = '<i class="bi bi-plus-lg"></i> Novo Produto';
+        btn.innerHTML = '<i class="bi bi-plus-lg"></i> Novo Insumo';
     }
 }
 
@@ -972,7 +924,6 @@ function suggestMinStock() {
         return;
     }
     
-    // Show loading
     const originalPlaceholder = minStockInput.placeholder;
     minStockInput.placeholder = "Calculando...";
     
@@ -998,156 +949,66 @@ function suggestMinStock() {
 }
 
 function editProduct(product) {
-    // Open form
-    const form = document.getElementById('productFormCard');
-    const btn = document.getElementById('toggleFormBtn');
-    
-    form.style.display = 'block';
-    btn.style.display = 'none';
-    
-    // Fill fields
+    toggleForm();
+    document.getElementById('formTitle').innerText = 'Editar Insumo';
     document.getElementById('product_id').value = product.id;
     document.getElementById('name').value = product.name;
     document.getElementById('department').value = product.department;
+    document.getElementById('category').value = product.category;
     document.getElementById('unit').value = product.unit;
-    document.getElementById('price').value = product.price ? parseFloat(product.price).toFixed(2) : '0.00';
-    document.getElementById('category').value = product.category || '';
-    document.getElementById('min_stock').value = product.min_stock ? parseFloat(product.min_stock).toFixed(2) : '0.00';
+    document.getElementById('price').value = product.price;
+    document.getElementById('min_stock').value = product.min_stock;
+    document.getElementById('frequency').value = product.frequency || 'Sem Frequência';
     document.getElementById('package_size').value = product.package_size || 1;
     document.getElementById('purchase_unit').value = product.purchase_unit || '';
-    document.getElementById('frequency').value = product.frequency || 'Sem Frequência';
     
-    // Fill suppliers
+    // New Fiscal Fields
+    document.getElementById('ncm').value = product.ncm || '';
+    document.getElementById('cest').value = product.cest || '';
+    document.getElementById('icms_rate').value = product.icms_rate || '';
+    document.getElementById('anp_code').value = product.anp_code || '';
+    document.getElementById('cfop_default').value = product.cfop_default || '';
+
     const container = document.getElementById('suppliersContainer');
     container.innerHTML = '';
     
     if (product.suppliers && product.suppliers.length > 0) {
-        product.suppliers.forEach((s, index) => {
+        product.suppliers.forEach(s => {
             const div = document.createElement('div');
             div.className = 'supplier-row';
-            div.style.cssText = 'margin-bottom: 10px; display: flex; gap: 10px;';
+            div.style.marginBottom = '10px';
+            div.style.display = 'flex';
+            div.style.gap = '10px';
             div.innerHTML = `
-                <input type="text" name="suppliers[]" list="suppliersList" value="${s}" required placeholder="Nome do Fornecedor ${index + 1}" style="flex: 1;">
-                ${index > 0 ? '<button type="button" onclick="removeSupplier(this)" style="background: none; border: none; cursor: pointer; color: #e74c3c;"><i class="bi bi-x-circle"></i></button>' : ''}
+                <input type="text" name="suppliers[]" list="suppliersList" value="${s}" required placeholder="Nome do Fornecedor" style="flex: 1; padding: 6px;">
+                <button type="button" class="action-btn" style="background-color: #e74c3c; padding: 2px 8px; margin: 0;" onclick="this.parentElement.remove()"><i class="bi bi-trash"></i></button>
             `;
             container.appendChild(div);
         });
     } else {
-        // Add one empty if none
-        const div = document.createElement('div');
-        div.className = 'supplier-row';
-        div.style.cssText = 'margin-bottom: 10px; display: flex; gap: 10px;';
-        div.innerHTML = `
-            <input type="text" name="suppliers[]" list="suppliersList" required placeholder="Nome do Fornecedor 1" style="flex: 1;">
-        `;
-        container.appendChild(div);
+        container.innerHTML = `
+            <div class="supplier-row" style="margin-bottom: 10px; display: flex; gap: 10px;">
+                <input type="text" name="suppliers[]" list="suppliersList" required placeholder="Nome do Fornecedor 1" style="flex: 1; padding: 6px;">
+            </div>`;
     }
-    
-    checkLimit();
-    
-    // Change UI text
-    document.getElementById('formTitle').innerText = 'Editar Produto';
-    document.getElementById('submitBtn').innerText = 'Atualizar Produto';
-    
-    // Scroll to form
-    form.scrollIntoView({ behavior: 'smooth' });
 }
 
 function addSupplier() {
     const container = document.getElementById('suppliersContainer');
-    const count = container.querySelectorAll('.supplier-row').length;
-    if (count >= 3) {
+    if (container.children.length >= 3) {
         alert('Máximo de 3 fornecedores.');
         return;
     }
-    
     const div = document.createElement('div');
     div.className = 'supplier-row';
-    div.style.cssText = 'margin-bottom: 10px; display: flex; gap: 10px;';
+    div.style.marginBottom = '10px';
+    div.style.display = 'flex';
+    div.style.gap = '10px';
     div.innerHTML = `
-        <input type="text" name="suppliers[]" list="suppliersList" required placeholder="Nome do Fornecedor ${count + 1}" style="flex: 1;">
-        <button type="button" onclick="removeSupplier(this)" style="background: none; border: none; cursor: pointer; color: #e74c3c;"><i class="bi bi-x-circle"></i></button>
+        <input type="text" name="suppliers[]" list="suppliersList" required placeholder="Nome do Fornecedor" style="flex: 1; padding: 6px;">
+        <button type="button" class="action-btn" style="background-color: #e74c3c; padding: 2px 8px; margin: 0;" onclick="this.parentElement.remove()"><i class="bi bi-trash"></i></button>
     `;
     container.appendChild(div);
-    checkLimit();
-}
-
-function removeSupplier(btn) {
-    btn.parentElement.remove();
-    checkLimit();
-}
-
-function checkLimit() {
-    const count = document.getElementById('suppliersContainer').querySelectorAll('.supplier-row').length;
-    const btn = document.getElementById('addSupplierBtn');
-    if (count >= 3) {
-        btn.style.display = 'none';
-    } else {
-        btn.style.display = 'inline-block';
-    }
-}
-
-function toggleSelectAll() {
-    var checkboxes = document.querySelectorAll('.product-checkbox');
-    var selectAll = document.getElementById('selectAllCheckbox');
-    for(var i=0; i<checkboxes.length; i++) {
-        checkboxes[i].checked = selectAll.checked;
-    }
-    updateBulkActionsUI();
-}
-
-function updateBulkActionsUI() {
-    var checkboxes = document.querySelectorAll('.product-checkbox:checked');
-    var panel = document.getElementById('bulkActionsPanel');
-    var countSpan = document.getElementById('selectedCount');
-    
-    if (checkboxes.length > 0) {
-        panel.style.display = 'flex';
-        countSpan.innerText = checkboxes.length;
-    } else {
-        panel.style.display = 'none';
-    }
-}
-
-function applyBulkManualMinStock() {
-    var checkboxes = document.querySelectorAll('.product-checkbox:checked');
-    var newVal = document.getElementById('bulkMinStockInput').value;
-    
-    if (checkboxes.length === 0) return;
-    if (newVal === '') {
-        alert('Por favor, informe o novo valor de estoque mínimo.');
-        return;
-    }
-    
-    var updates = [];
-    for(var i=0; i<checkboxes.length; i++) {
-        updates.push({
-            id: checkboxes[i].value,
-            min_stock: newVal
-        });
-    }
-    
-    if (!confirm('Deseja atualizar o estoque mínimo de ' + updates.length + ' produtos para ' + newVal + '?')) return;
-    
-    fetch('/stock/update_min_stock_bulk', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ updates: updates })
-    })
-    .then(function(response) { return response.json(); })
-    .then(function(data) {
-        if (data.success) {
-            alert(data.count + ' produtos atualizados com sucesso!');
-            location.reload();
-        } else {
-            alert('Erro: ' + data.message);
-        }
-    })
-    .catch(function(err) {
-        alert('Erro na requisição.');
-    });
 }
 </script>
 {% endblock %}

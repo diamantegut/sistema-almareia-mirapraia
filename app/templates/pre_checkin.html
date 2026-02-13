@@ -271,6 +271,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.8/jquery.inputmask.min.js"></script>
+    <script src="{{ url_for('static', filename='js/cep-service.js') }}"></script>
 
     <script>
         $(document).ready(function(){
@@ -280,25 +281,14 @@
             $('#phone').inputmask('(99) 99999-9999');
             
             // Busca CEP
-            function buscaCep() {
-                var cep = $('#zip_code').val().replace(/\D/g, '');
-                if (cep.length === 8) {
-                    $.getJSON("https://viacep.com.br/ws/"+ cep +"/json/?callback=?", function(dados) {
-                        if (!("erro" in dados)) {
-                            $("#street").val(dados.logradouro);
-                            $("#neighborhood").val(dados.bairro);
-                            $("#city").val(dados.localidade);
-                            $("#state").val(dados.uf);
-                            $("#number").focus();
-                        } else {
-                            alert("CEP não encontrado.");
-                        }
-                    });
-                }
-            }
+            // IDs: zip_code, street, neighborhood, city, state, number
+            CepService.bind('zip_code', 'street', 'neighborhood', 'city', 'state', 'number');
             
-            $('#zip_code').blur(buscaCep);
-            $('#btnBuscaCep').click(buscaCep);
+            // Manual trigger button if exists
+            $('#btnBuscaCep').click(function() {
+                // Trigger blur event to start search
+                document.getElementById('zip_code').dispatchEvent(new Event('blur'));
+            });
 
             // Toggle Vehicle
             $('#vehicle').change(function(){

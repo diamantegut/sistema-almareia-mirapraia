@@ -43,51 +43,7 @@ def api_smart_suggestions():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
 
-@stock_bp.route('/stock/adjust-min-levels', methods=['GET', 'POST'])
-@login_required
-def stock_adjust_min_levels():
-    if session.get('role') != 'gerente' and session.get('role') != 'admin':
-        flash('Acesso restrito.')
-        return redirect(url_for('main.service_page', service_id='principal'))
-        
-    if request.method == 'POST':
-        products = load_products()
-        applied_count = 0
-        
-        for key, value in request.form.items():
-            if key.startswith('new_min_'):
-                p_id = key.split('new_min_')[1]
-                new_val = float(value)
-                
-                for p in products:
-                    if p['id'] == p_id:
-                        p['min_stock'] = new_val
-                        applied_count += 1
-                        break
-                        
-        if applied_count > 0:
-            save_products(products)
-            try:
-                LoggerService.log_acao(
-                    acao='Ajuste de Estoque Mínimo',
-                    entidade='Estoque',
-                    detalhes={
-                        'updated_count': applied_count,
-                        'updates': {k: v for k, v in request.form.items() if k.startswith('new_min_')}
-                    },
-                    nivel_severidade='INFO',
-                    departamento_id='Estoque',
-                    colaborador_id=session.get('user', 'Sistema')
-                )
-            except Exception as e:
-                print(f"Log Error: {e}")
-            flash(f'{applied_count} produtos atualizados com novos estoques mínimos.')
-        else:
-            flash('Nenhuma alteração realizada.')
-        return redirect(url_for('main.service_page', service_id='principal'))
-        
-    suggestions = calculate_suggested_min_stock()
-    return render_template('stock_adjust_min.html', suggestions=suggestions)
+    # Route stock_adjust_min_levels removed as per request
 
 @stock_bp.route('/stock/new', methods=['GET', 'POST'])
 @login_required
@@ -304,25 +260,52 @@ def stock_products():
 
             products = load_products()
             
+            # Extract Fiscal Fields
+            ncm = request.form.get('ncm')
+            cest = request.form.get('cest')
+            icms_rate = request.form.get('icms_rate')
+            anp_code = request.form.get('anp_code')
+            cfop_default = request.form.get('cfop_default')
+            
             try:
-                pkg_size_val = float(package_size) if package_size else 1.0
-            except ValueError:
+                pkg_size_val = float(package_size.replace(',', '.')) if package_size else 1.0
+            except (ValueError, AttributeError):
                 pkg_size_val = 1.0
             
+            try:
+                price_val = float(price.replace(',', '.')) if price else 0.0
+            except (ValueError, AttributeError):
+                price_val = 0.0
+
+            try:
+                min_stock_val = float(min_stock.replace(',', '.')) if min_stock else 0.0
+            except (ValueError, AttributeError):
+                min_stock_val = 0.0
+
+            try:
+                icms_val = float(icms_rate.replace(',', '.')) if icms_rate else 0.0
+            except (ValueError, AttributeError):
+                icms_val = 0.0
+
             if product_id:
                 for p in products:
                     if p.get('id') == product_id:
                         p['name'] = name
                         p['department'] = department
                         p['unit'] = unit
-                        p['price'] = float(price)
+                        p['price'] = price_val
                         p['category'] = category
-                        p['min_stock'] = float(min_stock) if min_stock else 0
+                        p['min_stock'] = min_stock_val
                         p['package_size'] = pkg_size_val
                         p['purchase_unit'] = purchase_unit
                         p['frequency'] = frequency
                         p['suppliers'] = suppliers_list
                         p['is_internal'] = (category == 'Porcionado')
+                        p['ncm'] = ncm
+                        p['cest'] = cest
+                        p['icms_rate'] = icms_val
+                        p['anp_code'] = anp_code
+                        p['cfop_default'] = cfop_default
                         break
                 save_products(products)
                 log_system_action('Produto Atualizado', {'id': product_id, 'name': name}, category='Estoque')
@@ -334,14 +317,19 @@ def stock_products():
                         'name': name,
                         'department': department,
                         'unit': unit,
-                        'price': float(price),
+                        'price': price_val,
                         'category': category,
-                        'min_stock': float(min_stock) if min_stock else 0,
+                        'min_stock': min_stock_val,
                         'package_size': pkg_size_val,
                         'purchase_unit': purchase_unit,
                         'frequency': frequency,
                         'suppliers': suppliers_list,
-                        'is_internal': (category == 'Porcionado')
+                        'is_internal': (category == 'Porcionado'),
+                        'ncm': ncm,
+                        'cest': cest,
+                        'icms_rate': icms_val,
+                        'anp_code': anp_code,
+                        'cfop_default': cfop_default
                     })
                     save_products(products)
                     log_system_action('Produto Criado', {'name': name}, category='Estoque')
@@ -351,18 +339,55 @@ def stock_products():
         
         return redirect(url_for('stock.stock_products'))
 
-    products = load_products()
-    balances = get_product_balances()
-    
+    try:
+        products = load_products()
+        balances = get_product_balances()
+        raw_suppliers = load_suppliers()
+    except Exception as e:
+        current_app.logger.error(f"Error loading stock data: {e}")
+        flash('Erro ao carregar dados do estoque. Contate o suporte.', 'error')
+        products = []
+        balances = {}
+        raw_suppliers = []
+
     # --- 1. Calcular saldos e valores (Necessário para filtros) ---
     for p in products:
-        p['balance'] = balances.get(p['name'], 0.0)
-        p['total_value'] = p['balance'] * p.get('price', 0.0)
+        try:
+            p['balance'] = balances.get(p['name'], 0.0)
+            price = p.get('price', 0.0)
+            if price is None: price = 0.0
+            p['total_value'] = p['balance'] * float(price)
+        except (ValueError, TypeError):
+            p['total_value'] = 0.0
         
     # --- 2. Preparar listas auxiliares antes de filtrar (para dropdowns) ---
     all_categories = sorted(list(set(p.get('category', 'Outros') for p in products if p.get('category'))))
     dept_options = ['Geral'] + DEPARTMENTS
-    existing_suppliers = load_suppliers()
+    
+    existing_suppliers = []
+    supplier_map = {}
+    
+    for s in raw_suppliers:
+        try:
+            if isinstance(s, dict):
+                existing_suppliers.append(s)
+                supplier_map[s.get('name')] = s
+            else:
+                # Handle legacy string suppliers
+                s_obj = {
+                    'id': str(uuid.uuid4()),
+                    'name': s,
+                    'active': True,
+                    'category': 'Geral',
+                    'cnpj': '',
+                    'trade_name': s
+                }
+                existing_suppliers.append(s_obj)
+                supplier_map[s] = s_obj
+        except Exception:
+            continue
+            
+    existing_suppliers.sort(key=lambda x: x.get('name', ''))
 
     # --- 3. Aplicar Filtros (Request Args) ---
     filtered_products = products
@@ -370,7 +395,11 @@ def stock_products():
     # Filtro: Departamento
     dept_filter = request.args.get('department')
     if dept_filter and dept_filter != 'Todos':
-        filtered_products = [p for p in filtered_products if p.get('department') == dept_filter]
+        if ',' in dept_filter:
+             depts = dept_filter.split(',')
+             filtered_products = [p for p in filtered_products if p.get('department') in depts]
+        else:
+             filtered_products = [p for p in filtered_products if p.get('department') == dept_filter]
         
     # Filtro: Categoria
     cat_filter = request.args.get('category')
@@ -404,7 +433,7 @@ def stock_products():
     else: # Default: name
         filtered_products.sort(key=lambda x: x.get('name', ''))
 
-    return render_template('stock_products.html', products=filtered_products, departments=dept_options, suppliers=existing_suppliers, categories=all_categories)
+    return render_template('stock_products.html', products=filtered_products, departments=dept_options, suppliers=existing_suppliers, categories=all_categories, supplier_map=supplier_map)
 
 @stock_bp.route('/stock/categories')
 @login_required

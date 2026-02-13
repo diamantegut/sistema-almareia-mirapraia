@@ -53,6 +53,9 @@ def create_app(config_name=None):
     from app.blueprints.finance import finance_bp
     app.register_blueprint(finance_bp)
 
+    from app.blueprints.suppliers import suppliers_bp
+    app.register_blueprint(suppliers_bp)
+
     from app.blueprints.governance import governance_bp
     app.register_blueprint(governance_bp)
 

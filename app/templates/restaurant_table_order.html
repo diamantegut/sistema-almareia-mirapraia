@@ -402,27 +402,14 @@
                                     <div class="row row-cols-3 row-cols-sm-4 row-cols-md-5 g-2">
                                         {% for p in items %}
                                         {% if p.product_type != 'accompaniment_only' or p.category in ['Doses', 'Drinks', 'Café da Manhã'] %}
-                                        <div class="col">
+                                        <div class="col product-item-container" data-product-id="{{ p.id }}">
                                             <div class="position-relative h-100">
-                                                {% if p.paused %}
-                                                <button type="button" 
-                                                        class="btn btn-light w-100 h-100 p-2 text-start d-flex flex-column justify-content-between shadow-sm border"
-                                                        disabled
-                                                        style="opacity: 0.7; cursor: not-allowed;">
-                                                    <div class="d-flex justify-content-between align-items-start w-100">
-                                                        <span class="fw-bold lh-sm mb-1 text-muted text-break" style="font-size: 0.85rem; overflow-wrap: break-word; text-decoration: line-through;">{{ p.name }}</span>
-                                                        <span class="badge bg-danger ms-1" style="font-size: 0.6em;">PAUSADO</span>
-                                                    </div>
-                                                    <span class="badge bg-light text-muted border align-self-start mt-1" style="font-size: 0.75em;">R$ {{ "%.2f"|format(p.price|default(0)) }}</span>
-                                                </button>
-                                                {% else %}
                                                 <button type="button" 
                                                         class="btn btn-outline-secondary w-100 h-100 p-2 product-btn text-start d-flex flex-column justify-content-between shadow-sm"
                                                         onclick="selectProductFromId('{{ p.id }}', this)">
                                                     <span class="fw-bold lh-sm mb-1 text-break" style="font-size: 0.85rem; overflow-wrap: break-word;">{{ p.name }}</span>
                                                     <span class="badge bg-light text-dark border align-self-start mt-1" style="font-size: 0.75em;">R$ {{ "%.2f"|format(p.price|default(0)) }}</span>
                                                 </button>
-                                                {% endif %}
 
                                                 {% if can_manage_items and false %}
                                                 <button type="button" 
@@ -642,15 +629,7 @@
                                         {% endif %}
 
                                         {% if can_manage_items %}
-                                        <button type="button" class="btn btn-sm btn-outline-primary me-1" title="Editar Item"
-                                                data-id="{{ item.ids[-1] }}"
-                                                data-name="{{ item.name }}"
-                                                data-qty="{{ item.qty }}"
-                                                data-obs="{{ item.observations|join(', ') }}"
-                                                onclick="openEditItemModal(this)">
-                                            <i class="bi bi-pencil-square"></i>
-                                        </button>
-                                        
+                                        <!-- Edit button removed -->
                                         {% set unit_price = item.total / item.qty %}
                                         <div class="input-group input-group-sm mb-1 d-inline-flex w-auto cancel-group">
                                             <input type="text" class="form-control form-control-sm cancel-reason" placeholder="Motivo" style="width: 100px;">
@@ -811,7 +790,60 @@
                 </div>
                 
                 <script>
-                function toggleHistoryView() {
+        // Polling for Paused Products
+        function checkPausedProducts() {
+            fetch('/api/products/paused')
+                .then(response => response.json())
+                .then(data => {
+                    const pausedIds = data.paused_ids;
+                    const productContainers = document.querySelectorAll('.product-item-container');
+                    let hiddenCount = 0;
+                    
+                    productContainers.forEach(container => {
+                        const prodId = container.getAttribute('data-product-id');
+                        if (pausedIds.includes(prodId)) {
+                            if (container.style.display !== 'none') {
+                                container.style.display = 'none';
+                                console.log(`Hiding paused product: ${prodId}`);
+                            }
+                            hiddenCount++;
+                        } else {
+                            // Only show if it was hidden by this script (active filtering might be separate)
+                            // But here we assume if it's NOT paused, it should be visible (unless filtered by search)
+                            // However, we must respect the search filter.
+                            // Better approach: Add a class 'paused-hidden' and use CSS or check classes.
+                            if (container.classList.contains('paused-hidden')) {
+                                container.classList.remove('paused-hidden');
+                                // Reset display if search is not active, or re-trigger search
+                                // Simple approach: just set display: block (or remove inline style)
+                                // But this might conflict with Search or Category filtering.
+                                // Category filtering uses display:none on the GROUP, not the item usually.
+                                // Search uses display:none on the item.
+                                
+                                // Let's use a class 'paused-item' and manage display via CSS or robust logic.
+                            }
+                            
+                            // Safe toggle
+                             if (container.style.display === 'none' && !container.classList.contains('search-hidden')) {
+                                container.style.display = '';
+                             }
+                        }
+                        
+                        if (pausedIds.includes(prodId)) {
+                            container.classList.add('paused-hidden');
+                            container.style.display = 'none';
+                        }
+                    });
+                })
+                .catch(err => console.error('Error checking paused products:', err));
+        }
+
+        // Start polling every 10 seconds
+        setInterval(checkPausedProducts, 10000);
+        // Initial check
+        document.addEventListener('DOMContentLoaded', checkPausedProducts);
+
+        function toggleHistoryView() {
                     const stdView = document.getElementById('standard-view');
                     const histView = document.getElementById('history-view');
                     const btn = document.getElementById('btnToggleHistory');
@@ -843,31 +875,104 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">Atualizar Número de Adultos</h5>
+                <h5 class="modal-title">Atualizar Detalhes da Mesa</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <form action="{{ url_for('restaurant.restaurant_table_order', table_id=table_id) }}" method="POST">
                 <div class="modal-body">
                     <input type="hidden" name="action" value="update_pax">
+                    
+                    <!-- Num Adults -->
                     <div class="mb-3">
                         <label for="edit_num_adults" class="form-label fw-bold">Adultos na Mesa</label>
-                        <input type="number"
-                               class="form-control form-control-lg text-center"
-                               id="edit_num_adults"
-                               name="num_adults"
-                               min="1"
-                               required
-                               value="{{ order.num_adults }}">
-                        <div class="form-text">
-                            Se a Música ao Vivo estiver ativa, novos adultos receberão Cover adicional.
+                        <input type="number" class="form-control form-control-lg text-center" id="edit_num_adults" name="num_adults" min="1" required value="{{ order.num_adults }}">
+                    </div>
+
+                    <!-- Customer Type -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Tipo de Cliente</label>
+                        <div class="d-flex gap-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="customer_type" id="edit_type_passante" value="passante" {{ 'checked' if order.customer_type == 'passante' else '' }} onchange="toggleEditRoomInput()">
+                                <label class="form-check-label" for="edit_type_passante">Passante</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="customer_type" id="edit_type_hospede" value="hospede" {{ 'checked' if order.customer_type == 'hospede' else '' }} onchange="toggleEditRoomInput()">
+                                <label class="form-check-label" for="edit_type_hospede">Hóspede</label>
+                            </div>
                         </div>
                     </div>
+
+                    <!-- Room Selection (Hidden by default unless hospede) -->
+                    <div class="mb-3" id="edit_room_input_container" {% if order.customer_type == 'hospede' %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+                        <label class="form-label fw-bold">Selecione o Quarto</label>
+                        <div class="alert alert-warning small py-1">
+                            <i class="bi bi-exclamation-triangle"></i> Trocar o quarto atualizará o hóspede vinculado.
+                        </div>
+                        <div class="d-flex flex-wrap gap-2" id="edit-room-list" style="max-height: 200px; overflow-y: auto;">
+                            {% set excluded_rooms = [4, 5, 6, 7, 8, 9, 10, 13, 18, 19, 20, 27, 28, 29, 30] %}
+                            {% for r in range(1, 36) %}
+                                {% if r not in excluded_rooms %}
+                                    {% set r_str = r|string %}
+                                    {% set r_padded = "%02d"|format(r) %}
+                                    {% set guest = room_occupancy.get(r_padded) or room_occupancy.get(r_str) %}
+                                    <button type="button" 
+                                            class="btn {{ 'btn-primary' if (order.room_number and (order.room_number|int == r)) else ('btn-outline-primary' if guest else 'btn-outline-secondary') }} room-btn text-start" 
+                                            onclick="selectEditRoom('{{ r }}', this)"
+                                            style="min-width: 60px;"
+                                            {% if not guest %}disabled title="Quarto Vazio"{% endif %}>
+                                        <div class="fw-bold text-center">{{ r }}</div>
+                                        {% if guest %}
+                                        <div style="font-size: 0.7em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80px;" title="{{ guest.guest_name }}">
+                                            {{ guest.guest_name }}
+                                        </div>
+                                        {% else %}
+                                        <div style="font-size: 0.7em; white-space: nowrap;" class="text-muted">Vazio</div>
+                                        {% endif %}
+                                    </button>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" id="edit_room_number" name="room_number" value="{{ order.room_number if order.room_number else '' }}">
+                    </div>
+
+                    <!-- Passante Name -->
+                    <div class="mb-3" id="edit_customer_name_container" {% if order.customer_type == 'passante' %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+                        <label for="edit_customer_name" class="form-label">Nome do Passante</label>
+                        <input type="text" class="form-control" id="edit_customer_name" name="customer_name" value="{{ order.customer_name if order.customer_type == 'passante' else '' }}">
+                    </div>
+
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Atualizar</button>
+                    <button type="submit" class="btn btn-primary">Atualizar Informações</button>
                 </div>
             </form>
+            
+            <script>
+            function toggleEditRoomInput() {
+                const type = document.querySelector('input[name="customer_type"]:checked').value;
+                document.getElementById('edit_room_input_container').style.display = type === 'hospede' ? 'block' : 'none';
+                document.getElementById('edit_customer_name_container').style.display = type === 'passante' ? 'block' : 'none';
+            }
+            
+            function selectEditRoom(room, btn) {
+                document.getElementById('edit_room_number').value = room;
+                // Update UI
+                document.querySelectorAll('#edit-room-list .room-btn').forEach(b => {
+                    b.classList.remove('btn-primary');
+                    // Reset to outline if it was outline before... simplified:
+                    if (b.classList.contains('btn-outline-secondary')) {
+                        // keep it
+                    } else {
+                        b.classList.add('btn-outline-primary');
+                    }
+                });
+                btn.classList.remove('btn-outline-primary');
+                btn.classList.remove('btn-outline-secondary');
+                btn.classList.add('btn-primary');
+            }
+            </script>
         </div>
     </div>
 </div>

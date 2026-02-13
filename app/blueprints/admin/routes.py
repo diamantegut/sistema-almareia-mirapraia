@@ -1004,9 +1004,10 @@ def fiscal_pool_view():
 @login_required
 def fiscal_pool_action():
     if session.get('role') != 'admin':
-        return jsonify({'success': False}), 403
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 403
         
     action = request.json.get('action')
+    entry_id = request.json.get('id')
     
     if action == 'start':
         FiscalPoolService.start_pool()
@@ -1019,8 +1020,45 @@ def fiscal_pool_action():
         time.sleep(1)
         FiscalPoolService.start_pool()
         msg = "Pool reiniciado."
+    elif action == 'emit':
+        if not entry_id:
+            return jsonify({'success': False, 'error': 'ID ausente'}), 400
+        
+        try:
+            # Use updated process_pending_emissions with specific_id
+            from app.services.fiscal_service import process_pending_emissions
+            results = process_pending_emissions(specific_id=entry_id)
+            
+            if results['success'] > 0:
+                msg = "Emissão realizada com sucesso."
+            elif results['failed'] > 0:
+                # Fetch error detail from entry
+                entry = FiscalPoolService.get_entry(entry_id)
+                error_detail = "Erro desconhecido"
+                if entry:
+                    if entry.get('last_error'):
+                        error_detail = entry.get('last_error')
+                    else:
+                        error_detail = "Verifique o status da conta ou configurações."
+                return jsonify({'success': False, 'error': f"Falha na emissão: {error_detail}"})
+            else:
+                return jsonify({'success': False, 'error': "Nenhuma emissão processada (Item não encontrado, já emitido ou status inválido)."})
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({'success': False, 'error': f"Erro interno ao emitir: {str(e)}"})
+            
+    elif action == 'ignore':
+        if not entry_id:
+            return jsonify({'success': False, 'error': 'ID ausente'}), 400
+        
+        success = FiscalPoolService.update_status(entry_id, 'ignored', user=session.get('user'))
+        if success:
+            msg = "Conta marcada como ignorada."
+        else:
+            return jsonify({'success': False, 'error': "Erro ao atualizar status."})
+            
     else:
-        return jsonify({'success': False, 'message': 'Ação inválida'}), 400
+        return jsonify({'success': False, 'error': 'Ação inválida'}), 400
         
     return jsonify({'success': True, 'message': msg})
 

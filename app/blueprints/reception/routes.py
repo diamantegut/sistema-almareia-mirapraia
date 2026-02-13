@@ -2864,6 +2864,12 @@ def reception_close_account(room_num):
         processed_charges = []
         now_str = datetime.now().strftime('%d/%m/%Y %H:%M')
         
+        # Resolve Payment Method Name and Object
+        payment_methods_list = load_payment_methods()
+        pm_obj = next((m for m in payment_methods_list if m['id'] == payment_method), None)
+        pm_name = pm_obj['name'] if pm_obj else payment_method
+        is_fiscal = pm_obj.get('is_fiscal', False) if pm_obj else False
+
         # Aggregate waiter breakdown
         from collections import defaultdict
         aggregated_waiter_breakdown = defaultdict(float)
@@ -2896,6 +2902,26 @@ def reception_close_account(room_num):
                 except: items_list = []
             elif items_list is None:
                 items_list = []
+
+            # Add to Fiscal Pool (Individual Emission per Charge)
+            try:
+                fiscal_payments = [{
+                    'method': pm_name,
+                    'amount': float(charge.get('total', 0)),
+                    'is_fiscal': is_fiscal
+                }]
+                
+                FiscalPoolService.add_to_pool(
+                    origin='reception_charge',
+                    original_id=f"CHARGE_{charge['id']}",
+                    total_amount=float(charge.get('total', 0)),
+                    items=items_list,
+                    payment_methods=fiscal_payments,
+                    user=user,
+                    customer_info={'room_number': room_num, 'guest_name': guest_name}
+                )
+            except Exception as e:
+                print(f"Error adding charge {charge['id']} to fiscal pool: {e}")
                 
             charge_items = []
             charge_subtotal = 0.0
@@ -3018,27 +3044,9 @@ def reception_close_account(room_num):
                                 charges=processed_charges,
                                 total_amount=total_amount)
 
-        # --- FISCAL POOL INTEGRATION ---
-        try:
-            pool_items = []
-            for c in processed_charges:
-                pool_items.extend(c.get('line_items', []))
-            
-            FiscalPoolService.add_to_pool(
-                origin='reception',
-                original_id=f"ROOM_{room_num}",
-                total_amount=total_amount,
-                items=pool_items,
-                payment_methods=[{'method': pm_name, 'amount': total_amount, 'is_fiscal': False}],
-                user=user,
-                customer_info={
-                    'room_number': room_num,
-                    'guest_name': guest_name
-                }
-            )
-        except Exception as fp_e:
-            print(f"Error adding to fiscal pool (reception): {fp_e}")
-        # -------------------------------
+        # --- FISCAL POOL INTEGRATION REMOVED ---
+        # Logic moved to individual charge loop to prevent grouping
+        # ---------------------------------------
 
         return jsonify({'success': True, 'receipt_html': receipt_html})
         

@@ -220,7 +220,14 @@ function viewDetails(id) {
 }
 
 async function emitInvoice(id) {
-    if (!confirm('Deseja emitir a nota fiscal para esta conta?')) return;
+    if (!confirm('Deseja iniciar a emissão fiscal para esta conta?')) return;
+    
+    // Show loading state (optional)
+    const btn = document.querySelector(`#row-${id} .btn-success`);
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Emitindo...';
+    }
 
     try {
         const response = await fetch('/admin/fiscal/pool/action', {
@@ -230,15 +237,25 @@ async function emitInvoice(id) {
         });
         
         const result = await response.json();
+        
         if (result.success) {
             alert('Emissão iniciada com sucesso!');
             location.reload();
         } else {
-            alert('Erro ao iniciar emissão: ' + result.error);
+            console.error('Erro emissão:', result);
+            alert('Erro ao iniciar emissão: ' + (result.error || 'Erro desconhecido'));
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-cloud-upload"></i> Emitir';
+            }
         }
     } catch (e) {
-        alert('Erro de comunicação com o servidor.');
-        console.error(e);
+        console.error('Exceção emissão:', e);
+        alert('Erro de conexão ou servidor: ' + e.message);
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-cloud-upload"></i> Emitir';
+        }
     }
 }
 
