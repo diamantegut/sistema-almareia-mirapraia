@@ -6445,5 +6445,1911 @@
         "notes": "Recovered from Cashier Session (Missing in Closed Accounts)",
         "fiscal_doc_uuid": null,
         "history": []
+    },
+    {
+        "id": "38a494ce-1565-497c-b28f-50f42a60ee80",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "MESA_50_202602121400",
+        "closed_at": "2026-02-12 14:00:58",
+        "closed_by": "dudu",
+        "total_amount": 29.370000000000005,
+        "fiscal_amount": 29.37,
+        "items": [
+            {
+                "id": "a44bde60-4e1d-49c2-b418-4b0d364158f9",
+                "product_id": "47",
+                "name": "Agua Sem Gás Pet",
+                "price": 8.9,
+                "qty": 3.0,
+                "category": "Sucos e Águas",
+                "created_at": "12/02/2026 13:51",
+                "waiter": "dudu",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "PIX Maquininha CNPJ",
+                "amount": 21.78,
+                "is_fiscal": true
+            },
+            {
+                "method": "Debito Mirapraia Pagseguro",
+                "amount": 7.59,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 50",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "84b56599-4a23-4033-b342-753754bb4a39",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "MESA_93_202602121421",
+        "closed_at": "2026-02-12 14:21:39",
+        "closed_by": "filipe",
+        "total_amount": 111.65,
+        "fiscal_amount": 111.65,
+        "items": [
+            {
+                "id": "8da3f661-7170-432a-ad1a-1781acacdfda",
+                "product_id": "265",
+                "name": "Caldo (Consultar sabor do dia)",
+                "price": 15.9,
+                "qty": 1.0,
+                "category": "Entradas",
+                "created_at": "12/02/2026 13:49",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "Feijão (Caldo)",
+                "questions_answers": []
+            },
+            {
+                "id": "3bebd56e-f0bd-49b2-a8cf-0f339e02286b",
+                "product_id": "40",
+                "name": "Ceviche Tropical (Individual)",
+                "price": 47.9,
+                "qty": 1.0,
+                "category": "Especiais da Casa",
+                "created_at": "12/02/2026 13:51",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "63e120f2-c7e9-41d3-bee7-bca69a9f91bb",
+                "product_id": "274",
+                "name": "Cachacas Salinas ",
+                "price": 18.9,
+                "qty": 1.0,
+                "category": "Doses",
+                "created_at": "12/02/2026 14:00",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "77f6b3be-9a8f-4b30-824f-ce2241662ddf",
+                "product_id": "133",
+                "name": "Agua com Gás 275ml",
+                "price": 9.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "12/02/2026 14:02",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Não mandar"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "Um copo"
+                    }
+                ]
+            },
+            {
+                "id": "467f7b35-7824-4dbf-9518-d97c75e251f3",
+                "product_id": "148",
+                "name": "Coca Cola Zero 350ml",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Refrigerante",
+                "created_at": "12/02/2026 14:09",
+                "waiter": "edson",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "1 cp"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "1copo"
+                    }
+                ]
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Credito MIrapraia Pagseguro",
+                "amount": 111.65,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 93",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "03dc3c5e-0b5a-4fa9-8a2a-4ca1988580b7",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "MESA_50_202602121518",
+        "closed_at": "2026-02-12 15:18:45",
+        "closed_by": "filipe",
+        "total_amount": 49.28,
+        "fiscal_amount": 49.28,
+        "items": [
+            {
+                "id": "bd7b8d0e-e445-4aa4-a01f-9e0f2fff3fe6",
+                "product_id": "2006",
+                "name": "Caipiroska Absolut (Escolha o sabor)",
+                "price": 34.9,
+                "qty": 1.0,
+                "category": "Drinks",
+                "created_at": "12/02/2026 14:48",
+                "waiter": "filipe",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "Caju",
+                "questions_answers": []
+            },
+            {
+                "id": "d4d18edb-f91b-41ec-a930-31581f306315",
+                "product_id": "133",
+                "name": "Agua com Gás 275ml",
+                "price": 9.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "12/02/2026 14:48",
+                "waiter": "filipe",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Sem gelo"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "1"
+                    }
+                ]
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "PIX Maquininha CNPJ",
+                "amount": 49.28,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 50",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "d8ed4f4f-4b46-4080-b63d-195e470dbf05",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "MESA_58_202602121519",
+        "closed_at": "2026-02-12 15:19:05",
+        "closed_by": "filipe",
+        "total_amount": 292.05,
+        "fiscal_amount": 292.05,
+        "items": [
+            {
+                "id": "b15fc4fe-e445-4b6b-b825-0496a09b914e",
+                "product_id": "33",
+                "name": "Gin Tonica",
+                "price": 36.9,
+                "qty": 1.0,
+                "category": "Drinks",
+                "created_at": "12/02/2026 14:10",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "380ba174-8a45-420f-993b-79d8a1cba51d",
+                "product_id": "60",
+                "name": "Brusqueta de Salmão com pão artesanal da  casa (3un.)",
+                "price": 39.9,
+                "qty": 1.0,
+                "category": "Entradas",
+                "created_at": "12/02/2026 14:10",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Crocância",
+                        "answer": "Normal"
+                    }
+                ]
+            },
+            {
+                "id": "c44e3e07-0c21-4f0c-8b6e-6dade265291a",
+                "product_id": "149",
+                "name": "Coca-Cola 350ml",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Refrigerante",
+                "created_at": "12/02/2026 14:10",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "1 cp"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "Com gelo e limao"
+                    }
+                ]
+            },
+            {
+                "id": "7af4c006-3456-4c66-9b02-c6b4814f135b",
+                "product_id": "118",
+                "name": "Arroz de Polvo (Individual)",
+                "price": 89.9,
+                "qty": 1.0,
+                "category": "Pratos",
+                "created_at": "12/02/2026 14:20",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "cc7a72ff-0597-4a7b-8195-88644c2b8faf",
+                "product_id": "115",
+                "name": "Salmão com Spaghetti ao molho pesto (Individual)",
+                "price": 89.9,
+                "qty": 1.0,
+                "category": "Pratos",
+                "created_at": "12/02/2026 14:20",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Debito Mirapraia Pagseguro",
+                "amount": 292.05,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 58",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "6188cb89-d034-4f4c-ba1a-91f262809187",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "MESA_97_202602121637",
+        "closed_at": "2026-02-12 16:37:39",
+        "closed_by": "filipe",
+        "total_amount": 271.26000000000005,
+        "fiscal_amount": 271.26,
+        "items": [
+            {
+                "id": "8138dbcc-99f6-4471-bc96-835b7d871e66",
+                "product_id": "91",
+                "name": "Cupim na telha (2 Pessoas)",
+                "price": 179.9,
+                "qty": 1.0,
+                "category": "Pratos",
+                "created_at": "12/02/2026 14:16",
+                "waiter": "edson",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Troca arroz por arroz de castanha"
+                ],
+                "accompaniments": [
+                    "Macaxeira Frita"
+                ],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "c78bb07b-4f20-4f1a-9823-9f50f4133bbd",
+                "product_id": "148",
+                "name": "Coca Cola Zero 350ml",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Refrigerante",
+                "created_at": "12/02/2026 14:55",
+                "waiter": "edson",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "2 com gelo e limão"
+                    }
+                ]
+            },
+            {
+                "id": "6552ccfe-1f37-41d1-bf74-d52db3e9de8d",
+                "product_id": "2001",
+                "name": "Caipirinha de Pitú",
+                "price": 28.9,
+                "qty": 1.0,
+                "category": "Drinks",
+                "created_at": "12/02/2026 15:30",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "Caju",
+                "questions_answers": []
+            },
+            {
+                "id": "7ee9faed-87b3-41c8-a8b7-cb093834ed24",
+                "product_id": "2001",
+                "name": "Caipirinha de Pitú",
+                "price": 28.9,
+                "qty": 1.0,
+                "category": "Drinks",
+                "created_at": "12/02/2026 15:30",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "Caju + Umbu Cajá",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "PIX Maquininha CNPJ",
+                "amount": 271.26,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Leonardo ",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 97",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "d8b42dce-34b4-4dea-9d63-26c615f36e1a",
+        "origin": "reception",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "ROOM_34",
+        "closed_at": "2026-02-12 16:57:32",
+        "closed_by": "bruno",
+        "total_amount": 811.9090000000001,
+        "fiscal_amount": 0.0,
+        "items": [
+            {
+                "name": "Suco Copo",
+                "qty": 1,
+                "unit_price": 10.9,
+                "total": 10.9
+            },
+            {
+                "name": "Heineken Long Neck",
+                "qty": 1,
+                "unit_price": 16.9,
+                "total": 16.9
+            },
+            {
+                "name": "Agua Sem Gás Pet FRIGOBAR",
+                "qty": 3,
+                "unit_price": 8.9,
+                "total": 26.700000000000003
+            },
+            {
+                "name": "Agua Sem Gás Pet FRIGOBAR",
+                "qty": 3,
+                "unit_price": 8.9,
+                "total": 26.700000000000003
+            },
+            {
+                "name": "Coca cola FRIGOBAR",
+                "qty": 1,
+                "unit_price": 8.9,
+                "total": 8.9
+            },
+            {
+                "name": "Suco Copo",
+                "qty": 1,
+                "unit_price": 10.9,
+                "total": 10.9
+            },
+            {
+                "name": "Heineken Long Neck",
+                "qty": 1,
+                "unit_price": 16.9,
+                "total": 16.9
+            },
+            {
+                "name": "Agua Sem Gás Pet FRIGOBAR",
+                "qty": 4,
+                "unit_price": 8.9,
+                "total": 35.6
+            },
+            {
+                "name": "Heineken Long Neck",
+                "qty": 1,
+                "unit_price": 16.9,
+                "total": 16.9
+            },
+            {
+                "name": "Suco Copo",
+                "qty": 1,
+                "unit_price": 10.9,
+                "total": 10.9
+            },
+            {
+                "name": "Salmão com Spaghetti ao molho pesto (Individual)",
+                "qty": 1,
+                "unit_price": 89.9,
+                "total": 89.9
+            },
+            {
+                "name": "Moqueca de Camarão (Individual)",
+                "qty": 1,
+                "unit_price": 89.9,
+                "total": 89.9
+            },
+            {
+                "name": "Coca-Cola 350ml",
+                "qty": 1,
+                "unit_price": 8.9,
+                "total": 8.9
+            },
+            {
+                "name": "Suco Copo",
+                "qty": 1,
+                "unit_price": 10.9,
+                "total": 10.9
+            },
+            {
+                "name": "Agua Sem Gás Pet FRIGOBAR",
+                "qty": 4,
+                "unit_price": 8.9,
+                "total": 35.6
+            },
+            {
+                "name": "Agua Sem Gás Pet FRIGOBAR",
+                "qty": 2,
+                "unit_price": 8.9,
+                "total": 17.8
+            },
+            {
+                "name": "Suco Copo",
+                "qty": 1,
+                "unit_price": 10.9,
+                "total": 10.9
+            },
+            {
+                "name": "Heineken Long Neck",
+                "qty": 1,
+                "unit_price": 16.9,
+                "total": 16.9
+            },
+            {
+                "name": "Heineken Long Neck",
+                "qty": 1,
+                "unit_price": 16.9,
+                "total": 16.9
+            },
+            {
+                "name": "Suco Copo",
+                "qty": 1,
+                "unit_price": 10.9,
+                "total": 10.9
+            },
+            {
+                "name": "Agua Sem Gás Pet FRIGOBAR",
+                "qty": 3,
+                "unit_price": 8.9,
+                "total": 26.700000000000003
+            },
+            {
+                "name": "Coca cola FRIGOBAR",
+                "qty": 1,
+                "unit_price": 8.9,
+                "total": 8.9
+            },
+            {
+                "name": "Camarão na manteiga de alho",
+                "qty": 1,
+                "unit_price": 89.9,
+                "total": 89.9
+            },
+            {
+                "name": "Arroz",
+                "qty": 1,
+                "unit_price": 14.9,
+                "total": 14.9
+            },
+            {
+                "name": "Pirão",
+                "qty": 1,
+                "unit_price": 14.9,
+                "total": 14.9
+            },
+            {
+                "name": "Parmegiana de Filé Mignon (Individual)",
+                "qty": 1,
+                "unit_price": 98.99,
+                "total": 98.99
+            },
+            {
+                "name": "Suco Copo",
+                "qty": 1,
+                "unit_price": 10.9,
+                "total": 10.9
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Credito Angelo",
+                "amount": 811.9090000000001,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "room_number": "34",
+            "guest_name": "Lilian Aragão e Sergio Aragão"
+        },
+        "status": "pending",
+        "notes": null,
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "f59dcc4b-130a-4145-b04e-0a0cb4157efe",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "MESA_40_202602121859",
+        "closed_at": "2026-02-12 18:59:49",
+        "closed_by": "leo",
+        "total_amount": 0.0,
+        "fiscal_amount": 0.0,
+        "items": [],
+        "payment_methods": [],
+        "customer": {
+            "name": "",
+            "type": "passante"
+        },
+        "status": "failed",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": [
+            {
+                "timestamp": "2026-02-12 21:45:27",
+                "action": "status_change",
+                "from": "pending",
+                "to": "failed",
+                "user": "Sistema"
+            }
+        ]
+    },
+    {
+        "id": "f40770e8-5aa4-4e95-ae47-f37d34509d95",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "MESA_58_202602122021",
+        "closed_at": "2026-02-12 20:21:36",
+        "closed_by": "filipe",
+        "total_amount": 444.95000000000005,
+        "fiscal_amount": 444.95,
+        "items": [
+            {
+                "id": "7f3d5528-c706-4970-b924-7f778e8d9cdb",
+                "product_id": "133",
+                "name": "Agua com Gás 275ml",
+                "price": 9.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "12/02/2026 18:27",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "2 cp"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "Com gelo"
+                    }
+                ]
+            },
+            {
+                "id": "67bac623-a40e-462b-be20-85db73d5eb2a",
+                "product_id": "201",
+                "name": "Vinho Milani Pinot Grigio Veneto",
+                "price": 150.0,
+                "qty": 1.0,
+                "category": "Vinhos",
+                "created_at": "12/02/2026 18:33",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "2 Taças"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "db82f95b-bcea-4699-867e-7c2076519c93",
+                "product_id": "103",
+                "name": "Moqueca de Camarão (Individual)",
+                "price": 89.9,
+                "qty": 1.0,
+                "category": "Pratos",
+                "created_at": "12/02/2026 18:42",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "be8c0e5c-c1da-4762-85f7-719b8fa0fe0a",
+                "product_id": "107",
+                "name": "Peixada Pernambucana  (Individual)",
+                "price": 115.9,
+                "qty": 1.0,
+                "category": "Pratos",
+                "created_at": "12/02/2026 18:42",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "01367ec9-ae2f-4a0e-a23b-b5b4ebad8d60",
+                "product_id": "133",
+                "name": "Agua com Gás 275ml",
+                "price": 9.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "12/02/2026 18:42",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "."
+                    }
+                ]
+            },
+            {
+                "id": "e71ed1c7-40fe-455c-b89e-756177611d75",
+                "product_id": "79",
+                "name": "Pasteis de Queijo coalho  (6 unidades)",
+                "price": 28.9,
+                "qty": 1.0,
+                "category": "Entradas",
+                "created_at": "12/02/2026 18:52",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Credito MIrapraia Pagseguro",
+                "amount": 444.95,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Passante",
+            "type": "passante"
+        },
+        "status": "emitted",
+        "notes": "Mesa 58",
+        "fiscal_doc_uuid": "nfc_3a1f6bc90c454c3b9ceae585b67d38b3",
+        "history": [
+            {
+                "timestamp": "2026-02-12 21:45:25",
+                "action": "status_change",
+                "from": "pending",
+                "to": "emitted",
+                "user": "Sistema"
+            }
+        ],
+        "fiscal_serie": 8,
+        "fiscal_number": 643
+    },
+    {
+        "id": "bdc9091d-793b-47ae-9b8e-b561870a5494",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "MESA_61_202602122037",
+        "closed_at": "2026-02-12 20:37:05",
+        "closed_by": "filipe",
+        "total_amount": 441.419,
+        "fiscal_amount": 441.42,
+        "items": [
+            {
+                "id": "94b81481-e2d6-40b5-862b-33d66bcdd851",
+                "product_id": "79",
+                "name": "Pasteis de Queijo coalho  (6 unidades)",
+                "price": 28.9,
+                "qty": 1.0,
+                "category": "Entradas",
+                "created_at": "12/02/2026 19:04",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "3df03aca-a922-4413-a1d8-f1cfa229d158",
+                "product_id": "2001",
+                "name": "Caipirinha de Pitú",
+                "price": 28.9,
+                "qty": 2.0,
+                "category": "Drinks",
+                "created_at": "12/02/2026 19:04",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "Limão",
+                "questions_answers": []
+            },
+            {
+                "id": "84f3199a-1c0c-4866-ab36-b23153be9d91",
+                "product_id": "135",
+                "name": "Agua sem Gás 275ml",
+                "price": 9.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "12/02/2026 19:06",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "1 cp",
+                    "Com gelo"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": ","
+                    }
+                ]
+            },
+            {
+                "id": "ea6701ec-3bbe-405e-8081-b62b0211ea54",
+                "product_id": "101",
+                "name": "Medalhão com risotto de champignon e molho especial (Individual)",
+                "price": 94.99,
+                "qty": 1.0,
+                "category": "Pratos",
+                "created_at": "12/02/2026 19:21",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Ponto da Carne",
+                        "answer": "Ao ponto para mal"
+                    },
+                    {
+                        "question": "Ponto do Arroz",
+                        "answer": "Bem cozido"
+                    }
+                ]
+            },
+            {
+                "id": "a160566c-c0aa-453d-ade5-20315cd4b446",
+                "product_id": "111",
+                "name": "Filé de peixe branco na folha de bananeira (individual)",
+                "price": 99.9,
+                "qty": 1.0,
+                "category": "Pratos",
+                "created_at": "12/02/2026 19:21",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "71a37ac7-e87c-41d5-86f4-cbd2fe51882f",
+                "product_id": "113",
+                "name": "Polvo a Provençal (Individual)",
+                "price": 99.9,
+                "qty": 1.0,
+                "category": "Pratos",
+                "created_at": "12/02/2026 19:21",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "9e4e4bb2-36e1-412c-ba79-782ebab07390",
+                "product_id": "133",
+                "name": "Agua com Gás 275ml",
+                "price": 9.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "12/02/2026 20:15",
+                "waiter": "edson",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "1"
+                    }
+                ]
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Credito MIrapraia Pagseguro",
+                "amount": 441.42,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Passante",
+            "type": "passante"
+        },
+        "status": "failed",
+        "notes": "Mesa 61",
+        "fiscal_doc_uuid": null,
+        "history": [
+            {
+                "timestamp": "2026-02-12 21:45:23",
+                "action": "status_change",
+                "from": "pending",
+                "to": "failed",
+                "user": "Sistema"
+            }
+        ]
+    },
+    {
+        "id": "e58b25e7-3daf-4fb4-a3ea-421008f423e6",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "MESA_56_202602122143",
+        "closed_at": "2026-02-12 21:43:14",
+        "closed_by": "filipe",
+        "total_amount": 378.93899999999996,
+        "fiscal_amount": 378.94,
+        "items": [
+            {
+                "id": "82f929a8-e97d-4907-8213-0cb617e6c77b",
+                "product_id": "164",
+                "name": "Heineken Long Neck",
+                "price": 16.9,
+                "qty": 1.0,
+                "category": "Cervejas",
+                "created_at": "12/02/2026 19:31",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "1 cp",
+                    "Transf de Mesa 60"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "e4ef750a-369e-4dec-92fa-979a70ac9c27",
+                "product_id": "160",
+                "name": "Corona Long Neck",
+                "price": 16.9,
+                "qty": 1.0,
+                "category": "Cervejas",
+                "created_at": "12/02/2026 19:34",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Com limao",
+                    "Transf de Mesa 60"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "572346aa-7782-419c-9bd7-64dda45a7d2a",
+                "product_id": "37",
+                "name": "Arroz Havaiano (Individual)",
+                "price": 139.9,
+                "qty": 1.0,
+                "category": "Especiais da Casa",
+                "created_at": "12/02/2026 19:42",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 60"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "72897dce-13d2-4936-aaa3-7a1cc14b1a95",
+                "product_id": "105",
+                "name": "Parmegiana de Filé Mignon (Individual)",
+                "price": 98.99,
+                "qty": 1.0,
+                "category": "Pratos",
+                "created_at": "12/02/2026 19:42",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 60"
+                ],
+                "accompaniments": [
+                    "Batata Frita",
+                    "Macarrão"
+                ],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "e3a153fc-883f-4aa7-a2a7-44fc2e7e965c",
+                "product_id": "83",
+                "name": "Polvo a Pescador",
+                "price": 54.9,
+                "qty": 1.0,
+                "category": "Entradas",
+                "created_at": "12/02/2026 19:43",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Entrada",
+                    "Transf de Mesa 60"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "4f4050be-fc82-4eba-a103-e866d16c54e5",
+                "product_id": "164",
+                "name": "Heineken Long Neck",
+                "price": 16.9,
+                "qty": 1.0,
+                "category": "Cervejas",
+                "created_at": "12/02/2026 20:06",
+                "waiter": "edson",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 60"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Credito MIrapraia Pagseguro",
+                "amount": 378.94,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "",
+            "type": "passante"
+        },
+        "status": "failed",
+        "notes": "Mesa 56",
+        "fiscal_doc_uuid": null,
+        "history": [
+            {
+                "timestamp": "2026-02-12 21:45:23",
+                "action": "status_change",
+                "from": "pending",
+                "to": "failed",
+                "user": "Sistema"
+            }
+        ]
+    },
+    {
+        "id": "ff9ad4ae-584e-4279-9d03-8e1208891f6a",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "MESA_55_202602122143",
+        "closed_at": "2026-02-12 21:43:28",
+        "closed_by": "filipe",
+        "total_amount": 364.65,
+        "fiscal_amount": 364.65,
+        "items": [
+            {
+                "id": "4065d903-5770-44f1-b22a-3a449ce6313e",
+                "product_id": "37",
+                "name": "Arroz Havaiano (Individual)",
+                "price": 139.9,
+                "qty": 2.0,
+                "category": "Especiais da Casa",
+                "created_at": "12/02/2026 20:29",
+                "waiter": "edson",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Camarão sem casca"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "655562a1-e5f6-4d78-b0cb-cf808f647a59",
+                "product_id": "155",
+                "name": "Guaraná Zero 350ml",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Refrigerante",
+                "created_at": "12/02/2026 20:29",
+                "waiter": "edson",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "1 cp",
+                    "Copo com gelo"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "71af2857-59d6-413e-9579-f9f60b6d2a9e",
+                "product_id": "133",
+                "name": "Agua com Gás 275ml",
+                "price": 9.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "12/02/2026 20:29",
+                "waiter": "edson",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "1 sumo de limão a parte"
+                    }
+                ]
+            },
+            {
+                "id": "5472e94c-04d0-4f0d-9885-7db1cee45ef8",
+                "product_id": "132",
+                "name": "Cocada de forno da casa",
+                "price": 32.9,
+                "qty": 1.0,
+                "category": "Sobremesas",
+                "created_at": "12/02/2026 21:20",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Debito Mirapraia Pagseguro",
+                "amount": 364.65,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Sérgio ",
+            "type": "passante"
+        },
+        "status": "emitted",
+        "notes": "Mesa 55",
+        "fiscal_doc_uuid": "nfc_3a1f6bc8f69a41e8bb3cb5ff7c7b68c4",
+        "history": [
+            {
+                "timestamp": "2026-02-12 21:45:21",
+                "action": "status_change",
+                "from": "pending",
+                "to": "emitted",
+                "user": "Sistema"
+            }
+        ],
+        "fiscal_serie": 8,
+        "fiscal_number": 642
+    },
+    {
+        "id": "5250b2c1-5f3a-47ae-8ce5-126f0a454d1c",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "MESA_36_202602131053",
+        "closed_at": "2026-02-13 10:53:36",
+        "closed_by": "Angelo",
+        "total_amount": 2.0,
+        "fiscal_amount": 0.0,
+        "items": [
+            {
+                "id": "84320e08-60b0-4dce-81bf-dff18c2d4146",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "12/02/2026 08:55",
+                "waiter": "dudu",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "já foi",
+                    "Transf de Mesa 94"
+                ],
+                "accompaniments": [],
+                "flavor": "Tomate + Queijo Coalho",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Omelete"
+                    }
+                ]
+            },
+            {
+                "id": "25c35227-c767-453f-afe3-df8a6d09d74d",
+                "product_id": "10",
+                "name": "Misto Quente",
+                "price": 14.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "12/02/2026 09:14",
+                "waiter": "dudu",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 90",
+                    "Transf de Mesa 99"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "6b41964a-e03c-4c01-9543-45365db81ae4",
+                "product_id": "2002",
+                "name": "Tapioca",
+                "price": 10.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "12/02/2026 09:14",
+                "waiter": "dudu",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 90",
+                    "Transf de Mesa 99"
+                ],
+                "accompaniments": [],
+                "flavor": "Presunto + Tomate + Queijo Coalho",
+                "questions_answers": []
+            },
+            {
+                "id": "b56cf61e-bcb1-4034-886d-e346344e07da",
+                "product_id": "267",
+                "name": "Toast (Consultar Sabor do Dia)",
+                "price": 24.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "12/02/2026 09:14",
+                "waiter": "dudu",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 90",
+                    "Transf de Mesa 99"
+                ],
+                "accompaniments": [],
+                "flavor": "Parma",
+                "questions_answers": []
+            },
+            {
+                "id": "0ff317b0-5f4b-47a6-b4f7-cf9633c14ee8",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 2.0,
+                "category": "Café da manhã",
+                "created_at": "13/02/2026 08:47",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 42"
+                ],
+                "accompaniments": [],
+                "flavor": "Tradicional",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Pochê"
+                    }
+                ]
+            },
+            {
+                "id": "b3dfab9a-9e4d-4db2-a2e7-165b367ed0df",
+                "product_id": "267",
+                "name": "Toast (Consultar Sabor do Dia)",
+                "price": 24.9,
+                "qty": 2.0,
+                "category": "Café da manhã",
+                "created_at": "13/02/2026 08:47",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Sem nada",
+                    "Transf de Mesa 42"
+                ],
+                "accompaniments": [],
+                "flavor": "Tradicional",
+                "questions_answers": []
+            },
+            {
+                "id": "a8784192-5dc3-422f-852a-7e20a171e422",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 2.0,
+                "category": "Café da manhã",
+                "created_at": "13/02/2026 08:57",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 42"
+                ],
+                "accompaniments": [],
+                "flavor": "Ovos (Omelete,Mexido,Pochê,cozido ou frito)",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Pochê"
+                    }
+                ]
+            },
+            {
+                "id": "01368f10-2a28-4d90-87b5-3248f098282a",
+                "product_id": "267",
+                "name": "Toast (Consultar Sabor do Dia)",
+                "price": 24.9,
+                "qty": 2.0,
+                "category": "Café da manhã",
+                "created_at": "13/02/2026 08:57",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Sem nada",
+                    "Transf de Mesa 42"
+                ],
+                "accompaniments": [],
+                "flavor": "Tradicional",
+                "questions_answers": []
+            },
+            {
+                "id": "3e0c814c-7f39-4b18-98cf-97f3db8724a9",
+                "product_id": "10",
+                "name": "Misto Quente",
+                "price": 14.9,
+                "qty": 2.0,
+                "category": "Café da manhã",
+                "created_at": "13/02/2026 09:31",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 47"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "a77c0895-a14d-48cf-9da2-85a721ad0880",
+                "product_id": "267",
+                "name": "Toast (Consultar Sabor do Dia)",
+                "price": 24.9,
+                "qty": 2.0,
+                "category": "Café da manhã",
+                "created_at": "13/02/2026 09:31",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 47"
+                ],
+                "accompaniments": [],
+                "flavor": "Charque Desfiada",
+                "questions_answers": []
+            },
+            {
+                "id": "0594aa4c-6d44-4f9f-a70b-91e287843360",
+                "product_id": "2002",
+                "name": "Tapioca",
+                "price": 10.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "13/02/2026 09:31",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Orégano",
+                    "Transf de Mesa 47"
+                ],
+                "accompaniments": [],
+                "flavor": "Presunto + Tomate + Queijo Coalho",
+                "questions_answers": []
+            },
+            {
+                "id": "03004117-f480-47d7-aaaa-a2852ea4488b",
+                "product_id": "7",
+                "name": "Jarra de Agua 700ml",
+                "price": 0.1,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "13/02/2026 09:31",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 47"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "2"
+                    }
+                ]
+            },
+            {
+                "id": "1e6528ea-166f-413d-86a6-d7baceb30afd",
+                "product_id": "2002",
+                "name": "Tapioca",
+                "price": 10.0,
+                "qty": 2.0,
+                "category": "Café da manhã",
+                "created_at": "13/02/2026 09:12",
+                "waiter": "guilherme",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 50"
+                ],
+                "accompaniments": [],
+                "flavor": "Queijo Coalho",
+                "questions_answers": []
+            },
+            {
+                "id": "460758bc-0855-448b-ad1a-f956b0c023a9",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 2.0,
+                "category": "Café da manhã",
+                "created_at": "13/02/2026 09:12",
+                "waiter": "guilherme",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 50"
+                ],
+                "accompaniments": [],
+                "flavor": "Presunto + Tomate + Queijo Coalho",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Omelete"
+                    }
+                ]
+            },
+            {
+                "id": "4e6df1cb-82c0-4fcb-ad60-5305dda1897d",
+                "product_id": "13",
+                "name": "Pao Na Chapa",
+                "price": 2.0,
+                "qty": 4.0,
+                "category": "Café da manhã",
+                "created_at": "13/02/2026 09:28",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Pão de forma",
+                    "Transf de Mesa 54"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "7035142b-2eda-482e-8ae0-ec29a662196b",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 2.0,
+                "category": "Café da manhã",
+                "created_at": "13/02/2026 09:28",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 54"
+                ],
+                "accompaniments": [],
+                "flavor": "Ovos (Omelete,Mexido,Pochê,cozido ou frito)",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Mexido"
+                    }
+                ]
+            },
+            {
+                "id": "2633870e-d0de-4e71-b364-a245b60e157e",
+                "product_id": "2",
+                "name": "Acai",
+                "price": 19.9,
+                "qty": 1.0,
+                "category": "Sobremesas",
+                "created_at": "13/02/2026 09:28",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 54"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "a400dd18-ef3c-4568-991b-e59bcbae29b9",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 2.0,
+                "category": "Café da manhã",
+                "created_at": "13/02/2026 09:42",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 54"
+                ],
+                "accompaniments": [],
+                "flavor": "Ovos (Omelete,Mexido,Pochê,cozido ou frito)",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Mexido"
+                    }
+                ]
+            },
+            {
+                "id": "439bac83-b5f0-4a0a-ace9-bf8fbb8d1901",
+                "product_id": "2002",
+                "name": "Tapioca",
+                "price": 10.0,
+                "qty": 2.0,
+                "category": "Café da manhã",
+                "created_at": "13/02/2026 09:16",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 83"
+                ],
+                "accompaniments": [],
+                "flavor": "Charque Desfiada + Queijo Coalho",
+                "questions_answers": []
+            },
+            {
+                "id": "7afec632-0962-4700-86c8-e7d398857e1f",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "13/02/2026 08:13",
+                "waiter": "guilherme",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 96"
+                ],
+                "accompaniments": [],
+                "flavor": "Ovos (Omelete,Mexido,Pochê,cozido ou frito)",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Pochê"
+                    }
+                ]
+            },
+            {
+                "id": "1d6aedda-96c2-4d5e-afcb-7b9cd11da70d",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 2.0,
+                "category": "Café da manhã",
+                "created_at": "13/02/2026 08:15",
+                "waiter": "guilherme",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 96"
+                ],
+                "accompaniments": [],
+                "flavor": "Queijo Mussarela",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Mexido"
+                    }
+                ]
+            },
+            {
+                "id": "830cff12-b993-4284-9fbe-d0fbcc293c87",
+                "product_id": "13",
+                "name": "Pao Na Chapa",
+                "price": 2.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "13/02/2026 08:15",
+                "waiter": "guilherme",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Pão Frances",
+                    "Pão do toast sem nada",
+                    "Transf de Mesa 96"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "83beee89-a44e-40fa-a321-70821d6b9f49",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 2.0,
+                "category": "Café da manhã",
+                "created_at": "13/02/2026 08:15",
+                "waiter": "guilherme",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 96"
+                ],
+                "accompaniments": [],
+                "flavor": "Tomate + Queijo Coalho",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Omelete"
+                    }
+                ]
+            },
+            {
+                "id": "ed560997-bbc7-487d-aea2-c125491bc7a1",
+                "product_id": "13",
+                "name": "Pao Na Chapa",
+                "price": 2.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "13/02/2026 08:15",
+                "waiter": "guilherme",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Pão Frances",
+                    "Na chapa",
+                    "Transf de Mesa 96"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "aa50467a-9aa0-4301-a325-86b7b341079f",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 2.0,
+                "category": "Café da manhã",
+                "created_at": "13/02/2026 08:12",
+                "waiter": "guilherme",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 89"
+                ],
+                "accompaniments": [],
+                "flavor": "Tomate + Queijo Coalho + Cebola Branca",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Mexido"
+                    }
+                ]
+            },
+            {
+                "id": "8623409a-e797-492e-9964-6f3c1b4de60c",
+                "product_id": "22",
+                "name": "Tropical Sunset",
+                "price": 38.9,
+                "qty": 1.0,
+                "category": "Drinks",
+                "created_at": "13/02/2026 10:35",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 73"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "c10829c7-e58a-4bd1-94a6-440bbfdc5af5",
+                "product_id": "164",
+                "name": "Heineken Long Neck",
+                "price": 16.9,
+                "qty": 1.0,
+                "category": "Cervejas",
+                "created_at": "13/02/2026 10:35",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 73"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 2.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "name": "",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 36",
+        "fiscal_doc_uuid": null,
+        "history": []
     }
 ]

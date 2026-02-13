@@ -1922,104 +1922,6 @@
         "customer_type": "hospede",
         "room_number": "31"
     },
-    "36": {
-        "items": [
-            {
-                "id": "84320e08-60b0-4dce-81bf-dff18c2d4146",
-                "product_id": "12",
-                "name": "Ovos ",
-                "price": 8.9,
-                "qty": 1.0,
-                "category": "Café da manhã",
-                "created_at": "12/02/2026 08:55",
-                "waiter": "dudu",
-                "printed": true,
-                "print_status": "printed",
-                "complements": [],
-                "observations": [
-                    "já foi",
-                    "Transf de Mesa 94"
-                ],
-                "accompaniments": [],
-                "flavor": "Tomate + Queijo Coalho",
-                "questions_answers": [
-                    {
-                        "question": "Tipo do Ovo",
-                        "answer": "Omelete"
-                    }
-                ]
-            },
-            {
-                "id": "25c35227-c767-453f-afe3-df8a6d09d74d",
-                "product_id": "10",
-                "name": "Misto Quente",
-                "price": 14.9,
-                "qty": 1.0,
-                "category": "Café da manhã",
-                "created_at": "12/02/2026 09:14",
-                "waiter": "dudu",
-                "printed": true,
-                "print_status": "printed",
-                "complements": [],
-                "observations": [
-                    "Transf de Mesa 90",
-                    "Transf de Mesa 99"
-                ],
-                "accompaniments": [],
-                "flavor": "",
-                "questions_answers": []
-            },
-            {
-                "id": "6b41964a-e03c-4c01-9543-45365db81ae4",
-                "product_id": "2002",
-                "name": "Tapioca",
-                "price": 10.0,
-                "qty": 1.0,
-                "category": "Café da manhã",
-                "created_at": "12/02/2026 09:14",
-                "waiter": "dudu",
-                "printed": true,
-                "print_status": "printed",
-                "complements": [],
-                "observations": [
-                    "Transf de Mesa 90",
-                    "Transf de Mesa 99"
-                ],
-                "accompaniments": [],
-                "flavor": "Presunto + Tomate + Queijo Coalho",
-                "questions_answers": []
-            },
-            {
-                "id": "b56cf61e-bcb1-4034-886d-e346344e07da",
-                "product_id": "267",
-                "name": "Toast (Consultar Sabor do Dia)",
-                "price": 24.9,
-                "qty": 1.0,
-                "category": "Café da manhã",
-                "created_at": "12/02/2026 09:14",
-                "waiter": "dudu",
-                "printed": true,
-                "print_status": "printed",
-                "complements": [],
-                "observations": [
-                    "Transf de Mesa 90",
-                    "Transf de Mesa 99"
-                ],
-                "accompaniments": [],
-                "flavor": "Parma",
-                "questions_answers": []
-            }
-        ],
-        "total": 58.699999999999996,
-        "status": "open",
-        "opened_at": "11/02/2026 12:08",
-        "num_adults": "1",
-        "customer_type": "passante",
-        "customer_name": "",
-        "room_number": null,
-        "waiter": null,
-        "staff_name": null
-    },
     "25": {
         "items": [],
         "total": 0,
@@ -2088,17 +1990,672 @@
         "partial_payments": [],
         "total_paid": 0.0
     },
-    "89": {
+    "12": {
         "items": [],
         "total": 0,
         "status": "open",
-        "opened_at": "12/02/2026 13:08",
-        "num_adults": 1,
+        "opened_at": "12/02/2026 13:42",
+        "num_adults": 2,
+        "customer_type": "hospede",
+        "room_number": "12"
+    },
+    "24": {
+        "items": [],
+        "total": 0,
+        "status": "open",
+        "opened_at": "12/02/2026 15:02",
+        "num_adults": 2,
+        "customer_type": "hospede",
+        "room_number": "24"
+    },
+    "01": {
+        "items": [],
+        "total": 0,
+        "status": "open",
+        "opened_at": "12/02/2026 15:20",
+        "num_adults": 2,
+        "customer_type": "hospede",
+        "room_number": "01"
+    },
+    "59": {
+        "items": [
+            {
+                "id": "6a5a4d33-f659-4e40-86e6-2881e4226b39",
+                "product_id": "142",
+                "name": "Água de Coco",
+                "price": 10.9,
+                "qty": 2.0,
+                "category": "Sucos e Águas",
+                "created_at": "13/02/2026 11:17",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "total": 21.8,
+        "status": "open",
+        "opened_at": "13/02/2026 11:17",
+        "num_adults": 2,
         "customer_type": "hospede",
         "customer_name": "",
-        "room_number": "34",
+        "room_number": "17",
+        "waiter": "",
+        "staff_name": null,
+        "is_breakfast": false,
+        "partial_payments": [],
+        "total_paid": 0.0
+    },
+    "50": {
+        "items": [
+            {
+                "id": "5b8c112b-5290-4967-b7ab-8bc672a3e703",
+                "product_id": "142",
+                "name": "Água de Coco",
+                "price": 10.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "13/02/2026 11:18",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "total": 10.9,
+        "status": "open",
+        "opened_at": "13/02/2026 11:18",
+        "num_adults": 2,
+        "customer_type": "hospede",
+        "customer_name": "",
+        "room_number": "26",
+        "waiter": "",
+        "staff_name": null,
+        "is_breakfast": false,
+        "partial_payments": [],
+        "total_paid": 0.0
+    },
+    "60": {
+        "items": [
+            {
+                "id": "fb18d977-c3c9-4b69-a81b-cf370ce3a6d7",
+                "product_id": "142",
+                "name": "Água de Coco",
+                "price": 10.9,
+                "qty": 2.0,
+                "category": "Sucos e Águas",
+                "created_at": "13/02/2026 11:36",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "total": 21.8,
+        "status": "open",
+        "opened_at": "13/02/2026 11:31",
+        "num_adults": 2,
+        "customer_type": "hospede",
+        "customer_name": "",
+        "room_number": "12",
+        "waiter": "",
+        "staff_name": null,
+        "is_breakfast": false,
+        "partial_payments": [],
+        "total_paid": 0.0
+    },
+    "74": {
+        "items": [
+            {
+                "id": "3e39e08d-04ce-454c-83d7-0c5a444a5bb9",
+                "product_id": "142",
+                "name": "Água de Coco",
+                "price": 10.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "13/02/2026 11:39",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "total": 10.9,
+        "status": "open",
+        "opened_at": "13/02/2026 11:36",
+        "num_adults": 2,
+        "customer_type": "hospede",
+        "customer_name": "",
+        "room_number": "31",
+        "waiter": "",
+        "staff_name": null,
+        "is_breakfast": false,
+        "partial_payments": [],
+        "total_paid": 0.0
+    },
+    "73": {
+        "items": [
+            {
+                "id": "0669170d-4a83-40af-9284-2a46c5532dea",
+                "product_id": "142",
+                "name": "Água de Coco",
+                "price": 10.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "13/02/2026 11:42",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "total": 10.9,
+        "status": "open",
+        "opened_at": "13/02/2026 11:40",
+        "num_adults": 2,
+        "customer_type": "hospede",
+        "customer_name": "",
+        "room_number": "25",
+        "waiter": "",
+        "staff_name": null,
+        "is_breakfast": false,
+        "partial_payments": [],
+        "total_paid": 0.0
+    },
+    "40": {
+        "items": [
+            {
+                "id": "d11e6b7d-4b42-42f3-ac22-6dc58e408df4",
+                "product_id": "133",
+                "name": "Agua com Gás 275ml",
+                "price": 9.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "13/02/2026 11:58",
+                "waiter": "guilherme",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Sem gelo"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "1"
+                    }
+                ]
+            }
+        ],
+        "total": 9.9,
+        "status": "open",
+        "opened_at": "13/02/2026 11:46",
+        "num_adults": 2,
+        "customer_type": "passante",
+        "customer_name": "",
+        "room_number": null,
+        "waiter": "",
+        "staff_name": null,
+        "is_breakfast": false,
+        "partial_payments": [],
+        "total_paid": 0.0
+    },
+    "57": {
+        "items": [
+            {
+                "id": "6c69b4a6-3d0a-4dd1-90e5-48bdabee251f",
+                "product_id": "266",
+                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
+                "price": 16.9,
+                "qty": 2.0,
+                "category": "Cervejas",
+                "created_at": "13/02/2026 11:57",
+                "waiter": "guilherme",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "1 cp"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "61a4a8ca-f861-4497-a4cd-e02787b067fa",
+                "product_id": "60",
+                "name": "Brusqueta de Salmão com pão artesanal da  casa (3un.)",
+                "price": 39.9,
+                "qty": 1.0,
+                "category": "Entradas",
+                "created_at": "13/02/2026 12:06",
+                "waiter": "guilherme",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Crocância",
+                        "answer": "Normal"
+                    }
+                ]
+            },
+            {
+                "id": "9d63f8bf-fe2b-42e5-b55a-68b96ec32ed3",
+                "product_id": "265",
+                "name": "Caldo (Consultar sabor do dia)",
+                "price": 15.9,
+                "qty": 1.0,
+                "category": "Entradas",
+                "created_at": "13/02/2026 12:06",
+                "waiter": "guilherme",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "Sururu (Caldos)",
+                "questions_answers": []
+            },
+            {
+                "id": "b7dffb28-c076-4648-b7eb-a4edb13c83c1",
+                "product_id": "266",
+                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
+                "price": 16.9,
+                "qty": 1.0,
+                "category": "Cervejas",
+                "created_at": "13/02/2026 12:17",
+                "waiter": "guilherme",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "1 cp"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "total": 106.5,
+        "status": "open",
+        "opened_at": "13/02/2026 11:57",
+        "num_adults": 2,
+        "customer_type": "passante",
+        "customer_name": "",
+        "room_number": null,
+        "waiter": "",
+        "staff_name": null,
+        "is_breakfast": false,
+        "partial_payments": [],
+        "total_paid": 0.0
+    },
+    "53": {
+        "items": [
+            {
+                "id": "fc9b7d64-5296-4097-9fff-11cc9b44544b",
+                "product_id": "149",
+                "name": "Coca-Cola 350ml",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Refrigerante",
+                "created_at": "13/02/2026 12:03",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "2"
+                    }
+                ]
+            },
+            {
+                "id": "df4671ae-1f1d-408a-bc2d-6441a7081620",
+                "product_id": "79",
+                "name": "Pasteis de Queijo coalho  (6 unidades)",
+                "price": 28.9,
+                "qty": 1.0,
+                "category": "Entradas",
+                "created_at": "13/02/2026 12:28",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "total": 37.8,
+        "status": "open",
+        "opened_at": "13/02/2026 12:03",
+        "num_adults": 2,
+        "customer_type": "passante",
+        "customer_name": "",
+        "room_number": null,
+        "waiter": "",
+        "staff_name": null,
+        "is_breakfast": false,
+        "partial_payments": [],
+        "total_paid": 0.0
+    },
+    "42": {
+        "items": [
+            {
+                "id": "b6ee7e22-a69f-41df-a230-fe03e9ee5271",
+                "product_id": "266",
+                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
+                "price": 16.9,
+                "qty": 1.0,
+                "category": "Cervejas",
+                "created_at": "13/02/2026 12:05",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "2065b2a1-9d35-4f5c-a222-4eb869a87e46",
+                "product_id": "265",
+                "name": "Caldo (Consultar sabor do dia)",
+                "price": 15.9,
+                "qty": 1.0,
+                "category": "Entradas",
+                "created_at": "13/02/2026 12:20",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "Feijão (Caldo)",
+                "questions_answers": []
+            },
+            {
+                "id": "24b7cfa8-3b39-4121-8ef7-07cb937ffcef",
+                "product_id": "108",
+                "name": "Peixe ao Molho de Camarão (Individual)",
+                "price": 98.9,
+                "qty": 1.0,
+                "category": "Pratos",
+                "created_at": "13/02/2026 12:20",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "862e5b83-983a-419e-bdb5-3bfb052b5049",
+                "product_id": "114",
+                "name": "Risotto de Camarão (Individual)",
+                "price": 79.9,
+                "qty": 1.0,
+                "category": "Pratos",
+                "created_at": "13/02/2026 12:20",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Ponto do Arroz",
+                        "answer": "Al Dente"
+                    }
+                ]
+            },
+            {
+                "id": "a9ec22f3-9239-4e7d-ba4a-554a9e8c50bb",
+                "product_id": "266",
+                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
+                "price": 16.9,
+                "qty": 1.0,
+                "category": "Cervejas",
+                "created_at": "13/02/2026 12:24",
+                "waiter": "guilherme",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "1 cp"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "total": 228.5,
+        "status": "open",
+        "opened_at": "13/02/2026 12:04",
+        "num_adults": 1,
+        "customer_type": "passante",
+        "customer_name": "",
+        "room_number": null,
+        "waiter": "",
+        "staff_name": null,
+        "is_breakfast": false,
+        "partial_payments": [],
+        "total_paid": 0.0
+    },
+    "52": {
+        "items": [
+            {
+                "id": "bcb3f133-c038-4213-a170-43d763c902ac",
+                "product_id": "162",
+                "name": "Heineken 0%",
+                "price": 16.9,
+                "qty": 1.0,
+                "category": "Cervejas",
+                "created_at": "13/02/2026 12:07",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "1 cp"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "1c0962cd-5172-4e24-97b4-1c0c1806ea79",
+                "product_id": "142",
+                "name": "Água de Coco",
+                "price": 10.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "13/02/2026 12:07",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "9b38294a-e468-4ba0-bbbc-b09da36e16df",
+                "product_id": "162",
+                "name": "Heineken 0%",
+                "price": 16.9,
+                "qty": 1.0,
+                "category": "Cervejas",
+                "created_at": "13/02/2026 12:27",
+                "waiter": "guilherme",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "1 cp"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "total": 44.699999999999996,
+        "status": "open",
+        "opened_at": "13/02/2026 12:06",
+        "num_adults": 2,
+        "customer_type": "passante",
+        "customer_name": "",
+        "room_number": null,
+        "waiter": "",
+        "staff_name": null,
+        "is_breakfast": false,
+        "partial_payments": [],
+        "total_paid": 0.0
+    },
+    "75": {
+        "items": [
+            {
+                "id": "d05cc79f-8024-49a9-b266-6564e7797dbf",
+                "product_id": "266",
+                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
+                "price": 16.9,
+                "qty": 5.0,
+                "category": "Cervejas",
+                "created_at": "13/02/2026 12:23",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "2 cp"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "total": 84.5,
+        "status": "open",
+        "opened_at": "13/02/2026 12:22",
+        "num_adults": 2,
+        "customer_type": "hospede",
+        "customer_name": "",
+        "room_number": "01",
+        "waiter": "",
+        "staff_name": null,
+        "is_breakfast": false,
+        "partial_payments": [],
+        "total_paid": 0.0
+    },
+    "41": {
+        "items": [],
+        "total": 0,
+        "status": "open",
+        "opened_at": "13/02/2026 12:24",
+        "num_adults": 2,
+        "customer_type": "passante",
+        "customer_name": "",
+        "room_number": null,
         "waiter": "",
         "staff_name": null,
         "is_breakfast": false
+    },
+    "90": {
+        "items": [
+            {
+                "id": "b6835edf-2067-4206-a991-0784141cf5ff",
+                "product_id": "101",
+                "name": "Medalhão com risotto de champignon e molho especial (Individual)",
+                "price": 94.99,
+                "qty": 1.0,
+                "category": "Pratos",
+                "created_at": "13/02/2026 12:39",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Sem  arroz com batata frita"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Ponto da Carne",
+                        "answer": "Mal Passada"
+                    },
+                    {
+                        "question": "Ponto do Arroz",
+                        "answer": "Al Dente"
+                    }
+                ]
+            },
+            {
+                "id": "495e69aa-eaa3-4815-933c-3f3b19a56547",
+                "product_id": "76",
+                "name": "Batata Frita",
+                "price": 24.9,
+                "qty": 1.0,
+                "category": "Entradas",
+                "created_at": "13/02/2026 12:39",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "total": 119.88999999999999,
+        "status": "open",
+        "opened_at": "13/02/2026 12:38",
+        "num_adults": 2,
+        "customer_type": "hospede",
+        "customer_name": "",
+        "room_number": "15",
+        "waiter": "",
+        "staff_name": null,
+        "is_breakfast": false,
+        "partial_payments": [],
+        "total_paid": 0.0
     }
 }
