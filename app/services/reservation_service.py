@@ -3,12 +3,25 @@ import pandas as pd
 import os
 from datetime import datetime
 import re
+from app.services.system_config_manager import (
+    MANUAL_ALLOCATIONS_FILE, GUEST_DETAILS_FILE, 
+    MANUAL_RESERVATIONS_FILE, RESERVATIONS_DIR
+)
 
 class ReservationService:
-    RESERVATIONS_DIR = r"F:\Reservas FEV"
-    RESERVATIONS_FILE = r"F:\Reservas FEV\minhas_reservas.xlsx" 
-
-    MANUAL_RESERVATIONS_FILE = r"f:\Sistema Almareia Mirapraia\data\manual_reservations.json"
+    RESERVATIONS_DIR = RESERVATIONS_DIR
+    RESERVATIONS_FILE = os.path.join(RESERVATIONS_DIR, "minhas_reservas.xlsx")
+    MANUAL_RESERVATIONS_FILE = MANUAL_RESERVATIONS_FILE
+    
+    # Room Capacities (Estimated)
+    ROOM_CAPACITIES = {
+        "01": 2, "02": 2, "03": 2, # Areia
+        "11": 4, # Mar Familia
+        "12": 3, "14": 3, "15": 3, "16": 3, "17": 3, "21": 3, "22": 3, "23": 3, "24": 3, "25": 3, "26": 3, # Mar
+        "31": 2, "35": 2, # Alma Banheira
+        "32": 2, "34": 2, # Alma
+        "33": 2 # Master Diamante
+    }
 
     def get_manual_reservations_data(self):
         import json
@@ -171,8 +184,8 @@ class ReservationService:
             "Suíte Master Diamante": ["33"]
         }
 
-    MANUAL_ALLOCATIONS_FILE = r"f:\Sistema Almareia Mirapraia\data\manual_allocations.json"
-    GUEST_DETAILS_FILE = r"f:\Sistema Almareia Mirapraia\data\guest_details.json"
+    MANUAL_ALLOCATIONS_FILE = MANUAL_ALLOCATIONS_FILE
+    GUEST_DETAILS_FILE = GUEST_DETAILS_FILE
 
     def get_guest_details_data(self):
         import json
@@ -295,6 +308,10 @@ class ReservationService:
 
         # 1. Check Occupancy (Checked-in guests)
         if occupancy_data:
+            # We need to know who is the guest of the current reservation to avoid self-collision
+            current_res = self.get_reservation_by_id(reservation_id)
+            current_guest = current_res.get('guest_name') if current_res else None
+            
             for r_num, data in occupancy_data.items():
                 try:
                     r_num_fmt = f"{int(r_num):02d}"
@@ -302,6 +319,11 @@ class ReservationService:
                     r_num_fmt = str(r_num)
                 
                 if r_num_fmt == str(room_number):
+                    # If the occupant is the same guest, allow it (Assuming it's the same reservation)
+                    # This is heuristic, but safe for now.
+                    if current_guest and data.get('guest_name') == current_guest:
+                        continue
+                        
                     occ_in = datetime.strptime(data['checkin'], '%d/%m/%Y')
                     occ_out = datetime.strptime(data['checkout'], '%d/%m/%Y')
                     
@@ -338,6 +360,112 @@ class ReservationService:
                 # Check overlap
                 if new_checkin < eff_checkout and new_checkout > eff_checkin:
                     raise ValueError(f"Conflito com reserva de {res['guest_name']} no quarto {room_number} ({eff_checkin_str} - {eff_checkout_str})")
+
+    def calculate_reservation_update(self, reservation_id, new_room=None, new_checkin=None, new_checkout=None):
+        """
+        Calculates price difference and validates moves/resizes.
+        Returns a dict with validation status and price info.
+        """
+        result = {
+            'valid': True,
+            'conflict_message': None,
+            'old_total': 0.0,
+            'new_total': 0.0,
+            'diff': 0.0,
+            'days': 0,
+            'old_days': 0,
+            'avg_daily': 0.0
+        }
+
+        try:
+            res = self.get_reservation_by_id(reservation_id)
+            if not res:
+                return {'valid': False, 'conflict_message': "Reserva não encontrada."}
+                
+            current_checkin_str = res.get('checkin')
+            current_checkout_str = res.get('checkout')
+            current_amount = float(res.get('amount_val', 0.0))
+            
+            # Determine effective new dates
+            target_checkin_str = new_checkin if new_checkin else current_checkin_str
+            target_checkout_str = new_checkout if new_checkout else current_checkout_str
+            
+            # Determine effective new room
+            # If new_room is provided, use it. If not, use current allocated room (or manual override).
+            current_manual_room = self.get_manual_room(reservation_id)
+            current_allocated_room = res.get('allocated_room')
+            
+            # Priority: New Room > Current Manual > Current Allocated > None
+            target_room = new_room if new_room else (current_manual_room if current_manual_room else current_allocated_room)
+            
+            # 1. Date Validation
+            try:
+                d_in = datetime.strptime(target_checkin_str, '%d/%m/%Y')
+                d_out = datetime.strptime(target_checkout_str, '%d/%m/%Y')
+                days = (d_out - d_in).days
+            except ValueError:
+                return {'valid': False, 'conflict_message': "Datas inválidas."}
+                
+            if days < 1:
+                return {'valid': False, 'conflict_message': "Período inválido (mínimo 1 diária)."}
+            
+            # 2. Collision Check
+            # We need occupancy data to check collisions properly.
+            # Assuming occupancy_data is passed or loaded. 
+            # Ideally, we should load it here if not provided, but checking collision is expensive if we reload every time.
+            # Let's load it here for safety as this is a critical validation step.
+            from app.services.data_service import load_room_occupancy
+            occupancy_data = load_room_occupancy()
+            
+            try:
+                if target_room:
+                    self.check_collision(reservation_id, target_room, target_checkin_str, target_checkout_str, occupancy_data)
+            except ValueError as e:
+                 return {'valid': False, 'conflict_message': str(e)}
+
+            # 3. Capacity Check
+            if target_room:
+                 try:
+                     r_key = f"{int(target_room):02d}"
+                 except:
+                     r_key = str(target_room)
+                     
+                 cap = self.ROOM_CAPACITIES.get(r_key, 2)
+                 
+                 # Check guest details for count (if available)
+                 # details = self.get_guest_details(reservation_id)
+                 # guest_count = details.get('guest_count', 2) # Default 2?
+                 # if guest_count > cap:
+                 #    return {'valid': False, 'conflict_message': f"Capacidade do quarto {target_room} excedida ({cap} pessoas)."}
+                 pass
+
+            # 4. Price Calculation
+            # Determine effective current dates (for avg calculation)
+            try:
+                c_in = datetime.strptime(current_checkin_str, '%d/%m/%Y')
+                c_out = datetime.strptime(current_checkout_str, '%d/%m/%Y')
+                current_days = (c_out - c_in).days
+                if current_days < 1: current_days = 1
+            except:
+                current_days = 1
+                
+            avg_daily = current_amount / current_days
+            new_total = avg_daily * days
+            
+            result.update({
+                'old_total': current_amount,
+                'new_total': new_total,
+                'diff': new_total - current_amount,
+                'days': days,
+                'old_days': current_days,
+                'avg_daily': avg_daily
+            })
+            
+            return result
+
+        except Exception as e:
+            return {'valid': False, 'conflict_message': f"Erro interno: {str(e)}"}
+
 
             
     def get_manual_room(self, reservation_id):

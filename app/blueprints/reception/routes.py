@@ -19,6 +19,7 @@ from app.services.data_service import (
     ARCHIVED_ORDERS_FILE, load_table_orders, save_table_orders,
     load_audit_logs, save_audit_logs
 )
+from app.services.system_config_manager import RESERVATIONS_DIR
 from app.services.printer_manager import load_printers, load_printer_settings, save_printer_settings
 from app.services.printing_service import process_and_print_pending_bills, print_individual_bills_thermal, print_cashier_ticket, print_cashier_ticket_async
 from app.services.logger_service import log_system_action, LoggerService
@@ -1228,6 +1229,28 @@ def reception_cashier():
                          total_balance=total_balance,
                          current_totals=current_totals)
 
+@reception_bp.route('/api/reception/calculate_reservation_update', methods=['POST'])
+@login_required
+def api_calculate_reservation_update():
+    try:
+        data = request.json
+        res_id = data.get('reservation_id')
+        new_room = data.get('new_room')
+        new_checkin = data.get('new_checkin')
+        new_checkout = data.get('new_checkout')
+        
+        service = ReservationService()
+        
+        # Now the service handles all logic including collision check
+        calculation = service.calculate_reservation_update(res_id, new_room, new_checkin, new_checkout)
+            
+        return jsonify({'success': True, 'data': calculation})
+        
+    except ValueError as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 @reception_bp.route('/api/reception/move_reservation', methods=['POST'])
 @login_required
 def api_move_reservation():
@@ -1235,6 +1258,11 @@ def api_move_reservation():
         data = request.json
         res_id = data.get('reservation_id')
         new_room = data.get('new_room')
+        
+        # Optional date overrides from Drag & Drop
+        new_checkin = data.get('checkin')
+        new_checkout = data.get('checkout')
+        
         price_adj = data.get('price_adjustment') # dict {type, amount}
         
         if not res_id or not new_room:
@@ -1246,6 +1274,8 @@ def api_move_reservation():
         service.save_manual_allocation(
             reservation_id=res_id,
             room_number=new_room,
+            checkin=new_checkin,
+            checkout=new_checkout,
             price_adjustment=price_adj,
             occupancy_data=occupancy
         )
@@ -1299,7 +1329,7 @@ def api_upload_reservations():
         if not (filename.endswith('.xlsx') or filename.endswith('.csv')):
              return jsonify({'success': False, 'error': 'Formato não suportado. Use Excel (.xlsx) ou CSV.'}), 400
         
-        target_dir = r"F:\Reservas FEV"
+        target_dir = RESERVATIONS_DIR
         os.makedirs(target_dir, exist_ok=True)
         
         save_path = os.path.join(target_dir, f"upload_{datetime.now().strftime('%Y%m%d%H%M%S')}_{file.filename}")

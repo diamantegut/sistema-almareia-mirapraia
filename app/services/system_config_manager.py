@@ -172,6 +172,10 @@ CONFERENCE_SKIPPED_FILE = get_data_path('conference_skipped_items.json')
 
 # Hotel Operations
 ROOM_OCCUPANCY_FILE = get_data_path('room_occupancy.json')
+MANUAL_ALLOCATIONS_FILE = get_data_path('manual_allocations.json')
+GUEST_DETAILS_FILE = get_data_path('guest_details.json')
+MANUAL_RESERVATIONS_FILE = get_data_path('manual_reservations.json')
+RESERVATIONS_DIR = get_data_path('reservations')
 BREAKFAST_HISTORY_FILE = get_data_path('breakfast_history.json')
 CLEANING_STATUS_FILE = get_data_path('cleaning_status.json')
 CLEANING_LOGS_FILE = get_data_path('cleaning_logs.json')

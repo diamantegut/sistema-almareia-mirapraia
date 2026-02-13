@@ -1,0 +1,401 @@
+[
+  {
+    "id": "TC001",
+    "title": "Successful login with valid credentials and correct user role",
+    "description": "Verify that a user with valid credentials and appropriate role can log in and access the permitted modules.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the login page"
+      },
+      {
+        "type": "action",
+        "description": "Enter valid username and password for a user with a specific role (e.g., reception)"
+      },
+      {
+        "type": "action",
+        "description": "Click the login button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify login is successful and user is redirected to the permitted dashboard or module"
+      }
+    ]
+  },
+  {
+    "id": "TC002",
+    "title": "Login failure with invalid credentials",
+    "description": "Ensure the system does not allow access when invalid username or password is provided.",
+    "category": "error handling",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the login page"
+      },
+      {
+        "type": "action",
+        "description": "Enter invalid username and/or incorrect password"
+      },
+      {
+        "type": "action",
+        "description": "Click the login button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that login is denied and an appropriate error message is displayed"
+      }
+    ]
+  },
+  {
+    "id": "TC003",
+    "title": "Role-based access control enforcement",
+    "description": "Validate that users can only access modules and functionalities according to their permission levels.",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as a user with restricted role (e.g., kitchen staff or reception)"
+      },
+      {
+        "type": "action",
+        "description": "Attempt to access an administrative or unauthorized module (e.g., backup restoration or user management)"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify access is denied and an appropriate message or redirection occurs"
+      }
+    ]
+  },
+  {
+    "id": "TC004",
+    "title": "Interactive reservation map drag-and-drop reservation movement",
+    "description": "Verify drag-and-drop functionality in the reservation Gantt-style map updates reservation dates and status correctly.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as a reception user"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to the reservation map"
+      },
+      {
+        "type": "action",
+        "description": "Drag a reservation to a new date or time slot"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that reservation details reflect the new date/time and the changes are persisted"
+      }
+    ]
+  },
+  {
+    "id": "TC005",
+    "title": "Click on reservation to show detailed information modal",
+    "description": "Ensure clicking a reservation item opens a modal or detail view displaying comprehensive guest and booking info.",
+    "category": "ui",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as a reception user"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to the reservation map"
+      },
+      {
+        "type": "action",
+        "description": "Click on a reservation entry"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a detail modal is shown with guest data, booking dates, and other relevant info"
+      }
+    ]
+  },
+  {
+    "id": "TC006",
+    "title": "Create new manual reservation via backend service",
+    "description": "Validate the backend service accepts and creates new reservations given valid input data.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Prepare valid reservation data including guest details and room/dates"
+      },
+      {
+        "type": "action",
+        "description": "Call the reservation service API or function to create a new reservation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the reservation is created, stored in the database, and assigned a unique ID"
+      }
+    ]
+  },
+  {
+    "id": "TC007",
+    "title": "Reject creation of reservation with conflicting dates or invalid data",
+    "description": "Ensure the backend service rejects reservation requests that overlap existing bookings or have invalid attributes.",
+    "category": "error handling",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Prepare reservation data with dates overlapping existing confirmed booking"
+      },
+      {
+        "type": "action",
+        "description": "Submit data to the reservation service for creation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the service rejects the request with an appropriate error message"
+      },
+      {
+        "type": "action",
+        "description": "Prepare reservation data with missing mandatory fields or invalid formats"
+      },
+      {
+        "type": "action",
+        "description": "Submit data to reservation service"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the service rejects the request due to invalid input"
+      }
+    ]
+  },
+  {
+    "id": "TC008",
+    "title": "Read reservation data from JSON and Excel files",
+    "description": "Confirm the reservation service can successfully parse and load reservation data from both JSON and Excel formats.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Prepare valid JSON file containing reservation data"
+      },
+      {
+        "type": "action",
+        "description": "Use the reservation service to load reservations from the JSON file"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify reservations are loaded correctly and accurately"
+      },
+      {
+        "type": "action",
+        "description": "Prepare valid Excel file containing reservation data"
+      },
+      {
+        "type": "action",
+        "description": "Use reservation service to load reservations from Excel file"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify reservations are loaded correctly matching the Excel data"
+      }
+    ]
+  },
+  {
+    "id": "TC009",
+    "title": "Admin cancel consumption with justification and audit log entry",
+    "description": "Validate that only administrators can cancel consumption entries via API by providing justification and that all cancellations are logged properly.",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as administrator"
+      },
+      {
+        "type": "action",
+        "description": "Invoke the consumption cancellation API providing valid consumption ID and a non-empty justification"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm the consumption is cancelled successfully and the action is recorded in the audit log with justification"
+      },
+      {
+        "type": "action",
+        "description": "Attempt to cancel consumption without justification or with empty justification"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the API rejects the request with a validation error"
+      },
+      {
+        "type": "action",
+        "description": "Login as a non-administrator user"
+      },
+      {
+        "type": "action",
+        "description": "Try to invoke the consumption cancellation API"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify access is denied with appropriate security error"
+      }
+    ]
+  },
+  {
+    "id": "TC010",
+    "title": "Automatic backup creation and restoration via dashboard",
+    "description": "Verify the system triggers automatic backups as configured and allows manual restoration from backup interface with status monitoring.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Verify system configuration is set for automatic backups (local and complete)"
+      },
+      {
+        "type": "action",
+        "description": "Trigger backup creation manually from the backup dashboard"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm backup is successfully created and logged in the dashboard"
+      },
+      {
+        "type": "action",
+        "description": "Select a backup from the dashboard to restore"
+      },
+      {
+        "type": "action",
+        "description": "Initiate restoration process"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify restoration completes successfully and system data is reverted to backup state"
+      }
+    ]
+  },
+  {
+    "id": "TC011",
+    "title": "Backup failure handling and error messaging",
+    "description": "Test system behavior when automatic or manual backup fails due to disk space or permission errors, ensuring proper error reporting.",
+    "category": "error handling",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Simulate failure conditions like insufficient disk space or access rights"
+      },
+      {
+        "type": "action",
+        "description": "Trigger backup creation manually or wait for automatic backup"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm backup fails with explicit error messages displayed in dashboard logs"
+      }
+    ]
+  },
+  {
+    "id": "TC012",
+    "title": "Real-time synchronization of minibar products between governance and reception",
+    "description": "Validate that products launched in governance are synchronized via API in real time with reception minibar product list.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as governance user and add or update minibar product entries"
+      },
+      {
+        "type": "action",
+        "description": "Observe reception minibar product list via reception interface"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify minibar product list in reception updates immediately to reflect changes made in governance"
+      }
+    ]
+  },
+  {
+    "id": "TC013",
+    "title": "Concurrent table to room transfer with lock and rollback",
+    "description": "Test the atomic transfer process of restaurant tables to hotel rooms with concurrency control and rollback on failure.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login to restaurant module and initiate transfer of a table to a hotel room"
+      },
+      {
+        "type": "action",
+        "description": "Simulate concurrent transfer attempts on the same table"
+      },
+      {
+        "type": "assertion",
+        "description": "Validate that only one transfer succeeds with proper file locks, others fail with concurrency error"
+      },
+      {
+        "type": "action",
+        "description": "Simulate an error during transfer process"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the process rolls back and no inconsistent data remains"
+      }
+    ]
+  },
+  {
+    "id": "TC014",
+    "title": "Departmental logging and audit trail for all user actions",
+    "description": "Ensure all actions by users in various modules generate detailed logs with timestamps and user identities.",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Perform actions in different modules such as reservations, consumption cancellation, backup, and minibar updates"
+      },
+      {
+        "type": "action",
+        "description": "Access the audit log for the respective modules"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify logs contain timestamps, user IDs, action details, and relevant metadata for all performed operations"
+      }
+    ]
+  },
+  {
+    "id": "TC015",
+    "title": "Configuration manager load and validate system configuration",
+    "description": "Test the Configuration Manager service can load and validate required system configuration parameters and file paths correctly.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Invoke configuration manager to load system configs"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify all expected configuration keys are loaded with correct types and valid values"
+      },
+      {
+        "type": "action",
+        "description": "Modify configuration with invalid values or missing keys"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the system detects invalid configuration and throws appropriate errors or warnings"
+      }
+    ]
+  }
+]
