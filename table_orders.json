@@ -2101,17 +2101,24 @@
         "staff_name": null,
         "is_breakfast": false
     },
-    "40": {
+    "37": {
         "items": [],
         "total": 0,
         "status": "open",
-        "opened_at": "12/02/2026 13:48",
+        "opened_at": "13/02/2026 12:31",
         "num_adults": 1,
         "customer_type": "passante",
         "customer_name": "",
         "room_number": null,
         "waiter": "",
         "staff_name": null,
-        "is_breakfast": false
+        "is_breakfast": false,
+        "partial_payments": [],
+        "total_paid": 0.0,
+        "last_transfer": {
+            "source_table": "40",
+            "timestamp": "13/02/2026 12:31",
+            "user": "Angelo"
+        }
     }
 }
