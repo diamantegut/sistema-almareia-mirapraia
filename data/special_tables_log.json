@@ -1,0 +1,31 @@
+[
+  {
+    "timestamp": "13/02/2026 12:06:52",
+    "table_id": "36",
+    "action": "close_breakfast",
+    "user": "TestUser",
+    "details": {
+      "original_total": 10.0,
+      "items_count": 1
+    }
+  },
+  {
+    "timestamp": "13/02/2026 12:06:52",
+    "table_id": "68",
+    "action": "close_courtesy",
+    "user": "TestUser",
+    "details": {
+      "original_total": 5.0,
+      "justification": "Cliente VIP"
+    }
+  },
+  {
+    "timestamp": "13/02/2026 12:06:52",
+    "table_id": "69",
+    "action": "close_owners",
+    "user": "TestUser",
+    "details": {
+      "original_total": 100.0
+    }
+  }
+]

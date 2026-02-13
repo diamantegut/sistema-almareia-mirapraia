@@ -139,12 +139,29 @@
 
                 {% if table_id == breakfast_table_id and mode != 'minibar' %}
                     <!-- Breakfast Close Button -->
-                    <form action="{{ url_for('restaurant.restaurant_table_order', table_id=table_id) }}" method="POST" class="d-inline" onsubmit="return confirm('ATENÇÃO: Fechar Mesa do Café da Manhã?\n\n- Os itens serão baixados do estoque.\n- NÃO será gerado financeiro.\n- A mesa será limpa.');">
-                        <input type="hidden" name="action" value="close_breakfast">
+                    <form action="{{ url_for('restaurant.close_special_table') }}" method="POST" class="d-inline" onsubmit="return confirm('ATENÇÃO: Fechar Mesa do Café da Manhã?\n\n- Os itens serão baixados do estoque.\n- NÃO será gerado financeiro.\n- A mesa será limpa.');">
+                        <input type="hidden" name="table_id" value="{{ table_id }}">
                         <button type="submit" class="btn btn-info btn-sm text-white">
                             <i class="bi bi-cup-hot-fill"></i> <span class="d-none d-sm-inline">Fechar Café</span><span class="d-inline d-sm-none">Fechar</span>
                         </button>
                     </form>
+                {% endif %}
+
+                {% if table_id|string == '69' and mode != 'minibar' %}
+                    <!-- Owners Close Button -->
+                    <form action="{{ url_for('restaurant.close_special_table') }}" method="POST" class="d-inline" onsubmit="return confirm('ATENÇÃO: Fechar Conta dos Proprietários?\n\n- Os itens serão baixados do estoque.\n- NÃO será gerado financeiro.\n- A mesa será limpa.');">
+                        <input type="hidden" name="table_id" value="{{ table_id }}">
+                        <button type="submit" class="btn btn-dark btn-sm text-white">
+                            <i class="bi bi-star-fill"></i> <span class="d-none d-sm-inline">Fechar Proprietários</span><span class="d-inline d-sm-none">Fechar</span>
+                        </button>
+                    </form>
+                {% endif %}
+
+                {% if table_id|string == '68' and mode != 'minibar' %}
+                    <!-- Courtesy Close Button -->
+                    <button type="button" class="btn btn-warning btn-sm text-dark" data-bs-toggle="modal" data-bs-target="#closeCourtesyModal">
+                        <i class="bi bi-gift-fill"></i> <span class="d-none d-sm-inline">Fechar Cortesia</span><span class="d-inline d-sm-none">Cortesia</span>
+                    </button>
                 {% endif %}
 
                 {% if order.customer_type == 'hospede' and order.room_number %}
@@ -1222,6 +1239,41 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button type="button" class="btn btn-warning" onclick="checkTransfer()">Transferir</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Courtesy Close Modal -->
+<div class="modal fade" id="closeCourtesyModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title">Fechar Cortesia</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('restaurant.close_special_table') }}" method="POST">
+                <div class="modal-body">
+                    <input type="hidden" name="table_id" value="{{ table_id }}">
+                    
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle-fill"></i> Atenção:
+                        <ul class="mb-0 small">
+                            <li>Total da mesa será zerado.</li>
+                            <li>Estoque será baixado.</li>
+                            <li>Nenhuma receita será gerada.</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Justificativa da Cortesia *</label>
+                        <textarea class="form-control" name="justification" rows="3" required minlength="5" placeholder="Descreva o motivo da cortesia (mínimo 5 caracteres)"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-warning">Confirmar Cortesia</button>
                 </div>
             </form>
         </div>
