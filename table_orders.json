@@ -2081,7 +2081,8 @@
         "staff_name": null,
         "is_breakfast": false,
         "partial_payments": [],
-        "total_paid": 0.0
+        "total_paid": 0.0,
+        "locked": false
     },
     "60": {
         "items": [
@@ -2300,9 +2301,28 @@
                 "accompaniments": [],
                 "flavor": "",
                 "questions_answers": []
+            },
+            {
+                "id": "c3019e32-f17a-42b2-b5a2-6c50be60f95d",
+                "product_id": "266",
+                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
+                "price": 16.9,
+                "qty": 1.0,
+                "category": "Cervejas",
+                "created_at": "13/02/2026 12:47",
+                "waiter": "guilherme",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "1 cp"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
             }
         ],
-        "total": 106.5,
+        "total": 123.4,
         "status": "open",
         "opened_at": "13/02/2026 11:57",
         "num_adults": 2,
@@ -2355,9 +2375,31 @@
                 "accompaniments": [],
                 "flavor": "",
                 "questions_answers": []
+            },
+            {
+                "id": "292ef58f-bf24-4a32-8799-6b219d114dea",
+                "product_id": "149",
+                "name": "Coca-Cola 350ml",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Refrigerante",
+                "created_at": "13/02/2026 12:48",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "2"
+                    }
+                ]
             }
         ],
-        "total": 37.8,
+        "total": 46.699999999999996,
         "status": "open",
         "opened_at": "13/02/2026 12:03",
         "num_adults": 2,
@@ -2463,9 +2505,52 @@
                 "accompaniments": [],
                 "flavor": "",
                 "questions_answers": []
+            },
+            {
+                "id": "c4fafdb3-854a-4b0a-b601-627419e79b53",
+                "product_id": "148",
+                "name": "Coca Cola Zero 350ml",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Refrigerante",
+                "created_at": "13/02/2026 12:49",
+                "waiter": "guilherme",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "1 cp"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "2"
+                    }
+                ]
+            },
+            {
+                "id": "77c4a3ed-c110-48cf-b6d6-3a3bf08b01e0",
+                "product_id": "2004",
+                "name": "Suco Copo",
+                "price": 10.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "13/02/2026 12:49",
+                "waiter": "guilherme",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Sem gelo"
+                ],
+                "accompaniments": [],
+                "flavor": "Laranja",
+                "questions_answers": []
             }
         ],
-        "total": 228.5,
+        "total": 248.3,
         "status": "open",
         "opened_at": "13/02/2026 12:04",
         "num_adults": 1,
@@ -2643,9 +2728,28 @@
                 "accompaniments": [],
                 "flavor": "",
                 "questions_answers": []
+            },
+            {
+                "id": "77c8daf5-89ed-4139-b72c-d56b58d45fec",
+                "product_id": "86",
+                "name": "Bacalhau a Natas (Individual)",
+                "price": 99.9,
+                "qty": 1.0,
+                "category": "Pratos",
+                "created_at": "13/02/2026 12:48",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Arroz e tomate"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
             }
         ],
-        "total": 119.88999999999999,
+        "total": 219.79,
         "status": "open",
         "opened_at": "13/02/2026 12:38",
         "num_adults": 2,
