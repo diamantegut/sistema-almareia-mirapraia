@@ -6447,29 +6447,6 @@
         "history": []
     },
     {
-        "id": "1234567890",
-        "status": "processed",
-        "timestamp": "2026-02-06T12:34:56Z",
-        "details": {
-            "type": "NFe",
-            "issuer": {
-                "name": "Empresa Exemplo Ltda",
-                "cnpj": "12345678000195"
-            },
-            "value": 1500.75,
-            "items": [
-                {
-                    "item_code": "ABC123",
-                    "quantity": 1,
-                    "price": 1500.75
-                }
-            ],
-            "protocol_number": "1357924680"
-        },
-        "closed_at": "2026-02-12 13:58:18",
-        "fiscal_amount": 0.0
-    },
-    {
         "id": "38a494ce-1565-497c-b28f-50f42a60ee80",
         "origin": "restaurant",
         "fiscal_type": "nfce",
@@ -7151,10 +7128,18 @@
             "name": "",
             "type": "passante"
         },
-        "status": "pending",
+        "status": "failed",
         "notes": "Mesa 40",
         "fiscal_doc_uuid": null,
-        "history": []
+        "history": [
+            {
+                "timestamp": "2026-02-12 21:45:27",
+                "action": "status_change",
+                "from": "pending",
+                "to": "failed",
+                "user": "Sistema"
+            }
+        ]
     },
     {
         "id": "f40770e8-5aa4-4e95-ae47-f37d34509d95",
@@ -7295,10 +7280,20 @@
             "name": "Passante",
             "type": "passante"
         },
-        "status": "pending",
+        "status": "emitted",
         "notes": "Mesa 58",
-        "fiscal_doc_uuid": null,
-        "history": []
+        "fiscal_doc_uuid": "nfc_3a1f6bc90c454c3b9ceae585b67d38b3",
+        "history": [
+            {
+                "timestamp": "2026-02-12 21:45:25",
+                "action": "status_change",
+                "from": "pending",
+                "to": "emitted",
+                "user": "Sistema"
+            }
+        ],
+        "fiscal_serie": 8,
+        "fiscal_number": 643
     },
     {
         "id": "bdc9091d-793b-47ae-9b8e-b561870a5494",
@@ -7464,10 +7459,18 @@
             "name": "Passante",
             "type": "passante"
         },
-        "status": "pending",
+        "status": "failed",
         "notes": "Mesa 61",
         "fiscal_doc_uuid": null,
-        "history": []
+        "history": [
+            {
+                "timestamp": "2026-02-12 21:45:23",
+                "action": "status_change",
+                "from": "pending",
+                "to": "failed",
+                "user": "Sistema"
+            }
+        ]
     },
     {
         "id": "e58b25e7-3daf-4fb4-a3ea-421008f423e6",
@@ -7612,10 +7615,18 @@
             "name": "",
             "type": "passante"
         },
-        "status": "pending",
+        "status": "failed",
         "notes": "Mesa 56",
         "fiscal_doc_uuid": null,
-        "history": []
+        "history": [
+            {
+                "timestamp": "2026-02-12 21:45:23",
+                "action": "status_change",
+                "from": "pending",
+                "to": "failed",
+                "user": "Sistema"
+            }
+        ]
     },
     {
         "id": "ff9ad4ae-584e-4279-9d03-8e1208891f6a",
@@ -7718,10 +7729,20 @@
             "name": "Sérgio ",
             "type": "passante"
         },
-        "status": "pending",
+        "status": "emitted",
         "notes": "Mesa 55",
-        "fiscal_doc_uuid": null,
-        "history": []
+        "fiscal_doc_uuid": "nfc_3a1f6bc8f69a41e8bb3cb5ff7c7b68c4",
+        "history": [
+            {
+                "timestamp": "2026-02-12 21:45:21",
+                "action": "status_change",
+                "from": "pending",
+                "to": "emitted",
+                "user": "Sistema"
+            }
+        ],
+        "fiscal_serie": 8,
+        "fiscal_number": 642
     },
     {
         "id": "5250b2c1-5f3a-47ae-8ce5-126f0a454d1c",
