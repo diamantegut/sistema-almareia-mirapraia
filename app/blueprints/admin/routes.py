@@ -1,10 +1,12 @@
-from flask import render_template, request, redirect, url_for, flash, jsonify, session, Response, current_app
+from flask import render_template, request, redirect, url_for, flash, jsonify, session, Response, current_app, send_file
 import os
 import sys
 import json
+import io
 import time
 import threading
 import subprocess
+import pandas as pd
 from datetime import datetime
 from . import admin_bp
 from app.utils.decorators import login_required
@@ -294,6 +296,102 @@ def admin_users():
                            is_admin=is_admin, 
                            is_rh=is_rh,
                            password_requests=password_requests)
+
+@admin_bp.route('/admin/users/export')
+@login_required
+def admin_export_users():
+    # Permission check
+    is_admin = session.get('role') == 'admin'
+    is_rh = session.get('department') == 'Recursos Humanos' or 'rh' in session.get('permissions', [])
+    
+    if not is_admin and not is_rh:
+        flash('Acesso restrito.')
+        return redirect(url_for('main.index'))
+        
+    try:
+        users = load_users()
+        data_list = []
+        
+        for username, data in users.items():
+            # Calculate status (active if in users.json)
+            status = "Ativo"
+            
+            # Format permissions
+            perms = ", ".join(data.get('permissions', []))
+            
+            # Weekly day off mapping
+            days_map = {0: 'Segunda', 1: 'Terça', 2: 'Quarta', 3: 'Quinta', 4: 'Sexta', 5: 'Sábado', 6: 'Domingo'}
+            try:
+                day_off_val = int(data.get('weekly_day_off', 6))
+            except:
+                day_off_val = 6
+            day_off = days_map.get(day_off_val, 'Domingo')
+            
+            data_list.append({
+                'Login': username,
+                'Nome Completo': data.get('full_name', ''),
+                'Departamento': data.get('department', ''),
+                'Cargo': data.get('role', '').title(),
+                'Email': data.get('email', ''),
+                'Telefone': data.get('phone', ''),
+                'Data Admissão': data.get('admission_date', ''),
+                'Aniversário': data.get('birthday', ''),
+                'Pontuação': data.get('score', 0),
+                'Folga Semanal': day_off,
+                'Permissões': perms,
+                'Status': status
+            })
+            
+        df = pd.DataFrame(data_list)
+        
+        # Output to BytesIO
+        output = io.BytesIO()
+        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            df.to_excel(writer, sheet_name='Colaboradores', index=False)
+            
+            # Get workbook and worksheet objects
+            workbook = writer.book
+            worksheet = writer.sheets['Colaboradores']
+            
+            # Add header format
+            header_format = workbook.add_format({
+                'bold': True,
+                'text_wrap': True,
+                'valign': 'top',
+                'fg_color': '#D7E4BC',
+                'border': 1
+            })
+            
+            # Apply format to headers
+            for col_num, value in enumerate(df.columns.values):
+                worksheet.write(0, col_num, value, header_format)
+                
+            # Auto-adjust column width (approximate)
+            for i, col in enumerate(df.columns):
+                # Find max length of column content
+                max_len = max(
+                    df[col].astype(str).map(len).max(),
+                    len(col)
+                ) + 2
+                worksheet.set_column(i, i, max_len)
+                
+            # Add AutoFilter
+            worksheet.autofilter(0, 0, len(df), len(df.columns) - 1)
+                
+        output.seek(0)
+        
+        filename = f"colaboradores_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+        return send_file(
+            output,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            as_attachment=True,
+            download_name=filename
+        )
+        
+    except Exception as e:
+        current_app.logger.error(f"Erro ao exportar usuários: {e}")
+        flash(f'Erro ao gerar arquivo de exportação: {str(e)}')
+        return redirect(url_for('admin.admin_users'))
 
 @admin_bp.route('/admin/restart', methods=['POST'])
 @login_required

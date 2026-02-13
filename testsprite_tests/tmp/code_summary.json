@@ -1,0 +1,44 @@
+syrupy-jaliyah-intracranial.ngrok-free.dev{
+  "tech_stack": [
+    "Python",
+    "Flask",
+    "JavaScript",
+    "HTML",
+    "CSS",
+    "Bootstrap",
+    "Pandas",
+    "JSON",
+    "Excel"
+  ],
+  "features": [
+    {
+      "name": "Reservation Map",
+      "description": "Interactive Gantt-style chart for viewing and managing room reservations. Supports drag-and-drop for moving reservations and click-to-open details.",
+      "files": [
+        "app/templates/reception_reservations.html",
+        "app/static/css/style.css"
+      ]
+    },
+    {
+      "name": "Reservation Service",
+      "description": "Backend service for handling reservation data, including reading from Excel/JSON files, creating manual reservations, and managing guest details.",
+      "files": [
+        "app/services/reservation_service.py"
+      ]
+    },
+    {
+      "name": "Reception Routes",
+      "description": "Flask blueprint routes for serving the reception dashboard, reservation map, and handling API requests for reservation updates.",
+      "files": [
+        "app/blueprints/reception/routes.py"
+      ]
+    },
+    {
+      "name": "Configuration Manager",
+      "description": "Service for managing system configurations and file paths.",
+      "files": [
+        "app/services/system_config_manager.py"
+      ]
+    }
+  ]
+}

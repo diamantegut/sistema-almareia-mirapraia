@@ -1,0 +1,19 @@
+{
+  "status": "commited",
+  "type": "frontend",
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:5001/reception/reservations",
+  "executionArgs": {
+    "projectName": "sistema-almareia-mirapraia",
+    "projectPath": "e:\\Sistema Mirapraia\\sistema-almareia-mirapraia",
+    "testIds": [
+      "TC005"
+    ],
+    "additionalInstruction": "Expand TC005 to cover the user's 10-point request for the Reservation Map Click Functionality.\nThe target page is /reception/reservations.\nThe reservation elements have class 'res-bar-content' inside a TD.\nThe current implementation uses 'ondblclick=\"handleResDblClick(event, this)\"' on '.res-bar-content'.\n\nPlease implement the following checks in the test script:\n1. Verify click event triggering: Ensure clicking (and double-clicking) the element fires the event.\n2. Test modal opening: Double-click a reservation and verify '#reservationModal' becomes visible (class 'show' or display block).\n3. Validate info: Check if modal fields (Guest Name, Dates, Status) match the data-attributes of the clicked TD (closest parent of .res-bar-content).\n4. Test scenarios: Try to find reservations with different statuses (if available in the DOM) or mock them.\n5. Multiple clicks: Perform rapid clicks and ensure no UI glitch or multiple modals.\n6. Responsiveness: Resize viewport to mobile/tablet and retry.\n7. Modal closing: Click the 'X' button (.btn-close) and verify modal disappears.\n8. Console errors: Monitor browser console for errors during these interactions.\n9. API Integration: Verify if any network requests are made upon click (if applicable, though current code seems to use data-attributes).\n10. Documentation: The report should list any failure as a bug.\n\nNote: The code uses double-click. If single click is expected by user but code is double-click, note this behavior.\nUse the existing 'reception_reservations.html' structure.\nYou may need to login first. Use a valid user if possible or mock login state if supported by the test framework.\nThe test should output a detailed log of these 10 points.",
+    "envs": {
+      "API_KEY": "sk-user-TNAZ85UZaYQ14wwez0aiAjhb8vPKTbFXmWkbbUm2oNM38AOxq53XplPRDY_dq5_D3y9XZESapmx4VZNIdTCI_kqXwpuet7nFmIoftcbO0xxO85Ah2QsO6CzDYhRege1Cwzs"
+    }
+  },
+  "serverPort": 64477,
+  "proxy": "http://f735c500-d005-4b61-a61c-e329d0adab14:9vrhdKPY4pMfUTra7rZOLmcmQcYmIz38@tun.testsprite.com:8080"
+}

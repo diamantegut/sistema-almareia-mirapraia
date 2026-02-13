@@ -685,6 +685,43 @@ def toggle_live_music():
         
     return redirect(url_for('restaurant.restaurant_tables'))
 
+from app.services.special_tables_service import SpecialTablesService
+
+@restaurant_bp.route('/restaurant/close_special_table', methods=['POST'])
+@login_required
+def close_special_table():
+    user = session.get('user')
+    table_id = request.form.get('table_id')
+    
+    if not table_id:
+        flash('Mesa inválida.')
+        return redirect(url_for('restaurant.restaurant_tables'))
+        
+    str_table_id = str(table_id)
+    
+    try:
+        if str_table_id == '36':
+            success, msg = SpecialTablesService.process_table_36_breakfast(table_id, user)
+        elif str_table_id == '69':
+            success, msg = SpecialTablesService.process_table_69_owners(table_id, user)
+        elif str_table_id == '68':
+            justification = request.form.get('justification')
+            success, msg = SpecialTablesService.process_table_68_courtesy(table_id, user, justification)
+        else:
+            success, msg = False, "Esta não é uma mesa especial configurada para fechamento automático."
+            
+        if success:
+            flash(msg)
+            return redirect(url_for('restaurant.restaurant_tables'))
+        else:
+            flash(f"Erro: {msg}")
+            return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
+            
+    except Exception as e:
+        current_app.logger.error(f"Erro ao fechar mesa especial {table_id}: {e}")
+        flash(f"Erro interno: {str(e)}")
+        return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
+
 @restaurant_bp.route('/restaurant/table/<table_id>', methods=['GET', 'POST'])
 @login_required
 def restaurant_table_order(table_id):
@@ -1456,7 +1493,17 @@ def restaurant_table_order(table_id):
                 # Find bill printer
                 bill_printer = next((p for p in printers if 'conta' in p.get('name', '').lower() or 'caixa' in p.get('name', '').lower()), None)
                 
-                print_bill(bill_printer, table_id, items, subtotal, service_fee, total, order.get('waiter', 'Garçom'))
+                # Resolve Guest Name if Hospede
+                guest_name = order.get('customer_name')
+                room_number = order.get('room_number')
+                
+                if order.get('customer_type') == 'hospede' and room_number:
+                    # Try to fetch from occupancy
+                    clean_room = format_room_number(room_number)
+                    if clean_room in room_occupancy:
+                        guest_name = room_occupancy[clean_room].get('guest_name')
+                
+                print_bill(bill_printer, table_id, items, subtotal, service_fee, total, order.get('waiter', 'Garçom'), guest_name=guest_name, room_number=room_number)
                 flash('Conta puxada (Mesa Bloqueada).')
 
         elif action == 'unlock_table':
@@ -1544,6 +1591,26 @@ def restaurant_table_order(table_id):
                  return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
             # VALIDATION END
 
+            # SPECIAL TABLES VALIDATION
+            if target_table_id in ['36', '69', '68']:
+                # Import here to avoid circular imports if any, or use the one at top
+                from app.services.special_tables_service import SpecialTablesService
+                
+                # Check constraints
+                # For full table transfer, we pass all items
+                items_to_transfer = orders.get(str_table_id, {}).get('items', [])
+                source_opened_at = orders.get(str_table_id, {}).get('opened_at')
+                
+                valid, msg = SpecialTablesService.validate_transfer_to_special(target_table_id, items_to_transfer, session.get('user'), source_created_at=source_opened_at)
+                
+                if not valid:
+                    flash(f"Transferência bloqueada: {msg}")
+                    return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
+                    
+                # For Mesa 68, we might need justification handled in UI. 
+                # If target is 68 and we are here, we might be missing the justification input if it wasn't a special form.
+                # However, for now, we apply the strict time/rule checks.
+
             if str_table_id in orders:
                 source_order = orders[str_table_id]
                 
@@ -1590,6 +1657,14 @@ def restaurant_table_order(table_id):
                 save_table_orders(orders)
                 
                 log_action('Transferência Mesa', f'Mesa {table_id} transferida para Mesa {target_table_id} por {session.get("user")}', department='Restaurante')
+                
+                # Print Transfer Notification
+                try:
+                    printers = load_printers()
+                    print_transfer_ticket(table_id, target_table_id, session.get('user', 'Sistema'), printers)
+                except Exception as e:
+                    current_app.logger.error(f"Erro ao imprimir ticket de transferência: {e}")
+                
                 flash(f'Mesa transferida para {target_table_id} com sucesso.')
                 return redirect(url_for('restaurant.restaurant_table_order', table_id=target_table_id))
             else:
@@ -1983,6 +2058,20 @@ def restaurant_transfer_item():
                 'staff_name': None
             }
             # return jsonify({'success': False, 'error': f'Mesa de destino {dest_table_id} não está aberta.'}), 400
+
+        # SPECIAL TABLES VALIDATION FOR ITEM TRANSFER
+        if dest_table_id in ['36', '69', '68']:
+            from app.services.special_tables_service import SpecialTablesService
+            source_opened_at = orders.get(source_table_id, {}).get('opened_at')
+            # For item transfer, we pass the specific item (wrapped in list)
+            # Actually we just need to pass context, item list is less relevant for time check
+            # But we should find the item first to be precise? 
+            # Logic below finds item. But we want to fail fast.
+            # Let's pass empty list for now as validate_transfer_to_special only checks time for Table 36
+            valid, msg = SpecialTablesService.validate_transfer_to_special(dest_table_id, [], session.get('user'), source_created_at=source_opened_at)
+            
+            if not valid:
+                 return jsonify({'success': False, 'error': f"Transferência bloqueada: {msg}"}), 400
 
         source_order = orders[source_table_id]
         dest_order = orders[dest_table_id]

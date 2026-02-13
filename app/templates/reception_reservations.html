@@ -3,30 +3,67 @@
 {% block title %}Mapa de Reservas - Recepção{% endblock %}
 
 {% block content %}
-<div class="container-fluid mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div class="d-flex align-items-center gap-3">
-            <h2><i class="bi bi-calendar-week-fill"></i> Mapa de Reservas</h2>
-            
-            <form action="{{ url_for('reception.reception_reservations') }}" method="get" class="d-flex align-items-center gap-2">
-                <input type="date" name="start_date" class="form-control" value="{{ start_date.strftime('%Y-%m-%d') }}" onchange="this.form.submit()">
-                <a href="{{ url_for('reception.reception_reservations') }}" class="btn btn-outline-primary" title="Ir para Hoje">
-                    Hoje
-                </a>
-            </form>
+<div class="container-fluid px-4 py-4 bg-light min-vh-100">
+    <!-- Header Section -->
+    <div class="row align-items-center mb-4 g-3">
+        <!-- Title & Date Nav -->
+        <div class="col-lg-5 col-md-6">
+            <div class="d-flex align-items-center gap-3">
+                <div class="bg-white p-2 rounded shadow-sm">
+                    <i class="bi bi-calendar-week-fill text-primary fs-4"></i>
+                </div>
+                <div>
+                    <h4 class="mb-0 fw-bold text-dark">Mapa de Reservas</h4>
+                    <small class="text-muted">{{ start_date.strftime('%B %Y')|capitalize }}</small>
+                </div>
+                
+                <div class="vr mx-2 text-muted"></div>
+                
+                <form action="{{ url_for('reception.reception_reservations') }}" method="get" class="d-flex align-items-center gap-2 bg-white p-1 rounded shadow-sm border">
+                    <button type="submit" class="btn btn-sm btn-link text-dark text-decoration-none" onclick="document.querySelector('input[name=start_date]').stepDown(7);"><i class="bi bi-chevron-left"></i></button>
+                    <input type="date" name="start_date" class="form-control form-control-sm border-0 bg-transparent fw-bold text-center" style="width: 130px;" value="{{ start_date.strftime('%Y-%m-%d') }}" onchange="this.form.submit()">
+                    <button type="submit" class="btn btn-sm btn-link text-dark text-decoration-none" onclick="document.querySelector('input[name=start_date]').stepUp(7);"><i class="bi bi-chevron-right"></i></button>
+                    <div class="vr mx-1"></div>
+                    <a href="{{ url_for('reception.reception_reservations') }}" class="btn btn-sm btn-primary px-3 rounded-pill" title="Ir para Hoje">Hoje</a>
+                </form>
+            </div>
         </div>
-        <div>
-            <a href="{{ url_for('reception.reception_dashboard') }}" class="btn btn-secondary">
-                <i class="bi bi-arrow-left"></i> Voltar
-            </a>
+
+        <!-- Action Toolbar -->
+        <div class="col-lg-7 col-md-6">
+            <div class="d-flex justify-content-md-end gap-2 flex-wrap">
+                <!-- Main Actions -->
+                <div class="bg-white p-1 rounded shadow-sm d-flex gap-1 border">
+                    <button class="btn btn-light btn-sm fw-medium d-flex align-items-center gap-2 action-btn" onclick="openNewReservationModal()" data-bs-toggle="tooltip" title="Criar nova reserva manualmente">
+                        <i class="bi bi-plus-circle-fill text-primary"></i> <span class="d-none d-xl-inline">Nova Reserva</span>
+                    </button>
+                    <div class="vr my-1"></div>
+                    <button class="btn btn-light btn-sm fw-medium d-flex align-items-center gap-2 action-btn" onclick="document.getElementById('fileUploadInput').click()" data-bs-toggle="tooltip" title="Importar planilha de reservas">
+                        <i class="bi bi-cloud-upload-fill text-secondary"></i> <span class="d-none d-xl-inline">Importar</span>
+                    </button>
+                    <div class="vr my-1"></div>
+                    <button class="btn btn-light btn-sm fw-medium d-flex align-items-center gap-2 action-btn" onclick="runPreAllocation()" data-bs-toggle="tooltip" title="Executar algoritmo de pré-alocação">
+                        <i class="bi bi-magic text-warning"></i> <span class="d-none d-xl-inline">Pré-alocação</span>
+                    </button>
+                </div>
+                
+                <input type="file" id="fileUploadInput" class="d-none" accept=".xlsx, .csv" onchange="uploadReservationsFile(this)">
+
+                <!-- Navigation & Cashier -->
+                <a href="{{ url_for('reception.reception_reservations_cashier') }}" class="btn btn-success btn-sm shadow-sm d-flex align-items-center gap-2 px-3 fw-bold">
+                    <i class="bi bi-wallet2"></i> Caixa
+                </a>
+                
+                <a href="{{ url_for('reception.reception_dashboard') }}" class="btn btn-outline-secondary btn-sm shadow-sm d-flex align-items-center gap-2 px-3">
+                    <i class="bi bi-arrow-return-left"></i> Voltar
+                </a>
+            </div>
         </div>
     </div>
 
     <!-- Gantt Chart Card -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0"><i class="bi bi-grid-3x3"></i> Ocupação dos Quartos</h5>
-        </div>
+    <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+        <!-- Optional: Filter Bar inside Card Header could go here -->
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-bordered table-sm mb-0" style="font-size: 0.75rem; table-layout: fixed; width: 100%;">
@@ -83,26 +120,34 @@
                                         data-day-start="{{ segment.data.start_day }}"
                                         data-length="{{ segment.length }}"
                                         ondrop="drop(event)" 
-                                        ondragover="allowDrop(event)">
+                                        ondragover="allowDrop(event)"
+                                        onmousedown="startDraw(event, this)"
+                                        onmouseover="continueDraw(event, this)"
+                                        onmouseup="endDraw(event, this)">
                                         <div style="height: 24px; width: 100%;"></div>
                                     </td>
                                 {% else %}
                                     {% set cell = segment.data %}
-                                    {% set bg_class = 'bg-primary' if segment.type == 'occupied' else 'bg-warning' %}
-                                    {% set text_class = 'text-white' if segment.type == 'occupied' else 'text-dark' %}
-                                    {% set is_draggable = segment.type == 'reserved' %}
+                                    {% set bg_class = 'bg-occupied' if segment.type == 'occupied' else 'bg-reserved' %}
+                                    {% set text_class = '' %} <!-- Text color handled by CSS now -->
+                                    {% set is_draggable = true %} {# Always draggable if reserved or occupied #}
                                     
-                                    <td colspan="{{ segment.length }}" class="{{ bg_class }} {{ text_class }} text-center p-0 position-relative {{ border_class }}" 
-                                        style="cursor: pointer;"
+                                    <td colspan="{{ segment.length }}" class="text-center p-0 position-relative {{ border_class }}" 
+                                        style="vertical-align: middle;"
                                         title="{{ cell.guest }} ({{ cell.checkin }} - {{ cell.checkout }})"
-                                        draggable="{{ 'true' if is_draggable else 'false' }}"
-                                        ondragstart="drag(event)"
                                         data-res-id="{{ cell.id }}"
                                         data-room="{{ room }}"
                                         data-guest="{{ cell.guest }}"
+                                        data-checkin="{{ cell.checkin }}"
+                                        data-checkout="{{ cell.checkout }}"
+                                        data-category="{{ cell.category }}"
+                                        data-status="{{ cell.payment_status }}"
+                                        data-channel="{{ cell.channel }}"
+                                        data-amount="{{ cell.amount }}"
+                                        data-paid="{{ cell.paid_amount }}"
+                                        data-to-receive="{{ cell.to_receive }}"
                                         data-days="{{ segment.length }}"
-                                        data-start-day="{{ segment.data.start_day }}"
-                                        onclick="openReservationModal('{{ cell.guest }}', '{{ cell.checkin }}', '{{ cell.checkout }}', '{{ cell.category }}', '{{ cell.payment_status }}', '{{ cell.channel }}', '{{ cell.amount }}', '{{ cell.paid_amount }}', '{{ cell.to_receive }}', '{{ cell.id }}', '{{ segment.type }}')">
+                                        data-start-day="{{ segment.data.start_day }}">
                                         
                                         <!-- Handles -->
                                         {% if is_draggable %}
@@ -110,9 +155,13 @@
                                         <div class="resize-handle resize-end" onmousedown="startResize(event, 'end', '{{ cell.id }}', Number('{{ segment.data.start_day }}'), Number('{{ segment.length }}'), '{{ room }}')"></div>
                                         {% endif %}
                                         
-                                        <div class="d-flex align-items-center justify-content-between px-1 res-bar-content">
+                                        <div class="d-flex align-items-center justify-content-between px-2 res-bar-content {{ bg_class }}" 
+                                             draggable="{{ 'true' if is_draggable else 'false' }}"
+                                             ondragstart="drag(event)"
+                                             ondblclick="handleResDblClick(event, this)" 
+                                             style="cursor: grab;">
                                             <!-- Channel Icon (Left) -->
-                                            <div class="me-1 small">
+                                            <div class="me-1 small opacity-75">
                                                 {% set channel = (cell.channel or '')|lower %}
                                                 {% if 'booking' in channel %}
                                                     <i class="bi bi-calendar-check" title="Booking.com"></i>
@@ -130,14 +179,14 @@
                                             </div>
 
                                             <!-- Guest Name (Center/Truncated) -->
-                                            <span class="fw-bold text-truncate flex-grow-1 text-start" style="font-size: 0.75rem;">{{ cell.guest }}</span>
+                                            <span class="fw-bold text-truncate flex-grow-1 text-start px-1" style="font-size: 0.75rem;">{{ cell.guest }}</span>
 
                                             <!-- Status Icon (Right) -->
                                             <div class="ms-1 small">
                                                 {% if cell.payment_status == 'Pago' %}
-                                                    <i class="bi bi-check-circle-fill text-light" title="Pago"></i>
+                                                    <i class="bi bi-check-circle-fill text-white" title="Pago"></i>
                                                 {% elif cell.payment_status == 'Parcial' %}
-                                                    <i class="bi bi-pie-chart-fill text-warning" title="Parcial" style="filter: brightness(0.8);"></i>
+                                                    <i class="bi bi-pie-chart-fill text-dark" title="Parcial" style="opacity: 0.6;"></i>
                                                 {% else %}
                                                     <i class="bi bi-exclamation-circle-fill text-danger" title="Pendente"></i>
                                                 {% endif %}
@@ -157,53 +206,80 @@
 </div>
 
 <style>
-    .cat-areia { background-color: #fcf8e3; border-left: 4px solid #f0ad4e; }
-    .cat-mar-familia { background-color: #d9edf7; border-left: 4px solid #5bc0de; }
-    .cat-mar { background-color: #e8f4fd; border-left: 4px solid #007bff; }
-    .cat-alma-banheira { background-color: #f2dede; border-left: 4px solid #d9534f; }
-    .cat-alma { background-color: #f9f2f4; border-left: 4px solid #c7254e; }
-    .cat-master { background-color: #e6e6e6; border-left: 4px solid #333; }
-
-    .border-midnight {
-        border-right: 2px solid #aaa !important;
+    /* Modern UI Tweaks */
+    .action-btn {
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
     }
-    .border-noon {
-        border-right: 1px dashed #ddd !important;
+    .action-btn:hover {
+        background-color: #f8f9fa;
+        border-color: #dee2e6;
+        transform: translateY(-1px);
+    }
+    .action-btn:active {
+        transform: translateY(0);
+    }
+    
+    /* Category Colors - Soft Pastels with Strong Borders */
+    .cat-areia { background-color: #fff8e1; border-left: 4px solid #ffc107; }
+    .cat-mar-familia { background-color: #e3f2fd; border-left: 4px solid #0dcaf0; }
+    .cat-mar { background-color: #e8f4fd; border-left: 4px solid #0d6efd; }
+    .cat-alma-banheira { background-color: #f8d7da; border-left: 4px solid #dc3545; }
+    .cat-alma { background-color: #f2dae2; border-left: 4px solid #d63384; }
+    .cat-master { background-color: #e9ecef; border-left: 4px solid #212529; }
+
+    /* Grid Lines */
+    .border-midnight { border-right: 1px solid #adb5bd !important; } /* Stronger line for day separation */
+    .border-noon { border-right: 1px dashed #dee2e6 !important; } /* Softer line for noon */
+
+    /* Reservation Bars */
+    .res-bar-content {
+        height: 28px; /* Slightly taller */
+        width: 100%; 
+        font-size: 0.7rem; 
+        line-height: 28px; 
+        overflow: hidden; 
+        white-space: nowrap; 
+        text-overflow: ellipsis;
+        border-radius: 4px; /* Rounded bars */
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1); /* Subtle shadow */
+    }
+    
+    .res-bar-content:active {
+        cursor: grabbing !important;
+    }
+    
+    /* Occupied vs Reserved Colors */
+    .bg-occupied { background: linear-gradient(135deg, #0d6efd, #0b5ed7); color: white; }
+    .bg-reserved { background: linear-gradient(135deg, #ffc107, #ffca2c); color: #212529; }
+    
+    /* Table Header Sticky Fixes */
+    thead.sticky-top th {
+        box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+        z-index: 10;
     }
     
     .droppable-cell.drag-over {
-        background-color: #e2e6ea !important;
-        outline: 2px dashed #007bff;
+        background-color: rgba(13, 110, 253, 0.1) !important;
+        outline: 2px dashed #0d6efd;
+        z-index: 5;
     }
     
     .resize-handle {
         position: absolute;
         top: 0;
         bottom: 0;
-        width: 10px;
+        width: 12px; /* Wider handle area */
         cursor: col-resize;
-        z-index: 5;
+        z-index: 20;
         opacity: 0;
         transition: opacity 0.2s;
-        background-color: rgba(0,0,0,0.2);
     }
     
-    td:hover .resize-handle {
-        opacity: 1;
-    }
-    
+    td:hover .resize-handle { opacity: 1; }
+    .resize-handle:hover { background-color: rgba(0,0,0,0.1); }
     .resize-start { left: 0; }
     .resize-end { right: 0; }
-    
-    .res-bar-content {
-        height: 24px; 
-        width: 100%; 
-        font-size: 0.75rem; 
-        line-height: 24px; 
-        overflow: hidden; 
-        white-space: nowrap; 
-        text-overflow: ellipsis;
-    }
 </style>
 
 <script id="grid-data" type="application/json">{{ grid|tojson }}</script>
@@ -215,28 +291,320 @@
     var gridData = JSON.parse(document.getElementById('grid-data').textContent);
     var draggedData = null;
     
-    // Move Logic
-    function drag(ev) {
-        ev.dataTransfer.setData("resId", ev.target.dataset.resId);
-        ev.dataTransfer.setData("guest", ev.target.dataset.guest);
-        ev.dataTransfer.setData("days", ev.target.dataset.days);
-        ev.dataTransfer.setData("startDay", ev.target.dataset.startDay);
+    // --- Helper: Snap to Day Start (PM = Odd index) ---
+    function snapToDayStart(slotIndex) {
+        // Slot 0 = AM, Slot 1 = PM (Check-in).
+        // If even, add 1 to make it PM.
+        if (slotIndex % 2 === 0) return slotIndex + 1;
+        return slotIndex;
+    }
+
+    // --- Helper: Format Date ---
+    var fmtDate = (d) => d.getDate().toString().padStart(2, '0') + '/' + (d.getMonth()+1).toString().padStart(2, '0') + '/' + d.getFullYear();
+
+    // --- Helper: Calculate Date from Slot ---
+    function getDateFromSlot(slotIndex) {
+        var dayIndex = Math.floor(slotIndex / 2);
+        var d = new Date(gridStartDate);
+        d.setDate(gridStartDate.getDate() + dayIndex);
+        return d;
+    }
+    
+    // --- Draw to Create Logic ---
+    var isDrawing = false;
+    var drawRoom = null;
+    var drawStartSlot = null;
+    var drawEndSlot = null;
+    var drawStartCell = null;
+    
+    function startDraw(ev, cell) {
+        if (ev.button !== 0) return; // Only left click
+        isDrawing = true;
+        drawRoom = cell.dataset.room;
         
-        // Fallback for some browsers
+        // Calculate exact slot based on mouse X within the cell
+        var rect = cell.getBoundingClientRect();
+        var cellLength = parseInt(cell.dataset.length);
+        var cellStart = parseInt(cell.dataset.dayStart);
+        var slotWidth = rect.width / cellLength;
+        var clickX = ev.clientX - rect.left;
+        var slotOffset = Math.floor(clickX / slotWidth);
+        
+        drawStartSlot = cellStart + slotOffset;
+        drawEndSlot = drawStartSlot; // Initial single slot
+        drawStartCell = cell;
+        
+        // Visual feedback
+        clearSelection();
+        highlightSelection(drawRoom, drawStartSlot, drawEndSlot);
+        
+        // Prevent default drag behavior if any
+        ev.preventDefault();
+    }
+    
+    function continueDraw(ev, cell) {
+        if (!isDrawing) return;
+        if (cell.dataset.room !== drawRoom) return; // Stay in same room
+        
+        var rect = cell.getBoundingClientRect();
+        var cellLength = parseInt(cell.dataset.length);
+        var cellStart = parseInt(cell.dataset.dayStart);
+        var slotWidth = rect.width / cellLength;
+        var clickX = ev.clientX - rect.left;
+        var slotOffset = Math.floor(clickX / slotWidth);
+        
+        var currentSlot = cellStart + slotOffset;
+        drawEndSlot = currentSlot;
+        
+        highlightSelection(drawRoom, drawStartSlot, drawEndSlot);
+    }
+    
+    function endDraw(ev, cell) {
+        if (!isDrawing) return;
+        isDrawing = false;
+        
+        // Ensure start < end
+        var start = Math.min(drawStartSlot, drawEndSlot);
+        var end = Math.max(drawStartSlot, drawEndSlot);
+        
+        // Snap to days
+        // If we select half-day slots, we probably want full days for new reservation?
+        // Let's check logic:
+        // Slot 0 (AM), 1 (PM).
+        // If start is 0 (AM), Checkin Date AM? Usually Checkin is PM (1).
+        // If start is 1 (PM), Checkin Date PM.
+        
+        // Let's enforce Checkin at PM (Odd) and Checkout at AM (Even)?
+        // Or just map slots to dates.
+        
+        var checkinDate = getDateFromSlot(start);
+        // For checkout, if we selected up to 'end' slot.
+        // If end is AM (even), it includes that morning.
+        // If end is PM (odd), it includes that night.
+        // Checkout date should be the date AFTER the last occupied slot?
+        // Actually, logic: getDateFromSlot(slot) returns the date of that slot.
+        // If I select slots 0, 1 (Day 1 AM, Day 1 PM).
+        // Checkin: Day 1. Checkout: Day 2.
+        // Logic: Checkout = getDateFromSlot(end + 1).
+        
+        var checkoutDate = getDateFromSlot(end + 1);
+        
+        // If only 1 slot selected (click), maybe ignore or default to 1 night?
+        if (start === end) {
+            checkoutDate = getDateFromSlot(start + 2); // Minimum 1 day (2 slots)
+        }
+        
+        var checkinStr = fmtDate(checkinDate);
+        var checkoutStr = fmtDate(checkoutDate);
+        
+        // Open Modal
+        openNewReservationModal(drawRoom, checkinStr, checkoutStr);
+        
+        // Clear selection after a delay or immediately?
+        // Keep it until modal closes?
+        // For now, clear.
+        clearSelection();
+    }
+    
+    function highlightSelection(room, start, end) {
+        clearSelection();
+        var min = Math.min(start, end);
+        var max = Math.max(start, end);
+        
+        // Find all empty cells in this room that overlap with range
+        var row = document.querySelector(`tr td[data-room="${room}"]`).parentNode;
+        var cells = row.querySelectorAll('.droppable-cell');
+        
+        cells.forEach(c => {
+            var cStart = parseInt(c.dataset.dayStart);
+            var cLen = parseInt(c.dataset.length);
+            var cEnd = cStart + cLen - 1;
+            
+            // Check overlap
+            if (cStart <= max && cEnd >= min) {
+                // Calculate overlap relative to cell
+                var selStart = Math.max(min, cStart);
+                var selEnd = Math.min(max, cEnd);
+                
+                var startOffset = selStart - cStart;
+                var endOffset = selEnd - cStart;
+                var len = endOffset - startOffset + 1;
+                
+                // Create highlight div
+                var h = document.createElement('div');
+                h.className = 'selection-highlight';
+                h.style.position = 'absolute';
+                h.style.top = '0';
+                h.style.height = '100%';
+                h.style.backgroundColor = 'rgba(0, 123, 255, 0.3)';
+                h.style.pointerEvents = 'none'; // Click through
+                
+                // Width calculation
+                // We need precise width %
+                var widthPct = (len / cLen) * 100;
+                var leftPct = (startOffset / cLen) * 100;
+                
+                h.style.width = widthPct + '%';
+                h.style.left = leftPct + '%';
+                
+                // Ensure cell is relative
+                if (getComputedStyle(c).position === 'static') {
+                    c.style.position = 'relative';
+                }
+                c.appendChild(h);
+            }
+        });
+    }
+    
+    function clearSelection() {
+        document.querySelectorAll('.selection-highlight').forEach(el => el.remove());
+    }
+    
+    function openNewReservationModal(room, checkin, checkout) {
+        // Log to debug
+        console.log("Opening New Res Modal:", room, checkin, checkout);
+        
+        var modalEl = document.getElementById('newReservationModal');
+        if (modalEl) {
+            // Find inputs inside the form
+            var form = document.getElementById('newResForm');
+            if (form) {
+                // We need to map 'room' to category if possible, or just note it.
+                // The current modal only has 'category', not specific 'room' select?
+                // Wait, manual reservation usually asks for category. 
+                // But if we draw on a specific room row, we should pre-select that category/room.
+                // Looking at the modal HTML: it has 'category' select.
+                
+                // Let's try to infer category from room number if we have the mapping available in JS?
+                // We don't have the mapping explicitly in JS variable, but we can try to guess or add a hidden room field.
+                // For now, let's set dates.
+                
+                // Date inputs are type="date", expecting YYYY-MM-DD
+                // checkin/checkout are DD/MM/YYYY from fmtDate.
+                // Need to convert back.
+                
+                var partsIn = checkin.split('/');
+                var yyyy_mm_dd_in = `${partsIn[2]}-${partsIn[1]}-${partsIn[0]}`;
+                
+                var partsOut = checkout.split('/');
+                var yyyy_mm_dd_out = `${partsOut[2]}-${partsOut[1]}-${partsOut[0]}`;
+                
+                var inInput = form.querySelector('input[name="checkin"]');
+                var outInput = form.querySelector('input[name="checkout"]');
+                
+                if(inInput) inInput.value = yyyy_mm_dd_in;
+                if(outInput) outInput.value = yyyy_mm_dd_out;
+                
+                // Try to set category based on room (heuristic)
+                var catSelect = form.querySelector('select[name="category"]');
+                if (catSelect && room) {
+                    var roomInt = parseInt(room);
+                    var catVal = "";
+                    if ([1,2,3].includes(roomInt)) catVal = "Suíte Areia";
+                    else if (roomInt === 11) catVal = "Suíte Mar Família";
+                    else if ([12,14,15,16,17,21,22,23,24,25,26].includes(roomInt)) catVal = "Suíte Mar";
+                    else if ([31,35].includes(roomInt)) catVal = "Suíte Alma c/ Banheira";
+                    else if ([32,34].includes(roomInt)) catVal = "Suíte Alma";
+                    else if (roomInt === 33) catVal = "Suíte Master Diamante";
+                    
+                    if (catVal) catSelect.value = catVal;
+                    
+                    // Also, we might want to force the specific room assignment?
+                    // The backend create_manual_reservation doesn't seem to take 'room' directly?
+                    // It creates a reservation, then we might need to allocate it.
+                    // Or we can add a hidden 'room' field to the form and handle it in backend?
+                    // Let's check backend: create_manual_reservation just saves to JSON.
+                    // It doesn't allocate.
+                    // So we should probably allocate it immediately after creation?
+                    // Or add 'room' to the payload and have backend handle it.
+                    
+                    // Let's add a hidden input for room if it doesn't exist
+                    var roomInput = form.querySelector('input[name="allocated_room"]');
+                    if (!roomInput) {
+                        roomInput = document.createElement('input');
+                        roomInput.type = 'hidden';
+                        roomInput.name = 'allocated_room';
+                        form.appendChild(roomInput);
+                    }
+                    roomInput.value = room;
+                }
+            }
+            
+            var modal = new bootstrap.Modal(modalEl);
+            modal.show();
+        } else {
+             console.log("New Reservation Modal not found.");
+        }
+    }
+
+    // --- End Draw Logic ---
+
+    // --- Helper: Call Backend Calculation ---
+    function calculateUpdate(resId, newRoom, checkin, checkout, callback) {
+        fetch('/api/reception/calculate_reservation_update', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                reservation_id: resId,
+                new_room: newRoom,
+                new_checkin: checkin,
+                new_checkout: checkout
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.success) {
+                callback(data.data);
+            } else {
+                alert("Erro ao calcular atualização: " + data.error);
+            }
+        })
+        .catch(err => alert("Erro de comunicação ao calcular."));
+    }
+
+    // Move Logic
+    var isDragging = false;
+    
+    function drag(ev) {
+        isDragging = true;
+        var td = ev.target.closest('td');
+        if (!td) return;
+        
+        // Calculate and store initial X position for delta calculation
+        ev.dataTransfer.setData("startX", ev.clientX);
+        ev.dataTransfer.setData("resId", td.dataset.resId);
+        ev.dataTransfer.setData("guest", td.dataset.guest);
+        ev.dataTransfer.setData("days", td.dataset.days);
+        ev.dataTransfer.setData("startDay", td.dataset.startDay);
+        
+        // Visual feedback
+        ev.target.style.opacity = '0.5';
+        
         draggedData = {
-            resId: ev.target.dataset.resId,
-            guest: ev.target.dataset.guest,
-            days: parseInt(ev.target.dataset.days),
-            startDay: parseInt(ev.target.dataset.startDay)
+            resId: td.dataset.resId,
+            guest: td.dataset.guest,
+            days: parseInt(td.dataset.days),
+            startDay: parseInt(td.dataset.startDay),
+            startX: ev.clientX
         };
     }
+    
+    document.addEventListener('dragend', function(ev) {
+        if (ev.target.classList.contains('res-bar-content')) {
+            ev.target.style.opacity = '1';
+        }
+        // Small delay to prevent click firing immediately after drag
+        setTimeout(() => { isDragging = false; }, 100);
+    });
 
     function allowDrop(ev) {
         ev.preventDefault();
-        ev.target.closest('td').classList.add('drag-over');
+        var td = ev.target.closest('td');
+        if(td && td.classList.contains('droppable-cell')) {
+            td.classList.add('drag-over');
+        }
     }
     
-    // Add dragleave to remove highlight
     document.addEventListener('dragleave', function(ev) {
         if (ev.target.classList.contains('droppable-cell')) {
             ev.target.classList.remove('drag-over');
@@ -246,7 +614,6 @@
     function drop(ev) {
         ev.preventDefault();
         
-        // Find the TD element
         var target = ev.target;
         while (target.tagName !== 'TD' && target) {
             target = target.parentNode;
@@ -255,58 +622,97 @@
         if (!target) return;
         target.classList.remove('drag-over');
         
-        var resId = ev.dataTransfer.getData("resId");
-        var guest = ev.dataTransfer.getData("guest");
-        var daysRequired = parseInt(ev.dataTransfer.getData("days"));
-        var originalStartDay = parseInt(ev.dataTransfer.getData("startDay"));
+        // Get Drag Data
+        var resId = ev.dataTransfer.getData("resId") || (draggedData ? draggedData.resId : null);
+        var guest = ev.dataTransfer.getData("guest") || (draggedData ? draggedData.guest : null);
+        var daysRequired = parseInt(ev.dataTransfer.getData("days") || (draggedData ? draggedData.days : 0));
+        var originalStartDay = parseInt(ev.dataTransfer.getData("startDay") || (draggedData ? draggedData.startDay : 0));
+        var startX = parseInt(ev.dataTransfer.getData("startX") || (draggedData ? draggedData.startX : 0));
         
-        if (!resId && draggedData) {
-            resId = draggedData.resId;
-            guest = draggedData.guest;
-            daysRequired = draggedData.days;
-            originalStartDay = draggedData.startDay;
-        }
+        if (!resId) return;
 
-        var room = target.dataset.room;
-        
-        // Calculate Target Start Slot
-        var segmentStart = parseInt(target.dataset.dayStart);
-        var segmentLength = parseInt(target.dataset.length);
+        // Calculate Delta Slots based on horizontal movement
+        // We need to know the width of a slot. 
+        // We can approximate by looking at the target cell width (which is N slots wide)
+        var targetSlotLength = parseInt(target.dataset.length) || 1;
         var rect = target.getBoundingClientRect();
-        var clickX = ev.clientX - rect.left;
-        var cellWidth = rect.width / segmentLength;
-        var slotOffset = Math.floor(clickX / cellWidth);
-        var targetSlot = segmentStart + slotOffset;
+        var slotWidth = rect.width / targetSlotLength;
         
-        // SNAP TO PM (Middle of Day)
-        // Check-in should always be PM (Odd).
-        var targetDayIndex = Math.floor(targetSlot / 2);
-        var newStartSlot = (targetDayIndex * 2) + 1;
+        var deltaX = ev.clientX - startX;
+        var deltaSlots = Math.round(deltaX / slotWidth);
         
-        // For now, we only support changing ROOM, preserving original dates.
-        // So we use originalStartDay for collision check in the NEW room.
-        newStartSlot = originalStartDay;
+        // Determine New Room
+        var newRoom = target.dataset.room;
         
-        if (checkCollision(room, newStartSlot, daysRequired, resId)) {
-             alert("Não é possível mover para este quarto: Conflito de datas.");
-             return;
-        }
-
-        window.pendingMove = {
-            reservation_id: resId,
-            new_room: room
-        };
+        // Determine New Start Slot
+        // If we stayed in the same room, we use delta.
+        // If we changed rooms, we need to map to the new room's timeline.
+        // But drag & drop usually implies visual movement relative to grid.
+        // The grid is aligned vertically (same slots for all rooms).
+        // So dropping at X position corresponds to same time slot regardless of room row.
+        // Thus, we can just use Original Start Slot + Delta Slots.
         
-        // Prepare Modal
-        document.getElementById('moveGuest').textContent = guest;
-        document.getElementById('moveRoom').textContent = room + " (Mantendo datas originais)";
+        var newStartSlot = originalStartDay + deltaSlots;
         
-        // Show Modal
-        var moveModal = new bootstrap.Modal(document.getElementById('moveModal'));
-        moveModal.show();
+        // SNAP: Align to nearest PM slot (Check-in time)
+        // Check-in usually happens in PM (Odd slots: 1, 3, 5...).
+        // Slot 0 = StartDate AM, Slot 1 = StartDate PM.
+        // So we want odd numbers if possible, or consistent with existing logic.
+        // Let's enforce check-in at PM (odd index)
+        if (newStartSlot % 2 === 0) newStartSlot += 1; 
+        
+        // Ensure within bounds
+        if (newStartSlot < 0) newStartSlot = 1; // Minimum valid slot
+        
+        // Calculate New Dates
+        var checkinDate = getDateFromSlot(newStartSlot);
+        var checkoutDate = getDateFromSlot(newStartSlot + daysRequired);
+        
+        var checkinStr = fmtDate(checkinDate);
+        var checkoutStr = fmtDate(checkoutDate);
+        
+        // Call Backend to Calculate/Validate
+        calculateUpdate(resId, newRoom, checkinStr, checkoutStr, function(calcData) {
+            if (!calcData.valid) {
+                alert("Conflito detectado pelo servidor: " + calcData.conflict_message);
+                return;
+            }
+            
+            window.pendingMove = {
+                reservation_id: resId,
+                new_room: newRoom,
+                checkin: checkinStr,
+                checkout: checkoutStr,
+                calc: calcData
+            };
+            
+            // Prepare Modal
+            document.getElementById('moveGuest').textContent = guest;
+            document.getElementById('moveRoom').textContent = newRoom;
+            document.getElementById('moveDates').textContent = checkinStr + ' - ' + checkoutStr;
+            
+            // Price Info
+            var priceHtml = '';
+            if (calcData.diff !== 0) {
+                var diffStr = calcData.diff > 0 ? '+ R$ ' + calcData.diff.toFixed(2) : '- R$ ' + Math.abs(calcData.diff).toFixed(2);
+                priceHtml = `Valor atual: R$ ${calcData.old_total.toFixed(2)}<br>
+                             Novo valor: <strong>R$ ${calcData.new_total.toFixed(2)}</strong> (${diffStr})`;
+                document.getElementById('movePriceInfo').innerHTML = priceHtml;
+                document.getElementById('priceAdjYes').checked = true;
+                togglePriceInput(true);
+                document.getElementById('newPrice').value = calcData.new_total.toFixed(2);
+            } else {
+                document.getElementById('movePriceInfo').innerHTML = "Sem alteração de valor.";
+                document.getElementById('priceAdjNo').checked = true;
+                togglePriceInput(false);
+            }
+            
+            var moveModal = new bootstrap.Modal(document.getElementById('moveModal'));
+            moveModal.show();
+        });
     }
     
-    // Check Collisions
+    // Check Collisions (Client Side)
     function checkCollision(room, startDay, duration, currentResId) {
         if (!gridData[room]) return false;
         
@@ -315,11 +721,19 @@
             var cell = gridData[room][String(day)] || gridData[room][day];
             
             if (cell) {
-                if (cell.status === 'occupied') return true;
+                // Ignore if it's the SAME reservation (checking by ID)
+                // This allows self-overlap (e.g. extending date or moving partially over itself)
+                if (cell.id && String(cell.id) === String(currentResId)) {
+                    continue; 
+                }
+
+                if (cell.status === 'occupied') {
+                    // It's occupied by someone else (ID check failed above)
+                    return true;
+                }
                 if (cell.status === 'reserved') {
-                    if (cell.id && String(cell.id) !== String(currentResId)) {
-                        return true;
-                    }
+                    // It's reserved by someone else (ID check failed above)
+                    return true;
                 }
             }
         }
@@ -333,7 +747,7 @@
             container.classList.remove('d-none');
         } else {
             container.classList.add('d-none');
-            document.getElementById('newPrice').value = '';
+            // document.getElementById('newPrice').value = ''; // Don't clear, keep calc value
         }
     }
 
@@ -345,15 +759,13 @@
         
         var payload = {
             reservation_id: data.reservation_id,
-            new_room: data.new_room
+            new_room: data.new_room,
+            checkin: data.checkin,
+            checkout: data.checkout
         };
         
         if (priceAdjType === 'yes') {
             var amount = document.getElementById('newPrice').value;
-            if (!amount) {
-                alert("Por favor, informe o novo valor.");
-                return;
-            }
             payload.price_adjustment = {
                 type: 'manual',
                 amount: amount
@@ -366,9 +778,7 @@
         
         fetch('/api/reception/move_reservation', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(payload)
         })
         .then(response => response.json())
@@ -383,7 +793,7 @@
         })
         .catch(err => {
             console.error(err);
-            alert("Erro de comunicação com o servidor.");
+            alert("Erro de comunicação.");
             btn.disabled = false;
             btn.textContent = "Confirmar Mudança";
         });
@@ -395,7 +805,7 @@
 
     function startResize(ev, direction, resId, startSlot, length, room) {
         ev.stopPropagation();
-        ev.preventDefault(); // Prevent dragstart
+        ev.preventDefault(); 
         
         resizing = true;
         var td = ev.target.parentNode;
@@ -422,7 +832,7 @@
         var deltaX = ev.clientX - resizeData.startX;
         var deltaSlots = Math.round(deltaX / resizeData.cellWidth);
         
-        // Enforce 2-slot increments (Full Days) to keep PM-in/AM-out alignment
+        // Enforce 2-slot increments (Full Days)
         deltaSlots = Math.round(deltaSlots / 2) * 2;
         
         var newLength = resizeData.length;
@@ -435,11 +845,9 @@
             newStartSlot = resizeData.startSlot + deltaSlots;
         }
         
-        // Validation
-        if (newLength < 2) return; // Min 1 night (2 slots)
-        if (newStartSlot < 0) return; // Cannot start before month begin
+        if (newLength < 2) return; 
+        if (newStartSlot < 0) return; 
         
-        // Visual Preview (Simple width adjustment)
         resizeData.td.style.opacity = 0.7;
         document.body.style.cursor = 'col-resize';
     }
@@ -454,8 +862,6 @@
         
         var deltaX = ev.clientX - resizeData.startX;
         var deltaSlots = Math.round(deltaX / resizeData.cellWidth);
-        
-        // Snap to Full Days (2 slots)
         var deltaDays = Math.round(deltaSlots / 2);
         deltaSlots = deltaDays * 2;
         
@@ -475,52 +881,58 @@
             alert("A estadia mínima é de 1 diária.");
             return;
         }
-
         if (newStartSlot < 0) {
-            alert("Não é possível mover para antes do início do mês.");
+            alert("Data inválida.");
             return;
         }
         
-        // Check Collision for new period
         if (checkCollision(resizeData.room, newStartSlot, newLength, resizeData.resId)) {
-            alert("Conflito de datas com outra reserva ou ocupação.");
+            alert("Conflito de datas com outra reserva.");
             return;
         }
         
-        // Calculate Dates
-        // Slot 0 = Day 1 AM.
-        // Slot 1 = Day 1 PM (Check-in).
-        // Check-in Date:
-        // If newStartSlot is odd (e.g. 1), day is floor(1/2)+1 = 1.
-        // If newStartSlot is even (e.g. 0), day is floor(0/2)+1 = 1.
-        // But system expects Check-in at PM.
-        // If we snap to 2 slots, startSlot should preserve parity (Odd).
+        var checkinDate = getDateFromSlot(newStartSlot);
+        var checkoutDate = getDateFromSlot(newStartSlot + newLength);
+        var checkinStr = fmtDate(checkinDate);
+        var checkoutStr = fmtDate(checkoutDate);
         
-        var startDayIndex = Math.floor(newStartSlot / 2); // 0-based day index relative to grid start
-        
-        var checkinDate = new Date(gridStartDate);
-        checkinDate.setDate(gridStartDate.getDate() + startDayIndex);
-        
-        var checkoutDate = new Date(gridStartDate);
-        var endDayIndex = Math.floor((newStartSlot + newLength) / 2);
-        checkoutDate.setDate(gridStartDate.getDate() + endDayIndex);
-        
-        var fmt = (d) => d.getDate().toString().padStart(2, '0') + '/' + (d.getMonth()+1).toString().padStart(2, '0') + '/' + d.getFullYear();
-        
-        window.pendingResize = {
-            reservation_id: resizeData.resId,
-            checkin: fmt(checkinDate),
-            checkout: fmt(checkoutDate),
-            room_number: resizeData.room
-        };
-        
-        // Show Modal
-        var guestName = resizeData.td.querySelector('.fw-bold').textContent;
-        document.getElementById('resizeGuest').textContent = guestName;
-        document.getElementById('resizeDates').textContent = fmt(checkinDate) + ' - ' + fmt(checkoutDate);
-        
-        var modal = new bootstrap.Modal(document.getElementById('resizeModal'));
-        modal.show();
+        // Call Backend Calculation
+        calculateUpdate(resizeData.resId, resizeData.room, checkinStr, checkoutStr, function(calcData) {
+            if (!calcData.valid) {
+                alert("Conflito detectado pelo servidor: " + calcData.conflict_message);
+                return;
+            }
+            
+            window.pendingResize = {
+                reservation_id: resizeData.resId,
+                checkin: checkinStr,
+                checkout: checkoutStr,
+                room_number: resizeData.room,
+                calc: calcData
+            };
+            
+            var guestName = resizeData.td.querySelector('.fw-bold').textContent;
+            document.getElementById('resizeGuest').textContent = guestName;
+            document.getElementById('resizeDates').textContent = checkinStr + ' - ' + checkoutStr;
+            
+            // Show Calculated Price
+             var priceHtml = '';
+            if (calcData.diff !== 0) {
+                var diffStr = calcData.diff > 0 ? '+ R$ ' + calcData.diff.toFixed(2) : '- R$ ' + Math.abs(calcData.diff).toFixed(2);
+                priceHtml = `<div class="alert alert-info py-2">
+                                Valor atual: R$ ${calcData.old_total.toFixed(2)}<br>
+                                Novo valor sugerido: <strong>R$ ${calcData.new_total.toFixed(2)}</strong> (${diffStr})
+                             </div>`;
+                document.getElementById('resizePriceInfo').innerHTML = priceHtml;
+                document.getElementById('resizePriceAdj').value = calcData.diff.toFixed(2);
+            } else {
+                document.getElementById('resizePriceInfo').innerHTML = "<div class='alert alert-secondary py-2'>Sem alteração de valor calculada.</div>";
+                document.getElementById('resizePriceAdj').value = '';
+            }
+            
+            var modal = new bootstrap.Modal(document.getElementById('resizeModal'));
+            modal.show();
+        });
     }
     
     function confirmResize() {
@@ -572,8 +984,36 @@
         }
     }
 
+    // Explicit Double Click Handler
+    function handleResDblClick(ev, el) {
+        if (isDragging) return;
+        ev.stopPropagation(); 
+        
+        // Find closest TD that has reservation data
+        // Note: The element 'el' is .res-bar-content, its parent is TD
+        var td = el.closest('td');
+        if(td) {
+            console.log("Double Click Detected. Opening modal for guest:", td.dataset.guest);
+            openReservationModalFromData(td);
+        }
+    }
+
     // Guest Details & Upload (Existing functions)
+    // Global Click Listener REMOVED - Using inline onclick for robustness against Drag & Drop
+    
+    window.openReservationModalFromData = function(el) {
+        console.log('Opening reservation modal for:', el.dataset.guest);
+        try {
+            var d = el.dataset;
+            openReservationModal(d.guest, d.checkin, d.checkout, d.category, d.status, d.channel, d.amount, d.paid, d.toReceive, d.resId, 'reserved');
+        } catch (e) {
+            console.error('Error opening modal:', e);
+        }
+    };
+
     function openReservationModal(guest, checkin, checkout, category, status, channel, amount, paid, to_receive, id, type) {
+        console.log('openReservationModal called', {guest, id});
+        
         // Default to Guest Tab (Cadastro) as requested
         var guestTabEl = document.querySelector('#resTab button[data-bs-target="#guest"]');
         if(guestTabEl) {
@@ -581,21 +1021,31 @@
             guestTab.show();
         }
         
-        document.getElementById('modalGuestName').textContent = guest;
-        document.getElementById('modalDates').textContent = checkin + ' até ' + checkout;
-        document.getElementById('modalCategory').textContent = category;
+        // Helper to format currency
+        var fmtMoney = (val) => {
+            if (val === undefined || val === null || val === '') return '-';
+            var num = parseFloat(val);
+            if (isNaN(num)) return val; // Return original string if not a number
+            return num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        };
+
+        document.getElementById('modalGuestName').textContent = guest || 'Hóspede';
+        document.getElementById('modalDates').textContent = (checkin || '') + ' até ' + (checkout || '');
+        document.getElementById('modalCategory').textContent = category || '';
         document.getElementById('modalChannel').textContent = channel || 'Direto';
         document.getElementById('modalStatus').textContent = status || 'N/A';
-        document.getElementById('modalAmount').textContent = amount ? 'R$ ' + amount : '-';
-        document.getElementById('modalPaid').textContent = paid ? 'R$ ' + paid : '-';
-        document.getElementById('modalToReceive').textContent = to_receive ? 'R$ ' + to_receive : '-';
+        document.getElementById('modalAmount').textContent = fmtMoney(amount);
+        document.getElementById('modalPaid').textContent = fmtMoney(paid);
+        document.getElementById('modalToReceive').textContent = fmtMoney(to_receive);
         
         var guestIdField = document.getElementById('guestResId');
-        if(guestIdField) guestIdField.value = id;
+        if(guestIdField) guestIdField.value = id || '';
         
         const statusBadge = document.getElementById('modalStatusBadge');
-        statusBadge.textContent = status || 'N/A';
-        statusBadge.className = 'badge ' + (status === 'Pago' ? 'bg-success' : 'bg-warning text-dark');
+        if (statusBadge) {
+            statusBadge.textContent = status || 'N/A';
+            statusBadge.className = 'badge ' + (status === 'Pago' ? 'bg-success' : 'bg-warning text-dark');
+        }
         
         if(document.getElementById('guestPhone')) {
             // Reset fields
@@ -626,68 +1076,78 @@
             document.getElementById('docPreview').innerHTML = '';
             document.getElementById('modalAvgDaily').textContent = 'Carregando...';
             
-            fetch('/api/guest/details/' + id)
-                .then(res => res.json())
-                .then(data => {
-                    if(data.success) {
-                        if(data.data.reservation && data.data.reservation.avg_daily_paid) {
-                            document.getElementById('modalAvgDaily').textContent = 'R$ ' + data.data.reservation.avg_daily_paid.toFixed(2);
-                        } else {
-                            document.getElementById('modalAvgDaily').textContent = 'R$ 0.00';
-                        }
-                        
-                        var guestData = data.data.guest;
-                        if(guestData) {
-                            // Personal Info
-                            if (guestData.personal_info) {
-                                var info = guestData.personal_info;
-                                document.getElementById('guestPhone').value = info.phone || '';
-                                document.getElementById('guestEmail').value = info.email || '';
-                                document.getElementById('guestDob').value = info.dob || '';
-                                document.getElementById('guestDocId').value = info.doc_id || '';
-                                document.getElementById('guestAddress').value = info.address || '';
+            if (id) {
+                fetch('/api/guest/details/' + id)
+                    .then(res => res.json())
+                    .then(data => {
+                        if(data.success) {
+                            if(data.data.reservation && data.data.reservation.avg_daily_paid) {
+                                document.getElementById('modalAvgDaily').textContent = 'R$ ' + data.data.reservation.avg_daily_paid.toFixed(2);
+                            } else {
+                                document.getElementById('modalAvgDaily').textContent = 'R$ 0.00';
+                            }
+                            
+                            var guestData = data.data.guest;
+                            if(guestData) {
+                                // Personal Info
+                                if (guestData.personal_info) {
+                                    var info = guestData.personal_info;
+                                    document.getElementById('guestPhone').value = info.phone || '';
+                                    document.getElementById('guestEmail').value = info.email || '';
+                                    document.getElementById('guestDob').value = info.dob || '';
+                                    document.getElementById('guestDocId').value = info.doc_id || '';
+                                    document.getElementById('guestAddress').value = info.address || '';
+                                    
+                                    if(info.document_photo_path) {
+                                        document.getElementById('docPreview').innerHTML = 
+                                            '<div class="alert alert-success py-1"><i class="bi bi-check-circle"></i> Documento enviado</div>';
+                                    }
+                                }
                                 
-                                if(info.document_photo_path) {
-                                    document.getElementById('docPreview').innerHTML = 
-                                        '<div class="alert alert-success py-1"><i class="bi bi-check-circle"></i> Documento enviado</div>';
+                                // Fiscal Info
+                                if (guestData.fiscal_info) {
+                                    var fiscal = guestData.fiscal_info;
+                                    document.getElementById('fiscalBorrowerType').value = fiscal.borrower_type || 'cpf';
+                                    document.getElementById('fiscalDocNumber').value = fiscal.cpf || fiscal.cnpj || fiscal.foreigner_passport || '';
+                                    document.getElementById('fiscalAddressFull').value = fiscal.address || '';
+                                    document.getElementById('fiscalMunicipality').value = fiscal.municipality || 'Tamandaré';
+                                    document.getElementById('fiscalCountry').value = fiscal.foreigner_country || '';
+                                    toggleFiscalFields();
+                                }
+                                
+                                // Operational Info
+                                if (guestData.operational_info) {
+                                    var op = guestData.operational_info;
+                                    var restrictions = op.dietary_restrictions || [];
+                                    document.getElementById('dietGluten').checked = restrictions.includes('gluten_free');
+                                    document.getElementById('dietLactose').checked = restrictions.includes('lactose_free');
+                                    document.getElementById('dietVegan').checked = restrictions.includes('vegan');
+                                    document.getElementById('dietVegetarian').checked = restrictions.includes('vegetarian');
+                                    
+                                    document.getElementById('opAllergies').value = op.allergies || '';
+                                    document.getElementById('opBreakfastStart').value = op.breakfast_time_start || '';
+                                    document.getElementById('opBreakfastEnd').value = op.breakfast_time_end || '';
+                                    
+                                    var comm = op.commemorative_dates || [];
+                                    document.getElementById('opCommemorative').value = comm.join(', ');
                                 }
                             }
-                            
-                            // Fiscal Info
-                            if (guestData.fiscal_info) {
-                                var fiscal = guestData.fiscal_info;
-                                document.getElementById('fiscalBorrowerType').value = fiscal.borrower_type || 'cpf';
-                                document.getElementById('fiscalDocNumber').value = fiscal.cpf || fiscal.cnpj || fiscal.foreigner_passport || '';
-                                document.getElementById('fiscalAddressFull').value = fiscal.address || '';
-                                document.getElementById('fiscalMunicipality').value = fiscal.municipality || 'Tamandaré';
-                                document.getElementById('fiscalCountry').value = fiscal.foreigner_country || '';
-                                toggleFiscalFields();
-                            }
-                            
-                            // Operational Info
-                            if (guestData.operational_info) {
-                                var op = guestData.operational_info;
-                                var restrictions = op.dietary_restrictions || [];
-                                document.getElementById('dietGluten').checked = restrictions.includes('gluten_free');
-                                document.getElementById('dietLactose').checked = restrictions.includes('lactose_free');
-                                document.getElementById('dietVegan').checked = restrictions.includes('vegan');
-                                document.getElementById('dietVegetarian').checked = restrictions.includes('vegetarian');
-                                
-                                document.getElementById('opAllergies').value = op.allergies || '';
-                                document.getElementById('opBreakfastStart').value = op.breakfast_time_start || '';
-                                document.getElementById('opBreakfastEnd').value = op.breakfast_time_end || '';
-                                
-                                var comm = op.commemorative_dates || [];
-                                document.getElementById('opCommemorative').value = comm.join(', ');
-                            }
                         }
-                    }
-                })
-                .catch(err => console.error(err));
+                    })
+                    .catch(err => console.error('Error fetching details:', err));
+            }
         }
 
-        var myModal = new bootstrap.Modal(document.getElementById('reservationModal'));
-        myModal.show();
+        var modalEl = document.getElementById('reservationModal');
+        if (modalEl) {
+            var myModal = bootstrap.Modal.getInstance(modalEl);
+            if (!myModal) {
+                myModal = new bootstrap.Modal(modalEl);
+            }
+            myModal.show();
+        } else {
+            console.error('Modal element #reservationModal not found');
+        }
     }
 
     function saveGuestData() {
@@ -790,6 +1250,211 @@
     }
 </script>
 
+<!-- New Reservation Modal -->
+<div class="modal fade" id="newReservationModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Nova Reserva Manual</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="newResForm">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Hóspede (Responsável)</label>
+                            <input type="text" class="form-control" name="guest_name" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Categoria</label>
+                            <select class="form-select" name="category">
+                                <option value="Suíte Areia">Suíte Areia</option>
+                                <option value="Suíte Mar">Suíte Mar</option>
+                                <option value="Suíte Mar Família">Suíte Mar Família</option>
+                                <option value="Suíte Alma">Suíte Alma</option>
+                                <option value="Suíte Alma c/ Banheira">Suíte Alma c/ Banheira</option>
+                                <option value="Suíte Master Diamante">Suíte Master Diamante</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Check-in</label>
+                            <input type="date" class="form-control" name="checkin" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Check-out</label>
+                            <input type="date" class="form-control" name="checkout" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Valor Total (R$)</label>
+                            <input type="number" step="0.01" class="form-control" name="amount" value="0.00">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Pago (R$)</label>
+                            <input type="number" step="0.01" class="form-control" name="paid_amount" value="0.00">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">A Receber (R$)</label>
+                            <input type="number" step="0.01" class="form-control" name="to_receive" value="0.00">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                         <div class="col-md-6">
+                             <label class="form-label">Canal</label>
+                             <select class="form-select" name="channel">
+                                 <option value="Direto">Direto (Balcão/Telefone)</option>
+                                 <option value="WhatsApp">WhatsApp</option>
+                                 <option value="Booking.com">Booking.com</option>
+                                 <option value="Airbnb">Airbnb</option>
+                                 <option value="Expedia">Expedia</option>
+                             </select>
+                         </div>
+                         <div class="col-md-6">
+                             <label class="form-label">Status Pagamento</label>
+                             <select class="form-select" name="status">
+                                 <option value="Pendente">Pendente</option>
+                                 <option value="Parcial">Parcial</option>
+                                 <option value="Pago">Pago</option>
+                             </select>
+                         </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="submitNewReservation()">Salvar Reserva</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- File Upload ---
+    function uploadReservationsFile(input) {
+        if (!input.files || !input.files[0]) return;
+        
+        var formData = new FormData();
+        formData.append('file', input.files[0]);
+        
+        // Show loading state on button
+        var btn = input.previousElementSibling;
+        var originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Enviando...';
+        
+        fetch('/api/reception/upload_reservations', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert("Erro: " + data.error);
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Erro de conexão.");
+        })
+        .finally(() => {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+            input.value = ''; // Reset
+        });
+    }
+
+    // --- New Reservation ---
+    function openNewReservationModal() {
+        var modal = new bootstrap.Modal(document.getElementById('newReservationModal'));
+        modal.show();
+    }
+    
+    function submitNewReservation() {
+        var form = document.getElementById('newResForm');
+        var formData = new FormData(form);
+        var data = Object.fromEntries(formData.entries());
+        
+        // Format dates to DD/MM/YYYY
+        if (data.checkin) {
+            var d = new Date(data.checkin);
+            // Fix timezone offset issue by treating as UTC or appending time
+            d = new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+            data.checkin = d.toLocaleDateString('pt-BR');
+        }
+        if (data.checkout) {
+            var d = new Date(data.checkout);
+            d = new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+            data.checkout = d.toLocaleDateString('pt-BR');
+        }
+        
+        var btn = document.querySelector('#newReservationModal .btn-primary');
+        btn.disabled = true;
+        btn.innerHTML = 'Salvando...';
+        
+        fetch('/api/reception/create_manual_reservation', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        })
+        .then(res => res.json())
+        .then(resData => {
+            if (resData.success) {
+                alert("Reserva criada com sucesso!");
+                location.reload();
+            } else {
+                alert("Erro: " + resData.error);
+                btn.disabled = false;
+                btn.innerHTML = 'Salvar Reserva';
+            }
+        })
+        .catch(err => {
+            alert("Erro de comunicação.");
+            btn.disabled = false;
+            btn.innerHTML = 'Salvar Reserva';
+        });
+    }
+    
+    // --- Pre-Allocation ---
+    function runPreAllocation() {
+        var btn = document.querySelector('button[onclick="runPreAllocation()"]');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Processando...';
+        
+        fetch('/api/reception/auto_pre_allocate', {
+            method: 'POST'
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                var count = data.actions.length;
+                if (count > 0) {
+                    alert(`${count} reservas foram pré-alocadas!\n\n` + data.actions.join('\n'));
+                    location.reload();
+                } else {
+                    alert("Nenhuma nova pré-alocação necessária no momento.");
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-magic"></i> Pré-alocação';
+                }
+            } else {
+                alert("Erro: " + data.error);
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-magic"></i> Pré-alocação';
+            }
+        })
+        .catch(err => {
+            alert("Erro de comunicação.");
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-magic"></i> Pré-alocação';
+        });
+    }
+</script>
+
 <!-- Move Confirmation Modal -->
 <div class="modal fade" id="moveModal" tabindex="-1">
     <div class="modal-dialog">
@@ -800,8 +1465,11 @@
             </div>
             <div class="modal-body">
                 <p>Mover reserva de <strong><span id="moveGuest"></span></strong> para o quarto <strong><span id="moveRoom"></span></strong>?</p>
+                <p>Novas datas: <strong><span id="moveDates"></span></strong></p>
                 
                 <hr>
+                <div class="mb-3" id="movePriceInfo"></div>
+                
                 <div class="mb-3">
                     <label class="form-label">Haverá ajuste no valor da diária?</label>
                     <div class="form-check">
@@ -844,6 +1512,8 @@
                 <p>Novo período: <strong><span id="resizeDates"></span></strong></p>
                 
                 <hr>
+                <div id="resizePriceInfo" class="mb-3"></div>
+                
                 <div class="mb-3">
                     <label for="resizePriceAdj" class="form-label">Ajuste de Valor (Opcional)</label>
                     <input type="text" class="form-control" id="resizePriceAdj" placeholder="Ex: +100.00 ou -50.00 ou 1200.00">

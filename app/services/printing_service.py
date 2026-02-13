@@ -498,7 +498,8 @@ def print_order_items(table_id, waiter_name, new_items, printers_config, product
 
 def print_transfer_ticket(from_table, to_table, waiter_name, printers_config):
     """
-    Prints a notification about table transfer to all kitchen/bar printers.
+    Prints a notification about table transfer to Bar and Kitchen printers.
+    Ensures unique printing per IP/Device to avoid duplication.
     """
     # Build ticket
     ESC = b'\x1b'
@@ -524,27 +525,47 @@ def print_transfer_ticket(from_table, to_table, waiter_name, printers_config):
     cmd += b'\n\n\n'
     cmd += GS + b'V' + b'\x41' + b'\x03'
     
-    # Target: Bar printer + Kitchen printer if configured
-    target_printers = []
+    # Identify unique target printers (Bar and Kitchen)
+    unique_targets = {} # Key -> PrinterConfig
     
+    # Helper to generate unique key for printer
+    def get_printer_key(p):
+        if p.get('type') == 'windows':
+            return f"win:{p.get('windows_name')}"
+        else:
+            return f"net:{p.get('ip')}:{p.get('port', 9100)}"
+
+    # 1. Add Default Bar Printer
     bar_p = get_default_printer('bar')
-    if bar_p: target_printers.append(bar_p)
-    
-    kitchen_p = get_default_printer('kitchen')
-    if kitchen_p and kitchen_p['id'] != bar_p['id']: target_printers.append(kitchen_p)
-    
-    if not target_printers:
-        # Fallback: try all kitchen/bar by name
-        target_printers = [p for p in printers_config if 'Bar' in p.get('name', '') or 'Cozinha' in p.get('name', '')]
+    if bar_p:
+        unique_targets[get_printer_key(bar_p)] = bar_p
         
-    for printer in target_printers:
+    # 2. Add Default Kitchen Printer
+    kitchen_p = get_default_printer('kitchen')
+    if kitchen_p:
+        unique_targets[get_printer_key(kitchen_p)] = kitchen_p
+        
+    # 3. Fallback/Supplement: Scan all printers if defaults not sufficient or to ensure coverage?
+    # Requirement: "exclusivamente para duas categorias... Bar e Cozinha"
+    # If defaults are set, we rely on them. 
+    # If defaults are NOT set, we should look for printers with 'Bar' or 'Cozinha' in name.
+    
+    if not unique_targets:
+        for p in printers_config:
+            name_lower = p.get('name', '').lower()
+            if 'bar' in name_lower or 'cozinha' in name_lower or 'kitchen' in name_lower:
+                unique_targets[get_printer_key(p)] = p
+    
+    logger.info(f"Printing transfer ticket to {len(unique_targets)} unique destinations.")
+    
+    for key, printer in unique_targets.items():
         try:
             if printer.get('type') == 'windows':
                 send_to_windows_printer(printer.get('windows_name'), cmd)
             else:
                 send_to_printer(printer.get('ip'), printer.get('port', 9100), cmd)
-        except:
-            pass
+        except Exception as e:
+            logger.error(f"Error printing transfer ticket to {key}: {e}")
 
 def print_consolidated_stock_warning(items, printers_config):
     """
@@ -772,6 +793,7 @@ def format_bill(table_id, items, subtotal, service_fee, total, waiter_name, gues
     BOLD = ESC + b'E' + b'\x01'
     NO_BOLD = ESC + b'E' + b'\x00'
     DOUBLE_HW = GS + b'!' + b'\x11'
+    DOUBLE_H = GS + b'!' + b'\x10'
     NORMAL = GS + b'!' + b'\x00'
     SEPARATOR = b'--------------------------------\n'
     
@@ -781,16 +803,24 @@ def format_bill(table_id, items, subtotal, service_fee, total, waiter_name, gues
     cmd += b'CONFERENCIA DE CONTA\n'
     cmd += SEPARATOR
     
+    # --- HEADER MODIFICATION ---
     cmd += LEFT
+    
+    # 1. Guest/Room Info (High Priority)
+    if room_number or guest_name:
+        cmd += BOLD + DOUBLE_H
+        if room_number:
+            cmd += f"QUARTO: {room_number}\n".encode('cp850', errors='replace')
+        if guest_name:
+            cmd += f"HOSPEDE: {guest_name[:20]}\n".encode('cp850', errors='replace') # Truncate to fit
+        cmd += NO_BOLD + NORMAL
+        cmd += SEPARATOR
+
+    # 2. Table and Meta
     cmd += f"Mesa: {table_id}\n".encode('cp850', errors='replace')
     cmd += f"Data: {datetime.now().strftime('%d/%m/%Y %H:%M')}\n".encode('cp850', errors='replace')
     cmd += f"Garcom: {waiter_name}\n".encode('cp850', errors='replace')
     
-    if guest_name:
-        cmd += f"Hóspede: {guest_name}\n".encode('cp850', errors='replace')
-    if room_number:
-        cmd += f"Quarto: {room_number}\n".encode('cp850', errors='replace')
-        
     cmd += SEPARATOR
     cmd += b'ITEM                 QTD   VALOR\n'
     cmd += SEPARATOR
