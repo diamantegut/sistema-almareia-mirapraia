@@ -1,818 +1,11 @@
 [
     {
-        "id": "20260116141336",
-        "name": "Janeiro",
-        "month": "2026-01",
-        "created_at": "16/01/2026 14:13",
-        "status": "calculated",
-        "total_commission": 48916.0,
-        "total_bonus": 30495.0,
-        "card_percent": 0.8,
-        "commission_tax_percent": 12.0,
-        "bonus_tax_percent": 24.0,
-        "extras": 300.0,
-        "employees": [
-            {
-                "name": "Adailton dos santos oliveira",
-                "department": "Serviço",
-                "role": "colaborador",
-                "points": 3.0,
-                "days_worked": 30.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 113.52,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 1014.04,
-                    "dept_share": 366.67,
-                    "indiv_bonus_share": 0.0,
-                    "total": 1267.19
-                }
-            },
-            {
-                "name": "Ademir Generali",
-                "department": "Manutenção",
-                "role": "colaborador",
-                "points": 3.0,
-                "days_worked": 30.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 0.0,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 1014.04,
-                    "dept_share": 0.0,
-                    "indiv_bonus_share": 0.0,
-                    "total": 1014.04
-                }
-            },
-            {
-                "name": "Adriana Ferreira dos Santos",
-                "department": "Cozinha",
-                "role": "colaborador",
-                "points": 2.0,
-                "days_worked": 30.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 140.0,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 408.06,
-                    "dept_share": 0.0,
-                    "indiv_bonus_share": 0.0,
-                    "total": 268.06
-                }
-            },
-            {
-                "name": "Adriana Santos Do Nascimento",
-                "department": "Governança",
-                "role": "colaborador",
-                "points": 2.0,
-                "days_worked": 30.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 21.36,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 408.06,
-                    "dept_share": 0.0,
-                    "indiv_bonus_share": 0.0,
-                    "total": 386.7
-                }
-            },
-            {
-                "name": "Alan Paiva Lima",
-                "department": "Recepção",
-                "role": "colaborador",
-                "points": 3.0,
-                "days_worked": 30.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 112.72,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 1014.04,
-                    "dept_share": 0.0,
-                    "indiv_bonus_share": 0.0,
-                    "total": 901.32
-                }
-            },
-            {
-                "name": "Andrea Minervino De Melo Vasconcelos",
-                "department": "Governança",
-                "role": "supervisor",
-                "points": 4.0,
-                "days_worked": 30.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 0.0,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 1664.39,
-                    "dept_share": 0.0,
-                    "indiv_bonus_share": 0.0,
-                    "total": 1664.39
-                }
-            },
-            {
-                "name": "Angelo Diamante",
-                "department": "",
-                "role": "admin",
-                "points": 0.0,
-                "days_worked": 30.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 0.0,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 0.0,
-                    "dept_share": 0.0,
-                    "indiv_bonus_share": 0.0,
-                    "total": 0.0
-                }
-            },
-            {
-                "name": "Aurinete maria de oliveira",
-                "department": "Cozinha",
-                "role": "supervisor",
-                "points": 4.0,
-                "days_worked": 30.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 7.12,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 1664.39,
-                    "dept_share": 0.0,
-                    "indiv_bonus_share": 0.0,
-                    "total": 1657.27
-                }
-            },
-            {
-                "name": "Bartolomeu Leandro René de Araujo",
-                "department": "Serviço",
-                "role": "colaborador",
-                "points": 2.0,
-                "days_worked": 30.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 0.0,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 408.06,
-                    "dept_share": 366.67,
-                    "indiv_bonus_share": 0.0,
-                    "total": 774.73
-                }
-            },
-            {
-                "name": "Bruno Ruanderson Mendes",
-                "department": "Recepção",
-                "role": "colaborador",
-                "points": 3.0,
-                "days_worked": 30.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 0.0,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 1014.04,
-                    "dept_share": 0.0,
-                    "indiv_bonus_share": 0.0,
-                    "total": 1014.04
-                }
-            },
-            {
-                "name": "Carlos Eduardo Carneiro da Silva",
-                "department": "Estoque",
-                "role": "gerente",
-                "points": 5.0,
-                "days_worked": 30.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 0.0,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 2582.54,
-                    "dept_share": 0.0,
-                    "indiv_bonus_share": 0.0,
-                    "total": 2582.54
-                }
-            },
-            {
-                "name": "Cicera maria da Silva",
-                "department": "Cozinha",
-                "role": "gerente",
-                "points": 5.0,
-                "days_worked": 30.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 14.24,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 2582.54,
-                    "dept_share": 0.0,
-                    "indiv_bonus_share": 0.0,
-                    "total": 2568.3
-                }
-            },
-            {
-                "name": "Cintia Raquel Da Silva",
-                "department": "Cozinha",
-                "role": "supervisor",
-                "points": 4.0,
-                "days_worked": 30.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 500.0,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 1664.39,
-                    "dept_share": 0.0,
-                    "indiv_bonus_share": 0.0,
-                    "total": 1164.39
-                }
-            },
-            {
-                "name": "Clebio Alves de Moura",
-                "department": "Serviço",
-                "role": "colaborador",
-                "points": 2.0,
-                "days_worked": 30.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 82.16,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 408.06,
-                    "dept_share": 366.67,
-                    "indiv_bonus_share": 0.0,
-                    "total": 692.57
-                }
-            },
-            {
-                "name": "Daniel Luiz De Lima",
-                "department": "Manutenção",
-                "role": "colaborador",
-                "points": 2.0,
-                "days_worked": 30.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 0.0,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 408.06,
-                    "dept_share": 0.0,
-                    "indiv_bonus_share": 0.0,
-                    "total": 408.06
-                }
-            },
-            {
-                "name": "Danilo Cesar Silva Lima",
-                "department": "Serviço",
-                "role": "colaborador",
-                "points": 3.0,
-                "days_worked": 30.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 0.0,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 1014.04,
-                    "dept_share": 366.67,
-                    "indiv_bonus_share": 0.0,
-                    "total": 1380.71
-                }
-            },
-            {
-                "name": "Dina Priscila dos Santos Nunes",
-                "department": "Governança",
-                "role": "colaborador",
-                "points": 3.0,
-                "days_worked": 30.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 0.0,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 1014.04,
-                    "dept_share": 0.0,
-                    "indiv_bonus_share": 0.0,
-                    "total": 1014.04
-                }
-            },
-            {
-                "name": "Elenilda Dos Santos Da Silva",
-                "department": "Cozinha",
-                "role": "colaborador",
-                "points": 2.0,
-                "days_worked": 30.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 0.0,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 408.06,
-                    "dept_share": 0.0,
-                    "indiv_bonus_share": 0.0,
-                    "total": 408.06
-                }
-            },
-            {
-                "name": "Eliete Maria Dos Santos Da Silva",
-                "department": "Cozinha",
-                "role": "colaborador",
-                "points": 2.0,
-                "days_worked": 15.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 0.0,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 204.03,
-                    "dept_share": 0.0,
-                    "indiv_bonus_share": 0.0,
-                    "total": 204.03
-                }
-            },
-            {
-                "name": "Erik Manoel Santos Do Nascimento",
-                "department": "Serviço",
-                "role": "colaborador",
-                "points": 2.0,
-                "days_worked": 20.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 7.12,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 272.04,
-                    "dept_share": 244.44,
-                    "indiv_bonus_share": 0.0,
-                    "total": 509.37
-                }
-            },
-            {
-                "name": "Erique Neves Cavalcanti",
-                "department": "Serviço",
-                "role": "colaborador",
-                "points": 3.0,
-                "days_worked": 30.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 157.76,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 1014.04,
-                    "dept_share": 366.67,
-                    "indiv_bonus_share": 0.0,
-                    "total": 1222.95
-                }
-            },
-            {
-                "name": "Filipe da silva assis",
-                "department": "Serviço",
-                "role": "supervisor",
-                "points": 4.0,
-                "days_worked": 30.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 124.24,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 1664.39,
-                    "dept_share": 366.67,
-                    "indiv_bonus_share": 0.0,
-                    "total": 1906.82
-                }
-            },
-            {
-                "name": "Generina Jovelina Da Silva",
-                "department": "Governança",
-                "role": "colaborador",
-                "points": 3.0,
-                "days_worked": 30.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 0.0,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 1014.04,
-                    "dept_share": 0.0,
-                    "indiv_bonus_share": 0.0,
-                    "total": 1014.04
-                }
-            },
-            {
-                "name": "Gilvan Santos de Brito",
-                "department": "Manutenção",
-                "role": "gerente",
-                "points": 5.0,
-                "days_worked": 30.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 0.0,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 2582.54,
-                    "dept_share": 0.0,
-                    "indiv_bonus_share": 0.0,
-                    "total": 2582.54
-                }
-            },
-            {
-                "name": "Grasielli Diamante",
-                "department": "",
-                "role": "admin",
-                "points": 0.0,
-                "days_worked": 30.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 0.0,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 0.0,
-                    "dept_share": 0.0,
-                    "indiv_bonus_share": 0.0,
-                    "total": 0.0
-                }
-            },
-            {
-                "name": "Guilherme Henrique da Silva",
-                "department": "Serviço",
-                "role": "supervisor",
-                "points": 4.0,
-                "days_worked": 30.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 351.52,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 1664.39,
-                    "dept_share": 366.67,
-                    "indiv_bonus_share": 0.0,
-                    "total": 1679.54
-                }
-            },
-            {
-                "name": "Iraquitan De Freitas Lima Junior",
-                "department": "Recepção",
-                "role": "gerente",
-                "points": 5.0,
-                "days_worked": 30.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 774.55,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 2582.54,
-                    "dept_share": 0.0,
-                    "indiv_bonus_share": 0.0,
-                    "total": 1807.99
-                }
-            },
-            {
-                "name": "Jaqueline Maria Santos da Silva",
-                "department": "Governança",
-                "role": "colaborador",
-                "points": 2.0,
-                "days_worked": 30.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 0.0,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 408.06,
-                    "dept_share": 0.0,
-                    "indiv_bonus_share": 0.0,
-                    "total": 408.06
-                }
-            },
-            {
-                "name": "Jose Antunes Rocha e Silva do Nascimento",
-                "department": "Serviço",
-                "role": "gerente",
-                "points": 5.0,
-                "days_worked": 14.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 701.95,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 1205.18,
-                    "dept_share": 171.11,
-                    "indiv_bonus_share": 0.0,
-                    "total": 674.35
-                }
-            },
-            {
-                "name": "Jose Roberto Da Silva",
-                "department": "Recepção",
-                "role": "colaborador",
-                "points": 2.0,
-                "days_worked": 20.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 7.12,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 272.04,
-                    "dept_share": 0.0,
-                    "indiv_bonus_share": 0.0,
-                    "total": 264.92
-                }
-            },
-            {
-                "name": "Josenice Maria De Oliveira",
-                "department": "Cozinha",
-                "role": "colaborador",
-                "points": 3.0,
-                "days_worked": 30.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 7.12,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 1014.04,
-                    "dept_share": 0.0,
-                    "indiv_bonus_share": 0.0,
-                    "total": 1006.92
-                }
-            },
-            {
-                "name": "José Edson França dos Santos ",
-                "department": "Serviço",
-                "role": "colaborador",
-                "points": 2.0,
-                "days_worked": 30.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 540.97,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 408.06,
-                    "dept_share": 366.67,
-                    "indiv_bonus_share": 0.0,
-                    "total": 233.76
-                }
-            },
-            {
-                "name": "José Gomes Da Silva",
-                "department": "Serviço",
-                "role": "colaborador",
-                "points": 3.0,
-                "days_worked": 30.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 0.0,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 1014.04,
-                    "dept_share": 366.67,
-                    "indiv_bonus_share": 0.0,
-                    "total": 1380.71
-                }
-            },
-            {
-                "name": "José Henrique Lucena da Silva ",
-                "department": "Serviço",
-                "role": "colaborador",
-                "points": 3.0,
-                "days_worked": 30.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 7.92,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 1014.04,
-                    "dept_share": 366.67,
-                    "indiv_bonus_share": 0.0,
-                    "total": 1372.79
-                }
-            },
-            {
-                "name": "Kayke Emanoel de Lima",
-                "department": "Serviço",
-                "role": "colaborador",
-                "points": 2.0,
-                "days_worked": 30.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 0.0,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 408.06,
-                    "dept_share": 366.67,
-                    "indiv_bonus_share": 0.0,
-                    "total": 774.73
-                }
-            },
-            {
-                "name": "Lindinalva Maria Pereira",
-                "department": "Cozinha",
-                "role": "colaborador",
-                "points": 2.0,
-                "days_worked": 30.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 140.0,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 408.06,
-                    "dept_share": 0.0,
-                    "indiv_bonus_share": 0.0,
-                    "total": 268.06
-                }
-            },
-            {
-                "name": "Luciano Aleixo Dos Santos",
-                "department": "Manutenção",
-                "role": "colaborador",
-                "points": 2.0,
-                "days_worked": 15.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 42.72,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 204.03,
-                    "dept_share": 0.0,
-                    "indiv_bonus_share": 0.0,
-                    "total": 161.31
-                }
-            },
-            {
-                "name": "Luiz Carlos Rodrigues Dos Santos",
-                "department": "Manutenção",
-                "role": "colaborador",
-                "points": 2.0,
-                "days_worked": 30.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 0.0,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 408.06,
-                    "dept_share": 0.0,
-                    "indiv_bonus_share": 0.0,
-                    "total": 408.06
-                }
-            },
-            {
-                "name": "Luiz Eduardo Carneiro da Silva",
-                "department": "Recepção",
-                "role": "supervisor",
-                "points": 4.0,
-                "days_worked": 30.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 0.0,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 1664.39,
-                    "dept_share": 0.0,
-                    "indiv_bonus_share": 0.0,
-                    "total": 1664.39
-                }
-            },
-            {
-                "name": "Maria Nadier Da Silva",
-                "department": "Cozinha",
-                "role": "colaborador",
-                "points": 2.0,
-                "days_worked": 30.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 34.8,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 408.06,
-                    "dept_share": 0.0,
-                    "indiv_bonus_share": 0.0,
-                    "total": 373.26
-                }
-            },
-            {
-                "name": "Pauline Tavares Da Silva",
-                "department": "Governança",
-                "role": "colaborador",
-                "points": 2.0,
-                "days_worked": 12.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 0.0,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 163.23,
-                    "dept_share": 0.0,
-                    "indiv_bonus_share": 0.0,
-                    "total": 163.23
-                }
-            },
-            {
-                "name": "Pedro Lucas Silva Dos Santos",
-                "department": "Estoque",
-                "role": "colaborador",
-                "points": 2.0,
-                "days_worked": 30.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 0.0,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 408.06,
-                    "dept_share": 0.0,
-                    "indiv_bonus_share": 0.0,
-                    "total": 408.06
-                }
-            },
-            {
-                "name": "Priscila Silva Gonçalves",
-                "department": "Recepção",
-                "role": "supervisor",
-                "points": 4.0,
-                "days_worked": 30.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 0.0,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 1664.39,
-                    "dept_share": 0.0,
-                    "indiv_bonus_share": 0.0,
-                    "total": 1664.39
-                }
-            },
-            {
-                "name": "Robson Vieira Da Silva",
-                "department": "Cozinha",
-                "role": "colaborador",
-                "points": 3.0,
-                "days_worked": 30.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 21.36,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 1014.04,
-                    "dept_share": 0.0,
-                    "indiv_bonus_share": 0.0,
-                    "total": 992.68
-                }
-            },
-            {
-                "name": "Taciana Maria da Silva",
-                "department": "Cozinha",
-                "role": "colaborador",
-                "points": 2.0,
-                "days_worked": 30.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 14.24,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 408.06,
-                    "dept_share": 0.0,
-                    "indiv_bonus_share": 0.0,
-                    "total": 393.82
-                }
-            },
-            {
-                "name": "Welington Da Silva Lima",
-                "department": "Serviço",
-                "role": "colaborador",
-                "points": 3.0,
-                "days_worked": 30.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 7.12,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 1014.04,
-                    "dept_share": 366.67,
-                    "indiv_bonus_share": 0.0,
-                    "total": 1373.59
-                }
-            },
-            {
-                "name": "Werley Kaia Silvino Alves",
-                "department": "Serviço",
-                "role": "colaborador",
-                "points": 2.0,
-                "days_worked": 18.0,
-                "individual_bonus": 0.0,
-                "individual_deduction": 27.84,
-                "consumption": 0.0,
-                "calculated": {
-                    "point_share": 244.84,
-                    "dept_share": 220.0,
-                    "indiv_bonus_share": 0.0,
-                    "total": 437.0
-                }
-            }
-        ],
-        "department_bonuses": [
-            {
-                "name": "Cozinha",
-                "value": 0.0
-            },
-            {
-                "name": "Serviço",
-                "value": 5500.0
-            },
-            {
-                "name": "Manutenção",
-                "value": 0.0
-            },
-            {
-                "name": "Recepção",
-                "value": 0.0
-            },
-            {
-                "name": "Estoque",
-                "value": 0.0
-            },
-            {
-                "name": "Governança",
-                "value": 0.0
-            }
-        ],
-        "results": {
-            "gross_total": 79411.0,
-            "ded_convention": 15882.2,
-            "ded_tax_commission": 4695.94,
-            "ded_tax_bonus": 5855.04,
-            "ded_card": 1270.58,
-            "total_global_deductions": 27703.75,
-            "net_distributable": 45907.25,
-            "total_distributed": 44517.81,
-            "remainder": 2465.61
-        },
-        "updated_at": "19/01/2026 14:20",
-        "approved_at": "16/01/2026 14:58",
-        "approved_by": "Angelo"
-    },
-    {
         "id": "20260209122621",
         "name": "Janeiro 16 a 31/01",
         "month": "2026-01",
         "created_at": "09/02/2026 12:26",
         "status": "calculated",
-        "total_commission": 17053.6,
+        "total_commission": 12053.0,
         "total_bonus": 27208.53,
         "card_percent": 0.8,
         "commission_tax_percent": 12.0,
@@ -829,10 +22,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 107.52000000000001,
                 "calculated": {
-                    "point_share": 432.18,
+                    "point_share": 359.24,
                     "dept_share": 428.57,
                     "indiv_bonus_share": 0.0,
-                    "total": 753.24
+                    "total": 680.29
                 }
             },
             {
@@ -845,10 +38,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 0.0,
                 "calculated": {
-                    "point_share": 432.18,
+                    "point_share": 359.24,
                     "dept_share": 0.0,
                     "indiv_bonus_share": 0.0,
-                    "total": 432.18
+                    "total": 359.24
                 }
             },
             {
@@ -861,10 +54,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 0.0,
                 "calculated": {
-                    "point_share": 432.18,
+                    "point_share": 359.24,
                     "dept_share": 0.0,
                     "indiv_bonus_share": 0.0,
-                    "total": 432.18
+                    "total": 359.24
                 }
             },
             {
@@ -877,10 +70,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 0.0,
                 "calculated": {
-                    "point_share": 173.47,
+                    "point_share": 144.19,
                     "dept_share": 0.0,
                     "indiv_bonus_share": 0.0,
-                    "total": 173.47
+                    "total": 144.19
                 }
             },
             {
@@ -893,10 +86,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 31.12,
                 "calculated": {
-                    "point_share": 432.18,
+                    "point_share": 359.24,
                     "dept_share": 0.0,
                     "indiv_bonus_share": 0.0,
-                    "total": 401.06
+                    "total": 328.12
                 }
             },
             {
@@ -909,10 +102,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 0.0,
                 "calculated": {
-                    "point_share": 747.2,
+                    "point_share": 621.08,
                     "dept_share": 0.0,
                     "indiv_bonus_share": 0.0,
-                    "total": 747.2
+                    "total": 621.08
                 }
             },
             {
@@ -925,10 +118,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 0.0,
                 "calculated": {
-                    "point_share": 173.47,
+                    "point_share": 144.19,
                     "dept_share": 0.0,
                     "indiv_bonus_share": 0.0,
-                    "total": 173.47
+                    "total": 144.19
                 }
             },
             {
@@ -941,10 +134,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 0.0,
                 "calculated": {
-                    "point_share": 747.2,
+                    "point_share": 621.08,
                     "dept_share": 0.0,
                     "indiv_bonus_share": 0.0,
-                    "total": 747.2
+                    "total": 621.08
                 }
             },
             {
@@ -957,10 +150,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 0.0,
                 "calculated": {
-                    "point_share": 432.18,
+                    "point_share": 359.24,
                     "dept_share": 428.57,
                     "indiv_bonus_share": 0.0,
-                    "total": 860.76
+                    "total": 787.81
                 }
             },
             {
@@ -973,10 +166,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 0.0,
                 "calculated": {
-                    "point_share": 432.18,
+                    "point_share": 359.24,
                     "dept_share": 0.0,
                     "indiv_bonus_share": 0.0,
-                    "total": 432.18
+                    "total": 359.24
                 }
             },
             {
@@ -989,10 +182,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 0.0,
                 "calculated": {
-                    "point_share": 173.47,
+                    "point_share": 144.19,
                     "dept_share": 0.0,
                     "indiv_bonus_share": 0.0,
-                    "total": 173.47
+                    "total": 144.19
                 }
             },
             {
@@ -1005,10 +198,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 91.84,
                 "calculated": {
-                    "point_share": 1256.78,
+                    "point_share": 1044.65,
                     "dept_share": 0.0,
                     "indiv_bonus_share": 428.57,
-                    "total": 1593.51
+                    "total": 1381.38
                 }
             },
             {
@@ -1021,10 +214,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 15.840000000000002,
                 "calculated": {
-                    "point_share": 1256.78,
+                    "point_share": 1044.65,
                     "dept_share": 0.0,
                     "indiv_bonus_share": 0.0,
-                    "total": 1240.94
+                    "total": 1028.81
                 }
             },
             {
@@ -1037,10 +230,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 0.0,
                 "calculated": {
-                    "point_share": 747.2,
+                    "point_share": 621.08,
                     "dept_share": 0.0,
                     "indiv_bonus_share": 0.0,
-                    "total": 747.2
+                    "total": 621.08
                 }
             },
             {
@@ -1053,10 +246,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 46.88,
                 "calculated": {
-                    "point_share": 173.47,
+                    "point_share": 144.19,
                     "dept_share": 428.57,
                     "indiv_bonus_share": 0.0,
-                    "total": 555.17
+                    "total": 525.89
                 }
             },
             {
@@ -1069,10 +262,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 0.0,
                 "calculated": {
-                    "point_share": 173.47,
+                    "point_share": 144.19,
                     "dept_share": 0.0,
                     "indiv_bonus_share": 0.0,
-                    "total": 173.47
+                    "total": 144.19
                 }
             },
             {
@@ -1085,10 +278,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 62.8,
                 "calculated": {
-                    "point_share": 432.18,
+                    "point_share": 359.24,
                     "dept_share": 428.57,
                     "indiv_bonus_share": 0.0,
-                    "total": 797.96
+                    "total": 725.01
                 }
             },
             {
@@ -1101,10 +294,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 0.0,
                 "calculated": {
-                    "point_share": 173.47,
+                    "point_share": 144.19,
                     "dept_share": 0.0,
                     "indiv_bonus_share": 0.0,
-                    "total": 173.47
+                    "total": 144.19
                 }
             },
             {
@@ -1117,10 +310,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 0.0,
                 "calculated": {
-                    "point_share": 432.18,
+                    "point_share": 359.24,
                     "dept_share": 0.0,
                     "indiv_bonus_share": 0.0,
-                    "total": 432.18
+                    "total": 359.24
                 }
             },
             {
@@ -1133,10 +326,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 27.92,
                 "calculated": {
-                    "point_share": 173.47,
+                    "point_share": 144.19,
                     "dept_share": 0.0,
                     "indiv_bonus_share": 0.0,
-                    "total": 145.55
+                    "total": 116.27
                 }
             },
             {
@@ -1149,10 +342,10 @@
                 "individual_deduction": 428.57,
                 "consumption": 0.0,
                 "calculated": {
-                    "point_share": 173.47,
+                    "point_share": 144.19,
                     "dept_share": 428.57,
                     "indiv_bonus_share": 0.0,
-                    "total": 173.48
+                    "total": 144.2
                 }
             },
             {
@@ -1165,10 +358,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 21.360000000000003,
                 "calculated": {
-                    "point_share": 432.18,
+                    "point_share": 359.24,
                     "dept_share": 428.57,
                     "indiv_bonus_share": 0.0,
-                    "total": 839.4
+                    "total": 766.45
                 }
             },
             {
@@ -1181,10 +374,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 21.360000000000003,
                 "calculated": {
-                    "point_share": 747.2,
+                    "point_share": 621.08,
                     "dept_share": 428.57,
                     "indiv_bonus_share": 0.0,
-                    "total": 1154.41
+                    "total": 1028.29
                 }
             },
             {
@@ -1197,10 +390,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 0.0,
                 "calculated": {
-                    "point_share": 432.18,
+                    "point_share": 359.24,
                     "dept_share": 0.0,
                     "indiv_bonus_share": 0.0,
-                    "total": 432.18
+                    "total": 359.24
                 }
             },
             {
@@ -1213,10 +406,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 0.0,
                 "calculated": {
-                    "point_share": 1256.78,
+                    "point_share": 1044.65,
                     "dept_share": 0.0,
                     "indiv_bonus_share": 428.57,
-                    "total": 1685.35
+                    "total": 1473.22
                 }
             },
             {
@@ -1229,10 +422,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 6.32,
                 "calculated": {
-                    "point_share": 747.2,
+                    "point_share": 621.08,
                     "dept_share": 428.57,
                     "indiv_bonus_share": 0.0,
-                    "total": 1169.45
+                    "total": 1043.33
                 }
             },
             {
@@ -1245,10 +438,10 @@
                 "individual_deduction": 420.0,
                 "consumption": 14.240000000000002,
                 "calculated": {
-                    "point_share": 1256.78,
+                    "point_share": 1044.65,
                     "dept_share": 0.0,
                     "indiv_bonus_share": 0.0,
-                    "total": 822.54
+                    "total": 610.41
                 }
             },
             {
@@ -1261,10 +454,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 0.0,
                 "calculated": {
-                    "point_share": 173.47,
+                    "point_share": 144.19,
                     "dept_share": 0.0,
                     "indiv_bonus_share": 0.0,
-                    "total": 173.47
+                    "total": 144.19
                 }
             },
             {
@@ -1277,10 +470,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 0.0,
                 "calculated": {
-                    "point_share": 173.47,
+                    "point_share": 144.19,
                     "dept_share": 0.0,
                     "indiv_bonus_share": 0.0,
-                    "total": 173.47
+                    "total": 144.19
                 }
             },
             {
@@ -1293,10 +486,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 14.240000000000002,
                 "calculated": {
-                    "point_share": 173.47,
+                    "point_share": 144.19,
                     "dept_share": 0.0,
                     "indiv_bonus_share": 0.0,
-                    "total": 159.23
+                    "total": 129.95
                 }
             },
             {
@@ -1309,10 +502,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 7.120000000000001,
                 "calculated": {
-                    "point_share": 432.18,
+                    "point_share": 359.24,
                     "dept_share": 0.0,
                     "indiv_bonus_share": 0.0,
-                    "total": 425.06
+                    "total": 352.12
                 }
             },
             {
@@ -1325,10 +518,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 0.0,
                 "calculated": {
-                    "point_share": 173.47,
+                    "point_share": 144.19,
                     "dept_share": 0.0,
                     "indiv_bonus_share": 0.0,
-                    "total": 173.47
+                    "total": 144.19
                 }
             },
             {
@@ -1341,10 +534,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 0.0,
                 "calculated": {
-                    "point_share": 173.47,
+                    "point_share": 144.19,
                     "dept_share": 428.57,
                     "indiv_bonus_share": 0.0,
-                    "total": 602.05
+                    "total": 572.77
                 }
             },
             {
@@ -1357,10 +550,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 0.0,
                 "calculated": {
-                    "point_share": 432.18,
+                    "point_share": 359.24,
                     "dept_share": 428.57,
                     "indiv_bonus_share": 0.0,
-                    "total": 860.76
+                    "total": 787.81
                 }
             },
             {
@@ -1373,10 +566,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 7.120000000000001,
                 "calculated": {
-                    "point_share": 432.18,
+                    "point_share": 359.24,
                     "dept_share": 428.57,
                     "indiv_bonus_share": 0.0,
-                    "total": 853.64
+                    "total": 780.69
                 }
             },
             {
@@ -1389,10 +582,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 0.0,
                 "calculated": {
-                    "point_share": 173.47,
+                    "point_share": 144.19,
                     "dept_share": 428.57,
                     "indiv_bonus_share": 0.0,
-                    "total": 602.05
+                    "total": 572.77
                 }
             },
             {
@@ -1405,10 +598,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 0.0,
                 "calculated": {
-                    "point_share": 173.47,
+                    "point_share": 144.19,
                     "dept_share": 0.0,
                     "indiv_bonus_share": 0.0,
-                    "total": 173.47
+                    "total": 144.19
                 }
             },
             {
@@ -1421,10 +614,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 0.0,
                 "calculated": {
-                    "point_share": 173.47,
+                    "point_share": 144.19,
                     "dept_share": 0.0,
                     "indiv_bonus_share": 0.0,
-                    "total": 173.47
+                    "total": 144.19
                 }
             },
             {
@@ -1437,10 +630,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 0.0,
                 "calculated": {
-                    "point_share": 747.2,
+                    "point_share": 621.08,
                     "dept_share": 0.0,
                     "indiv_bonus_share": 0.0,
-                    "total": 747.2
+                    "total": 621.08
                 }
             },
             {
@@ -1453,10 +646,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 14.240000000000002,
                 "calculated": {
-                    "point_share": 173.47,
+                    "point_share": 144.19,
                     "dept_share": 0.0,
                     "indiv_bonus_share": 0.0,
-                    "total": 159.23
+                    "total": 129.95
                 }
             },
             {
@@ -1469,10 +662,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 0.0,
                 "calculated": {
-                    "point_share": 173.47,
+                    "point_share": 144.19,
                     "dept_share": 0.0,
                     "indiv_bonus_share": 0.0,
-                    "total": 173.47
+                    "total": 144.19
                 }
             },
             {
@@ -1485,10 +678,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 7.120000000000001,
                 "calculated": {
-                    "point_share": 173.47,
+                    "point_share": 144.19,
                     "dept_share": 0.0,
                     "indiv_bonus_share": 0.0,
-                    "total": 166.35
+                    "total": 137.07
                 }
             },
             {
@@ -1501,10 +694,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 0.0,
                 "calculated": {
-                    "point_share": 747.2,
+                    "point_share": 621.08,
                     "dept_share": 0.0,
                     "indiv_bonus_share": 0.0,
-                    "total": 747.2
+                    "total": 621.08
                 }
             },
             {
@@ -1517,10 +710,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 7.120000000000001,
                 "calculated": {
-                    "point_share": 432.18,
+                    "point_share": 359.24,
                     "dept_share": 0.0,
                     "indiv_bonus_share": 0.0,
-                    "total": 425.06
+                    "total": 352.12
                 }
             },
             {
@@ -1533,10 +726,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 14.240000000000002,
                 "calculated": {
-                    "point_share": 173.47,
+                    "point_share": 144.19,
                     "dept_share": 0.0,
                     "indiv_bonus_share": 0.0,
-                    "total": 159.23
+                    "total": 129.95
                 }
             },
             {
@@ -1549,10 +742,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 23.12,
                 "calculated": {
-                    "point_share": 432.18,
+                    "point_share": 359.24,
                     "dept_share": 428.57,
                     "indiv_bonus_share": 0.0,
-                    "total": 837.64
+                    "total": 764.69
                 }
             },
             {
@@ -1565,10 +758,10 @@
                 "individual_deduction": 0.0,
                 "consumption": 0.0,
                 "calculated": {
-                    "point_share": 173.47,
+                    "point_share": 144.19,
                     "dept_share": 428.57,
                     "indiv_bonus_share": 0.0,
-                    "total": 602.05
+                    "total": 572.77
                 }
             }
         ],
@@ -1599,16 +792,16 @@
             }
         ],
         "results": {
-            "gross_total": 44262.13,
-            "ded_convention": 8852.43,
-            "ded_tax_commission": 1637.15,
+            "gross_total": 39261.53,
+            "ded_convention": 7852.31,
+            "ded_tax_commission": 1157.09,
             "ded_tax_bonus": 5224.04,
-            "ded_card": 708.19,
-            "total_global_deductions": 16421.8,
-            "net_distributable": 20383.19,
-            "total_distributed": 25850.24,
-            "remainder": 0.1
+            "ded_card": 628.18,
+            "total_global_deductions": 14861.62,
+            "net_distributable": 16942.77,
+            "total_distributed": 22409.82,
+            "remainder": 0.02
         },
-        "updated_at": "12/02/2026 19:13"
+        "updated_at": "13/02/2026 14:14"
     }
 ]

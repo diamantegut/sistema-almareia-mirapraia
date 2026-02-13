@@ -8351,5 +8351,547 @@
         "notes": "Mesa 36",
         "fiscal_doc_uuid": null,
         "history": []
+    },
+    {
+        "id": "1234567890",
+        "status": "processed",
+        "timestamp": "2026-02-06T12:34:56Z",
+        "details": {
+            "type": "NFe",
+            "issuer": {
+                "name": "Empresa Exemplo Ltda",
+                "cnpj": "12345678000195"
+            },
+            "value": 1500.75,
+            "items": [
+                {
+                    "item_code": "ABC123",
+                    "quantity": 1,
+                    "price": 1500.75
+                }
+            ],
+            "protocol_number": "1357924680"
+        },
+        "closed_at": "2026-02-13 13:19:11",
+        "fiscal_amount": 0.0
+    },
+    {
+        "id": "ac478557-a32b-4f2b-818c-09c6190c61fd",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "MESA_42_202602131319",
+        "closed_at": "2026-02-13 13:19:38",
+        "closed_by": "guilherme",
+        "total_amount": 291.72,
+        "fiscal_amount": 291.72,
+        "items": [
+            {
+                "id": "b6ee7e22-a69f-41df-a230-fe03e9ee5271",
+                "product_id": "266",
+                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
+                "price": 16.9,
+                "qty": 1.0,
+                "category": "Cervejas",
+                "created_at": "13/02/2026 12:05",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "2065b2a1-9d35-4f5c-a222-4eb869a87e46",
+                "product_id": "265",
+                "name": "Caldo (Consultar sabor do dia)",
+                "price": 15.9,
+                "qty": 1.0,
+                "category": "Entradas",
+                "created_at": "13/02/2026 12:20",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "Feijão (Caldo)",
+                "questions_answers": []
+            },
+            {
+                "id": "24b7cfa8-3b39-4121-8ef7-07cb937ffcef",
+                "product_id": "108",
+                "name": "Peixe ao Molho de Camarão (Individual)",
+                "price": 98.9,
+                "qty": 1.0,
+                "category": "Pratos",
+                "created_at": "13/02/2026 12:20",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "862e5b83-983a-419e-bdb5-3bfb052b5049",
+                "product_id": "114",
+                "name": "Risotto de Camarão (Individual)",
+                "price": 79.9,
+                "qty": 1.0,
+                "category": "Pratos",
+                "created_at": "13/02/2026 12:20",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Ponto do Arroz",
+                        "answer": "Al Dente"
+                    }
+                ]
+            },
+            {
+                "id": "a9ec22f3-9239-4e7d-ba4a-554a9e8c50bb",
+                "product_id": "266",
+                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
+                "price": 16.9,
+                "qty": 1.0,
+                "category": "Cervejas",
+                "created_at": "13/02/2026 12:24",
+                "waiter": "guilherme",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "1 cp"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "c4fafdb3-854a-4b0a-b601-627419e79b53",
+                "product_id": "148",
+                "name": "Coca Cola Zero 350ml",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Refrigerante",
+                "created_at": "13/02/2026 12:49",
+                "waiter": "guilherme",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "1 cp"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "2"
+                    }
+                ]
+            },
+            {
+                "id": "77c4a3ed-c110-48cf-b6d6-3a3bf08b01e0",
+                "product_id": "2004",
+                "name": "Suco Copo",
+                "price": 10.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "13/02/2026 12:49",
+                "waiter": "guilherme",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Sem gelo"
+                ],
+                "accompaniments": [],
+                "flavor": "Laranja",
+                "questions_answers": []
+            },
+            {
+                "id": "d1431ce7-49a2-4db1-935a-4e1172244045",
+                "product_id": "266",
+                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
+                "price": 16.9,
+                "qty": 1.0,
+                "category": "Cervejas",
+                "created_at": "13/02/2026 12:50",
+                "waiter": "guilherme",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "1 cp"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Credito MIrapraia Pagseguro",
+                "amount": 291.72,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 42",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "10795784-b574-4b7d-a378-949f1103b598",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "MESA_92_202602131422",
+        "closed_at": "2026-02-13 14:22:42",
+        "closed_by": "filipe",
+        "total_amount": 186.45000000000002,
+        "fiscal_amount": 186.45,
+        "items": [
+            {
+                "id": "fc9b7d64-5296-4097-9fff-11cc9b44544b",
+                "product_id": "149",
+                "name": "Coca-Cola 350ml",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Refrigerante",
+                "created_at": "13/02/2026 12:03",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 53"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "2"
+                    }
+                ]
+            },
+            {
+                "id": "df4671ae-1f1d-408a-bc2d-6441a7081620",
+                "product_id": "79",
+                "name": "Pasteis de Queijo coalho  (6 unidades)",
+                "price": 28.9,
+                "qty": 1.0,
+                "category": "Entradas",
+                "created_at": "13/02/2026 12:28",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 53"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "292ef58f-bf24-4a32-8799-6b219d114dea",
+                "product_id": "149",
+                "name": "Coca-Cola 350ml",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Refrigerante",
+                "created_at": "13/02/2026 12:48",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 53"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "2"
+                    }
+                ]
+            },
+            {
+                "id": "cda7fac1-b07b-476d-aaba-73f2db1c93ff",
+                "product_id": "118",
+                "name": "Arroz de Polvo (Individual)",
+                "price": 89.9,
+                "qty": 1.0,
+                "category": "Pratos",
+                "created_at": "13/02/2026 12:51",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 53"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "855b2553-423b-4bb6-8256-70891f88f239",
+                "product_id": "132",
+                "name": "Cocada de forno da casa",
+                "price": 32.9,
+                "qty": 1.0,
+                "category": "Sobremesas",
+                "created_at": "13/02/2026 13:32",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Credito MIrapraia Pagseguro",
+                "amount": 186.45,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 92",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "421ed962-1f8e-445f-b78e-e1cd6a749f71",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "TEST_1",
+        "closed_at": "2026-02-13 15:34:45",
+        "closed_by": "test_user",
+        "total_amount": 10.0,
+        "fiscal_amount": 10.0,
+        "items": [
+            {
+                "id": "1",
+                "name": "Coca Cola",
+                "qty": 2.0,
+                "price": 5.0,
+                "total": 10.0,
+                "ncm": "22021000",
+                "cest": "0300700",
+                "cfop": "5102",
+                "origin": 0,
+                "tax_situation": null,
+                "icms_rate": null,
+                "pis_cst": null,
+                "cofins_cst": null
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 10.0,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {},
+        "status": "pending",
+        "notes": null,
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "5d1efc1c-ac26-428e-b056-2b11f55ec062",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "MESA_98_202602131635",
+        "closed_at": "2026-02-13 16:35:40",
+        "closed_by": "filipe",
+        "total_amount": 129.36,
+        "fiscal_amount": 129.36,
+        "items": [
+            {
+                "id": "d11e6b7d-4b42-42f3-ac22-6dc58e408df4",
+                "product_id": "133",
+                "name": "Agua com Gás 275ml",
+                "price": 9.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "13/02/2026 11:58",
+                "waiter": "guilherme",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Sem gelo",
+                    "Transf de Mesa 40"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "1"
+                    }
+                ]
+            },
+            {
+                "id": "e22545b5-836b-4277-830c-2ac0cebc15ff",
+                "product_id": "145",
+                "name": "Café Espresso",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "13/02/2026 12:52",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 40"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Tipo",
+                        "answer": "Curto"
+                    }
+                ]
+            },
+            {
+                "id": "54ad62d4-97d6-44a4-9d49-8cae056c8c4f",
+                "product_id": "84",
+                "name": "Camarão na manteiga de alho",
+                "price": 89.9,
+                "qty": 1.0,
+                "category": "Entradas",
+                "created_at": "13/02/2026 12:52",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Sem cascas",
+                    "Transf de Mesa 40"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "86b26991-7ee7-4993-ad02-7121aecff01d",
+                "product_id": "149",
+                "name": "Coca-Cola 350ml",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Refrigerante",
+                "created_at": "13/02/2026 14:19",
+                "waiter": "filipe",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Não Imprimir"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "1"
+                    }
+                ]
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Debito Mirapraia Pagseguro",
+                "amount": 129.36,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 98",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "96f7f559-f5cd-4cda-a315-0c19392a5686",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "MESA_42_202602131651",
+        "closed_at": "2026-02-13 16:51:41",
+        "closed_by": "dudu",
+        "total_amount": 38.39,
+        "fiscal_amount": 38.39,
+        "items": [
+            {
+                "id": "47cc79c6-6eca-4a97-9a6f-1a2c58024ffe",
+                "product_id": "2006",
+                "name": "Caipiroska Absolut (Escolha o sabor)",
+                "price": 34.9,
+                "qty": 1.0,
+                "category": "Drinks",
+                "created_at": "13/02/2026 16:39",
+                "waiter": "welington",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "Caju",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "PIX Maquininha CNPJ",
+                "amount": 38.39,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 42",
+        "fiscal_doc_uuid": null,
+        "history": []
     }
 ]
