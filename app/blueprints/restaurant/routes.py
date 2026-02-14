@@ -39,6 +39,10 @@ import io
 import xlsxwriter
 import copy
 from datetime import datetime
+import time
+
+# Idempotency cache for batch submissions (prevents duplicate on refresh)
+PROCESSED_BATCHES = {}
 
 # --- Helpers ---
 
@@ -1039,6 +1043,21 @@ def restaurant_table_order(table_id):
                 if not isinstance(batch_items, list):
                      raise ValueError("Formato de itens inválido.")
 
+                # Idempotency: prevent duplicate submission by batch_id within 60s
+                batch_id = request.form.get('batch_id')
+                now = time.time()
+                # Prune old entries (> 5 minutes)
+                for k, t in list(PROCESSED_BATCHES.items()):
+                    if now - t > 300:
+                        del PROCESSED_BATCHES[k]
+                if batch_id:
+                    last = PROCESSED_BATCHES.get(batch_id)
+                    if last and (now - last) < 60:
+                        current_app.logger.warning(f"Duplicate order batch blocked: {batch_id} for table {table_id}")
+                        flash('Pedido já enviado recentemente. Ignorando reenvio duplicado.')
+                        return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
+                    PROCESSED_BATCHES[batch_id] = now
+
                 menu_items = load_menu_items()
                 products_map = {str(p['id']): p for p in menu_items}
                 
@@ -1192,9 +1211,12 @@ def restaurant_table_order(table_id):
                         flash(f"Nenhum item adicionado. Detalhes: {error_msg}")
                     else:
                         flash("Nenhum item válido adicionado.")
+                # Always redirect after handling batch to avoid resubmission on refresh (PRG)
+                return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
                         
             except Exception as e:
                 flash(f"Erro ao adicionar itens: {str(e)}")
+                return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
 
         elif action == 'close_order':
             try:
@@ -1698,12 +1720,22 @@ def restaurant_table_order(table_id):
                 if target_table_id not in orders:
                     # Create new order at target
                     orders[target_table_id] = source_order.copy()
-                    orders[target_table_id]['items'] = [] # Clear items reference to avoid shared list issues initially
+                    orders[target_table_id]['items'] = []  # Clear items reference to avoid shared list issues initially
                     # Deep copy items
                     orders[target_table_id]['items'] = copy.deepcopy(source_order['items'])
                     
                     # Update metadata
                     orders[target_table_id]['opened_at'] = datetime.now().strftime('%d/%m/%Y %H:%M')
+                    # Se for conta de funcionário pelo destino, ajusta o tipo e o colaborador
+                    if is_staff:
+                        orders[target_table_id]['customer_type'] = 'funcionario'
+                        try:
+                            staff_id = target_table_id.replace('FUNC_', '', 1)
+                        except Exception:
+                            staff_id = target_table_id
+                        orders[target_table_id]['staff_name'] = staff_id
+                        orders[target_table_id]['room_number'] = None
+                        orders[target_table_id]['customer_name'] = None
                     # Record transfer info for Undo
                     orders[target_table_id]['last_transfer'] = {
                         'source_table': str_table_id,
@@ -1713,14 +1745,26 @@ def restaurant_table_order(table_id):
 
                     # Log transfer in observations
                     for item in orders[target_table_id]['items']:
-                        if 'observations' not in item: item['observations'] = []
+                        if 'observations' not in item:
+                            item['observations'] = []
                         item['observations'].append(f"Transf de Mesa {table_id}")
                 else:
                     # Merge into existing target
                     target_order = orders[target_table_id]
+                    # Se destino é mesa de funcionário, garante metadados corretos
+                    if is_staff:
+                        target_order['customer_type'] = 'funcionario'
+                        try:
+                            staff_id = target_table_id.replace('FUNC_', '', 1)
+                        except Exception:
+                            staff_id = target_table_id
+                        target_order['staff_name'] = staff_id
+                        target_order['room_number'] = None
+                        target_order['customer_name'] = None
                     transferred_items = source_order['items']
                     for item in transferred_items:
-                        if 'observations' not in item: item['observations'] = []
+                        if 'observations' not in item:
+                            item['observations'] = []
                         item['observations'].append(f"Transf de Mesa {table_id}")
                         target_order['items'].append(item)
                     
@@ -1748,8 +1792,8 @@ def restaurant_table_order(table_id):
                 flash(f'Mesa transferida para {target_table_id} com sucesso.')
                 return redirect(url_for('restaurant.restaurant_table_order', table_id=target_table_id))
             else:
-                 flash('Mesa de origem não encontrada.')
-                 return redirect(url_for('restaurant.restaurant_tables'))
+                flash('Mesa de origem não encontrada.')
+                return redirect(url_for('restaurant.restaurant_tables'))
 
         elif action == 'cancel_transfer':
             return_table_id = request.form.get('return_table_id')
@@ -1846,10 +1890,43 @@ def restaurant_table_order(table_id):
                 else:
                     sales_history = load_sales_history()
                     order['closed_at'] = datetime.now().strftime('%d/%m/%Y %H:%M')
-                    order['payment_method'] = 'Conta Funcionario'
-                    order['final_total'] = order['total']
+                    # Padroniza método de pagamento com acento para relatórios/financeiro
+                    order['payment_method'] = 'Conta Funcionário'
+                    # Aplica regra: isento de taxa + 20% de desconto
+                    try:
+                        subtotal = float(order.get('total', 0) or 0)
+                    except Exception:
+                        subtotal = 0.0
+                    discount_amount = round(subtotal * 0.20, 2)
+                    final_total = max(0.0, subtotal - discount_amount)
+                    order['service_fee'] = 0.0
+                    order['discounts'] = order.get('discounts', [])
+                    order['discounts'].append({'type': 'staff', 'percent': 20, 'amount': discount_amount})
+                    order['final_total'] = final_total
                     sales_history.append(order)
                     save_sales_history(sales_history)
+                    
+                    # Lançar transação no caixa do Restaurante para consolidar consumo de funcionário nos relatórios
+                    try:
+                        from app.services.cashier_service import CashierService
+                        desc = f"Consumo Funcionário - {order.get('staff_name')}"
+                        CashierService.add_transaction(
+                            cashier_type='restaurant',
+                            amount=final_total,
+                            description=desc,
+                            payment_method='Conta Funcionário',
+                            user=session.get('user', 'Sistema'),
+                            details={
+                                'table_id': str_table_id,
+                                'staff_name': order.get('staff_name'),
+                                'source': 'transfer_to_staff_account',
+                                'subtotal': subtotal,
+                                'discount': discount_amount
+                            },
+                            transaction_type='sale'
+                        )
+                    except Exception as e:
+                        current_app.logger.error(f"Falha ao lançar consumo de funcionário no caixa: {e}")
                     
                     # Deduct Stock
                     products_db = load_products()
@@ -1893,8 +1970,19 @@ def restaurant_table_order(table_id):
     grand_total = 0.0
     if str_table_id in orders:
         order = orders[str_table_id]
-        service_fee = order.get('total', 0) * 0.1
-        grand_total = order.get('total', 0) + service_fee
+        # Regra: Funcionário não paga taxa de serviço e recebe 20% de desconto
+        if order.get('customer_type') == 'funcionario':
+            subtotal = float(order.get('total', 0) or 0)
+            staff_discount = round(subtotal * 0.20, 2)
+            service_fee = 0.0
+            grand_total = max(0.0, subtotal - staff_discount)
+            # Anotações auxiliares no objeto em memória (não persistidas aqui)
+            order['calculated_staff_discount'] = staff_discount
+            order['calculated_service_fee'] = service_fee
+            order['calculated_grand_total'] = grand_total
+        else:
+            service_fee = order.get('total', 0) * 0.1
+            grand_total = order.get('total', 0) + service_fee
 
     products = load_menu_items()
     flavor_groups = load_flavor_groups()
@@ -1911,24 +1999,28 @@ def restaurant_table_order(table_id):
     can_manage_items = user_role in ['admin', 'gerente', 'supervisor'] or 'restaurante_full_access' in user_perms
     
     hidden_paused_count = 0
+    def _boolish(v):
+        if isinstance(v, bool):
+            return v
+        if isinstance(v, str):
+            return v.strip().lower() in ('true','on','1','checked','paused','yes')
+        if isinstance(v, int):
+            return v != 0
+        return False
     
+    filtered_products = []
     for p in products:
-        is_paused = p.get('paused', False)
-        if is_paused:
+        if _boolish(p.get('paused', False)):
             hidden_paused_count += 1
-            continue # Skip paused items completely
-            
-        if p.get('active', True) or can_manage_items: # Show if active OR can manage
+            continue
+        if p.get('active', True) or can_manage_items:
             cat = p.get('category', 'Outros')
-            
-            # Hide Frigobar in Restaurant Mode
-            # Exception: Allow for 'Serviço' department (Room Service) or if mode is minibar
             if cat == 'Frigobar' and mode != 'minibar' and session.get('department') != 'Serviço':
                 continue
-                
             if cat not in grouped_products_dict:
                 grouped_products_dict[cat] = []
             grouped_products_dict[cat].append(p)
+            filtered_products.append(p)
             
     if hidden_paused_count > 0:
         # Log occasionally or if needed
@@ -2072,7 +2164,7 @@ def restaurant_table_order(table_id):
                            mode=mode, 
                            service_fee=service_fee, 
                            grand_total=grand_total, 
-                           products=products, 
+                           products=filtered_products, 
                            observations=observations,
                            grouped_products=grouped_products,
                            grouped_order_items=grouped_order_items,
@@ -2144,10 +2236,10 @@ def restaurant_transfer_item():
                 'status': 'open', 
                 'opened_at': datetime.now().strftime('%d/%m/%Y %H:%M'),
                 'num_adults': 1, # Default
-                'customer_type': 'passante',
-                'customer_name': 'Transferencia',
+                'customer_type': 'funcionario' if is_staff else 'passante',
+                'customer_name': None if is_staff else 'Transferencia',
                 'waiter': session.get('user'),
-                'staff_name': None
+                'staff_name': dest_table_id.replace('FUNC_', '') if is_staff else None
             }
             # return jsonify({'success': False, 'error': f'Mesa de destino {dest_table_id} não está aberta.'}), 400
 
@@ -2443,7 +2535,15 @@ def get_available_tables():
 def get_paused_products():
     """Returns a list of IDs of paused products."""
     menu_items = load_menu_items()
-    paused_ids = [str(p['id']) for p in menu_items if p.get('paused', False)]
+    def _boolish(v):
+        if isinstance(v, bool):
+            return v
+        if isinstance(v, str):
+            return v.strip().lower() in ('true','on','1','checked','paused','yes')
+        if isinstance(v, int):
+            return v != 0
+        return False
+    paused_ids = [str(p.get('id')) for p in menu_items if _boolish(p.get('paused', False))]
     return jsonify({'paused_ids': paused_ids})
 
 @restaurant_bp.route('/restaurant/order/edit_item', methods=['POST'])

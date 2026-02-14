@@ -386,9 +386,12 @@
                     {% if breakfast_items %}
                         <div class="product-list">
                             {% for item in breakfast_items %}
-                            <div class="product-card product-item-container {{ 'highlighted' if item.highlight else '' }}" data-product-id="{{ item.id }}">
+                            <div class="product-card product-item-container {{ 'highlighted' if item.highlight else '' }} {% if item.paused %}paused{% endif %}" data-product-id="{{ item.id }}">
                                 {% if item.highlight %}
                                 <div class="highlight-badge"><i class="fas fa-star"></i> Destaque</div>
+                                {% endif %}
+                                {% if item.paused %}
+                                <div class="paused-badge">Indisponível</div>
                                 {% endif %}
                                 
                                 {% if item.image_url %}
@@ -459,15 +462,18 @@
 
                 <div class="product-list">
                     {% for item in breakfast_items %}
-                    <div class="product-card product-item-container {{ 'highlighted' if item.highlight else '' }}" data-product-id="{{ item.id }}">
+                    <div class="product-card product-item-container {{ 'highlighted' if item.highlight else '' }} {% if item.paused %}paused{% endif %}" data-product-id="{{ item.id }}">
                         {% if item.highlight %}
                         <div class="highlight-badge"><i class="fas fa-star"></i> Destaque</div>
                         {% endif %}
+                        {% if item.paused %}
+                        <div class="paused-badge">Indisponível</div>
+                        {% endif %}
                         
                         {% if item.highlight and item.video_url %}
-                        <video src="{{ item.video_url }}" class="product-image" autoplay muted loop playsinline style="object-fit: cover;" onclick="openLightbox('{{ item.video_url }}', '{{ item.name|replace("'", "\\'") }}', true)"></video>
+                        <video src="{{ item.video_url }}" class="product-image" autoplay muted loop playsinline style="object-fit: cover;" data-caption="{{ item.name }}"></video>
                         {% elif item.image_url %}
-                        <img src="{{ item.image_url }}" alt="{{ item.name }}" class="product-image" onclick="openLightbox('{{ item.image_url }}', '{{ item.name|replace("'", "\\'") }}')">
+                        <img src="{{ item.image_url }}" alt="{{ item.name }}" class="product-image" data-caption="{{ item.name }}">
                         {% endif %}
                         
                         <div class="product-info">
@@ -497,15 +503,18 @@
                 <h2 class="category-title">{{ category }}</h2>
                 <div class="product-list">
                     {% for item in items %}
-                    <div class="product-card product-item-container {{ 'highlighted' if item.highlight else '' }}" data-product-id="{{ item.id }}">
+                    <div class="product-card product-item-container {{ 'highlighted' if item.highlight else '' }} {% if item.paused %}paused{% endif %}" data-product-id="{{ item.id }}">
                         {% if item.highlight %}
                         <div class="highlight-badge"><i class="fas fa-star"></i> Destaque</div>
                         {% endif %}
+                        {% if item.paused %}
+                        <div class="paused-badge">Indisponível</div>
+                        {% endif %}
                         
                         {% if item.highlight and item.video_url %}
-                        <video src="{{ item.video_url }}" class="product-image" autoplay muted loop playsinline style="object-fit: cover;" onclick="openLightbox('{{ item.video_url }}', '{{ item.name|replace("'", "\\'") }}', true)"></video>
+                        <video src="{{ item.video_url }}" class="product-image" autoplay muted loop playsinline style="object-fit: cover;" data-caption="{{ item.name }}"></video>
                         {% elif item.image_url %}
-                        <img src="{{ item.image_url }}" alt="{{ item.name }}" class="product-image" onclick="openLightbox('{{ item.image_url }}', '{{ item.name|replace("'", "\\'") }}')">
+                        <img src="{{ item.image_url }}" alt="{{ item.name }}" class="product-image" data-caption="{{ item.name }}">
                         {% endif %}
                         
                         <div class="product-info">
@@ -589,81 +598,52 @@
             });
         });
 
-        // Polling for Paused Products (Real-time update)
         function checkPausedProducts() {
             fetch('/api/public/products/paused')
-                .then(response => response.json())
+                .then(r => r.json())
                 .then(data => {
-                    const pausedIds = data.paused_ids;
-                    const productContainers = document.querySelectorAll('.product-item-container');
-                    
-                    productContainers.forEach(container => {
-                        const prodId = container.getAttribute('data-product-id');
-                        
-                        if (pausedIds.includes(prodId)) {
-                            // If it's paused and currently visible, hide it
-                            if (container.style.display !== 'none') {
-                                container.style.display = 'none';
-                                console.log(`[Paused Check] Hiding paused product: ${prodId}`);
-                            }
-                            // Ensure it stays hidden/marked
-                            container.classList.add('paused-hidden');
-                        } else {
-                            // If it's NOT paused
-                            if (container.classList.contains('paused-hidden')) {
-                                container.classList.remove('paused-hidden');
-                                // Show it again (remove inline style)
-                                container.style.display = ''; 
-                                console.log(`[Paused Check] Restoring product: ${prodId}`);
-                            }
+                    const pausedIds = data.paused_ids || [];
+                    document.querySelectorAll('.product-item-container').forEach(container => {
+                        const id = container.getAttribute('data-product-id');
+                        if (pausedIds.includes(id)) {
+                            container.style.display = 'none';
+                        } else if (!container.classList.contains('search-hidden')) {
+                            container.style.display = '';
                         }
                     });
-                    
-                    // Check and hide empty categories if all items are paused
                     checkEmptyCategories();
                 })
-                .catch(err => console.error('Error checking paused products:', err));
+                .catch(() => {});
         }
-
         function checkEmptyCategories() {
-            // Check standard category sections
             document.querySelectorAll('.category-section').forEach(section => {
-                const productList = section.querySelector('.product-list');
-                if (productList) {
-                    // Check if there are any visible items (not display: none)
-                    const visibleItems = Array.from(productList.querySelectorAll('.product-item-container')).filter(el => el.style.display !== 'none');
-                    if (visibleItems.length === 0) {
-                        if (section.style.display !== 'none') {
-                            section.style.display = 'none';
-                        }
-                    } else {
-                        if (section.style.display === 'none') {
-                            section.style.display = '';
-                        }
-                    }
-                }
+                const list = section.querySelector('.product-list');
+                if (!list) return;
+                const visible = Array.from(list.querySelectorAll('.product-item-container')).filter(el => el.style.display !== 'none');
+                section.style.display = visible.length === 0 ? 'none' : '';
             });
-            
-            // Check breakfast splash section specially
-            const breakfastSplash = document.getElementById('breakfast-splash');
-            if (breakfastSplash) {
-                 const productList = breakfastSplash.querySelector('.product-list');
-                 if (productList) {
-                    const visibleItems = Array.from(productList.querySelectorAll('.product-item-container')).filter(el => el.style.display !== 'none');
-                    if (visibleItems.length === 0) {
-                        breakfastSplash.style.display = 'none';
-                    } else {
-                         breakfastSplash.style.display = '';
-                    }
-                 }
+            const splash = document.getElementById('breakfast-splash');
+            if (splash) {
+                const list = splash.querySelector('.product-list');
+                if (list) {
+                    const visible = Array.from(list.querySelectorAll('.product-item-container')).filter(el => el.style.display !== 'none');
+                    splash.style.display = visible.length === 0 ? 'none' : '';
+                }
             }
         }
-
-        // Start polling every 10 seconds
         setInterval(checkPausedProducts, 10000);
-        
-        // Initial check on load
         document.addEventListener('DOMContentLoaded', checkPausedProducts);
+        
+        // Delegate lightbox open on product image/video click
+        document.addEventListener('click', function(e) {
+            const el = e.target;
+            if (el && el.classList && el.classList.contains('product-image')) {
+                const isVideo = el.tagName.toLowerCase() === 'video';
+                const src = el.getAttribute('src');
+                const caption = el.getAttribute('data-caption') || '';
+                openLightbox(src, caption, isVideo);
+            }
+        });
     </script>
 <!-- Lightbox Modal -->
 <div id="lightboxModal" class="lightbox-modal" onclick="closeLightbox()">

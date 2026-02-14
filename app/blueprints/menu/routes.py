@@ -48,30 +48,32 @@ def save_digital_menu_order():
 def get_public_paused_products():
     """Returns a list of IDs of paused products (Public access)."""
     menu_items = load_menu_items()
-    paused_ids = [str(p['id']) for p in menu_items if p.get('paused', False)]
+    def _boolish(v):
+        if isinstance(v, bool):
+            return v
+        if isinstance(v, str):
+            return v.strip().lower() in ('true','on','1','checked','paused','yes')
+        if isinstance(v, int):
+            return v != 0
+        return False
+    paused_ids = [str(p.get('id')) for p in menu_items if _boolish(p.get('paused', False))]
     return jsonify({'paused_ids': paused_ids})
 
 @menu_bp.route('/cardapio')
 def client_menu():
     menu_items = load_menu_items()
-    # Filter active items, visible in virtual menu, and NOT paused
-    # Log paused items that would otherwise be visible
-    hidden_count = 0
+    def _boolish(v):
+        if isinstance(v, bool):
+            return v
+        if isinstance(v, str):
+            return v.strip().lower() in ('true','on','1','checked','paused','yes')
+        if isinstance(v, int):
+            return v != 0
+        return False
     visible_items = []
-    
     for i in menu_items:
-        is_active = i.get('active', True)
-        is_visible = i.get('visible_virtual_menu', True)
-        is_paused = i.get('paused', False)
-        
-        if is_active and is_visible:
-            if is_paused:
-                hidden_count += 1
-            else:
-                visible_items.append(i)
-                
-    if hidden_count > 0:
-        current_app.logger.info(f"Virtual Menu: {hidden_count} paused items hidden from view.")
+        if i.get('active', True) and i.get('visible_virtual_menu', True) and not _boolish(i.get('paused', False)):
+            visible_items.append(i)
     
     # Separate Breakfast items
     breakfast_items = []

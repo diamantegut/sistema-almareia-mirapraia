@@ -45,6 +45,29 @@
         padding-bottom: 0.5rem;
     }
 </style>
+<style>
+    .product-item-container.product-unavailable .product-btn {
+        position: relative;
+        opacity: 0.35;
+        filter: grayscale(1) contrast(0.85) brightness(0.9);
+        border-left: 6px solid #dc3545;
+        background-image: repeating-linear-gradient(
+            45deg,
+            rgba(220, 53, 69, 0.06) 0,
+            rgba(220, 53, 69, 0.06) 6px,
+            transparent 6px,
+            transparent 12px
+        );
+    }
+    .paused-overlay {
+        z-index: 10;
+        pointer-events: none;
+        font-weight: 700;
+        font-size: 0.8rem;
+        padding: 0.2rem 0.5rem;
+        box-shadow: 0 0 0 2px #fff, 0 2px 6px rgba(0,0,0,0.2);
+    }
+</style>
 <div class="container mt-4">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 gap-3">
         <h2>
@@ -400,30 +423,32 @@
                                 {% for category, items in grouped_products %}
                                 <div id="group_{{ loop.index }}" class="product-group" data-cat="{{ category if category else 'Outros' }}" style="display: none;">
                                     <div class="row row-cols-3 row-cols-sm-4 row-cols-md-5 g-2">
-                                        {% for p in items %}
-                                        {% if p.product_type != 'accompaniment_only' or p.category in ['Doses', 'Drinks', 'Café da Manhã'] %}
-                                        <div class="col product-item-container" data-product-id="{{ p.id }}">
-                                            <div class="position-relative h-100">
-                                                <button type="button" 
-                                                        class="btn btn-outline-secondary w-100 h-100 p-2 product-btn text-start d-flex flex-column justify-content-between shadow-sm"
-                                                        onclick="selectProductFromId('{{ p.id }}', this)">
-                                                    <span class="fw-bold lh-sm mb-1 text-break" style="font-size: 0.85rem; overflow-wrap: break-word;">{{ p.name }}</span>
-                                                    <span class="badge bg-light text-dark border align-self-start mt-1" style="font-size: 0.75em;">R$ {{ "%.2f"|format(p.price|default(0)) }}</span>
-                                                </button>
-
-                                                {% if can_manage_items and false %}
-                                                <button type="button" 
-                                                        class="btn btn-sm {{ 'btn-success' if p.paused else 'btn-danger' }} position-absolute top-0 end-0 m-1 p-0 px-1 shadow-sm"
-                                                        style="z-index: 10; width: 24px; height: 24px; line-height: 1;"
-                                                        onclick="toggleProductPause('{{ p.id }}', event)"
-                                                        title="{{ 'Ativar' if p.paused else 'Pausar' }}">
-                                                    <i class="bi {{ 'bi-play-fill' if p.paused else 'bi-pause-fill' }}"></i>
-                                                </button>
-                                                {% endif %}
-                                            </div>
-                                        </div>
+                                {% for p in items %}
+                                {% if (p.product_type != 'accompaniment_only' or p.category in ['Doses', 'Drinks', 'Café da Manhã']) %}
+                                <div class="col product-item-container" data-product-id="{{ p.id }}">
+                                    <div class="position-relative h-100">
+                                        <span class="badge bg-danger position-absolute top-0 start-0 m-1 paused-overlay{% if not p.paused and (p.active is defined and p.active) %} d-none{% endif %}">Indisponível</span>
+                                        <button type="button" 
+                                                class="btn btn-outline-secondary w-100 h-100 p-2 product-btn text-start d-flex flex-column justify-content-between shadow-sm"
+                                                {% if p.paused or (p.active is defined and not p.active) %}disabled aria-disabled="true"{% endif %}
+                                                onclick="selectProductFromId('{{ p.id }}', this)">
+                                            <span class="fw-bold lh-sm mb-1 text-break" style="font-size: 0.85rem; overflow-wrap: break-word;">{{ p.name }}</span>
+                                            <span class="badge bg-light text-dark border align-self-start mt-1" style="font-size: 0.75em;">R$ {{ "%.2f"|format(p.price|default(0)) }}</span>
+                                        </button>
+                                        
+                                        {% if can_manage_items and false %}
+                                        <button type="button" 
+                                                class="btn btn-sm {{ 'btn-success' if p.paused else 'btn-danger' }} position-absolute top-0 end-0 m-1 p-0 px-1 shadow-sm"
+                                                style="z-index: 10; width: 24px; height: 24px; line-height: 1;"
+                                                onclick="toggleProductPause('{{ p.id }}', event)"
+                                                title="{{ 'Ativar' if p.paused else 'Pausar' }}">
+                                            <i class="bi {{ 'bi-play-fill' if p.paused else 'bi-pause-fill' }}"></i>
+                                        </button>
                                         {% endif %}
-                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% endfor %}
                                     </div>
                                 </div>
                                 {% endfor %}
@@ -797,42 +822,14 @@
                 .then(data => {
                     const pausedIds = data.paused_ids;
                     const productContainers = document.querySelectorAll('.product-item-container');
-                    let hiddenCount = 0;
                     
                     productContainers.forEach(container => {
                         const prodId = container.getAttribute('data-product-id');
-                        if (pausedIds.includes(prodId)) {
-                            if (container.style.display !== 'none') {
-                                container.style.display = 'none';
-                                console.log(`Hiding paused product: ${prodId}`);
-                            }
-                            hiddenCount++;
-                        } else {
-                            // Only show if it was hidden by this script (active filtering might be separate)
-                            // But here we assume if it's NOT paused, it should be visible (unless filtered by search)
-                            // However, we must respect the search filter.
-                            // Better approach: Add a class 'paused-hidden' and use CSS or check classes.
-                            if (container.classList.contains('paused-hidden')) {
-                                container.classList.remove('paused-hidden');
-                                // Reset display if search is not active, or re-trigger search
-                                // Simple approach: just set display: block (or remove inline style)
-                                // But this might conflict with Search or Category filtering.
-                                // Category filtering uses display:none on the GROUP, not the item usually.
-                                // Search uses display:none on the item.
-                                
-                                // Let's use a class 'paused-item' and manage display via CSS or robust logic.
-                            }
-                            
-                            // Safe toggle
-                             if (container.style.display === 'none' && !container.classList.contains('search-hidden')) {
-                                container.style.display = '';
-                             }
-                        }
-                        
-                        if (pausedIds.includes(prodId)) {
-                            container.classList.add('paused-hidden');
-                            container.style.display = 'none';
-                        }
+                        const isPaused = pausedIds.includes(prodId);
+                        const btn = container.querySelector('.product-btn');
+                        if (btn) btn.disabled = isPaused;
+                        const mark = container.querySelector('.paused-overlay');
+                        if (mark) mark.style.display = isPaused ? '' : 'none';
                     });
                 })
                 .catch(err => console.error('Error checking paused products:', err));
@@ -1399,6 +1396,23 @@
         const productsDataEl = document.getElementById('products-data');
         if (productsDataEl && productsDataEl.textContent) {
             allProducts = JSON.parse(productsDataEl.textContent);
+            // Normalize 'paused' to boolean for robust filtering
+            const toBool = (v) => {
+                if (typeof v === 'boolean') return v;
+                if (typeof v === 'number') return v !== 0;
+                if (typeof v === 'string') {
+                    const s = v.trim().toLowerCase();
+                    return ['true','on','1','checked','paused','yes'].includes(s);
+                }
+                return !!v;
+            };
+            allProducts = allProducts.map(p => {
+                try {
+                    return Object.assign({}, p, { paused: toBool(p.paused) });
+                } catch (_) {
+                    return p;
+                }
+            });
             console.log('Products loaded:', allProducts.length);
         } else {
             console.warn('Products data element not found or empty');
@@ -1409,6 +1423,36 @@
         alert('Erro crítico ao carregar dados dos produtos. Por favor, recarregue a página.');
         allProducts = [];
     }
+    
+    (function flagPausedCardsImmediate(){
+        try {
+            const normalizeBool = (v) => {
+                if (typeof v === 'boolean') return v;
+                if (typeof v === 'number') return v !== 0;
+                if (typeof v === 'string') {
+                    const s = v.trim().toLowerCase();
+                    return ['true','on','1','checked','yes'].includes(s);
+                }
+                return !!v;
+            };
+            allProducts = allProducts.map(p => Object.assign({}, p, { paused: normalizeBool(p.paused), active: p.active === undefined ? true : normalizeBool(p.active) }));
+            const pausedOrInactive = new Set(allProducts.filter(p => p.paused || !p.active).map(p => String(p.id)));
+            document.querySelectorAll('.product-item-container').forEach(el => {
+                const id = el.getAttribute('data-product-id');
+                const isBlocked = pausedOrInactive.has(String(id));
+                const btn = el.querySelector('.product-btn');
+                if (btn) btn.disabled = isBlocked;
+                const mark = el.querySelector('.paused-overlay');
+                if (mark) {
+                    // Controla via classe para sobrepor estado inicial
+                    mark.classList.toggle('d-none', !isBlocked);
+                }
+                el.classList.toggle('product-unavailable', isBlocked);
+            });
+        } catch (e) {
+            console.warn('Flag paused cards failed:', e);
+        }
+    })();
     
     // Delete Authorization
     window.openDeleteModal = function(btn) {
@@ -1926,6 +1970,28 @@
                 target.style.setProperty('display', 'block', 'important');
                 target.classList.add('active-group');
                 
+                // Hide paused items defensively on category show
+                try {
+                    const pausedSet = new Set(allProducts.filter(p => p.paused).map(p => String(p.id)));
+                    let visibleCount = 0;
+                    target.querySelectorAll('.product-item-container').forEach(el => {
+                        const id = el.getAttribute('data-product-id');
+                        if (pausedSet.has(String(id))) {
+                            el.style.display = 'none';
+                        } else {
+                            el.style.display = '';
+                            visibleCount++;
+                        }
+                    });
+                    // Show empty message if nothing remains
+                    if (visibleCount === 0 && msg) {
+                        msg.style.display = 'block';
+                        msg.innerHTML = '<div class="alert alert-warning my-2">Esta categoria não possui produtos disponíveis.</div>';
+                    }
+                } catch (e) {
+                    console.warn('Failed to hide paused in category view:', e);
+                }
+                
                 // Check if group is empty
                 const products = target.querySelectorAll('.product-btn');
                 if (products.length === 0) {
@@ -2021,12 +2087,12 @@
     window.selectProductFromId = function(id, btn) {
         console.log('Selecting product by ID:', id);
         // Ensure ID types match (string vs number)
-        const product = allProducts.find(p => p.id == id);
+        const product = allProducts.find(p => p.id == id && !p.paused && p.active);
         
         if (!product) {
             console.error('Product not found in allProducts for ID:', id);
             console.log('Total products loaded:', allProducts.length);
-            alert('Erro: Produto não encontrado nos dados carregados.');
+            alert('Este item está indisponível no momento.');
             return;
         }
         
@@ -2128,7 +2194,7 @@
                 
                 // Filter allowed products
                 const allowedIds = product.allowed_accompaniments;
-                const accompaniments = allProducts.filter(p => allowedIds.some(id => id == p.id));
+                const accompaniments = allProducts.filter(p => !p.paused && p.active && allowedIds.some(id => id == p.id));
                 
                 accompaniments.forEach(acc => {
                     const div = document.createElement('div');
@@ -2638,18 +2704,22 @@
             return;
         }
         
-        const matches = allProducts.filter(p => p.name.toLowerCase().includes(query));
+        const matches = allProducts.filter(p => !p.paused && p.active && p.name.toLowerCase().includes(query));
         
         if (matches.length > 0) {
-            resultsContainer.innerHTML = matches.map(p => `
-                <button type="button" class="list-group-item list-group-item-action" onclick="selectProductFromSearch('${p.id}')">
+            resultsContainer.innerHTML = matches.map(p => {
+                const disabled = p.paused ? ' disabled aria-disabled="true"' : '';
+                const action = p.paused ? '' : ` onclick="selectProductFromSearch('${p.id}')"`;
+                const badge = p.paused ? '<span class="badge bg-danger ms-2">Indisponível</span>' : '';
+                return `
+                <button type="button" class="list-group-item list-group-item-action"${action}${disabled}>
                     <div class="d-flex justify-content-between align-items-center">
-                        <strong>${p.name}</strong>
+                        <div><strong>${p.name}</strong> ${badge}</div>
                         <span class="badge bg-primary rounded-pill">R$ ${parseFloat(p.price).toFixed(2)}</span>
                     </div>
                     <small class="text-muted">${p.category}</small>
-                </button>
-            `).join('');
+                </button>`;
+            }).join('');
             resultsContainer.style.display = 'block';
         } else {
             resultsContainer.innerHTML = '<div class="p-2 text-muted">Nenhum produto encontrado.</div>';
@@ -2658,9 +2728,10 @@
     };
 
     window.selectProductFromSearch = function(id) {
-        const product = allProducts.find(p => p.id == id);
+        const product = allProducts.find(p => p.id == id && !p.paused && p.active);
         if (!product) {
             console.error('Product not found via search:', id);
+            alert('Este item está indisponível no momento.');
             return;
         }
 

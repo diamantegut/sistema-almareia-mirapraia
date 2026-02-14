@@ -24,7 +24,7 @@ from app.services.data_service import (
 )
 from app.services.card_reconciliation_service import load_card_settings, save_card_settings
 from app.services.cashier_service import CashierService
-from app.services.commission_service import normalize_dept, load_commission_cycles, save_commission_cycles, get_commission_cycle, calculate_commission
+from app.services.commission_service import normalize_dept, load_commission_cycles, save_commission_cycles, get_commission_cycle, calculate_commission, compute_month_total_commission_by_ranking
 from app.services.fiscal_service import (
     emit_invoice as service_emit_invoice,
     get_fiscal_integration,
@@ -734,6 +734,76 @@ def finance_commission():
         flash('Acesso não autorizado.')
         return redirect(url_for('main.service_page', service_id='financeiro'))
     cycles = load_commission_cycles()
+    # Auto-create current month cycle if missing
+    now = datetime.now()
+    cur_month = now.strftime('%Y-%m')
+    has_current = any(c.get('month') == cur_month for c in cycles)
+    if not has_current:
+        cycle_id = datetime.now().strftime('%Y%m%d%H%M%S')
+        name = f"Comissão {cur_month}"
+        # Initialize employees from users
+        users = load_users()
+        employees = []
+        for username, data in users.items():
+            dept = data.get('department', 'Outros')
+            role = data.get('role', '')
+            try:
+                score = float(data.get('score', 0))
+            except:
+                score = 0
+            employees.append({
+                'name': data.get('full_name', username),
+                'department': dept,
+                'role': role,
+                'points': score, 
+                'days_worked': 30,
+                'individual_bonus': 0,
+                'individual_deduction': 0
+            })
+        dept_bonuses = [
+            {'name': 'Cozinha', 'value': 0},
+            {'name': 'Serviço', 'value': 0},
+            {'name': 'Manutenção', 'value': 0},
+            {'name': 'Recepção', 'value': 0},
+            {'name': 'Estoque', 'value': 0},
+            {'name': 'Governança', 'value': 0}
+        ]
+        # Set initial commission based on /commission_ranking logic (10% default)
+        try:
+            initial_commission = compute_month_total_commission_by_ranking(cur_month, commission_rate=10.0)
+        except Exception:
+            # Fallback: 10% of monthly sales if helper fails
+            try:
+                total_sales = calculate_monthly_sales(cur_month)
+                initial_commission = total_sales * 0.10
+            except:
+                initial_commission = 0
+        # Inherit last tax percents if exist
+        default_comm_tax = 12.0
+        default_bonus_tax = 12.0
+        if cycles:
+            sorted_cycles = sorted(cycles, key=lambda x: x['id'], reverse=True)
+            last_cycle = sorted_cycles[0]
+            default_comm_tax = float(last_cycle.get('commission_tax_percent', 12.0))
+            default_bonus_tax = float(last_cycle.get('bonus_tax_percent', 12.0))
+        new_cycle = {
+            'id': cycle_id,
+            'name': name,
+            'month': cur_month,
+            'created_at': datetime.now().strftime('%d/%m/%Y %H:%M'),
+            'status': 'draft',
+            'total_commission': initial_commission,
+            'total_bonus': 0,
+            'card_percent': 0.80,
+            'commission_tax_percent': default_comm_tax,
+            'bonus_tax_percent': default_bonus_tax,
+            'extras': 0,
+            'employees': employees,
+            'department_bonuses': dept_bonuses,
+            'results': {}
+        }
+        cycles.append(new_cycle)
+        save_commission_cycles(cycles)
     # Sort by date desc (assuming id starts with YYYYMMDD)
     cycles.sort(key=lambda x: x['id'], reverse=True)
     return render_template('finance_commission.html', cycles=cycles)
@@ -879,12 +949,16 @@ def finance_commission_new():
         {'name': 'Estoque', 'value': 0}
     ]
     
-    # Calculate Total Commission from Sales Files (10% of Total Sales)
+    # Calculate Total Commission using commission ranking logic (default 10%)
     try:
-        total_sales = calculate_monthly_sales(month)
-        initial_commission = total_sales * 0.10
-    except:
-        initial_commission = 0
+        initial_commission = compute_month_total_commission_by_ranking(month, commission_rate=10.0)
+    except Exception:
+        # Fallback to 10% of monthly sales
+        try:
+            total_sales = calculate_monthly_sales(month)
+            initial_commission = total_sales * 0.10
+        except:
+            initial_commission = 0
 
     # Load existing cycles to find the last one and inherit tax rates
     cycles = load_commission_cycles()
@@ -1128,6 +1202,12 @@ def finance_commission_calculate(cycle_id):
     # Update Cycle Data from Form
     try:
         update_cycle_from_form(cycle, request.form)
+        # Se total_commission ficou 0 após update, preencher com cálculo baseado no ranking do mês
+        if float(cycle.get('total_commission', 0) or 0) == 0 and cycle.get('month'):
+            try:
+                cycle['total_commission'] = compute_month_total_commission_by_ranking(cycle['month'], commission_rate=10.0)
+            except Exception:
+                pass
             
         # Run Calculation
         cycle = calculate_commission(cycle)
@@ -1220,15 +1300,7 @@ def finance_commission_delete(cycle_id):
     flash('Ciclo excluído.')
     return redirect(url_for('finance.finance_commission'))
 
-@finance_bp.route('/download_commission_model')
-@login_required
-def download_commission_model():
-    try:
-        return send_from_directory('static', 'comissao_modelo.xlsx', as_attachment=True)
-    except Exception as e:
-        print(f"Error serving static model: {e}")
-        flash('Erro ao baixar modelo. Contate o suporte.')
-        return redirect(url_for('finance.finance_commission'))
+ 
 
 @finance_bp.route('/finance/close_staff_month', methods=['POST'])
 @login_required
@@ -1265,7 +1337,12 @@ def close_staff_month():
     for table_id in staff_keys:
         order = orders[table_id]
         if order.get('items') and order.get('total', 0) > 0:
-            amount = float(order['total'])
+            try:
+                subtotal = float(order.get('total', 0) or 0)
+            except Exception:
+                subtotal = 0.0
+            discount_amount = round(subtotal * 0.20, 2)
+            amount = max(0.0, subtotal - discount_amount)
             staff_name = order.get('staff_name') or table_id.replace('FUNC_', '')
             
             # Create Transaction
@@ -1278,7 +1355,8 @@ def close_staff_month():
                 'emit_invoice': False,
                 'staff_name': staff_name,
                 'waiter': 'Sistema',
-                'timestamp': datetime.now().strftime('%d/%m/%Y %H:%M')
+                'timestamp': datetime.now().strftime('%d/%m/%Y %H:%M'),
+                'details': {'subtotal': subtotal, 'discount': discount_amount}
             }
             
             current_session['transactions'].append(transaction)

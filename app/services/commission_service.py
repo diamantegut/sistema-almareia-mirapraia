@@ -1,10 +1,12 @@
 import json
 import os
 import unicodedata
-from datetime import datetime
+from datetime import datetime, timedelta
+import calendar
 import xlsxwriter
 
 from app.services.system_config_manager import get_data_path
+from app.services.data_service import load_cashier_sessions
 
 COMMISSION_CYCLES_FILE = get_data_path('commission_cycles.json')
 
@@ -214,3 +216,82 @@ def generate_commission_model_file(output_path):
     # Keeping the original function for backup/download purposes if needed
     # (The content of the previous commission_service.py goes here)
     pass 
+
+def compute_month_total_commission_by_ranking(month_str, commission_rate=10.0):
+    """
+    Compute the total commission for a given month using the same logic as /commission_ranking.
+    month_str format: 'YYYY-MM'
+    """
+    try:
+        start_date = datetime.strptime(month_str + "-01", "%Y-%m-%d")
+    except Exception:
+        # Fallback: use current month
+        now = datetime.now()
+        start_date = now.replace(day=1)
+    year = start_date.year
+    month = start_date.month
+    last_day = calendar.monthrange(year, month)[1]
+    end_date = start_date.replace(day=last_day, hour=23, minute=59, second=59)
+    start_date_comp = start_date.replace(hour=0, minute=0, second=0)
+    end_date_comp = end_date
+    
+    def _get_waiter_breakdown(transaction):
+        wb = transaction.get('waiter_breakdown')
+        if not wb:
+            details = transaction.get('details') or {}
+            wb = details.get('waiter_breakdown')
+        return wb if isinstance(wb, dict) and wb else None
+    
+    def _is_service_fee_removed(transaction):
+        if transaction.get('service_fee_removed', False):
+            return True
+        details = transaction.get('details') or {}
+        if details.get('service_fee_removed', False):
+            return True
+        flags = transaction.get('flags') or []
+        if isinstance(flags, list):
+            for f in flags:
+                if isinstance(f, dict) and f.get('type') == 'service_removed':
+                    return True
+        desc = transaction.get('description') or ''
+        if isinstance(desc, str) and '10% Off' in desc:
+            return True
+        return False
+    
+    sessions = load_cashier_sessions()
+    total_commission = 0.0
+    
+    for session_data in sessions:
+        for t in session_data.get('transactions', []):
+            is_sale = t.get('type') == 'sale'
+            is_reception_payment = t.get('type') == 'in' and t.get('category') in ['Pagamento de Conta', 'Recebimento Manual']
+            if not (is_sale or is_reception_payment):
+                continue
+            t_date_str = t.get('timestamp')
+            if not t_date_str:
+                continue
+            try:
+                t_date = datetime.strptime(t_date_str, '%d/%m/%Y %H:%M')
+            except Exception:
+                continue
+            if not (start_date_comp <= t_date <= end_date_comp):
+                continue
+            if _is_service_fee_removed(t):
+                # Exclui valores com taxa de serviço removida da base comissionável
+                continue
+            wb = _get_waiter_breakdown(t)
+            if wb:
+                for w_amt in wb.values():
+                    try:
+                        amt = float(w_amt)
+                    except Exception:
+                        amt = 0.0
+                    total_commission += amt * (commission_rate / 100.0)
+            else:
+                try:
+                    amount = float(t.get('amount', 0))
+                except Exception:
+                    amount = 0.0
+                total_commission += amount * (commission_rate / 100.0)
+    
+    return round(total_commission, 2)

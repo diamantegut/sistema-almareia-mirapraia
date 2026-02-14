@@ -62,9 +62,92 @@
                 "source": "restaurant",
                 "waiter": "filipe",
                 "created_at": "01/02/2026 13:26"
+            },
+            {
+                "id": "c6957bce-66c7-4bef-95a2-a74893668747",
+                "product_id": "149",
+                "name": "Coca-Cola 350ml",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Refrigerante",
+                "created_at": "14/02/2026 11:19",
+                "waiter": "Angelo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "1"
+                    }
+                ],
+                "ncm": "22021000",
+                "cest": "301002",
+                "cfop": "5405",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "9a999e40-0c5a-405d-8f3b-5a60427ef8ee",
+                "product_id": "149",
+                "name": "Coca-Cola 350ml",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Refrigerante",
+                "created_at": "14/02/2026 11:21",
+                "waiter": "Angelo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "1"
+                    }
+                ],
+                "ncm": "22021000",
+                "cest": "301002",
+                "cfop": "5405",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "fdf441c0-7454-457f-8df1-1bbb085330aa",
+                "product_id": "149",
+                "name": "Coca-Cola 350ml",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Refrigerante",
+                "created_at": "14/02/2026 11:21",
+                "waiter": "Angelo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "1"
+                    }
+                ],
+                "ncm": "22021000",
+                "cest": "301002",
+                "cfop": "5405",
+                "origin": "0",
+                "tax_info": null
             }
         ],
-        "total": 7.120000000000001
+        "total": 33.82,
+        "partial_payments": [],
+        "total_paid": 0.0
     },
     "69": {
         "items": [
@@ -2208,9 +2291,53 @@
                         "answer": "1"
                     }
                 ]
+            },
+            {
+                "id": "25997361-9d8d-4031-b571-7c22bac29601",
+                "product_id": "71",
+                "name": "Pastel de Camarão",
+                "price": 42.9,
+                "qty": 1.0,
+                "category": "Entradas",
+                "created_at": "14/02/2026 11:15",
+                "waiter": "Angelo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "5e658601-cd06-448d-a4d5-af45669a7b1a",
+                "product_id": "71",
+                "name": "Pastel de Camarão",
+                "price": 42.9,
+                "qty": 1.0,
+                "category": "Entradas",
+                "created_at": "14/02/2026 11:18",
+                "waiter": "Angelo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
             }
         ],
-        "total": 9.9,
+        "total": 95.69999999999999,
         "status": "open",
         "opened_at": "13/02/2026 11:46",
         "num_adults": 2,
@@ -2756,6 +2883,116 @@
         "customer_type": "hospede",
         "customer_name": "",
         "room_number": "15",
+        "waiter": "",
+        "staff_name": null,
+        "is_breakfast": false,
+        "partial_payments": [],
+        "total_paid": 0.0
+    },
+    "36": {
+        "items": [
+            {
+                "id": "a1886257-149f-4725-bffd-c453e33d2fc8",
+                "product_id": "3",
+                "name": "Banana da Terra",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 10:59",
+                "waiter": "Angelo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Não Imprimir"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "576bceed-123f-4220-a3f6-1c44f1d6827f",
+                "product_id": "4",
+                "name": "Coalhada De Bufala",
+                "price": 9.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 10:59",
+                "waiter": "Angelo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Não Imprimir"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "a073f16a-de3a-49a2-8dda-4c36088f34a1",
+                "product_id": "5",
+                "name": "Comidinha Regional",
+                "price": 8.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 10:59",
+                "waiter": "Angelo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Não Imprimir"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "374f09b3-a5ca-43bb-b211-e527de8b5f26",
+                "product_id": "71",
+                "name": "Pastel de Camarão",
+                "price": 42.9,
+                "qty": 1.0,
+                "category": "Entradas",
+                "created_at": "14/02/2026 11:10",
+                "waiter": "Angelo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            }
+        ],
+        "total": 69.7,
+        "status": "open",
+        "opened_at": "14/02/2026 10:58",
+        "num_adults": 1,
+        "customer_type": "passante",
+        "customer_name": "",
+        "room_number": null,
         "waiter": "",
         "staff_name": null,
         "is_breakfast": false,

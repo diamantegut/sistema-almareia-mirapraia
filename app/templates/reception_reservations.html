@@ -272,16 +272,17 @@
 </style>
 
 <script id="grid-data" type="application/json">{{ grid|tojson }}</script>
+<script id="room-category-map" type="application/json">
+{% set ns = namespace(map={}) %}
+{% for group in grouped_rooms %}
+    {% for r in group.rooms %}
+        {% set _ = ns.map.update({ (r|string): group.category }) %}
+    {% endfor %}
+{% endfor %}
+{{ ns.map|tojson }}
+</script>
 <script>
-    window.roomCategoryMap = (function(){
-        var m = {};
-        {% for group in grouped_rooms %}
-            {% for r in group.rooms %}
-                m['{{ r }}'] = '{{ group.category }}';
-            {% endfor %}
-        {% endfor %}
-        return m;
-    })();
+    var roomCategoryMap = JSON.parse(document.getElementById('room-category-map').textContent || '{}');
     var currentYear = Number("{{ year }}");
     var currentMonth = Number("{{ month }}");
     var startDateStr = "{{ start_date.strftime('%Y-%m-%d') }}";
@@ -493,18 +494,10 @@
                 if(inInput) inInput.value = yyyy_mm_dd_in;
                 if(outInput) outInput.value = yyyy_mm_dd_out;
                 
-                // Try to set category based on room (heuristic)
+                // Try to set category based on room using precomputed map
                 var catSelect = form.querySelector('select[name="category"]');
                 if (catSelect && room) {
-                    var roomInt = parseInt(room);
-                    var catVal = "";
-                    if ([1,2,3].includes(roomInt)) catVal = "Suíte Areia";
-                    else if (roomInt === 11) catVal = "Suíte Mar Família";
-                    else if ([12,14,15,16,17,21,22,23,24,25,26].includes(roomInt)) catVal = "Suíte Mar";
-                    else if ([31,35].includes(roomInt)) catVal = "Suíte Alma c/ Banheira";
-                    else if ([32,34].includes(roomInt)) catVal = "Suíte Alma";
-                    else if (roomInt === 33) catVal = "Suíte Master Diamante";
-                    
+                    var catVal = roomCategoryMap[String(room)] || roomCategoryMap[room] || "";
                     if (catVal) catSelect.value = catVal;
                     
                     // Also, we might want to force the specific room assignment?
