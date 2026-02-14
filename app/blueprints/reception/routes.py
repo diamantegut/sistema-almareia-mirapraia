@@ -1347,11 +1347,42 @@ def api_create_manual_reservation():
         if not data.get('guest_name') or not data.get('checkin') or not data.get('checkout'):
              return jsonify({'success': False, 'error': 'Dados obrigatórios faltando.'}), 400
              
+        # Block past check-in dates for manual creations
+        try:
+            cin = datetime.strptime(data.get('checkin'), '%d/%m/%Y').date()
+            today = datetime.now().date()
+            if cin < today:
+                return jsonify({'success': False, 'error': 'Check-in não pode ser anterior a hoje.'}), 400
+        except Exception:
+            return jsonify({'success': False, 'error': 'Formato de data inválido. Use DD/MM/AAAA.'}), 400
+        
+        room_number = str(data.get('room_number') or '').strip()
+        if room_number:
+            occupancy = load_room_occupancy()
+            try:
+                service = ReservationService()
+                service.check_collision('new', room_number, data.get('checkin'), data.get('checkout'), occupancy_data=occupancy)
+            except ValueError as e:
+                return jsonify({'success': False, 'error': str(e)}), 400
+        
         service = ReservationService()
         new_res = service.create_manual_reservation(data)
         
         # Trigger pre-allocation immediately?
         service.auto_pre_allocate(window_hours=48)
+        
+        if room_number:
+            occupancy = load_room_occupancy()
+            try:
+                service.save_manual_allocation(
+                    reservation_id=new_res['id'],
+                    room_number=room_number,
+                    checkin=data.get('checkin'),
+                    checkout=data.get('checkout'),
+                    occupancy_data=occupancy
+                )
+            except ValueError as e:
+                return jsonify({'success': False, 'error': str(e)}), 400
         
         return jsonify({'success': True, 'reservation': new_res})
     except Exception as e:
@@ -3261,15 +3292,178 @@ def api_guest_upload_document():
         
         path = os.path.join(target_dir, filename)
         file.save(path)
+        final_filename = filename
+        try:
+            from PIL import Image, ImageOps
+            img = Image.open(path)
+            img = ImageOps.exif_transpose(img)
+            max_size = (1280, 1280)
+            img.thumbnail(max_size)
+            if img.mode in ('RGBA', 'P'):
+                bg = Image.new('RGB', img.size, (255, 255, 255))
+                bg.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
+                img = bg
+            out_name = os.path.splitext(filename)[0] + '.jpg'
+            out_path = os.path.join(target_dir, out_name)
+            img.save(out_path, format='JPEG', quality=80, optimize=True, progressive=True)
+            try:
+                if os.path.exists(path) and path != out_path:
+                    os.remove(path)
+            except:
+                pass
+            final_filename = out_name
+        except Exception:
+            final_filename = filename
         
-        # Update details with path
+        # Update details with path (support up to 3 documents per reservation)
         service = ReservationService()
         details = service.get_guest_details(res_id)
-        if 'personal_info' not in details: details['personal_info'] = {}
-        details['personal_info']['document_photo_path'] = filename
-        service.update_guest_details(res_id, {'personal_info': details['personal_info']})
+        if 'personal_info' not in details:
+            details['personal_info'] = {}
+        pi = details['personal_info']
+        photos = pi.get('document_photos')
+        if not isinstance(photos, list):
+            photos = []
+            legacy = pi.get('document_photo_path')
+            if legacy:
+                photos.append(legacy)
+        photos.append(final_filename)
+        # keep only last 4
+        photos = photos[-4:]
+        pi['document_photos'] = photos
+        # keep legacy key pointing to the latest for backward compatibility
+        pi['document_photo_path'] = photos[-1] if photos else final_filename
+        service.update_guest_details(res_id, {'personal_info': pi})
         
+        return jsonify({'success': True, 'filename': final_filename, 'count': len(photos)})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@reception_bp.route('/api/guest/upload_signature', methods=['POST'])
+@login_required
+def api_guest_upload_signature():
+    try:
+        res_id = request.form.get('reservation_id')
+        file = request.files.get('signature')
+        if not res_id or not file:
+            return jsonify({'success': False, 'error': 'Dados incompletos'}), 400
+        target_dir = os.path.join(current_app.root_path, 'static', 'uploads', 'signatures')
+        os.makedirs(target_dir, exist_ok=True)
+        filename = f"sign_{res_id}_{datetime.now().strftime('%Y%m%d%H%M%S')}.png"
+        path = os.path.join(target_dir, filename)
+        file.save(path)
+        service = ReservationService()
+        details = service.get_guest_details(res_id)
+        if 'personal_info' not in details:
+            details['personal_info'] = {}
+        details['personal_info']['signature_path'] = filename
+        service.update_guest_details(res_id, {'personal_info': details['personal_info']})
         return jsonify({'success': True, 'filename': filename})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@reception_bp.route('/reception/fnrh/<reservation_id>')
+@login_required
+def reception_fnrh(reservation_id):
+    try:
+        service = ReservationService()
+        res = service.get_reservation_by_id(reservation_id) or {}
+        details = service.get_guest_details(reservation_id) or {}
+        return render_template('fnrh.html', reservation=res, details=details, reservation_id=reservation_id)
+    except Exception as e:
+        return f"Erro: {str(e)}", 500
+
+@reception_bp.route('/api/utils/cep')
+@login_required
+def api_utils_cep():
+    try:
+        cep = request.args.get('cep', '').strip()
+        import re
+        cep_digits = re.sub(r'\D', '', cep or '')
+        if len(cep_digits) != 8:
+            return jsonify({'success': False, 'error': 'CEP inválido'}), 200
+        import requests
+        url = f'https://viacep.com.br/ws/{cep_digits}/json/'
+        r = requests.get(url, timeout=5)
+        data = r.json()
+        if data.get('erro'):
+            return jsonify({'success': False, 'error': 'CEP não encontrado'}), 200
+        logradouro = (data.get('logradouro') or '').strip()
+        bairro = (data.get('bairro') or '').strip()
+        localidade = (data.get('localidade') or '').strip()
+        uf = (data.get('uf') or '').strip()
+        address = ', '.join([p for p in [logradouro, bairro] if p])
+        municipality = ' - '.join([p for p in [localidade, uf] if p])
+        return jsonify({'success': True, 'address': address, 'municipality': municipality})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@reception_bp.route('/api/utils/cpf')
+@login_required
+def api_utils_cpf():
+    try:
+        cpf = request.args.get('cpf', '').strip()
+        import re, os
+        cpf_digits = re.sub(r'\D', '', cpf or '')
+        if len(cpf_digits) != 11:
+            return jsonify({'success': False, 'error': 'CPF inválido'}), 200
+        # Allow configuration via environment or system_config.json
+        try:
+            from app.services.system_config_manager import get_config_value
+        except Exception:
+            get_config_value = None
+        ab_base = os.environ.get('APIBRASIL_CPF_BASE') or (get_config_value('apibrasil_cpf_base') if get_config_value else None)
+        ab_token = os.environ.get('APIBRASIL_TOKEN') or (get_config_value('apibrasil_token') if get_config_value else None)
+        base = os.environ.get('CPF_API_BASE') or (get_config_value('cpf_api_base') if get_config_value else None)
+        token = os.environ.get('CPF_API_TOKEN') or (get_config_value('cpf_api_token') if get_config_value else None)
+        use_base = None
+        use_token = None
+        if ab_base and ab_token:
+            use_base = ab_base
+            use_token = ab_token
+        elif base and token:
+            use_base = base
+            use_token = token
+        if not use_base or not use_token:
+            return jsonify({'success': False, 'error': 'API de CPF não configurada'}), 200
+        import requests
+        headers = {'Authorization': f'Bearer {use_token}'}
+        # Generic pattern: base may require path/params; we try fallback query param
+        url = use_base
+        if '{cpf}' in url:
+            url = url.replace('{cpf}', cpf_digits)
+            r = requests.get(url, headers=headers, timeout=7)
+        else:
+            r = requests.get(url, headers=headers, params={'cpf': cpf_digits}, timeout=7)
+        data = {}
+        try:
+            data = r.json()
+        except Exception:
+            return jsonify({'success': False, 'error': 'Resposta inválida da API de CPF'}), 200
+        # Best-effort extraction
+        name = data.get('nome') or data.get('name') or data.get('full_name')
+        birth = data.get('nascimento') or data.get('birthdate') or data.get('data_nascimento')
+        address = None
+        # Try common address structures
+        endereco = data.get('endereco') or data.get('address') or {}
+        if isinstance(endereco, dict):
+            log = endereco.get('logradouro') or endereco.get('street')
+            num = endereco.get('numero') or endereco.get('number')
+            bai = endereco.get('bairro') or endereco.get('neighborhood')
+            cid = endereco.get('cidade') or endereco.get('city')
+            uf = endereco.get('uf') or endereco.get('state') or endereco.get('estado')
+            parts = [p for p in [log, num if num else None, bai] if p]
+            if parts:
+                address = ', '.join([str(x) for x in parts])
+        elif isinstance(endereco, str):
+            address = endereco
+        municipality = None
+        if isinstance(endereco, dict):
+            cid = endereco.get('cidade') or endereco.get('city')
+            uf = endereco.get('uf') or endereco.get('state') or endereco.get('estado')
+            if cid or uf:
+                municipality = ' - '.join([p for p in [cid, uf] if p])
+        return jsonify({'success': True, 'name': name, 'birthdate': birth, 'address': address, 'municipality': municipality})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 

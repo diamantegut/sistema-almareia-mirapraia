@@ -167,11 +167,11 @@ class ReservationService:
             if res['id']:
                 unique_reservations[res['id']] = res
             else:
-                # No ID? append with random key or ignore? 
-                # If no ID, we can't track it well.
                 import uuid
                 unique_reservations[str(uuid.uuid4())] = res
-                
+        for k, v in unique_reservations.items():
+            if not v.get('id'):
+                v['id'] = k
         return list(unique_reservations.values())
 
     def get_room_mapping(self):

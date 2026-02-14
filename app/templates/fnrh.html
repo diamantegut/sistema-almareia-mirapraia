@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4>FNRH - Ficha Nacional de Registro de Hóspedes</h4>
+    <button class="btn btn-primary" onclick="window.print()">Imprimir</button>
+  </div>
+  <div class="card">
+    <div class="card-body">
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <div class="mb-2"><strong>Hóspede</strong></div>
+          <div>Nome: {{ reservation.guest_name or details.personal_info.name or ' ' }}</div>
+          <div>CPF/Doc: {{ details.fiscal_info.cpf or details.fiscal_info.cnpj or details.personal_info.doc_id or ' ' }}</div>
+          <div>Data Nasc.: {{ details.personal_info.dob or ' ' }}</div>
+          <div>Telefone: {{ details.personal_info.phone or ' ' }}</div>
+          <div>Email: {{ details.personal_info.email or ' ' }}</div>
+        </div>
+        <div class="col-md-6">
+          <div class="mb-2"><strong>Endereço</strong></div>
+          <div>{{ details.personal_info.address or details.fiscal_info.address or ' ' }}</div>
+          <div>{{ details.fiscal_info.municipality or ' ' }}</div>
+        </div>
+      </div>
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <div class="mb-2"><strong>Estadia</strong></div>
+          <div>Check-in: {{ reservation.checkin or ' ' }}</div>
+          <div>Check-out: {{ reservation.checkout or ' ' }}</div>
+          <div>Categoria: {{ reservation.category or ' ' }}</div>
+        </div>
+        <div class="col-md-6">
+          <div class="mb-2"><strong>Assinatura</strong></div>
+          {% if details.personal_info.signature_path %}
+          <img src="{{ url_for('static', filename='uploads/signatures/' + details.personal_info.signature_path) }}" alt="Assinatura" style="height:90px;border:1px solid #dee2e6;border-radius:.25rem;background:#fff;padding:4px">
+          {% else %}
+          <div class="text-muted">Assinatura pendente</div>
+          {% endif %}
+        </div>
+      </div>
+      <div class="mt-4 small text-muted">
+        Declaro que as informações prestadas são verdadeiras e autorizo o uso conforme legislação aplicável.
+      </div>
+    </div>
+  </div>
+  <div class="mt-3">
+    <a class="btn btn-outline-secondary" href="{{ url_for('reception.reception_dashboard') }}">Voltar</a>
+  </div>
+</div>
+{% endblock %}
