@@ -8893,5 +8893,2974 @@
         "notes": "Mesa 42",
         "fiscal_doc_uuid": null,
         "history": []
+    },
+    {
+        "id": "1fede913-4544-44ca-9394-a6b08a8eea33",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "MESA_36_202602141047",
+        "closed_at": "2026-02-14 10:47:25",
+        "closed_by": "Angelo",
+        "total_amount": 0.0,
+        "fiscal_amount": 0.0,
+        "items": [
+            {
+                "id": "bcb3a232-7fc0-4729-948a-c7348f9e37c6",
+                "product_id": "267",
+                "name": "Toast (Consultar Sabor do Dia)",
+                "price": 24.9,
+                "qty": 2.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:08",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Sem coentro",
+                    "Sem nada",
+                    "Transf de Mesa 43"
+                ],
+                "accompaniments": [],
+                "flavor": "Tradicional",
+                "questions_answers": []
+            },
+            {
+                "id": "c13d967b-ed38-4db7-8384-eb07a67240bf",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 3.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:08",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 43"
+                ],
+                "accompaniments": [],
+                "flavor": "Ovos (Omelete,Mexido,Pochê,cozido ou frito)",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Pochê"
+                    }
+                ]
+            },
+            {
+                "id": "34ca2d01-9902-498d-9c63-70dcd1440f5c",
+                "product_id": "9",
+                "name": "Mimosa Espumante",
+                "price": 24.9,
+                "qty": 2.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 10:00",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 43"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "7acb904a-1d98-45e4-ba95-c6f900801873",
+                "product_id": "267",
+                "name": "Toast (Consultar Sabor do Dia)",
+                "price": 24.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 10:05",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 44"
+                ],
+                "accompaniments": [],
+                "flavor": "Parma",
+                "questions_answers": []
+            },
+            {
+                "id": "f16ba7b3-0325-468f-8f32-ac5f961f22be",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 2.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 10:05",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 44"
+                ],
+                "accompaniments": [],
+                "flavor": "Tradicional",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Pochê"
+                    }
+                ]
+            },
+            {
+                "id": "abec4eef-8c32-4440-9a83-1975aacba8ef",
+                "product_id": "14",
+                "name": "Queijo assado",
+                "price": 15.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 10:05",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 44"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "b05531a6-47e3-4fb2-bc17-20b03fdbe65e",
+                "product_id": "17",
+                "name": "Waffles da chef",
+                "price": 5.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 10:05",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Liberar quando goi pedir",
+                    "Transf de Mesa 44"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "b8cfe68a-be34-4e0a-84a6-74e1d0ce26e6",
+                "product_id": "10",
+                "name": "Misto Quente",
+                "price": 14.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:39",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 47"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "6d5b2376-a916-40d6-bfa7-b935a25e723b",
+                "product_id": "2002",
+                "name": "Tapioca",
+                "price": 10.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:42",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Carne",
+                    "Transf de Mesa 47"
+                ],
+                "accompaniments": [],
+                "flavor": "Queijo Mussarela + Charque Desfiada + Tradicional",
+                "questions_answers": []
+            },
+            {
+                "id": "74b1e661-cad7-4951-ac79-02464a54c45d",
+                "product_id": "2002",
+                "name": "Tapioca",
+                "price": 10.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:42",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 47"
+                ],
+                "accompaniments": [],
+                "flavor": "Presunto + Tomate + Queijo Coalho",
+                "questions_answers": []
+            },
+            {
+                "id": "cf41fcd4-bf66-4feb-b2b9-c9304e98bd26",
+                "product_id": "2002",
+                "name": "Tapioca",
+                "price": 10.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:42",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Nutela",
+                    "Transf de Mesa 47"
+                ],
+                "accompaniments": [],
+                "flavor": "Tradicional",
+                "questions_answers": []
+            },
+            {
+                "id": "b8e68748-6063-4d0b-952c-92988f42ccc8",
+                "product_id": "2002",
+                "name": "Tapioca",
+                "price": 10.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:42",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Leite condensado e coco",
+                    "Transf de Mesa 47"
+                ],
+                "accompaniments": [],
+                "flavor": "Tradicional",
+                "questions_answers": []
+            },
+            {
+                "id": "543db460-c3d9-4f17-94b8-8c9c0febcc39",
+                "product_id": "267",
+                "name": "Toast (Consultar Sabor do Dia)",
+                "price": 24.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:24",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 99"
+                ],
+                "accompaniments": [],
+                "flavor": "Tomate",
+                "questions_answers": []
+            },
+            {
+                "id": "a13f9271-dd22-49c7-a9ce-62d2b03fab4b",
+                "product_id": "13",
+                "name": "Pao Na Chapa",
+                "price": 2.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:24",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Pão Frances",
+                    "Sem miolo",
+                    "Transf de Mesa 99"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "33195681-b966-45a2-8237-8074f5a7337f",
+                "product_id": "17",
+                "name": "Waffles da chef",
+                "price": 5.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:24",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 99"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "958c6c85-5313-4e79-906d-3ecb9f49bf76",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:40",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 99"
+                ],
+                "accompaniments": [],
+                "flavor": "Tradicional",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Omelete"
+                    }
+                ]
+            },
+            {
+                "id": "8691d9d8-691b-4fed-ba19-e1599c69bbbc",
+                "product_id": "14",
+                "name": "Queijo assado",
+                "price": 15.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:44",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 99"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "aafc6e97-9488-4f16-a04d-3a61837c2c10",
+                "product_id": "267",
+                "name": "Toast (Consultar Sabor do Dia)",
+                "price": 24.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:44",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 99"
+                ],
+                "accompaniments": [],
+                "flavor": "Queijo Mussarela",
+                "questions_answers": []
+            },
+            {
+                "id": "ff80ebfc-fa66-4400-8c81-bd69e8f5698c",
+                "product_id": "7",
+                "name": "Jarra de Agua 700ml",
+                "price": 0.1,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:44",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 99"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "3"
+                    }
+                ]
+            },
+            {
+                "id": "928bca0b-7387-4e3e-b85e-3b234462dfea",
+                "product_id": "10",
+                "name": "Misto Quente",
+                "price": 14.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:58",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 99"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "85720712-80cb-4859-a51a-957ea3893045",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:58",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Sem recheio",
+                    "Transf de Mesa 99"
+                ],
+                "accompaniments": [],
+                "flavor": "Tradicional",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Omelete"
+                    }
+                ]
+            },
+            {
+                "id": "85ff79d0-065d-4141-af9c-bb2939e40c2c",
+                "product_id": "144",
+                "name": "Café Capuccino",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "14/02/2026 08:58",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 99"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Tipo",
+                        "answer": "Classic"
+                    }
+                ]
+            },
+            {
+                "id": "c0f9d0c4-6642-49ea-8da1-4ba42bf4bb5c",
+                "product_id": "144",
+                "name": "Café Capuccino",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "14/02/2026 08:58",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 99"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Tipo",
+                        "answer": "Classic"
+                    }
+                ]
+            },
+            {
+                "id": "b18cbf79-594f-43cc-be17-30064143233c",
+                "product_id": "2002",
+                "name": "Tapioca",
+                "price": 10.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 07:49",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 91"
+                ],
+                "accompaniments": [],
+                "flavor": "Queijo Mussarela + Tomate",
+                "questions_answers": []
+            },
+            {
+                "id": "ad374018-407c-4496-a82d-c3cf699e63e0",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 07:49",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 91"
+                ],
+                "accompaniments": [],
+                "flavor": "Tradicional",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Mexido"
+                    }
+                ]
+            },
+            {
+                "id": "0ea30445-dd8f-4c58-927e-6af60e21da46",
+                "product_id": "13",
+                "name": "Pao Na Chapa",
+                "price": 2.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 07:49",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Pão de forma",
+                    "Transf de Mesa 91"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "7d431999-9b80-484f-be64-e8e065567e3f",
+                "product_id": "267",
+                "name": "Toast (Consultar Sabor do Dia)",
+                "price": 24.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 07:51",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 91"
+                ],
+                "accompaniments": [],
+                "flavor": "Parma",
+                "questions_answers": []
+            },
+            {
+                "id": "7e831474-bbb0-4aa9-bc9f-5f61fb26950b",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 07:51",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 91"
+                ],
+                "accompaniments": [],
+                "flavor": "Tomate + Queijo Coalho + Ovos (Omelete,Mexido,Pochê,cozido ou frito)",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Omelete"
+                    }
+                ]
+            },
+            {
+                "id": "cee63303-a403-4d59-af0c-ec039df9781a",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 07:51",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 91"
+                ],
+                "accompaniments": [],
+                "flavor": "Tomate + Queijo Coalho + Ovos (Omelete,Mexido,Pochê,cozido ou frito)",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Omelete"
+                    }
+                ]
+            },
+            {
+                "id": "e136f511-fe26-4854-8813-405d507d54ce",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:02",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 91"
+                ],
+                "accompaniments": [],
+                "flavor": "Tradicional",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Mexido"
+                    }
+                ]
+            },
+            {
+                "id": "3f30e178-f52c-4922-af45-719f5df55f70",
+                "product_id": "10",
+                "name": "Misto Quente",
+                "price": 14.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:02",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "So queijo j",
+                    "Transf de Mesa 53"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "e70a8bd9-892e-425b-8f54-ab6daeecfcae",
+                "product_id": "267",
+                "name": "Toast (Consultar Sabor do Dia)",
+                "price": 24.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:02",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 53"
+                ],
+                "accompaniments": [],
+                "flavor": "Charque Desfiada",
+                "questions_answers": []
+            },
+            {
+                "id": "8b31754e-ea1f-4bf3-b9f2-f00e12571327",
+                "product_id": "267",
+                "name": "Toast (Consultar Sabor do Dia)",
+                "price": 24.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:02",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Só manteiga sem salb",
+                    "Transf de Mesa 53"
+                ],
+                "accompaniments": [],
+                "flavor": "Tradicional",
+                "questions_answers": []
+            },
+            {
+                "id": "7874e0ca-5161-4de4-8878-ffc08ed67b9c",
+                "product_id": "2004",
+                "name": "Suco Copo",
+                "price": 10.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "14/02/2026 09:02",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 53"
+                ],
+                "accompaniments": [],
+                "flavor": "Caju",
+                "questions_answers": []
+            },
+            {
+                "id": "34f74f20-e314-4172-a7b5-0410444d5ade",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:02",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 53"
+                ],
+                "accompaniments": [],
+                "flavor": "Ovos (Omelete,Mexido,Pochê,cozido ou frito)",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Pochê"
+                    }
+                ]
+            },
+            {
+                "id": "b018c02e-dea7-4a89-9667-41cce3b695cf",
+                "product_id": "2004",
+                "name": "Suco Copo",
+                "price": 10.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "14/02/2026 09:22",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 53"
+                ],
+                "accompaniments": [],
+                "flavor": "Laranja",
+                "questions_answers": []
+            },
+            {
+                "id": "bc700151-049f-43ec-abe1-83d88451297b",
+                "product_id": "5",
+                "name": "Comidinha Regional",
+                "price": 8.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:22",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 53"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "77d037e2-26dc-44e8-92ed-e5edf86845e1",
+                "product_id": "10",
+                "name": "Misto Quente",
+                "price": 14.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:52",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 96"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "29f9687f-ab14-464d-8e20-44508c036867",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:52",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 96"
+                ],
+                "accompaniments": [],
+                "flavor": "Tradicional",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Pochê"
+                    }
+                ]
+            },
+            {
+                "id": "a838cb06-6c4f-4030-b05a-e580c28b025e",
+                "product_id": "6",
+                "name": "Cuscuz Recheado",
+                "price": 11.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:52",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Requeijão",
+                    "Transf de Mesa 96"
+                ],
+                "accompaniments": [],
+                "flavor": "Tradicional",
+                "questions_answers": []
+            },
+            {
+                "id": "6ee89325-5227-469a-9f42-fe8ca1ea4d08",
+                "product_id": "139",
+                "name": "Café Latte Macchiato",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "14/02/2026 09:10",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 96"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "f14eee60-4f45-421c-a413-67ccafd6d72b",
+                "product_id": "6",
+                "name": "Cuscuz Recheado",
+                "price": 11.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:29",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 92"
+                ],
+                "accompaniments": [],
+                "flavor": "Charque Desfiada",
+                "questions_answers": []
+            },
+            {
+                "id": "58815fdf-3a62-4a6c-8132-69697e4810ae",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:29",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 92"
+                ],
+                "accompaniments": [],
+                "flavor": "Queijo Mussarela",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Omelete"
+                    }
+                ]
+            },
+            {
+                "id": "1ec11979-ab39-4450-9d1d-969c71a8bca1",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 2.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:04",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 89"
+                ],
+                "accompaniments": [],
+                "flavor": "Tomate + Queijo Coalho + Cebola Branca",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Mexido"
+                    }
+                ]
+            },
+            {
+                "id": "d53a6081-dedb-479d-90e3-c0f81fd181c9",
+                "product_id": "6",
+                "name": "Cuscuz Recheado",
+                "price": 11.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:47",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 89"
+                ],
+                "accompaniments": [],
+                "flavor": "Tradicional",
+                "questions_answers": []
+            },
+            {
+                "id": "0cd7dc1b-1e1d-4224-9d2e-6b1381189325",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:47",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 89"
+                ],
+                "accompaniments": [],
+                "flavor": "Tradicional",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Mexido"
+                    }
+                ]
+            },
+            {
+                "id": "b1d01c5a-fa55-44f7-8c44-5982a844ebed",
+                "product_id": "14",
+                "name": "Queijo assado",
+                "price": 15.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:03",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 89"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "74c315ac-a716-4389-8043-9ac2e3ec2121",
+                "product_id": "2004",
+                "name": "Suco Copo",
+                "price": 10.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "14/02/2026 09:03",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 89"
+                ],
+                "accompaniments": [],
+                "flavor": "Laranja",
+                "questions_answers": []
+            },
+            {
+                "id": "a809d949-f0d4-439d-aefb-985df9eb03c2",
+                "product_id": "17",
+                "name": "Waffles da chef",
+                "price": 5.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:03",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 89"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "cc5ae5d2-a2af-4064-91b0-a0f8a858f8ea",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 2.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:06",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Sem cebola",
+                    "Transf de Mesa 60"
+                ],
+                "accompaniments": [],
+                "flavor": "Tradicional",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Mexido"
+                    }
+                ]
+            },
+            {
+                "id": "2fd709f9-4a03-4a48-be2a-885e21e72fa0",
+                "product_id": "2002",
+                "name": "Tapioca",
+                "price": 10.0,
+                "qty": 2.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:06",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 60"
+                ],
+                "accompaniments": [],
+                "flavor": "Charque Desfiada + Queijo Coalho",
+                "questions_answers": []
+            },
+            {
+                "id": "aa1d9743-f2a7-4b5b-9528-1dcc10c5afbd",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:06",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 60"
+                ],
+                "accompaniments": [],
+                "flavor": "Charque Desfiada + Queijo Coalho",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Omelete"
+                    }
+                ]
+            },
+            {
+                "id": "985d799e-dbd8-4f6f-9e2c-885e88d8174c",
+                "product_id": "14",
+                "name": "Queijo assado",
+                "price": 15.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:06",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 60"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "a9a0cd05-516a-4f4f-8999-c04e6e1533c4",
+                "product_id": "139",
+                "name": "Café Latte Macchiato",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "14/02/2026 09:16",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 60"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "053cfdc3-6bf7-4a4f-97fa-c8affbad9d61",
+                "product_id": "13",
+                "name": "Pao Na Chapa",
+                "price": 2.0,
+                "qty": 3.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:13",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Sem mantega",
+                    "Transf de Mesa 54"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "3095e88e-d1ed-4950-8b23-c1b91dbd5171",
+                "product_id": "2",
+                "name": "Acai",
+                "price": 19.9,
+                "qty": 1.0,
+                "category": "Sobremesas",
+                "created_at": "14/02/2026 09:13",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 54"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "734b2912-9ff1-4d9a-9318-cf25850f7ced",
+                "product_id": "9",
+                "name": "Mimosa Espumante",
+                "price": 24.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:13",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Só espumante jj",
+                    "Transf de Mesa 54"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "6d26b8ae-1bb9-438d-88de-90786eea2da1",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 2.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:13",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 54"
+                ],
+                "accompaniments": [],
+                "flavor": "Ovos (Omelete,Mexido,Pochê,cozido ou frito)",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Mexido"
+                    }
+                ]
+            },
+            {
+                "id": "6491a391-fbd0-4ed2-bfb1-245d07c558fb",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:48",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 58"
+                ],
+                "accompaniments": [],
+                "flavor": "Presunto + Tomate + Queijo Coalho",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Omelete"
+                    }
+                ]
+            },
+            {
+                "id": "74714584-218b-4550-b10a-0a8b8ea470b8",
+                "product_id": "267",
+                "name": "Toast (Consultar Sabor do Dia)",
+                "price": 24.9,
+                "qty": 2.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:48",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 58"
+                ],
+                "accompaniments": [],
+                "flavor": "Parma",
+                "questions_answers": []
+            },
+            {
+                "id": "32c6dbb2-ad15-477d-92e3-4a674e2e3294",
+                "product_id": "2002",
+                "name": "Tapioca",
+                "price": 10.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:48",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Cocó",
+                    "Transf de Mesa 58"
+                ],
+                "accompaniments": [],
+                "flavor": "Queijo Coalho",
+                "questions_answers": []
+            },
+            {
+                "id": "acb4a6fb-3510-4f3a-8bb1-0e45cf63b6d9",
+                "product_id": "10",
+                "name": "Misto Quente",
+                "price": 14.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:14",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Bem passado",
+                    "Transf de Mesa 58"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 989.89,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "name": "",
+            "type": "hospede"
+        },
+        "status": "pending",
+        "notes": "Mesa 36",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "4fb28e17-c399-46a6-9d3a-8d206039f0a6",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "MESA_36_202602141047",
+        "closed_at": "2026-02-14 10:47:32",
+        "closed_by": "Angelo",
+        "total_amount": 0.0,
+        "fiscal_amount": 0.0,
+        "items": [
+            {
+                "id": "bcb3a232-7fc0-4729-948a-c7348f9e37c6",
+                "product_id": "267",
+                "name": "Toast (Consultar Sabor do Dia)",
+                "price": 24.9,
+                "qty": 2.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:08",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Sem coentro",
+                    "Sem nada",
+                    "Transf de Mesa 43"
+                ],
+                "accompaniments": [],
+                "flavor": "Tradicional",
+                "questions_answers": []
+            },
+            {
+                "id": "c13d967b-ed38-4db7-8384-eb07a67240bf",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 3.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:08",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 43"
+                ],
+                "accompaniments": [],
+                "flavor": "Ovos (Omelete,Mexido,Pochê,cozido ou frito)",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Pochê"
+                    }
+                ]
+            },
+            {
+                "id": "34ca2d01-9902-498d-9c63-70dcd1440f5c",
+                "product_id": "9",
+                "name": "Mimosa Espumante",
+                "price": 24.9,
+                "qty": 2.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 10:00",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 43"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "7acb904a-1d98-45e4-ba95-c6f900801873",
+                "product_id": "267",
+                "name": "Toast (Consultar Sabor do Dia)",
+                "price": 24.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 10:05",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 44"
+                ],
+                "accompaniments": [],
+                "flavor": "Parma",
+                "questions_answers": []
+            },
+            {
+                "id": "f16ba7b3-0325-468f-8f32-ac5f961f22be",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 2.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 10:05",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 44"
+                ],
+                "accompaniments": [],
+                "flavor": "Tradicional",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Pochê"
+                    }
+                ]
+            },
+            {
+                "id": "abec4eef-8c32-4440-9a83-1975aacba8ef",
+                "product_id": "14",
+                "name": "Queijo assado",
+                "price": 15.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 10:05",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 44"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "b05531a6-47e3-4fb2-bc17-20b03fdbe65e",
+                "product_id": "17",
+                "name": "Waffles da chef",
+                "price": 5.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 10:05",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Liberar quando goi pedir",
+                    "Transf de Mesa 44"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "b8cfe68a-be34-4e0a-84a6-74e1d0ce26e6",
+                "product_id": "10",
+                "name": "Misto Quente",
+                "price": 14.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:39",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 47"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "6d5b2376-a916-40d6-bfa7-b935a25e723b",
+                "product_id": "2002",
+                "name": "Tapioca",
+                "price": 10.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:42",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Carne",
+                    "Transf de Mesa 47"
+                ],
+                "accompaniments": [],
+                "flavor": "Queijo Mussarela + Charque Desfiada + Tradicional",
+                "questions_answers": []
+            },
+            {
+                "id": "74b1e661-cad7-4951-ac79-02464a54c45d",
+                "product_id": "2002",
+                "name": "Tapioca",
+                "price": 10.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:42",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 47"
+                ],
+                "accompaniments": [],
+                "flavor": "Presunto + Tomate + Queijo Coalho",
+                "questions_answers": []
+            },
+            {
+                "id": "cf41fcd4-bf66-4feb-b2b9-c9304e98bd26",
+                "product_id": "2002",
+                "name": "Tapioca",
+                "price": 10.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:42",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Nutela",
+                    "Transf de Mesa 47"
+                ],
+                "accompaniments": [],
+                "flavor": "Tradicional",
+                "questions_answers": []
+            },
+            {
+                "id": "b8e68748-6063-4d0b-952c-92988f42ccc8",
+                "product_id": "2002",
+                "name": "Tapioca",
+                "price": 10.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:42",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Leite condensado e coco",
+                    "Transf de Mesa 47"
+                ],
+                "accompaniments": [],
+                "flavor": "Tradicional",
+                "questions_answers": []
+            },
+            {
+                "id": "543db460-c3d9-4f17-94b8-8c9c0febcc39",
+                "product_id": "267",
+                "name": "Toast (Consultar Sabor do Dia)",
+                "price": 24.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:24",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 99"
+                ],
+                "accompaniments": [],
+                "flavor": "Tomate",
+                "questions_answers": []
+            },
+            {
+                "id": "a13f9271-dd22-49c7-a9ce-62d2b03fab4b",
+                "product_id": "13",
+                "name": "Pao Na Chapa",
+                "price": 2.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:24",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Pão Frances",
+                    "Sem miolo",
+                    "Transf de Mesa 99"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "33195681-b966-45a2-8237-8074f5a7337f",
+                "product_id": "17",
+                "name": "Waffles da chef",
+                "price": 5.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:24",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 99"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "958c6c85-5313-4e79-906d-3ecb9f49bf76",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:40",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 99"
+                ],
+                "accompaniments": [],
+                "flavor": "Tradicional",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Omelete"
+                    }
+                ]
+            },
+            {
+                "id": "8691d9d8-691b-4fed-ba19-e1599c69bbbc",
+                "product_id": "14",
+                "name": "Queijo assado",
+                "price": 15.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:44",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 99"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "aafc6e97-9488-4f16-a04d-3a61837c2c10",
+                "product_id": "267",
+                "name": "Toast (Consultar Sabor do Dia)",
+                "price": 24.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:44",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 99"
+                ],
+                "accompaniments": [],
+                "flavor": "Queijo Mussarela",
+                "questions_answers": []
+            },
+            {
+                "id": "ff80ebfc-fa66-4400-8c81-bd69e8f5698c",
+                "product_id": "7",
+                "name": "Jarra de Agua 700ml",
+                "price": 0.1,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:44",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 99"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "3"
+                    }
+                ]
+            },
+            {
+                "id": "928bca0b-7387-4e3e-b85e-3b234462dfea",
+                "product_id": "10",
+                "name": "Misto Quente",
+                "price": 14.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:58",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 99"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "85720712-80cb-4859-a51a-957ea3893045",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:58",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Sem recheio",
+                    "Transf de Mesa 99"
+                ],
+                "accompaniments": [],
+                "flavor": "Tradicional",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Omelete"
+                    }
+                ]
+            },
+            {
+                "id": "85ff79d0-065d-4141-af9c-bb2939e40c2c",
+                "product_id": "144",
+                "name": "Café Capuccino",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "14/02/2026 08:58",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 99"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Tipo",
+                        "answer": "Classic"
+                    }
+                ]
+            },
+            {
+                "id": "c0f9d0c4-6642-49ea-8da1-4ba42bf4bb5c",
+                "product_id": "144",
+                "name": "Café Capuccino",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "14/02/2026 08:58",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 99"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Tipo",
+                        "answer": "Classic"
+                    }
+                ]
+            },
+            {
+                "id": "b18cbf79-594f-43cc-be17-30064143233c",
+                "product_id": "2002",
+                "name": "Tapioca",
+                "price": 10.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 07:49",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 91"
+                ],
+                "accompaniments": [],
+                "flavor": "Queijo Mussarela + Tomate",
+                "questions_answers": []
+            },
+            {
+                "id": "ad374018-407c-4496-a82d-c3cf699e63e0",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 07:49",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 91"
+                ],
+                "accompaniments": [],
+                "flavor": "Tradicional",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Mexido"
+                    }
+                ]
+            },
+            {
+                "id": "0ea30445-dd8f-4c58-927e-6af60e21da46",
+                "product_id": "13",
+                "name": "Pao Na Chapa",
+                "price": 2.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 07:49",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Pão de forma",
+                    "Transf de Mesa 91"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "7d431999-9b80-484f-be64-e8e065567e3f",
+                "product_id": "267",
+                "name": "Toast (Consultar Sabor do Dia)",
+                "price": 24.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 07:51",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 91"
+                ],
+                "accompaniments": [],
+                "flavor": "Parma",
+                "questions_answers": []
+            },
+            {
+                "id": "7e831474-bbb0-4aa9-bc9f-5f61fb26950b",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 07:51",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 91"
+                ],
+                "accompaniments": [],
+                "flavor": "Tomate + Queijo Coalho + Ovos (Omelete,Mexido,Pochê,cozido ou frito)",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Omelete"
+                    }
+                ]
+            },
+            {
+                "id": "cee63303-a403-4d59-af0c-ec039df9781a",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 07:51",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 91"
+                ],
+                "accompaniments": [],
+                "flavor": "Tomate + Queijo Coalho + Ovos (Omelete,Mexido,Pochê,cozido ou frito)",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Omelete"
+                    }
+                ]
+            },
+            {
+                "id": "e136f511-fe26-4854-8813-405d507d54ce",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:02",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 91"
+                ],
+                "accompaniments": [],
+                "flavor": "Tradicional",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Mexido"
+                    }
+                ]
+            },
+            {
+                "id": "3f30e178-f52c-4922-af45-719f5df55f70",
+                "product_id": "10",
+                "name": "Misto Quente",
+                "price": 14.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:02",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "So queijo j",
+                    "Transf de Mesa 53"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "e70a8bd9-892e-425b-8f54-ab6daeecfcae",
+                "product_id": "267",
+                "name": "Toast (Consultar Sabor do Dia)",
+                "price": 24.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:02",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 53"
+                ],
+                "accompaniments": [],
+                "flavor": "Charque Desfiada",
+                "questions_answers": []
+            },
+            {
+                "id": "8b31754e-ea1f-4bf3-b9f2-f00e12571327",
+                "product_id": "267",
+                "name": "Toast (Consultar Sabor do Dia)",
+                "price": 24.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:02",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Só manteiga sem salb",
+                    "Transf de Mesa 53"
+                ],
+                "accompaniments": [],
+                "flavor": "Tradicional",
+                "questions_answers": []
+            },
+            {
+                "id": "7874e0ca-5161-4de4-8878-ffc08ed67b9c",
+                "product_id": "2004",
+                "name": "Suco Copo",
+                "price": 10.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "14/02/2026 09:02",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 53"
+                ],
+                "accompaniments": [],
+                "flavor": "Caju",
+                "questions_answers": []
+            },
+            {
+                "id": "34f74f20-e314-4172-a7b5-0410444d5ade",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:02",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 53"
+                ],
+                "accompaniments": [],
+                "flavor": "Ovos (Omelete,Mexido,Pochê,cozido ou frito)",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Pochê"
+                    }
+                ]
+            },
+            {
+                "id": "b018c02e-dea7-4a89-9667-41cce3b695cf",
+                "product_id": "2004",
+                "name": "Suco Copo",
+                "price": 10.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "14/02/2026 09:22",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 53"
+                ],
+                "accompaniments": [],
+                "flavor": "Laranja",
+                "questions_answers": []
+            },
+            {
+                "id": "bc700151-049f-43ec-abe1-83d88451297b",
+                "product_id": "5",
+                "name": "Comidinha Regional",
+                "price": 8.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:22",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 53"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "77d037e2-26dc-44e8-92ed-e5edf86845e1",
+                "product_id": "10",
+                "name": "Misto Quente",
+                "price": 14.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:52",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 96"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "29f9687f-ab14-464d-8e20-44508c036867",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:52",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 96"
+                ],
+                "accompaniments": [],
+                "flavor": "Tradicional",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Pochê"
+                    }
+                ]
+            },
+            {
+                "id": "a838cb06-6c4f-4030-b05a-e580c28b025e",
+                "product_id": "6",
+                "name": "Cuscuz Recheado",
+                "price": 11.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:52",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Requeijão",
+                    "Transf de Mesa 96"
+                ],
+                "accompaniments": [],
+                "flavor": "Tradicional",
+                "questions_answers": []
+            },
+            {
+                "id": "6ee89325-5227-469a-9f42-fe8ca1ea4d08",
+                "product_id": "139",
+                "name": "Café Latte Macchiato",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "14/02/2026 09:10",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 96"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "f14eee60-4f45-421c-a413-67ccafd6d72b",
+                "product_id": "6",
+                "name": "Cuscuz Recheado",
+                "price": 11.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:29",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 92"
+                ],
+                "accompaniments": [],
+                "flavor": "Charque Desfiada",
+                "questions_answers": []
+            },
+            {
+                "id": "58815fdf-3a62-4a6c-8132-69697e4810ae",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:29",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 92"
+                ],
+                "accompaniments": [],
+                "flavor": "Queijo Mussarela",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Omelete"
+                    }
+                ]
+            },
+            {
+                "id": "1ec11979-ab39-4450-9d1d-969c71a8bca1",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 2.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:04",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 89"
+                ],
+                "accompaniments": [],
+                "flavor": "Tomate + Queijo Coalho + Cebola Branca",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Mexido"
+                    }
+                ]
+            },
+            {
+                "id": "d53a6081-dedb-479d-90e3-c0f81fd181c9",
+                "product_id": "6",
+                "name": "Cuscuz Recheado",
+                "price": 11.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:47",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 89"
+                ],
+                "accompaniments": [],
+                "flavor": "Tradicional",
+                "questions_answers": []
+            },
+            {
+                "id": "0cd7dc1b-1e1d-4224-9d2e-6b1381189325",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:47",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 89"
+                ],
+                "accompaniments": [],
+                "flavor": "Tradicional",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Mexido"
+                    }
+                ]
+            },
+            {
+                "id": "b1d01c5a-fa55-44f7-8c44-5982a844ebed",
+                "product_id": "14",
+                "name": "Queijo assado",
+                "price": 15.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:03",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 89"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "74c315ac-a716-4389-8043-9ac2e3ec2121",
+                "product_id": "2004",
+                "name": "Suco Copo",
+                "price": 10.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "14/02/2026 09:03",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 89"
+                ],
+                "accompaniments": [],
+                "flavor": "Laranja",
+                "questions_answers": []
+            },
+            {
+                "id": "a809d949-f0d4-439d-aefb-985df9eb03c2",
+                "product_id": "17",
+                "name": "Waffles da chef",
+                "price": 5.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:03",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 89"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "cc5ae5d2-a2af-4064-91b0-a0f8a858f8ea",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 2.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:06",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Sem cebola",
+                    "Transf de Mesa 60"
+                ],
+                "accompaniments": [],
+                "flavor": "Tradicional",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Mexido"
+                    }
+                ]
+            },
+            {
+                "id": "2fd709f9-4a03-4a48-be2a-885e21e72fa0",
+                "product_id": "2002",
+                "name": "Tapioca",
+                "price": 10.0,
+                "qty": 2.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:06",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 60"
+                ],
+                "accompaniments": [],
+                "flavor": "Charque Desfiada + Queijo Coalho",
+                "questions_answers": []
+            },
+            {
+                "id": "aa1d9743-f2a7-4b5b-9528-1dcc10c5afbd",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:06",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 60"
+                ],
+                "accompaniments": [],
+                "flavor": "Charque Desfiada + Queijo Coalho",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Omelete"
+                    }
+                ]
+            },
+            {
+                "id": "985d799e-dbd8-4f6f-9e2c-885e88d8174c",
+                "product_id": "14",
+                "name": "Queijo assado",
+                "price": 15.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:06",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 60"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "a9a0cd05-516a-4f4f-8999-c04e6e1533c4",
+                "product_id": "139",
+                "name": "Café Latte Macchiato",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "14/02/2026 09:16",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 60"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "053cfdc3-6bf7-4a4f-97fa-c8affbad9d61",
+                "product_id": "13",
+                "name": "Pao Na Chapa",
+                "price": 2.0,
+                "qty": 3.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:13",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Sem mantega",
+                    "Transf de Mesa 54"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "3095e88e-d1ed-4950-8b23-c1b91dbd5171",
+                "product_id": "2",
+                "name": "Acai",
+                "price": 19.9,
+                "qty": 1.0,
+                "category": "Sobremesas",
+                "created_at": "14/02/2026 09:13",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 54"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "734b2912-9ff1-4d9a-9318-cf25850f7ced",
+                "product_id": "9",
+                "name": "Mimosa Espumante",
+                "price": 24.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:13",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Só espumante jj",
+                    "Transf de Mesa 54"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            },
+            {
+                "id": "6d26b8ae-1bb9-438d-88de-90786eea2da1",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 2.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:13",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 54"
+                ],
+                "accompaniments": [],
+                "flavor": "Ovos (Omelete,Mexido,Pochê,cozido ou frito)",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Mexido"
+                    }
+                ]
+            },
+            {
+                "id": "6491a391-fbd0-4ed2-bfb1-245d07c558fb",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:48",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 58"
+                ],
+                "accompaniments": [],
+                "flavor": "Presunto + Tomate + Queijo Coalho",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Omelete"
+                    }
+                ]
+            },
+            {
+                "id": "74714584-218b-4550-b10a-0a8b8ea470b8",
+                "product_id": "267",
+                "name": "Toast (Consultar Sabor do Dia)",
+                "price": 24.9,
+                "qty": 2.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:48",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 58"
+                ],
+                "accompaniments": [],
+                "flavor": "Parma",
+                "questions_answers": []
+            },
+            {
+                "id": "32c6dbb2-ad15-477d-92e3-4a674e2e3294",
+                "product_id": "2002",
+                "name": "Tapioca",
+                "price": 10.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 08:48",
+                "waiter": "erique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Cocó",
+                    "Transf de Mesa 58"
+                ],
+                "accompaniments": [],
+                "flavor": "Queijo Coalho",
+                "questions_answers": []
+            },
+            {
+                "id": "acb4a6fb-3510-4f3a-8bb1-0e45cf63b6d9",
+                "product_id": "10",
+                "name": "Misto Quente",
+                "price": 14.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:14",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Bem passado",
+                    "Transf de Mesa 58"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 989.89,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "name": "",
+            "type": "hospede"
+        },
+        "status": "pending",
+        "notes": "Mesa 36",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "c55c5fc1-1e40-4715-b6ec-58d8ba21160e",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "MESA_40_202602141118",
+        "closed_at": "2026-02-14 11:18:41",
+        "closed_by": "guilherme",
+        "total_amount": 81.18,
+        "fiscal_amount": 81.18,
+        "items": [
+            {
+                "id": "7d79c846-35bb-431b-ac30-122aedd05509",
+                "product_id": "2007",
+                "name": "Caipifruta Absolut (Escolha o sabor)",
+                "price": 36.9,
+                "qty": 2.0,
+                "category": "Drinks",
+                "created_at": "14/02/2026 10:58",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Com limão"
+                ],
+                "accompaniments": [],
+                "flavor": "Caju",
+                "questions_answers": []
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "PIX Maquininha CNPJ",
+                "amount": 81.18,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "34bac839-0346-48ef-9eef-b9d4b8c68e32",
+        "origin": "reception",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "ROOM_15",
+        "closed_at": "2026-02-14 11:23:03",
+        "closed_by": "luiz",
+        "total_amount": 2052.2259999999997,
+        "fiscal_amount": 0.0,
+        "items": [
+            {
+                "name": "Agua Sem Gás Pet FRIGOBAR",
+                "qty": 2,
+                "unit_price": 8.9,
+                "total": 17.8
+            },
+            {
+                "name": "Espumante Chandon Reserve Brut",
+                "qty": 1,
+                "unit_price": 180.0,
+                "total": 180.0
+            },
+            {
+                "name": "Caipirinha de Cachaça",
+                "qty": 1,
+                "unit_price": 34.9,
+                "total": 34.9
+            },
+            {
+                "name": "Caipirinha de Pitú",
+                "qty": 1,
+                "unit_price": 28.9,
+                "total": 28.9
+            },
+            {
+                "name": "Mexilhões ao Molho de Vinho Branco",
+                "qty": 1,
+                "unit_price": 34.9,
+                "total": 34.9
+            },
+            {
+                "name": "Medalhão com risotto de champignon e molho especial (Individual)",
+                "qty": 1,
+                "unit_price": 94.99,
+                "total": 94.99
+            },
+            {
+                "name": "Água de Coco",
+                "qty": 1,
+                "unit_price": 10.9,
+                "total": 10.9
+            },
+            {
+                "name": "Brusqueta de Salmão com pão artesanal da  casa (3un.)",
+                "qty": 1,
+                "unit_price": 39.9,
+                "total": 39.9
+            },
+            {
+                "name": "Caldo (Consultar sabor do dia)",
+                "qty": 1,
+                "unit_price": 15.9,
+                "total": 15.9
+            },
+            {
+                "name": "Acai",
+                "qty": 1,
+                "unit_price": 19.9,
+                "total": 19.9
+            },
+            {
+                "name": "Caipirinha de Pitú",
+                "qty": 1,
+                "unit_price": 28.9,
+                "total": 28.9
+            },
+            {
+                "name": "Brusqueta de Salmão com pão artesanal da  casa (3un.)",
+                "qty": 1,
+                "unit_price": 39.9,
+                "total": 39.9
+            },
+            {
+                "name": "Agua Sem Gás Pet FRIGOBAR",
+                "qty": 4,
+                "unit_price": 8.9,
+                "total": 35.6
+            },
+            {
+                "name": "Salmão com Spaghetti ao molho pesto (Individual)",
+                "qty": 1,
+                "unit_price": 89.9,
+                "total": 89.9
+            },
+            {
+                "name": "Medalhão com risotto de champignon e molho especial (Individual)",
+                "qty": 1,
+                "unit_price": 94.99,
+                "total": 94.99
+            },
+            {
+                "name": "Agua Sem Gás Pet FRIGOBAR",
+                "qty": 2,
+                "unit_price": 8.9,
+                "total": 17.8
+            },
+            {
+                "name": "Corona Long Neck",
+                "qty": 1,
+                "unit_price": 16.9,
+                "total": 16.9
+            },
+            {
+                "name": "Espumante Chandon Reserve Brut",
+                "qty": 1,
+                "unit_price": 180.0,
+                "total": 180.0
+            },
+            {
+                "name": "Corona Long Neck",
+                "qty": 1,
+                "unit_price": 16.9,
+                "total": 16.9
+            },
+            {
+                "name": "Casquinha de Aratu",
+                "qty": 1,
+                "unit_price": 49.9,
+                "total": 49.9
+            },
+            {
+                "name": "Medalhão com risotto de champignon e molho especial (Individual)",
+                "qty": 1,
+                "unit_price": 94.99,
+                "total": 94.99
+            },
+            {
+                "name": "Agua Sem Gás Pet FRIGOBAR",
+                "qty": 1,
+                "unit_price": 8.9,
+                "total": 8.9
+            },
+            {
+                "name": "Capsulas (Hospedes)",
+                "qty": 1,
+                "unit_price": 7.9,
+                "total": 7.9
+            },
+            {
+                "name": "Heineken FRIGOBAR",
+                "qty": 1,
+                "unit_price": 16.9,
+                "total": 16.9
+            },
+            {
+                "name": "Gin Tonica",
+                "qty": 1,
+                "unit_price": 36.9,
+                "total": 36.9
+            },
+            {
+                "name": "Caipirinha de Cachaça",
+                "qty": 1,
+                "unit_price": 34.9,
+                "total": 34.9
+            },
+            {
+                "name": "Salada da Chef de Salmão",
+                "qty": 1,
+                "unit_price": 45.9,
+                "total": 45.9
+            },
+            {
+                "name": "Batata Frita",
+                "qty": 1,
+                "unit_price": 24.9,
+                "total": 24.9
+            },
+            {
+                "name": "Corona Long Neck",
+                "qty": 1,
+                "unit_price": 16.9,
+                "total": 16.9
+            },
+            {
+                "name": "Água de Coco",
+                "qty": 1,
+                "unit_price": 10.9,
+                "total": 10.9
+            },
+            {
+                "name": "Corona Long Neck",
+                "qty": 1,
+                "unit_price": 16.9,
+                "total": 16.9
+            },
+            {
+                "name": "Corona Long Neck",
+                "qty": 1,
+                "unit_price": 16.9,
+                "total": 16.9
+            },
+            {
+                "name": "Agua Sem Gás Pet FRIGOBAR",
+                "qty": 3,
+                "unit_price": 8.9,
+                "total": 26.700000000000003
+            },
+            {
+                "name": "Medalhão com risotto de champignon e molho especial (Individual)",
+                "qty": 1,
+                "unit_price": 94.99,
+                "total": 94.99
+            },
+            {
+                "name": "Batata Frita",
+                "qty": 1,
+                "unit_price": 24.9,
+                "total": 24.9
+            },
+            {
+                "name": "Bacalhau a Natas (Individual)",
+                "qty": 1,
+                "unit_price": 99.9,
+                "total": 99.9
+            },
+            {
+                "name": "Vinho Tinto Familia Merlot Reserva",
+                "qty": 1,
+                "unit_price": 170.0,
+                "total": 170.0
+            },
+            {
+                "name": "Acai",
+                "qty": 1,
+                "unit_price": 19.9,
+                "total": 19.9
+            },
+            {
+                "name": "Agua Sem Gás Pet FRIGOBAR",
+                "qty": 2,
+                "unit_price": 8.9,
+                "total": 17.8
+            },
+            {
+                "name": "Capsulas (Hospedes)",
+                "qty": 2,
+                "unit_price": 7.9,
+                "total": 15.8
+            },
+            {
+                "name": "Heineken FRIGOBAR",
+                "qty": 2,
+                "unit_price": 16.9,
+                "total": 33.8
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Credito Angelo",
+                "amount": 2052.2259999999997,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "room_number": "15",
+            "guest_name": "Rodrigo Escudeiro e Catalina Javiera"
+        },
+        "status": "pending",
+        "notes": null,
+        "fiscal_doc_uuid": null,
+        "history": []
     }
 ]
