@@ -214,14 +214,18 @@
     {
         "id": "14",
         "name": "Cioba",
-        "department": "Estoques",
+        "department": "Cozinha",
         "unit": "Unidades",
         "price": 58.6,
         "suppliers": [
-            "Estoque Inicial"
+            "Rafael"
         ],
         "category": "Bruto Carnes",
-        "min_stock": 0.0
+        "min_stock": 20.0,
+        "package_size": 1.0,
+        "purchase_unit": "kilograma",
+        "frequency": "Quinzenal",
+        "is_internal": false
     },
     {
         "id": "15",
@@ -3045,14 +3049,18 @@
     {
         "id": "231",
         "name": "Cocada caseira",
-        "department": "Estoques",
+        "department": "Cozinha",
         "unit": "Kilogramas",
         "price": 15.0,
         "suppliers": [
-            "Estoque Inicial"
+            "PORCIONAMENTO ( COZINHA )"
         ],
         "category": "Sobremesa",
-        "min_stock": 0.0
+        "min_stock": 3.0,
+        "package_size": 1.0,
+        "purchase_unit": "NAÕ SE COMPRA",
+        "frequency": "Semanal",
+        "is_internal": false
     },
     {
         "id": "232",
@@ -5583,14 +5591,18 @@
     {
         "id": "419",
         "name": "Ciriguela",
-        "department": "Estoques",
+        "department": "Serviço",
         "unit": "Kilogramas",
         "price": 7.9,
         "suppliers": [
-            "Estoque Inicial"
+            "ceasa"
         ],
         "category": "Frutas",
-        "min_stock": 0.06074380165289256
+        "min_stock": 23.0,
+        "package_size": 1.0,
+        "purchase_unit": "kilograma",
+        "frequency": "Quinzenal",
+        "is_internal": false
     },
     {
         "id": "420",
@@ -5995,14 +6007,18 @@
     {
         "id": "448",
         "name": "Cloro",
-        "department": "Estoques",
+        "department": "Estoque",
         "unit": "Kilogramas",
-        "price": 0.0,
+        "price": 7.2,
         "suppliers": [
-            "Estoque Inicial"
+            "P&R"
         ],
         "category": "Produtos de Limpeza",
-        "min_stock": 0.0
+        "min_stock": 10.0,
+        "package_size": 1.0,
+        "purchase_unit": "unidadde",
+        "frequency": "Quinzenal",
+        "is_internal": false
     },
     {
         "id": "449",
@@ -6595,26 +6611,34 @@
     {
         "id": "496",
         "name": "Coca-Cola (GOVERNANÇA)",
-        "department": "Estoques",
+        "department": "Governança",
         "unit": "Unidades",
-        "price": 3.25,
+        "price": 2.86,
         "suppliers": [
-            "Estoque Inicial"
+            "coca cola"
         ],
         "category": "Governança",
-        "min_stock": 0.0
+        "min_stock": 24.0,
+        "package_size": 1.0,
+        "purchase_unit": "fardo",
+        "frequency": "Quinzenal",
+        "is_internal": false
     },
     {
         "id": "497",
         "name": "Coca-Cola Zero (GOVERNANÇA)",
-        "department": "Estoques",
+        "department": "Governança",
         "unit": "Unidades",
-        "price": 3.59,
+        "price": 2.8,
         "suppliers": [
-            "Estoque Inicial"
+            "coca cola"
         ],
         "category": "Governança",
-        "min_stock": 0.0
+        "min_stock": 24.0,
+        "package_size": 1.0,
+        "purchase_unit": "fardo",
+        "frequency": "Quinzenal",
+        "is_internal": false
     },
     {
         "id": "498",
@@ -7575,14 +7599,18 @@
     {
         "id": "570",
         "name": "Coador de coquetéis (chinoi ou chinoy )",
-        "department": "Estoques",
+        "department": "Serviço",
         "unit": "Unidades",
         "price": 7.0,
         "suppliers": [
-            "Estoque Inicial"
+            "MERCADO LIVRE"
         ],
         "category": "Inventario",
-        "min_stock": 0.0
+        "min_stock": 2.0,
+        "package_size": 1.0,
+        "purchase_unit": "unidadde",
+        "frequency": "Sem Frequência",
+        "is_internal": false
     },
     {
         "id": "571",
@@ -9852,26 +9880,34 @@
     {
         "id": "757",
         "name": "Coca-Cola",
-        "department": "Estoques",
+        "department": "Estoque",
         "unit": "Unidades",
         "price": 2.9,
         "suppliers": [
-            "Estoque Inicial"
+            "coca cola"
         ],
         "category": "Estoque Principal - Bar",
-        "min_stock": 12.0
+        "min_stock": 120.0,
+        "package_size": 1.0,
+        "purchase_unit": "fardo",
+        "frequency": "Quinzenal",
+        "is_internal": false
     },
     {
         "id": "758",
         "name": "Coca-Cola Zero",
-        "department": "Estoques",
+        "department": "Serviço",
         "unit": "Unidades",
         "price": 2.8,
         "suppliers": [
-            "Estoque Inicial"
+            "coca cola"
         ],
         "category": "Estoque Principal - Bar",
-        "min_stock": 12.0
+        "min_stock": 24.0,
+        "package_size": 1.0,
+        "purchase_unit": "fardo",
+        "frequency": "Quinzenal",
+        "is_internal": false
     },
     {
         "id": "759",
@@ -10101,14 +10137,18 @@
     {
         "id": "777",
         "name": "Cloro BD",
-        "department": "Estoques",
+        "department": "Estoque",
         "unit": "Kilogramas",
         "price": 23.0,
         "suppliers": [
-            "Estoque Inicial"
+            "P&R"
         ],
         "category": "Estoque Principal - Limpeza",
-        "min_stock": 0.0
+        "min_stock": 50.0,
+        "package_size": 1.0,
+        "purchase_unit": "kilograma",
+        "frequency": "Mensal",
+        "is_internal": false
     },
     {
         "id": "778",
@@ -10640,6 +10680,54 @@
         "frequency": "Semanal",
         "suppliers": [
             "dlp"
+        ],
+        "is_internal": false
+    },
+    {
+        "id": "806",
+        "name": "Nutella",
+        "department": "Cozinha",
+        "unit": "Kilogramas",
+        "price": 30.0,
+        "category": "recheio",
+        "min_stock": 0.0,
+        "package_size": 1.0,
+        "purchase_unit": "",
+        "frequency": "Semanal",
+        "suppliers": [
+            "casa"
+        ],
+        "is_internal": false
+    },
+    {
+        "id": "807",
+        "name": "Coco com leite condensado",
+        "department": "Cozinha",
+        "unit": "Litros",
+        "price": 8.0,
+        "category": "recheio",
+        "min_stock": 0.0,
+        "package_size": 1.0,
+        "purchase_unit": "",
+        "frequency": "Semanal",
+        "suppliers": [
+            "casa"
+        ],
+        "is_internal": false
+    },
+    {
+        "id": "808",
+        "name": "Doce de leite ",
+        "department": "Cozinha",
+        "unit": "Litros",
+        "price": 5.0,
+        "category": "recheio",
+        "min_stock": 0.0,
+        "package_size": 1.0,
+        "purchase_unit": "",
+        "frequency": "Semanal",
+        "suppliers": [
+            "casa"
         ],
         "is_internal": false
     }

@@ -700,12 +700,7 @@
         "service_fee_exempt": false,
         "visible_virtual_menu": true,
         "active": true,
-        "recipe": [
-            {
-                "ingredient_id": "349",
-                "qty": 1.0
-            }
-        ],
+        "recipe": [],
         "ncm": "22041010",
         "cest": "",
         "transparency_tax": 27.0,
@@ -720,7 +715,7 @@
         "pis_rate": 0.0,
         "cofins_cst": "01",
         "cofins_rate": 0.0,
-        "image": "18_taca_de_espumante.jpg",
+        "image": "/Produtos/Fotos/18_taca_de_espumante.jpg",
         "product_type": "standard",
         "has_accompaniments": false,
         "allowed_accompaniments": [],
@@ -2161,7 +2156,7 @@
         "pis_rate": 0.0,
         "cofins_cst": "06",
         "cofins_rate": 0.0,
-        "image": "47_199.jpg",
+        "image": "/Produtos/Fotos/47_199.jpg",
         "product_type": "standard",
         "has_accompaniments": false,
         "allowed_accompaniments": [],
@@ -3201,7 +3196,7 @@
         "description": "Uma deliciosa porção de Pastel de Camarão, ideal para abrir o apetite e compartilhar.",
         "service_fee_exempt": false,
         "visible_virtual_menu": true,
-        "active": true,
+        "active": false,
         "recipe": [
             {
                 "ingredient_id": "198",
@@ -3500,7 +3495,7 @@
         "description": "Mini pastéis recheados com generosa porção de queijo coalho, fritos na hora. Crocantes e saborosos (6 unidades).",
         "service_fee_exempt": false,
         "visible_virtual_menu": true,
-        "active": false,
+        "active": true,
         "recipe": [
             {
                 "ingredient_id": "200",
@@ -5477,7 +5472,7 @@
         "description": "Irresistível Sorvete Artesenal de Castanha, a doçura perfeita para finalizar sua refeição.",
         "service_fee_exempt": false,
         "visible_virtual_menu": true,
-        "active": false,
+        "active": true,
         "recipe": [],
         "ncm": "21069090",
         "cest": "",
@@ -7274,7 +7269,7 @@
         "description": "Vinho Espumante Chandon Reserve Rosé, selecionado para harmonizar com nossos pratos.",
         "service_fee_exempt": false,
         "visible_virtual_menu": true,
-        "active": false,
+        "active": true,
         "recipe": [
             {
                 "ingredient_id": "343",
@@ -7295,7 +7290,7 @@
         "pis_rate": 0.0,
         "cofins_cst": "01",
         "cofins_rate": 0.0,
-        "image": "174_1021.jpg",
+        "image": "/Produtos/Fotos/174_1021.jpg",
         "mandatory_questions": [],
         "flavor_group_id": "",
         "flavor_multiplier": 1.0,
@@ -12200,5 +12195,46 @@
         "pis_rate": 0.0,
         "cofins_cst": "",
         "cofins_rate": 0.0
+    },
+    {
+        "id": "288",
+        "name": "Salada de Frutas ",
+        "category": "Entradas",
+        "price": 24.9,
+        "cost_price": 10.0,
+        "printer_id": "2",
+        "should_print": true,
+        "description": "",
+        "image": "",
+        "image_url": "",
+        "service_fee_exempt": false,
+        "visible_virtual_menu": false,
+        "highlight": false,
+        "active": true,
+        "recipe": [],
+        "mandatory_questions": [],
+        "flavor_group_id": "",
+        "flavor_multiplier": 1.0,
+        "product_type": "standard",
+        "has_accompaniments": false,
+        "allowed_accompaniments": [],
+        "ncm": "21069090",
+        "cest": "",
+        "transparency_tax": 0.0,
+        "fiscal_benefit_code": "",
+        "cfop": "5101",
+        "origin": "1",
+        "tax_situation": "102",
+        "icms_rate": 0.0,
+        "icms_base_reduction": 0.0,
+        "fcp_rate": 0.0,
+        "pis_cst": "",
+        "pis_rate": 0.0,
+        "cofins_cst": "",
+        "cofins_rate": 0.0,
+        "paused": false,
+        "pause_reason": "",
+        "pause_start": "",
+        "pause_end": ""
     }
 ]

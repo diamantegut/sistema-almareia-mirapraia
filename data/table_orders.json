@@ -31,7 +31,7 @@
         "total": 18.32
     },
     "FUNC_robson": {
-        "status": "closed",
+        "status": "open",
         "opened_at": "01/02/2026 13:26",
         "num_adults": 1,
         "customer_type": "funcionario",
@@ -62,117 +62,9 @@
                 "source": "restaurant",
                 "waiter": "filipe",
                 "created_at": "01/02/2026 13:26"
-            },
-            {
-                "id": "c6957bce-66c7-4bef-95a2-a74893668747",
-                "product_id": "149",
-                "name": "Coca-Cola 350ml",
-                "price": 8.9,
-                "qty": 1.0,
-                "category": "Refrigerante",
-                "created_at": "14/02/2026 11:19",
-                "waiter": "Angelo",
-                "printed": true,
-                "print_status": "printed",
-                "complements": [],
-                "observations": [],
-                "accompaniments": [],
-                "flavor": "",
-                "questions_answers": [
-                    {
-                        "question": "Copo",
-                        "answer": "1"
-                    }
-                ],
-                "ncm": "22021000",
-                "cest": "301002",
-                "cfop": "5405",
-                "origin": "0",
-                "tax_info": null
-            },
-            {
-                "id": "9a999e40-0c5a-405d-8f3b-5a60427ef8ee",
-                "product_id": "149",
-                "name": "Coca-Cola 350ml",
-                "price": 8.9,
-                "qty": 1.0,
-                "category": "Refrigerante",
-                "created_at": "14/02/2026 11:21",
-                "waiter": "Angelo",
-                "printed": true,
-                "print_status": "printed",
-                "complements": [],
-                "observations": [],
-                "accompaniments": [],
-                "flavor": "",
-                "questions_answers": [
-                    {
-                        "question": "Copo",
-                        "answer": "1"
-                    }
-                ],
-                "ncm": "22021000",
-                "cest": "301002",
-                "cfop": "5405",
-                "origin": "0",
-                "tax_info": null
-            },
-            {
-                "id": "fdf441c0-7454-457f-8df1-1bbb085330aa",
-                "product_id": "149",
-                "name": "Coca-Cola 350ml",
-                "price": 8.9,
-                "qty": 1.0,
-                "category": "Refrigerante",
-                "created_at": "14/02/2026 11:21",
-                "waiter": "Angelo",
-                "printed": true,
-                "print_status": "printed",
-                "complements": [],
-                "observations": [],
-                "accompaniments": [],
-                "flavor": "",
-                "questions_answers": [
-                    {
-                        "question": "Copo",
-                        "answer": "1"
-                    }
-                ],
-                "ncm": "22021000",
-                "cest": "301002",
-                "cfop": "5405",
-                "origin": "0",
-                "tax_info": null
-            },
-            {
-                "id": "118700ba-e8b7-4080-bf15-610e878463e9",
-                "product_id": "160",
-                "name": "Corona Long Neck",
-                "price": 16.9,
-                "qty": 1.0,
-                "category": "Cervejas",
-                "created_at": "14/02/2026 15:51",
-                "waiter": "Angelo",
-                "printed": false,
-                "print_status": "error",
-                "complements": [],
-                "observations": [],
-                "accompaniments": [],
-                "flavor": "",
-                "questions_answers": [],
-                "ncm": "22030000",
-                "cest": "302101",
-                "cfop": "5405",
-                "origin": "0",
-                "tax_info": null
             }
         ],
-        "total": 50.72,
-        "partial_payments": [],
-        "total_paid": 0.0,
-        "payment_method": "deducao_comissao",
-        "closed_at": "14/02/2026 15:57",
-        "commission_cycle_id": "20260214123206"
+        "total": 7.120000000000001
     },
     "69": {
         "items": [
@@ -771,7 +663,7 @@
         "total": 15.040000000000003
     },
     "FUNC_erique": {
-        "status": "closed",
+        "status": "open",
         "opened_at": "02/02/2026 14:26",
         "num_adults": 1,
         "customer_type": "funcionario",
@@ -829,13 +721,10 @@
         ],
         "total": 21.360000000000003,
         "partial_payments": [],
-        "total_paid": 0.0,
-        "payment_method": "deducao_comissao",
-        "closed_at": "14/02/2026 15:57",
-        "commission_cycle_id": "20260214123206"
+        "total_paid": 0.0
     },
     "FUNC_clebio": {
-        "status": "closed",
+        "status": "open",
         "opened_at": "02/02/2026 14:27",
         "num_adults": 1,
         "customer_type": "funcionario",
@@ -883,10 +772,7 @@
                 "created_at": "05/02/2026 20:24"
             }
         ],
-        "total": 46.88,
-        "payment_method": "deducao_comissao",
-        "closed_at": "14/02/2026 15:57",
-        "commission_cycle_id": "20260214123206"
+        "total": 46.88
     },
     "FUNC_bartolomeu": {
         "status": "open",
@@ -925,7 +811,7 @@
         "total": 7.920000000000001
     },
     "FUNC_welington": {
-        "status": "closed",
+        "status": "open",
         "opened_at": "02/02/2026 14:27",
         "num_adults": 1,
         "customer_type": "funcionario",
@@ -953,10 +839,7 @@
                 "created_at": "02/02/2026 14:28"
             }
         ],
-        "total": 23.12,
-        "payment_method": "deducao_comissao",
-        "closed_at": "14/02/2026 15:57",
-        "commission_cycle_id": "20260214123206"
+        "total": 23.12
     },
     "FUNC_jose.santos": {
         "status": "open",
@@ -1010,7 +893,7 @@
         "total": 19.84
     },
     "FUNC_iraquitan": {
-        "status": "closed",
+        "status": "open",
         "opened_at": "02/02/2026 14:29",
         "num_adults": 1,
         "customer_type": "funcionario",
@@ -1066,17 +949,36 @@
                 "source": "restaurant",
                 "waiter": "filipe",
                 "created_at": "09/02/2026 15:17"
+            },
+            {
+                "id": "7694de09-24b3-44b7-ba51-e524471f8495",
+                "product_id": "148",
+                "name": "Coca Cola Zero 350ml",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Refrigerante",
+                "created_at": "14/02/2026 13:27",
+                "waiter": "filipe",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "1"
+                    }
+                ]
             }
         ],
-        "total": 14.240000000000002,
+        "total": 23.14,
         "partial_payments": [],
-        "total_paid": 0.0,
-        "payment_method": "deducao_comissao",
-        "closed_at": "14/02/2026 15:57",
-        "commission_cycle_id": "20260214123206"
+        "total_paid": 0.0
     },
     "FUNC_danilo": {
-        "status": "closed",
+        "status": "open",
         "opened_at": "02/02/2026 14:29",
         "num_adults": 1,
         "customer_type": "funcionario",
@@ -1124,13 +1026,10 @@
                 "created_at": "06/02/2026 18:01"
             }
         ],
-        "total": 62.8,
-        "payment_method": "deducao_comissao",
-        "closed_at": "14/02/2026 15:57",
-        "commission_cycle_id": "20260214123206"
+        "total": 62.8
     },
     "FUNC_cicera": {
-        "status": "closed",
+        "status": "open",
         "opened_at": "02/02/2026 14:30",
         "num_adults": 1,
         "customer_type": "funcionario",
@@ -1183,13 +1082,10 @@
                 "created_at": "05/02/2026 20:25"
             }
         ],
-        "total": 15.840000000000002,
-        "payment_method": "deducao_comissao",
-        "closed_at": "14/02/2026 15:57",
-        "commission_cycle_id": "20260214123206"
+        "total": 15.840000000000002
     },
     "FUNC_filipe": {
-        "status": "closed",
+        "status": "open",
         "opened_at": "02/02/2026 14:30",
         "num_adults": 1,
         "customer_type": "funcionario",
@@ -1222,13 +1118,10 @@
                 "created_at": "02/02/2026 14:30"
             }
         ],
-        "total": 21.360000000000003,
-        "payment_method": "deducao_comissao",
-        "closed_at": "14/02/2026 15:57",
-        "commission_cycle_id": "20260214123206"
+        "total": 21.360000000000003
     },
     "FUNC_adailton": {
-        "status": "closed",
+        "status": "open",
         "opened_at": "02/02/2026 14:31",
         "num_adults": 1,
         "customer_type": "funcionario",
@@ -1336,13 +1229,10 @@
         ],
         "total": 107.52000000000001,
         "partial_payments": [],
-        "total_paid": 0.0,
-        "payment_method": "deducao_comissao",
-        "closed_at": "14/02/2026 15:57",
-        "commission_cycle_id": "20260214123206"
+        "total_paid": 0.0
     },
     "FUNC_elenilda": {
-        "status": "closed",
+        "status": "open",
         "opened_at": "02/02/2026 15:07",
         "num_adults": 1,
         "customer_type": "funcionario",
@@ -1370,13 +1260,10 @@
                 "created_at": "02/02/2026 15:07"
             }
         ],
-        "total": 27.92,
-        "payment_method": "deducao_comissao",
-        "closed_at": "14/02/2026 15:57",
-        "commission_cycle_id": "20260214123206"
+        "total": 27.92
     },
     "FUNC_Grasi": {
-        "status": "closed",
+        "status": "open",
         "opened_at": "02/02/2026 16:54",
         "num_adults": 1,
         "customer_type": "funcionario",
@@ -1427,56 +1314,7 @@
         ],
         "total": 16.64,
         "partial_payments": [],
-        "total_paid": 0.0,
-        "payment_method": "deducao_comissao",
-        "closed_at": "14/02/2026 15:57",
-        "commission_cycle_id": "20260214123206"
-    },
-    "34": {
-        "items": [
-            {
-                "id": "f5a32c65-80e0-4229-844e-0f5ade3a9700",
-                "printed": true,
-                "print_status": "skipped",
-                "name": "Agua Sem Gás Pet FRIGOBAR",
-                "flavor": null,
-                "qty": 3.0,
-                "price": 8.9,
-                "complements": [],
-                "accompaniments": [],
-                "questions_answers": [],
-                "observations": [],
-                "category": "Frigobar",
-                "service_fee_exempt": false,
-                "source": "restaurant",
-                "waiter": "priscila",
-                "created_at": "07/02/2026 18:23"
-            },
-            {
-                "id": "54254280-909e-4357-b3bd-3b168d734e3b",
-                "printed": true,
-                "print_status": "skipped",
-                "name": "Agua Sem Gás Pet FRIGOBAR",
-                "flavor": null,
-                "qty": 3.0,
-                "price": 8.9,
-                "complements": [],
-                "accompaniments": [],
-                "questions_answers": [],
-                "observations": [],
-                "category": "Frigobar",
-                "service_fee_exempt": false,
-                "source": "restaurant",
-                "waiter": "priscila",
-                "created_at": "07/02/2026 18:24"
-            }
-        ],
-        "total": 0,
-        "status": "open",
-        "opened_at": "02/02/2026 20:57",
-        "num_adults": 2,
-        "customer_type": "hospede",
-        "room_number": "34"
+        "total_paid": 0.0
     },
     "FUNC_carlos": {
         "status": "open",
@@ -1510,7 +1348,7 @@
         "total": 6.32
     },
     "FUNC_jose": {
-        "status": "closed",
+        "status": "open",
         "opened_at": "03/02/2026 16:01",
         "num_adults": 1,
         "customer_type": "funcionario",
@@ -1564,15 +1402,38 @@
                 "source": "restaurant",
                 "waiter": "adailton",
                 "created_at": "06/02/2026 14:18"
+            },
+            {
+                "id": "4cf5542e-d7b3-4c26-8135-af26a1418abc",
+                "product_id": "149",
+                "name": "Coca-Cola 350ml",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Refrigerante",
+                "created_at": "14/02/2026 13:09",
+                "waiter": "filipe",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Não Imprimir"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "1"
+                    }
+                ]
             }
         ],
-        "total": 14.240000000000002,
-        "payment_method": "deducao_comissao",
-        "closed_at": "14/02/2026 15:57",
-        "commission_cycle_id": "20260214123206"
+        "total": 23.14,
+        "partial_payments": [],
+        "total_paid": 0.0
     },
     "FUNC_alan": {
-        "status": "closed",
+        "status": "open",
         "opened_at": "04/02/2026 09:15",
         "num_adults": 1,
         "customer_type": "funcionario",
@@ -1659,15 +1520,36 @@
                 "source": "restaurant",
                 "waiter": "alan",
                 "created_at": "07/02/2026 09:41"
+            },
+            {
+                "id": "b5a2539b-7a16-4d2a-9267-186e1656bf18",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "14/02/2026 09:50",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "Queijo Mussarela + Tomate",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Omelete"
+                    }
+                ]
             }
         ],
-        "total": 31.12,
-        "payment_method": "deducao_comissao",
-        "closed_at": "14/02/2026 15:57",
-        "commission_cycle_id": "20260214123206"
+        "total": 40.02,
+        "partial_payments": [],
+        "total_paid": 0.0
     },
     "FUNC_taciana": {
-        "status": "closed",
+        "status": "open",
         "opened_at": "04/02/2026 14:47",
         "num_adults": 1,
         "customer_type": "funcionario",
@@ -1725,13 +1607,10 @@
                 "created_at": "07/02/2026 13:05"
             }
         ],
-        "total": 14.240000000000002,
-        "payment_method": "deducao_comissao",
-        "closed_at": "14/02/2026 15:57",
-        "commission_cycle_id": "20260214123206"
+        "total": 14.240000000000002
     },
     "FUNC_pedro": {
-        "status": "closed",
+        "status": "open",
         "opened_at": "04/02/2026 15:09",
         "num_adults": 1,
         "customer_type": "funcionario",
@@ -1757,13 +1636,10 @@
                 "created_at": "04/02/2026 15:10"
             }
         ],
-        "total": 7.120000000000001,
-        "payment_method": "deducao_comissao",
-        "closed_at": "14/02/2026 15:57",
-        "commission_cycle_id": "20260214123206"
+        "total": 7.120000000000001
     },
     "FUNC_josenice": {
-        "status": "closed",
+        "status": "open",
         "opened_at": "04/02/2026 15:10",
         "num_adults": 1,
         "customer_type": "funcionario",
@@ -1794,10 +1670,7 @@
                 "created_at": "04/02/2026 15:10"
             }
         ],
-        "total": 7.120000000000001,
-        "payment_method": "deducao_comissao",
-        "closed_at": "14/02/2026 15:57",
-        "commission_cycle_id": "20260214123206"
+        "total": 7.120000000000001
     },
     "GOV": {
         "items": [
@@ -1820,7 +1693,7 @@
         "room_number": "31"
     },
     "FUNC_guilherme": {
-        "status": "closed",
+        "status": "open",
         "opened_at": "06/02/2026 14:07",
         "num_adults": 1,
         "customer_type": "funcionario",
@@ -1846,12 +1719,28 @@
                 "source": "restaurant",
                 "waiter": "filipe",
                 "created_at": "06/02/2026 14:07"
+            },
+            {
+                "id": "b0c79e0c-48fc-437a-a78d-d59220c6fea9",
+                "product_id": "143",
+                "name": "H2o",
+                "price": 7.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "13/02/2026 16:37",
+                "waiter": "filipe",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": []
             }
         ],
-        "total": 6.32,
-        "payment_method": "deducao_comissao",
-        "closed_at": "14/02/2026 15:57",
-        "commission_cycle_id": "20260214123206"
+        "total": 14.22,
+        "partial_payments": [],
+        "total_paid": 0.0
     },
     "26": {
         "items": [],
@@ -1899,7 +1788,7 @@
         "total": 7.120000000000001
     },
     "FUNC_dudu": {
-        "status": "closed",
+        "status": "open",
         "opened_at": "06/02/2026 17:58",
         "num_adults": 1,
         "customer_type": "funcionario",
@@ -1952,13 +1841,10 @@
         ],
         "total": 91.84,
         "partial_payments": [],
-        "total_paid": 0.0,
-        "payment_method": "deducao_comissao",
-        "closed_at": "14/02/2026 15:57",
-        "commission_cycle_id": "20260214123206"
+        "total_paid": 0.0
     },
     "FUNC_maria": {
-        "status": "closed",
+        "status": "open",
         "opened_at": "06/02/2026 18:01",
         "num_adults": 1,
         "customer_type": "funcionario",
@@ -2016,10 +1902,7 @@
                 "created_at": "07/02/2026 14:38"
             }
         ],
-        "total": 14.240000000000002,
-        "payment_method": "deducao_comissao",
-        "closed_at": "14/02/2026 15:57",
-        "commission_cycle_id": "20260214123206"
+        "total": 14.240000000000002
     },
     "17": {
         "items": [],
@@ -2031,7 +1914,7 @@
         "room_number": "17"
     },
     "FUNC_henrique": {
-        "status": "closed",
+        "status": "open",
         "opened_at": "09/02/2026 13:16",
         "num_adults": 1,
         "customer_type": "funcionario",
@@ -2064,19 +1947,7 @@
         ],
         "total": 7.120000000000001,
         "partial_payments": [],
-        "total_paid": 0.0,
-        "payment_method": "deducao_comissao",
-        "closed_at": "14/02/2026 15:57",
-        "commission_cycle_id": "20260214123206"
-    },
-    "15": {
-        "items": [],
-        "total": 0,
-        "status": "open",
-        "opened_at": "09/02/2026 16:37",
-        "num_adults": 2,
-        "customer_type": "hospede",
-        "room_number": "15"
+        "total_paid": 0.0
     },
     "31": {
         "items": [],
@@ -2182,902 +2053,142 @@
         "customer_type": "hospede",
         "room_number": "01"
     },
-    "59": {
-        "items": [
-            {
-                "id": "6a5a4d33-f659-4e40-86e6-2881e4226b39",
-                "product_id": "142",
-                "name": "Água de Coco",
-                "price": 10.9,
-                "qty": 2.0,
-                "category": "Sucos e Águas",
-                "created_at": "13/02/2026 11:17",
-                "waiter": "erique",
-                "printed": true,
-                "print_status": "printed",
-                "complements": [],
-                "observations": [],
-                "accompaniments": [],
-                "flavor": "",
-                "questions_answers": []
-            }
-        ],
-        "total": 21.8,
-        "status": "open",
-        "opened_at": "13/02/2026 11:17",
-        "num_adults": 2,
-        "customer_type": "hospede",
-        "customer_name": "",
-        "room_number": "17",
-        "waiter": "",
-        "staff_name": null,
-        "is_breakfast": false,
-        "partial_payments": [],
-        "total_paid": 0.0
-    },
-    "50": {
-        "items": [
-            {
-                "id": "5b8c112b-5290-4967-b7ab-8bc672a3e703",
-                "product_id": "142",
-                "name": "Água de Coco",
-                "price": 10.9,
-                "qty": 1.0,
-                "category": "Sucos e Águas",
-                "created_at": "13/02/2026 11:18",
-                "waiter": "erique",
-                "printed": true,
-                "print_status": "printed",
-                "complements": [],
-                "observations": [],
-                "accompaniments": [],
-                "flavor": "",
-                "questions_answers": []
-            }
-        ],
-        "total": 10.9,
-        "status": "open",
-        "opened_at": "13/02/2026 11:18",
-        "num_adults": 2,
-        "customer_type": "hospede",
-        "customer_name": "Rodrigo Escudeiro e Catalina Javiera",
-        "room_number": "15",
-        "waiter": "",
-        "staff_name": null,
-        "is_breakfast": false,
-        "partial_payments": [],
-        "total_paid": 0.0,
-        "locked": false
-    },
-    "60": {
-        "items": [
-            {
-                "id": "fb18d977-c3c9-4b69-a81b-cf370ce3a6d7",
-                "product_id": "142",
-                "name": "Água de Coco",
-                "price": 10.9,
-                "qty": 2.0,
-                "category": "Sucos e Águas",
-                "created_at": "13/02/2026 11:36",
-                "waiter": "erique",
-                "printed": true,
-                "print_status": "printed",
-                "complements": [],
-                "observations": [],
-                "accompaniments": [],
-                "flavor": "",
-                "questions_answers": []
-            }
-        ],
-        "total": 21.8,
-        "status": "open",
-        "opened_at": "13/02/2026 11:31",
-        "num_adults": 2,
-        "customer_type": "hospede",
-        "customer_name": "",
-        "room_number": "12",
-        "waiter": "",
-        "staff_name": null,
-        "is_breakfast": false,
-        "partial_payments": [],
-        "total_paid": 0.0
-    },
-    "74": {
-        "items": [
-            {
-                "id": "3e39e08d-04ce-454c-83d7-0c5a444a5bb9",
-                "product_id": "142",
-                "name": "Água de Coco",
-                "price": 10.9,
-                "qty": 1.0,
-                "category": "Sucos e Águas",
-                "created_at": "13/02/2026 11:39",
-                "waiter": "erique",
-                "printed": true,
-                "print_status": "printed",
-                "complements": [],
-                "observations": [],
-                "accompaniments": [],
-                "flavor": "",
-                "questions_answers": []
-            }
-        ],
-        "total": 10.9,
-        "status": "open",
-        "opened_at": "13/02/2026 11:36",
-        "num_adults": 2,
-        "customer_type": "hospede",
-        "customer_name": "",
-        "room_number": "31",
-        "waiter": "",
-        "staff_name": null,
-        "is_breakfast": false,
-        "partial_payments": [],
-        "total_paid": 0.0
-    },
-    "73": {
-        "items": [
-            {
-                "id": "0669170d-4a83-40af-9284-2a46c5532dea",
-                "product_id": "142",
-                "name": "Água de Coco",
-                "price": 10.9,
-                "qty": 1.0,
-                "category": "Sucos e Águas",
-                "created_at": "13/02/2026 11:42",
-                "waiter": "erique",
-                "printed": true,
-                "print_status": "printed",
-                "complements": [],
-                "observations": [],
-                "accompaniments": [],
-                "flavor": "",
-                "questions_answers": []
-            }
-        ],
-        "total": 10.9,
-        "status": "open",
-        "opened_at": "13/02/2026 11:40",
-        "num_adults": 2,
-        "customer_type": "hospede",
-        "customer_name": "",
-        "room_number": "25",
-        "waiter": "",
-        "staff_name": null,
-        "is_breakfast": false,
-        "partial_payments": [],
-        "total_paid": 0.0
-    },
-    "40": {
-        "items": [
-            {
-                "id": "d11e6b7d-4b42-42f3-ac22-6dc58e408df4",
-                "product_id": "133",
-                "name": "Agua com Gás 275ml",
-                "price": 9.9,
-                "qty": 1.0,
-                "category": "Sucos e Águas",
-                "created_at": "13/02/2026 11:58",
-                "waiter": "guilherme",
-                "printed": true,
-                "print_status": "printed",
-                "complements": [],
-                "observations": [
-                    "Sem gelo"
-                ],
-                "accompaniments": [],
-                "flavor": "",
-                "questions_answers": [
-                    {
-                        "question": "Copo",
-                        "answer": "1"
-                    }
-                ]
-            },
-            {
-                "id": "25997361-9d8d-4031-b571-7c22bac29601",
-                "product_id": "71",
-                "name": "Pastel de Camarão",
-                "price": 42.9,
-                "qty": 1.0,
-                "category": "Entradas",
-                "created_at": "14/02/2026 11:15",
-                "waiter": "Angelo",
-                "printed": true,
-                "print_status": "printed",
-                "complements": [],
-                "observations": [],
-                "accompaniments": [],
-                "flavor": "",
-                "questions_answers": [],
-                "ncm": "21069090",
-                "cest": "",
-                "cfop": "5101",
-                "origin": "0",
-                "tax_info": null
-            },
-            {
-                "id": "5e658601-cd06-448d-a4d5-af45669a7b1a",
-                "product_id": "71",
-                "name": "Pastel de Camarão",
-                "price": 42.9,
-                "qty": 1.0,
-                "category": "Entradas",
-                "created_at": "14/02/2026 11:18",
-                "waiter": "Angelo",
-                "printed": true,
-                "print_status": "printed",
-                "complements": [],
-                "observations": [],
-                "accompaniments": [],
-                "flavor": "",
-                "questions_answers": [],
-                "ncm": "21069090",
-                "cest": "",
-                "cfop": "5101",
-                "origin": "0",
-                "tax_info": null
-            }
-        ],
-        "total": 95.69999999999999,
-        "status": "open",
-        "opened_at": "13/02/2026 11:46",
-        "num_adults": 2,
-        "customer_type": "passante",
-        "customer_name": "",
-        "room_number": null,
-        "waiter": "",
-        "staff_name": null,
-        "is_breakfast": false,
-        "partial_payments": [],
-        "total_paid": 0.0
-    },
-    "57": {
-        "items": [
-            {
-                "id": "6c69b4a6-3d0a-4dd1-90e5-48bdabee251f",
-                "product_id": "266",
-                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
-                "price": 16.9,
-                "qty": 2.0,
-                "category": "Cervejas",
-                "created_at": "13/02/2026 11:57",
-                "waiter": "guilherme",
-                "printed": true,
-                "print_status": "printed",
-                "complements": [],
-                "observations": [
-                    "1 cp"
-                ],
-                "accompaniments": [],
-                "flavor": "",
-                "questions_answers": []
-            },
-            {
-                "id": "61a4a8ca-f861-4497-a4cd-e02787b067fa",
-                "product_id": "60",
-                "name": "Brusqueta de Salmão com pão artesanal da  casa (3un.)",
-                "price": 39.9,
-                "qty": 1.0,
-                "category": "Entradas",
-                "created_at": "13/02/2026 12:06",
-                "waiter": "guilherme",
-                "printed": true,
-                "print_status": "printed",
-                "complements": [],
-                "observations": [],
-                "accompaniments": [],
-                "flavor": "",
-                "questions_answers": [
-                    {
-                        "question": "Crocância",
-                        "answer": "Normal"
-                    }
-                ]
-            },
-            {
-                "id": "9d63f8bf-fe2b-42e5-b55a-68b96ec32ed3",
-                "product_id": "265",
-                "name": "Caldo (Consultar sabor do dia)",
-                "price": 15.9,
-                "qty": 1.0,
-                "category": "Entradas",
-                "created_at": "13/02/2026 12:06",
-                "waiter": "guilherme",
-                "printed": true,
-                "print_status": "printed",
-                "complements": [],
-                "observations": [],
-                "accompaniments": [],
-                "flavor": "Sururu (Caldos)",
-                "questions_answers": []
-            },
-            {
-                "id": "b7dffb28-c076-4648-b7eb-a4edb13c83c1",
-                "product_id": "266",
-                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
-                "price": 16.9,
-                "qty": 1.0,
-                "category": "Cervejas",
-                "created_at": "13/02/2026 12:17",
-                "waiter": "guilherme",
-                "printed": true,
-                "print_status": "printed",
-                "complements": [],
-                "observations": [
-                    "1 cp"
-                ],
-                "accompaniments": [],
-                "flavor": "",
-                "questions_answers": []
-            },
-            {
-                "id": "c3019e32-f17a-42b2-b5a2-6c50be60f95d",
-                "product_id": "266",
-                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
-                "price": 16.9,
-                "qty": 1.0,
-                "category": "Cervejas",
-                "created_at": "13/02/2026 12:47",
-                "waiter": "guilherme",
-                "printed": true,
-                "print_status": "printed",
-                "complements": [],
-                "observations": [
-                    "1 cp"
-                ],
-                "accompaniments": [],
-                "flavor": "",
-                "questions_answers": []
-            }
-        ],
-        "total": 123.4,
-        "status": "open",
-        "opened_at": "13/02/2026 11:57",
-        "num_adults": 2,
-        "customer_type": "passante",
-        "customer_name": "",
-        "room_number": null,
-        "waiter": "",
-        "staff_name": null,
-        "is_breakfast": false,
-        "partial_payments": [],
-        "total_paid": 0.0
-    },
-    "53": {
-        "items": [
-            {
-                "id": "fc9b7d64-5296-4097-9fff-11cc9b44544b",
-                "product_id": "149",
-                "name": "Coca-Cola 350ml",
-                "price": 8.9,
-                "qty": 1.0,
-                "category": "Refrigerante",
-                "created_at": "13/02/2026 12:03",
-                "waiter": "erique",
-                "printed": true,
-                "print_status": "printed",
-                "complements": [],
-                "observations": [],
-                "accompaniments": [],
-                "flavor": "",
-                "questions_answers": [
-                    {
-                        "question": "Copo",
-                        "answer": "2"
-                    }
-                ]
-            },
-            {
-                "id": "df4671ae-1f1d-408a-bc2d-6441a7081620",
-                "product_id": "79",
-                "name": "Pasteis de Queijo coalho  (6 unidades)",
-                "price": 28.9,
-                "qty": 1.0,
-                "category": "Entradas",
-                "created_at": "13/02/2026 12:28",
-                "waiter": "erique",
-                "printed": true,
-                "print_status": "printed",
-                "complements": [],
-                "observations": [],
-                "accompaniments": [],
-                "flavor": "",
-                "questions_answers": []
-            },
-            {
-                "id": "292ef58f-bf24-4a32-8799-6b219d114dea",
-                "product_id": "149",
-                "name": "Coca-Cola 350ml",
-                "price": 8.9,
-                "qty": 1.0,
-                "category": "Refrigerante",
-                "created_at": "13/02/2026 12:48",
-                "waiter": "erique",
-                "printed": true,
-                "print_status": "printed",
-                "complements": [],
-                "observations": [],
-                "accompaniments": [],
-                "flavor": "",
-                "questions_answers": [
-                    {
-                        "question": "Copo",
-                        "answer": "2"
-                    }
-                ]
-            }
-        ],
-        "total": 46.699999999999996,
-        "status": "open",
-        "opened_at": "13/02/2026 12:03",
-        "num_adults": 2,
-        "customer_type": "passante",
-        "customer_name": "",
-        "room_number": null,
-        "waiter": "",
-        "staff_name": null,
-        "is_breakfast": false,
-        "partial_payments": [],
-        "total_paid": 0.0
-    },
-    "42": {
-        "items": [
-            {
-                "id": "b6ee7e22-a69f-41df-a230-fe03e9ee5271",
-                "product_id": "266",
-                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
-                "price": 16.9,
-                "qty": 1.0,
-                "category": "Cervejas",
-                "created_at": "13/02/2026 12:05",
-                "waiter": "erique",
-                "printed": true,
-                "print_status": "printed",
-                "complements": [],
-                "observations": [],
-                "accompaniments": [],
-                "flavor": "",
-                "questions_answers": []
-            },
-            {
-                "id": "2065b2a1-9d35-4f5c-a222-4eb869a87e46",
-                "product_id": "265",
-                "name": "Caldo (Consultar sabor do dia)",
-                "price": 15.9,
-                "qty": 1.0,
-                "category": "Entradas",
-                "created_at": "13/02/2026 12:20",
-                "waiter": "erique",
-                "printed": true,
-                "print_status": "printed",
-                "complements": [],
-                "observations": [],
-                "accompaniments": [],
-                "flavor": "Feijão (Caldo)",
-                "questions_answers": []
-            },
-            {
-                "id": "24b7cfa8-3b39-4121-8ef7-07cb937ffcef",
-                "product_id": "108",
-                "name": "Peixe ao Molho de Camarão (Individual)",
-                "price": 98.9,
-                "qty": 1.0,
-                "category": "Pratos",
-                "created_at": "13/02/2026 12:20",
-                "waiter": "erique",
-                "printed": true,
-                "print_status": "printed",
-                "complements": [],
-                "observations": [],
-                "accompaniments": [],
-                "flavor": "",
-                "questions_answers": []
-            },
-            {
-                "id": "862e5b83-983a-419e-bdb5-3bfb052b5049",
-                "product_id": "114",
-                "name": "Risotto de Camarão (Individual)",
-                "price": 79.9,
-                "qty": 1.0,
-                "category": "Pratos",
-                "created_at": "13/02/2026 12:20",
-                "waiter": "erique",
-                "printed": true,
-                "print_status": "printed",
-                "complements": [],
-                "observations": [],
-                "accompaniments": [],
-                "flavor": "",
-                "questions_answers": [
-                    {
-                        "question": "Ponto do Arroz",
-                        "answer": "Al Dente"
-                    }
-                ]
-            },
-            {
-                "id": "a9ec22f3-9239-4e7d-ba4a-554a9e8c50bb",
-                "product_id": "266",
-                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
-                "price": 16.9,
-                "qty": 1.0,
-                "category": "Cervejas",
-                "created_at": "13/02/2026 12:24",
-                "waiter": "guilherme",
-                "printed": true,
-                "print_status": "printed",
-                "complements": [],
-                "observations": [
-                    "1 cp"
-                ],
-                "accompaniments": [],
-                "flavor": "",
-                "questions_answers": []
-            },
-            {
-                "id": "c4fafdb3-854a-4b0a-b601-627419e79b53",
-                "product_id": "148",
-                "name": "Coca Cola Zero 350ml",
-                "price": 8.9,
-                "qty": 1.0,
-                "category": "Refrigerante",
-                "created_at": "13/02/2026 12:49",
-                "waiter": "guilherme",
-                "printed": true,
-                "print_status": "printed",
-                "complements": [],
-                "observations": [
-                    "1 cp"
-                ],
-                "accompaniments": [],
-                "flavor": "",
-                "questions_answers": [
-                    {
-                        "question": "Copo",
-                        "answer": "2"
-                    }
-                ]
-            },
-            {
-                "id": "77c4a3ed-c110-48cf-b6d6-3a3bf08b01e0",
-                "product_id": "2004",
-                "name": "Suco Copo",
-                "price": 10.9,
-                "qty": 1.0,
-                "category": "Sucos e Águas",
-                "created_at": "13/02/2026 12:49",
-                "waiter": "guilherme",
-                "printed": true,
-                "print_status": "printed",
-                "complements": [],
-                "observations": [
-                    "Sem gelo"
-                ],
-                "accompaniments": [],
-                "flavor": "Laranja",
-                "questions_answers": []
-            }
-        ],
-        "total": 248.3,
-        "status": "open",
-        "opened_at": "13/02/2026 12:04",
-        "num_adults": 1,
-        "customer_type": "passante",
-        "customer_name": "",
-        "room_number": null,
-        "waiter": "",
-        "staff_name": null,
-        "is_breakfast": false,
-        "partial_payments": [],
-        "total_paid": 0.0
-    },
-    "52": {
-        "items": [
-            {
-                "id": "bcb3f133-c038-4213-a170-43d763c902ac",
-                "product_id": "162",
-                "name": "Heineken 0%",
-                "price": 16.9,
-                "qty": 1.0,
-                "category": "Cervejas",
-                "created_at": "13/02/2026 12:07",
-                "waiter": "erique",
-                "printed": true,
-                "print_status": "printed",
-                "complements": [],
-                "observations": [
-                    "1 cp"
-                ],
-                "accompaniments": [],
-                "flavor": "",
-                "questions_answers": []
-            },
-            {
-                "id": "1c0962cd-5172-4e24-97b4-1c0c1806ea79",
-                "product_id": "142",
-                "name": "Água de Coco",
-                "price": 10.9,
-                "qty": 1.0,
-                "category": "Sucos e Águas",
-                "created_at": "13/02/2026 12:07",
-                "waiter": "erique",
-                "printed": true,
-                "print_status": "printed",
-                "complements": [],
-                "observations": [],
-                "accompaniments": [],
-                "flavor": "",
-                "questions_answers": []
-            },
-            {
-                "id": "9b38294a-e468-4ba0-bbbc-b09da36e16df",
-                "product_id": "162",
-                "name": "Heineken 0%",
-                "price": 16.9,
-                "qty": 1.0,
-                "category": "Cervejas",
-                "created_at": "13/02/2026 12:27",
-                "waiter": "guilherme",
-                "printed": true,
-                "print_status": "printed",
-                "complements": [],
-                "observations": [
-                    "1 cp"
-                ],
-                "accompaniments": [],
-                "flavor": "",
-                "questions_answers": []
-            }
-        ],
-        "total": 44.699999999999996,
-        "status": "open",
-        "opened_at": "13/02/2026 12:06",
-        "num_adults": 2,
-        "customer_type": "passante",
-        "customer_name": "",
-        "room_number": null,
-        "waiter": "",
-        "staff_name": null,
-        "is_breakfast": false,
-        "partial_payments": [],
-        "total_paid": 0.0
-    },
-    "75": {
-        "items": [
-            {
-                "id": "d05cc79f-8024-49a9-b266-6564e7797dbf",
-                "product_id": "266",
-                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
-                "price": 16.9,
-                "qty": 5.0,
-                "category": "Cervejas",
-                "created_at": "13/02/2026 12:23",
-                "waiter": "erique",
-                "printed": true,
-                "print_status": "printed",
-                "complements": [],
-                "observations": [
-                    "2 cp"
-                ],
-                "accompaniments": [],
-                "flavor": "",
-                "questions_answers": []
-            }
-        ],
-        "total": 84.5,
-        "status": "open",
-        "opened_at": "13/02/2026 12:22",
-        "num_adults": 2,
-        "customer_type": "hospede",
-        "customer_name": "",
-        "room_number": "01",
-        "waiter": "",
-        "staff_name": null,
-        "is_breakfast": false,
-        "partial_payments": [],
-        "total_paid": 0.0
-    },
-    "41": {
+    "22": {
         "items": [],
         "total": 0,
         "status": "open",
-        "opened_at": "13/02/2026 12:24",
-        "num_adults": 2,
-        "customer_type": "passante",
-        "customer_name": "",
-        "room_number": null,
-        "waiter": "",
-        "staff_name": null,
-        "is_breakfast": false
-    },
-    "90": {
-        "items": [
-            {
-                "id": "b6835edf-2067-4206-a991-0784141cf5ff",
-                "product_id": "101",
-                "name": "Medalhão com risotto de champignon e molho especial (Individual)",
-                "price": 94.99,
-                "qty": 1.0,
-                "category": "Pratos",
-                "created_at": "13/02/2026 12:39",
-                "waiter": "erique",
-                "printed": true,
-                "print_status": "printed",
-                "complements": [],
-                "observations": [
-                    "Sem  arroz com batata frita"
-                ],
-                "accompaniments": [],
-                "flavor": "",
-                "questions_answers": [
-                    {
-                        "question": "Ponto da Carne",
-                        "answer": "Mal Passada"
-                    },
-                    {
-                        "question": "Ponto do Arroz",
-                        "answer": "Al Dente"
-                    }
-                ]
-            },
-            {
-                "id": "495e69aa-eaa3-4815-933c-3f3b19a56547",
-                "product_id": "76",
-                "name": "Batata Frita",
-                "price": 24.9,
-                "qty": 1.0,
-                "category": "Entradas",
-                "created_at": "13/02/2026 12:39",
-                "waiter": "erique",
-                "printed": true,
-                "print_status": "printed",
-                "complements": [],
-                "observations": [],
-                "accompaniments": [],
-                "flavor": "",
-                "questions_answers": []
-            },
-            {
-                "id": "77c8daf5-89ed-4139-b72c-d56b58d45fec",
-                "product_id": "86",
-                "name": "Bacalhau a Natas (Individual)",
-                "price": 99.9,
-                "qty": 1.0,
-                "category": "Pratos",
-                "created_at": "13/02/2026 12:48",
-                "waiter": "erique",
-                "printed": true,
-                "print_status": "printed",
-                "complements": [],
-                "observations": [
-                    "Arroz e tomate"
-                ],
-                "accompaniments": [],
-                "flavor": "",
-                "questions_answers": []
-            }
-        ],
-        "total": 219.79,
-        "status": "open",
-        "opened_at": "13/02/2026 12:38",
+        "opened_at": "13/02/2026 14:05",
         "num_adults": 2,
         "customer_type": "hospede",
-        "customer_name": "",
-        "room_number": "15",
-        "waiter": "",
-        "staff_name": null,
-        "is_breakfast": false,
-        "partial_payments": [],
-        "total_paid": 0.0
+        "room_number": "22"
     },
-    "36": {
+    "14": {
+        "items": [],
+        "total": 0,
+        "status": "open",
+        "opened_at": "13/02/2026 14:25",
+        "num_adults": 2,
+        "customer_type": "hospede",
+        "room_number": "14"
+    },
+    "16": {
+        "items": [],
+        "total": 0,
+        "status": "open",
+        "opened_at": "13/02/2026 14:26",
+        "num_adults": 2,
+        "customer_type": "hospede",
+        "room_number": "16"
+    },
+    "35": {
+        "items": [],
+        "total": 0,
+        "status": "open",
+        "opened_at": "13/02/2026 14:27",
+        "num_adults": 2,
+        "customer_type": "hospede",
+        "room_number": "35"
+    },
+    "33": {
+        "items": [],
+        "total": 0,
+        "status": "open",
+        "opened_at": "13/02/2026 14:27",
+        "num_adults": 2,
+        "customer_type": "hospede",
+        "room_number": "33"
+    },
+    "32": {
+        "items": [],
+        "total": 0,
+        "status": "open",
+        "opened_at": "13/02/2026 14:28",
+        "num_adults": 2,
+        "customer_type": "hospede",
+        "room_number": "32"
+    },
+    "23": {
+        "items": [],
+        "total": 0,
+        "status": "open",
+        "opened_at": "13/02/2026 14:29",
+        "num_adults": 2,
+        "customer_type": "hospede",
+        "room_number": "23"
+    },
+    "21": {
+        "items": [],
+        "total": 0,
+        "status": "open",
+        "opened_at": "13/02/2026 14:29",
+        "num_adults": 2,
+        "customer_type": "hospede",
+        "room_number": "21"
+    },
+    "02": {
+        "items": [],
+        "total": 0,
+        "status": "open",
+        "opened_at": "14/02/2026 08:54",
+        "num_adults": 2,
+        "customer_type": "hospede",
+        "room_number": "02"
+    },
+    "11": {
+        "items": [],
+        "total": 0,
+        "status": "open",
+        "opened_at": "14/02/2026 12:15",
+        "num_adults": 2,
+        "customer_type": "hospede",
+        "room_number": "11"
+    },
+    "03": {
+        "items": [],
+        "total": 0,
+        "status": "open",
+        "opened_at": "14/02/2026 12:20",
+        "num_adults": 2,
+        "customer_type": "hospede",
+        "room_number": "03"
+    },
+    "15": {
+        "items": [],
+        "total": 0,
+        "status": "open",
+        "opened_at": "14/02/2026 12:57",
+        "num_adults": 2,
+        "customer_type": "hospede",
+        "room_number": "15"
+    },
+    "FUNC_edson": {
+        "status": "open",
+        "opened_at": "14/02/2026 13:35",
+        "num_adults": 1,
+        "customer_type": "funcionario",
+        "staff_name": "edson",
+        "waiter": "filipe",
         "items": [
             {
-                "id": "a1886257-149f-4725-bffd-c453e33d2fc8",
-                "product_id": "3",
-                "name": "Banana da Terra",
-                "price": 8.9,
-                "qty": 1.0,
-                "category": "Café da manhã",
-                "created_at": "14/02/2026 10:59",
-                "waiter": "Angelo",
-                "printed": true,
-                "print_status": "printed",
-                "complements": [],
-                "observations": [
-                    "Não Imprimir"
-                ],
-                "accompaniments": [],
-                "flavor": "",
-                "questions_answers": [],
-                "ncm": "21069090",
-                "cest": "",
-                "cfop": "5101",
-                "origin": "0",
-                "tax_info": null
-            },
-            {
-                "id": "576bceed-123f-4220-a3f6-1c44f1d6827f",
-                "product_id": "4",
-                "name": "Coalhada De Bufala",
-                "price": 9.9,
-                "qty": 1.0,
-                "category": "Café da manhã",
-                "created_at": "14/02/2026 10:59",
-                "waiter": "Angelo",
-                "printed": true,
-                "print_status": "printed",
-                "complements": [],
-                "observations": [
-                    "Não Imprimir"
-                ],
-                "accompaniments": [],
-                "flavor": "",
-                "questions_answers": [],
-                "ncm": "21069090",
-                "cest": "",
-                "cfop": "5101",
-                "origin": "0",
-                "tax_info": null
-            },
-            {
-                "id": "a073f16a-de3a-49a2-8dda-4c36088f34a1",
-                "product_id": "5",
-                "name": "Comidinha Regional",
-                "price": 8.0,
-                "qty": 1.0,
-                "category": "Café da manhã",
-                "created_at": "14/02/2026 10:59",
-                "waiter": "Angelo",
-                "printed": true,
-                "print_status": "printed",
-                "complements": [],
-                "observations": [
-                    "Não Imprimir"
-                ],
-                "accompaniments": [],
-                "flavor": "",
-                "questions_answers": [],
-                "ncm": "21069090",
-                "cest": "",
-                "cfop": "5101",
-                "origin": "0",
-                "tax_info": null
-            },
-            {
-                "id": "374f09b3-a5ca-43bb-b211-e527de8b5f26",
-                "product_id": "71",
-                "name": "Pastel de Camarão",
-                "price": 42.9,
+                "id": "43ce9fdf-1a7c-4c4d-87fa-fad205fce883",
+                "product_id": "74",
+                "name": "Salada da Chef de Salmão",
+                "price": 45.9,
                 "qty": 1.0,
                 "category": "Entradas",
-                "created_at": "14/02/2026 11:10",
-                "waiter": "Angelo",
+                "created_at": "14/02/2026 13:36",
+                "waiter": "filipe",
                 "printed": true,
                 "print_status": "printed",
                 "complements": [],
                 "observations": [],
                 "accompaniments": [],
                 "flavor": "",
-                "questions_answers": [],
-                "ncm": "21069090",
-                "cest": "",
-                "cfop": "5101",
-                "origin": "0",
-                "tax_info": null
+                "questions_answers": []
             }
         ],
-        "total": 69.7,
-        "status": "open",
-        "opened_at": "14/02/2026 10:58",
-        "num_adults": 1,
-        "customer_type": "passante",
-        "customer_name": "",
-        "room_number": null,
-        "waiter": "",
-        "staff_name": null,
-        "is_breakfast": false,
+        "total": 45.9,
+        "created_via": "open_staff_table_v2",
         "partial_payments": [],
         "total_paid": 0.0
     }
