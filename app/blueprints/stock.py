@@ -10,6 +10,7 @@ from app.utils.decorators import login_required
 from app.services.data_service import (
     load_products, save_products, load_stock_requests, save_stock_request, save_all_stock_requests,
     load_stock_entries, save_stock_entry, load_suppliers, save_suppliers,
+    load_payables, save_payables,
     load_sales_products, save_sales_products, load_sales_history,
     load_stock_transfers, save_stock_transfers, load_settings, save_settings, log_stock_action,
     load_maintenance_requests, load_menu_items,
@@ -677,10 +678,37 @@ def stock_entry():
         if data_json:
             try:
                 data = json.loads(data_json)
-                supplier = data.get('supplier')
-                invoice = data.get('invoice')
-                date_str = data.get('date')
-                items = data.get('items', [])
+                
+                # Check for new structure (header/items/financials) or legacy
+                if 'header' in data:
+                    header = data['header']
+                    items = data.get('items', [])
+                    financials = data.get('financials', {})
+                    
+                    supplier = header.get('supplier')
+                    invoice = header.get('number')
+                    invoice_serial = header.get('serial')
+                    access_key = header.get('access_key')
+                    
+                    # Date handling (YYYY-MM-DD from input type=date)
+                    date_str = header.get('entry_date')
+                    try:
+                        entry_date_obj = datetime.strptime(date_str, '%Y-%m-%d')
+                        formatted_date = entry_date_obj.strftime('%d/%m/%Y')
+                    except:
+                        formatted_date = datetime.now().strftime('%d/%m/%Y')
+                        
+                    issue_date = header.get('issue_date')
+                else:
+                    # Legacy structure
+                    supplier = data.get('supplier')
+                    invoice = data.get('invoice')
+                    invoice_serial = ""
+                    access_key = ""
+                    date_str = data.get('date') # dd/mm/yyyy
+                    formatted_date = date_str
+                    items = data.get('items', [])
+                    financials = {}
                 
                 if not items:
                      flash('Nenhum item adicionado.')
@@ -689,9 +717,27 @@ def stock_entry():
                 products = load_products()
                 products_map = {p['name']: p for p in products}
                 
+                # Update Suppliers List
+                suppliers = load_suppliers()
+                # Ensure suppliers is a list of dicts
+                valid_suppliers = [s for s in suppliers if isinstance(s, dict)]
+                supplier_names = {s.get('name', '').strip().lower() for s in valid_suppliers}
+                
+                if supplier and supplier.strip().lower() not in supplier_names:
+                    import uuid
+                    new_sup = {
+                        "id": str(uuid.uuid4()),
+                        "name": supplier.strip(),
+                        "category": "Geral",
+                        "active": True,
+                        "created_at": datetime.now().isoformat()
+                    }
+                    suppliers.append(new_sup)
+                    save_suppliers(suppliers)
+                
                 count = 0
                 for item in items:
-                    product_name = item.get('product')
+                    product_name = item.get('name') or item.get('product') # New vs Old key
                     try:
                         qty = float(item.get('qty'))
                         price = float(item.get('price'))
@@ -711,8 +757,13 @@ def stock_entry():
                         'qty': qty,
                         'price': price,
                         'invoice': invoice,
-                        'date': datetime.strptime(date_str, '%d/%m/%Y').strftime('%d/%m/%Y'),
-                        'entry_date': datetime.now().strftime('%d/%m/%Y %H:%M')
+                        'invoice_serial': invoice_serial,
+                        'access_key': access_key,
+                        'date': formatted_date,
+                        'entry_date': datetime.now().strftime('%d/%m/%Y %H:%M'),
+                        'expiry': item.get('expiry'),
+                        'batch': item.get('batch'),
+                        'unit': item.get('unit')
                     }
                     save_stock_entry(entry_data)
                     
@@ -730,8 +781,39 @@ def stock_entry():
                                 p['aliases'] = []
                             if original_name not in p['aliases']:
                                 p['aliases'].append(original_name)
-                            
+                
                 save_products(products)
+                
+                # --- Process Financials (Payables) ---
+                bills = financials.get('bills', [])
+                if bills:
+                    payables = load_payables()
+                    for bill in bills:
+                        try:
+                            amount = float(bill.get('value', 0))
+                            if amount <= 0: continue
+                            
+                            due_date = bill.get('date') # YYYY-MM-DD
+                            
+                            new_payable = {
+                                'id': str(uuid.uuid4()),
+                                'type': 'supplier',
+                                'supplier': supplier,
+                                'description': f"NF {invoice} - Entrada de Mercadoria",
+                                'amount': amount,
+                                'due_date': due_date,
+                                'barcode': '',
+                                'status': 'pending',
+                                'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                                'invoice_number': invoice,
+                                'access_key': access_key,
+                                'category': 'Fornecedores'
+                            }
+                            payables.append(new_payable)
+                        except Exception as e:
+                            print(f"Error creating payable: {e}")
+                    save_payables(payables)
+                            
                 flash(f'Entrada de {count} itens registrada com sucesso!')
                 return redirect(url_for('main.service_page', service_id='estoques'))
                 
@@ -747,8 +829,85 @@ def stock_entry():
     products.sort(key=lambda x: x['name'])
     products_json = json.dumps(products)
     suppliers = load_suppliers()
-    suppliers.sort()
+    # Filter and sort
+    suppliers = [s for s in suppliers if isinstance(s, dict)]
+    suppliers.sort(key=lambda x: x.get('name', '').lower())
     return render_template('stock_entry.html', products=products, products_json=products_json, suppliers=suppliers)
+
+def _parse_nfe_xml(root):
+    # Namespaces
+    ns = {'nfe': 'http://www.portalfiscal.inf.br/nfe'}
+    
+    # Try to find infNFe
+    infNFe = root.find('.//nfe:infNFe', ns)
+    if infNFe is None:
+        # Fallback without namespace
+        ns = {}
+        infNFe = root.find('.//infNFe')
+        
+    if infNFe is None: raise ValueError('Estrutura NFe inválida')
+        
+    # Access Key (ID attribute)
+    access_key = infNFe.get('Id', '')
+    if access_key and access_key.startswith('NFe'):
+        access_key = access_key[3:] # Remove 'NFe' prefix
+        
+    # Emitter
+    emit = infNFe.find('nfe:emit', ns) or infNFe.find('emit')
+    supplier_name = emit.find('nfe:xNome', ns).text if emit is not None else "Desconhecido"
+    if emit is not None:
+        xFant = emit.find('nfe:xFant', ns)
+        if xFant is not None and xFant.text:
+            supplier_name = xFant.text # Prefer Fantasy Name
+    
+    # Identification
+    ide = infNFe.find('nfe:ide', ns) or infNFe.find('ide')
+    invoice_num = ide.find('nfe:nNF', ns).text if ide is not None else ""
+    invoice_serial = ide.find('nfe:serie', ns).text if ide is not None else ""
+    date_str = ide.find('nfe:dhEmi', ns).text if ide is not None else ""
+    
+    # Total
+    total_node = infNFe.find('nfe:total/nfe:ICMSTot', ns) or infNFe.find('total/ICMSTot')
+    total_val = 0.0
+    if total_node is not None:
+        v_nf = total_node.find('nfe:vNF', ns) or total_node.find('vNF')
+        if v_nf is not None:
+            total_val = float(v_nf.text)
+    
+    try:
+        # Format: YYYY-MM-DD
+        dt = datetime.strptime(date_str[:10], '%Y-%m-%d')
+        formatted_date = dt.strftime('%Y-%m-%d') # Return ISO for input type=date
+    except:
+        formatted_date = datetime.now().strftime('%Y-%m-%d')
+        
+    items = []
+    dets = infNFe.findall('nfe:det', ns) or infNFe.findall('det')
+    for det in dets:
+        prod = det.find('nfe:prod', ns) or det.find('prod')
+        if prod is not None:
+            qty = float(prod.find('nfe:qCom', ns).text)
+            price = float(prod.find('nfe:vUnCom', ns).text)
+            code = prod.find('nfe:cProd', ns).text if prod.find('nfe:cProd', ns) is not None else ""
+            unit = prod.find('nfe:uCom', ns).text if prod.find('nfe:uCom', ns) is not None else ""
+            
+            items.append({
+                'code': code,
+                'name': prod.find('nfe:xProd', ns).text,
+                'qty': qty,
+                'unit': unit,
+                'price': price
+            })
+            
+    return {
+        'supplier': supplier_name, 
+        'invoice': invoice_num, 
+        'serial': invoice_serial,
+        'access_key': access_key,
+        'date': formatted_date, 
+        'total': total_val,
+        'items': items
+    }
 
 @stock_bp.route('/stock/entry/upload-xml', methods=['POST'])
 @login_required
@@ -763,37 +922,30 @@ def upload_stock_xml():
         import xml.etree.ElementTree as ET
         tree = ET.parse(file)
         root = tree.getroot()
-        ns = {'nfe': 'http://www.portalfiscal.inf.br/nfe'}
-        infNFe = root.find('.//nfe:infNFe', ns) or root.find('.//infNFe')
-        if infNFe is None: return jsonify({'error': 'Estrutura NFe inválida'}), 400
-        if not root.find('.//nfe:infNFe', ns): ns = {}
-            
-        emit = infNFe.find('nfe:emit', ns) or infNFe.find('emit')
-        supplier_name = emit.find('nfe:xNome', ns).text if emit is not None else "Desconhecido"
-        
-        ide = infNFe.find('nfe:ide', ns) or infNFe.find('ide')
-        invoice_num = ide.find('nfe:nNF', ns).text if ide is not None else ""
-        date_str = ide.find('nfe:dhEmi', ns).text if ide is not None else ""
-        
-        try:
-            dt = datetime.strptime(date_str[:10], '%Y-%m-%d')
-            formatted_date = dt.strftime('%d/%m/%Y')
-        except:
-            formatted_date = datetime.now().strftime('%d/%m/%Y')
-            
-        items = []
-        dets = infNFe.findall('nfe:det', ns) or infNFe.findall('det')
-        for det in dets:
-            prod = det.find('nfe:prod', ns) or det.find('prod')
-            if prod is not None:
-                items.append({
-                    'name': prod.find('nfe:xProd', ns).text,
-                    'qty': float(prod.find('nfe:qCom', ns).text),
-                    'price': float(prod.find('nfe:vUnCom', ns).text)
-                })
-        return jsonify({'supplier': supplier_name, 'invoice': invoice_num, 'date': formatted_date, 'items': items})
+        data = _parse_nfe_xml(root)
+        return jsonify(data)
     except Exception as e:
         return jsonify({'error': f'Erro ao processar XML: {str(e)}'}), 500
+
+@stock_bp.route('/stock/entry/parse-xml-content', methods=['POST'])
+@login_required
+def parse_stock_xml_content():
+    try:
+        content = request.json.get('content')
+        if not content:
+            return jsonify({'error': 'Conteúdo XML vazio'}), 400
+            
+        import xml.etree.ElementTree as ET
+        # Handle base64 if needed, but assuming raw string or utf-8
+        if content.startswith('base64,'):
+             import base64
+             content = base64.b64decode(content.split(',', 1)[1]).decode('utf-8')
+             
+        root = ET.fromstring(content)
+        data = _parse_nfe_xml(root)
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({'error': f'Erro ao processar conteúdo XML: {str(e)}'}), 500
 
 @stock_bp.route('/list-nfe-dfe', methods=['GET'])
 def list_nfe_dfe_route():
@@ -816,20 +968,46 @@ def list_nfe_dfe_route():
             return jsonify({'documents': mock_docs})
 
         settings = load_fiscal_settings()
-        if settings.get('provider') != 'nuvem_fiscal':
-             return jsonify({'error': 'Provedor fiscal não configurado ou não é Nuvem Fiscal.'}), 400
-        documents, error = list_received_nfes(settings)
+        
+        # Select best integration
+        integrations = settings.get('integrations', [])
+        if not integrations and settings.get('provider'): # Legacy fallback
+            integrations = [settings]
+            
+        target_integration = None
+        
+        # 1. Prioritize sefaz_direto (Free)
+        for integ in integrations:
+            if integ.get('provider') == 'sefaz_direto':
+                target_integration = integ
+                break
+                
+        # 2. Fallback to nuvem_fiscal (Paid)
+        if not target_integration:
+            for integ in integrations:
+                if integ.get('provider') == 'nuvem_fiscal':
+                    target_integration = integ
+                    break
+                    
+        if not target_integration:
+             return jsonify({'error': 'Nenhuma integração fiscal configurada para consulta.'}), 400
+             
+        documents, error = list_received_nfes(target_integration)
         if error: return jsonify({'error': error}), 500
+        
         formatted_docs = []
-        for doc in documents:
-            formatted_docs.append({
-                'key': doc.get('access_key'),
-                'issuer': doc.get('emit', {}).get('xNome', 'Desconhecido'),
-                'cnpj': doc.get('emit', {}).get('cnpj', ''),
-                'amount': doc.get('total', 0),
-                'date': doc.get('created_at', '') or doc.get('issued_at', ''),
-                'status': doc.get('status', 'recebida')
-            })
+        if documents:
+            for doc in documents:
+                emit = doc.get('emitente', {}) or doc.get('emit', {})
+                formatted_docs.append({
+                    'key': doc.get('access_key') or doc.get('chave'),
+                    'issuer': emit.get('nome') or emit.get('xNome', 'Desconhecido'),
+                    'cnpj': emit.get('cpf_cnpj') or emit.get('cnpj', ''),
+                    'amount': doc.get('total_amount') or doc.get('total', 0),
+                    'date': doc.get('created_at', '') or doc.get('issued_at', ''),
+                    'status': doc.get('status', 'recebida'),
+                    'xml_content': doc.get('xml_content') # Pass XML content if available (for sefaz_direto)
+                })
         return jsonify({'documents': formatted_docs})
     except Exception as e:
         return jsonify({'error': str(e)}), 500

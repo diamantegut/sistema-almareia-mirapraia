@@ -147,7 +147,6 @@
                                         <!-- Resize handles desativados -->
                                         
                                         <div class="d-flex align-items-center justify-content-between px-2 res-bar-content {{ bg_class }}" 
-                                             onclick="resClickOpenModal(this)"
                                              style="cursor: grab;">
                                             <!-- Channel Icon (Left) -->
                                             <div class="me-1 small opacity-75">
@@ -258,7 +257,7 @@
         position: absolute;
         top: 0;
         bottom: 0;
-        width: 12px; /* Wider handle area */
+        width: 18px; /* Wider handle area for easier dragging */
         cursor: col-resize;
         z-index: 20;
         opacity: 0;
@@ -269,6 +268,12 @@
     .resize-handle:hover { background-color: rgba(0,0,0,0.1); }
     .resize-start { left: 0; }
     .resize-end { right: 0; }
+    
+    /* Ensure inner placeholders don't intercept drag events */
+    .droppable-cell > div { pointer-events: none; }
+    .res-bar-content { pointer-events: auto; z-index: 5; }
+    .res-bar-content .resize-handle { pointer-events: auto; }
+    .res-bar-content { user-select: none; -webkit-user-select: none; -ms-user-select: none; }
 </style>
 
 <script id="grid-data" type="application/json">{{ grid|tojson }}</script>
@@ -283,6 +288,42 @@
 </script>
 <script>
     var roomCategoryMap = JSON.parse(document.getElementById('room-category-map').textContent || '{}');
+    window.roomCategoryMap = roomCategoryMap;
+    function askYesNo(message) {
+        return new Promise(function(resolve){
+            var id = 'yesNoDynamicModal';
+            var el = document.getElementById(id);
+            if (!el) {
+                el = document.createElement('div');
+                el.id = id;
+                el.className = 'modal fade';
+                el.tabIndex = -1;
+                el.innerHTML = '<div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-body" id="yesNoMsg"></div><div class="modal-footer"><button type="button" class="btn btn-secondary" id="btnNo">Não</button><button type="button" class="btn btn-primary" id="btnYes">Sim</button></div></div></div>';
+                document.body.appendChild(el);
+            }
+            var msgEl = el.querySelector('#yesNoMsg');
+            var btnYes = el.querySelector('#btnYes');
+            var btnNo = el.querySelector('#btnNo');
+            msgEl.textContent = message;
+            var modal = null;
+            if (window.bootstrap && window.bootstrap.Modal) {
+                modal = window.bootstrap.Modal.getOrCreateInstance(el);
+                modal.show();
+            } else {
+                el.style.display = 'block';
+            }
+            function done(v){
+                btnYes.removeEventListener('click', onYes);
+                btnNo.removeEventListener('click', onNo);
+                if (modal) modal.hide(); else el.style.display = 'none';
+                resolve(v);
+            }
+            function onYes(){ done(true); }
+            function onNo(){ done(false); }
+            btnYes.addEventListener('click', onYes);
+            btnNo.addEventListener('click', onNo);
+        });
+    }
     var currentYear = Number("{{ year }}");
     var currentMonth = Number("{{ month }}");
     var startDateStr = "{{ start_date.strftime('%Y-%m-%d') }}";
@@ -978,7 +1019,7 @@
     function resClickOpenModal(el) {
         try {
             console.log('resClickOpenModal');
-            if (typeof isDragging !== 'undefined' && isDragging) return;
+            if (window.__resizing) return;
             var td = el && el.closest ? el.closest('td') : null;
             if (!td) {
                 console.error('Elemento de reserva não associado a uma célula válida.');
@@ -993,6 +1034,16 @@
         }
     }
     document.addEventListener('click', function(e){
+        if (window.__resizing || window.__suppressNextOpenModal) {
+            e.preventDefault();
+            e.stopPropagation();
+            return;
+        }
+        if (e.target && e.target.closest && e.target.closest('.resize-handle')) {
+            e.preventDefault();
+            e.stopPropagation();
+            return;
+        }
         var el = e.target && e.target.closest ? e.target.closest('.res-bar-content') : null;
         if(el){ resClickOpenModal(el); }
     });
@@ -1022,7 +1073,7 @@
         console.log('openReservationModal called', {guest, id});
         var fmtMoney = (val) => {
             if (val === undefined || val === null || val === '') return '-';
-            var num = parseFloat(val);
+            var num = parseFloat(String(val).replace(',', '.'));
             if (isNaN(num)) return val;
             return num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         };
@@ -1086,6 +1137,22 @@
                     .then(res => res.json())
                     .then(data => {
                         if(data.success) {
+                            // Populate edit inputs with merged reservation data (including overrides)
+                            var r = data.data.reservation || {};
+                            var getStr = function(v){ return (v === undefined || v === null) ? '' : String(v); };
+                            var setVal = function(id, v){ var x=document.getElementById(id); if (x) x.value = getStr(v); };
+                            setVal('resCategoryInput', r.category);
+                            var chSel = document.getElementById('resChannelInput');
+                            if (chSel) { chSel.value = r.channel || 'Direto'; }
+                            var stSel = document.getElementById('resStatusInput');
+                            if (stSel) { stSel.value = r.status || 'Pendente'; }
+                            setVal('resAmountInput', r.amount || '');
+                            setVal('resPaidInput', r.paid_amount || '');
+                            // Compute to_receive if missing
+                            var amt = parseFloat(String(r.amount || '0').replace(',', '.')) || 0;
+                            var pd = parseFloat(String(r.paid_amount || '0').replace(',', '.')) || 0;
+                            var tr = Math.max(0, amt - pd).toFixed(2).replace('.', ',');
+                            setVal('resToReceiveInput', r.to_receive || tr);
                             if(data.data.reservation && data.data.reservation.avg_daily_paid) {
                                 document.getElementById('modalAvgDaily').textContent = 'R$ ' + data.data.reservation.avg_daily_paid.toFixed(2);
                             } else {
@@ -1165,11 +1232,93 @@
                 myModal = new bootstrap.Modal(modalEl);
             }
             myModal.show();
+            // Bind edit toggle once modal is shown
+            setupReservationEditHandlers(checkin, checkout, id);
         } else {
             console.error('Modal element #reservationModal not found');
         }
     }
 
+    function setupReservationEditHandlers(checkin, checkout, resId) {
+        var tgl = document.getElementById('resEditToggle');
+        var saveBtn = document.getElementById('resSaveBtn');
+        if (!tgl || !saveBtn) return;
+        var setMode = function(edit){
+            document.querySelectorAll('#info .res-readonly').forEach(function(el){ el.classList.toggle('d-none', edit); });
+            document.querySelectorAll('#info .res-edit').forEach(function(el){ el.classList.toggle('d-none', !edit); });
+            saveBtn.classList.toggle('d-none', !edit);
+            tgl.textContent = edit ? 'Cancelar' : 'Editar';
+        };
+        if (!tgl.dataset.bound) {
+            tgl.addEventListener('click', function(){
+                var editing = tgl.textContent === 'Editar';
+                setMode(editing);
+            });
+            tgl.dataset.bound = '1';
+        }
+        function recalc() {
+            var amt = parseFloat(String(document.getElementById('resAmountInput').value || '0').replace(',', '.')) || 0;
+            var pd = parseFloat(String(document.getElementById('resPaidInput').value || '0').replace(',', '.')) || 0;
+            var tr = Math.max(0, amt - pd);
+            var toR = document.getElementById('resToReceiveInput');
+            if (toR) toR.value = tr.toFixed(2).replace('.', ',');
+            try {
+                var partsIn = (checkin || '').split('/');
+                var partsOut = (checkout || '').split('/');
+                var dIn = new Date(partsIn[2], partsIn[1]-1, partsIn[0]);
+                var dOut = new Date(partsOut[2], partsOut[1]-1, partsOut[0]);
+                var days = Math.max(1, Math.round((dOut - dIn)/(1000*60*60*24)));
+                var avg = pd / days;
+                var avgEl = document.getElementById('modalAvgDaily');
+                if (avgEl) avgEl.textContent = 'R$ ' + avg.toFixed(2).replace('.', ',');
+            } catch(_) {}
+        }
+        ['resAmountInput','resPaidInput'].forEach(function(id){
+            var el = document.getElementById(id);
+            if (el && !el.dataset.bound) {
+                el.addEventListener('input', recalc);
+                el.dataset.bound = '1';
+            }
+        });
+        if (!saveBtn.dataset.bound) {
+            saveBtn.addEventListener('click', function(){
+                var payload = {
+                    reservation_id: resId,
+                    category: document.getElementById('resCategoryInput').value,
+                    channel: document.getElementById('resChannelInput').value,
+                    status: document.getElementById('resStatusInput').value,
+                    amount: document.getElementById('resAmountInput').value,
+                    paid_amount: document.getElementById('resPaidInput').value,
+                    to_receive: document.getElementById('resToReceiveInput').value
+                };
+                fetch('/api/reception/update_reservation_financials', {
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body: JSON.stringify(payload)
+                }).then(r=>r.json().catch(()=>({success:false})))
+                .then(function(ans){
+                    if (ans && ans.success) {
+                        // Refresh readonly labels
+                        document.getElementById('modalChannel').textContent = payload.channel;
+                        var st = document.getElementById('modalStatusBadge');
+                        if (st) {
+                            st.textContent = payload.status;
+                            st.className = 'badge ' + (payload.status === 'Pago' ? 'bg-success' : 'bg-warning text-dark');
+                        }
+                        document.getElementById('modalAmount').textContent = fmtBR(payload.amount);
+                        document.getElementById('modalPaid').textContent = fmtBR(payload.paid_amount);
+                        document.getElementById('modalToReceive').textContent = fmtBR(payload.to_receive);
+                        setMode(false);
+                    } else {
+                        alert('Falha ao salvar: ' + ((ans && ans.error) || 'erro'));
+                    }
+                }).catch(function(){
+                    alert('Erro ao salvar.');
+                });
+            });
+            saveBtn.dataset.bound = '1';
+        }
+    }
     function maskCPF(val) {
         var d = String(val || '').replace(/\D/g, '').slice(0, 11);
         if (d.length <= 3) return d;
@@ -1386,11 +1535,25 @@
             var todayISO = new Date().toISOString().slice(0,10);
             el.querySelector('#nrCheckin').setAttribute('min', todayISO);
         } catch(e){}
-        el.querySelector('#nrCategory').value = 'Manual';
+        el.querySelector('#nrCategory').value = '';
         el.querySelector('#nrChannel').value = 'Direto';
         el.querySelector('#nrAmount').value = '';
         el.querySelector('#nrPaid').value = '';
         el.querySelector('#nrToReceive').value = '';
+        try {
+            var roomSel = el.querySelector('#nrRoom');
+            var catSel = el.querySelector('#nrCategory');
+            if (roomSel && catSel) {
+                roomSel.onchange = function(){
+                    var rv = (roomSel.value || '').trim();
+                    if (rv && window.roomCategoryMap && window.roomCategoryMap[rv]) {
+                        // Try to set exact option match
+                        var target = window.roomCategoryMap[rv];
+                        catSel.value = target;
+                    }
+                };
+            }
+        } catch(e){}
         modal.show();
     }
     function formatDateToBR(d) {
@@ -1399,6 +1562,13 @@
         var parts = d.split('-');
         if (parts.length !== 3) return d;
         return parts[2] + '/' + parts[1] + '/' + parts[0];
+    }
+    function fmtBR(val) {
+        if (val === undefined || val === null || val === '') return '-';
+        var num = parseFloat(String(val).replace(',', '.'));
+        if (isNaN(num)) return val;
+        try { return num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
+        catch(_) { return 'R$ ' + num.toFixed(2).replace('.', ','); }
     }
     function submitNewReservation() {
         var modalEl = document.getElementById('newReservationModal');
@@ -1428,6 +1598,11 @@
             btn.disabled = false;
             return;
         }
+        if (!payload.room_number && !payload.category) {
+            alert('Selecione a categoria do quarto ou escolha um número de quarto.');
+            btn.disabled = false;
+            return;
+        }
         fetch('/api/reception/create_manual_reservation', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -1453,6 +1628,96 @@
     (function attachDragAndDrop(){
         var bars = document.querySelectorAll('.res-bar-content');
         bars.forEach(function(b){
+            if (!b.querySelector('.resize-start')) {
+                var hs = document.createElement('div');
+                hs.className = 'resize-handle resize-start';
+                var he = document.createElement('div');
+                he.className = 'resize-handle resize-end';
+                b.style.position = 'relative';
+                b.appendChild(hs);
+                b.appendChild(he);
+                // Dynamic handle width to preserve clickable center, especially for 1-day bars
+                try {
+                    var bw = b.clientWidth || 0;
+                    var handlePx = 12;
+                    if (bw > 0) {
+                        handlePx = Math.max(6, Math.min(12, Math.floor(bw * 0.22)));
+                    }
+                    hs.style.width = handlePx + 'px';
+                    he.style.width = handlePx + 'px';
+                } catch(_) {}
+            }
+            function startResize(e, mode){
+                e.preventDefault();
+                if (e.stopPropagation) e.stopPropagation();
+                if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+                var td = b.closest('td');
+                if (!td) return;
+                var rect = td.getBoundingClientRect();
+                var span = parseInt(td.getAttribute('data-days') || '1', 10);
+                var prev = b.getAttribute('draggable');
+                b.setAttribute('data-prev-draggable', prev === null ? '' : String(prev));
+                b.setAttribute('draggable', 'false');
+                window.__resizing = {
+                    mode: mode,
+                    td: td,
+                    rect: rect,
+                    span: span,
+                    startHalf: parseInt(td.getAttribute('data-start-day') || '1', 10),
+                    lengthHalf: parseInt(td.getAttribute('data-days') || '2', 10),
+                    resId: td.getAttribute('data-res-id') || '',
+                    room: td.getAttribute('data-room') || '',
+                    bar: b
+                };
+            }
+            var hs = b.querySelector('.resize-start');
+            var he = b.querySelector('.resize-end');
+            if (hs) hs.onmousedown = function(e){ startResize(e, 'start'); };
+            if (he) he.onmousedown = function(e){ startResize(e, 'end'); };
+            // Pointer events for more robust capture across elements
+            function startResizePointer(e, mode){
+                try { if (e.cancelable) e.preventDefault(); } catch(_) {}
+                if (e.stopPropagation) e.stopPropagation();
+                var td = b.closest('td');
+                if (!td) return;
+                var rect = td.getBoundingClientRect();
+                var span = parseInt(td.getAttribute('data-days') || '1', 10);
+                var prev = b.getAttribute('draggable');
+                b.setAttribute('data-prev-draggable', prev === null ? '' : String(prev));
+                b.setAttribute('draggable', 'false');
+                window.__resizeActive = true;
+                window.__resizeMoved = false;
+                window.__resizing = {
+                    mode: mode,
+                    td: td,
+                    rect: rect,
+                    span: span,
+                    startHalf: parseInt(td.getAttribute('data-start-day') || '1', 10),
+                    lengthHalf: parseInt(td.getAttribute('data-days') || '2', 10),
+                    resId: td.getAttribute('data-res-id') || '',
+                    room: td.getAttribute('data-room') || '',
+                    bar: b,
+                    startX: e.clientX,
+                    startY: e.clientY,
+                    lastX: e.clientX,
+                    lastY: e.clientY,
+                    initialEndX: rect.right,
+                    initialStartX: rect.left
+                };
+                try { e.currentTarget.setPointerCapture && e.currentTarget.setPointerCapture(e.pointerId); } catch(_) {}
+            }
+            if (hs) hs.addEventListener('pointerdown', function(e){ startResizePointer(e, 'start'); });
+            if (he) he.addEventListener('pointerdown', function(e){ startResizePointer(e, 'end'); });
+            document.addEventListener('pointermove', function(e){
+                if (!window.__resizing) return;
+                window.__resizing.lastX = e.clientX;
+                window.__resizing.lastY = e.clientY;
+                if (window.__resizeActive && window.__resizing) {
+                    var dx = Math.abs((window.__resizing.startX || 0) - e.clientX);
+                    var dy = Math.abs((window.__resizing.startY || 0) - e.clientY);
+                    if (dx > 2 || dy > 2) window.__resizeMoved = true;
+                }
+            });
             b.addEventListener('mousedown', function(e){
                 var td = e.currentTarget.closest('td');
                 if (!td) return;
@@ -1463,7 +1728,19 @@
                 e.currentTarget.dataset.grabHalf = String(grab);
             });
             b.setAttribute('draggable', 'true');
+            // Capture-phase click blocker to preempt inline/bubble handlers when resizing
+            b.addEventListener('click', function(ev){
+                if (window.__resizing || window.__resizeMoved || window.__suppressNextOpenModal) {
+                    ev.stopImmediatePropagation();
+                    ev.preventDefault();
+                }
+            }, true);
             b.addEventListener('dragstart', function(ev){
+                if (window.__resizing) {
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    return false;
+                }
                 var td = ev.target.closest('td');
                 if (!td) return;
                 var resId = td.getAttribute('data-res-id');
@@ -1481,22 +1758,28 @@
                 ev.dataTransfer.effectAllowed = 'move';
             });
         });
-        var slots = document.querySelectorAll('td[data-start-day]');
+        var slots = document.querySelectorAll('td[data-start-day], td[data-day-start]');
         function bindDrop(el){
-            el.addEventListener('dragover', function(ev){ ev.preventDefault(); ev.dataTransfer.dropEffect = 'move'; });
+            if (!el) return;
+            var hasAttr = el.hasAttribute('data-start-day') || el.hasAttribute('data-day-start');
+            if (!hasAttr) return;
+            el.addEventListener('dragover', function(ev){ ev.preventDefault(); ev.stopPropagation(); ev.dataTransfer.dropEffect = 'move'; });
             el.addEventListener('drop', function(ev){
                 ev.preventDefault();
+                ev.stopPropagation();
                 try {
                     var data = JSON.parse(ev.dataTransfer.getData('text/plain'));
                     if (!data || !data.resId) return;
                     var targetRoom = el.getAttribute('data-room');
-                    var baseStartHalf = parseInt(el.getAttribute('data-day-start') || '1', 10);
-                    var span = parseInt(el.getAttribute('data-length') || el.colSpan || '1', 10);
+                    var baseStartHalf = parseInt(el.getAttribute('data-start-day') || el.getAttribute('data-day-start') || '1', 10);
+                    var span = parseInt(el.getAttribute('data-length') || el.getAttribute('data-days') || el.colSpan || '1', 10);
                     var rect = el.getBoundingClientRect();
                     var relX = Math.max(0, Math.min(rect.width, ev.clientX - rect.left));
                     var offsetHalf = Math.floor((relX / rect.width) * span);
                     var targetStartHalf = baseStartHalf + offsetHalf;
-                    var newStartHalf = Math.max(1, targetStartHalf - (parseInt(data.grab, 10) || 0));
+                    var grabHalf = parseInt(data.grab, 10);
+                    if (isNaN(grabHalf) || grabHalf < 0) grabHalf = 0;
+                    var newStartHalf = Math.max(1, targetStartHalf - grabHalf);
                     var lengthHalf = data.length || 0;
                     var ganttStart = '{{ start_date.strftime("%Y-%m-%d") }}';
                     function addDays(iso, d){
@@ -1515,54 +1798,201 @@
                         var ok = confirm('Confirmar alteração de datas de ' + (data.oc||'?') + '–' + (data.oo||'?') + ' para ' + brIn + '–' + brOut + '?');
                         if (!ok) return;
                     }
-                    var newCat = (window.roomCategoryMap && window.roomCategoryMap[String(targetRoom)]) || '';
-                    var priceAdj = null;
-                    if (data.ocat && newCat && String(data.ocat).toLowerCase() !== String(newCat).toLowerCase()) {
-                        var change = confirm('Categoria alterada de "' + data.ocat + '" para "' + newCat + '". Haverá alteração de valor?');
-                        if (change) priceAdj = {type:'recalculate'};
+                    var newCatRaw = (window.roomCategoryMap && window.roomCategoryMap[String(targetRoom)]) || '';
+                    var oldCatRaw = (window.roomCategoryMap && window.roomCategoryMap[String(data.oroom || '')] ) || (data.ocat || '');
+                    function normCat(s){
+                        return String(s || '')
+                            .toLowerCase()
+                            .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // remove acentos
+                            .replace(/\bsuite\b|\bsu\u00edte\b/gi, '') // remove palavra suíte/suite
+                            .replace(/\s+/g, ' ')
+                            .trim();
                     }
-                    var payloadCalc = {
-                        reservation_id: data.resId,
-                        new_room: String(targetRoom || '').trim(),
-                        new_checkin: brIn,
-                        new_checkout: brOut,
-                        price_adjustment: priceAdj
-                    };
-                    fetch('/api/reception/calculate_reservation_update', {
-                        method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payloadCalc)
-                    }).then(function(r){ return r.json().catch(function(){ return {success:false}; }); })
-                    .then(function(ans){
-                        if (!ans || !ans.success) { alert('Falha ao validar movimento: ' + ((ans && ans.error) || 'erro')); return; }
-                        var calc = ans.data || {};
-                        if (calc.valid === false && calc.conflict_message) {
-                            alert('Conflito: ' + calc.conflict_message);
-                            return;
-                        }
-                        var payloadMove = {
+                    var newCat = normCat(newCatRaw);
+                    var oldCat = normCat(oldCatRaw);
+                    var sameRoom = data.oroom && targetRoom && String(data.oroom) === String(targetRoom);
+                    function proceedMove(priceAdj) {
+                        var payloadCalc = {
                             reservation_id: data.resId,
                             new_room: String(targetRoom || '').trim(),
-                            checkin: brIn,
-                            checkout: brOut,
+                            new_checkin: brIn,
+                            new_checkout: brOut,
                             price_adjustment: priceAdj
                         };
-                        fetch('/api/reception/move_reservation', {
-                            method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payloadMove)
+                        fetch('/api/reception/calculate_reservation_update', {
+                            method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payloadCalc)
                         }).then(function(r){ return r.json().catch(function(){ return {success:false}; }); })
-                        .then(function(ans2){
-                            if (ans2 && ans2.success) {
-                                location.reload();
-                            } else {
-                                alert('Falha ao mover: ' + ((ans2 && ans2.error) || 'erro'));
+                        .then(function(ans){
+                            if (!ans || !ans.success) { alert('Falha ao validar movimento: ' + ((ans && ans.error) || 'erro')); return; }
+                            var calc = ans.data || {};
+                            if (calc.valid === false && calc.conflict_message) {
+                                alert('Conflito: ' + calc.conflict_message);
+                                return;
                             }
-                        }).catch(function(){ alert('Erro ao mover.'); });
-                    }).catch(function(){ alert('Erro na validação de conflito.'); });
+                            var payloadMove = {
+                                reservation_id: data.resId,
+                                new_room: String(targetRoom || '').trim(),
+                                checkin: brIn,
+                                checkout: brOut,
+                                price_adjustment: priceAdj
+                            };
+                            fetch('/api/reception/move_reservation', {
+                                method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payloadMove)
+                            }).then(function(r){ return r.json().catch(function(){ return {success:false}; }); })
+                            .then(function(ans2){
+                                if (ans2 && ans2.success) {
+                                    location.reload();
+                                } else {
+                                    alert('Falha ao mover: ' + ((ans2 && ans2.error) || 'erro'));
+                                }
+                            }).catch(function(){ alert('Erro ao mover.'); });
+                        }).catch(function(){ alert('Erro na validação de conflito.'); });
+                    }
+                    var needsAsk = (!sameRoom && newCat && oldCat && newCat !== oldCat);
+                    if (needsAsk) {
+                        askYesNo('Categoria alterada de "' + (oldCatRaw || oldCat) + '" para "' + (newCatRaw || newCat) + '". Haverá alteração de valor?')
+                        .then(function(change){ proceedMove(change ? {type:'recalculate'} : null); });
+                    } else {
+                        proceedMove(null);
+                    }
                 } catch(e) {
                 }
             });
         }
-        slots.forEach(function(cell){
-            bindDrop(cell);
-            if (cell.firstElementChild) bindDrop(cell.firstElementChild);
+        slots.forEach(function(cell){ bindDrop(cell); });
+        function finishResize(clientX, clientY){
+            var rz = window.__resizing;
+            if (!rz) return false;
+            window.__resizing = null;
+            try {
+                if (rz.bar) {
+                    var prev = rz.bar.getAttribute('data-prev-draggable');
+                    if (prev === '') rz.bar.removeAttribute('draggable');
+                    else rz.bar.setAttribute('draggable', prev || 'true');
+                }
+                var el = document.elementFromPoint(clientX, clientY);
+                if (el && el.closest) {
+                    el = el.closest('td[data-start-day], td[data-day-start]') || rz.td;
+                } else {
+                    el = rz.td;
+                }
+                var rect = el.getBoundingClientRect();
+                var relX = Math.max(0, Math.min(rect.width, clientX - rect.left));
+                var span = parseInt(el.getAttribute('data-days') || '2', 10);
+                var frac = rect.width ? (relX / rect.width) : 0;
+                var offsetHalfFloor = Math.floor(frac * span);
+                var baseStartHalf = parseInt(el.getAttribute('data-start-day') || el.getAttribute('data-day-start') || '1', 10);
+                var newStartHalf = rz.startHalf;
+                var newLengthHalf = rz.lengthHalf;
+                if (rz.mode === 'start') {
+                    var targetStartHalf = baseStartHalf + offsetHalfFloor;
+                    newStartHalf = Math.max(1, targetStartHalf);
+                    var delta = newStartHalf - rz.startHalf;
+                    newLengthHalf = Math.max(2, rz.lengthHalf - delta);
+                } else {
+                    var endOffset = Math.ceil(frac * span) - 1;
+                    if (endOffset < 0) endOffset = 0;
+                    var targetEndHalf = baseStartHalf + endOffset;
+                    newLengthHalf = Math.max(2, (targetEndHalf - rz.startHalf) + 1);
+                    newStartHalf = rz.startHalf;
+                    var expanding = clientX > (rz.initialEndX || (rz.rect.left + rz.rect.width));
+                    if (expanding && newLengthHalf <= rz.lengthHalf) {
+                        newLengthHalf = rz.lengthHalf + 2;
+                    }
+                }
+                var ganttStart = '{{ start_date.strftime("%Y-%m-%d") }}';
+                function addDays(iso, d){ var dt=new Date(iso+'T00:00:00'); dt.setDate(dt.getDate()+d); return dt.toISOString().slice(0,10); }
+                var startDayOffset = Math.floor((newStartHalf - 1)/2);
+                var checkinISO = addDays(ganttStart, startDayOffset);
+                var newDays = Math.max(1, Math.ceil((newLengthHalf || 2)/2));
+                var checkoutISO = addDays(checkinISO, newDays);
+                function toBR(iso){ var p=iso.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+                var brIn = toBR(checkinISO);
+                var brOut = toBR(checkoutISO);
+                var oc = (rz.td && rz.td.getAttribute('data-checkin')) || '';
+                var oo = (rz.td && rz.td.getAttribute('data-checkout')) || '';
+                if ((oc && oc !== brIn) || (oo && oo !== brOut)) {
+                    askYesNo('Confirmar alteração de datas de ' + (oc||'?') + '–' + (oo||'?') + ' para ' + brIn + '–' + brOut + '?')
+                    .then(function(ok){
+                        if (!ok) return;
+                        var payloadCalc = {
+                            reservation_id: rz.resId,
+                            new_room: String(rz.room || '').trim(),
+                            new_checkin: brIn,
+                            new_checkout: brOut
+                        };
+                        fetch('/api/reception/calculate_reservation_update', {
+                            method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payloadCalc)
+                        }).then(function(r){ return r.json().catch(function(){ return {success:false}; }); })
+                        .then(function(ans){
+                            if (!ans || !ans.success) { alert('Falha ao validar: ' + ((ans && ans.error) || 'erro')); return; }
+                            var calc = ans.data || {};
+                            if (calc.valid === false && calc.conflict_message) { alert('Conflito: ' + calc.conflict_message); return; }
+                            var priceAdj = null;
+                            try {
+                                var oldDays = parseInt(calc.old_days || calc.oldDays || 0, 10);
+                                var newDays = parseInt(calc.days || 0, 10);
+                                if (newDays > oldDays) {
+                                    var avg = calc.avg_daily || 0;
+                                    var msg = 'Calcular automaticamente as diárias extras pela média (' + fmtBR(avg) + ' por diária)?';
+                                    return askYesNo(msg).then(function(useAuto){
+                                        if (useAuto) {
+                                            priceAdj = { type: 'auto' };
+                                        } else {
+                                            var val = prompt('Informe o valor da diária extra (apenas números, ex: 250.00):');
+                                            if (val === null) return; // cancel
+                                            val = String(val).replace(',', '.').trim();
+                                            if (val && !isNaN(parseFloat(val))) {
+                                                priceAdj = { type: 'extra_daily_manual', amount: val };
+                                            } else {
+                                                alert('Valor inválido. Operação cancelada.');
+                                                return;
+                                            }
+                                        }
+                                        return priceAdj;
+                                    });
+                                }
+                            } catch(_) {}
+                            return priceAdj;
+                        })
+                        .then(function(priceAdj){
+                            if (priceAdj === undefined) return; // canceled in prompt
+                            var payload = {
+                                reservation_id: rz.resId,
+                                room_number: String(rz.room || '').trim(),
+                                checkin: brIn,
+                                checkout: brOut
+                            };
+                            if (priceAdj) payload.price_adjustment = priceAdj;
+                            fetch('/api/reception/resize_reservation', {
+                                method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)
+                            }).then(function(r){ return r.json().catch(function(){ return {success:false}; }); })
+                            .then(function(ans2){
+                                if (ans2 && ans2.success) location.reload();
+                                else alert('Falha ao redimensionar: ' + ((ans2 && ans2.error) || 'erro'));
+                            }).catch(function(){ alert('Erro ao redimensionar.'); });
+                        })
+                        .catch(function(){ alert('Erro na validação.'); });
+                    });
+                }
+            } catch(_) {}
+            // Always suppress the next click after a resize gesture
+            window.__suppressNextOpenModal = true;
+            window.__resizeActive = false;
+            window.__resizeMoved = false;
+            setTimeout(function(){ window.__suppressNextOpenModal = false; }, 150);
+            return true;
+        }
+        document.addEventListener('mouseup', function(e){
+            finishResize(e.clientX, e.clientY);
+        });
+        document.addEventListener('pointerup', function(e){
+            if (window.__resizing) {
+                var rx = (window.__resizing.lastX !== undefined) ? window.__resizing.lastX : e.clientX;
+                var ry = (window.__resizing.lastY !== undefined) ? window.__resizing.lastY : e.clientY;
+                finishResize(rx, ry);
+                try { e.target.releasePointerCapture && e.target.releasePointerCapture(e.pointerId); } catch(_) {}
+            }
         });
     })();
 
@@ -2013,45 +2443,72 @@
         <div class="tab-content" id="resTabContent">
           <!-- Reservation Info Tab -->
           <div class="tab-pane fade show active" id="info" role="tabpanel">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="fw-bold">Dados da Reserva</div>
+                <div>
+                    <button type="button" id="resEditToggle" class="btn btn-sm btn-outline-secondary">Editar</button>
+                    <button type="button" id="resSaveBtn" class="btn btn-sm btn-primary d-none">Salvar</button>
+                </div>
+            </div>
             <div class="row mb-3">
                 <div class="col-6">
                     <small class="text-muted d-block">Check-in / Check-out</small>
-                    <strong id="modalDates"></strong>
+                    <strong id="modalDates" class="res-readonly"></strong>
+                    <div class="res-edit d-none text-muted">Use o mapa para alterar as datas.</div>
                 </div>
                 <div class="col-6">
                     <small class="text-muted d-block">Categoria</small>
-                    <strong id="modalCategory"></strong>
+                    <strong id="modalCategory" class="res-readonly"></strong>
+                    <input type="text" class="form-control form-control-sm res-edit d-none" id="resCategoryInput">
                 </div>
             </div>
             <div class="row mb-3">
                 <div class="col-6">
                     <small class="text-muted d-block">Canal de Reserva (Origem)</small>
-                    <strong id="modalChannel"></strong>
+                    <strong id="modalChannel" class="res-readonly"></strong>
+                    <select class="form-select form-select-sm res-edit d-none" id="resChannelInput">
+                        <option>Direto</option>
+                        <option>Booking</option>
+                        <option>Airbnb</option>
+                        <option>Agência</option>
+                    </select>
                 </div>
                 <div class="col-6">
                     <small class="text-muted d-block">Status Pagamento</small>
-                    <span id="modalStatusBadge" class="badge bg-secondary"></span>
+                    <span id="modalStatusBadge" class="badge bg-secondary res-readonly"></span>
+                    <select class="form-select form-select-sm res-edit d-none" id="resStatusInput">
+                        <option>Pendente</option>
+                        <option>Pago</option>
+                        <option>Parcial</option>
+                        <option>Cancelado</option>
+                    </select>
                 </div>
             </div>
             <div class="row bg-light p-2 rounded mb-3">
                 <div class="col-4">
                     <small class="text-muted d-block">Valor Total</small>
-                    <strong id="modalAmount" class="text-dark"></strong>
+                    <strong id="modalAmount" class="text-dark res-readonly"></strong>
+                    <input type="text" class="form-control form-control-sm res-edit d-none" id="resAmountInput" placeholder="0,00">
                 </div>
                 <div class="col-4">
                     <small class="text-muted d-block">Valor Pago</small>
-                    <strong id="modalPaid" class="text-success"></strong>
+                    <strong id="modalPaid" class="text-success res-readonly"></strong>
+                    <input type="text" class="form-control form-control-sm res-edit d-none" id="resPaidInput" placeholder="0,00">
                 </div>
                 <div class="col-4">
                     <small class="text-muted d-block">A Receber</small>
-                    <strong id="modalToReceive" class="text-danger"></strong>
+                    <strong id="modalToReceive" class="text-danger res-readonly"></strong>
+                    <input type="text" class="form-control form-control-sm res-edit d-none" id="resToReceiveInput" placeholder="0,00" disabled>
                 </div>
             </div>
             
             <div class="row mb-3">
                 <div class="col-12">
                      <small class="text-muted d-block">Valor Médio da Diária (Paga)</small>
-                     <strong id="modalAvgDaily" class="text-primary fs-5">R$ 0.00</strong>
+                     <strong id="modalAvgDaily" class="text-primary fs-5 res-readonly">R$ 0.00</strong>
+                     <div class="res-edit d-none">
+                        <span class="text-muted">Recalculado automaticamente com base no pago e número de diárias.</span>
+                     </div>
                 </div>
             </div>
             
@@ -2342,11 +2799,10 @@
           <div class="col-md-6 mb-3">
             <label class="form-label">Categoria</label>
             <select id="nrCategory" class="form-select">
-              <option value="Manual">Manual</option>
-              <option value="Direto">Direto</option>
-              <option value="Booking">Booking</option>
-              <option value="Airbnb">Airbnb</option>
-              <option value="Expedia">Expedia</option>
+              <option value="">Selecione a categoria</option>
+              {% for group in grouped_rooms %}
+                <option value="{{ group.category }}">{{ group.category }}</option>
+              {% endfor %}
             </select>
           </div>
           <div class="col-md-6 mb-3">

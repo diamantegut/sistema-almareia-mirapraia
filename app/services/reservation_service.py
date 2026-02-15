@@ -187,6 +187,47 @@ class ReservationService:
     MANUAL_ALLOCATIONS_FILE = MANUAL_ALLOCATIONS_FILE
     GUEST_DETAILS_FILE = GUEST_DETAILS_FILE
 
+    def has_availability_for_category(self, category, checkin_str, checkout_str):
+        try:
+            cin = datetime.strptime(checkin_str, '%d/%m/%Y')
+            cout = datetime.strptime(checkout_str, '%d/%m/%Y')
+        except ValueError:
+            return False
+        from app.services.data_service import load_room_occupancy
+        occupancy = load_room_occupancy()
+        start_date = datetime(cin.year, cin.month, cin.day)
+        num_days = max(1, (cout - cin).days + 1)
+        grid = self.get_occupancy_grid(occupancy, start_date, num_days)
+        reservations = self.get_february_reservations()
+        dummy = {
+            'id': '__new__',
+            'guest_name': 'Novo',
+            'checkin': checkin_str,
+            'checkout': checkout_str,
+            'category': category,
+            'status': 'Pendente',
+            'channel': 'Direto',
+            'amount': '0',
+            'paid_amount': '0',
+            'to_receive': '0'
+        }
+        reservations2 = reservations + [dummy]
+        self.allocate_reservations(grid, reservations2, start_date, num_days)
+        for r in reservations2:
+            if r.get('id') == '__new__':
+                return bool(r.get('allocated'))
+        return False
+
+    def available_categories_for_period(self, checkin_str, checkout_str, exclude_category=None):
+        mapping = self.get_room_mapping()
+        result = []
+        for cat in mapping.keys():
+            if exclude_category and str(cat) == str(exclude_category):
+                continue
+            if self.has_availability_for_category(cat, checkin_str, checkout_str):
+                result.append(cat)
+        return result
+
     def get_guest_details_data(self):
         import json
         if not os.path.exists(self.GUEST_DETAILS_FILE):
@@ -290,7 +331,80 @@ class ReservationService:
             entry['checkin'] = checkin
         if checkout:
             entry['checkout'] = checkout
-            
+        
+        # If a price_adjustment is provided or dates changed, compute and persist financial overrides
+        try:
+            res = self.get_reservation_by_id(reservation_id) or {}
+            # Effective original values
+            def _parse_money(v):
+                try:
+                    if v is None: return 0.0
+                    if isinstance(v, (int, float)): return float(v)
+                    s = str(v).strip()
+                    s = s.replace('R$', '').replace('.', '').replace(',', '.')
+                    return float(s)
+                except:
+                    return 0.0
+            current_amount = _parse_money(res.get('amount_val', res.get('amount')))
+            paid_amount = _parse_money(res.get('paid_amount_val', res.get('paid_amount')))
+            # Dates
+            from datetime import datetime as _dt
+            cin_str = res.get('checkin')
+            cout_str = res.get('checkout')
+            # Apply previous manual overrides if present for baseline
+            try:
+                prev_cin = entry.get('checkin') or cin_str
+                prev_cout = entry.get('checkout') or cout_str
+                d_in = _dt.strptime(prev_cin, '%d/%m/%Y')
+                d_out = _dt.strptime(prev_cout, '%d/%m/%Y')
+                old_days = max(1, (d_out - d_in).days)
+            except:
+                old_days = 1
+            # New dates (if provided)
+            try:
+                n_in_str = checkin or entry.get('checkin') or cin_str
+                n_out_str = checkout or entry.get('checkout') or cout_str
+                nd_in = _dt.strptime(n_in_str, '%d/%m/%Y')
+                nd_out = _dt.strptime(n_out_str, '%d/%m/%Y')
+                new_days = max(1, (nd_out - nd_in).days)
+            except:
+                new_days = old_days
+            # Default avg
+            avg_daily = current_amount / old_days if old_days > 0 else 0.0
+            # Compute new total by rule
+            new_total = None
+            if price_adjustment:
+                try:
+                    ptype = str(price_adjustment.get('type', '')).lower()
+                except:
+                    ptype = ''
+                if ptype in ('manual', 'manual_total'):
+                    new_total = _parse_money(price_adjustment.get('amount'))
+                elif ptype in ('extra_daily_manual', 'per_day_manual', 'extra_manual'):
+                    extra_daily = _parse_money(price_adjustment.get('amount'))
+                    diff_days = max(0, new_days - old_days)
+                    new_total = current_amount + (extra_daily * diff_days)
+                elif ptype in ('auto', 'automatic'):
+                    new_total = avg_daily * new_days
+            # Fallback: auto recalculation if dates changed
+            if new_total is None and (checkin or checkout):
+                new_total = avg_daily * new_days
+            if new_total is not None:
+                fin = entry.get('financial', {})
+                fin['amount'] = f"{new_total:.2f}"
+                # Preserve paid amount if any (prefer override > original)
+                if 'paid_amount' not in fin or fin.get('paid_amount') is None:
+                    fin['paid_amount'] = f"{paid_amount:.2f}"
+                try:
+                    to_recv = max(0.0, float(fin['amount'].replace(',', '.')) - float(fin['paid_amount'].replace(',', '.')))
+                except:
+                    to_recv = max(0.0, new_total - paid_amount)
+                fin['to_receive'] = f"{to_recv:.2f}"
+                entry['financial'] = fin
+        except Exception:
+            # Do not fail allocation due to financial computation issues
+            pass
+        
         allocations[str(reservation_id)] = entry
         
         # Ensure directory exists
@@ -299,6 +413,48 @@ class ReservationService:
         with open(self.MANUAL_ALLOCATIONS_FILE, 'w') as f:
             json.dump(allocations, f, indent=2)
 
+    def update_financial_overrides(self, reservation_id, info):
+        import json
+        allocations = self.get_manual_overrides()
+        entry = allocations.get(str(reservation_id), {})
+        if isinstance(entry, str):
+            entry = {'room': entry}
+        fin = entry.get('financial', {})
+        for key in ['amount', 'paid_amount', 'to_receive', 'status', 'channel']:
+            if key in info and info.get(key) is not None:
+                fin[key] = str(info.get(key))
+        entry['financial'] = fin
+        allocations[str(reservation_id)] = entry
+        os.makedirs(os.path.dirname(self.MANUAL_ALLOCATIONS_FILE), exist_ok=True)
+        with open(self.MANUAL_ALLOCATIONS_FILE, 'w') as f:
+            json.dump(allocations, f, indent=2)
+        return fin
+
+    def merge_overrides_into_reservation(self, res_id, res):
+        entry = self.get_manual_overrides().get(str(res_id))
+        if not entry:
+            return res
+        if isinstance(entry, dict):
+            # Dates overrides
+            cin = entry.get('checkin') or res.get('checkin')
+            cout = entry.get('checkout') or res.get('checkout')
+            if cin: res['checkin'] = cin
+            if cout: res['checkout'] = cout
+            # Financial overrides
+            fin = entry.get('financial') or {}
+            for k in ['amount', 'paid_amount', 'to_receive', 'status', 'channel']:
+                if fin.get(k) is not None:
+                    res[k] = fin.get(k)
+            # Avg daily (paid)
+            try:
+                d_in = datetime.strptime(res.get('checkin'), '%d/%m/%Y')
+                d_out = datetime.strptime(res.get('checkout'), '%d/%m/%Y')
+                days = max(1, (d_out - d_in).days)
+                paid = float(str(res.get('paid_amount') or '0').replace(',', '.'))
+                res['avg_daily_paid'] = round(paid / days, 2)
+            except Exception:
+                res['avg_daily_paid'] = 0.0
+        return res
     def check_collision(self, reservation_id, room_number, checkin_str, checkout_str, occupancy_data=None):
         try:
             new_checkin = datetime.strptime(checkin_str, '%d/%m/%Y')

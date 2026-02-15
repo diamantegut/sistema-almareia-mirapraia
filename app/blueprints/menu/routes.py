@@ -1026,22 +1026,36 @@ def flavor_config_add_item():
         return redirect(url_for('main.index'))
         
     group_id = request.form.get('group_id')
-    item_id = request.form.get('item_id')
+    # The form sends 'product_id' and optional 'qty'
+    product_id = request.form.get('product_id')
+    raw_qty = request.form.get('qty', '1.0')
+    try:
+        if isinstance(raw_qty, str):
+            raw_qty = raw_qty.replace(',', '.')
+        qty = float(raw_qty)
+        if qty <= 0:
+            qty = 1.0
+    except Exception:
+        qty = 1.0
     
-    if group_id and item_id:
+    if group_id and product_id:
         groups = load_flavor_groups()
         group = next((g for g in groups if g['id'] == group_id), None)
         if group:
-            if not any(i['id'] == item_id for i in group.get('items', [])):
+            if not any(i.get('id') == product_id for i in group.get('items', [])):
                 insumos = load_products()
-                insumo = next((p for p in insumos if p['id'] == item_id), None)
+                insumo = next((p for p in insumos if str(p.get('id')) == str(product_id)), None)
                 
                 if insumo:
-                    group['items'].append({
-                        'id': item_id,
-                        'name': insumo['name'],
-                        'is_simple': False
-                    })
+                    item_entry = {
+                        'id': str(product_id),
+                        'name': insumo.get('name', 'Item'),
+                        'is_simple': False,
+                        'qty': qty
+                    }
+                    if 'items' not in group or not isinstance(group['items'], list):
+                        group['items'] = []
+                    group['items'].append(item_entry)
                     save_flavor_groups(groups)
                     flash('Item adicionado ao grupo.')
                 else:

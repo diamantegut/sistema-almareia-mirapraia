@@ -161,6 +161,10 @@
                             <th style="width: 100px;">Bônus Indiv.</th>
                             <th style="width: 100px;">Dedução</th>
                             <th style="width: 100px;">Consumo</th>
+                            {% if cycle.status == 'approved' %}
+                            <th style="width: 110px;">Abatido</th>
+                            <th style="width: 130px;">Restante Conta</th>
+                            {% endif %}
                             {% if cycle.results %}
                             <th class="table-primary">Rateio Pontos</th>
                             <th class="table-primary">Bonif. Depto</th>
@@ -196,6 +200,14 @@
                             <td>
                                 <input type="text" class="form-control form-control-sm text-danger" value="{{ '%.2f'|format(emp.consumption|default(0)) }}" readonly>
                             </td>
+                            {% if cycle.status == 'approved' %}
+                            <td class="text-end">
+                                R$ {{ "%.2f"|format(emp.commission_deduction|default(0)) }}
+                            </td>
+                            <td class="text-end">
+                                R$ {{ "%.2f"|format(emp.consumption_remaining|default(0)) }}
+                            </td>
+                            {% endif %}
                             {% if cycle.results %}
                             <td class="text-end">{{ "%.2f"|format(emp.calculated.point_share) if emp.calculated else '-' }}</td>
                             <td class="text-end">{{ "%.2f"|format(emp.calculated.dept_share) if emp.calculated else '-' }}</td>

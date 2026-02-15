@@ -1357,15 +1357,24 @@ def api_create_manual_reservation():
             return jsonify({'success': False, 'error': 'Formato de data inválido. Use DD/MM/AAAA.'}), 400
         
         room_number = str(data.get('room_number') or '').strip()
+        service = ReservationService()
+        occupancy = load_room_occupancy()
         if room_number:
-            occupancy = load_room_occupancy()
             try:
-                service = ReservationService()
                 service.check_collision('new', room_number, data.get('checkin'), data.get('checkout'), occupancy_data=occupancy)
             except ValueError as e:
                 return jsonify({'success': False, 'error': str(e)}), 400
+        else:
+            req_category = (data.get('category') or '').strip()
+            if req_category:
+                if not service.has_availability_for_category(req_category, data.get('checkin'), data.get('checkout')):
+                    alts = service.available_categories_for_period(data.get('checkin'), data.get('checkout'), exclude_category=req_category)
+                    if alts:
+                        bullet = "\n".join([f" - {c}" for c in alts])
+                        msg = f'Indisponível na categoria "{req_category}" para o período {data.get("checkin")}–{data.get("checkout")}. Disponível nas categorias:\n{bullet}'
+                        return jsonify({'success': False, 'error': msg, 'available_categories': alts}), 200
+                    return jsonify({'success': False, 'error': f'Não há disponibilidade para o período {data.get("checkin")}–{data.get("checkout")} em nenhuma categoria.'}), 200
         
-        service = ReservationService()
         new_res = service.create_manual_reservation(data)
         
         # Trigger pre-allocation immediately?
@@ -3246,6 +3255,8 @@ def api_guest_details(reservation_id):
         res = service.get_reservation_by_id(reservation_id)
         if not res:
             res = {}
+        else:
+            res = service.merge_overrides_into_reservation(reservation_id, res)
 
         # 2. Get Extended Info
         details = service.get_guest_details(reservation_id)
@@ -3273,6 +3284,27 @@ def api_guest_update():
         service.update_guest_details(res_id, data)
         
         return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@reception_bp.route('/api/reception/update_reservation_financials', methods=['POST'])
+@login_required
+def api_update_reservation_financials():
+    try:
+        data = request.json
+        res_id = data.get('reservation_id')
+        if not res_id:
+            return jsonify({'success': False, 'error': 'ID da reserva necessário'}), 400
+        # Normalize numeric strings
+        for k in ['amount', 'paid_amount', 'to_receive']:
+            if k in data and isinstance(data.get(k), (int, float)):
+                data[k] = f"{float(data[k]):.2f}"
+        service = ReservationService()
+        fin = service.update_financial_overrides(res_id, data)
+        # Return merged details
+        res = service.get_reservation_by_id(res_id) or {}
+        res = service.merge_overrides_into_reservation(res_id, res)
+        return jsonify({'success': True, 'financial': fin, 'reservation': res})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 

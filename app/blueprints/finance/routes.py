@@ -456,11 +456,18 @@ def load_employee_consumption():
 
         consumption = {}
         for order in orders.values():
-            if order.get('status') == 'open' and order.get('customer_type') == 'funcionario':
+            if order.get('customer_type') == 'funcionario' and order.get('status') in ['open', 'locked']:
                 staff_name = order.get('staff_name')
                 if staff_name:
                     resolved_name = user_map.get(staff_name, staff_name)
-                    consumption[resolved_name] = consumption.get(resolved_name, 0) + float(order.get('total', 0))
+                    try:
+                        subtotal = float(order.get('total', 0) or 0)
+                    except Exception:
+                        subtotal = 0.0
+                    discounted_total = subtotal * 0.80
+                    already_paid = float(order.get('total_paid', 0) or 0)
+                    outstanding = max(0.0, discounted_total - already_paid)
+                    consumption[resolved_name] = consumption.get(resolved_name, 0) + outstanding
         return consumption
     except Exception as e:
         print(f"Error loading consumption: {e}")
@@ -1244,31 +1251,78 @@ def finance_commission_approve(cycle_id):
         return redirect(url_for('finance.finance_commission'))
         
     orders = load_table_orders()
-            
-    count = 0
-    # Map employees in cycle to check existence
-    emp_names = {e['name'] for e in cycle.get('employees', [])}
-    
-    # Load users for mapping
+    import uuid
+    count_closed = 0
+    count_partial = 0
+    employees = cycle.get('employees', [])
+    emp_names = {e['name'] for e in employees}
+    name_to_emp = {e['name']: e for e in employees}
+
     users = load_users()
     user_map = {}
     for uname, udata in users.items():
         full_name = udata.get('full_name') or udata.get('name') or uname
         user_map[uname] = full_name
-    
+
     for order_id, order in orders.items():
-        if order.get('status') == 'open' and order.get('customer_type') == 'funcionario':
+        if order.get('customer_type') == 'funcionario' and order.get('status') in ['open', 'locked']:
             staff_name = order.get('staff_name')
             resolved_name = user_map.get(staff_name, staff_name)
-            
+
             if resolved_name in emp_names:
-                order['status'] = 'closed'
-                order['payment_method'] = 'deducao_comissao'
-                order['closed_at'] = datetime.now().strftime('%d/%m/%Y %H:%M')
-                order['commission_cycle_id'] = cycle_id
-                count += 1
-                
-    if count > 0:
+                if 'partial_payments' not in order:
+                    order['partial_payments'] = []
+                if 'total_paid' not in order:
+                    order['total_paid'] = 0.0
+
+                try:
+                    subtotal = float(order.get('total', 0) or 0)
+                except Exception:
+                    subtotal = 0.0
+                discounted_total = subtotal * 0.80
+                already_paid = float(order.get('total_paid', 0) or 0)
+                outstanding_now = max(0.0, discounted_total - already_paid)
+
+                emp = name_to_emp.get(resolved_name, {})
+                consumption_used = float(emp.get('consumption', 0) or 0)
+
+                pay_amount = min(outstanding_now, consumption_used)
+
+                if pay_amount > 0.001:
+                    payment_entry = {
+                        'id': str(uuid.uuid4()),
+                        'timestamp': datetime.now().strftime('%d/%m/%Y %H:%M'),
+                        'amount': round(pay_amount, 2),
+                        'method': 'Dedução Comissão',
+                        'user': session.get('user')
+                    }
+                    order['partial_payments'].append(payment_entry)
+                    order['total_paid'] = round(already_paid + pay_amount, 2)
+                    
+
+                if emp is not None:
+                    try:
+                        emp['commission_deduction'] = round(pay_amount, 2) if pay_amount else 0.0
+                    except Exception:
+                        emp['commission_deduction'] = 0.0
+                    try:
+                        emp['consumption_remaining'] = round(outstanding_after, 2)
+                    except Exception:
+                        emp['consumption_remaining'] = 0.0
+                    try:
+                        emp['consumption_considered'] = round(consumption_used, 2)
+                    except Exception:
+                        emp['consumption_considered'] = emp.get('consumption', 0.0)
+                outstanding_after = max(0.0, (subtotal * 0.80) - order.get('total_paid', 0))
+                if outstanding_after <= 0.001:
+                    order['status'] = 'closed'
+                    order['payment_method'] = 'deducao_comissao'
+                    order['closed_at'] = datetime.now().strftime('%d/%m/%Y %H:%M')
+                    order['commission_cycle_id'] = cycle_id
+                    count_closed += 1
+                else:
+                    count_partial += 1
+    if count_closed > 0 or count_partial > 0:
         save_table_orders(orders)
             
     cycle['status'] = 'approved'
@@ -1283,7 +1337,10 @@ def finance_commission_approve(cycle_id):
             break
     save_commission_cycles(cycles)
     
-    flash(f'Comissão aprovada! {count} mesas de consumo foram fechadas.')
+    if count_partial > 0:
+        flash(f'Comissão aprovada! {count_closed} contas fechadas e {count_partial} contas registradas com pagamento parcial.', 'info')
+    else:
+        flash(f'Comissão aprovada! {count_closed} contas fechadas.', 'success')
     return redirect(url_for('finance.finance_commission_detail', cycle_id=cycle_id))
 
 @finance_bp.route('/finance/commission/<cycle_id>/delete', methods=['POST'])

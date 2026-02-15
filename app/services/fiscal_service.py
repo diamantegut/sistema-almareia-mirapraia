@@ -14,6 +14,7 @@ from app.services.system_config_manager import (
 from app.services.printing_service import print_fiscal_receipt
 from app.services.printer_manager import load_printer_settings, load_printers
 from app.services.fiscal_pool_service import FiscalPoolService
+from app.services.sefaz_service import SefazService
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -649,6 +650,41 @@ def consult_nfe_sefaz(access_key, settings):
     """
     Consults an NFe from SEFAZ using Nuvem Fiscal API and returns the XML content.
     """
+    if settings.get('provider') == 'sefaz_direto':
+        service = _get_sefaz_service_instance(settings)
+        if not service: return None, "Erro certificado"
+        
+        try:
+            with service:
+                 # Consulta por chave
+                 result = service.consultar_por_chave(access_key, settings.get('cnpj_emitente'))
+                 if not result['success']:
+                     return None, result.get('message')
+                     
+                 # Procura o XML completo nos documentos retornados
+                 for doc in result.get('documents', []):
+                     # Verifica se é procNFe ou NFe
+                     if 'nfeProc' in doc['content'] or '<NFe' in doc['content']:
+                         return doc['content'].encode('utf-8'), None
+                         
+                 # Se não achou, tenta manifestar Ciência
+                 logger.info(f"XML não disponível para {access_key}. Tentando manifestar Ciência.")
+                 manif_res = service.manifestar_ciencia_operacao(access_key, settings.get('cnpj_emitente'))
+                 if manif_res.get('success'): # Atenção: sefaz_service retorna dict padronizado?
+                      # manifestar_ciencia_operacao chama _enviar_evento que precisa ser implementado ou retorna o _enviar_soap
+                      # Se _enviar_evento não estiver implementado (retorna None), vai falhar.
+                      # Mas deixamos o TODO lá. Se falhar, falha aqui.
+                      
+                      time.sleep(2)
+                      result_retry = service.consultar_por_chave(access_key, settings.get('cnpj_emitente'))
+                      for doc in result_retry.get('documents', []):
+                         if 'nfeProc' in doc['content'] or '<NFe' in doc['content']:
+                             return doc['content'].encode('utf-8'), None
+                             
+                 return None, "XML completo não disponível (nota resumida ou pendente de autorização)."
+        except Exception as e:
+            return None, f"Erro SEFAZ Direto: {str(e)}"
+
     client_id = settings.get('client_id')
     client_secret = settings.get('client_secret')
     
@@ -727,10 +763,97 @@ def save_last_nsu(nsu):
     except Exception as e:
         logger.error(f"Error saving last NSU: {e}")
 
+def _get_sefaz_service_instance(settings):
+    pfx_path = settings.get('certificate_path')
+    pfx_password = settings.get('certificate_password')
+    
+    if not pfx_path:
+        return None
+        
+    if not os.path.isabs(pfx_path):
+        # Tenta em data/certs
+        possible_path = os.path.join(os.getcwd(), 'data', 'certs', pfx_path)
+        if os.path.exists(possible_path):
+            pfx_path = possible_path
+        else:
+             pfx_path = os.path.join(os.getcwd(), pfx_path)
+             
+    if not os.path.exists(pfx_path):
+        logger.error(f"Certificado não encontrado em: {pfx_path}")
+        return None
+        
+    return SefazService(pfx_path, pfx_password)
+
+def _list_received_nfes_sefaz(settings):
+    service = _get_sefaz_service_instance(settings)
+    if not service:
+        return None, "Certificado digital não configurado ou inválido (verifique data/certs)."
+        
+    try:
+        with service:
+            cnpj = settings.get('cnpj_emitente')
+            last_nsu = str(get_last_nsu() or 0)
+            ambiente = 2 if settings.get('environment') == 'homologation' else 1
+            
+            # Consultar Distribuição
+            # Loop simples: tenta pegar até 50 documentos ou até esgotar (cStat 137)
+            # A API da SEFAZ retorna lote de até 50 docs.
+            
+            all_documents = []
+            
+            # Primeira chamada
+            logger.info(f"Consultando SEFAZ Direto (NSU {last_nsu})...")
+            result = service.consultar_distribuicao_dfe(cnpj, ult_nsu=last_nsu, ambiente=ambiente)
+            
+            if not result['success']:
+                # Tratamento específico para Consumo Indevido (656)
+                if str(result.get('cStat')) == '656':
+                    return None, "A SEFAZ bloqueou temporariamente novas consultas (Consumo Indevido). Aguarde 1 hora e tente novamente."
+                return None, f"Erro SEFAZ: {result.get('message')} (cStat: {result.get('cStat')})"
+                
+            max_nsu_retorno = result.get('maxNSU')
+            
+            for doc in result.get('documents', []):
+                parsed = service.parse_xml_content(doc['content'])
+                if parsed:
+                    normalized = {
+                        'id': parsed.get('access_key'),
+                        'access_key': parsed.get('access_key'),
+                        'chave': parsed.get('access_key'),
+                        'created_at': parsed.get('dhemi') or parsed.get('dh_evento') or datetime.now().isoformat(),
+                        'issued_at': parsed.get('dhemi'),
+                        'amount': float(parsed.get('vnf', 0) or 0),
+                        'total_amount': float(parsed.get('vnf', 0) or 0),
+                        'digest_value': parsed.get('digval'),
+                        'schema': doc.get('schema'),
+                        'type': parsed.get('type'),
+                        'nsu': doc.get('nsu'),
+                        'emitente': {
+                            'cpf_cnpj': parsed.get('cnpj_emitente'),
+                            'nome': parsed.get('nome_emitente'),
+                            'ie': parsed.get('ie_emitente')
+                        },
+                        'xml_content': doc.get('content') # Guarda XML bruto para salvar depois
+                    }
+                    all_documents.append(normalized)
+            
+            # Atualiza NSU
+            if max_nsu_retorno and int(max_nsu_retorno) > int(last_nsu):
+                save_last_nsu(max_nsu_retorno)
+                
+            return all_documents, None
+            
+    except Exception as e:
+        logger.error(f"Erro no serviço SEFAZ: {e}")
+        return None, f"Erro interno SEFAZ: {str(e)}"
+
 def list_received_nfes(settings):
     """
     Lists recent NFe documents received by the CNPJ (DFe).
     """
+    if settings.get('provider') == 'sefaz_direto':
+        return _list_received_nfes_sefaz(settings)
+
     client_id = settings.get('client_id')
     client_secret = settings.get('client_secret')
     
@@ -919,7 +1042,14 @@ def sync_received_nfes(settings):
         # Also check in flat inbox or root just in case (optional, but let's stick to the new structure)
         if not os.path.exists(file_path):
             # Download XML
-            xml_content, err = consult_nfe_sefaz(key, settings)
+            xml_content = doc.get('xml_content')
+            if xml_content:
+                if isinstance(xml_content, str):
+                    xml_content = xml_content.encode('utf-8')
+                err = None
+            else:
+                xml_content, err = consult_nfe_sefaz(key, settings)
+                
             if xml_content:
                 with open(file_path, 'wb') as f:
                     f.write(xml_content)

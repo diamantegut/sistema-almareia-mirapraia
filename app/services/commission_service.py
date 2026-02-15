@@ -183,9 +183,8 @@ def calculate_commission(cycle_data):
         # Individual Bonus is also time-scaled (like Dept Bonus)
         indiv_bonus_final = indiv_bonus * time_factor
         
-        # Total for Employee
-        # Deductions are taken from the final amount
-        total_final = point_share_final + dept_share_final + indiv_bonus_final - indiv_deduction - consumption
+        discounted_consumption = consumption
+        total_final = point_share_final + dept_share_final + indiv_bonus_final - indiv_deduction - discounted_consumption
         if total_final < 0: total_final = 0
         
         e['calculated'] = {

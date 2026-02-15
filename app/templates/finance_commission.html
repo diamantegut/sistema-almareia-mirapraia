@@ -78,8 +78,10 @@
                             <td>{{ cycle.name }}</td>
                             <td>{{ cycle.month }}</td>
                             <td>
-                                {% if cycle.status == 'calculated' %}
-                                <span class="badge bg-success">Calculado</span>
+                                {% if cycle.status == 'approved' %}
+                                <span class="badge bg-success">Aprovado</span>
+                                {% elif cycle.status == 'calculated' %}
+                                <span class="badge bg-info text-dark">Calculado</span>
                                 {% else %}
                                 <span class="badge bg-secondary">Rascunho</span>
                                 {% endif %}
@@ -145,10 +147,10 @@
         <!-- Calculadora Rápida (Legacy) -->
         <div class="col-md-6">
             <div class="card mb-4 collapsed-card">
-                <div class="card-header bg-secondary text-white" data-bs-toggle="collapse" href="#quickSim" role="button" aria-expanded="false">
+                <div class="card-header bg-secondary text-white" data-bs-toggle="collapse" href="#quickSim" role="button" aria-expanded="true">
                     <h3 class="card-title mb-0" style="font-size: 1rem;">Simulador Rápido (Legado) <i class="bi bi-chevron-down float-end"></i></h3>
                 </div>
-                <div class="collapse" id="quickSim">
+                <div class="collapse show" id="quickSim">
                     <div class="card-body">
                         <form id="commissionForm">
                             <div class="mb-3">
@@ -166,6 +168,11 @@
                             <div class="mb-3">
                                 <label for="extraDiscounts" class="form-label">Descontos Extras / Perdas (R$)</label>
                                 <input type="number" class="form-control" id="extraDiscounts" step="0.01" value="0">
+                            </div>
+                            <div class="mb-3">
+                                <a href="{{ url_for('restaurant.restaurant_tables') }}" target="_blank" class="btn btn-outline-secondary w-100">
+                                    <i class="bi bi-person-badge"></i> Abrir Consumo de Funcionários
+                                </a>
                             </div>
                             
                             <div class="d-grid gap-2">
