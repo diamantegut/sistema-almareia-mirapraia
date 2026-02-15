@@ -1,0 +1,23 @@
+Checking DB at data\department_logs.db
+
+Recent Errors/Criticals:
+Time: 2026-02-15 11:26:25.850394
+Action: Slow Request
+Details: {"path": "/restaurant/cashier", "method": "POST", "duration_seconds": 50.15, "status_code": 302, "ip": "192.168.69.99"}
+----------------------------------------
+Time: 2026-02-15 11:22:45.992022
+Action: Slow Request
+Details: {"path": "/restaurant/cashier", "method": "POST", "duration_seconds": 10.05, "status_code": 302, "ip": "192.168.69.99"}
+----------------------------------------
+Time: 2026-02-15 11:21:18.215970
+Action: Slow Request
+Details: {"path": "/restaurant/cashier", "method": "POST", "duration_seconds": 10.05, "status_code": 302, "ip": "192.168.69.242"}
+----------------------------------------
+Time: 2026-02-15 11:18:17.997398
+Action: Slow Request
+Details: {"path": "/restaurant/cashier", "method": "POST", "duration_seconds": 10.07, "status_code": 302, "ip": "192.168.69.55"}
+----------------------------------------
+Time: 2026-02-15 11:09:10.806772
+Action: Slow Request
+Details: {"path": "/restaurant/cashier", "method": "POST", "duration_seconds": 10.06, "status_code": 302, "ip": "192.168.69.99"}
+----------------------------------------

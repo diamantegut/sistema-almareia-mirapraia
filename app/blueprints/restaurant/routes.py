@@ -1496,8 +1496,24 @@ def restaurant_table_order(table_id):
                 flash('Mesa fechada com sucesso!')
                 return redirect(url_for('restaurant.restaurant_tables'))
             except Exception as e:
+                import traceback
+                error_details = traceback.format_exc()
                 current_app.logger.exception(f"Erro ao fechar mesa {table_id}: {e}")
-                flash('Erro ao fechar conta. Tente novamente.')
+                
+                # Log to DB
+                try:
+                    from app.services.logger_service import LoggerService
+                    LoggerService.log_acao(
+                        acao="Erro Fechamento Mesa",
+                        entidade="Restaurante",
+                        detalhes=error_details,
+                        nivel_severidade="CRITICAL",
+                        departamento_id="Restaurante"
+                    )
+                except:
+                    pass
+
+                flash(f'Erro ao fechar conta: {str(e)}')
                 return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
 
         elif action == 'add_partial_payment':
@@ -1921,7 +1937,6 @@ def restaurant_table_order(table_id):
                     
                     # Lançar transação no caixa do Restaurante para consolidar consumo de funcionário nos relatórios
                     try:
-                        from app.services.cashier_service import CashierService
                         desc = f"Consumo Funcionário - {order.get('staff_name')}"
                         CashierService.add_transaction(
                             cashier_type='restaurant',
