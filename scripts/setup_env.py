@@ -42,7 +42,7 @@ def update_ngrok_config(env, port, domain):
         # Update port for the environment
         config[env]['port'] = int(port)
 
-        # Update staff tunnel domain
+        # Update staff tunnel domain (other tunnels, including 'menu', keep fixed domains/ports)
         modified = False
         for tunnel in config[env]['tunnels']:
             if tunnel['name'] == 'staff':

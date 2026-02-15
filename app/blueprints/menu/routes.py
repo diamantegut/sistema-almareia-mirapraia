@@ -125,6 +125,73 @@ def client_menu():
                           breakfast_items=breakfast_items,
                           is_breakfast_time=is_breakfast_time)
 
+@menu_bp.route('/cardapio/preview')
+def client_menu_preview():
+    # Duplicated logic for preview
+    menu_items = load_menu_items()
+    def _boolish(v):
+        if isinstance(v, bool):
+            return v
+        if isinstance(v, str):
+            return v.strip().lower() in ('true','on','1','checked','paused','yes')
+        if isinstance(v, int):
+            return v != 0
+        return False
+    visible_items = []
+    for i in menu_items:
+        if i.get('active', True) and i.get('visible_virtual_menu', True) and not _boolish(i.get('paused', False)):
+            visible_items.append(i)
+    
+    # Separate Breakfast items
+    breakfast_items = []
+    other_items = []
+    
+    for item in visible_items:
+        # Check if category is "Café da Manhã" (normalized)
+        cat_norm = normalize_text(item.get('category', ''))
+        if 'cafe da manha' in cat_norm:
+            breakfast_items.append(item)
+        else:
+            other_items.append(item)
+    
+    # New Sorting Logic
+    all_categories = sorted(list(set(i['category'] for i in other_items)))
+    
+    settings = load_settings()
+    custom_order = settings.get('digital_menu_category_order', [])
+    
+    # Create a map for order index
+    order_map = {cat: i for i, cat in enumerate(custom_order)}
+    
+    # Sort: First by custom order index (if exists), then alphabetical
+    # Items not in custom_order will have index infinity (float('inf')) so they go to end
+    categories = sorted(all_categories, key=lambda x: (order_map.get(x, float('inf')), x))
+    
+    grouped = {cat: [] for cat in categories}
+    
+    for item in other_items:
+        grouped[item['category']].append(item)
+        
+    # Sort items within each category: Highlighted first, then by Name
+    for cat in grouped:
+        grouped[cat].sort(key=lambda x: (not x.get('highlight', False), x.get('name', '')))
+        
+    # Sort breakfast items: Highlighted first, then by Name
+    breakfast_items.sort(key=lambda x: (not x.get('highlight', False), x.get('name', '')))
+    
+    # Breakfast Time Logic (08:00 - 11:00)
+    now = datetime.now()
+    is_breakfast_time = 8 <= now.hour < 11
+    
+    if not is_breakfast_time:
+        breakfast_items = [] # Hide breakfast items outside hours
+        
+    return render_template('mirapraia_menu_preview.html', 
+                          menu_items_grouped=grouped, 
+                          categories=categories,
+                          breakfast_items=breakfast_items,
+                          is_breakfast_time=is_breakfast_time)
+
 @menu_bp.route('/menu_showcase')
 def menu_showcase():
     menu_items = load_menu_items()

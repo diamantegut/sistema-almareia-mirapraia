@@ -732,6 +732,7 @@ def restaurant_table_order(table_id):
     orders = load_table_orders()
     str_table_id = str(table_id)
     room_occupancy = load_room_occupancy()
+    breakfast_table_id = '36'
     mode = request.args.get('mode') or request.form.get('mode')
     
     try:
@@ -1736,13 +1737,19 @@ def restaurant_table_order(table_id):
                         orders[target_table_id]['staff_name'] = staff_id
                         orders[target_table_id]['room_number'] = None
                         orders[target_table_id]['customer_name'] = None
+                    # Se for mesa 36 (Café), normaliza metadados para evitar botão de transferência para quarto
+                    if target_table_id == '36':
+                        orders[target_table_id]['customer_type'] = 'passante'
+                        orders[target_table_id]['customer_name'] = 'Café da Manhã'
+                        orders[target_table_id]['room_number'] = None
+                        orders[target_table_id]['is_breakfast'] = True
                     # Record transfer info for Undo
                     orders[target_table_id]['last_transfer'] = {
                         'source_table': str_table_id,
                         'timestamp': datetime.now().strftime('%d/%m/%Y %H:%M'),
                         'user': session.get('user')
                     }
-
+                    
                     # Log transfer in observations
                     for item in orders[target_table_id]['items']:
                         if 'observations' not in item:
@@ -1761,6 +1768,12 @@ def restaurant_table_order(table_id):
                         target_order['staff_name'] = staff_id
                         target_order['room_number'] = None
                         target_order['customer_name'] = None
+                    # Se destino é mesa 36 (Café), normaliza metadados
+                    if target_table_id == '36':
+                        target_order['customer_type'] = 'passante'
+                        target_order['customer_name'] = 'Café da Manhã'
+                        target_order['room_number'] = None
+                        target_order['is_breakfast'] = True
                     transferred_items = source_order['items']
                     for item in transferred_items:
                         if 'observations' not in item:
@@ -2157,6 +2170,7 @@ def restaurant_table_order(table_id):
 
     return render_template('restaurant_table_order.html', 
                            table_id=table_id, 
+                           breakfast_table_id=breakfast_table_id,
                            order=orders.get(str_table_id), 
                            complements=complements, 
                            users=users, 
@@ -2242,6 +2256,11 @@ def restaurant_transfer_item():
                 'staff_name': dest_table_id.replace('FUNC_', '') if is_staff else None
             }
             # return jsonify({'success': False, 'error': f'Mesa de destino {dest_table_id} não está aberta.'}), 400
+            if dest_table_id == '36':
+                orders[dest_table_id]['customer_type'] = 'passante'
+                orders[dest_table_id]['customer_name'] = 'Café da Manhã'
+                orders[dest_table_id]['room_number'] = None
+                orders[dest_table_id]['is_breakfast'] = True
 
         # SPECIAL TABLES VALIDATION FOR ITEM TRANSFER
         if dest_table_id in ['36', '69', '68']:
@@ -2259,6 +2278,11 @@ def restaurant_transfer_item():
 
         source_order = orders[source_table_id]
         dest_order = orders[dest_table_id]
+        if dest_table_id == '36':
+            dest_order['customer_type'] = 'passante'
+            dest_order['customer_name'] = 'Café da Manhã'
+            dest_order['room_number'] = None
+            dest_order['is_breakfast'] = True
         
         if source_order.get('locked'):
             return jsonify({'success': False, 'error': 'Não é possível transferir itens de uma conta fechada/puxada.'}), 400

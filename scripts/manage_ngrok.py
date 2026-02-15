@@ -65,15 +65,17 @@ def start_tunnels(env="development"):
             name = tunnel_cfg['name']
             domain = tunnel_cfg['domain']
             desc = tunnel_cfg['description']
+            tunnel_port = tunnel_cfg.get('port_override', port)
             
-            logger.info(f"Starting tunnel '{name}' ({desc}) -> {domain} on port {port}...")
+            logger.info(f"Starting tunnel '{name}' ({desc}) -> {domain} on port {tunnel_port}...")
             try:
-                tunnel = ngrok.connect(port, domain=domain, name=name)
+                tunnel = ngrok.connect(tunnel_port, domain=domain, name=name)
                 logger.info(f" [OK] {name} active: {tunnel.public_url}")
                 active_tunnels.append({
                     "name": name,
                     "url": tunnel.public_url,
                     "domain": domain,
+                    "port": tunnel_port,
                     "description": desc,
                     "status": "active",
                     "timestamp": time.strftime('%Y-%m-%d %H:%M:%S')
@@ -84,6 +86,7 @@ def start_tunnels(env="development"):
                     "name": name,
                     "error": str(e),
                     "domain": domain,
+                    "port": tunnel_port,
                     "description": desc,
                     "status": "failed",
                     "timestamp": time.strftime('%Y-%m-%d %H:%M:%S')

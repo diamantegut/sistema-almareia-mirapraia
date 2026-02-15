@@ -129,16 +129,4 @@ def create_app(config_name=None):
                 
         return response
 
-    # Start Auto-Backup Service for Cashier
-    try:
-        from app.services.cashier_service import CashierService
-        # Only start if not in reloader or if it's the main process
-        if os.environ.get('WERKZEUG_RUN_MAIN') == 'true' or os.environ.get('FLASK_ENV') == 'production':
-             CashierService.start_auto_backup_service()
-        else:
-            # Fallback for some dev environments
-            CashierService.start_auto_backup_service()
-    except Exception as e:
-        print(f"Failed to start Cashier Auto-Backup: {e}")
-    
     return app

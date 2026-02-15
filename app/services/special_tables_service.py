@@ -3,7 +3,16 @@ import os
 import json
 import logging
 from datetime import datetime
-from app.services.data_service import load_table_orders, save_table_orders, load_products, save_stock_entry
+import uuid
+from app.services.data_service import (
+    load_table_orders,
+    save_table_orders,
+    load_products,
+    save_stock_entry,
+    load_breakfast_history,
+    save_breakfast_history,
+    log_stock_action,
+)
 from app.services.logger_service import log_system_action
 
 SPECIAL_TABLES_LOG_FILE = r"f:\Sistema Almareia Mirapraia\data\special_tables_log.json"
@@ -72,20 +81,87 @@ class SpecialTablesService:
         order['closed_at'] = now.strftime('%d/%m/%Y %H:%M')
         order['closed_by'] = user
         
-        # Stock Deduction
+        # Stock Deduction + Breakfast History
         products_db = load_products()
+        history_items = []
+        total_value = 0.0
+        
         for item in order.get('items', []):
-            product_obj = next((p for p in products_db if p['name'] == item['name']), None)
+            product_obj = next((p for p in products_db if p['name'] == item.get('name')), None)
+            try:
+                qty = float(item.get('qty', 0) or 0)
+            except (TypeError, ValueError):
+                qty = 0.0
+            if qty <= 0:
+                continue
+            
+            # Base price: prefer item price, fallback to product price
+            base_price = 0.0
+            try:
+                base_price = float(item.get('price', 0) or 0)
+            except (TypeError, ValueError):
+                if product_obj:
+                    try:
+                        base_price = float(product_obj.get('price', 0) or 0)
+                    except (TypeError, ValueError):
+                        base_price = 0.0
+            
+            complements = item.get('complements') or []
+            
+            item_total = qty * base_price
+            for comp in complements:
+                try:
+                    comp_price = float(comp.get('price', 0) or 0)
+                except (TypeError, ValueError):
+                    comp_price = 0.0
+                item_total += qty * comp_price
+            total_value += item_total
+            
+            history_items.append({
+                'name': item.get('name'),
+                'qty': qty,
+                'price': base_price,
+                'complements': complements,
+            })
+            
             if product_obj:
-                qty = item['qty']
-                # Log stock out without revenue
-                # We reuse save_stock_entry but might need a specific type or just rely on it
-                # Assuming save_stock_entry handles basic deduction.
-                # If we need "no revenue", standard stock deduction doesn't record revenue anyway (that's cashier).
-                # But we should ensure no cashier transaction is created.
-                pass 
+                log_stock_action(
+                    user=user,
+                    action='saida',
+                    product=product_obj['name'],
+                    qty=qty,
+                    details=f"Café da Manhã - Mesa {table_id}",
+                    department='Restaurante'
+                )
+                save_stock_entry({
+                    'id': str(uuid.uuid4()),
+                    'date': now.strftime('%d/%m/%Y'),
+                    'product': product_obj['name'],
+                    'qty': -abs(qty),
+                    'unit': product_obj.get('unit', 'un'),
+                    'price': product_obj.get('price', 0),
+                    'supplier': 'Café da Manhã',
+                    'invoice': f"Mesa {table_id}",
+                    'user': user
+                })
 
-        # Save changes
+        # Breakfast History (estoque sem financeiro)
+        try:
+            history = load_breakfast_history()
+        except Exception:
+            history = []
+        history_entry = {
+            'date': now.strftime('%d/%m/%Y'),
+            'closed_at': now.strftime('%d/%m/%Y %H:%M'),
+            'items': history_items,
+            'total_value': round(total_value, 2),
+            'closed_by': user,
+            'table_id': str(table_id),
+        }
+        history.append(history_entry)
+        save_breakfast_history(history)
+        
+        # Save changes (remove mesa do mapa)
         del orders[str(table_id)]
         save_table_orders(orders)
         

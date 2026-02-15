@@ -1,0 +1,42 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code - Mirapraia</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f0f0f0; padding: 20px; }
+        h1 { text-align: center; color: #333; }
+        h2 { color: #E86C2B; border-bottom: 2px solid #E86C2B; padding-bottom: 10px; margin-top: 40px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; }
+        .card img { max-width: 100%; height: auto; border: 1px solid #ddd; }
+        .card h3 { margin: 10px 0 5px; font-size: 1.1em; color: #555; }
+        .card p { font-size: 0.9em; color: #888; }
+        .download-btn { display: inline-block; margin-top: 10px; padding: 8px 15px; background: #2ABCC7; color: white; text-decoration: none; border-radius: 4px; font-size: 0.9em; }
+        .download-btn:hover { background: #1e8fa3; }
+    </style>
+</head>
+<body>
+
+    <h1>QR Code Simplificado</h1>
+    <p style="text-align: center;">Domínio: <strong>menu.mirapraia.ngrok.app</strong></p>
+
+    <div class="grid" style="justify-content: center;">
+        <div class="card">
+            <h3>Laser (Corte + Gravação)</h3>
+            <img src="laser_simple.svg" alt="Laser Simple">
+            <p>QR Code preto + Linha de corte vermelha.</p>
+            <a href="laser_simple.svg" download class="download-btn">Download SVG</a>
+        </div>
+        <div class="card">
+            <h3>Impressão Vetorial</h3>
+            <img src="print_simple.svg" alt="Print Simple">
+            <p>QR Code puro (Preto).</p>
+            <a href="print_simple.svg" download class="download-btn">Download SVG</a>
+        </div>
+    </div>
+
+</body>
+</html>

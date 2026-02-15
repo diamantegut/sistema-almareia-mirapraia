@@ -674,38 +674,6 @@ class CashierService:
             print(f"Cashier Backup Failed: {e}")
 
     @staticmethod
-    def start_auto_backup_service(interval=30):
-        """
-        Starts a background thread that backs up the cashier session every 'interval' seconds.
-        """
-        global _backup_thread_started
-        if _backup_thread_started:
-            logger.info("Auto-backup service already running.")
-            return
-
-        def backup_loop():
-            logger.info(f"Auto-backup service started (Interval: {interval}s)")
-            while True:
-                try:
-                    time.sleep(interval)
-                    # Acquire lock to read safely
-                    with file_lock(CASHIER_SESSIONS_FILE):
-                        # We use _load_sessions which handles recovery if needed
-                        sessions = CashierService._load_sessions()
-                        if sessions:
-                            CashierService._perform_backup(sessions)
-                except Exception as e:
-                    logger.error(f"Error in auto-backup loop: {e}")
-                    # Don't crash the thread, just wait and retry
-                    time.sleep(5)
-
-        import threading
-        t = threading.Thread(target=backup_loop, daemon=True)
-        t.start()
-        _backup_thread_started = True
-        logger.info("Auto-backup thread initiated.")
-
-    @staticmethod
     def prepare_transactions_for_display(transactions):
         """
         Groups transactions with the same payment_group_id into a single displayable item.

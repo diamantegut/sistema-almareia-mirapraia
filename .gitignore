@@ -30,7 +30,7 @@ debug_*.txt
 temp_*.py
 
 # Ignore large data files if needed (careful with json databases)
-# data/*.json # Uncomment if data is not versioned
+data/*.json # Uncomment if data is not versioned
 
 # Ignore trash folder
 _trash/
