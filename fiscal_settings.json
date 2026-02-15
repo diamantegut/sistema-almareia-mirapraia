@@ -29,6 +29,14 @@
             "next_number": "1",
             "xml_storage_path": "fiscal_documents/xmls_almareia",
             "description": "Almareia - Reservas (NFS-e)"
+        },
+        {
+            "provider": "sefaz_direto",
+            "cnpj_emitente": "28952732000109",
+            "certificate_path": "mirapraia.pfx",
+            "certificate_password": "alma2006",
+            "environment": "production",
+            "xml_storage_path": "fiscal_documents/xmls"
         }
     ],
     "environment": "homologation"

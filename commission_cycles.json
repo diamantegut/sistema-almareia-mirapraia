@@ -4,7 +4,7 @@
         "name": "Janeiro 16 a 31/01",
         "month": "2026-01",
         "created_at": "09/02/2026 12:26",
-        "status": "calculated",
+        "status": "approved",
         "total_commission": 12053.0,
         "total_bonus": 27208.53,
         "card_percent": 0.8,
@@ -802,480 +802,543 @@
             "total_distributed": 22409.82,
             "remainder": 0.02
         },
-        "updated_at": "13/02/2026 14:14"
+        "updated_at": "13/02/2026 14:14",
+        "approved_at": "14/02/2026 15:57",
+        "approved_by": "Angelo"
     },
     {
         "id": "20260214123206",
         "name": "Fevereiro",
         "month": "2026-02",
         "created_at": "14/02/2026 12:32",
-        "status": "draft",
-        "total_commission": 16654.238500000007,
-        "total_bonus": 0,
+        "status": "calculated",
+        "total_commission": 16654.24,
+        "total_bonus": 0.0,
         "card_percent": 0.8,
         "commission_tax_percent": 12.0,
         "bonus_tax_percent": 24.0,
-        "extras": 0,
+        "extras": 0.0,
         "employees": [
-            {
-                "name": "Angelo Diamante",
-                "department": "",
-                "role": "admin",
-                "points": 0.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
-            },
-            {
-                "name": "Grasielli Diamante",
-                "department": "",
-                "role": "admin",
-                "points": 0.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
-            },
             {
                 "name": "Adailton dos santos oliveira",
                 "department": "Serviço",
                 "role": "colaborador",
                 "points": 3.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
             },
             {
                 "name": "Ademir Generali",
                 "department": "Manutenção",
                 "role": "colaborador",
                 "points": 3.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
-            },
-            {
-                "name": "Adriana Santos Do Nascimento",
-                "department": "Cozinha",
-                "role": "colaborador",
-                "points": 2.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
             },
             {
                 "name": "Adriana Ferreira dos Santos",
                 "department": "Cozinha",
                 "role": "colaborador",
                 "points": 3.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
+            },
+            {
+                "name": "Adriana Santos Do Nascimento",
+                "department": "Cozinha",
+                "role": "colaborador",
+                "points": 2.0,
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
             },
             {
                 "name": "Alan Paiva Lima",
                 "department": "Recepção",
                 "role": "colaborador",
                 "points": 3.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
             },
             {
                 "name": "Andrea Minervino De Melo Vasconcelos",
                 "department": "Governança",
                 "role": "supervisor",
                 "points": 4.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
             },
             {
-                "name": "Aurinete maria de oliveira",
-                "department": "Cozinha",
-                "role": "supervisor",
-                "points": 4.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
-            },
-            {
-                "name": "Bruno Ruanderson Mendes",
-                "department": "Recepção",
-                "role": "colaborador",
-                "points": 3.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
-            },
-            {
-                "name": "Cicera maria da Silva",
-                "department": "Cozinha",
-                "role": "gerente",
-                "points": 5.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
-            },
-            {
-                "name": "Cintia Raquel Da Silva",
-                "department": "Cozinha",
-                "role": "supervisor",
-                "points": 4.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
-            },
-            {
-                "name": "Clebio Alves de Moura",
-                "department": "Serviço",
-                "role": "colaborador",
-                "points": 2.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
-            },
-            {
-                "name": "Daniel Luiz De Lima",
-                "department": "Manutenção",
-                "role": "colaborador",
-                "points": 2.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
-            },
-            {
-                "name": "Danilo Cesar Silva Lima",
-                "department": "Serviço",
-                "role": "colaborador",
-                "points": 3.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
-            },
-            {
-                "name": "Dina Priscila dos Santos Nunes",
-                "department": "Governança",
-                "role": "colaborador",
-                "points": 3.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
-            },
-            {
-                "name": "Elenilda Dos Santos Da Silva",
-                "department": "Cozinha",
-                "role": "colaborador",
-                "points": 2.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
-            },
-            {
-                "name": "Erique Neves Cavalcanti",
-                "department": "Serviço",
-                "role": "colaborador",
-                "points": 3.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
-            },
-            {
-                "name": "Filipe Da Silva Assis",
-                "department": "Serviço",
-                "role": "supervisor",
-                "points": 4.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
-            },
-            {
-                "name": "Generina Jovelina Da Silva",
-                "department": "Governança",
-                "role": "colaborador",
-                "points": 3.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
-            },
-            {
-                "name": "Gilvan Santos de Brito",
-                "department": "Manutenção",
-                "role": "gerente",
-                "points": 5.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
-            },
-            {
-                "name": "Guilherme Henrique da Silva",
-                "department": "Serviço",
-                "role": "supervisor",
-                "points": 4.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
-            },
-            {
-                "name": "Iraquitan De Freitas Lima Junior",
-                "department": "Recepção",
-                "role": "gerente",
-                "points": 5.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
-            },
-            {
-                "name": "Jaqueline Maria Santos da Silva",
-                "department": "Governança",
-                "role": "colaborador",
-                "points": 2.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
-            },
-            {
-                "name": "Jose Roberto Da Silva",
-                "department": "Recepção",
-                "role": "colaborador",
-                "points": 2.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
-            },
-            {
-                "name": "Josenice Maria De Oliveira",
-                "department": "Cozinha",
-                "role": "colaborador",
-                "points": 3.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
-            },
-            {
-                "name": "Kayke Emanoel de Lima",
-                "department": "Serviço",
-                "role": "colaborador",
-                "points": 2.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
-            },
-            {
-                "name": "Lindinalva Maria Pereira",
-                "department": "Cozinha",
-                "role": "colaborador",
-                "points": 2.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
-            },
-            {
-                "name": "Luiz Eduardo Carneiro da Silva",
-                "department": "Recepção",
-                "role": "supervisor",
-                "points": 4.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
-            },
-            {
-                "name": "Maria Nadier Da Silva",
-                "department": "Cozinha",
-                "role": "colaborador",
-                "points": 2.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
-            },
-            {
-                "name": "Pedro Lucas Silva Dos Santos",
-                "department": "Estoque",
-                "role": "colaborador",
-                "points": 2.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
-            },
-            {
-                "name": "Priscila Silva Gonçalves",
-                "department": "Recepção",
-                "role": "supervisor",
-                "points": 4.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
-            },
-            {
-                "name": "Robson Vieira Da Silva",
-                "department": "Cozinha",
-                "role": "colaborador",
-                "points": 3.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
-            },
-            {
-                "name": "Taciana Maria da Silva",
-                "department": "Cozinha",
-                "role": "colaborador",
-                "points": 2.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
-            },
-            {
-                "name": "Welington Da Silva Lima",
-                "department": "Serviço",
-                "role": "colaborador",
-                "points": 3.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
-            },
-            {
-                "name": "Werley Kaia Silvino Alves",
-                "department": "Serviço",
-                "role": "colaborador",
-                "points": 2.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
-            },
-            {
-                "name": "Luiz Carlos Rodrigues Dos Santos",
-                "department": "Manutenção",
-                "role": "colaborador",
-                "points": 2.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
-            },
-            {
-                "name": "Danilo Ferreira de Lima",
-                "department": "Cozinha",
-                "role": "colaborador",
-                "points": 2.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
+                "name": "Angelo Diamante",
+                "department": "",
+                "role": "admin",
+                "points": 0.0,
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
             },
             {
                 "name": "Antonio Carlos Da Silva",
                 "department": "Recepção",
                 "role": "colaborador",
                 "points": 2.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
             },
             {
-                "name": "José Gomes Da Silva",
-                "department": "Serviço",
-                "role": "colaborador",
-                "points": 3.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
-            },
-            {
-                "name": "Jose Cicero Santos Acioli de Melo",
-                "department": "Manutenção",
-                "role": "colaborador",
-                "points": 2.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
-            },
-            {
-                "name": "Orlando Severino de Gouveia",
-                "department": "Serviço",
-                "role": "colaborador",
-                "points": 2.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
-            },
-            {
-                "name": "Josiane Maria De Oliveira",
+                "name": "Aurinete maria de oliveira",
                 "department": "Cozinha",
-                "role": "colaborador",
-                "points": 2.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
-            },
-            {
-                "name": "Pauline Tavares Da Silva",
-                "department": "Governança",
-                "role": "colaborador",
-                "points": 2.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
+                "role": "supervisor",
+                "points": 4.0,
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
             },
             {
                 "name": "Bartolomeu Leandro René de Araujo",
                 "department": "Serviço",
                 "role": "colaborador",
                 "points": 3.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
+            },
+            {
+                "name": "Bruno Ruanderson Mendes",
+                "department": "Recepção",
+                "role": "colaborador",
+                "points": 3.0,
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
             },
             {
                 "name": "Carlos Eduardo Carneiro da Silva",
                 "department": "Estoque",
                 "role": "gerente",
                 "points": 5.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
             },
             {
-                "name": "José Henrique Lucena da Silva ",
+                "name": "Cicera maria da Silva",
+                "department": "Cozinha",
+                "role": "gerente",
+                "points": 5.0,
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
+            },
+            {
+                "name": "Cintia Raquel Da Silva",
+                "department": "Cozinha",
+                "role": "supervisor",
+                "points": 4.0,
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
+            },
+            {
+                "name": "Clebio Alves de Moura",
+                "department": "Serviço",
+                "role": "colaborador",
+                "points": 2.0,
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
+            },
+            {
+                "name": "Daniel Luiz De Lima",
+                "department": "Manutenção",
+                "role": "colaborador",
+                "points": 2.0,
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
+            },
+            {
+                "name": "Danilo Cesar Silva Lima",
                 "department": "Serviço",
                 "role": "colaborador",
                 "points": 3.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
+            },
+            {
+                "name": "Danilo Ferreira de Lima",
+                "department": "Cozinha",
+                "role": "colaborador",
+                "points": 2.0,
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
+            },
+            {
+                "name": "Dina Priscila dos Santos Nunes",
+                "department": "Governança",
+                "role": "colaborador",
+                "points": 3.0,
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
+            },
+            {
+                "name": "Elenilda Dos Santos Da Silva",
+                "department": "Cozinha",
+                "role": "colaborador",
+                "points": 2.0,
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
+            },
+            {
+                "name": "Erique Neves Cavalcanti",
+                "department": "Serviço",
+                "role": "colaborador",
+                "points": 3.0,
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
+            },
+            {
+                "name": "Filipe Da Silva Assis",
+                "department": "Serviço",
+                "role": "supervisor",
+                "points": 4.0,
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
+            },
+            {
+                "name": "Generina Jovelina Da Silva",
+                "department": "Governança",
+                "role": "colaborador",
+                "points": 3.0,
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
+            },
+            {
+                "name": "Gilvan Santos de Brito",
+                "department": "Manutenção",
+                "role": "gerente",
+                "points": 5.0,
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
+            },
+            {
+                "name": "Grasielli Diamante",
+                "department": "",
+                "role": "admin",
+                "points": 0.0,
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
+            },
+            {
+                "name": "Guilherme Henrique da Silva",
+                "department": "Serviço",
+                "role": "supervisor",
+                "points": 4.0,
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
+            },
+            {
+                "name": "Iraquitan De Freitas Lima Junior",
+                "department": "Recepção",
+                "role": "gerente",
+                "points": 5.0,
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
+            },
+            {
+                "name": "Jaqueline Maria Santos da Silva",
+                "department": "Governança",
+                "role": "colaborador",
+                "points": 2.0,
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
+            },
+            {
+                "name": "Jose Cicero Santos Acioli de Melo",
+                "department": "Manutenção",
+                "role": "colaborador",
+                "points": 2.0,
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
+            },
+            {
+                "name": "Jose Roberto Da Silva",
+                "department": "Recepção",
+                "role": "colaborador",
+                "points": 2.0,
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
+            },
+            {
+                "name": "Josenice Maria De Oliveira",
+                "department": "Cozinha",
+                "role": "colaborador",
+                "points": 3.0,
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
+            },
+            {
+                "name": "Josiane Maria De Oliveira",
+                "department": "Cozinha",
+                "role": "colaborador",
+                "points": 2.0,
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
             },
             {
                 "name": "José Edson França dos Santos ",
                 "department": "Serviço",
                 "role": "colaborador",
                 "points": 2.0,
-                "days_worked": 30,
-                "individual_bonus": 0,
-                "individual_deduction": 0
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
+            },
+            {
+                "name": "José Gomes Da Silva",
+                "department": "Serviço",
+                "role": "colaborador",
+                "points": 3.0,
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
+            },
+            {
+                "name": "José Henrique Lucena da Silva ",
+                "department": "Serviço",
+                "role": "colaborador",
+                "points": 3.0,
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
+            },
+            {
+                "name": "Kayke Emanoel de Lima",
+                "department": "Serviço",
+                "role": "colaborador",
+                "points": 2.0,
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
+            },
+            {
+                "name": "Lindinalva Maria Pereira",
+                "department": "Cozinha",
+                "role": "colaborador",
+                "points": 2.0,
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
+            },
+            {
+                "name": "Luiz Carlos Rodrigues Dos Santos",
+                "department": "Manutenção",
+                "role": "colaborador",
+                "points": 2.0,
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
+            },
+            {
+                "name": "Luiz Eduardo Carneiro da Silva",
+                "department": "Recepção",
+                "role": "supervisor",
+                "points": 4.0,
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
+            },
+            {
+                "name": "Maria Nadier Da Silva",
+                "department": "Cozinha",
+                "role": "colaborador",
+                "points": 2.0,
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
+            },
+            {
+                "name": "Orlando Severino de Gouveia",
+                "department": "Serviço",
+                "role": "colaborador",
+                "points": 2.0,
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
+            },
+            {
+                "name": "Pauline Tavares Da Silva",
+                "department": "Governança",
+                "role": "colaborador",
+                "points": 2.0,
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
+            },
+            {
+                "name": "Pedro Lucas Silva Dos Santos",
+                "department": "Estoque",
+                "role": "colaborador",
+                "points": 2.0,
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
+            },
+            {
+                "name": "Priscila Silva Gonçalves",
+                "department": "Recepção",
+                "role": "supervisor",
+                "points": 4.0,
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
+            },
+            {
+                "name": "Robson Vieira Da Silva",
+                "department": "Cozinha",
+                "role": "colaborador",
+                "points": 3.0,
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
+            },
+            {
+                "name": "Taciana Maria da Silva",
+                "department": "Cozinha",
+                "role": "colaborador",
+                "points": 2.0,
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
+            },
+            {
+                "name": "Welington Da Silva Lima",
+                "department": "Serviço",
+                "role": "colaborador",
+                "points": 3.0,
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
+            },
+            {
+                "name": "Werley Kaia Silvino Alves",
+                "department": "Serviço",
+                "role": "colaborador",
+                "points": 2.0,
+                "days_worked": 30.0,
+                "individual_bonus": 0.0,
+                "individual_deduction": 0.0,
+                "consumption": 0.0
             }
         ],
         "department_bonuses": [
             {
                 "name": "Cozinha",
-                "value": 0
+                "value": 0.0
             },
             {
                 "name": "Serviço",
-                "value": 0
+                "value": 0.0
             },
             {
                 "name": "Manutenção",
-                "value": 0
+                "value": 0.0
             },
             {
                 "name": "Recepção",
-                "value": 0
+                "value": 0.0
             },
             {
                 "name": "Estoque",
-                "value": 0
+                "value": 0.0
             },
             {
                 "name": "Governança",
-                "value": 0
+                "value": 0.0
             }
         ],
-        "results": {}
+        "results": {
+            "gross_total": 16654.24,
+            "ded_convention": 3330.85,
+            "ded_tax_commission": 1598.81,
+            "ded_tax_bonus": 0.0,
+            "ded_card": 266.47,
+            "total_global_deductions": 5196.12,
+            "net_distributable": 11458.12,
+            "total_distributed": 11458.12,
+            "remainder": -0.18
+        },
+        "approved_at": "14/02/2026 15:57",
+        "approved_by": "Angelo",
+        "updated_at": "14/02/2026 15:59"
     }
 ]

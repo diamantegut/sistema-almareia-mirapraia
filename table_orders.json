@@ -31,7 +31,7 @@
         "total": 18.32
     },
     "FUNC_robson": {
-        "status": "open",
+        "status": "closed",
         "opened_at": "01/02/2026 13:26",
         "num_adults": 1,
         "customer_type": "funcionario",
@@ -143,11 +143,36 @@
                 "cfop": "5405",
                 "origin": "0",
                 "tax_info": null
+            },
+            {
+                "id": "118700ba-e8b7-4080-bf15-610e878463e9",
+                "product_id": "160",
+                "name": "Corona Long Neck",
+                "price": 16.9,
+                "qty": 1.0,
+                "category": "Cervejas",
+                "created_at": "14/02/2026 15:51",
+                "waiter": "Angelo",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "22030000",
+                "cest": "302101",
+                "cfop": "5405",
+                "origin": "0",
+                "tax_info": null
             }
         ],
-        "total": 33.82,
+        "total": 50.72,
         "partial_payments": [],
-        "total_paid": 0.0
+        "total_paid": 0.0,
+        "payment_method": "deducao_comissao",
+        "closed_at": "14/02/2026 15:57",
+        "commission_cycle_id": "20260214123206"
     },
     "69": {
         "items": [
@@ -746,7 +771,7 @@
         "total": 15.040000000000003
     },
     "FUNC_erique": {
-        "status": "open",
+        "status": "closed",
         "opened_at": "02/02/2026 14:26",
         "num_adults": 1,
         "customer_type": "funcionario",
@@ -804,10 +829,13 @@
         ],
         "total": 21.360000000000003,
         "partial_payments": [],
-        "total_paid": 0.0
+        "total_paid": 0.0,
+        "payment_method": "deducao_comissao",
+        "closed_at": "14/02/2026 15:57",
+        "commission_cycle_id": "20260214123206"
     },
     "FUNC_clebio": {
-        "status": "open",
+        "status": "closed",
         "opened_at": "02/02/2026 14:27",
         "num_adults": 1,
         "customer_type": "funcionario",
@@ -855,7 +883,10 @@
                 "created_at": "05/02/2026 20:24"
             }
         ],
-        "total": 46.88
+        "total": 46.88,
+        "payment_method": "deducao_comissao",
+        "closed_at": "14/02/2026 15:57",
+        "commission_cycle_id": "20260214123206"
     },
     "FUNC_bartolomeu": {
         "status": "open",
@@ -894,7 +925,7 @@
         "total": 7.920000000000001
     },
     "FUNC_welington": {
-        "status": "open",
+        "status": "closed",
         "opened_at": "02/02/2026 14:27",
         "num_adults": 1,
         "customer_type": "funcionario",
@@ -922,7 +953,10 @@
                 "created_at": "02/02/2026 14:28"
             }
         ],
-        "total": 23.12
+        "total": 23.12,
+        "payment_method": "deducao_comissao",
+        "closed_at": "14/02/2026 15:57",
+        "commission_cycle_id": "20260214123206"
     },
     "FUNC_jose.santos": {
         "status": "open",
@@ -976,7 +1010,7 @@
         "total": 19.84
     },
     "FUNC_iraquitan": {
-        "status": "open",
+        "status": "closed",
         "opened_at": "02/02/2026 14:29",
         "num_adults": 1,
         "customer_type": "funcionario",
@@ -1036,10 +1070,13 @@
         ],
         "total": 14.240000000000002,
         "partial_payments": [],
-        "total_paid": 0.0
+        "total_paid": 0.0,
+        "payment_method": "deducao_comissao",
+        "closed_at": "14/02/2026 15:57",
+        "commission_cycle_id": "20260214123206"
     },
     "FUNC_danilo": {
-        "status": "open",
+        "status": "closed",
         "opened_at": "02/02/2026 14:29",
         "num_adults": 1,
         "customer_type": "funcionario",
@@ -1087,10 +1124,13 @@
                 "created_at": "06/02/2026 18:01"
             }
         ],
-        "total": 62.8
+        "total": 62.8,
+        "payment_method": "deducao_comissao",
+        "closed_at": "14/02/2026 15:57",
+        "commission_cycle_id": "20260214123206"
     },
     "FUNC_cicera": {
-        "status": "open",
+        "status": "closed",
         "opened_at": "02/02/2026 14:30",
         "num_adults": 1,
         "customer_type": "funcionario",
@@ -1143,10 +1183,13 @@
                 "created_at": "05/02/2026 20:25"
             }
         ],
-        "total": 15.840000000000002
+        "total": 15.840000000000002,
+        "payment_method": "deducao_comissao",
+        "closed_at": "14/02/2026 15:57",
+        "commission_cycle_id": "20260214123206"
     },
     "FUNC_filipe": {
-        "status": "open",
+        "status": "closed",
         "opened_at": "02/02/2026 14:30",
         "num_adults": 1,
         "customer_type": "funcionario",
@@ -1179,10 +1222,13 @@
                 "created_at": "02/02/2026 14:30"
             }
         ],
-        "total": 21.360000000000003
+        "total": 21.360000000000003,
+        "payment_method": "deducao_comissao",
+        "closed_at": "14/02/2026 15:57",
+        "commission_cycle_id": "20260214123206"
     },
     "FUNC_adailton": {
-        "status": "open",
+        "status": "closed",
         "opened_at": "02/02/2026 14:31",
         "num_adults": 1,
         "customer_type": "funcionario",
@@ -1290,10 +1336,13 @@
         ],
         "total": 107.52000000000001,
         "partial_payments": [],
-        "total_paid": 0.0
+        "total_paid": 0.0,
+        "payment_method": "deducao_comissao",
+        "closed_at": "14/02/2026 15:57",
+        "commission_cycle_id": "20260214123206"
     },
     "FUNC_elenilda": {
-        "status": "open",
+        "status": "closed",
         "opened_at": "02/02/2026 15:07",
         "num_adults": 1,
         "customer_type": "funcionario",
@@ -1321,10 +1370,13 @@
                 "created_at": "02/02/2026 15:07"
             }
         ],
-        "total": 27.92
+        "total": 27.92,
+        "payment_method": "deducao_comissao",
+        "closed_at": "14/02/2026 15:57",
+        "commission_cycle_id": "20260214123206"
     },
     "FUNC_Grasi": {
-        "status": "open",
+        "status": "closed",
         "opened_at": "02/02/2026 16:54",
         "num_adults": 1,
         "customer_type": "funcionario",
@@ -1375,7 +1427,10 @@
         ],
         "total": 16.64,
         "partial_payments": [],
-        "total_paid": 0.0
+        "total_paid": 0.0,
+        "payment_method": "deducao_comissao",
+        "closed_at": "14/02/2026 15:57",
+        "commission_cycle_id": "20260214123206"
     },
     "34": {
         "items": [
@@ -1455,7 +1510,7 @@
         "total": 6.32
     },
     "FUNC_jose": {
-        "status": "open",
+        "status": "closed",
         "opened_at": "03/02/2026 16:01",
         "num_adults": 1,
         "customer_type": "funcionario",
@@ -1511,10 +1566,13 @@
                 "created_at": "06/02/2026 14:18"
             }
         ],
-        "total": 14.240000000000002
+        "total": 14.240000000000002,
+        "payment_method": "deducao_comissao",
+        "closed_at": "14/02/2026 15:57",
+        "commission_cycle_id": "20260214123206"
     },
     "FUNC_alan": {
-        "status": "open",
+        "status": "closed",
         "opened_at": "04/02/2026 09:15",
         "num_adults": 1,
         "customer_type": "funcionario",
@@ -1603,10 +1661,13 @@
                 "created_at": "07/02/2026 09:41"
             }
         ],
-        "total": 31.12
+        "total": 31.12,
+        "payment_method": "deducao_comissao",
+        "closed_at": "14/02/2026 15:57",
+        "commission_cycle_id": "20260214123206"
     },
     "FUNC_taciana": {
-        "status": "open",
+        "status": "closed",
         "opened_at": "04/02/2026 14:47",
         "num_adults": 1,
         "customer_type": "funcionario",
@@ -1664,10 +1725,13 @@
                 "created_at": "07/02/2026 13:05"
             }
         ],
-        "total": 14.240000000000002
+        "total": 14.240000000000002,
+        "payment_method": "deducao_comissao",
+        "closed_at": "14/02/2026 15:57",
+        "commission_cycle_id": "20260214123206"
     },
     "FUNC_pedro": {
-        "status": "open",
+        "status": "closed",
         "opened_at": "04/02/2026 15:09",
         "num_adults": 1,
         "customer_type": "funcionario",
@@ -1693,10 +1757,13 @@
                 "created_at": "04/02/2026 15:10"
             }
         ],
-        "total": 7.120000000000001
+        "total": 7.120000000000001,
+        "payment_method": "deducao_comissao",
+        "closed_at": "14/02/2026 15:57",
+        "commission_cycle_id": "20260214123206"
     },
     "FUNC_josenice": {
-        "status": "open",
+        "status": "closed",
         "opened_at": "04/02/2026 15:10",
         "num_adults": 1,
         "customer_type": "funcionario",
@@ -1727,7 +1794,10 @@
                 "created_at": "04/02/2026 15:10"
             }
         ],
-        "total": 7.120000000000001
+        "total": 7.120000000000001,
+        "payment_method": "deducao_comissao",
+        "closed_at": "14/02/2026 15:57",
+        "commission_cycle_id": "20260214123206"
     },
     "GOV": {
         "items": [
@@ -1750,7 +1820,7 @@
         "room_number": "31"
     },
     "FUNC_guilherme": {
-        "status": "open",
+        "status": "closed",
         "opened_at": "06/02/2026 14:07",
         "num_adults": 1,
         "customer_type": "funcionario",
@@ -1778,7 +1848,10 @@
                 "created_at": "06/02/2026 14:07"
             }
         ],
-        "total": 6.32
+        "total": 6.32,
+        "payment_method": "deducao_comissao",
+        "closed_at": "14/02/2026 15:57",
+        "commission_cycle_id": "20260214123206"
     },
     "26": {
         "items": [],
@@ -1826,7 +1899,7 @@
         "total": 7.120000000000001
     },
     "FUNC_dudu": {
-        "status": "open",
+        "status": "closed",
         "opened_at": "06/02/2026 17:58",
         "num_adults": 1,
         "customer_type": "funcionario",
@@ -1879,10 +1952,13 @@
         ],
         "total": 91.84,
         "partial_payments": [],
-        "total_paid": 0.0
+        "total_paid": 0.0,
+        "payment_method": "deducao_comissao",
+        "closed_at": "14/02/2026 15:57",
+        "commission_cycle_id": "20260214123206"
     },
     "FUNC_maria": {
-        "status": "open",
+        "status": "closed",
         "opened_at": "06/02/2026 18:01",
         "num_adults": 1,
         "customer_type": "funcionario",
@@ -1940,7 +2016,10 @@
                 "created_at": "07/02/2026 14:38"
             }
         ],
-        "total": 14.240000000000002
+        "total": 14.240000000000002,
+        "payment_method": "deducao_comissao",
+        "closed_at": "14/02/2026 15:57",
+        "commission_cycle_id": "20260214123206"
     },
     "17": {
         "items": [],
@@ -1952,7 +2031,7 @@
         "room_number": "17"
     },
     "FUNC_henrique": {
-        "status": "open",
+        "status": "closed",
         "opened_at": "09/02/2026 13:16",
         "num_adults": 1,
         "customer_type": "funcionario",
@@ -1985,7 +2064,10 @@
         ],
         "total": 7.120000000000001,
         "partial_payments": [],
-        "total_paid": 0.0
+        "total_paid": 0.0,
+        "payment_method": "deducao_comissao",
+        "closed_at": "14/02/2026 15:57",
+        "commission_cycle_id": "20260214123206"
     },
     "15": {
         "items": [],
@@ -2158,8 +2240,8 @@
         "opened_at": "13/02/2026 11:18",
         "num_adults": 2,
         "customer_type": "hospede",
-        "customer_name": "",
-        "room_number": "26",
+        "customer_name": "Rodrigo Escudeiro e Catalina Javiera",
+        "room_number": "15",
         "waiter": "",
         "staff_name": null,
         "is_breakfast": false,
