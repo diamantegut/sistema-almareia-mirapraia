@@ -5237,10 +5237,11 @@
         "opened_at": "15/02/2026 11:32",
         "opening_balance": 0.0,
         "transactions": [],
-        "status": "open",
-        "closed_at": null,
-        "closing_balance": null,
-        "difference": null
+        "status": "closed",
+        "closed_at": "15/02/2026 13:42",
+        "closing_balance": 0.0,
+        "difference": 0.0,
+        "closed_by": "Angelo"
     },
     {
         "id": "SESSION_GUEST_CONSUMPTION_20260215113349_Angelo",
@@ -5308,6 +5309,72 @@
         "transactions": [],
         "status": "closed",
         "closed_at": "15/02/2026 12:45",
+        "closing_balance": 100.0,
+        "difference": 0.0,
+        "closed_by": "Angelo"
+    },
+    {
+        "id": "SESSION_RESTAURANT_20260215134247_Angelo",
+        "user": "Angelo",
+        "type": "restaurant",
+        "entity": "Restaurante Mirapraia",
+        "opened_at": "15/02/2026 13:42",
+        "opening_balance": 0.0,
+        "transactions": [
+            {
+                "id": "TX_20260215140111_705867",
+                "type": "sale",
+                "amount": 19.58,
+                "description": "Venda Mesa 90 - Dinheiro",
+                "payment_method": "Dinheiro",
+                "timestamp": "15/02/2026 14:01",
+                "user": "Angelo",
+                "details": {}
+            }
+        ],
+        "status": "open",
+        "closed_at": null,
+        "closing_balance": null,
+        "difference": null
+    },
+    {
+        "id": "SESSION_GUEST_CONSUMPTION_20260215135151_Angelo",
+        "user": "Angelo",
+        "type": "guest_consumption",
+        "entity": "Hotel Almareia",
+        "opened_at": "15/02/2026 13:51",
+        "opening_balance": 100.0,
+        "transactions": [],
+        "status": "closed",
+        "closed_at": "15/02/2026 13:51",
+        "closing_balance": 100.0,
+        "difference": 0.0,
+        "closed_by": "Angelo"
+    },
+    {
+        "id": "SESSION_GUEST_CONSUMPTION_20260215135253_Angelo",
+        "user": "Angelo",
+        "type": "guest_consumption",
+        "entity": "Hotel Almareia",
+        "opened_at": "15/02/2026 13:52",
+        "opening_balance": 100.0,
+        "transactions": [],
+        "status": "closed",
+        "closed_at": "15/02/2026 13:53",
+        "closing_balance": 100.0,
+        "difference": 0.0,
+        "closed_by": "Angelo"
+    },
+    {
+        "id": "SESSION_GUEST_CONSUMPTION_20260215140118_Angelo",
+        "user": "Angelo",
+        "type": "guest_consumption",
+        "entity": "Hotel Almareia",
+        "opened_at": "15/02/2026 14:01",
+        "opening_balance": 100.0,
+        "transactions": [],
+        "status": "closed",
+        "closed_at": "15/02/2026 14:01",
         "closing_balance": 100.0,
         "difference": 0.0,
         "closed_by": "Angelo"

@@ -17996,8 +17996,112 @@
             "name": "",
             "type": "passante"
         },
-        "status": "pending",
+        "status": "failed",
         "notes": "Mesa 44",
+        "fiscal_doc_uuid": null,
+        "history": [
+            {
+                "timestamp": "2026-02-15 13:42:43",
+                "action": "status_change",
+                "from": "pending",
+                "to": "failed",
+                "user": "Sistema",
+                "details": "Falha na autenticação com Nuvem Fiscal."
+            }
+        ],
+        "last_error": "Falha na autenticação com Nuvem Fiscal."
+    },
+    {
+        "id": "fb31e08d-80fe-4281-8fc7-57e0085157c0",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "MESA_90_202602151401",
+        "closed_at": "2026-02-15 14:01:12",
+        "closed_by": "Angelo",
+        "total_amount": 19.580000000000002,
+        "fiscal_amount": 0.0,
+        "items": [
+            {
+                "id": "34e142a0-676c-4e1a-b421-4438f662e4ab",
+                "product_id": "149",
+                "name": "Coca-Cola 350ml",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Refrigerante",
+                "created_at": "15/02/2026 13:43",
+                "waiter": "Angelo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "5 cp"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "1"
+                    }
+                ],
+                "ncm": "22021000",
+                "cest": "301002",
+                "cfop": "5405",
+                "origin": "0",
+                "tax_info": null,
+                "total": 8.9,
+                "tax_situation": "500",
+                "icms_rate": 0.0,
+                "pis_cst": "06",
+                "cofins_cst": "06"
+            },
+            {
+                "id": "ad7a09ce-1d72-4a45-83d6-c710ca30b5e3",
+                "product_id": "149",
+                "name": "Coca-Cola 350ml",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Refrigerante",
+                "created_at": "15/02/2026 13:51",
+                "waiter": "Angelo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "1"
+                    }
+                ],
+                "ncm": "22021000",
+                "cest": "301002",
+                "cfop": "5405",
+                "origin": "0",
+                "tax_info": null,
+                "total": 8.9,
+                "tax_situation": "500",
+                "icms_rate": 0.0,
+                "pis_cst": "06",
+                "cofins_cst": "06"
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 19.58,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "name": "",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 90",
         "fiscal_doc_uuid": null,
         "history": []
     }

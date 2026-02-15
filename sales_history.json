@@ -15463,5 +15463,93 @@
         "closed_by": "eduardo",
         "close_id": "CLOSE_20260215132204_44_f51b1c",
         "payments": []
+    },
+    {
+        "items": [
+            {
+                "id": "34e142a0-676c-4e1a-b421-4438f662e4ab",
+                "product_id": "149",
+                "name": "Coca-Cola 350ml",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Refrigerante",
+                "created_at": "15/02/2026 13:43",
+                "waiter": "Angelo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "5 cp"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "1"
+                    }
+                ],
+                "ncm": "22021000",
+                "cest": "301002",
+                "cfop": "5405",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "ad7a09ce-1d72-4a45-83d6-c710ca30b5e3",
+                "product_id": "149",
+                "name": "Coca-Cola 350ml",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Refrigerante",
+                "created_at": "15/02/2026 13:51",
+                "waiter": "Angelo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "1"
+                    }
+                ],
+                "ncm": "22021000",
+                "cest": "301002",
+                "cfop": "5405",
+                "origin": "0",
+                "tax_info": null
+            }
+        ],
+        "total": 17.8,
+        "status": "closed",
+        "opened_at": "15/02/2026 13:43",
+        "num_adults": 1,
+        "customer_type": "passante",
+        "customer_name": "",
+        "room_number": null,
+        "waiter": "",
+        "staff_name": null,
+        "is_breakfast": false,
+        "partial_payments": [],
+        "total_paid": 0.0,
+        "locked": true,
+        "closed_at": "15/02/2026 14:01",
+        "final_total": 19.580000000000002,
+        "discount": 0.0,
+        "closed_by": "Angelo",
+        "close_id": "CLOSE_20260215140112_90_f0a48f",
+        "payments": [
+            {
+                "id": "6e0e7863-54a5-4c12-8a31-22aa5526af9e",
+                "timestamp": "15/02/2026 14:01",
+                "amount": 19.58,
+                "method": "Dinheiro",
+                "user": "Angelo",
+                "type": "final_payment"
+            }
+        ]
     }
 ]
