@@ -156,11 +156,16 @@
             "EXPRESSO CAMARÃO"
         ],
         "category": "Bruto Carnes",
-        "min_stock": 10.0,
+        "min_stock": 30.0,
         "package_size": 1.0,
         "purchase_unit": "kilograma",
         "frequency": "Quinzenal",
-        "is_internal": false
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": ""
     },
     {
         "id": "11",
@@ -4073,7 +4078,7 @@
     },
     {
         "id": "307",
-        "name": "Agua sem gás Mirapraia 275ml (BAR)",
+        "name": "Água sem gás Mirapraia 275ml (BAR)",
         "department": "Serviço",
         "unit": "Unidades",
         "price": 3.04,
@@ -4085,7 +4090,12 @@
         "package_size": 1.0,
         "purchase_unit": "caixa",
         "frequency": "Mensal",
-        "is_internal": false
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": ""
     },
     {
         "id": "308",
@@ -10555,20 +10565,24 @@
     },
     {
         "id": "800",
-        "name": "Farinha Panko",
-        "department": "Cozinha",
-        "unit": "Litros",
-        "price": 21.82,
+        "name": "Açucar",
+        "department": "Estoque",
+        "unit": "Kilogramas",
+        "price": 3.14,
         "category": "Estoque Principal - cozinha",
-        "min_stock": 10.0,
+        "min_stock": 30.0,
         "package_size": 1.0,
-        "purchase_unit": "caixa",
-        "frequency": "Quinzenal",
+        "purchase_unit": "fardo",
+        "frequency": "Semanal",
         "suppliers": [
-            "KarneKeijo",
             "atacamax"
         ],
-        "is_internal": false
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": ""
     },
     {
         "id": "801",

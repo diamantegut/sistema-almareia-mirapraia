@@ -5216,104 +5216,6 @@
         "closed_by": "eduardo"
     },
     {
-        "id": "SESSION_RESTAURANT_20260215112527_Angelo",
-        "user": "Angelo",
-        "type": "restaurant",
-        "entity": "Restaurante Mirapraia",
-        "opened_at": "15/02/2026 11:25",
-        "opening_balance": 0.0,
-        "transactions": [],
-        "status": "closed",
-        "closed_at": "15/02/2026 11:25",
-        "closing_balance": 0.0,
-        "difference": 0.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_RESTAURANT_20260215113205_Angelo",
-        "user": "Angelo",
-        "type": "restaurant",
-        "entity": "Restaurante Mirapraia",
-        "opened_at": "15/02/2026 11:32",
-        "opening_balance": 0.0,
-        "transactions": [],
-        "status": "closed",
-        "closed_at": "15/02/2026 13:42",
-        "closing_balance": 0.0,
-        "difference": 0.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260215113349_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "15/02/2026 11:33",
-        "opening_balance": 100.0,
-        "transactions": [],
-        "status": "closed",
-        "closed_at": "15/02/2026 11:33",
-        "closing_balance": 100.0,
-        "difference": 0.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260215115006_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "15/02/2026 11:50",
-        "opening_balance": 100.0,
-        "transactions": [],
-        "status": "closed",
-        "closed_at": "15/02/2026 12:10",
-        "closing_balance": 100.0,
-        "difference": 0.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260215121314_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "15/02/2026 12:13",
-        "opening_balance": 100.0,
-        "transactions": [],
-        "status": "closed",
-        "closed_at": "15/02/2026 12:13",
-        "closing_balance": 100.0,
-        "difference": 0.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260215123016_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "15/02/2026 12:30",
-        "opening_balance": 100.0,
-        "transactions": [],
-        "status": "closed",
-        "closed_at": "15/02/2026 12:30",
-        "closing_balance": 100.0,
-        "difference": 0.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260215124535_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "15/02/2026 12:45",
-        "opening_balance": 100.0,
-        "transactions": [],
-        "status": "closed",
-        "closed_at": "15/02/2026 12:45",
-        "closing_balance": 100.0,
-        "difference": 0.0,
-        "closed_by": "Angelo"
-    },
-    {
         "id": "SESSION_RESTAURANT_20260215134247_Angelo",
         "user": "Angelo",
         "type": "restaurant",
@@ -5330,6 +5232,622 @@
                 "timestamp": "15/02/2026 14:01",
                 "user": "Angelo",
                 "details": {}
+            },
+            {
+                "id": "TX_20260215141036_026b7c",
+                "type": "sale",
+                "amount": 341.77,
+                "description": "Venda Mesa 52 - Dinheiro",
+                "payment_method": "Dinheiro",
+                "timestamp": "15/02/2026 14:10",
+                "user": "Angelo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260215141117_ff907e",
+                "type": "sale",
+                "amount": 227.57,
+                "description": "Venda Mesa 47 - PIX Maquininha CNPJ",
+                "payment_method": "PIX Maquininha CNPJ",
+                "timestamp": "15/02/2026 14:11",
+                "user": "filipe",
+                "details": {}
+            },
+            {
+                "id": "TX_20260215141123_931418",
+                "type": "sale",
+                "amount": 329.23,
+                "description": "Venda Mesa 93 - PIX Maquininha CNPJ",
+                "payment_method": "PIX Maquininha CNPJ",
+                "timestamp": "15/02/2026 14:11",
+                "user": "eduardo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260215141141_4e7b42",
+                "type": "sale",
+                "amount": 335.94,
+                "description": "Venda Mesa 46 - Credito MIrapraia Pagseguro",
+                "payment_method": "Credito MIrapraia Pagseguro",
+                "timestamp": "15/02/2026 14:11",
+                "user": "filipe",
+                "details": {}
+            },
+            {
+                "id": "TX_20260215141213_b1022b",
+                "type": "sale",
+                "amount": 200.0,
+                "description": "Venda Mesa 56 - Dinheiro",
+                "payment_method": "Dinheiro",
+                "timestamp": "15/02/2026 14:12",
+                "user": "eduardo",
+                "details": {
+                    "payment_group_id": "6bff0cc5-81bf-4339-bc1e-64bc319ea502",
+                    "total_payment_group_amount": 227.26,
+                    "payment_method_code": "Dinheiro"
+                }
+            },
+            {
+                "id": "TX_20260215141213_d90a39",
+                "type": "sale",
+                "amount": 27.26,
+                "description": "Venda Mesa 56 - Debito Mirapraia Pagseguro",
+                "payment_method": "Debito Mirapraia Pagseguro",
+                "timestamp": "15/02/2026 14:12",
+                "user": "eduardo",
+                "details": {
+                    "payment_group_id": "6bff0cc5-81bf-4339-bc1e-64bc319ea502",
+                    "total_payment_group_amount": 227.26,
+                    "payment_method_code": "Debito Mirapraia Pagseguro"
+                }
+            },
+            {
+                "id": "TX_20260215142951_f5d85c",
+                "type": "out",
+                "amount": 20.0,
+                "description": "Comprar soro (Alan)",
+                "payment_method": "dinheiro",
+                "timestamp": "15/02/2026 14:29",
+                "user": "eduardo",
+                "details": {
+                    "idempotency_key": "7cb0d10e-f823-4f30-a0d7-c2dddfe94cd0"
+                }
+            },
+            {
+                "id": "TX_20260215150011_aca2d0",
+                "type": "sale",
+                "amount": 400.0,
+                "description": "Venda Mesa 41 - Dinheiro",
+                "payment_method": "Dinheiro",
+                "timestamp": "15/02/2026 15:00",
+                "user": "guilherme",
+                "details": {}
+            },
+            {
+                "id": "TX_20260215150121_7c62c9",
+                "type": "sale",
+                "amount": 809.38,
+                "description": "Venda Mesa 54 - Credito MIrapraia Pagseguro",
+                "payment_method": "Credito MIrapraia Pagseguro",
+                "timestamp": "15/02/2026 15:01",
+                "user": "filipe",
+                "details": {}
+            },
+            {
+                "id": "TX_20260215150152_de9a02",
+                "type": "sale",
+                "amount": 260.48,
+                "description": "Venda Mesa 45 - Credito MIrapraia Pagseguro",
+                "payment_method": "Credito MIrapraia Pagseguro",
+                "timestamp": "15/02/2026 15:01",
+                "user": "filipe",
+                "details": {
+                    "payment_group_id": "607ef904-c8c3-46ff-96ff-b5bae1a556c1",
+                    "total_payment_group_amount": 520.96,
+                    "payment_method_code": "Credito MIrapraia Pagseguro"
+                }
+            },
+            {
+                "id": "TX_20260215150152_bae097",
+                "type": "sale",
+                "amount": 260.48,
+                "description": "Venda Mesa 45 - Debito Mirapraia Pagseguro",
+                "payment_method": "Debito Mirapraia Pagseguro",
+                "timestamp": "15/02/2026 15:01",
+                "user": "filipe",
+                "details": {
+                    "payment_group_id": "607ef904-c8c3-46ff-96ff-b5bae1a556c1",
+                    "total_payment_group_amount": 520.96,
+                    "payment_method_code": "Debito Mirapraia Pagseguro"
+                }
+            },
+            {
+                "id": "TX_20260215150158_0ab0df",
+                "type": "sale",
+                "amount": 550.32,
+                "description": "Venda Mesa 94 - Dinheiro",
+                "payment_method": "Dinheiro",
+                "timestamp": "15/02/2026 15:01",
+                "user": "guilherme",
+                "details": {}
+            },
+            {
+                "id": "TX_20260215154300_c15f2b",
+                "type": "sale",
+                "amount": 385.11,
+                "description": "Venda Mesa 49 - PIX Maquininha CNPJ",
+                "payment_method": "PIX Maquininha CNPJ",
+                "timestamp": "15/02/2026 15:43",
+                "user": "guilherme",
+                "details": {}
+            },
+            {
+                "id": "TX_20260215154355_01e561",
+                "type": "sale",
+                "amount": 168.85,
+                "description": "Venda Mesa 47 - Credito MIrapraia Pagseguro",
+                "payment_method": "Credito MIrapraia Pagseguro",
+                "timestamp": "15/02/2026 15:43",
+                "user": "guilherme",
+                "details": {}
+            },
+            {
+                "id": "TX_20260215162104_be8e7e",
+                "type": "sale",
+                "amount": 257.62,
+                "description": "Venda Mesa 42 - Credito MIrapraia Pagseguro",
+                "payment_method": "Credito MIrapraia Pagseguro",
+                "timestamp": "15/02/2026 16:21",
+                "user": "filipe",
+                "details": {}
+            },
+            {
+                "id": "TX_20260215162921_5bf9b9",
+                "type": "sale",
+                "amount": 201.3,
+                "description": "Venda Mesa 53 - PIX Maquininha CNPJ",
+                "payment_method": "PIX Maquininha CNPJ",
+                "timestamp": "15/02/2026 16:29",
+                "user": "guilherme",
+                "details": {}
+            },
+            {
+                "id": "TX_20260215163011_f7b7e6",
+                "type": "sale",
+                "amount": 100.54,
+                "description": "Venda Mesa 48 - Credito MIrapraia Pagseguro",
+                "payment_method": "Credito MIrapraia Pagseguro",
+                "timestamp": "15/02/2026 16:30",
+                "user": "guilherme",
+                "details": {}
+            },
+            {
+                "id": "TX_20260215163100_6aae89",
+                "type": "sale",
+                "amount": 890.67,
+                "description": "Venda Mesa 43 - Credito MIrapraia Pagseguro",
+                "payment_method": "Credito MIrapraia Pagseguro",
+                "timestamp": "15/02/2026 16:31",
+                "user": "guilherme",
+                "details": {}
+            },
+            {
+                "id": "TX_20260215163216_d27067",
+                "type": "sale",
+                "amount": 540.98,
+                "description": "Venda Mesa 55 - Credito MIrapraia Pagseguro",
+                "payment_method": "Credito MIrapraia Pagseguro",
+                "timestamp": "15/02/2026 16:32",
+                "user": "guilherme",
+                "details": {}
+            },
+            {
+                "id": "TX_20260215171622_74c9ba",
+                "type": "sale",
+                "amount": 362.89,
+                "description": "Venda Mesa 52 - PIX Maquininha CNPJ",
+                "payment_method": "PIX Maquininha CNPJ",
+                "timestamp": "15/02/2026 17:16",
+                "user": "filipe",
+                "details": {}
+            },
+            {
+                "id": "TX_20260215171702_4296e7",
+                "type": "sale",
+                "amount": 48.18,
+                "description": "Venda Mesa 50 - PIX Maquininha CNPJ",
+                "payment_method": "PIX Maquininha CNPJ",
+                "timestamp": "15/02/2026 17:17",
+                "user": "filipe",
+                "details": {}
+            },
+            {
+                "id": "TX_20260215174817_071232",
+                "type": "sale",
+                "amount": 29.9,
+                "description": "Venda Mesa 49 - Dinheiro",
+                "payment_method": "Dinheiro",
+                "timestamp": "15/02/2026 17:48",
+                "user": "eduardo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260215183231_93cc46",
+                "type": "sale",
+                "amount": 576.0,
+                "description": "Venda Mesa 54 - Credito MIrapraia Pagseguro",
+                "payment_method": "Credito MIrapraia Pagseguro",
+                "timestamp": "15/02/2026 18:32",
+                "user": "eduardo",
+                "details": {
+                    "payment_group_id": "f702b60b-dfff-4ae0-9049-7361a5fc8392",
+                    "total_payment_group_amount": 1151.0,
+                    "payment_method_code": "Credito MIrapraia Pagseguro"
+                }
+            },
+            {
+                "id": "TX_20260215183231_fbfa41",
+                "type": "sale",
+                "amount": 575.0,
+                "description": "Venda Mesa 54 - Dinheiro",
+                "payment_method": "Dinheiro",
+                "timestamp": "15/02/2026 18:32",
+                "user": "eduardo",
+                "details": {
+                    "payment_group_id": "f702b60b-dfff-4ae0-9049-7361a5fc8392",
+                    "total_payment_group_amount": 1151.0,
+                    "payment_method_code": "Dinheiro"
+                }
+            },
+            {
+                "id": "TX_20260215191456_396946",
+                "type": "sale",
+                "amount": 23.98,
+                "description": "Venda Mesa 53 - PIX Maquininha CNPJ",
+                "payment_method": "PIX Maquininha CNPJ",
+                "timestamp": "15/02/2026 19:14",
+                "user": "eduardo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260215191508_587192",
+                "type": "sale",
+                "amount": 312.84,
+                "description": "Venda Mesa 60 - Credito MIrapraia Pagseguro",
+                "payment_method": "Credito MIrapraia Pagseguro",
+                "timestamp": "15/02/2026 19:15",
+                "user": "eduardo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260215191534_db4537",
+                "type": "sale",
+                "amount": 309.65,
+                "description": "Venda Mesa 44 - Credito MIrapraia Pagseguro",
+                "payment_method": "Credito MIrapraia Pagseguro",
+                "timestamp": "15/02/2026 19:15",
+                "user": "eduardo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260215191648_3154e2",
+                "type": "sale",
+                "amount": 118.96,
+                "description": "Venda Mesa 57 - Debito Mirapraia Pagseguro",
+                "payment_method": "Debito Mirapraia Pagseguro",
+                "timestamp": "15/02/2026 19:16",
+                "user": "eduardo",
+                "details": {
+                    "payment_group_id": "fce3c066-d265-44f2-a3b8-511da7157176",
+                    "total_payment_group_amount": 237.92,
+                    "payment_method_code": "Debito Mirapraia Pagseguro"
+                }
+            },
+            {
+                "id": "TX_20260215191648_a1d375",
+                "type": "sale",
+                "amount": 118.96,
+                "description": "Venda Mesa 57 - Credito MIrapraia Pagseguro",
+                "payment_method": "Credito MIrapraia Pagseguro",
+                "timestamp": "15/02/2026 19:16",
+                "user": "eduardo",
+                "details": {
+                    "payment_group_id": "fce3c066-d265-44f2-a3b8-511da7157176",
+                    "total_payment_group_amount": 237.92,
+                    "payment_method_code": "Credito MIrapraia Pagseguro"
+                }
+            },
+            {
+                "id": "TX_20260215191702_bef4ea",
+                "type": "sale",
+                "amount": 257.62,
+                "description": "Venda Mesa 42 - Credito MIrapraia Pagseguro",
+                "payment_method": "Credito MIrapraia Pagseguro",
+                "timestamp": "15/02/2026 19:17",
+                "user": "eduardo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260215191729_6b1dab",
+                "type": "sale",
+                "amount": 233.64,
+                "description": "Venda Mesa 41 - Credito MIrapraia Pagseguro",
+                "payment_method": "Credito MIrapraia Pagseguro",
+                "timestamp": "15/02/2026 19:17",
+                "user": "eduardo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260215195113_41d084",
+                "type": "sale",
+                "amount": 263.56,
+                "description": "Venda Mesa 97 - Credito MIrapraia Pagseguro",
+                "payment_method": "Credito MIrapraia Pagseguro",
+                "timestamp": "15/02/2026 19:51",
+                "user": "eduardo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260215221131_82c2d7",
+                "type": "in",
+                "amount": 1307.0,
+                "description": "pagamento das contas do apto 31",
+                "payment_method": "dinheiro",
+                "timestamp": "15/02/2026 22:11",
+                "user": "eduardo",
+                "details": {
+                    "idempotency_key": "954d3145-0eeb-4ea0-a12f-52216734fc4d"
+                }
+            },
+            {
+                "id": "TX_20260215221518_416a0a",
+                "type": "sale",
+                "amount": 653.18,
+                "description": "Venda Mesa 57 - PIX Maquininha CNPJ",
+                "payment_method": "PIX Maquininha CNPJ",
+                "timestamp": "15/02/2026 22:15",
+                "user": "eduardo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260215221528_5f1194",
+                "type": "sale",
+                "amount": 364.65,
+                "description": "Venda Mesa 55 - PIX Maquininha CNPJ",
+                "payment_method": "PIX Maquininha CNPJ",
+                "timestamp": "15/02/2026 22:15",
+                "user": "eduardo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260215221540_5778d0",
+                "type": "sale",
+                "amount": 354.64,
+                "description": "Venda Mesa 53 - Credito MIrapraia Pagseguro",
+                "payment_method": "Credito MIrapraia Pagseguro",
+                "timestamp": "15/02/2026 22:15",
+                "user": "eduardo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260215221645_63cf21",
+                "type": "sale",
+                "amount": 155.92,
+                "description": "Venda Mesa 52 - Debito Mirapraia Pagseguro",
+                "payment_method": "Debito Mirapraia Pagseguro",
+                "timestamp": "15/02/2026 22:16",
+                "user": "eduardo",
+                "details": {
+                    "payment_group_id": "16066ddd-a16e-47f2-9be7-bf7cc91e74f0",
+                    "total_payment_group_amount": 311.84,
+                    "payment_method_code": "Debito Mirapraia Pagseguro"
+                }
+            },
+            {
+                "id": "TX_20260215221645_719e47",
+                "type": "sale",
+                "amount": 155.92,
+                "description": "Venda Mesa 52 - Credito MIrapraia Pagseguro",
+                "payment_method": "Credito MIrapraia Pagseguro",
+                "timestamp": "15/02/2026 22:16",
+                "user": "eduardo",
+                "details": {
+                    "payment_group_id": "16066ddd-a16e-47f2-9be7-bf7cc91e74f0",
+                    "total_payment_group_amount": 311.84,
+                    "payment_method_code": "Credito MIrapraia Pagseguro"
+                }
+            },
+            {
+                "id": "TX_20260215221700_25b1cd",
+                "type": "sale",
+                "amount": 486.75,
+                "description": "Venda Mesa 59 - Credito MIrapraia Pagseguro",
+                "payment_method": "Credito MIrapraia Pagseguro",
+                "timestamp": "15/02/2026 22:17",
+                "user": "eduardo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260215221709_27e12e",
+                "type": "sale",
+                "amount": 144.54,
+                "description": "Venda Mesa 45 - Credito MIrapraia Pagseguro",
+                "payment_method": "Credito MIrapraia Pagseguro",
+                "timestamp": "15/02/2026 22:17",
+                "user": "eduardo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260215222339_35dde2",
+                "type": "out",
+                "amount": 3000.0,
+                "description": "para o cofre",
+                "payment_method": "dinheiro",
+                "timestamp": "15/02/2026 22:23",
+                "user": "eduardo",
+                "details": {
+                    "idempotency_key": "0056c52e-7874-4755-aa4c-9bdb27b8b7f8"
+                }
+            }
+        ],
+        "status": "closed",
+        "closed_at": "15/02/2026 22:37",
+        "closing_balance": 10359.13,
+        "difference": 9955.56,
+        "closed_by": "eduardo"
+    },
+    {
+        "id": "SESSION_GUEST_CONSUMPTION_20260215144727_priscila",
+        "user": "priscila",
+        "type": "guest_consumption",
+        "entity": "Hotel Almareia",
+        "opened_at": "15/02/2026 14:47",
+        "opening_balance": 0.0,
+        "transactions": [
+            {
+                "id": "TX_20260215214136_faac42",
+                "type": "sale",
+                "amount": 1310.808,
+                "description": "Fechamento Conta Quarto 31 - GUILHERME E CASSIA",
+                "payment_method": "Dinheiro",
+                "timestamp": "15/02/2026 21:41",
+                "user": "priscila",
+                "details": {
+                    "room_number": "31",
+                    "guest_name": "GUILHERME E CASSIA",
+                    "category": "Baixa de Conta",
+                    "waiter_breakdown": {
+                        "erique": 23.98,
+                        "adailton": 268.40000000000003,
+                        "henrique": 36.19,
+                        "leo": 267.949,
+                        "welington": 544.049,
+                        "guilherme": 124.85000000000001
+                    }
+                }
+            },
+            {
+                "id": "TX_20260215214400_b6ba10",
+                "type": "out",
+                "amount": 3.81,
+                "description": "não deu para dar desconto na mesa ap31guilherme ",
+                "payment_method": "Dinheiro",
+                "timestamp": "15/02/2026 21:44",
+                "user": "priscila",
+                "details": {
+                    "idempotency_key": "beda4a62-0dee-44eb-9035-5974355872a3"
+                }
+            },
+            {
+                "id": "TX_20260215220722_139ffe",
+                "type": "sale",
+                "amount": 820.03,
+                "description": "Fechamento Conta Quarto 16 - HELIO MISAN e  Anna Maria",
+                "payment_method": "Debito Angelo",
+                "timestamp": "15/02/2026 22:07",
+                "user": "priscila",
+                "details": {
+                    "room_number": "16",
+                    "guest_name": "HELIO MISAN e  Anna Maria",
+                    "category": "Baixa de Conta",
+                    "waiter_breakdown": {
+                        "welington": 602.9100000000001,
+                        "leo": 63.360000000000014,
+                        "filipe": 18.59,
+                        "adailton": 107.58,
+                        "eduardo": 9.790000000000001
+                    }
+                }
+            }
+        ],
+        "status": "closed",
+        "closed_at": "15/02/2026 22:21",
+        "closing_balance": 820.03,
+        "difference": -486.9680000000001,
+        "closed_by": "priscila"
+    },
+    {
+        "id": "SESSION_RESTAURANT_20260216073532_Angelo",
+        "user": "Angelo",
+        "type": "restaurant",
+        "entity": "Restaurante Mirapraia",
+        "opened_at": "16/02/2026 07:35",
+        "opening_balance": 0.0,
+        "transactions": [],
+        "status": "closed",
+        "closed_at": "16/02/2026 07:35",
+        "closing_balance": 0.0,
+        "difference": 0.0,
+        "closed_by": "Angelo"
+    },
+    {
+        "id": "SESSION_GUEST_CONSUMPTION_20260216073553_Angelo",
+        "user": "Angelo",
+        "type": "guest_consumption",
+        "entity": "Hotel Almareia",
+        "opened_at": "16/02/2026 07:35",
+        "opening_balance": 0.0,
+        "transactions": [],
+        "status": "closed",
+        "closed_at": "16/02/2026 07:36",
+        "closing_balance": 0.0,
+        "difference": 0.0,
+        "closed_by": "Angelo"
+    },
+    {
+        "id": "SESSION_GUEST_CONSUMPTION_20260216084720_luiz",
+        "user": "luiz",
+        "type": "guest_consumption",
+        "entity": "Hotel Almareia",
+        "opened_at": "16/02/2026 08:47",
+        "opening_balance": 0.0,
+        "transactions": [
+            {
+                "id": "TX_20260216095933_d5ec2c",
+                "type": "sale",
+                "amount": 2325.54,
+                "description": "Fechamento Conta Quarto 17 - KATIA E RITA",
+                "payment_method": "Credito Angelo",
+                "timestamp": "16/02/2026 09:59",
+                "user": "luiz",
+                "details": {
+                    "room_number": "17",
+                    "guest_name": "KATIA E RITA",
+                    "category": "Baixa de Conta",
+                    "waiter_breakdown": {
+                        "edson": 224.95000000000002,
+                        "welington": 552.41,
+                        "leo": 490.82000000000005,
+                        "henrique": 267.23278350515466,
+                        "erique": 346.83,
+                        "filipe": 120.67000000000002,
+                        "adailton": 226.54721649484534,
+                        "guilherme": 42.67999999999999
+                    }
+                }
+            },
+            {
+                "id": "TX_20260216100001_60ca3b",
+                "type": "sale",
+                "amount": 3343.847,
+                "description": "Fechamento Conta Quarto 26 - ANA ELISABETH E MARIA ISABEL",
+                "payment_method": "Credito Angelo",
+                "timestamp": "16/02/2026 10:00",
+                "user": "luiz",
+                "details": {
+                    "room_number": "26",
+                    "guest_name": "ANA ELISABETH E MARIA ISABEL",
+                    "category": "Baixa de Conta",
+                    "waiter_breakdown": {
+                        "welington": 801.68,
+                        "leo": 629.948,
+                        "erique": 479.49,
+                        "edson": 474.97999999999996,
+                        "henrique": 490.6000000000001,
+                        "adailton": 302.37899999999996,
+                        "filipe": 57.969999999999985
+                    }
+                }
             }
         ],
         "status": "open",
@@ -5338,45 +5856,16 @@
         "difference": null
     },
     {
-        "id": "SESSION_GUEST_CONSUMPTION_20260215135151_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "15/02/2026 13:51",
-        "opening_balance": 100.0,
+        "id": "SESSION_RESTAURANT_20260216085351_luiz",
+        "user": "luiz",
+        "type": "restaurant",
+        "entity": "Restaurante Mirapraia",
+        "opened_at": "16/02/2026 08:53",
+        "opening_balance": 880.35,
         "transactions": [],
-        "status": "closed",
-        "closed_at": "15/02/2026 13:51",
-        "closing_balance": 100.0,
-        "difference": 0.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260215135253_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "15/02/2026 13:52",
-        "opening_balance": 100.0,
-        "transactions": [],
-        "status": "closed",
-        "closed_at": "15/02/2026 13:53",
-        "closing_balance": 100.0,
-        "difference": 0.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260215140118_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "15/02/2026 14:01",
-        "opening_balance": 100.0,
-        "transactions": [],
-        "status": "closed",
-        "closed_at": "15/02/2026 14:01",
-        "closing_balance": 100.0,
-        "difference": 0.0,
-        "closed_by": "Angelo"
+        "status": "open",
+        "closed_at": null,
+        "closing_balance": null,
+        "difference": null
     }
 ]
