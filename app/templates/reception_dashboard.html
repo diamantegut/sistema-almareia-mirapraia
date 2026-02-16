@@ -63,21 +63,7 @@
             </div>
         </div>
 
-        <!-- Chat WhatsApp -->
-        <div class="col">
-            <div class="card h-100 shadow-sm hover-card">
-                <div class="card-body text-center p-4">
-                    <div class="mb-3 text-success">
-                        <i class="bi bi-whatsapp display-4"></i>
-                    </div>
-                    <h4 class="card-title">Chat WhatsApp</h4>
-                    <p class="card-text text-muted">Monitoramento e troca de mensagens com clientes via WhatsApp.</p>
-                    <a href="{{ url_for('reception.reception_chat') }}" class="btn btn-success w-100 stretched-link">
-                        Abrir Chat
-                    </a>
-                </div>
-            </div>
-        </div>
+        <!-- Chat WhatsApp (removido: chat interno descontinuado) -->
 
         <!-- Caixa -->
         <div class="col">
@@ -159,81 +145,6 @@
 <!-- Reuse Checklist Modal from rooms page if possible, or include it -->
 <!-- Since this is a dashboard, maybe we don't need the modal here, but keeping it simple -->
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Check for unread messages every 3 minutes
-    const checkInterval = 3 * 60 * 1000; // 3 minutes
-    
-    function checkUnreadMessages() {
-        fetch('/api/chat/unread_count')
-            .then(response => response.json())
-            .then(data => {
-                const count = data.count;
-                updateNotification(count);
-            })
-            .catch(error => console.error('Error checking messages:', error));
-    }
-
-    function updateNotification(count) {
-        let alertBox = document.getElementById('whatsapp-notification-alert');
-        
-        if (count > 0) {
-            // Play sound (discrete beep)
-            try {
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = audioCtx.createOscillator();
-                const gainNode = audioCtx.createGain();
-                
-                oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // A5
-                oscillator.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 0.1);
-                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime); // Low volume
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
-                oscillator.start();
-                oscillator.stop(audioCtx.currentTime + 0.1);
-            } catch (e) {
-                console.warn('AudioContext not supported or allowed', e);
-            }
-
-            // Show Visual Alert
-            if (!alertBox) {
-                alertBox = document.createElement('div');
-                alertBox.id = 'whatsapp-notification-alert';
-                alertBox.className = 'alert alert-success position-fixed top-0 start-50 translate-middle-x mt-3 shadow-lg';
-                alertBox.style.zIndex = '9999';
-                alertBox.style.minWidth = '300px';
-                alertBox.innerHTML = `
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <i class="bi bi-whatsapp me-2 fs-4"></i>
-                            <strong>Novas mensagens!</strong>
-                            <div class="small">Você tem <span id="wa-unread-count">${count}</span> conversa(s) não lida(s).</div>
-                        </div>
-                        <a href="{{ url_for('reception.reception_chat') }}" class="btn btn-sm btn-light text-success fw-bold ms-3">Ver</a>
-                        <button type="button" class="btn-close ms-2" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                `;
-                document.body.appendChild(alertBox);
-            } else {
-                document.getElementById('wa-unread-count').innerText = count;
-                alertBox.style.display = 'block'; // Ensure it's visible if it was hidden
-            }
-        } else {
-            if (alertBox) {
-                alertBox.remove();
-            }
-        }
-    }
-
-    // Initial check
-    checkUnreadMessages();
-    
-    // Set interval
-    setInterval(checkUnreadMessages, checkInterval);
-});
-</script>
+<!-- Script de notificações de chat removido: chat interno descontinuado -->
 
 {% endblock %}

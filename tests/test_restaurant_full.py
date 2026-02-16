@@ -422,11 +422,12 @@ class TestRestaurantFull(unittest.TestCase):
         orders = self.get_orders()
         self.assertNotIn('40', orders)
         
-        # Verify Transaction logs "service_fee_removed": True
+        # Verify Transaction logs "service_fee_removed": True (nos detalhes da transação)
         with open(self.test_sessions, 'r', encoding='utf-8') as f:
             sessions = json.load(f)
         trans = sessions[0]['transactions'][0]
-        # self.assertTrue(trans.get('service_fee_removed'))
+        details = trans.get('details') or {}
+        self.assertTrue(details.get('service_fee_removed', False))
 
     def test_11_commission_persistence(self):
         """11. Persistência de Comissões."""

@@ -612,8 +612,8 @@ def toggle_table_disabled(table_id):
 @restaurant_bp.route('/restaurant/toggle_live_music', methods=['POST'])
 @login_required
 def toggle_live_music():
-    if session.get('role') not in ['admin', 'gerente']:
-        flash('Acesso restrito a Gerentes e Diretoria.')
+    if session.get('role') not in ['admin', 'gerente', 'supervisor']:
+        flash('Acesso restrito a Gerentes, Supervisores e Diretoria.')
         return redirect(url_for('restaurant.restaurant_tables'))
     
     settings = load_restaurant_settings()
@@ -662,7 +662,7 @@ def toggle_live_music():
                             'price': float(couvert['price']),
                             'complements': [],
                             'category': couvert.get('category'),
-                            'service_fee_exempt': False,
+                            'service_fee_exempt': True,
                             'source': 'auto_cover_activation',
                             'waiter': 'Sistema'
                         }
@@ -1274,8 +1274,9 @@ def restaurant_table_order(table_id):
                         flash(' '.join(payment_errors[:3]))
                         return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
 
+                    service_fee_removed = request.form.get('remove_service_fee') == 'on'
                     grand_total = order.get('total', 0) * 1.1
-                    if request.form.get('remove_service_fee') == 'on':
+                    if service_fee_removed:
                         grand_total = order.get('total', 0)
                     
                     try:
@@ -1311,6 +1312,21 @@ def restaurant_table_order(table_id):
                     payment_group_id = str(uuid.uuid4()) if len(payments) > 1 else None
                     total_payment_group_amount = sum(float(p.get('amount', 0)) for p in payments) if payment_group_id else 0
 
+                    try:
+                        log_system_action(
+                            action='COMMISSION_SERVICE_FEE_STATUS',
+                            details={
+                                'table_id': table_id,
+                                'service_fee_removed': service_fee_removed,
+                                'grand_total': grand_total,
+                                'payments': payments,
+                            },
+                            user=session.get('user', 'Sistema'),
+                            category='Restaurante'
+                        )
+                    except Exception:
+                        pass
+
                     for p in payments:
                         method = sanitize_input(p.get('method'))
                         try:
@@ -1323,6 +1339,8 @@ def restaurant_table_order(table_id):
                             details['payment_group_id'] = payment_group_id
                             details['total_payment_group_amount'] = total_payment_group_amount
                             details['payment_method_code'] = method
+                        if service_fee_removed:
+                            details['service_fee_removed'] = True
 
                         CashierService.add_transaction(
                             cashier_type='restaurant',
@@ -2680,7 +2698,6 @@ def restaurant_toggle_product_active():
         return jsonify({'success': False, 'error': 'Produto não encontrado.'}), 404
 
 from app.services import waiting_list_service
-from app.services import whatsapp_chat_service as chat_service
 
 @restaurant_bp.route('/fila', methods=['GET', 'POST'])
 def public_waiting_list():
@@ -2727,28 +2744,7 @@ def public_waiting_list():
         if error:
             flash(error)
         else:
-            # Integration: WhatsApp Chat & Welcome Message
-            try:
-                chat_service.update_contact_name(phone, name)
-                
-                entry_id = result['entry']['id']
-                sent, msg_content = waiting_list_service.send_notification(entry_id, "welcome")
-                
-                if sent:
-                    msg_data = {
-                        'type': 'sent',
-                        'content': msg_content,
-                        'timestamp': datetime.now().isoformat(),
-                        'status': 'sent',
-                        'via': 'auto_waiting_list',
-                        'user': 'system'
-                    }
-                    chat_service.add_message(phone, msg_data)
-            except Exception as e:
-                print(f"Integration Error: {e}")
-
             session['waiting_list_id'] = result['entry']['id']
-            # Make session permanent (30 days)
             session.permanent = True
             return redirect(url_for('restaurant.public_waiting_list'))
             

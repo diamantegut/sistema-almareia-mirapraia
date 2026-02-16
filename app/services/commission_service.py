@@ -7,6 +7,7 @@ import xlsxwriter
 
 from app.services.system_config_manager import get_data_path
 from app.services.data_service import load_cashier_sessions
+from app.services.logger_service import LoggerService
 
 COMMISSION_CYCLES_FILE = get_data_path('commission_cycles.json')
 
@@ -34,6 +35,27 @@ def get_commission_cycle(cycle_id):
         if c['id'] == cycle_id:
             return c
     return None
+
+
+def is_service_fee_removed_for_transaction(transaction):
+    """
+    Regra centralizada: determina se a taxa de serviço foi removida para uma transação.
+    Utilizada por toda a lógica de comissão para garantir consistência.
+    """
+    if transaction.get('service_fee_removed', False):
+        return True
+    details = transaction.get('details') or {}
+    if details.get('service_fee_removed', False):
+        return True
+    flags = transaction.get('flags') or []
+    if isinstance(flags, list):
+        for f in flags:
+            if isinstance(f, dict) and f.get('type') == 'service_removed':
+                return True
+    desc = transaction.get('description') or ''
+    if isinstance(desc, str) and '10% Off' in desc:
+        return True
+    return False
 
 def calculate_commission(cycle_data):
     """
@@ -241,24 +263,16 @@ def compute_month_total_commission_by_ranking(month_str, commission_rate=10.0):
             wb = details.get('waiter_breakdown')
         return wb if isinstance(wb, dict) and wb else None
     
-    def _is_service_fee_removed(transaction):
-        if transaction.get('service_fee_removed', False):
-            return True
-        details = transaction.get('details') or {}
-        if details.get('service_fee_removed', False):
-            return True
-        flags = transaction.get('flags') or []
-        if isinstance(flags, list):
-            for f in flags:
-                if isinstance(f, dict) and f.get('type') == 'service_removed':
-                    return True
-        desc = transaction.get('description') or ''
-        if isinstance(desc, str) and '10% Off' in desc:
-            return True
-        return False
-    
     sessions = load_cashier_sessions()
     total_commission = 0.0
+    audit_summary = {
+        'month': month_str,
+        'commission_rate': commission_rate,
+        'total_transactions': 0,
+        'eligible_transactions': 0,
+        'removed_transactions': 0,
+        'total_base_amount': 0.0,
+    }
     
     for session_data in sessions:
         for t in session_data.get('transactions', []):
@@ -275,9 +289,29 @@ def compute_month_total_commission_by_ranking(month_str, commission_rate=10.0):
                 continue
             if not (start_date_comp <= t_date <= end_date_comp):
                 continue
-            if _is_service_fee_removed(t):
-                # Exclui valores com taxa de serviço removida da base comissionável
+            
+            audit_summary['total_transactions'] += 1
+            if is_service_fee_removed_for_transaction(t):
+                audit_summary['removed_transactions'] += 1
+                # Comissão não é gerada quando a taxa de serviço foi retirada
+                try:
+                    LoggerService.log_acao(
+                        acao='COMMISSION_DECISION',
+                        entidade='Financeiro',
+                        detalhes={
+                            'tx_id': t.get('id'),
+                            'type': t.get('type'),
+                            'category': t.get('category'),
+                            'decision': 'ignored_service_fee_removed',
+                            'amount': t.get('amount', 0),
+                            'waiter_breakdown': t.get('waiter_breakdown') or (t.get('details') or {}).get('waiter_breakdown')
+                        },
+                        nivel_severidade='INFO'
+                    )
+                except Exception:
+                    pass
                 continue
+            
             wb = _get_waiter_breakdown(t)
             if wb:
                 for w_amt in wb.values():
@@ -285,12 +319,57 @@ def compute_month_total_commission_by_ranking(month_str, commission_rate=10.0):
                         amt = float(w_amt)
                     except Exception:
                         amt = 0.0
+                    audit_summary['eligible_transactions'] += 1
+                    audit_summary['total_base_amount'] += amt
                     total_commission += amt * (commission_rate / 100.0)
+                    try:
+                        LoggerService.log_acao(
+                            acao='COMMISSION_DECISION',
+                            entidade='Financeiro',
+                            detalhes={
+                                'tx_id': t.get('id'),
+                                'type': t.get('type'),
+                                'category': t.get('category'),
+                                'decision': 'applied',
+                                'base_amount': amt
+                            },
+                            nivel_severidade='INFO'
+                        )
+                    except Exception:
+                        pass
             else:
                 try:
                     amount = float(t.get('amount', 0))
                 except Exception:
                     amount = 0.0
+                audit_summary['eligible_transactions'] += 1
+                audit_summary['total_base_amount'] += amount
                 total_commission += amount * (commission_rate / 100.0)
+                try:
+                    LoggerService.log_acao(
+                        acao='COMMISSION_DECISION',
+                        entidade='Financeiro',
+                        detalhes={
+                            'tx_id': t.get('id'),
+                            'type': t.get('type'),
+                            'category': t.get('category'),
+                            'decision': 'applied_fallback_amount',
+                            'base_amount': amount
+                        },
+                        nivel_severidade='INFO'
+                    )
+                except Exception:
+                    pass
+    
+    try:
+        LoggerService.log_acao(
+            acao='COMMISSION_MONTHLY_CALCULATION',
+            entidade='Financeiro',
+            detalhes=audit_summary,
+            nivel_severidade='INFO'
+        )
+    except Exception:
+        # Não quebra o fluxo de cálculo caso o log falhe
+        pass
     
     return round(total_commission, 2)

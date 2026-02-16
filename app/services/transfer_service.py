@@ -183,10 +183,51 @@ def transfer_table_to_room(table_id, raw_room_number, user_name, mode='restauran
             
             # 3a. Restaurant Portion
             if restaurant_items:
+                cover_items_total = 0.0
+                noncover_items_total = 0.0
+                restaurant_items_total = 0.0
+                
+                for item in restaurant_items:
+                    try:
+                        qty_sf = float(item.get('qty', 1) or 1)
+                    except Exception:
+                        qty_sf = 1.0
+                    try:
+                        price_sf = float(item.get('price', 0) or 0)
+                    except Exception:
+                        price_sf = 0.0
+                    
+                    complements_total_sf = 0.0
+                    for c in item.get('complements', []) or []:
+                        try:
+                            complements_total_sf += float(c.get('price', 0) or 0)
+                        except Exception:
+                            continue
+                    
+                    item_val_sf = qty_sf * (price_sf + complements_total_sf)
+                    restaurant_items_total += item_val_sf
+                    
+                    name_sf = (item.get('name') or '').lower()
+                    is_auto_cover_sf = item.get('source') == 'auto_cover_activation'
+                    is_cover_name_sf = 'couvert artistico' in name_sf
+                    is_cover_item_sf = is_auto_cover_sf or is_cover_name_sf
+                    
+                    if is_cover_item_sf:
+                        cover_items_total += item_val_sf
+                    else:
+                        noncover_items_total += item_val_sf
+                
                 rest_taxable = sum(i['qty'] * i['price'] for i in restaurant_items if not i.get('service_fee_exempt', False))
+                
+                if restaurant_items_total > 0:
+                    noncover_share_for_service = noncover_items_total / restaurant_items_total
+                else:
+                    noncover_share_for_service = 1.0
+                
+                rest_taxable *= noncover_share_for_service
                 rest_service = 0 if service_fee_removed else rest_taxable * 0.10
                 
-                rest_total_base = sum(i['qty'] * (i['price'] + sum(c['price'] for c in i.get('complements', []))) for i in restaurant_items)
+                rest_total_base = restaurant_items_total
                 
                 current_discount = 0
                 if discount_remaining > 0:
@@ -203,6 +244,7 @@ def transfer_table_to_room(table_id, raw_room_number, user_name, mode='restauran
 
                 waiter_totals = {}
                 total_item_value_for_breakdown = 0.0
+
                 for item in restaurant_items:
                     try:
                         qty = float(item.get('qty', 1) or 1)
@@ -221,16 +263,33 @@ def transfer_table_to_room(table_id, raw_room_number, user_name, mode='restauran
                             continue
 
                     item_val = qty * (price + complements_total)
-                    w = item.get('waiter') or order.get('waiter') or 'Garçom'
-                    waiter_totals[w] = waiter_totals.get(w, 0.0) + item_val
-                    total_item_value_for_breakdown += item_val
+
+                    name = (item.get('name') or '').lower()
+                    is_auto_cover = item.get('source') == 'auto_cover_activation'
+                    is_cover_name = 'couvert artistico' in name
+                    is_cover_item = is_auto_cover or is_cover_name
+
+                    if is_cover_item:
+                        cover_items_total += item_val
+                    else:
+                        noncover_items_total += item_val
+                        w = item.get('waiter') or order.get('waiter') or 'Garçom'
+                        waiter_totals[w] = waiter_totals.get(w, 0.0) + item_val
+                        total_item_value_for_breakdown += item_val
 
                 if total_item_value_for_breakdown > 0:
                     waiter_shares = {w: amt / total_item_value_for_breakdown for w, amt in waiter_totals.items()}
                 else:
                     waiter_shares = {order.get('waiter') or 'Garçom': 1.0}
 
-                waiter_breakdown = {w: rest_grand_total * share for w, share in waiter_shares.items()}
+                if restaurant_items_total > 0:
+                    noncover_share_of_check = noncover_items_total / restaurant_items_total
+                else:
+                    noncover_share_of_check = 1.0
+
+                commissionable_total = rest_grand_total * noncover_share_of_check
+
+                waiter_breakdown = {w: commissionable_total * share for w, share in waiter_shares.items()}
                 main_waiter = None
                 if waiter_breakdown:
                     main_waiter = max(waiter_breakdown.items(), key=lambda x: x[1])[0]
@@ -293,8 +352,8 @@ def transfer_table_to_room(table_id, raw_room_number, user_name, mode='restauran
                     'service_fee': 0,
                     'discount': current_discount,
                     'flags': flags,
-                    'waiter': order.get('waiter'),
-                    'waiter_breakdown': order.get('waiter_breakdown'),
+                    'waiter': None,
+                    'waiter_breakdown': None,
                     'date': datetime.now().strftime('%d/%m/%Y %H:%M'),
                     'status': 'pending',
                     'type': 'minibar'

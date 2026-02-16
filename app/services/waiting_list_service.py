@@ -6,8 +6,6 @@ import unicodedata
 from flask import current_app
 from app.models.database import db
 from app.models.models import WaitingListEntry
-from app.services.whatsapp_service import WhatsAppService
-from app.services.whatsapp_chat_service import WhatsAppChatService
 
 WAITING_LIST_FILE = os.path.join('data', 'waiting_list.json')
 _WAITING_LIST_DB_SYNC_DONE = False
@@ -311,33 +309,7 @@ def _normalize_phone_for_whatsapp(phone):
     return phone_str, wa_digits, None
 
 def _ensure_waiting_list_tag(phone_number, contact_name=None):
-    if not phone_number:
-        return False
-
-    chat_service = WhatsAppChatService()
-    try:
-        tags_config = chat_service.get_tags_config()
-        if isinstance(tags_config, list) and not any(t.get('name') == "Fila de Espera" for t in tags_config if isinstance(t, dict)):
-            tags_config.append({"name": "Fila de Espera", "color": "#198754"})
-            chat_service.save_tags_config(tags_config)
-    except Exception:
-        pass
-
-    try:
-        if contact_name:
-            chat_service.update_contact_name(phone_number, contact_name)
-    except Exception:
-        pass
-
-    try:
-        current_tags = chat_service.get_tags(phone_number)
-        if not isinstance(current_tags, list):
-            current_tags = []
-        if current_tags != ["Fila de Espera"]:
-            chat_service.update_tags(phone_number, ["Fila de Espera"])
-        return True
-    except Exception:
-        return False
+    return True
 
 def add_customer(name, phone, party_size):
     data = load_waiting_data()
@@ -383,12 +355,6 @@ def add_customer(name, phone, party_size):
     
     data['queue'].append(new_entry)
     save_waiting_data(data)
-
-    _ensure_waiting_list_tag(phone_wa, clean_name)
-    try:
-        send_notification(new_entry["id"], message_type="welcome", user="system")
-    except Exception:
-        pass
     
     # Return position (1-based index)
     position = active_count + 1
@@ -443,37 +409,12 @@ def log_notification(customer_id, type, method="whatsapp", user="system"):
     return False
 
 def send_notification(customer_id, message_type, user=None):
-    """
-    Sends a WhatsApp notification to a waiting list customer.
-    
-    Args:
-        customer_id (str): The ID of the customer in the waiting list.
-        message_type (str): 'table_ready', 'welcome', or 'cancellation'
-        user (str): Username triggering the action (for logging)
-        
-    Returns: (success, message_or_error)
-    """
-    settings = get_settings()
-    token = settings.get('whatsapp_api_token')
-    phone_id = settings.get('whatsapp_phone_id')
-    
-    if not token or not phone_id:
-        return False, "api_not_configured"
-        
     data = load_waiting_data()
     queue = data.get('queue', [])
     customer = next((item for item in queue if item['id'] == customer_id), None)
     
     if not customer:
         return False, "Customer not found"
-        
-    wa_service = WhatsAppService(token, phone_id)
-    chat_service = WhatsAppChatService()
-
-    phone_wa = customer.get('phone_wa')
-    if not phone_wa:
-        digits = "".join(filter(str.isdigit, customer.get('phone', '')))
-        phone_wa = digits if digits.startswith('55') else f"55{digits}"
     
     message = ""
     if message_type == "table_ready":
@@ -500,32 +441,14 @@ def send_notification(customer_id, message_type, user=None):
         message = (
             f"Olá {customer.get('name', '')}! Aqui é do Mirapraia. "
             "Confirmamos sua entrada na nossa fila de espera. "
-            "Fique atento a esta conversa: assim que sua mesa estiver disponível, "
-            "a gente te chama por aqui."
+            "Fique atento: assim que sua mesa estiver disponível, "
+            "vamos avisar pelo WhatsApp."
         )
     else:
         message = f"Olá {customer['name']}, notificação do Restaurante Mirapraia."
-        
-    result = wa_service.send_message(phone_wa or customer.get('phone', ''), message)
     
-    if result:
-        # Log to chat history
-        msg_data = {
-            'type': 'sent',
-            'content': message,
-            'timestamp': datetime.now().isoformat(),
-            'status': 'sent'
-        }
-        chat_service.add_message(phone_wa or customer.get('phone', ''), msg_data)
-        
-        # Also ensure name is saved in chat contact
-        chat_service.update_contact_name(phone_wa or customer.get('phone', ''), customer.get('name', ''))
-        _ensure_waiting_list_tag(phone_wa or customer.get('phone', ''), customer.get('name', ''))
-        
-        log_notification(customer_id, message_type, method="whatsapp_api", user=user)
-        return True, message
-    else:
-        return False, wa_service.last_error or "Failed to send message via API"
+    log_notification(customer_id, message_type, method="whatsapp_deeplink", user=user or "system")
+    return True, message
 
 def get_queue_metrics():
     data = load_waiting_data()

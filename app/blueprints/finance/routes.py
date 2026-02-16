@@ -24,7 +24,15 @@ from app.services.data_service import (
 )
 from app.services.card_reconciliation_service import load_card_settings, save_card_settings
 from app.services.cashier_service import CashierService
-from app.services.commission_service import normalize_dept, load_commission_cycles, save_commission_cycles, get_commission_cycle, calculate_commission, compute_month_total_commission_by_ranking
+from app.services.commission_service import (
+    normalize_dept,
+    load_commission_cycles,
+    save_commission_cycles,
+    get_commission_cycle,
+    calculate_commission,
+    compute_month_total_commission_by_ranking,
+    is_service_fee_removed_for_transaction,
+)
 from app.services.fiscal_service import (
     emit_invoice as service_emit_invoice,
     get_fiscal_integration,
@@ -1722,22 +1730,6 @@ def commission_ranking():
             return waiter_breakdown
         return None
 
-    def _is_service_fee_removed(transaction):
-        if transaction.get('service_fee_removed', False):
-            return True
-        details = transaction.get('details') or {}
-        if details.get('service_fee_removed', False):
-            return True
-        flags = transaction.get('flags') or []
-        if isinstance(flags, list):
-            for f in flags:
-                if isinstance(f, dict) and f.get('type') == 'service_removed':
-                    return True
-        description = transaction.get('description') or ''
-        if isinstance(description, str) and '10% Off' in description:
-            return True
-        return False
-
     def _get_operator_name(transaction, session_data):
         return transaction.get('user') or session_data.get('user') or '-'
 
@@ -1796,6 +1788,11 @@ def commission_ranking():
     
     total_sales_period = 0.0
     removed_groups = {}
+    audit_counters = {
+        'total_transactions': 0,
+        'eligible_transactions': 0,
+        'removed_transactions': 0,
+    }
     
     for session_data in sessions:
         for transaction in session_data.get('transactions', []):
@@ -1808,7 +1805,13 @@ def commission_ranking():
                         
                         if start_date_comp <= t_date <= end_date_comp:
                                 waiter_breakdown = _get_waiter_breakdown(transaction)
-                                is_removed = _is_service_fee_removed(transaction)
+                                is_removed = is_service_fee_removed_for_transaction(transaction)
+
+                                audit_counters['total_transactions'] += 1
+                                if is_removed:
+                                    audit_counters['removed_transactions'] += 1
+                                else:
+                                    audit_counters['eligible_transactions'] += 1
 
                                 if waiter_breakdown:
                                     for w, amt in waiter_breakdown.items():
@@ -1913,6 +1916,23 @@ def commission_ranking():
             'waiters': ", ".join(sorted(list(g.get('waiters', set())))) if g.get('waiters') else '-'
         })
     removed_events.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
+
+    try:
+        log_system_action(
+            action='COMMISSION_RANKING_VIEW',
+            details={
+                'start_date': start_date_str,
+                'end_date': end_date_str,
+                'commission_rate': commission_rate,
+                'audit_counters': audit_counters,
+                'total_sales_period': total_sales_period,
+                'removed_total_sales': removed_total_sales,
+            },
+            user=session.get('user', 'Sistema'),
+            category='Financeiro'
+        )
+    except Exception:
+        pass
     
     return render_template('commission_ranking.html', 
                            ranking=ranking, 

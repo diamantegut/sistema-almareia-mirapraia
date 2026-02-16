@@ -18125,5 +18125,126 @@
         "notes": "Mesa 85",
         "fiscal_doc_uuid": null,
         "history": []
+    },
+    {
+        "id": "8c01239d-b3db-4b4b-a6a0-bea37addc416",
+        "origin": "reception",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "charge_1",
+        "closed_at": "2026-02-16 06:44:05",
+        "closed_by": "admin_tester",
+        "total_amount": 100.0,
+        "fiscal_amount": 0.0,
+        "items": [
+            {
+                "name": "Jantar",
+                "price": 100.0,
+                "qty": 1.0,
+                "total": 100.0,
+                "ncm": "00000000"
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 50.0,
+                "is_fiscal": false
+            },
+            {
+                "method": "Cartão",
+                "amount": 50.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "room_number": "01",
+            "guest_name": "Hóspede"
+        },
+        "status": "pending",
+        "notes": null,
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "67f7ec7e-049b-4b6e-bdb9-654489836964",
+        "origin": "reception",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "charge_1",
+        "closed_at": "2026-02-16 06:45:54",
+        "closed_by": "admin_tester",
+        "total_amount": 100.0,
+        "fiscal_amount": 0.0,
+        "items": [
+            {
+                "name": "Jantar",
+                "price": 100.0,
+                "qty": 1.0,
+                "total": 100.0,
+                "ncm": "00000000"
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 50.0,
+                "is_fiscal": false
+            },
+            {
+                "method": "Cartão",
+                "amount": 50.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "room_number": "01",
+            "guest_name": "Hóspede"
+        },
+        "status": "pending",
+        "notes": null,
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "f1ff9e4c-87c2-4e16-8625-4921057cfa88",
+        "origin": "reception",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "charge_1",
+        "closed_at": "2026-02-16 06:53:02",
+        "closed_by": "admin_tester",
+        "total_amount": 100.0,
+        "fiscal_amount": 0.0,
+        "items": [
+            {
+                "name": "Jantar",
+                "price": 100.0,
+                "qty": 1.0,
+                "category": "Frigobar",
+                "total": 100.0,
+                "ncm": "00000000"
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 50.0,
+                "is_fiscal": false
+            },
+            {
+                "method": "Cartão",
+                "amount": 50.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "room_number": "01",
+            "guest_name": "Hóspede"
+        },
+        "status": "pending",
+        "notes": null,
+        "fiscal_doc_uuid": null,
+        "history": []
     }
 ]

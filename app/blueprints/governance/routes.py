@@ -595,17 +595,17 @@ def send_checklist_api():
         if not phone:
             return jsonify({'success': False, 'error': 'Número WhatsApp não configurado.'})
             
-        # Generate Text
         checklist = checklist_service.get_todays_checklist(department=dept)
         items_by_cat = {}
         for item in checklist.get('items', []):
             if item.get('checked'):
                 cat = item.get('category', 'Outros')
-                if cat not in items_by_cat: items_by_cat[cat] = []
+                if cat not in items_by_cat:
+                    items_by_cat[cat] = []
                 items_by_cat[cat].append(item)
         
         if not items_by_cat:
-             return jsonify({'success': False, 'error': 'Nenhum item selecionado.'})
+            return jsonify({'success': False, 'error': 'Nenhum item selecionado.'})
 
         lines = [f"*Checklist de Compras - {dept}*"]
         lines.append(f"Data: {datetime.now().strftime('%d/%m/%Y')}")
@@ -621,31 +621,6 @@ def send_checklist_api():
             
         message_text = "\n".join(lines)
         
-        # Send
-        from app.services.whatsapp_service import WhatsAppService
-        # Load credentials from config
-        from app.services.system_config_manager import load_system_config
-        sys_config = load_system_config()
-        
-        # Assuming WhatsApp credentials are in system config or env
-        # For now, hardcode or check if they are in sys_config
-        # Usually in system_config.json under 'whatsapp'
-        # Or I can try to load from ENV if not in config
-        
-        wa_config = sys_config.get('whatsapp', {})
-        token = wa_config.get('token') or os.environ.get('WHATSAPP_TOKEN')
-        phone_id = wa_config.get('phone_id') or os.environ.get('WHATSAPP_PHONE_ID')
-        
-        if not token or not phone_id:
-             return jsonify({'success': False, 'error': 'Credenciais da API WhatsApp não configuradas no sistema.'})
-             
-        wa = WhatsAppService(token=token, phone_id=phone_id)
-        result = wa.send_message(phone, message_text)
-        
-        if result:
-            return jsonify({'success': True})
-        else:
-            return jsonify({'success': False, 'error': wa.last_error})
-            
+        return jsonify({'success': True, 'phone': phone, 'text': message_text})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
