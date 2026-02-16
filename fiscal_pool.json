@@ -18246,5 +18246,49 @@
         "notes": null,
         "fiscal_doc_uuid": null,
         "history": []
+    },
+    {
+        "id": "699bbad5-efbe-4d71-9fdb-75677b5a39ad",
+        "origin": "reception_charge",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "CHARGE_charge_flow_1",
+        "closed_at": "2026-02-16 09:05:33",
+        "closed_by": "admin",
+        "total_amount": 165.0,
+        "fiscal_amount": 0.0,
+        "items": [
+            {
+                "name": "Steak",
+                "price": 100.0,
+                "qty": 1.0,
+                "waiter": "Waiter A",
+                "total": 100.0,
+                "ncm": "00000000"
+            },
+            {
+                "name": "Wine",
+                "price": 50.0,
+                "qty": 1.0,
+                "waiter": "Waiter B",
+                "total": 50.0,
+                "ncm": "00000000"
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Cartão de Crédito",
+                "amount": 165.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "room_number": "101",
+            "guest_name": "Guest Flow"
+        },
+        "status": "pending",
+        "notes": null,
+        "fiscal_doc_uuid": null,
+        "history": []
     }
 ]
