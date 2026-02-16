@@ -51,12 +51,14 @@
     "15": {
         "status": "inspected",
         "last_cleaned_by": "andrea",
-        "last_cleaned_at": "15/02/2026 09:29"
+        "last_cleaned_at": "16/02/2026 08:47"
     },
     "16": {
-        "status": "inspected",
-        "last_cleaned_by": "andrea",
-        "last_cleaned_at": "14/02/2026 10:44"
+        "status": "in_progress",
+        "previous_status": "dirty_checkout",
+        "maid": "andrea",
+        "start_time": "16/02/2026 08:48:06",
+        "last_update": "16/02/2026 08:48"
     },
     "23": {
         "status": "inspected",
@@ -66,7 +68,7 @@
     "22": {
         "status": "inspected",
         "last_cleaned_by": "dina",
-        "last_cleaned_at": "15/02/2026 10:19"
+        "last_cleaned_at": "16/02/2026 09:40"
     },
     "21": {
         "status": "in_progress",
@@ -76,9 +78,9 @@
         "last_update": "15/02/2026 10:37"
     },
     "17": {
-        "status": "inspected",
-        "last_cleaned_by": "andrea",
-        "last_cleaned_at": "15/02/2026 08:43"
+        "status": "dirty_checkout",
+        "marked_at": "16/02/2026 09:59",
+        "last_guest": "KATIA E RITA"
     },
     "24": {
         "status": "inspected",
@@ -91,14 +93,14 @@
         "last_cleaned_at": "14/02/2026 11:15"
     },
     "26": {
-        "status": "inspected",
-        "last_cleaned_by": "dina",
-        "last_cleaned_at": "14/02/2026 10:31"
+        "status": "dirty_checkout",
+        "marked_at": "16/02/2026 10:00",
+        "last_guest": "ANA ELISABETH E MARIA ISABEL"
     },
     "31": {
-        "status": "inspected",
+        "status": "clean",
         "last_cleaned_by": "jaqueline",
-        "last_cleaned_at": "14/02/2026 11:23"
+        "last_cleaned_at": "16/02/2026 09:46"
     },
     "35": {
         "status": "inspected",
@@ -106,14 +108,18 @@
         "last_cleaned_at": "14/02/2026 10:08"
     },
     "34": {
-        "status": "clean",
-        "last_cleaned_by": "jaqueline",
-        "last_cleaned_at": "14/02/2026 13:30"
-    },
-    "33": {
         "status": "inspected",
         "last_cleaned_by": "jaqueline",
-        "last_cleaned_at": "15/02/2026 10:41"
+        "last_cleaned_at": "14/02/2026 13:30",
+        "inspected_at": "15/02/2026 18:51",
+        "inspected_by": "priscila"
+    },
+    "33": {
+        "status": "in_progress",
+        "previous_status": "inspected",
+        "maid": "jaqueline",
+        "start_time": "16/02/2026 10:02:29",
+        "last_update": "16/02/2026 10:02"
     },
     "32": {
         "status": "in_progress",
