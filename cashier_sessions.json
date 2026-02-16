@@ -5850,10 +5850,13 @@
                 }
             }
         ],
-        "status": "open",
-        "closed_at": null,
-        "closing_balance": null,
-        "difference": null
+        "status": "closed",
+        "closed_at": "16/02/2026 15:00",
+        "closing_balance": 0.0,
+        "difference": 0.0,
+        "closing_cash": 0.0,
+        "closing_non_cash": null,
+        "closed_by": "Angelo"
     },
     {
         "id": "SESSION_RESTAURANT_20260216085351_luiz",
@@ -5862,10 +5865,117 @@
         "entity": "Restaurante Mirapraia",
         "opened_at": "16/02/2026 08:53",
         "opening_balance": 880.35,
-        "transactions": [],
+        "transactions": [
+            {
+                "id": "TX_20260216124256_4a60e6",
+                "type": "sale",
+                "amount": 110.88,
+                "description": "Venda Mesa 49 - PIX Maquininha CNPJ",
+                "payment_method": "PIX Maquininha CNPJ",
+                "timestamp": "16/02/2026 12:42",
+                "user": "filipe",
+                "details": {}
+            },
+            {
+                "id": "TX_20260216124400_5efa4d",
+                "type": "sale",
+                "amount": 68.97,
+                "description": "Venda Mesa 100 - Credito MIrapraia Pagseguro",
+                "payment_method": "Credito MIrapraia Pagseguro",
+                "timestamp": "16/02/2026 12:44",
+                "user": "filipe",
+                "details": {}
+            },
+            {
+                "id": "TX_20260216130252_ea8975",
+                "type": "sale",
+                "amount": 257.4,
+                "description": "Venda Mesa 41 - PIX Maquininha CNPJ",
+                "payment_method": "PIX Maquininha CNPJ",
+                "timestamp": "16/02/2026 13:02",
+                "user": "filipe",
+                "details": {
+                    "service_fee_removed": true
+                }
+            },
+            {
+                "id": "TX_20260216135940_54e48f",
+                "type": "sale",
+                "amount": 37.18,
+                "description": "Venda Mesa 100 - Credito MIrapraia Pagseguro",
+                "payment_method": "Credito MIrapraia Pagseguro",
+                "timestamp": "16/02/2026 13:59",
+                "user": "filipe",
+                "details": {}
+            },
+            {
+                "id": "TX_20260216140445_1126ae",
+                "type": "sale",
+                "amount": 67.98,
+                "description": "Venda Mesa 100 - Debito Mirapraia Pagseguro",
+                "payment_method": "Debito Mirapraia Pagseguro",
+                "timestamp": "16/02/2026 14:04",
+                "user": "filipe",
+                "details": {}
+            },
+            {
+                "id": "TX_20260216142039_74e7f9",
+                "type": "sale",
+                "amount": 554.07,
+                "description": "Venda Mesa 45 - Credito MIrapraia Pagseguro",
+                "payment_method": "Credito MIrapraia Pagseguro",
+                "timestamp": "16/02/2026 14:20",
+                "user": "filipe",
+                "details": {}
+            },
+            {
+                "id": "TX_20260216144037_e5083b",
+                "type": "sale",
+                "amount": 21.8,
+                "description": "Venda Mesa 49 - Dinheiro",
+                "payment_method": "Dinheiro",
+                "timestamp": "16/02/2026 14:40",
+                "user": "filipe",
+                "details": {
+                    "service_fee_removed": true
+                }
+            }
+        ],
         "status": "open",
         "closed_at": null,
         "closing_balance": null,
         "difference": null
+    },
+    {
+        "id": "SESSION_GUEST_CONSUMPTION_20260216150229_Angelo",
+        "user": "Angelo",
+        "type": "guest_consumption",
+        "entity": "Hotel Almareia",
+        "opened_at": "16/02/2026 15:02",
+        "opening_balance": 100.0,
+        "transactions": [],
+        "status": "closed",
+        "closed_at": "16/02/2026 15:02",
+        "closing_balance": 100.0,
+        "difference": 0.0,
+        "closing_cash": 100.0,
+        "closing_non_cash": null,
+        "closed_by": "Angelo"
+    },
+    {
+        "id": "SESSION_GUEST_CONSUMPTION_20260216152134_Angelo",
+        "user": "Angelo",
+        "type": "guest_consumption",
+        "entity": "Hotel Almareia",
+        "opened_at": "16/02/2026 15:21",
+        "opening_balance": 100.0,
+        "transactions": [],
+        "status": "closed",
+        "closed_at": "16/02/2026 15:21",
+        "closing_balance": 100.0,
+        "difference": 0.0,
+        "closing_cash": 100.0,
+        "closing_non_cash": null,
+        "closed_by": "Angelo"
     }
 ]
