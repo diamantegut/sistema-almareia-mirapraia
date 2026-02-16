@@ -10,8 +10,11 @@
       <div class="text-muted">{{ survey.title }}</div>
     </div>
     <div class="d-flex gap-2">
-      <a href="{{ url_for('reception.reception_dashboard', survey_id=survey.id) }}" class="btn btn-secondary">
+      <a href="{{ url_for('reception.reception_survey_edit', survey_id=survey.id) }}" class="btn btn-secondary">
         <i class="bi bi-arrow-left"></i> Voltar
+      </a>
+      <a href="{{ url_for('reception.reception_survey_export', survey_id=survey.id, range=range_mode) }}" class="btn btn-outline-secondary">
+        <i class="bi bi-download"></i> Exportar CSV
       </a>
     </div>
   </div>
@@ -29,10 +32,10 @@
       {% endif %}
     </div>
     <div class="btn-group" role="group" aria-label="Período">
-      <a class="btn btn-outline-primary {{ 'active' if range_mode == 'week' else '' }}" href="{{ url_for('reception.reception_dashboard', survey_id=survey.id, range='week') }}">Semanal</a>
-      <a class="btn btn-outline-primary {{ 'active' if range_mode == 'month' else '' }}" href="{{ url_for('reception.reception_dashboard', survey_id=survey.id, range='month') }}">Mensal</a>
-      <a class="btn btn-outline-primary {{ 'active' if range_mode == 'semester' else '' }}" href="{{ url_for('reception.reception_dashboard', survey_id=survey.id, range='semester') }}">Semestral</a>
-      <a class="btn btn-outline-primary {{ 'active' if range_mode == 'year' else '' }}" href="{{ url_for('reception.reception_dashboard', survey_id=survey.id, range='year') }}">Anual</a>
+      <a class="btn btn-outline-primary {{ 'active' if range_mode == 'week' else '' }}" href="{{ url_for('reception.reception_survey_dashboard', survey_id=survey.id, range='week') }}">Semanal</a>
+      <a class="btn btn-outline-primary {{ 'active' if range_mode == 'month' else '' }}" href="{{ url_for('reception.reception_survey_dashboard', survey_id=survey.id, range='month') }}">Mensal</a>
+      <a class="btn btn-outline-primary {{ 'active' if range_mode == 'semester' else '' }}" href="{{ url_for('reception.reception_survey_dashboard', survey_id=survey.id, range='semester') }}">Semestral</a>
+      <a class="btn btn-outline-primary {{ 'active' if range_mode == 'year' else '' }}" href="{{ url_for('reception.reception_survey_dashboard', survey_id=survey.id, range='year') }}">Anual</a>
     </div>
   </div>
 
@@ -152,11 +155,14 @@
               {% endif %}
             </td>
             <td class="text-muted small">{{ r.notes }}</td>
-            <td class="text-end" style="min-width: 220px;">
+            <td class="text-end" style="min-width: 260px;">
               <div class="btn-group btn-group-sm" role="group">
                 <button type="button" class="btn btn-outline-secondary" onclick="navigator.clipboard.writeText('{{ r.ref or r.short_id }}')">
                   <i class="bi bi-clipboard"></i>
                 </button>
+                <a class="btn btn-outline-secondary" href="{{ url_for('reception.reception_survey_response_detail', survey_id=survey.id, response_id=r.id) }}" target="_blank">
+                  Ver
+                </a>
                 {% if r.category == 'promotor' %}
                   {% if google_review_url %}
                     <a class="btn btn-outline-success" href="{{ google_review_url }}" target="_blank" rel="noopener noreferrer">

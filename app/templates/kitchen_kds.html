@@ -1,98 +1,860 @@
 {% extends "base.html" %}
 
-{% block title %}KDS - Cozinha{% endblock %}
+{% block title %}
+KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
+{% endblock %}
 
 {% block content %}
-<div class="container-fluid mt-3">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="text-white"><i class="bi bi-tv"></i> KDS - Monitor de Pedidos</h2>
-        <div>
-            <span class="text-white me-3" id="clock"></span>
-            <a href="{{ url_for('kitchen.kitchen_kds') }}" class="btn btn-primary"><i class="bi bi-arrow-clockwise"></i> Atualizar</a>
+<div class="container-fluid kds-page">
+    <div class="kds-header d-flex flex-wrap justify-content-between align-items-center mb-2">
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            <h2 class="kds-title mb-0 text-white">
+                <i class="bi bi-tv"></i>
+                KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
+            </h2>
+            <span class="badge bg-secondary kds-badge-station text-uppercase">
+                {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
+            </span>
+            <div class="btn-group btn-group-sm kds-station-toggle" role="group" aria-label="Selecionar estação">
+                <a href="{{ url_for('kitchen.kitchen_kds', station='cozinha') }}"
+                   class="btn btn-outline-light {% if station != 'bar' %}active{% endif %}">
+                    Cozinha
+                </a>
+                <a href="{{ url_for('kitchen.kitchen_kds', station='bar') }}"
+                   class="btn btn-outline-light {% if station == 'bar' %}active{% endif %}">
+                    Bar
+                </a>
+            </div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span class="text-white kds-clock" id="kds-clock"></span>
+            <span class="badge bg-info text-dark kds-refresh-label">Atualizando a cada 20s</span>
+            <button type="button" class="btn btn-sm btn-outline-light" id="kds-refresh-now">
+                <i class="bi bi-arrow-clockwise"></i>
+                Atualizar agora
+            </button>
         </div>
     </div>
 
-    <div class="row g-3">
-        {% for table_id, order in orders.items() %}
-            {% if order.status == 'open' and order['items'] %}
-                {% set has_kitchen_items = false %}
-                {% for item in order['items'] %}
-                    {% if item.category != 'Bebidas' %} 
-                        {% set has_kitchen_items = true %}
-                    {% endif %}
-                {% endfor %}
+    <div class="kds-summary d-flex flex-wrap gap-2 mb-2" id="kds-summary"></div>
 
-                {% if has_kitchen_items %}
-                <div class="col-12 col-md-6 col-lg-4 col-xl-3">
-                    <div class="card h-100 shadow-sm border-0">
-                        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-                            <h4 class="m-0">
-                                {% if 'FUNC_' in table_id %}
-                                    <i class="bi bi-person-badge"></i> {{ order.staff_name }}
-                                {% else %}
-                                    Mesa {{ table_id }}
-                                {% endif %}
-                            </h4>
-                            <span class="badge bg-secondary">{{ order.opened_at.split(' ')[1] }}</span>
-                        </div>
-                        <div class="card-body p-0" style="max-height: 400px; overflow-y: auto;">
-                            <ul class="list-group list-group-flush">
-                                {% for item in order['items'] %}
-                                    {% if item.category != 'Bebidas' %}
-                                    <li class="list-group-item d-flex justify-content-between align-items-start">
-                                        <div class="ms-2 me-auto">
-                                            <div class="fw-bold" style="font-size: 1.1em;">
-                                                {{ item.qty|int }}x {{ item.name }}
-                                            </div>
-                                            {% if item.complements %}
-                                                <small class="text-muted">
-                                                    {% for comp in item.complements %}
-                                                        + {{ comp.name }}<br>
-                                                    {% endfor %}
-                                                </small>
-                                            {% endif %}
-                                            {% if item.notes %}
-                                                <div class="text-danger small"><i class="bi bi-chat-left-text"></i> {{ item.notes }}</div>
-                                            {% endif %}
-                                        </div>
-                                    </li>
-                                    {% endif %}
-                                {% endfor %}
-                            </ul>
-                        </div>
-                        <div class="card-footer bg-light text-end">
-                            <small class="text-muted">Garçom: {{ order.waiter }}</small>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-            {% endif %}
+    <div id="kds-orders-container">
+        {% if station == 'bar' %}
+        <div class="kds-row-title">Pedidos Bar</div>
+        <div id="kds-orders-bar" class="kds-orders-strip"></div>
         {% else %}
-            <div class="col-12 text-center mt-5">
-                <div class="alert alert-success display-6">
-                    <i class="bi bi-check-circle"></i> Todos os pedidos prontos!
-                </div>
-            </div>
-        {% endfor %}
+        <div class="kds-row-title">Pedidos Cozinha</div>
+        <div id="kds-orders-main" class="kds-orders-strip"></div>
+        <div class="kds-row-title">Entradas / Sobremesas</div>
+        <div id="kds-orders-secondary" class="kds-orders-strip"></div>
+        {% endif %}
     </div>
 </div>
 
 <script>
-    // Relógio
-    setInterval(() => {
-        const now = new Date();
-        document.getElementById('clock').innerText = now.toLocaleTimeString();
-    }, 1000);
+    const kdsStation = "{{ station }}";
+    const pollingIntervalMs = 20000;
+    let kdsTimerId = null;
+    const kdsUpdateUrl = "{{ url_for('kitchen.kitchen_kds_update_status') }}";
+    const kdsMarkReceivedUrl = "{{ url_for('kitchen.kitchen_kds_mark_received') }}";
+    const kdsLocalDone = new Set();
 
-    // Auto-refresh a cada 30 segundos
-    setTimeout(() => {
-        window.location.reload();
-    }, 30000);
+    function formatTimeFromIso(isoString) {
+        if (!isoString) return "";
+        const date = new Date(isoString);
+        if (Number.isNaN(date.getTime())) return "";
+        return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
+
+    function formatDurationMinutes(startIso, endIso) {
+        if (!startIso || !endIso) return "";
+        const start = new Date(startIso);
+        const end = new Date(endIso);
+        if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return "";
+        const diffMs = end.getTime() - start.getTime();
+        const diffMin = Math.max(0, Math.round(diffMs / 60000));
+        return diffMin + " min";
+    }
+
+    function updateClock() {
+        const el = document.getElementById("kds-clock");
+        if (!el) return;
+        const now = new Date();
+        el.textContent = now.toLocaleTimeString();
+    }
+
+    function clearOrders() {
+        const main = document.getElementById("kds-orders-main");
+        const secondary = document.getElementById("kds-orders-secondary");
+        const bar = document.getElementById("kds-orders-bar");
+        if (main) main.innerHTML = "";
+        if (secondary) secondary.innerHTML = "";
+        if (bar) bar.innerHTML = "";
+    }
+
+    function renderEmptyState() {
+        clearOrders();
+        const container = document.getElementById("kds-orders-container");
+        if (!container) return;
+        const wrapper = document.createElement("div");
+        wrapper.className = "kds-empty-wrapper";
+        const alert = document.createElement("div");
+        alert.className = "alert alert-success kds-empty-alert";
+        const icon = document.createElement("i");
+        icon.className = "bi bi-check-circle me-2";
+        alert.appendChild(icon);
+        const text = document.createElement("span");
+        text.textContent = "Todos os pedidos prontos";
+        alert.appendChild(text);
+        wrapper.appendChild(alert);
+        container.appendChild(wrapper);
+    }
+
+    function renderSummary(sectionsSummary) {
+        const summaryEl = document.getElementById("kds-summary");
+        if (!summaryEl) return;
+        summaryEl.innerHTML = "";
+        if (!Array.isArray(sectionsSummary) || !sectionsSummary.length) return;
+        sectionsSummary.forEach(section => {
+            const badge = document.createElement("div");
+            badge.className = "kds-summary-pill";
+            const nameSpan = document.createElement("span");
+            nameSpan.className = "kds-summary-name";
+            nameSpan.textContent = section.name || "Seção";
+            const countSpan = document.createElement("span");
+            countSpan.className = "kds-summary-count";
+            countSpan.textContent = String(section.pending || 0);
+            badge.appendChild(nameSpan);
+            badge.appendChild(countSpan);
+            summaryEl.appendChild(badge);
+        });
+    }
+
+    function openKdsOverlay(card) {
+        const overlay = document.getElementById("kds-overlay");
+        const content = document.getElementById("kds-overlay-content");
+        if (!overlay || !content || !card) return;
+        content.innerHTML = "";
+        const clone = card.cloneNode(true);
+        content.appendChild(clone);
+        overlay.classList.add("show");
+    }
+
+    function closeKdsOverlay() {
+        const overlay = document.getElementById("kds-overlay");
+        const content = document.getElementById("kds-overlay-content");
+        if (!overlay || !content) return;
+        content.innerHTML = "";
+        overlay.classList.remove("show");
+    }
+
+    function renderKds(payload) {
+        const isBar = kdsStation === "bar";
+        const mainStrip = document.getElementById("kds-orders-main");
+        const secondaryStrip = document.getElementById("kds-orders-secondary");
+        const barStrip = document.getElementById("kds-orders-bar");
+        clearOrders();
+        const orders = payload && Array.isArray(payload.orders) ? payload.orders : [];
+        renderSummary(payload.sections_summary || []);
+        if (!orders.length) {
+            renderEmptyState();
+            return;
+        }
+
+        const mainCards = [];
+        const secondaryCards = [];
+        const barCards = [];
+
+        function parseIso(ts) {
+            if (!ts) return NaN;
+            const d = new Date(ts);
+            return d.getTime();
+        }
+
+        orders.forEach(order => {
+            const sections = Array.isArray(order.sections) ? order.sections : [];
+            if (!sections.length) return;
+            sections.forEach(section => {
+                const items = Array.isArray(section.items) ? section.items : [];
+                if (!items.length) return;
+                const times = items
+                    .map(i => parseIso(i.order_time))
+                    .filter(v => !Number.isNaN(v) && Number.isFinite(v));
+                let ts = Math.min.apply(null, times.length ? times : [parseIso(order.opened_at)]);
+                if (!Number.isFinite(ts)) ts = Date.now();
+
+                if (isBar) {
+                    barCards.push({ order, section, items, ts });
+                } else {
+                    const secName = (section.name || "").toString().toLowerCase();
+                    if (secName.indexOf("entrada") !== -1 || secName.indexOf("sobremesa") !== -1) {
+                        secondaryCards.push({ order, section, items, ts });
+                    } else {
+                        mainCards.push({ order, section, items, ts });
+                    }
+                }
+            });
+        });
+
+        function byTs(a, b) { return a.ts - b.ts; }
+        mainCards.sort(byTs);
+        secondaryCards.sort(byTs);
+        barCards.sort(byTs);
+
+        function buildCardEl(order, section, items) {
+            const col = document.createElement("div");
+            col.className = "kds-col";
+            const card = document.createElement("div");
+            card.className = "kds-order-card";
+            if (order.is_late) {
+                card.classList.add("kds-order-late");
+            }
+            const header = document.createElement("div");
+            header.className = "kds-order-header";
+            const titleWrap = document.createElement("div");
+            titleWrap.className = "kds-order-header-main";
+            const title = document.createElement("div");
+            title.className = "kds-order-title";
+            title.textContent = order.label || ("Mesa " + (order.table_id || ""));
+            const titleRow = document.createElement("div");
+            titleRow.className = "kds-order-title-row";
+            titleRow.appendChild(title);
+            const totalPending = typeof section.pending === "number" ? section.pending : 0;
+            const totalPreparing = typeof section.preparing === "number" ? section.preparing : 0;
+            const totalDone = typeof section.done === "number" ? section.done : 0;
+            let cardStatus = "pending";
+            if (totalPending > 0) {
+                cardStatus = "pending";
+            } else if (totalPreparing > 0) {
+                cardStatus = "preparing";
+            } else {
+                cardStatus = "done";
+            }
+            const actionBtn = document.createElement("button");
+            actionBtn.type = "button";
+            actionBtn.className = "btn btn-sm ms-2 kds-card-action";
+            actionBtn.dataset.tableId = order.table_id || "";
+            actionBtn.dataset.itemIds = JSON.stringify(items.map(i => i.id).filter(Boolean));
+            actionBtn.dataset.status = cardStatus;
+            if (cardStatus === "pending") {
+                actionBtn.textContent = "Pendente";
+                actionBtn.classList.add("btn-danger");
+            } else if (cardStatus === "preparing") {
+                actionBtn.textContent = "Preparando";
+                actionBtn.classList.add("btn-warning");
+            } else {
+                actionBtn.textContent = "Finalizado";
+                actionBtn.classList.add("btn-success");
+            }
+            actionBtn.addEventListener("click", function (ev) {
+                ev.stopPropagation();
+                const tableId = actionBtn.dataset.tableId || "";
+                let ids = [];
+                try {
+                    ids = JSON.parse(actionBtn.dataset.itemIds || "[]");
+                } catch (e) {
+                    ids = [];
+                }
+                if (!tableId || !ids.length) return;
+                const current = actionBtn.dataset.status || "pending";
+                let next = "preparing";
+                if (current === "pending") {
+                    next = "preparing";
+                } else if (current === "preparing") {
+                    next = "done";
+                } else {
+                    next = "archived";
+                }
+                // Atualização visual imediata do botão
+                actionBtn.classList.remove("btn-danger", "btn-warning", "btn-success");
+                if (next === "preparing") {
+                    actionBtn.textContent = "Preparando";
+                    actionBtn.classList.add("btn-warning");
+                    actionBtn.dataset.status = "preparing";
+                } else if (next === "done") {
+                    actionBtn.textContent = "Finalizado";
+                    actionBtn.classList.add("btn-success");
+                    actionBtn.dataset.status = "done";
+                } else if (next === "archived") {
+                    actionBtn.textContent = "Arquivando...";
+                }
+                if (next === "archived") {
+                    const colEl = card.parentElement;
+                    if (colEl) {
+                        colEl.remove();
+                    } else {
+                        card.remove();
+                    }
+                    markItemsReceived(tableId, ids).then(fetchKdsData);
+                } else {
+                    updateItemsStatus(tableId, ids, next).then(fetchKdsData);
+                }
+            });
+            titleRow.appendChild(actionBtn);
+            titleWrap.appendChild(titleRow);
+            const waiterSpan = document.createElement("div");
+            waiterSpan.className = "kds-order-waiter";
+            waiterSpan.textContent = order.waiter ? "Garçom: " + order.waiter : "";
+            titleWrap.appendChild(waiterSpan);
+            header.appendChild(titleWrap);
+            const metaWrap = document.createElement("div");
+            metaWrap.className = "kds-order-meta";
+            const sectionBadge = document.createElement("span");
+            sectionBadge.className = "kds-badge-section";
+            sectionBadge.textContent = section.name || "";
+            metaWrap.appendChild(sectionBadge);
+            const openTime = document.createElement("span");
+            openTime.className = "kds-badge-time";
+            openTime.textContent = formatTimeFromIso(order.opened_at);
+            let durSpanNode = null;
+            if (order.opened_at) {
+                const nowIso = new Date().toISOString();
+                const duration = formatDurationMinutes(order.opened_at, nowIso);
+                if (duration) {
+                    const durSpan = document.createElement("span");
+                    durSpan.className = "kds-badge-duration";
+                    durSpan.textContent = duration;
+                    durSpanNode = durSpan;
+                }
+            }
+            const timeRow = document.createElement("div");
+            timeRow.className = "kds-meta-time-row";
+            if (durSpanNode) timeRow.appendChild(durSpanNode);
+            timeRow.appendChild(openTime);
+            metaWrap.appendChild(timeRow);
+            header.appendChild(metaWrap);
+            card.appendChild(header);
+            const body = document.createElement("div");
+            body.className = "kds-order-body";
+            items.forEach(item => {
+                const row = document.createElement("div");
+                row.className = "kds-item-row";
+                row.dataset.tableId = order.table_id || "";
+                row.dataset.itemId = item.id || "";
+                if (item.status === "preparing") {
+                    row.classList.add("kds-item-preparing");
+                } else if (item.status === "done") {
+                    row.classList.add("kds-item-done");
+                }
+                const name = document.createElement("span");
+                name.className = "kds-item-name";
+                name.textContent = String(item.qty || 1) + "x" + (item.name || "");
+                const notesWrap = document.createElement("div");
+                notesWrap.className = "kds-item-notes";
+                if (item.notes) {
+                    const rawNotes = String(item.notes);
+                    const parts = rawNotes.split(/(?:\r?\n| \/ )/);
+                    const filtered = parts.filter(p => {
+                        const t = p.toLowerCase();
+                        if (t.includes("transfer") && t.includes("mesa")) return false;
+                        if (t.includes("transferência") || t.includes("transferencia")) return false;
+                        if (t.startsWith("transf de mesa")) return false;
+                        if (t.startsWith("transf mesa")) return false;
+                        return t.trim().length > 0;
+                    });
+                    notesWrap.textContent = filtered.join(" / ");
+                }
+                const left = document.createElement("div");
+                left.className = "kds-item-main";
+                left.appendChild(name);
+                left.appendChild(notesWrap);
+                const statusSpan = document.createElement("span");
+                statusSpan.className = "kds-item-status";
+                if (item.status === "preparing") {
+                    statusSpan.textContent = "Preparando";
+                } else if (item.status === "done") {
+                    statusSpan.textContent = "Pronto";
+                } // não mostra texto quando pendente
+                const toggle = document.createElement("button");
+                toggle.type = "button";
+                toggle.className = "kds-item-local-toggle";
+                toggle.textContent = "✔";
+                toggle.addEventListener("click", function (ev) {
+                    ev.stopPropagation();
+                    const tableId = row.dataset.tableId || "";
+                    const itemId = row.dataset.itemId || "";
+                    const key = tableId + "::" + itemId;
+                    if (kdsLocalDone.has(key)) {
+                        kdsLocalDone.delete(key);
+                        row.classList.remove("kds-item-local-done");
+                    } else {
+                        kdsLocalDone.add(key);
+                        row.classList.add("kds-item-local-done");
+                    }
+                });
+                const keyLocal = (order.table_id || "") + "::" + (item.id || "");
+                if (kdsLocalDone.has(keyLocal)) {
+                    row.classList.add("kds-item-local-done");
+                }
+                row.appendChild(left);
+                row.appendChild(statusSpan);
+                row.appendChild(toggle);
+                body.appendChild(row);
+            });
+            card.appendChild(body);
+            const footer = document.createElement("div");
+            footer.className = "kds-order-footer";
+            card.appendChild(footer);
+            card.addEventListener("click", function () {
+                openKdsOverlay(card);
+            });
+            col.appendChild(card);
+            return col;
+        }
+
+        if (isBar && barStrip) {
+            barCards.forEach(({ order, section, items }) => {
+                barStrip.appendChild(buildCardEl(order, section, items));
+            });
+        } else {
+            if (mainStrip) {
+                mainCards.forEach(({ order, section, items }) => {
+                    mainStrip.appendChild(buildCardEl(order, section, items));
+                });
+            }
+            if (secondaryStrip) {
+                secondaryCards.forEach(({ order, section, items }) => {
+                    secondaryStrip.appendChild(buildCardEl(order, section, items));
+                });
+            }
+        }
+    }
+
+    function updateItemsStatus(tableId, itemIds, newStatus) {
+        const jobs = itemIds.map(id => {
+            return fetch(kdsUpdateUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ table_id: tableId, item_id: id, status: newStatus })
+            }).catch(() => null);
+        });
+        return Promise.all(jobs);
+    }
+
+    function markItemsReceived(tableId, itemIds) {
+        return fetch(kdsMarkReceivedUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ table_id: tableId, item_ids: itemIds })
+        }).catch(() => null);
+    }
+
+    function fetchKdsData() {
+        const params = new URLSearchParams();
+        if (kdsStation) {
+            params.set("station", kdsStation);
+        }
+        const url = "{{ url_for('kitchen.kitchen_kds_data') }}?" + params.toString();
+        return fetch(url, { headers: { "Accept": "application/json" } })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Erro ao carregar dados");
+                }
+                return response.json();
+            })
+            .then(json => {
+                if (!json || json.success !== true || !json.data) {
+                    throw new Error("Resposta inválida");
+                }
+                renderKds(json.data);
+            })
+            .catch(() => {
+                clearOrders();
+            });
+    }
+
+    function startKdsPolling() {
+        if (kdsTimerId) {
+            clearInterval(kdsTimerId);
+        }
+        fetchKdsData();
+        kdsTimerId = setInterval(fetchKdsData, pollingIntervalMs);
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        updateClock();
+        setInterval(updateClock, 1000);
+        const btnRefresh = document.getElementById("kds-refresh-now");
+        if (btnRefresh) {
+            btnRefresh.addEventListener("click", function (ev) {
+                ev.stopPropagation();
+                fetchKdsData();
+            });
+        }
+        const overlay = document.getElementById("kds-overlay");
+        if (overlay) {
+            overlay.addEventListener("click", function (ev) {
+                if (ev.target === overlay) {
+                    closeKdsOverlay();
+                }
+            });
+        }
+        const overlayClose = document.getElementById("kds-overlay-close");
+        if (overlayClose) {
+            overlayClose.addEventListener("click", function (ev) {
+                ev.stopPropagation();
+                closeKdsOverlay();
+            });
+        }
+        startKdsPolling();
+    });
 </script>
+
+<div id="kds-overlay" class="kds-overlay">
+    <div class="kds-overlay-inner">
+        <button type="button" id="kds-overlay-close" class="btn btn-sm btn-light kds-overlay-close">
+            Fechar
+        </button>
+        <div id="kds-overlay-content" class="kds-overlay-content"></div>
+    </div>
+</div>
 
 <style>
     body {
         background-color: #343a40;
+    }
+
+    .kds-page {
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+    }
+
+    .kds-header {
+        gap: 0.5rem;
+    }
+
+    .kds-station-toggle .btn {
+        padding-inline: 0.75rem;
+    }
+
+    .kds-title {
+        font-size: 1.4rem;
+    }
+
+    .kds-badge-station {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+    }
+
+    .kds-clock {
+        font-size: 0.9rem;
+        min-width: 80px;
+        text-align: right;
+    }
+
+    .kds-refresh-label {
+        font-size: 0.75rem;
+    }
+
+    .kds-summary {
+        min-height: 1.5rem;
+    }
+
+    .kds-summary-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.15rem 0.5rem;
+        border-radius: 999px;
+        background-color: rgba(255, 255, 255, 0.06);
+        color: #f8f9fa;
+        font-size: 0.75rem;
+    }
+
+    .kds-summary-name {
+        font-weight: 500;
+    }
+
+    .kds-summary-count {
+        min-width: 1.4rem;
+        text-align: center;
+        border-radius: 999px;
+        background-color: rgba(255, 255, 255, 0.12);
+        padding: 0.05rem 0.35rem;
+    }
+
+    .kds-orders-strip {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 0.5rem;
+        align-items: stretch;
+        overflow-x: auto;
+        padding-bottom: 0.25rem;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .kds-row-title {
+        color: #f8f9fa;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-top: 0.35rem;
+        margin-bottom: 0.15rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+
+    .kds-col {
+        flex: 0 0 auto;
+        width: auto;
+    }
+
+    .kds-order-card {
+        background-color: #212529;
+        color: #f8f9fa;
+        border-radius: 0.5rem;
+        box-shadow: 0 0.15rem 0.4rem rgba(0, 0, 0, 0.5);
+        padding: 0.35rem 0.4rem 0.35rem 0.4rem;
+        display: flex;
+        flex-direction: column;
+        min-width: 240px;
+        max-width: 320px;
+        min-height: 150px;
+        max-height: 230px;
+        cursor: pointer;
+    }
+
+    .kds-order-late {
+        border: 2px solid #ff6b6b;
+    }
+
+    .kds-order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 0.35rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .kds-order-header-main {
+        display: flex;
+        flex-direction: column;
+        gap: 0.1rem;
+        min-width: 0;
+    }
+
+    .kds-order-title {
+        font-size: 1rem;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .kds-order-title-row {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        min-width: 0;
+    }
+
+    .kds-order-waiter {
+        font-size: 0.75rem;
+        color: #ced4da;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .kds-order-meta {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.1rem;
+        font-size: 0.7rem;
+    }
+
+    .kds-badge-section {
+        border-radius: 999px;
+        padding: 0.1rem 0.4rem;
+        background-color: #0d6efd;
+        font-size: 0.7rem;
+        max-width: 120px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .kds-badge-time {
+        color: #f1f3f5;
+    }
+
+    .kds-badge-duration {
+        color: #ff8787;
+        font-weight: 600;
+    }
+    
+    .kds-meta-time-row {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .kds-order-body {
+        flex: 1 1 auto;
+        overflow-y: auto;
+        padding: 0.25rem 0.1rem 0.1rem 0.1rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .kds-item-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.35rem;
+        padding: 0.1rem 0;
+        font-size: 0.8rem;
+    }
+
+    .kds-item-main {
+        display: flex;
+        flex-direction: column;
+        gap: 0.05rem;
+        min-width: 0;
+    }
+
+    .kds-item-qty {
+        font-weight: 600;
+        color: #f8f9fa;
+        margin-right: 0.35rem;
+    }
+
+    .kds-item-name {
+        font-weight: 500;
+        color: #f8f9fa;
+    }
+
+    .kds-item-notes {
+        font-size: 0.7rem;
+        color: #ffc9c9;
+        max-height: 2.1em;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .kds-item-status {
+        font-size: 0.7rem;
+        padding: 0.1rem 0.35rem;
+        border-radius: 999px;
+        background-color: rgba(255, 255, 255, 0.07);
+        white-space: nowrap;
+    }
+    
+    .kds-card-action {
+        font-size: 0.72rem;
+        padding: 0.1rem 0.35rem;
+        line-height: 1.1;
+    }
+
+    .kds-item-local-toggle {
+        border: none;
+        background: rgba(40, 167, 69, 0.15);
+        color: #8ce99a;
+        border-radius: 999px;
+        font-size: 0.65rem;
+        padding: 0.05rem 0.3rem;
+        cursor: pointer;
+    }
+
+    .kds-item-local-done .kds-item-name {
+        text-decoration: line-through;
+        color: #a5d8ff;
+    }
+
+    .kds-item-preparing .kds-item-status {
+        background-color: rgba(255, 193, 7, 0.25);
+        color: #ffd43b;
+    }
+
+    .kds-item-done .kds-item-status {
+        background-color: rgba(25, 135, 84, 0.25);
+        color: #51cf66;
+    }
+
+    .kds-order-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 0.2rem;
+        margin-top: 0.1rem;
+        font-size: 0.7rem;
+    }
+
+    .kds-overlay {
+        position: fixed;
+        inset: 0;
+        background-color: rgba(0, 0, 0, 0.7);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1050;
+    }
+
+    .kds-overlay.show {
+        display: flex;
+    }
+
+    .kds-overlay-inner {
+        background-color: #212529;
+        padding: 0.75rem;
+        border-radius: 0.75rem;
+        max-width: 900px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.8);
+    }
+
+    .kds-overlay-content .kds-order-card {
+        max-width: 100%;
+        min-width: 100%;
+        max-height: none;
+        cursor: default;
+    }
+
+    .kds-overlay-close {
+        margin-bottom: 0.5rem;
+    }
+
+    .kds-order-counters {
+        display: flex;
+        gap: 0.25rem;
+    }
+
+    .kds-order-actions {
+        display: flex;
+        align-items: center;
+    }
+
+    .kds-counter-badge {
+        border-radius: 999px;
+        padding: 0.1rem 0.35rem;
+    }
+
+    .kds-counter-pending {
+        background-color: rgba(220, 53, 69, 0.2);
+        color: #ff8787;
+    }
+
+    .kds-counter-preparing {
+        background-color: rgba(255, 193, 7, 0.2);
+        color: #ffd43b;
+    }
+
+    .kds-counter-done {
+        background-color: rgba(25, 135, 84, 0.2);
+        color: #8ce99a;
+    }
+
+    .kds-empty-wrapper {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        padding-top: 3rem;
+    }
+
+    .kds-empty-alert {
+        font-size: 1.4rem;
+        margin: 0;
     }
 </style>
 {% endblock %}

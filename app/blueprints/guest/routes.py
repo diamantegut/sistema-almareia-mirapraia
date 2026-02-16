@@ -100,3 +100,59 @@ def satisfaction_survey():
                            survey=survey, 
                            questions=questions, 
                            errors={})
+
+@guest_bp.route('/pesquisa/<slug>', methods=['GET', 'POST'])
+def satisfaction_survey_by_slug(slug):
+    survey = SatisfactionSurvey.query.filter_by(public_slug=slug, is_active=True).first()
+    if not survey:
+        return "Pesquisa não encontrada.", 404
+    questions_query = SatisfactionSurveyQuestion.query.filter_by(survey_id=survey.id).order_by(SatisfactionSurveyQuestion.position).all()
+    questions = []
+    for q in questions_query:
+        options = []
+        if q.options_json:
+            try:
+                options = json.loads(q.options_json)
+            except:
+                pass
+        questions.append({'q': q, 'options': options})
+    if request.method == 'POST':
+        answers = {}
+        errors = {}
+        for q in questions_query:
+            field_name = f'q_{q.id}'
+            val = request.form.get(field_name)
+            if q.required and not val:
+                errors[q.id] = "Campo obrigatório"
+            else:
+                answers[q.id] = val
+        if errors:
+            return render_template('satisfaction_survey_public.html', 
+                                   survey=survey, 
+                                   questions=questions, 
+                                   errors=errors)
+        response = SatisfactionSurveyResponse(
+            survey_id=survey.id,
+            answers_json=json.dumps(answers, ensure_ascii=False),
+            meta_json=json.dumps({
+                'ip': request.remote_addr,
+                'user_agent': request.user_agent.string
+            })
+        )
+        db.session.add(response)
+        db.session.commit()
+        ref = request.form.get('ref')
+        if ref:
+            invite = SatisfactionSurveyInvite.query.filter_by(survey_id=survey.id, ref=ref).first()
+            if invite:
+                invite.used_at = datetime.now()
+                invite.used_response_id = response.id
+                db.session.commit()
+        return render_template('satisfaction_survey_public.html', 
+                               survey=survey, 
+                               submitted=True, 
+                               response_id=response.id)
+    return render_template('satisfaction_survey_public.html', 
+                           survey=survey, 
+                           questions=questions, 
+                           errors={})

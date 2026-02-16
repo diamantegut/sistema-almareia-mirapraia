@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Monitor de Produção{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-center mb-4">
+        <h1 class="display-5 fw-bold text-center">Monitor de Produção</h1>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="card shadow border-0">
+                <div class="card-body p-4">
+                    <h2 class="h4 text-center mb-4">Selecione a Estação</h2>
+                    <div class="d-grid gap-3">
+                        <a href="{{ url_for('kitchen.kitchen_kds', station='cozinha') }}" class="btn btn-lg btn-primary py-3 fs-3">
+                            Cozinha
+                        </a>
+                        <a href="{{ url_for('kitchen.kitchen_kds', station='bar') }}" class="btn btn-lg btn-success py-3 fs-3">
+                            Bar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

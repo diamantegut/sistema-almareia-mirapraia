@@ -1,31 +1,366 @@
 import json
 import os
 import re
+import unicodedata
 from datetime import datetime, timedelta
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify
 from app.utils.decorators import login_required
 import uuid
 from app.services.data_service import (
-    load_products, load_settings, save_settings, load_stock_entries, 
+    load_products, load_settings, save_settings, load_stock_entries,
     save_stock_entry, load_stock_logs, STOCK_LOGS_FILE, STOCK_ENTRIES_FILE,
-    load_table_orders
+    load_table_orders, save_table_orders, load_menu_items, load_printers
 )
 from app.services.logger_service import LoggerService
 from app.services.kitchen_checklist_service import KitchenChecklistService
+from app.services.printing_service import get_default_printer
 
 kitchen_bp = Blueprint('kitchen', __name__)
+
+
+def _normalize_station(value):
+    if not value:
+        return None
+    v = str(value).strip().lower()
+    if v in ['cozinha', 'kitchen']:
+        return 'kitchen'
+    if v in ['bar', 'balcao']:
+        return 'bar'
+    return None
+
+
+def _classify_section(category):
+    if not category:
+        return 'Outros'
+    c = str(category).strip().lower()
+    if 'sobremesa' in c or 'doce' in c or 'dessert' in c:
+        return 'Sobremesas'
+    if 'entrada' in c or 'petisco' in c or 'porção' in c or 'porcao' in c:
+        return 'Entradas'
+    return 'Pratos Principais'
+
+
+def _build_kds_payload(station, now=None):
+    if now is None:
+        now = datetime.now()
+    orders = load_table_orders()
+    menu_items = load_menu_items()
+    menu_map = {str(p.get('id')): p for p in menu_items}
+    printers = load_printers()
+    printers_map = {str(p.get('id')): p for p in printers}
+    default_kitchen = get_default_printer('kitchen')
+    result_orders = []
+    sections_counter = {}
+    changed = False
+    for table_id, order in orders.items():
+        status = str(order.get('status', '')).lower()
+        if status not in ['open', 'aberta', 'aberto']:
+            continue
+        items = order.get('items') or []
+        table_items = []
+        opened_raw = order.get('opened_at') or order.get('created_at')
+        try:
+            opened_at = datetime.strptime(opened_raw, '%d/%m/%Y %H:%M') if opened_raw else now
+        except Exception:
+            opened_at = now
+        for item in items:
+            cat = item.get('category') or ''
+            cat_norm = unicodedata.normalize('NFKD', str(cat)).encode('ASCII', 'ignore').decode('utf-8').strip().lower()
+            is_beverage = cat_norm in [
+                'vinhos',
+                'drinks',
+                'sucos e aguas',
+                'sucos e agua',
+                'refrigerante',
+                'refrigerantes',
+                'cervejas',
+                'cerveja',
+                'frigobar',
+                'bebidas',
+                'bebida',
+            ]
+            if station == 'bar' and not is_beverage:
+                continue
+            if station == 'kitchen' and is_beverage:
+                continue
+            item_id = item.get('id')
+            if not item_id:
+                continue
+            prod = None
+            prod_id = item.get('product_id')
+            if prod_id:
+                prod = menu_map.get(str(prod_id))
+            printer_id = None
+            if prod and prod.get('printer_id'):
+                printer_id = str(prod.get('printer_id'))
+            if not printer_id and default_kitchen and default_kitchen.get('id') is not None:
+                printer_id = str(default_kitchen.get('id'))
+            printer_name = None
+            if printer_id and printer_id in printers_map:
+                printer_name = printers_map[printer_id].get('name') or ''
+            if not printer_name:
+                if station == 'kitchen':
+                    printer_name = 'Cozinha'
+                else:
+                    printer_name = 'Bar'
+            # Separação rígida por estação baseada no nome da impressora
+            p_lower = (printer_name or '').strip().lower()
+            if station == 'kitchen' and 'bar' in p_lower:
+                continue
+            if station == 'bar' and 'bar' not in p_lower:
+                continue
+            kds_status = item.get('kds_status') or 'pending'
+            if kds_status not in ['pending', 'preparing', 'done', 'archived']:
+                kds_status = 'pending'
+            # Auto-arquivamento após 120 minutos sem interação (somente se pendente e sem start/done)
+            created_raw = item.get('created_at')
+            try:
+                created_at = datetime.strptime(created_raw, '%d/%m/%Y %H:%M') if created_raw else opened_at
+            except Exception:
+                created_at = opened_at
+            age_minutes = (now - created_at).total_seconds() / 60.0
+            if kds_status == 'pending' and not item.get('kds_start_time') and not item.get('kds_done_time') and age_minutes >= 150:
+                item['kds_status'] = 'archived'
+                item['kds_no_interaction'] = True
+                item['kds_archived_time'] = now.strftime('%d/%m/%Y %H:%M')
+                kds_status = 'archived'
+                changed = True
+            # Não incluir arquivados na tela ativa
+            if kds_status == 'archived':
+                continue
+            section_name = printer_name
+            if section_name not in sections_counter:
+                sections_counter[section_name] = 0
+            if kds_status in ['pending', 'preparing']:
+                sections_counter[section_name] += 1
+            order_age = (now - created_at).total_seconds() / 60.0
+            is_late = order_age >= 40
+            observations = item.get('observations') or []
+            if isinstance(observations, list):
+                notes_parts = [str(o) for o in observations if o]
+            else:
+                notes_parts = [str(observations)] if observations else []
+            accompaniments = item.get('accompaniments') or []
+            if accompaniments:
+                acc_str = ', '.join(str(a) for a in accompaniments)
+                notes_parts.append(acc_str)
+            questions = item.get('questions_answers') or []
+            if isinstance(questions, dict):
+                for q, ans in questions.items():
+                    if ans:
+                        notes_parts.append(str(ans))
+            elif isinstance(questions, list):
+                for qa in questions:
+                    if isinstance(qa, dict):
+                        q_text = qa.get('question')
+                        ans = qa.get('answer')
+                        if ans:
+                            notes_parts.append(str(ans))
+                    else:
+                        notes_parts.append(str(qa))
+            notes = ' / '.join(notes_parts)
+            flavor_text = item.get('flavor') or item.get('flavor_name')
+            if flavor_text:
+                flavor_str = str(flavor_text).strip()
+                if flavor_str:
+                    if notes:
+                        notes = f"Sabor: {flavor_str} / {notes}"
+                    else:
+                        notes = f"Sabor: {flavor_str}"
+            start_time = item.get('kds_start_time')
+            done_time = item.get('kds_done_time')
+            table_items.append({
+                'id': item_id,
+                'name': item.get('name'),
+                'qty': item.get('qty', 1),
+                'category': cat,
+                'section': section_name,
+                'status': kds_status,
+                'order_time': created_at.isoformat(),
+                'start_time': start_time,
+                'done_time': done_time,
+                'notes': notes,
+                'is_late': is_late
+            })
+        # Se houve auto-archive, persistir após processar esta mesa
+        if not table_items:
+            continue
+        pending_count = sum(1 for i in table_items if i['status'] == 'pending')
+        preparing_count = sum(1 for i in table_items if i['status'] == 'preparing')
+        done_count = sum(1 for i in table_items if i['status'] == 'done')
+        if pending_count > 0:
+            overall_status = 'pending'
+        elif preparing_count > 0:
+            overall_status = 'preparing'
+        else:
+            overall_status = 'done'
+        order_late = any(i['is_late'] for i in table_items)
+        sections = {}
+        for i in table_items:
+            key = i['section']
+            if key not in sections:
+                sections[key] = []
+            sections[key].append(i)
+        sections_list = []
+        for name, items_list in sections.items():
+            sections_list.append({
+                'name': name,
+                'pending': sum(1 for i in items_list if i['status'] == 'pending'),
+                'preparing': sum(1 for i in items_list if i['status'] == 'preparing'),
+                'done': sum(1 for i in items_list if i['status'] == 'done'),
+                'items': items_list
+            })
+        label = order.get('label')
+        if not label:
+            tid_str = str(table_id)
+            staff_name = order.get('staff_name')
+            if 'FUNC_' in tid_str and staff_name:
+                label = staff_name
+            else:
+                label = f"Mesa {table_id}"
+        result_orders.append({
+            'table_id': table_id,
+            'label': label,
+            'waiter': order.get('waiter') or '',
+            'status': overall_status,
+            'is_late': order_late,
+            'opened_at': opened_at.isoformat(),
+            'sections': sections_list,
+            'totals': {
+                'pending': pending_count,
+                'preparing': preparing_count,
+                'done': done_count
+            }
+        })
+    sections_summary = []
+    for name, count in sections_counter.items():
+        sections_summary.append({'name': name, 'pending': count})
+    payload = {
+        'station': station,
+        'generated_at': now.isoformat(),
+        'orders': result_orders,
+        'sections_summary': sections_summary
+    }
+    if changed:
+        save_table_orders(orders)
+    return payload
+
 
 @kitchen_bp.route('/kitchen/kds')
 @login_required
 def kitchen_kds():
-    # Permissões: Admin, Gerente, Cozinha
     if session.get('role') not in ['admin', 'gerente'] and session.get('department') != 'Cozinha':
         flash('Acesso restrito.')
         return redirect(url_for('main.service_page', service_id='cozinha'))
-        
+    reset = request.args.get('reset')
+    if reset:
+        session.pop('kds_station', None)
+    station = _normalize_station(request.args.get('station')) or session.get('kds_station')
+    station = _normalize_station(station)
+    if not station:
+        return render_template('kitchen_kds_select.html')
+    session['kds_station'] = station
+    return render_template('kitchen_kds.html', station=station)
+
+
+@kitchen_bp.route('/kitchen/kds/data')
+@login_required
+def kitchen_kds_data():
+    if session.get('role') not in ['admin', 'gerente'] and session.get('department') != 'Cozinha':
+        return jsonify({'success': False, 'error': 'Acesso restrito.'}), 403
+    station = _normalize_station(request.args.get('station')) or session.get('kds_station')
+    station = _normalize_station(station) or 'kitchen'
+    payload = _build_kds_payload(station)
+    return jsonify({'success': True, 'data': payload})
+
+
+@kitchen_bp.route('/kitchen/kds/update_status', methods=['POST'])
+@login_required
+def kitchen_kds_update_status():
+    if session.get('role') not in ['admin', 'gerente'] and session.get('department') != 'Cozinha':
+        return jsonify({'success': False, 'error': 'Acesso restrito.'}), 403
+    try:
+        data = request.get_json(force=True) or {}
+    except Exception:
+        data = {}
+    table_id = str(data.get('table_id') or '')
+    item_id = str(data.get('item_id') or '')
+    new_status = str(data.get('status') or '')
+    if not table_id or not item_id or new_status not in ['pending', 'preparing', 'done', 'archived']:
+        return jsonify({'success': False, 'error': 'Parâmetros inválidos.'}), 400
     orders = load_table_orders()
-    # Logic to sort or filter could go here, but template handles display logic
-    return render_template('kitchen_kds.html', orders=orders)
+    order = orders.get(table_id)
+    if not order:
+        return jsonify({'success': False, 'error': 'Mesa não encontrada.'}), 404
+    items = order.get('items') or []
+    target = None
+    for item in items:
+        if str(item.get('id')) == item_id:
+            target = item
+            break
+    if not target:
+        return jsonify({'success': False, 'error': 'Item não encontrado.'}), 404
+    now_str = datetime.now().strftime('%d/%m/%Y %H:%M')
+    if new_status == 'pending':
+        target['kds_status'] = 'pending'
+        target.pop('kds_start_time', None)
+        target.pop('kds_done_time', None)
+    elif new_status == 'preparing':
+        # Calcula tempo de espera até início do preparo
+        # Salva em segundos desde created_at até agora
+        try:
+            created_at = datetime.strptime(target.get('created_at'), '%d/%m/%Y %H:%M')
+        except Exception:
+            created_at = datetime.now()
+        wait_sec = max(0, int((datetime.now() - created_at).total_seconds()))
+        target['kds_pending_duration_sec'] = wait_sec
+        if target.get('kds_status') != 'preparing':
+            target['kds_status'] = 'preparing'
+            target['kds_start_time'] = now_str
+            target.pop('kds_done_time', None)
+    elif new_status == 'done':
+        target['kds_status'] = 'done'
+        if 'kds_start_time' not in target:
+            target['kds_start_time'] = now_str
+        target['kds_done_time'] = now_str
+        # Calcula tempo de preparo entre start e done
+        try:
+            t_start = datetime.strptime(target.get('kds_start_time'), '%d/%m/%Y %H:%M')
+        except Exception:
+            t_start = datetime.now()
+        prep_sec = max(0, int((datetime.now() - t_start).total_seconds()))
+        target['kds_preparing_duration_sec'] = prep_sec
+    elif new_status == 'archived':
+        target['kds_status'] = 'archived'
+        target['kds_archived_time'] = now_str
+    save_table_orders(orders)
+    return jsonify({'success': True})
+
+
+@kitchen_bp.route('/kitchen/kds/mark_received', methods=['POST'])
+@login_required
+def kitchen_kds_mark_received():
+    if session.get('role') not in ['admin', 'gerente'] and session.get('department') != 'Cozinha':
+        return jsonify({'success': False, 'error': 'Acesso restrito.'}), 403
+    try:
+        data = request.get_json(force=True) or {}
+    except Exception:
+        data = {}
+    table_id = str(data.get('table_id') or '')
+    item_ids = data.get('item_ids') or []
+    if not table_id or not item_ids:
+        return jsonify({'success': False, 'error': 'Parâmetros inválidos.'}), 400
+    item_ids = [str(i) for i in item_ids]
+    orders = load_table_orders()
+    order = orders.get(table_id)
+    if not order:
+        return jsonify({'success': False, 'error': 'Mesa não encontrada.'}), 404
+    items = order.get('items') or []
+    for item in items:
+        if str(item.get('id')) in item_ids:
+            item['kds_status'] = 'archived'
+    save_table_orders(orders)
+    return jsonify({'success': True})
 
 @kitchen_bp.route('/kitchen/portion/settings', methods=['GET', 'POST'])
 @login_required

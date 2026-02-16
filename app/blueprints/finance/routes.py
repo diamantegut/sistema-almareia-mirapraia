@@ -48,6 +48,14 @@ from app.services.card_reconciliation_service import (
     reconcile_transactions, parse_pagseguro_csv, parse_rede_csv
 )
 
+
+def _load_cashier_sessions():
+    try:
+        from app import load_cashier_sessions as app_loader
+        return app_loader()
+    except Exception:
+        return load_cashier_sessions()
+
 @finance_bp.route('/accounting/emission')
 @login_required
 def fiscal_emission_page():
@@ -309,7 +317,7 @@ def api_fiscal_analyze_error():
 # --- Helpers ---
 
 def get_balance_data(period_type, year, specific_value=None):
-    sessions = load_cashier_sessions()
+    sessions = _load_cashier_sessions()
     closed_sessions = [s for s in sessions if s.get('status') == 'closed']
     
     # Determine Date Range
@@ -355,83 +363,179 @@ def get_balance_data(period_type, year, specific_value=None):
         except (ValueError, TypeError):
             continue
             
-    # Group by Type
     report = {}
-    # Define known types
     types = {
         'restaurant_service': 'Restaurante',
         'reception_room_billing': 'Recepção (Quartos)',
-        'reception_reservations': 'Recepção (Reservas)'
+        'reception_reservations': 'Recepção (Reservas)',
+        'guest_consumption': 'Consumo de Hóspedes Restaurante'
     }
     
     for s in filtered_sessions:
         s_type = s.get('type', 'restaurant_service')
-        # Normalize types
-        if s_type == 'restaurant': s_type = 'restaurant_service'
-        if s_type == 'reception': s_type = 'reception_room_billing'
+        if s_type == 'restaurant':
+            s_type = 'restaurant_service'
+        if s_type == 'reception':
+            s_type = 'reception_room_billing'
         
         label = types.get(s_type, s_type.replace('_', ' ').title())
         
         if label not in report:
             report[label] = {
+                'type_key': s_type,
                 'initial_balance': 0.0,
-                'total_in': 0.0,
-                'total_out': 0.0,
+                'total_in': 0.0,      # total de todas as entradas (todas as formas)
+                'total_out': 0.0,     # total de todas as saídas (todas as formas)
+                'cash_total_in': 0.0, # entradas apenas em dinheiro
+                'cash_total_out': 0.0,# saídas apenas em dinheiro
                 'final_balance': 0.0,
                 'sessions_count': 0,
-                'sessions': [] # For detailed view
+                'sessions': []
             }
         
         report[label]['sessions'].append(s)
 
-    # Calculate Aggregates
     for label, data in report.items():
-        # Sort sessions by date
+        original_sessions = list(data['sessions'])
         data['sessions'].sort(key=lambda x: datetime.strptime(x.get('closed_at'), '%d/%m/%Y %H:%M'))
         
         if data['sessions']:
-            # Initial balance of the period is the opening balance of the FIRST session
             first_session = data['sessions'][0]
-            # Handle potential None or string issues
             try:
                 data['initial_balance'] = float(first_session.get('opening_balance') or first_session.get('initial_balance') or 0.0)
             except:
                 data['initial_balance'] = 0.0
             
-            # Final balance of the period is the closing balance of the LAST session
             last_session = data['sessions'][-1]
             try:
                 data['final_balance'] = float(last_session.get('closing_balance', 0.0))
             except:
                 data['final_balance'] = 0.0
             
-            # Sum transactions
             for s in data['sessions']:
                 for t in s.get('transactions', []):
                     try:
-                        amount = float(t.get('amount', 0.0))
+                        amount = float(t.get('amount', 0.0) or 0.0)
                     except:
                         amount = 0.0
-                        
-                    t_type = t.get('type')
-                    if t_type in ['sale', 'in', 'deposit']:
-                        data['total_in'] += amount
-                    elif t_type in ['withdrawal', 'out']:
-                        data['total_out'] += amount
+                    
+                    t_type = str(t.get('type', '')).strip().lower()
+                    method = str(t.get('payment_method', '')).strip().lower()
+                    
+                    is_cash = False
+                    if 'dinheiro' in method or 'espécie' in method or 'especie' in method:
+                        is_cash = True
+                    elif t_type in ['supply', 'suprimento', 'bleeding', 'sangria']:
+                        is_cash = True
+                    elif 'transfer' in method or 'transferência' in method or 'transferencia' in method:
+                        is_cash = True
+
+                    # Totais gerais (todas as formas de pagamento)
+                    if t_type in ['out', 'withdrawal', 'refund']:
+                        data['total_out'] += abs(amount)
+                    elif t_type in ['in', 'deposit', 'sale']:
+                        if amount >= 0:
+                            data['total_in'] += abs(amount)
+                        else:
+                            data['total_out'] += abs(amount)
+                    else:
+                        if amount >= 0:
+                            data['total_in'] += abs(amount)
+                        else:
+                            data['total_out'] += abs(amount)
+
+                    # Totais apenas em dinheiro (para cálculo de saldo esperado em espécie)
+                    if not is_cash:
+                        continue
+                    
+                    if t_type in ['out', 'withdrawal', 'refund']:
+                        data['cash_total_out'] += abs(amount)
+                    elif t_type in ['in', 'deposit', 'sale']:
+                        if amount >= 0:
+                            data['cash_total_in'] += abs(amount)
+                        else:
+                            data['cash_total_out'] += abs(amount)
+                    else:
+                        if amount >= 0:
+                            data['cash_total_in'] += abs(amount)
+                        else:
+                            data['cash_total_out'] += abs(amount)
                         
             data['sessions_count'] = len(data['sessions'])
             
+            for s in data['sessions']:
+                s['continuity_issue'] = False
+            
+            for idx in range(1, len(data['sessions'])):
+                current_session = data['sessions'][idx]
+                prev_session = data['sessions'][idx - 1]
+                try:
+                    prev_close_str = prev_session.get('closed_at')
+                    next_open_str = current_session.get('opened_at')
+                    if prev_close_str and next_open_str:
+                        prev_close = datetime.strptime(prev_close_str, '%d/%m/%Y %H:%M')
+                        next_open = datetime.strptime(next_open_str, '%d/%m/%Y %H:%M')
+                        prev_close_date = prev_close.date()
+                        next_open_date = next_open.date()
+                        prev_closing_balance = float(prev_session.get('closing_balance') or 0.0)
+                        next_opening_balance = float(current_session.get('opening_balance') or 0.0)
+                        if prev_closing_balance > 0.01 and prev_close_date != next_open_date:
+                            if abs(prev_closing_balance - next_opening_balance) > 0.01:
+                                current_session['continuity_issue'] = True
+                except:
+                    continue
+            
+            has_unapproved = False
+            for s in original_sessions:
+                try:
+                    session_diff = float(s.get('difference', 0.0) or 0.0)
+                except:
+                    session_diff = 0.0
+                approved = bool(s.get('difference_approved'))
+                if abs(session_diff) > 0.01 and not approved:
+                    has_unapproved = True
+                    break
+            
             simple_sessions = []
             for s in data['sessions']:
+                transactions = s.get('transactions') or []
+                try:
+                    session_diff = float(s.get('difference', 0.0) or 0.0)
+                except:
+                    session_diff = 0.0
                 simple_sessions.append({
                     'id': s.get('id'),
                     'opened_at': s.get('opened_at'),
                     'closed_at': s.get('closed_at'),
                     'user': s.get('user'),
                     'opening_balance': s.get('opening_balance'),
-                    'closing_balance': s.get('closing_balance')
+                    'closing_balance': s.get('closing_balance'),
+                    'closing_cash': s.get('closing_cash'),
+                    'closing_non_cash': s.get('closing_non_cash'),
+                    'transactions_count': len(transactions),
+                    'difference': session_diff,
+                    'difference_approved': bool(s.get('difference_approved')),
+                    'continuity_issue': bool(s.get('continuity_issue'))
                 })
             data['sessions'] = simple_sessions
+            
+            try:
+                # Usa apenas movimentação em dinheiro para cálculo de saldo esperado
+                cash_in = data.get('cash_total_in', data['total_in'])
+                cash_out = data.get('cash_total_out', data['total_out'])
+                calculated_final = data['initial_balance'] + cash_in - cash_out
+                data['calculated_final'] = calculated_final
+                difference = data['final_balance'] - calculated_final
+                data['difference'] = difference
+                data['has_anomaly'] = has_unapproved
+                data['has_approved_divergence'] = abs(difference) > 0.01 and not has_unapproved
+                data['has_continuity_issue'] = any(s.get('continuity_issue') for s in simple_sessions)
+            except:
+                data['calculated_final'] = data.get('final_balance', 0.0)
+                data['difference'] = 0.0
+                data['has_anomaly'] = has_unapproved
+                data['has_approved_divergence'] = False
+                data['has_continuity_issue'] = any(s.get('continuity_issue') for s in simple_sessions)
 
     return report
 
@@ -579,7 +683,7 @@ def find_col(cols, candidates):
     return None
 
 def get_staff_consumption_for_period(start_date, end_date):
-    sessions = load_cashier_sessions()
+    sessions = _load_cashier_sessions()
     consumption = {} # {'username': amount}
     
     start_dt = start_date.replace(hour=0, minute=0, second=0)
@@ -680,6 +784,117 @@ def finance_cashier_reports():
 def finance_balances():
     return render_template('finance_balances.html')
 
+@finance_bp.route('/api/finance/session/<session_id>', methods=['GET'])
+@login_required
+def api_finance_session_details(session_id):
+    session_data = CashierService.get_session_details(session_id)
+    if not session_data:
+        return jsonify({'success': False, 'message': 'Sessão não encontrada'}), 404
+    return jsonify({'success': True, 'data': session_data})
+
+@finance_bp.route('/api/finance/session/<session_id>/approve_divergence', methods=['POST'])
+@login_required
+def api_finance_session_approve_divergence(session_id):
+    if session.get('role') != 'admin':
+        return jsonify({'success': False, 'message': 'Acesso não autorizado'}), 403
+    
+    sessions = _load_cashier_sessions()
+    updated = False
+    for s in sessions:
+        if s.get('id') == session_id and s.get('status') == 'closed':
+            s['difference_approved'] = True
+            updated = True
+            break
+    if updated:
+        save_cashier_sessions(sessions)
+        return jsonify({'success': True})
+    return jsonify({'success': False, 'message': 'Sessão não encontrada'}), 404
+
+@finance_bp.route('/api/finance/balances/approve_divergences', methods=['POST'])
+@login_required
+def api_finance_approve_divergences():
+    if session.get('role') != 'admin':
+        return jsonify({'success': False, 'message': 'Acesso não autorizado'}), 403
+    
+    payload = request.json or {}
+    period_type = payload.get('period_type', 'monthly')
+    year = payload.get('year')
+    specific_value = payload.get('specific_value')
+    type_key = payload.get('type_key')
+    
+    if not year or (period_type != 'annual' and not specific_value) or not type_key:
+        return jsonify({'success': False, 'message': 'Parâmetros inválidos'}), 400
+    
+    sessions = _load_cashier_sessions()
+    closed_sessions = [s for s in sessions if s.get('status') == 'closed']
+    
+    start_date = None
+    end_date = None
+    
+    try:
+        year_int = int(year)
+        if period_type == 'monthly':
+            month = int(specific_value)
+            _, last_day = calendar.monthrange(year_int, month)
+            start_date = datetime(year_int, month, 1)
+            end_date = datetime(year_int, month, last_day, 23, 59, 59)
+        elif period_type == 'quarterly':
+            quarter = int(specific_value)
+            start_month = 3 * (quarter - 1) + 1
+            end_month = 3 * quarter
+            _, last_day = calendar.monthrange(year_int, end_month)
+            start_date = datetime(year_int, start_month, 1)
+            end_date = datetime(year_int, end_month, last_day, 23, 59, 59)
+        elif period_type == 'semiannual':
+            semester = int(specific_value)
+            start_month = 6 * (semester - 1) + 1
+            end_month = 6 * semester
+            _, last_day = calendar.monthrange(year_int, end_month)
+            start_date = datetime(year_int, start_month, 1)
+            end_date = datetime(year_int, end_month, last_day, 23, 59, 59)
+        elif period_type == 'annual':
+            start_date = datetime(year_int, 1, 1)
+            end_date = datetime(year_int, 12, 31, 23, 59, 59)
+    except (ValueError, TypeError):
+        return jsonify({'success': False, 'message': 'Período inválido'}), 400
+    
+    updated = 0
+    for s in closed_sessions:
+        s_closed_at = s.get('closed_at')
+        if not s_closed_at:
+            continue
+        try:
+            closed_at = datetime.strptime(s_closed_at, '%d/%m/%Y %H:%M')
+        except (ValueError, TypeError):
+            continue
+        if not (start_date <= closed_at <= end_date):
+            continue
+        
+        s_type = s.get('type')
+        if s_type == 'restaurant':
+            s_type_norm = 'restaurant_service'
+        elif s_type == 'reception':
+            s_type_norm = 'reception_room_billing'
+        else:
+            s_type_norm = s_type
+        
+        if s_type_norm != type_key:
+            continue
+        
+        try:
+            diff = float(s.get('difference', 0.0) or 0.0)
+        except:
+            diff = 0.0
+        
+        if abs(diff) > 0.01 and not s.get('difference_approved'):
+            s['difference_approved'] = True
+            updated += 1
+    
+    if updated > 0:
+        save_cashier_sessions(sessions)
+    
+    return jsonify({'success': True, 'updated_sessions': updated})
+
 @finance_bp.route('/finance/balances/data')
 @login_required
 def finance_balances_data():
@@ -689,16 +904,21 @@ def finance_balances_data():
     
     report = get_balance_data(period_type, year, specific_value)
     
-    # Transform to list for frontend
     data_list = []
     for label, values in report.items():
         data_list.append({
             'type_label': label,
-            'user': label, # Using label as user/name for the card
+            'user': label,
             'initial_balance': values['initial_balance'],
             'total_in': values['total_in'],
             'total_out': values['total_out'],
             'final_balance': values['final_balance'],
+            'calculated_final': values.get('calculated_final', values.get('final_balance', 0.0)),
+            'difference': values.get('difference', 0.0),
+            'has_anomaly': values.get('has_anomaly', False),
+            'has_approved_divergence': values.get('has_approved_divergence', False),
+            'has_continuity_issue': values.get('has_continuity_issue', False),
+            'type_key': values.get('type_key'),
             'sessions': values.get('sessions', [])
         })
         
@@ -1375,7 +1595,7 @@ def close_staff_month():
         return redirect(url_for('main.index'))
         
     orders = load_table_orders()
-    sessions = load_cashier_sessions()
+    sessions = _load_cashier_sessions()
     
     # Use CashierService helper to find active session
     current_session = CashierService.get_active_session()
@@ -1781,7 +2001,7 @@ def commission_ranking():
     # Start date to beginning of day
     start_date_comp = start_date.replace(hour=0, minute=0, second=0)
 
-    sessions = load_cashier_sessions()
+    sessions = _load_cashier_sessions()
     
     # Aggregation dictionary: waiter -> {total: 0.0, count: 0}
     waiter_stats = {}
@@ -1962,7 +2182,7 @@ def admin_invoice_report():
     except Exception as e:
         print(f"Security Log Error: {e}")
 
-    sessions = load_cashier_sessions()
+    sessions = _load_cashier_sessions()
     # load_payment_methods is in data_service? No, it was local in app.py then moved.
     # Check import. It is in app.services.data_service in app.py now (after my previous fix).
     # I imported load_payment_methods in routes.py imports? No, I missed it.
@@ -2223,7 +2443,7 @@ def finance_reconciliation_sync():
     start_search = start_date - timedelta(days=1)
     end_search = end_date + timedelta(days=1)
     
-    sessions = load_cashier_sessions()
+    sessions = _load_cashier_sessions()
     system_transactions = []
     
     for s in sessions:
@@ -2300,7 +2520,7 @@ def finance_reconciliation_upload():
         start_search = min_date - timedelta(days=1)
         end_search = max_date + timedelta(days=1)
         
-        sessions = load_cashier_sessions()
+        sessions = _load_cashier_sessions()
         system_transactions = []
         
         for s in sessions:

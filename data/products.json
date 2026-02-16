@@ -9745,14 +9745,23 @@
     {
         "id": "747",
         "name": "Água com gás 275ml",
-        "department": "Estoques",
+        "department": "Estoque",
         "unit": "Unidades",
         "price": 3.2,
         "suppliers": [
             "Estoque Inicial"
         ],
         "category": "Estoque Principal - Bar",
-        "min_stock": 16.0
+        "min_stock": 120.0,
+        "package_size": 1.0,
+        "purchase_unit": "",
+        "frequency": "Sem Frequência",
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": ""
     },
     {
         "id": "748",
@@ -9769,14 +9778,23 @@
     {
         "id": "749",
         "name": "Água sem gás 275ml Mirapraia",
-        "department": "Estoques",
+        "department": "Estoque",
         "unit": "Unidades",
         "price": 3.05,
         "suppliers": [
             "Estoque Inicial"
         ],
         "category": "Estoque Principal - Bar",
-        "min_stock": 16.0
+        "min_stock": 180.0,
+        "package_size": 1.0,
+        "purchase_unit": "",
+        "frequency": "Sem Frequência",
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": ""
     },
     {
         "id": "750",
@@ -9913,11 +9931,16 @@
             "coca cola"
         ],
         "category": "Estoque Principal - Bar",
-        "min_stock": 24.0,
+        "min_stock": 120.0,
         "package_size": 1.0,
         "purchase_unit": "fardo",
         "frequency": "Quinzenal",
-        "is_internal": false
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": ""
     },
     {
         "id": "759",
@@ -10744,5 +10767,26 @@
             "casa"
         ],
         "is_internal": false
+    },
+    {
+        "id": "809",
+        "name": "Borrifadores Pro ",
+        "department": "Governança",
+        "unit": "Litros",
+        "price": 20.0,
+        "category": "Governança",
+        "min_stock": 0.0,
+        "package_size": 1.0,
+        "purchase_unit": "",
+        "frequency": "Semanal",
+        "suppliers": [
+            "grasi"
+        ],
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": ""
     }
 ]
