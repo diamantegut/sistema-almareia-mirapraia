@@ -358,7 +358,7 @@
                 </button>
                 
                 <!-- Contact Button -->
-                <a href="https://wa.me/5581984696967" target="_blank" class="btn-header">
+                <a href="https://wa.me/5581984696967" target="_blank" class="btn-header" onclick="openMenuWhatsApp(); return false;">
                     <i class="fab fa-whatsapp me-1"></i> <span class="btn-text">Contato</span>
                 </a>
             </div>
@@ -733,6 +733,25 @@ function openLightbox(src, caption, isVideo=false) {
 function closeLightbox() {
     document.getElementById('lightboxModal').style.display = "none";
     document.getElementById('lightboxVideo').pause();
+}
+
+function openMenuWhatsApp() {
+    const phone = '5581984696967';
+    const encodedText = '';
+    const appUrl = `whatsapp://send?phone=${phone}`;
+    const webUrl = `https://wa.me/${phone}`;
+    const isMobile = /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
+    if (isMobile) {
+        const start = Date.now();
+        window.location.href = appUrl;
+        setTimeout(function() {
+            if (Date.now() - start < 1500) {
+                window.open(webUrl, '_blank');
+            }
+        }, 1200);
+    } else {
+        window.open(webUrl, '_blank');
+    }
 }
 </script>
 </body>

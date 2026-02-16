@@ -108,3 +108,5 @@ O projeto inclui um script `git_auto.bat` para facilitar o fluxo de trabalho:
 
 ---
 Desenvolvido para Almareia Mirapraia.
+
+Fluxo Git sincronizado e testado em 2026-02-15.

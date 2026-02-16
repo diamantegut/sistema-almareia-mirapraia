@@ -12,9 +12,6 @@
                 <a href="{{ url_for('reception.toggle_queue_status') }}" class="btn btn-outline-secondary">
                     <i class="bi bi-power"></i> {{ 'Fechar Fila' if settings.is_open else 'Abrir Fila' }}
                 </a>
-                <a href="{{ url_for('reception.reception_chat') }}" class="btn btn-outline-success">
-                    <i class="bi bi-whatsapp"></i> Chat
-                </a>
                 <a href="{{ queue_public_url }}" target="_blank" class="btn btn-outline-primary">
                     <i class="bi bi-box-arrow-up-right"></i> Link Público
                 </a>
@@ -51,9 +48,8 @@
                                     <div class="btn-group btn-group-sm" role="group">
                                         <button type="button"
                                                 class="btn btn-success"
-                                                data-wa-link="{{ item.wa_link }}"
-                                                data-chat-phone="{{ item.wa_phone }}"
-                                                data-prefill="{{ item.call_message|e }}"
+                                                data-wa-phone="{{ item.wa_phone }}"
+                                                data-wa-message="{{ item.call_message|e }}"
                                                 onclick="callCustomer('{{ item.id }}', this)">
                                             <i class="bi bi-whatsapp"></i> Chamar
                                         </button>
@@ -192,59 +188,44 @@
     }
 
     function callCustomer(id, btn) {
-        const waLink = btn.getAttribute('data-wa-link');
-        const chatPhone = btn.getAttribute('data-chat-phone');
-        const prefillMessage = btn.getAttribute('data-prefill');
+        const phone = btn.getAttribute('data-wa-phone');
+        const message = btn.getAttribute('data-wa-message') || '';
         const originalContent = btn.innerHTML;
 
-        if (chatPhone) {
-            let chatUrl = "{{ url_for('reception.reception_chat') }}" + "?phone=" + encodeURIComponent(chatPhone);
-            if (prefillMessage) {
-                chatUrl += "&message=" + encodeURIComponent(prefillMessage);
-            }
-            window.open(chatUrl, "_blank");
+        if (!phone) {
+            alert('Número de WhatsApp inválido.');
+            return;
         }
-        
+
+        const encodedMessage = encodeURIComponent(message);
+        const appUrl = `whatsapp://send?phone=${phone}&text=${encodedMessage}`;
+        const webUrl = `https://wa.me/${phone}?text=${encodedMessage}`;
+
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
 
-        fetch("{{ url_for('reception.send_queue_notification') }}", {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({id: id})
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.code === 'api_not_configured') {
-                // Fallback to WA Web
-                window.open(waLink, '_blank');
-                logNotification(id);
-            } else if (data.success) {
-                // Success
-                btn.classList.remove('btn-success');
-                btn.classList.add('btn-outline-success');
-                btn.innerHTML = '<i class="bi bi-check-lg"></i> Enviado';
-            } else {
-                // Error
-                if (confirm("Erro na API: " + data.message + "\n\nDeseja abrir o WhatsApp Web?")) {
-                    window.open(waLink, '_blank');
-                    logNotification(id);
+        logNotification(id);
+
+        const isMobile = /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
+
+        if (isMobile) {
+            const start = Date.now();
+            window.location.href = appUrl;
+            setTimeout(function () {
+                if (Date.now() - start < 1500) {
+                    window.open(webUrl, '_blank');
                 }
-                btn.innerHTML = originalContent;
-            }
-        })
-        .catch(err => {
-            console.error(err);
-            window.open(waLink, '_blank');
-            logNotification(id);
-            btn.innerHTML = originalContent;
-        })
-        .finally(() => {
+            }, 1200);
+        } else {
+            window.open(webUrl, '_blank');
+        }
+
+        setTimeout(function () {
             btn.disabled = false;
-            if (btn.innerHTML !== originalContent && !btn.innerHTML.includes('Enviado')) {
-                 btn.innerHTML = originalContent;
-            }
-        });
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-outline-success');
+            btn.innerHTML = '<i class="bi bi-check-lg"></i> Enviado';
+        }, 1500);
     }
 
     // Auto-refresh every 30 seconds

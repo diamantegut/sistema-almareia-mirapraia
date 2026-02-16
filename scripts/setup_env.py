@@ -86,14 +86,27 @@ def update_settings(domain):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Setup environment configuration.')
-    parser.add_argument('--env', required=True, choices=['development', 'production'], help='Environment (development/production)')
+    parser.add_argument('--env', choices=['development', 'production'], help='Environment (development/production)')
     parser.add_argument('--port', required=True, type=int, help='Server port')
-    parser.add_argument('--domain', required=True, help='Ngrok domain')
+    parser.add_argument('--domain', help='Ngrok domain')
+    parser.add_argument(
+        '--no-ngrok',
+        action='store_true',
+        help='Atualiza apenas a porta em system_config.json, sem alterar ngrok_config/settings'
+    )
 
     args = parser.parse_args()
 
-    print(f"--- Configuring for {args.env.upper()} (Port: {args.port}, Domain: {args.domain}) ---")
+    print(f"--- Atualizando configuracao de porta (Port: {args.port}) ---")
     update_system_config(args.port)
-    update_ngrok_config(args.env, args.port, args.domain)
-    update_settings(args.domain)
+
+    if not args.no_ngrok:
+        if not args.env or not args.domain:
+            print("[ERROR] --env e --domain sao obrigatorios quando o ngrok deve ser atualizado.")
+            sys.exit(1)
+
+        print(f"--- Atualizando configuracao do NGROK ({args.env.upper()}, Domain: {args.domain}) ---")
+        update_ngrok_config(args.env, args.port, args.domain)
+        update_settings(args.domain)
+
     print("---------------------------------------------------------------")

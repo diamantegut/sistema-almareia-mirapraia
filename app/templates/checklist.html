@@ -330,8 +330,43 @@ function sendWhatsApp() {
           btn.innerHTML = originalText;
           btn.disabled = false;
           
-          if(data.success) alert('Lista enviada com sucesso!');
-          else alert('Erro ao enviar: ' + (data.error || 'Erro desconhecido'));
+          if(data.success) {
+              const phoneRaw = data.phone || '';
+              const digits = phoneRaw.replace(/\D/g, '');
+              let phone = digits;
+              if (phone && !phone.startsWith('55')) {
+                  phone = '55' + phone;
+              }
+              
+              const text = data.text || '';
+              const encodedText = encodeURIComponent(text);
+              const isMobile = /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
+              
+              let appUrl;
+              let webUrl;
+              
+              if (phone) {
+                  appUrl = `whatsapp://send?phone=${phone}&text=${encodedText}`;
+                  webUrl = `https://wa.me/${phone}?text=${encodedText}`;
+              } else {
+                  appUrl = `whatsapp://send?text=${encodedText}`;
+                  webUrl = `https://wa.me/?text=${encodedText}`;
+              }
+              
+              if (isMobile) {
+                  const start = Date.now();
+                  window.location.href = appUrl;
+                  setTimeout(function() {
+                      if (Date.now() - start < 1500) {
+                          window.open(webUrl, '_blank');
+                      }
+                  }, 1200);
+              } else {
+                  window.open(webUrl, '_blank');
+              }
+          } else {
+              alert('Erro ao enviar: ' + (data.error || 'Erro desconhecido'));
+          }
       })
       .catch(e => {
           btn.innerHTML = originalText;

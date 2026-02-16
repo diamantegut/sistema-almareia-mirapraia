@@ -157,10 +157,7 @@ async function generateOrder() {
         
         if (data.success) {
             document.getElementById('orderText').value = data.text;
-            
-            // Setup WhatsApp Link
-            const encodedText = encodeURIComponent(data.text);
-            document.getElementById('waLink').href = `https://wa.me/?text=${encodedText}`;
+            window.kitchenOrderText = data.text;
             
             const modal = new bootstrap.Modal(document.getElementById('resultModal'));
             modal.show();
@@ -181,5 +178,39 @@ function copyText() {
         alert("Texto copiado para a área de transferência!");
     });
 }
+
+function openKitchenWhatsApp() {
+    const textArea = document.getElementById('orderText');
+    const message = (window.kitchenOrderText || (textArea ? textArea.value : '')) || '';
+    if (!message) {
+        alert('Nenhum texto de pedido gerado.');
+        return;
+    }
+    const encodedText = encodeURIComponent(message);
+    const appUrl = `whatsapp://send?text=${encodedText}`;
+    const webUrl = `https://wa.me/?text=${encodedText}`;
+    const isMobile = /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
+    if (isMobile) {
+        const start = Date.now();
+        window.location.href = appUrl;
+        setTimeout(function() {
+            if (Date.now() - start < 1500) {
+                window.open(webUrl, '_blank');
+            }
+        }, 1200);
+    } else {
+        window.open(webUrl, '_blank');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const waLink = document.getElementById('waLink');
+    if (waLink) {
+        waLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            openKitchenWhatsApp();
+        });
+    }
+});
 </script>
 {% endblock %}

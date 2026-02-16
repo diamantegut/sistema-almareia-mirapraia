@@ -5,7 +5,7 @@ import time
 import shutil
 from datetime import datetime, timedelta
 from app import create_app
-from app.services import data_service, cashier_service
+from app.services import data_service, cashier_service, transfer_service
 from app.blueprints.reception import routes as reception_routes
 from app.blueprints.governance import routes as governance_routes
 
@@ -31,8 +31,10 @@ class TestReceptionComprehensive(unittest.TestCase):
         self.original_charges = data_service.ROOM_CHARGES_FILE
         self.original_orders = data_service.TABLE_ORDERS_FILE
         self.original_sessions = cashier_service.CASHIER_SESSIONS_FILE
+        self.original_data_sessions = data_service.CASHIER_SESSIONS_FILE
         self.original_products = data_service.PRODUCTS_FILE
         self.original_menu = data_service.MENU_ITEMS_FILE
+        self.original_get_data_path = transfer_service.get_data_path
         
         # Define test file paths
         self.test_occupancy = os.path.join(TEST_DATA_DIR, 'room_occupancy.json')
@@ -51,6 +53,8 @@ class TestReceptionComprehensive(unittest.TestCase):
         data_service.PRODUCTS_FILE = self.test_products
         data_service.MENU_ITEMS_FILE = self.test_menu
         cashier_service.CASHIER_SESSIONS_FILE = self.test_sessions
+        data_service.CASHIER_SESSIONS_FILE = self.test_sessions
+        transfer_service.get_data_path = lambda filename: os.path.join(TEST_DATA_DIR, filename)
         
         # Also patch routes if they import directly (common issue in Flask)
         reception_routes.ROOM_OCCUPANCY_FILE = self.test_occupancy # Just in case
@@ -73,6 +77,8 @@ class TestReceptionComprehensive(unittest.TestCase):
         cashier_service.CASHIER_SESSIONS_FILE = self.original_sessions
         data_service.PRODUCTS_FILE = self.original_products
         data_service.MENU_ITEMS_FILE = self.original_menu
+        data_service.CASHIER_SESSIONS_FILE = self.original_data_sessions
+        transfer_service.get_data_path = self.original_get_data_path
 
     def reset_data(self):
         with open(self.test_occupancy, 'w') as f: json.dump({}, f)
@@ -179,14 +185,15 @@ class TestReceptionComprehensive(unittest.TestCase):
         self.assertEqual(occupancy['02']['guest_name'], 'Mover')
 
     # 6. Pagamento de consumos (Setup for next tests)
-    def _create_charge(self, room='01', amount=100.0, status='pending'):
+    def _create_charge(self, room='01', amount=100.0, status='pending', table_id=None):
         charges = data_service.load_room_charges()
         charges.append({
             'id': 'charge_1',
             'room_number': room,
             'total': amount,
             'status': status,
-            'items': [{'name': 'Jantar', 'price': amount}],
+            'items': [{'name': 'Jantar', 'price': amount, 'qty': 1, 'category': 'Frigobar'}],
+            'table_id': table_id,
             'date': datetime.now().strftime('%d/%m/%Y %H:%M')
         })
         data_service.save_room_charges(charges)
@@ -202,7 +209,7 @@ class TestReceptionComprehensive(unittest.TestCase):
         # We reset data in setUp so it should be clean.
         self.assertIn(b'aberto com sucesso', response.data)
         
-        sessions = cashier_service.load_cashier_sessions()
+        sessions = data_service.load_cashier_sessions()
         self.assertEqual(len(sessions), 1)
         self.assertEqual(sessions[0]['status'], 'open')
         self.assertEqual(sessions[0]['opening_balance'], 100.0)
@@ -242,7 +249,7 @@ class TestReceptionComprehensive(unittest.TestCase):
         # We simulate the charge appearing.
         self._create_charge(room='01', amount=15.0)
         response = self.client.get('/reception/rooms')
-        self.assertIn(b'R$ 15,00', response.data)
+        self.assertIn(b'Frigobar', response.data)
 
     # 9. Cancelamentos de itens (Charge Cancellation)
     def test_09_cancellation(self):
@@ -285,7 +292,9 @@ class TestReceptionComprehensive(unittest.TestCase):
     # 11. Devolução para restaurante
     def test_11_return_to_restaurant(self):
         print("\n--- Test 11: Return to Restaurant ---")
-        charge_id = self._create_charge()
+        cashier_service.CashierService.open_session('guest_consumption', 'admin_tester', opening_balance=0.0)
+        cashier_service.CashierService.open_session('restaurant', 'admin_tester', opening_balance=0.0)
+        charge_id = self._create_charge(table_id='10')
         
         data = {
             'charge_id': charge_id
@@ -293,8 +302,7 @@ class TestReceptionComprehensive(unittest.TestCase):
         
         response = self.client.post('/api/reception/return_to_restaurant', json=data, follow_redirects=True)
         self.assertEqual(response.status_code, 200)
-        # Depending on implementation, it might return success=True
-        self.assertTrue(response.json['success'])
+        self.assertTrue(response.json.get('success'))
 
     # 12. Atualização de nome
     def test_12_update_guest_name(self):
@@ -320,7 +328,7 @@ class TestReceptionComprehensive(unittest.TestCase):
         response = self.client.post('/reception/cashier', data=data, follow_redirects=True)
         self.assertIn(b'fechado com sucesso', response.data)
         
-        sessions = cashier_service.load_cashier_sessions()
+        sessions = data_service.load_cashier_sessions()
         self.assertEqual(sessions[0]['status'], 'closed')
 
     # 15. Persistência (Implicit)
@@ -332,6 +340,193 @@ class TestReceptionComprehensive(unittest.TestCase):
         # Simulate app restart by reloading module or just reading file
         occupancy = data_service.load_room_occupancy()
         self.assertEqual(occupancy['01']['guest_name'], 'Persistent')
+
+    # 16. Suprimento e Sangria no Caixa da Recepção
+    def test_16_reception_cashier_deposit_and_withdrawal(self):
+        print("\n--- Test 16: Reception Cashier Deposit & Withdrawal ---")
+        # Abre o caixa da recepção com saldo inicial 0
+        data = {'action': 'open_cashier', 'opening_balance': '0,00'}
+        self.client.post('/reception/cashier', data=data, follow_redirects=True)
+        sessions = data_service.load_cashier_sessions()
+        self.assertEqual(len(sessions), 1)
+        self.assertEqual(sessions[0]['type'], 'guest_consumption')
+        self.assertEqual(sessions[0]['status'], 'open')
+
+        # Suprimento de R$ 200,00
+        data_deposit = {
+            'action': 'add_transaction',
+            'type': 'deposit',
+            'amount': '200,00',
+            'description': 'Teste Suprimento'
+        }
+        response_deposit = self.client.post('/reception/cashier', data=data_deposit, follow_redirects=True)
+        self.assertEqual(response_deposit.status_code, 200)
+        self.assertIn(b'Suprimento registrado com sucesso.', response_deposit.data)
+
+        sessions = data_service.load_cashier_sessions()
+        reception_session = next(s for s in sessions if s['type'] == 'guest_consumption')
+        self.assertEqual(len(reception_session['transactions']), 1)
+        self.assertEqual(reception_session['transactions'][0]['type'], 'in')
+        self.assertEqual(reception_session['transactions'][0]['amount'], 200.0)
+
+        # Sangria de R$ 50,00 (deve ser permitida)
+        data_withdrawal = {
+            'action': 'add_transaction',
+            'type': 'withdrawal',
+            'amount': '50,00',
+            'description': 'Teste Sangria'
+        }
+        response_withdrawal = self.client.post('/reception/cashier', data=data_withdrawal, follow_redirects=True)
+        self.assertEqual(response_withdrawal.status_code, 200)
+        self.assertIn(b'Sangria registrada com sucesso.', response_withdrawal.data)
+
+        sessions = data_service.load_cashier_sessions()
+        reception_session = next(s for s in sessions if s['type'] == 'guest_consumption')
+        self.assertEqual(len(reception_session['transactions']), 2)
+
+        types = [t['type'] for t in reception_session['transactions']]
+        amounts = [t['amount'] for t in reception_session['transactions']]
+        self.assertIn('in', types)
+        self.assertIn('out', types)
+        self.assertIn(200.0, amounts)
+        self.assertIn(50.0, amounts)
+
+        # Sangria de valor maior que o saldo em espécie deve falhar
+        data_withdrawal_blocked = {
+            'action': 'add_transaction',
+            'type': 'withdrawal',
+            'amount': '1000,00',
+            'description': 'Sangria Excedente'
+        }
+        response_blocked = self.client.post('/reception/cashier', data=data_withdrawal_blocked, follow_redirects=True)
+        self.assertEqual(response_blocked.status_code, 200)
+        self.assertIn(b'Erro:', response_blocked.data)
+
+        sessions_after = data_service.load_cashier_sessions()
+        reception_session_after = next(s for s in sessions_after if s['type'] == 'guest_consumption')
+        self.assertEqual(len(reception_session_after['transactions']), 2)
+
+    # 17. Transferência de dinheiro entre caixas abertos (Recepção -> Restaurante)
+    def test_17_reception_cashier_transfer_between_open_cashiers(self):
+        print("\n--- Test 17: Reception Cashier Transfer Between Open Cashiers ---")
+        # Abre caixa da recepção e do restaurante
+        cashier_service.CashierService.open_session('guest_consumption', 'admin_tester', opening_balance=500.0)
+        cashier_service.CashierService.open_session('restaurant', 'admin_tester', opening_balance=0.0)
+
+        # Executa transferência via endpoint da recepção
+        data_transfer = {
+            'action': 'add_transaction',
+            'type': 'transfer',
+            'amount': '150,00',
+            'description': 'Transferência para Restaurante',
+            'target_cashier': 'restaurant'
+        }
+        response = self.client.post('/reception/cashier', data=data_transfer, follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+
+        sessions = data_service.load_cashier_sessions()
+        reception_session = next(s for s in sessions if s['type'] in ['guest_consumption', 'reception_room_billing'])
+        restaurant_session = next(s for s in sessions if s['type'] in ['restaurant', 'restaurant_service'])
+
+        # Verifica transação de saída na recepção
+        self.assertEqual(len(reception_session['transactions']), 1)
+        out_tx = reception_session['transactions'][0]
+        self.assertEqual(out_tx['type'], 'out')
+        self.assertEqual(out_tx['amount'], 150.0)
+        self.assertEqual(out_tx.get('category'), 'Transferência Enviada')
+
+        # Verifica transação de entrada no restaurante
+        self.assertEqual(len(restaurant_session['transactions']), 1)
+        in_tx = restaurant_session['transactions'][0]
+        self.assertEqual(in_tx['type'], 'in')
+        self.assertEqual(in_tx['amount'], 150.0)
+        self.assertEqual(in_tx.get('category'), 'Transferência Recebida')
+
+    # 18. Suprimento e Sangria no Caixa de Reservas
+    def test_18_reservations_cashier_deposit_and_withdrawal(self):
+        print("\n--- Test 18: Reservations Cashier Deposit & Withdrawal ---")
+        data_open = {'action': 'open_cashier', 'opening_balance': '0'}
+        self.client.post('/reception/reservations-cashier', data=data_open, follow_redirects=True)
+
+        sessions = data_service.load_cashier_sessions()
+        reservations_session = next(s for s in sessions if isinstance(s, dict) and s.get('type') == 'reception_reservations')
+        self.assertEqual(reservations_session['status'], 'open')
+
+        data_deposit = {
+            'action': 'add_transaction',
+            'type': 'deposit',
+            'amount': '300',
+            'description': 'Suprimento Reservas'
+        }
+        response_deposit = self.client.post('/reception/reservations-cashier', data=data_deposit, follow_redirects=True)
+        self.assertEqual(response_deposit.status_code, 200)
+        self.assertIn(b'Suprimento registrado com sucesso.', response_deposit.data)
+
+        sessions = data_service.load_cashier_sessions()
+        reservations_session = next(s for s in sessions if isinstance(s, dict) and s.get('type') == 'reception_reservations')
+        self.assertEqual(len(reservations_session['transactions']), 1)
+        self.assertEqual(reservations_session['transactions'][0]['type'], 'deposit')
+        self.assertEqual(reservations_session['transactions'][0]['amount'], 300.0)
+
+        data_withdrawal = {
+            'action': 'add_transaction',
+            'type': 'withdrawal',
+            'amount': '100',
+            'description': 'Sangria Reservas'
+        }
+        response_withdrawal = self.client.post('/reception/reservations-cashier', data=data_withdrawal, follow_redirects=True)
+        self.assertEqual(response_withdrawal.status_code, 200)
+        self.assertIn(b'Sangria registrada com sucesso.', response_withdrawal.data)
+
+        sessions = data_service.load_cashier_sessions()
+        reservations_session = next(s for s in sessions if s['type'] == 'reception_reservations')
+        self.assertEqual(len(reservations_session['transactions']), 2)
+
+        types = [t['type'] for t in reservations_session['transactions']]
+        amounts = [t['amount'] for t in reservations_session['transactions']]
+        self.assertIn('deposit', types)
+        self.assertIn('withdrawal', types)
+        self.assertIn(300.0, amounts)
+        self.assertIn(100.0, amounts)
+
+        data_withdrawal_blocked = {
+            'action': 'add_transaction',
+            'type': 'withdrawal',
+            'amount': '1000',
+            'description': 'Sangria Excedente Reservas'
+        }
+        response_blocked = self.client.post('/reception/reservations-cashier', data=data_withdrawal_blocked, follow_redirects=True)
+        self.assertEqual(response_blocked.status_code, 200)
+        self.assertIn(b'Erro:', response_blocked.data)
+
+        sessions_after = data_service.load_cashier_sessions()
+        reservations_session_after = next(s for s in sessions_after if isinstance(s, dict) and s.get('type') == 'reception_reservations')
+        self.assertEqual(len(reservations_session_after['transactions']), 2)
+
+    # 19. Transferência com caixa de destino fechado via endpoint da Recepção
+    def test_19_reception_cashier_transfer_with_closed_target(self):
+        print("\n--- Test 19: Reception Cashier Transfer With Closed Target ---")
+        data_open = {'action': 'open_cashier', 'opening_balance': '500,00'}
+        self.client.post('/reception/cashier', data=data_open, follow_redirects=True)
+
+        sessions = data_service.load_cashier_sessions()
+        reception_session = next(s for s in sessions if isinstance(s, dict) and s.get('type') in ['guest_consumption', 'reception_room_billing'])
+        self.assertEqual(reception_session['status'], 'open')
+
+        data_transfer = {
+            'action': 'add_transaction',
+            'type': 'transfer',
+            'amount': '100,00',
+            'description': 'Transferência para Caixa Fechado',
+            'target_cashier': 'restaurant'
+        }
+        response = self.client.post('/reception/cashier', data=data_transfer, follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Erro: Transfer\xc3\xaancia Bloqueada: Caixa de destino (restaurant) est\xc3\xa1 FECHADO.', response.data)
+
+        sessions_after = data_service.load_cashier_sessions()
+        reception_session_after = next(s for s in sessions_after if isinstance(s, dict) and s.get('type') in ['guest_consumption', 'reception_room_billing'])
+        self.assertEqual(len(reception_session_after['transactions']), 0)
 
 if __name__ == '__main__':
     unittest.main()

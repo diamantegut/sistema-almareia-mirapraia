@@ -1,5 +1,7 @@
-
 import pytest
+
+pytest.skip("Integração de chat WhatsApp interno removida; testes desativados.", allow_module_level=True)
+
 from unittest.mock import MagicMock, patch
 from whatsapp_chat_service import WhatsAppChatService
 

@@ -29,9 +29,6 @@ from app.services.cashier_service import CashierService
 from app.services.fiscal_pool_service import FiscalPoolService
 from app.services import waiting_list_service
 from app.services.reservation_service import ReservationService
-from app.services.whatsapp_chat_service import WhatsAppChatService
-chat_service = WhatsAppChatService()
-from app.services.whatsapp_service import WhatsAppService
 from app.utils.validators import (
     validate_required, validate_phone, validate_cpf, validate_email, 
     sanitize_input, validate_date, validate_room_number
@@ -659,6 +656,8 @@ def reception_rooms():
         pending_charges = [c for c in room_charges if c.get('status') == 'pending']
         
         grouped_charges = {}
+        any_commissionable_charge = False
+        has_commissionable_service_fee_charge = False
         for charge in pending_charges:
             room_num = str(charge.get('room_number'))
             if room_num not in grouped_charges:
@@ -1024,8 +1023,7 @@ def reception_cashier():
                             target_type=target_cashier,
                             amount=amount,
                             description=description,
-                            user=current_user,
-                            details={'idempotency_key': idempotency_key} if idempotency_key else None
+                            user=current_user
                         )
                         
                         try:
@@ -2350,7 +2348,33 @@ def reception_waiting_list():
         item['wait_minutes'] = int((now - entry_time).total_seconds() / 60)
         item['entry_time_fmt'] = entry_time.strftime('%H:%M')
         item['phone_clean'] = re.sub(r'\D', '', item['phone'])
-        
+
+        party_size = item.get('party_size')
+        try:
+            party_size_int = int(party_size)
+        except (TypeError, ValueError):
+            party_size_int = None
+
+        if party_size_int == 1:
+            party_label = "1 pessoa"
+        elif party_size_int and party_size_int > 1:
+            party_label = f"{party_size_int} pessoas"
+        else:
+            party_label = "seu grupo"
+
+        item['call_message'] = (
+            f"Olá {item.get('name', '')}! Aqui é do Mirapraia. "
+            f"Sua mesa já está pronta para {party_label}. "
+            "Vamos te esperar por até 15 minutos. "
+            "Por favor, venham até a recepção. Até já!"
+        )
+
+        phone_wa = item.get('phone_wa')
+        if not phone_wa:
+            digits = re.sub(r'\D', '', item['phone'])
+            phone_wa = digits if digits.startswith('55') else f"55{digits}"
+        item['wa_phone'] = phone_wa
+
     return render_template('waiting_list_admin.html', queue=queue, settings=settings, metrics=metrics)
 
 @reception_bp.route('/reception/waiting-list/update/<id>/<status>')
@@ -2410,146 +2434,18 @@ def send_queue_notification():
     customer_id = data.get('id')
     if not customer_id:
         return jsonify({'success': False, 'message': 'ID required'}), 400
-        
+    
     success, message = waiting_list_service.send_notification(
-        customer_id, 
-        message_type="table_ready", 
+        customer_id,
+        message_type="table_ready",
         user=session.get('user')
     )
     
     return jsonify({
-        'success': success, 
+        'success': success,
         'message': message,
-        'code': message if not success else 'sent'
+        'code': 'sent' if success else 'error'
     })
-
-@reception_bp.route('/reception/chat')
-@login_required
-def reception_chat():
-    if session.get('role') not in ['admin', 'recepcao', 'gerente']:
-        flash('Acesso restrito.')
-        return redirect(url_for('main.index'))
-    return render_template('whatsapp_chat.html')
-
-@reception_bp.route('/api/chat/conversations')
-@login_required
-def api_chat_conversations():
-    conversations = chat_service.get_all_conversations()
-    return jsonify(conversations)
-
-@reception_bp.route('/api/chat/history/<path:phone>')
-@login_required
-def api_chat_history(phone):
-    messages = chat_service.get_messages(phone)
-    return jsonify(messages)
-
-@reception_bp.route('/api/chat/send', methods=['POST'])
-@login_required
-def api_chat_send():
-    data = request.json
-    phone = data.get('phone')
-    message = data.get('message')
-    
-    if not phone or not message:
-        return jsonify({'success': False, 'message': 'Phone and message required'}), 400
-        
-    settings = waiting_list_service.get_settings()
-    token = settings.get('whatsapp_api_token')
-    phone_id = settings.get('whatsapp_phone_id')
-    
-    if not token or not phone_id:
-        return jsonify({'success': False, 'message': 'WhatsApp API not configured'}), 500
-        
-    wa_service = WhatsAppService(token, phone_id)
-    result = wa_service.send_message(phone, message)
-    
-    if result:
-        msg_data = {
-            'type': 'sent',
-            'content': message,
-            'timestamp': datetime.now().isoformat(),
-            'status': 'sent',
-            'via': 'api',
-            'user': session.get('user')
-        }
-        chat_service.add_message(phone, msg_data)
-        return jsonify({'success': True, 'data': result})
-    else:
-        return jsonify({'success': False, 'message': 'Failed to send via WhatsApp API'}), 500
-
-@reception_bp.route('/api/chat/tags/<path:phone>', methods=['GET'])
-@login_required
-def api_chat_get_tags(phone):
-    tags = chat_service.get_tags(phone)
-    name = chat_service.get_contact_name(phone)
-    return jsonify({'tags': tags, 'name': name})
-
-@reception_bp.route('/api/chat/tags', methods=['POST'])
-@login_required
-def api_chat_update_tags():
-    data = request.json
-    phone = data.get('phone')
-    tags = data.get('tags', [])
-    
-    if not phone:
-        return jsonify({'success': False, 'message': 'Phone required'}), 400
-        
-    success = chat_service.update_tags(phone, tags)
-    return jsonify({'success': success})
-
-@reception_bp.route('/api/chat/tags_config', methods=['GET', 'POST'])
-@login_required
-def api_chat_tags_config():
-    if request.method == 'POST':
-        if session.get('role') not in ['admin', 'gerente', 'supervisor']:
-             return jsonify({'success': False, 'error': 'Unauthorized'}), 403
-        
-        tags = request.json.get('tags', [])
-        success = chat_service.save_tags_config(tags)
-        return jsonify({'success': success})
-    else:
-        tags = chat_service.get_tags_config()
-        return jsonify({'tags': tags})
-
-@reception_bp.route('/api/chat/name', methods=['POST'])
-@login_required
-def api_chat_update_name():
-    data = request.json
-    phone = data.get('phone')
-    name = data.get('name', '')
-    
-    if not phone:
-        return jsonify({'success': False, 'message': 'Phone required'}), 400
-        
-    success = chat_service.update_contact_name(phone, name)
-    return jsonify({'success': success})
-
-@reception_bp.route('/api/chat/improve_text', methods=['POST'])
-@login_required
-def api_chat_improve_text():
-    data = request.json
-    text = data.get('text', '')
-    
-    if not text:
-        return jsonify({'success': False, 'text': ''})
-    
-    improved = text[0].upper() + text[1:] if len(text) > 0 else text
-    
-    if improved and improved[-1] not in ['.', '!', '?']:
-        improved += '.'
-        
-    corrections = {
-        r'\bvc\b': 'você',
-        r'\btbm\b': 'também',
-        r'\bq\b': 'que',
-        r'\bnao\b': 'não',
-        r'\beh\b': 'é',
-        r'\bta\b': 'está'
-    }
-    for slang, formal in corrections.items():
-        improved = re.sub(slang, formal, improved, flags=re.IGNORECASE)
-        
-    return jsonify({'success': True, 'text': improved})
 
 @reception_bp.route('/reception/room_consumption_report/<room_num>')
 @reception_bp.route('/reception/room_consumption_report/<room_num>/')
@@ -3014,9 +2910,13 @@ def reception_close_account(room_num):
                 })
                 total_amount += charge_total
                 
+                if not is_fee_removed and source != 'minibar' and service_fee > 0:
+                    has_commissionable_service_fee_charge = True
+                
                 # Waiter Commission Aggregation
-                # Only add commission if service fee was NOT removed
-                if not is_fee_removed:
+                # Only add commission if service fee was NOT removed e não for Minibar
+                if not is_fee_removed and source != 'minibar':
+                    any_commissionable_charge = True
                     wb = charge.get('waiter_breakdown')
                     if wb and isinstance(wb, dict):
                         for w, amt in wb.items():
@@ -3024,12 +2924,20 @@ def reception_close_account(room_num):
                                 aggregated_waiter_breakdown[w] += float(amt)
                             except: pass
                     elif charge.get('waiter'):
-                        # Fallback for legacy charges
+                        # Fallback para cobranças legadas: usa o total da cobrança como base de comissão
                         try:
                             w_name = charge.get('waiter')
-                            # Calculate proportional commission based on service fee
-                            if service_fee > 0:
-                                aggregated_waiter_breakdown[w_name] += service_fee
+                            base_amount = charge_total
+                            if base_amount > 0:
+                                aggregated_waiter_breakdown[w_name] += base_amount
+                        except: pass
+                    else:
+                        # Lançamentos com taxa de serviço ativos feitos pela recepção (sem garçom)
+                        # são atribuídos ao grupo "Recepção" na base de comissão.
+                        try:
+                            base_amount = charge_total
+                            if base_amount > 0 and service_fee > 0:
+                                aggregated_waiter_breakdown['Recepção'] += base_amount
                         except: pass
 
         save_room_charges(room_charges)
@@ -3049,6 +2957,8 @@ def reception_close_account(room_num):
             # Add waiter breakdown to details if exists
             if aggregated_waiter_breakdown:
                 transaction_details['waiter_breakdown'] = dict(aggregated_waiter_breakdown)
+            elif not has_commissionable_service_fee_charge:
+                transaction_details['service_fee_removed'] = True
             
             CashierService.add_transaction(
                 cashier_type='guest_consumption',
@@ -3094,63 +3004,6 @@ def reception_close_account(room_num):
         traceback.print_exc()
         return jsonify({'success': False, 'error': str(e)}), 500
 
-
-@reception_bp.route('/webhook/whatsapp', methods=['GET', 'POST'])
-def webhook_whatsapp():
-    # Verification Challenge
-    if request.method == 'GET':
-        mode = request.args.get('hub.mode')
-        token = request.args.get('hub.verify_token')
-        challenge = request.args.get('hub.challenge')
-        
-        # You should configure this token in your settings or env
-        # For now accepting 'almareia_webhook_token' or the one from settings if we decide to store it
-        VERIFY_TOKEN = 'almareia_webhook_token'
-        
-        if mode and token:
-            if mode == 'subscribe' and token == VERIFY_TOKEN:
-                return challenge, 200
-            else:
-                return 'Forbidden', 403
-        return 'Hello World', 200
-        
-    # Receive Message
-    if request.method == 'POST':
-        data = request.json
-        # Log raw hook for debug
-        # logger.info(f"Webhook received: {data}")
-        
-        try:
-            entry = data['entry'][0]
-            changes = entry['changes'][0]
-            value = changes['value']
-            
-            if 'messages' in value:
-                message = value['messages'][0]
-                phone = message['from'] # This is the sender's phone ID/number
-                msg_body = ""
-                msg_type = message.get('type')
-                
-                if msg_type == 'text':
-                    msg_body = message['text']['body']
-                else:
-                    msg_body = f"[{msg_type} message]"
-                    
-                msg_data = {
-                    'type': 'received',
-                    'content': msg_body,
-                    'timestamp': datetime.now().isoformat(),
-                    'id': message.get('id'),
-                    'raw': message
-                }
-                
-                chat_service.add_message(phone, msg_data)
-                
-            return 'EVENT_RECEIVED', 200
-            
-        except Exception as e:
-            # logger.error(f"Webhook processing error: {e}")
-            return 'EVENT_RECEIVED', 200 # Return 200 anyway to prevent retries loop
 
 @reception_bp.route('/admin/consumption/cancel', methods=['POST'])
 @login_required
@@ -3225,20 +3078,6 @@ def cancel_consumption():
             colaborador_id=session.get('user', 'Sistema')
         )
         
-        # Notify Guest
-        try:
-            room_num = str(charge.get('room_number'))
-            room_occupancy = load_room_occupancy()
-            guest_info = room_occupancy.get(room_num, {})
-            guest_name = guest_info.get('guest_name', 'Hóspede')
-            guest_phone = guest_info.get('guest_phone')
-            
-            if guest_phone:
-                msg = f"Olá {guest_name}, o consumo de R$ {charge.get('total', 0):.2f} no quarto {room_num} foi cancelado/estornado. Motivo: {justification}."
-                chat_service.send_message(guest_phone, msg)
-        except:
-            pass
-            
         return jsonify({'success': True, 'message': 'Consumo cancelado com sucesso.'})
         
     except Exception as e:

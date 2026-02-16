@@ -24,6 +24,19 @@
                 <span class="badge bg-danger rounded-pill ms-1">{{ waiting_queue_count }}</span>
                 {% endif %}
             </a>
+            {% if session.get('role') in ['admin', 'gerente', 'supervisor'] %}
+            <form method="POST" action="{{ url_for('restaurant.toggle_live_music') }}">
+                <button type="submit" class="btn {% if live_music_active %}btn-success{% else %}btn-outline-success{% endif %}">
+                    <i class="bi bi-music-note-beamed"></i>
+                    <span class="d-none d-sm-inline">
+                        Música ao Vivo: {% if live_music_active %}Ativada{% else %}Desativada{% endif %}
+                    </span>
+                    <span class="d-inline d-sm-none">
+                        Música
+                    </span>
+                </button>
+            </form>
+            {% endif %}
             <button type="button" class="btn btn-secondary text-white" data-bs-toggle="modal" data-bs-target="#legendModal" title="Legenda Visual">
                 <i class="bi bi-info-circle"></i> <span class="d-none d-sm-inline">Legenda</span>
             </button>
