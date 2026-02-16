@@ -5,7 +5,9 @@ import re
 import random
 import traceback
 import subprocess
-from datetime import datetime
+import csv
+import io
+from datetime import datetime, timedelta
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session, current_app, send_file
 
 from . import reception_bp
@@ -33,6 +35,14 @@ from app.utils.validators import (
     validate_required, validate_phone, validate_cpf, validate_email, 
     sanitize_input, validate_date, validate_room_number
 )
+from app.models.database import db
+from app.models.models import (
+    SatisfactionSurvey,
+    SatisfactionSurveyQuestion,
+    SatisfactionSurveyResponse,
+    SatisfactionSurveyInvite,
+)
+from sqlalchemy import func
 
 # --- Helpers ---
 
@@ -795,16 +805,25 @@ def reception_cashier():
                 flash('Não há caixa aberto para fechar.')
             else:
                 try:
-                    raw_closing = request.form.get('closing_balance')
-                    user_closing_balance = parse_br_currency(raw_closing) if raw_closing else None
+                    raw_cash = request.form.get('closing_cash')
+                    raw_non_cash = request.form.get('closing_non_cash')
+                    closing_cash = parse_br_currency(raw_cash) if raw_cash else None
+                    closing_non_cash = parse_br_currency(raw_non_cash) if raw_non_cash else None
+                    user_closing_balance = None
+                    if closing_cash is not None or closing_non_cash is not None:
+                        user_closing_balance = (closing_cash or 0.0) + (closing_non_cash or 0.0)
                 except ValueError:
+                    closing_cash = None
+                    closing_non_cash = None
                     user_closing_balance = None
                 
                 try:
                     closed_session = CashierService.close_session(
                         session_id=current_session['id'],
                         user=current_user,
-                        closing_balance=user_closing_balance
+                        closing_balance=user_closing_balance,
+                        closing_cash=closing_cash,
+                        closing_non_cash=closing_non_cash
                     )
                     
                     log_action('Caixa Fechado', f'Caixa Recepção Restaurante fechado por {current_user} com saldo final R$ {closed_session["closing_balance"]:.2f}', department='Recepção')
@@ -1456,7 +1475,7 @@ def reception_reservations():
                           year=start_date.year,
                           month=start_date.month)
 
-@reception_bp.route('/reception/surveys')
+@reception_bp.route('/reception/surveys', methods=['GET', 'POST'])
 @login_required
 def reception_surveys():
     # Permission check
@@ -1466,10 +1485,649 @@ def reception_surveys():
         flash('Acesso restrito.')
         return redirect(url_for('main.index'))
     
-    # Placeholder data for template
-    stats_by_audience = {'hotel': {'sent': 0, 'responded': 0}, 'restaurant': {'sent': 0, 'responded': 0}}
-    return render_template('reception_surveys.html', stats_by_audience=stats_by_audience)
+    try:
+        db.create_all()
+    except Exception:
+        pass
 
+    if request.method == 'POST':
+        action = request.form.get('action')
+        if action == 'create':
+            title = request.form.get('title', '').strip()
+            audience = request.form.get('audience', 'hotel').strip()
+            is_active = bool(request.form.get('is_active'))
+            if not title:
+                flash('Título é obrigatório.', 'danger')
+                return redirect(url_for('reception.reception_surveys'))
+            # Gera slug público único
+            base_slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')[:24] or 'survey'
+            slug = base_slug
+            suffix = 1
+            while SatisfactionSurvey.query.filter_by(public_slug=slug).first() is not None:
+                suffix += 1
+                slug = f"{base_slug}-{suffix}"
+                if len(slug) > 40:
+                    slug = f"survey-{uuid.uuid4().hex[:8]}"
+                    break
+            survey = SatisfactionSurvey(
+                title=title,
+                audience=audience if audience in ['hotel', 'restaurant', 'colaboradores', 'candidatos'] else 'hotel',
+                is_active=is_active,
+                public_slug=slug
+            )
+            db.session.add(survey)
+            db.session.commit()
+            flash('Pesquisa criada com sucesso.', 'success')
+            return redirect(url_for('reception.reception_surveys'))
+        elif action == 'delete':
+            survey_id = request.form.get('survey_id')
+            s = SatisfactionSurvey.query.filter_by(id=survey_id).first()
+            if s:
+                # Remover dependências
+                SatisfactionSurveyInvite.query.filter_by(survey_id=s.id).delete()
+                SatisfactionSurveyResponse.query.filter_by(survey_id=s.id).delete()
+                SatisfactionSurveyQuestion.query.filter_by(survey_id=s.id).delete()
+                db.session.delete(s)
+                db.session.commit()
+                flash('Pesquisa removida.', 'success')
+            else:
+                flash('Pesquisa não encontrada.', 'warning')
+            return redirect(url_for('reception.reception_surveys'))
+
+    # Estatísticas por público
+    stats_by_audience = {
+        'hotel': {'sent': 0, 'responded': 0},
+        'restaurant': {'sent': 0, 'responded': 0},
+        'colaboradores': {'sent': 0, 'responded': 0},
+        'candidatos': {'sent': 0, 'responded': 0},
+    }
+    # Agregados (counts) por audience
+    surveys = SatisfactionSurvey.query.order_by(SatisfactionSurvey.created_at.desc()).all()
+    survey_ids = [s.id for s in surveys]
+    if survey_ids:
+        # invites
+        inv_counts = dict(
+            db.session.query(SatisfactionSurveyInvite.survey_id, func.count('*'))
+            .filter(SatisfactionSurveyInvite.survey_id.in_(survey_ids))
+            .group_by(SatisfactionSurveyInvite.survey_id)
+            .all()
+        )
+        # responses
+        resp_counts = dict(
+            db.session.query(SatisfactionSurveyResponse.survey_id, func.count('*'))
+            .filter(SatisfactionSurveyResponse.survey_id.in_(survey_ids))
+            .group_by(SatisfactionSurveyResponse.survey_id)
+            .all()
+        )
+        # questions
+        q_counts = dict(
+            db.session.query(SatisfactionSurveyQuestion.survey_id, func.count('*'))
+            .filter(SatisfactionSurveyQuestion.survey_id.in_(survey_ids))
+            .group_by(SatisfactionSurveyQuestion.survey_id)
+            .all()
+        )
+    else:
+        inv_counts, resp_counts, q_counts = {}, {}, {}
+
+    items = []
+    for s in surveys:
+        audience = s.audience or 'hotel'
+        if audience not in stats_by_audience:
+            audience = 'hotel'
+        stats_by_audience[audience]['sent'] += inv_counts.get(s.id, 0)
+        stats_by_audience[audience]['responded'] += resp_counts.get(s.id, 0)
+        public_url = url_for('guest.satisfaction_survey', _external=False)
+        items.append({
+            'survey': s,
+            'questions_count': q_counts.get(s.id, 0),
+            'invites_count': inv_counts.get(s.id, 0),
+            'responses_count': resp_counts.get(s.id, 0),
+            'public_url': public_url,
+        })
+
+    return render_template('reception_surveys.html',
+                           stats_by_audience=stats_by_audience,
+                           items=items)
+
+@reception_bp.route('/reception/surveys/<survey_id>/edit', methods=['GET', 'POST'])
+@login_required
+def reception_survey_edit(survey_id):
+    user_role = session.get('role')
+    user_perms = session.get('permissions', [])
+    if user_role not in ['admin', 'gerente'] and 'recepcao' not in user_perms:
+        flash('Acesso restrito.')
+        return redirect(url_for('main.index'))
+    s = SatisfactionSurvey.query.filter_by(id=survey_id).first()
+    if not s:
+        flash('Pesquisa não encontrada.', 'warning')
+        return redirect(url_for('reception.reception_surveys'))
+    if request.method == 'POST':
+        title = request.form.get('title', '').strip()
+        audience = request.form.get('audience', 'hotel').strip()
+        is_active = bool(request.form.get('is_active'))
+        intro_text = request.form.get('intro_text') or ''
+        thank_you_text = request.form.get('thank_you_text') or ''
+        if title:
+            s.title = title
+        s.audience = audience if audience in ['hotel', 'restaurant', 'colaboradores', 'candidatos'] else 'hotel'
+        s.is_active = is_active
+        s.intro_text = intro_text
+        s.thank_you_text = thank_you_text
+        s.updated_at = datetime.now()
+        db.session.commit()
+        flash('Configurações salvas.', 'success')
+        return redirect(url_for('reception.reception_survey_edit', survey_id=survey_id))
+    inv_count = db.session.query(func.count('*')).select_from(SatisfactionSurveyInvite).filter_by(survey_id=s.id).scalar()
+    resp_count = db.session.query(func.count('*')).select_from(SatisfactionSurveyResponse).filter_by(survey_id=s.id).scalar()
+    q_count = db.session.query(func.count('*')).select_from(SatisfactionSurveyQuestion).filter_by(survey_id=s.id).scalar()
+    public_url = url_for('guest.satisfaction_survey_by_slug', slug=s.public_slug, _external=False)
+    return render_template('reception_survey_edit.html',
+                           survey=s,
+                           questions_count=q_count,
+                           invites_count=inv_count,
+                           responses_count=resp_count,
+                           public_url=public_url)
+
+@reception_bp.route('/reception/surveys/<survey_id>/questions', methods=['GET', 'POST'])
+@login_required
+def reception_survey_questions(survey_id):
+    user_role = session.get('role')
+    user_perms = session.get('permissions', [])
+    if user_role not in ['admin', 'gerente'] and 'recepcao' not in user_perms:
+        flash('Acesso restrito.')
+        return redirect(url_for('main.index'))
+    s = SatisfactionSurvey.query.filter_by(id=survey_id).first()
+    if not s:
+        flash('Pesquisa não encontrada.', 'warning')
+        return redirect(url_for('reception.reception_surveys'))
+    if request.method == 'POST':
+        action = request.form.get('action')
+        if action == 'add_question':
+            text = request.form.get('question_text', '').strip()
+            qtype = request.form.get('question_type', 'rating_0_10').strip()
+            required = bool(request.form.get('required'))
+            options_raw = request.form.get('options_raw', '').strip()
+            options_json = None
+            if options_raw:
+                lines = [l.strip() for l in options_raw.splitlines() if l.strip()]
+                if lines:
+                    options_json = json.dumps(lines, ensure_ascii=False)
+            max_pos = db.session.query(func.max(SatisfactionSurveyQuestion.position)).filter_by(survey_id=s.id).scalar() or 0
+            q = SatisfactionSurveyQuestion(
+                survey_id=s.id,
+                position=max_pos + 1,
+                question_text=text or 'Pergunta',
+                question_type=qtype if qtype else 'rating_0_10',
+                required=required,
+                options_json=options_json
+            )
+            db.session.add(q)
+            db.session.commit()
+            flash('Pergunta adicionada.', 'success')
+            return redirect(url_for('reception.reception_survey_questions', survey_id=survey_id))
+        elif action == 'update_question':
+            qid = request.form.get('question_id')
+            q = SatisfactionSurveyQuestion.query.filter_by(id=qid, survey_id=s.id).first()
+            if not q:
+                flash('Pergunta não encontrada.', 'warning')
+                return redirect(url_for('reception.reception_survey_questions', survey_id=survey_id))
+            text = request.form.get('question_text', '').strip()
+            qtype = request.form.get('question_type', '').strip()
+            required = bool(request.form.get('required'))
+            options_raw = request.form.get('options_raw', '').strip()
+            if text:
+                q.question_text = text
+            if qtype:
+                q.question_type = qtype
+            q.required = required
+            if options_raw:
+                lines = [l.strip() for l in options_raw.splitlines() if l.strip()]
+                if lines:
+                    q.options_json = json.dumps(lines, ensure_ascii=False)
+                else:
+                    q.options_json = None
+            elif q.question_type != 'multiple_choice':
+                q.options_json = None
+            db.session.commit()
+            flash('Pergunta atualizada.', 'success')
+            return redirect(url_for('reception.reception_survey_questions', survey_id=survey_id))
+        elif action == 'delete_question':
+            qid = request.form.get('question_id')
+            q = SatisfactionSurveyQuestion.query.filter_by(id=qid, survey_id=s.id).first()
+            if q:
+                db.session.delete(q)
+                db.session.commit()
+                # Renumerar posições após remoção
+                qs_all = SatisfactionSurveyQuestion.query.filter_by(survey_id=s.id).order_by(SatisfactionSurveyQuestion.position).all()
+                for idx, item in enumerate(qs_all, start=1):
+                    item.position = idx
+                db.session.commit()
+                flash('Pergunta removida.', 'success')
+            else:
+                flash('Pergunta não encontrada.', 'warning')
+            return redirect(url_for('reception.reception_survey_questions', survey_id=survey_id))
+        elif action in ['move_up', 'move_down']:
+            qid = request.form.get('question_id')
+            q = SatisfactionSurveyQuestion.query.filter_by(id=qid, survey_id=s.id).first()
+            if not q:
+                flash('Pergunta não encontrada.', 'warning')
+                return redirect(url_for('reception.reception_survey_questions', survey_id=survey_id))
+            # Buscar todas ordenadas
+            qs_all = SatisfactionSurveyQuestion.query.filter_by(survey_id=s.id).order_by(SatisfactionSurveyQuestion.position).all()
+            # Criar mapa id->index
+            idx_map = {item.id: i for i, item in enumerate(qs_all)}
+            i = idx_map.get(q.id, None)
+            if i is None:
+                return redirect(url_for('reception.reception_survey_questions', survey_id=survey_id))
+            if action == 'move_up' and i > 0:
+                qs_all[i].position, qs_all[i-1].position = qs_all[i-1].position, qs_all[i].position
+            elif action == 'move_down' and i < len(qs_all) - 1:
+                qs_all[i].position, qs_all[i+1].position = qs_all[i+1].position, qs_all[i].position
+            db.session.commit()
+            # Normalizar posições 1..N
+            qs_all_sorted = sorted(qs_all, key=lambda x: x.position)
+            for idx, item in enumerate(qs_all_sorted, start=1):
+                item.position = idx
+            db.session.commit()
+            return redirect(url_for('reception.reception_survey_questions', survey_id=survey_id))
+    qs = SatisfactionSurveyQuestion.query.filter_by(survey_id=s.id).order_by(SatisfactionSurveyQuestion.position).all()
+    for q in qs:
+        lines = []
+        if q.options_json:
+            try:
+                data = json.loads(q.options_json)
+                if isinstance(data, list):
+                    lines = [str(x) for x in data]
+                else:
+                    lines = [str(data)]
+            except Exception:
+                lines = [q.options_json]
+        q.options_lines = "\n".join(lines)
+    return render_template('reception_survey_edit.html',
+                           survey=s,
+                           questions=qs,
+                           questions_count=len(qs),
+                           invites_count=db.session.query(func.count('*')).select_from(SatisfactionSurveyInvite).filter_by(survey_id=s.id).scalar(),
+                           responses_count=db.session.query(func.count('*')).select_from(SatisfactionSurveyResponse).filter_by(survey_id=s.id).scalar(),
+                           public_url=url_for('guest.satisfaction_survey_by_slug', slug=s.public_slug, _external=False))
+
+@reception_bp.route('/reception/surveys/<survey_id>/dashboard')
+@login_required
+def reception_survey_dashboard(survey_id):
+    user_role = session.get('role')
+    user_perms = session.get('permissions', [])
+    if user_role not in ['admin', 'gerente'] and 'recepcao' not in user_perms:
+        flash('Acesso restrito.')
+        return redirect(url_for('main.index'))
+    s = SatisfactionSurvey.query.filter_by(id=survey_id).first()
+    if not s:
+        flash('Pesquisa não encontrada.', 'warning')
+        return redirect(url_for('reception.reception_surveys'))
+    qs = SatisfactionSurveyQuestion.query.filter_by(survey_id=s.id).order_by(SatisfactionSurveyQuestion.position).all()
+    rating_qid = None
+    for q in qs:
+        if str(q.question_type).startswith('rating'):
+            rating_qid = q.id
+            break
+    resps = SatisfactionSurveyResponse.query.filter_by(survey_id=s.id).order_by(SatisfactionSurveyResponse.submitted_at.desc()).all()
+    scores = []
+    recent = []
+    for r in resps[:10]:
+        cat = None
+        sc = None
+        try:
+            ans = json.loads(r.answers_json)
+        except:
+            ans = {}
+        if rating_qid:
+            key = f"q_{rating_qid}"
+            try:
+                sc = float(ans.get(key)) if key in ans else None
+            except:
+                sc = None
+            if sc is not None:
+                scores.append(sc)
+                if sc >= 9:
+                    cat = 'promotor'
+                elif sc >= 7:
+                    cat = 'neutro'
+                else:
+                    cat = 'detrator'
+        recent.append({
+            'id': r.id,
+            'submitted_at': r.submitted_at,
+            'ref': None,
+            'short_id': r.id.split('-')[0] if r.id else '',
+            'score': sc,
+            'category': cat,
+            'notes': ''
+        })
+    total_responses = len(resps)
+    has_rating = rating_qid is not None
+    avg_score = sum(scores) / len(scores) if scores else None
+    promoters = len([x for x in scores if x is not None and x >= 9])
+    passives = len([x for x in scores if x is not None and 7 <= x < 9])
+    detractors = len([x for x in scores if x is not None and x < 7])
+    nps = None
+    if total_responses and has_rating:
+        nps = int(((promoters - detractors) / total_responses) * 100)
+    # Range selector
+    range_mode = request.args.get('range', 'week')
+    labels = []
+    counts = []
+    today = datetime.now().date()
+    if range_mode == 'week':
+        for i in range(6, -1, -1):
+            d = today.fromordinal(today.toordinal() - i)
+            labels.append(d.strftime('%d/%m'))
+            c = 0
+            for r in resps:
+                if r.submitted_at and r.submitted_at.date() == d:
+                    c += 1
+            counts.append(c)
+    elif range_mode == 'month':
+        for i in range(29, -1, -1):
+            d = today.fromordinal(today.toordinal() - i)
+            labels.append(d.strftime('%d/%m'))
+            c = 0
+            for r in resps:
+                if r.submitted_at and r.submitted_at.date() == d:
+                    c += 1
+            counts.append(c)
+    elif range_mode == 'semester':
+        # Últimos 6 meses, por mês
+        cur = datetime(today.year, today.month, 1)
+        months = []
+        for i in range(5, -1, -1):
+            y = (cur.year if cur.month - i > 0 else cur.year - 1)
+            m = (cur.month - i) if (cur.month - i) > 0 else (12 + (cur.month - i))
+            months.append((y, m))
+        for y, m in months:
+            labels.append(f"{m:02d}/{y%100:02d}")
+            c = 0
+            for r in resps:
+                if r.submitted_at and r.submitted_at.year == y and r.submitted_at.month == m:
+                    c += 1
+            counts.append(c)
+    elif range_mode == 'year':
+        # Últimos 12 meses, por mês
+        cur = datetime(today.year, today.month, 1)
+        months = []
+        for i in range(11, -1, -1):
+            y = (cur.year if cur.month - i > 0 else cur.year - 1)
+            m = (cur.month - i) if (cur.month - i) > 0 else (12 + (cur.month - i))
+            months.append((y, m))
+        for y, m in months:
+            labels.append(f"{m:02d}/{y%100:02d}")
+            c = 0
+            for r in resps:
+                if r.submitted_at and r.submitted_at.year == y and r.submitted_at.month == m:
+                    c += 1
+            counts.append(c)
+    else:
+        range_mode = 'week'
+        for i in range(6, -1, -1):
+            d = today.fromordinal(today.toordinal() - i)
+            labels.append(d.strftime('%d/%m'))
+            c = 0
+            for r in resps:
+                if r.submitted_at and r.submitted_at.date() == d:
+                    c += 1
+            counts.append(c)
+    # Para o gráfico de média, usamos a média global como linha de referência
+    chart_avgs = []
+    for _ in labels:
+        chart_avgs.append(avg_score if avg_score is not None else 0)
+    return render_template('satisfaction_survey_dashboard.html',
+                           survey=s,
+                           range_mode=range_mode,
+                           total_responses=total_responses,
+                           has_rating=has_rating,
+                           avg_score=avg_score,
+                           nps=nps,
+                           promoters=promoters,
+                           passives=passives,
+                           detractors=detractors,
+                           recent=recent,
+                           chart_labels=labels,
+                           chart_counts=counts,
+                           chart_avgs=chart_avgs,
+                           google_review_url=None,
+                           tripadvisor_review_url=None)
+
+@reception_bp.route('/reception/surveys/<survey_id>/export')
+@login_required
+def reception_survey_export(survey_id):
+    user_role = session.get('role')
+    user_perms = session.get('permissions', [])
+    if user_role not in ['admin', 'gerente'] and 'recepcao' not in user_perms:
+        flash('Acesso restrito.')
+        return redirect(url_for('main.index'))
+    s = SatisfactionSurvey.query.filter_by(id=survey_id).first()
+    if not s:
+        flash('Pesquisa não encontrada.', 'warning')
+        return redirect(url_for('reception.reception_surveys'))
+    range_mode = request.args.get('range', 'week')
+    today = datetime.now().date()
+    days = None
+    if range_mode == 'week':
+        days = 6
+    elif range_mode == 'month':
+        days = 29
+    elif range_mode == 'semester':
+        days = 180
+    elif range_mode == 'year':
+        days = 365
+    if days is not None:
+        start_date = today - timedelta(days=days)
+        start_dt = datetime.combine(start_date, datetime.min.time())
+        resps = SatisfactionSurveyResponse.query.filter_by(survey_id=s.id).filter(
+            SatisfactionSurveyResponse.submitted_at >= start_dt
+        ).order_by(SatisfactionSurveyResponse.submitted_at.desc()).all()
+    else:
+        resps = SatisfactionSurveyResponse.query.filter_by(survey_id=s.id).order_by(
+            SatisfactionSurveyResponse.submitted_at.desc()
+        ).all()
+    qs = SatisfactionSurveyQuestion.query.filter_by(survey_id=s.id).order_by(SatisfactionSurveyQuestion.position).all()
+    header = ['id', 'submitted_at', 'ref', 'ip', 'user_agent']
+    for q in qs:
+        header.append(f"Q{q.position} - {q.question_text[:40]}")
+    header.extend(['score', 'category'])
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(header)
+    rating_qid = None
+    for q in qs:
+        if str(q.question_type).startswith('rating'):
+            rating_qid = q.id
+            break
+    resp_ids = [r.id for r in resps]
+    invite_map = {}
+    if resp_ids:
+        invites = SatisfactionSurveyInvite.query.filter(
+            SatisfactionSurveyInvite.survey_id == s.id,
+            SatisfactionSurveyInvite.used_response_id.in_(resp_ids)
+        ).all()
+        for inv in invites:
+            rid = getattr(inv, 'used_response_id', None)
+            if rid:
+                invite_map[rid] = inv.ref
+    for r in resps:
+        try:
+            ans = json.loads(r.answers_json)
+        except:
+            ans = {}
+        meta = {}
+        if getattr(r, 'meta_json', None):
+            try:
+                meta = json.loads(r.meta_json)
+            except Exception:
+                meta = {}
+        ip = meta.get('ip', '')
+        ua = meta.get('user_agent', '')
+        if ua:
+            ua = ua[:120]
+        ref = invite_map.get(r.id, '')
+        row = [r.id, r.submitted_at.strftime('%Y-%m-%d %H:%M:%S') if r.submitted_at else '', ref, ip, ua]
+        for q in qs:
+            key = f"q_{q.id}"
+            row.append(ans.get(key, ''))
+        score = None
+        cat = None
+        if rating_qid:
+            key = f"q_{rating_qid}"
+            try:
+                score = float(ans.get(key)) if key in ans else None
+            except:
+                score = None
+            if score is not None:
+                if score >= 9:
+                    cat = 'promotor'
+                elif score >= 7:
+                    cat = 'neutro'
+                else:
+                    cat = 'detrator'
+        row.append(score if score is not None else '')
+        row.append(cat or '')
+        writer.writerow(row)
+    data = output.getvalue().encode('utf-8-sig')
+    buffer = io.BytesIO(data)
+    buffer.seek(0)
+    filename = f"pesquisa_{survey_id}_{range_mode}.csv"
+    return send_file(buffer, as_attachment=True, download_name=filename, mimetype='text/csv')
+
+@reception_bp.route('/reception/surveys/<survey_id>/responses/<response_id>')
+@login_required
+def reception_survey_response_detail(survey_id, response_id):
+    user_role = session.get('role')
+    user_perms = session.get('permissions', [])
+    if user_role not in ['admin', 'gerente'] and 'recepcao' not in user_perms:
+        flash('Acesso restrito.')
+        return redirect(url_for('main.index'))
+    s = SatisfactionSurvey.query.filter_by(id=survey_id).first()
+    if not s:
+        flash('Pesquisa não encontrada.', 'warning')
+        return redirect(url_for('reception.reception_surveys'))
+    r = SatisfactionSurveyResponse.query.filter_by(id=response_id, survey_id=s.id).first()
+    if not r:
+        flash('Resposta não encontrada.', 'warning')
+        return redirect(url_for('reception.reception_survey_dashboard', survey_id=survey_id))
+    qs = SatisfactionSurveyQuestion.query.filter_by(survey_id=s.id).order_by(SatisfactionSurveyQuestion.position).all()
+    try:
+        ans = json.loads(r.answers_json)
+    except Exception:
+        ans = {}
+    meta_raw = {}
+    if getattr(r, 'meta_json', None):
+        try:
+            meta_raw = json.loads(r.meta_json)
+        except Exception:
+            meta_raw = {}
+    meta = {
+        'ip': meta_raw.get('ip', ''),
+        'user_agent': meta_raw.get('user_agent', '')
+    }
+    rating_qid = None
+    for q in qs:
+        if str(q.question_type).startswith('rating'):
+            rating_qid = q.id
+            break
+    score = None
+    category = None
+    if rating_qid:
+        key = f"q_{rating_qid}"
+        try:
+            score = float(ans.get(key)) if key in ans else None
+        except Exception:
+            score = None
+        if score is not None:
+            if score >= 9:
+                category = 'promotor'
+            elif score >= 7:
+                category = 'neutro'
+            else:
+                category = 'detrator'
+    answers = []
+    for q in qs:
+        key = f"q_{q.id}"
+        answers.append({
+            'position': q.position,
+            'question': q.question_text,
+            'answer': ans.get(key, ''),
+            'type': q.question_type
+        })
+    ref = None
+    inv = SatisfactionSurveyInvite.query.filter_by(survey_id=s.id, used_response_id=response_id).first()
+    if inv:
+        ref = inv.ref
+    return render_template('reception_survey_response_detail.html',
+                           survey=s,
+                           response=r,
+                           answers=answers,
+                           meta=meta,
+                           score=score,
+                           category=category,
+                           ref=ref)
+
+@reception_bp.route('/reception/surveys/<survey_id>/invite/new', methods=['POST'])
+@login_required
+def reception_survey_invite_new(survey_id):
+    user_role = session.get('role')
+    user_perms = session.get('permissions', [])
+    if user_role not in ['admin', 'gerente'] and 'recepcao' not in user_perms:
+        return jsonify({'ok': False, 'error': 'Acesso restrito.'}), 403
+    s = SatisfactionSurvey.query.filter_by(id=survey_id).first()
+    if not s:
+        return jsonify({'ok': False, 'error': 'Pesquisa não encontrada.'}), 404
+    ref = request.json.get('ref') if request.is_json else None
+    if not ref:
+        chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+        ref = ''.join(random.choice(chars) for _ in range(8))
+    # Garantir unicidade por pesquisa
+    exists = SatisfactionSurveyInvite.query.filter_by(survey_id=s.id, ref=ref).first()
+    if exists:
+        return jsonify({'ok': False, 'error': 'Ref em uso.'}), 400
+    inv = SatisfactionSurveyInvite(survey_id=s.id, ref=ref)
+    db.session.add(inv)
+    db.session.commit()
+    base_url = url_for('guest.satisfaction_survey_by_slug', slug=s.public_slug, _external=False)
+    link = f"{base_url}?ref={ref}"
+    return jsonify({'ok': True, 'ref': ref, 'link': link})
+
+@reception_bp.route('/reception/surveys/<survey_id>/questions/reorder', methods=['POST'])
+@login_required
+def reception_survey_questions_reorder(survey_id):
+    user_role = session.get('role')
+    user_perms = session.get('permissions', [])
+    if user_role not in ['admin', 'gerente'] and 'recepcao' not in user_perms:
+        return jsonify({'ok': False, 'error': 'Acesso restrito.'}), 403
+    s = SatisfactionSurvey.query.filter_by(id=survey_id).first()
+    if not s:
+        return jsonify({'ok': False, 'error': 'Pesquisa não encontrada.'}), 404
+    if not request.is_json:
+        return jsonify({'ok': False, 'error': 'JSON obrigatório.'}), 400
+    data = request.get_json(silent=True) or {}
+    order = data.get('order')
+    if not isinstance(order, list):
+        return jsonify({'ok': False, 'error': 'Formato inválido.'}), 400
+    qs_all = SatisfactionSurveyQuestion.query.filter_by(survey_id=s.id).all()
+    id_map = {str(q.id): q for q in qs_all}
+    used = set()
+    pos = 1
+    for qid in order:
+        q = id_map.get(str(qid))
+        if not q:
+            continue
+        q.position = pos
+        pos += 1
+        used.add(q.id)
+    # Qualquer pergunta não incluída fica no final, mantendo ordem atual
+    for q in qs_all:
+        if q.id not in used:
+            q.position = pos
+            pos += 1
+    db.session.commit()
+    return jsonify({'ok': True})
 @reception_bp.route('/reception/print_pending_bills', methods=['POST'])
 @login_required
 def print_reception_pending_bills():
@@ -1688,7 +2346,17 @@ def reception_pay_charge(charge_id):
         charge['status'] = 'paid'
         charge['paid_at'] = timestamp
         charge['reception_cashier_id'] = current_session['id']
-        charge['payment_details'] = payments
+        # Persist the payments in a standard field
+        try:
+            normalized_payments = []
+            for p in payments:
+                normalized_payments.append({
+                    'method': str(p.get('method')),
+                    'amount': float(p.get('amount', 0))
+                })
+            charge['payments'] = normalized_payments
+        except Exception:
+            charge['payments'] = payments
         
         save_room_charges(room_charges)
         
@@ -2093,7 +2761,27 @@ def reception_reservations_cashier():
                 flash('Não há caixa de reservas aberto para fechar.')
             else:
                 try:
-                    CashierService.close_session(session_id=current_session['id'], user=current_user)
+                    raw_cash = request.form.get('closing_cash')
+                    raw_non_cash = request.form.get('closing_non_cash')
+                    try:
+                        closing_cash = parse_br_currency(raw_cash) if raw_cash else None
+                    except Exception:
+                        closing_cash = None
+                    try:
+                        closing_non_cash = parse_br_currency(raw_non_cash) if raw_non_cash else None
+                    except Exception:
+                        closing_non_cash = None
+                    closing_balance = None
+                    if closing_cash is not None or closing_non_cash is not None:
+                        closing_balance = (closing_cash or 0.0) + (closing_non_cash or 0.0)
+                    
+                    CashierService.close_session(
+                        session_id=current_session['id'],
+                        user=current_user,
+                        closing_balance=closing_balance,
+                        closing_cash=closing_cash,
+                        closing_non_cash=closing_non_cash
+                    )
                     log_system_action('Caixa Fechado', f'Caixa Reservas fechado por {current_user}', department='Recepção')
                     flash('Caixa de Reservas fechado com sucesso.')
                 except Exception as e:

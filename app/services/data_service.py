@@ -109,12 +109,32 @@ def load_flavor_groups(): return _load_json(FLAVOR_GROUPS_FILE, [])
 def save_flavor_groups(groups): return _save_json(FLAVOR_GROUPS_FILE, groups)
 
 # --- Room Charges ---
-def load_room_charges(): return _load_json(ROOM_CHARGES_FILE, [])
-def save_room_charges(charges): return _save_json_atomic(ROOM_CHARGES_FILE, charges)
+def _get_room_charges_path():
+    try:
+        import app as _app
+        if hasattr(_app, 'ROOM_CHARGES_FILE') and _app.ROOM_CHARGES_FILE:
+            return _app.ROOM_CHARGES_FILE
+        if hasattr(_app, 'get_data_path'):
+            return _app.get_data_path('room_charges.json')
+    except Exception:
+        return ROOM_CHARGES_FILE
+
+def load_room_charges(): return _load_json(_get_room_charges_path(), [])
+def save_room_charges(charges): return _save_json_atomic(_get_room_charges_path(), charges)
 
 # --- Room Occupancy ---
+def _get_room_occupancy_path():
+    try:
+        import app as _app
+        if hasattr(_app, 'ROOM_OCCUPANCY_FILE') and _app.ROOM_OCCUPANCY_FILE:
+            return _app.ROOM_OCCUPANCY_FILE
+        if hasattr(_app, 'get_data_path'):
+            return _app.get_data_path('room_occupancy.json')
+    except Exception:
+        return ROOM_OCCUPANCY_FILE
+
 def load_room_occupancy():
-    data = _load_json(ROOM_OCCUPANCY_FILE, {})
+    data = _load_json(_get_room_occupancy_path(), {})
     normalized_data = {}
     for k, v in data.items():
         normalized_data[format_room_number(k)] = v
@@ -219,8 +239,18 @@ def load_payment_methods():
 def save_payment_methods(methods): return _save_json(PAYMENT_METHODS_FILE, methods)
 
 # --- Cashier Sessions ---
-def load_cashier_sessions(): return _load_json(CASHIER_SESSIONS_FILE, [])
-def save_cashier_sessions(sessions): return _save_json(CASHIER_SESSIONS_FILE, sessions)
+def _get_cashier_sessions_path():
+    try:
+        import app as _app
+        if hasattr(_app, 'CASHIER_SESSIONS_FILE') and _app.CASHIER_SESSIONS_FILE:
+            return _app.CASHIER_SESSIONS_FILE
+        if hasattr(_app, 'get_data_path'):
+            return _app.get_data_path('cashier_sessions.json')
+    except Exception:
+        return CASHIER_SESSIONS_FILE
+
+def load_cashier_sessions(): return _load_json(_get_cashier_sessions_path(), [])
+def save_cashier_sessions(sessions): return _save_json(_get_cashier_sessions_path(), sessions)
 
 def get_current_cashier(user=None, cashier_type=None):
     # Delegate to centralized CashierService to ensure consistent logic
@@ -266,8 +296,19 @@ def save_products(data): return _save_json(PRODUCTS_FILE, data)
 def load_suppliers(): return _load_json(SUPPLIERS_FILE, [])
 def save_suppliers(data): return _save_json(SUPPLIERS_FILE, data)
 
-def load_payables(): return _load_json(PAYABLES_FILE, [])
-def save_payables(data): return _save_json(PAYABLES_FILE, data)
+
+def _get_payables_path():
+    try:
+        import app as _app
+        if hasattr(_app, 'PAYABLES_FILE') and _app.PAYABLES_FILE:
+            return _app.PAYABLES_FILE
+        if hasattr(_app, 'get_data_path'):
+            return _app.get_data_path('payables.json')
+    except Exception:
+        return PAYABLES_FILE
+
+def load_payables(): return _load_json(_get_payables_path(), [])
+def save_payables(data): return _save_json(_get_payables_path(), data)
 
 def load_stock_entries(): return _load_json(STOCK_ENTRIES_FILE, [])
 def save_stock_entries(data): return _save_json(STOCK_ENTRIES_FILE, data)

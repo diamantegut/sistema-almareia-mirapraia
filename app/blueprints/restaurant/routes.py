@@ -112,20 +112,38 @@ def restaurant_cashier():
                 flash('Não há caixa aberto para fechar.')
             else:
                 try:
-                    raw_closing = request.form.get('closing_balance', '0')
-                    if isinstance(raw_closing, str):
-                        clean_closing = raw_closing.replace('R$', '').replace(' ', '')
-                        if ',' in clean_closing:
-                            clean_closing = clean_closing.replace('.', '').replace(',', '.')
-                        closing_balance = float(clean_closing)
-                    else:
-                        closing_balance = float(raw_closing)
+                    raw_cash = request.form.get('closing_cash', '0')
+                    raw_non_cash = request.form.get('closing_non_cash', '0')
+                    def parse_val(raw):
+                        if isinstance(raw, str):
+                            clean = raw.replace('R$', '').replace(' ', '')
+                            if ',' in clean:
+                                clean = clean.replace('.', '').replace(',', '.')
+                            return float(clean)
+                        return float(raw)
+                    try:
+                        closing_cash = parse_val(raw_cash)
+                    except ValueError:
+                        closing_cash = 0.0
+                    try:
+                        closing_non_cash = parse_val(raw_non_cash)
+                    except ValueError:
+                        closing_non_cash = 0.0
+                    closing_balance = closing_cash + closing_non_cash
                 except ValueError:
                     closing_balance = 0.0
+                    closing_cash = 0.0
+                    closing_non_cash = 0.0
                 
                 try:
                     # Close via Service
-                    CashierService.close_session(session_id=current_cashier['id'], user=current_user, closing_balance=closing_balance)
+                    CashierService.close_session(
+                        session_id=current_cashier['id'],
+                        user=current_user,
+                        closing_balance=closing_balance,
+                        closing_cash=closing_cash,
+                        closing_non_cash=closing_non_cash
+                    )
                     
                     # Process Fiscal Batch
                     try:

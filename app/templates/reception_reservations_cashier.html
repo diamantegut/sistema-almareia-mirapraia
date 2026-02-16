@@ -424,12 +424,17 @@
                         <input type="hidden" name="action" value="close_cashier">
                         <p>Confira os valores antes de fechar.</p>
                         <div class="alert alert-info">
-                            Saldo Calculado pelo Sistema: <strong>R$ {{ "%.2f"|format(total_balance) }}</strong>
+                            Saldo Calculado em Dinheiro pelo Sistema: <strong>R$ {{ "%.2f"|format(total_balance) }}</strong>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Saldo Final em Gaveta (Real)</label>
-                            <input type="tel" class="form-control" name="closing_balance" required value="{{ "%.2f"|format(total_balance)|replace('.', ',') }}" onfocus="this.select()" oninput="formatCurrency(this)">
-                            <div class="form-text">Informe o valor contado fisicamente.</div>
+                            <label class="form-label">Saldo Final em Dinheiro (Gaveta)</label>
+                            <input type="tel" class="form-control" name="closing_cash" required value="{{ "%.2f"|format(total_balance)|replace('.', ',') }}" onfocus="this.select()" oninput="formatCurrency(this)">
+                            <div class="form-text">Informe o valor em dinheiro contado fisicamente na gaveta.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Total em Outras Formas de Pagamento</label>
+                            <input type="tel" class="form-control" name="closing_non_cash" value="0,00" onfocus="this.select()" oninput="formatCurrency(this)">
+                            <div class="form-text">Somatório declarado de cartões, Pix e demais formas.</div>
                         </div>
                     </div>
                     <div class="modal-footer">

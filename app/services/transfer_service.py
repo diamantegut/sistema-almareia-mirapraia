@@ -7,7 +7,6 @@ from datetime import datetime
 from app.services.logger_service import LoggerService
 from app.services.system_config_manager import get_data_path
 from app.services.data_service import (
-    load_table_orders, save_table_orders,
     load_sales_history, save_sales_history,
     load_products, save_stock_entry, log_stock_action
 )
@@ -17,15 +16,14 @@ from app.services.cashier_service import CashierService
 import time
 from contextlib import contextmanager
 
+
 @contextmanager
 def file_lock(lock_file):
     lock_path = lock_file + '.lock'
-    timeout = 5 # seconds
+    timeout = 5
     start_time = time.time()
-    
     while True:
         try:
-            # Exclusive creation
             fd = os.open(lock_path, os.O_CREAT | os.O_EXCL | os.O_RDWR)
             os.close(fd)
             break
@@ -33,7 +31,6 @@ def file_lock(lock_file):
             if time.time() - start_time > timeout:
                 raise TimeoutError(f"Could not acquire lock for {lock_file}")
             time.sleep(0.1)
-    
     try:
         yield
     finally:
@@ -41,6 +38,19 @@ def file_lock(lock_file):
             os.remove(lock_path)
         except OSError:
             pass
+
+
+def log_action(action_type, details, user=None, department=None):
+    try:
+        LoggerService.log_acao(
+            acao=action_type,
+            entidade='Transferência',
+            detalhes=details,
+            colaborador_id=user,
+            departamento_id=department or 'Sistema'
+        )
+    except Exception:
+        pass
 
 def load_json(filename, default=None):
     path = get_data_path(filename)
@@ -77,21 +87,9 @@ def save_json(filename, data):
         return False
 
 def normalize_room_key(raw_input, valid_keys):
-    """
-    Robustly finds the correct room key in valid_keys.
-    Strategy:
-    1. Exact match
-    2. Zero-padded (up to 4 chars)
-    3. Unpadded
-    4. "Room X" variations
-    """
     raw_input = str(raw_input).strip()
-    
-    # 1. Exact match
     if raw_input in valid_keys:
         return raw_input
-        
-    # 2. Common numeric variations
     variations = [
         raw_input.zfill(2),
         raw_input.zfill(3),
@@ -113,16 +111,6 @@ class TableOccupiedError(TransferError):
         self.free_tables = free_tables or []
 
 def transfer_table_to_room(table_id, raw_room_number, user_name, mode='restaurant'):
-    """
-    Transfers a table's items to a room charge.
-    Returns: (success, message)
-    """
-    # Validate Cashier Status (Business Rule)
-    try:
-        CashierService.validate_transfer_eligibility('restaurant', 'guest_consumption', user_name)
-    except ValueError as e:
-        raise TransferError(str(e))
-
     str_table_id = str(table_id)
     
     # Acquire locks for both files to ensure consistency
@@ -134,7 +122,7 @@ def transfer_table_to_room(table_id, raw_room_number, user_name, mode='restauran
     try:
         with file_lock(lock_file):
             # Reload data inside lock
-            orders = load_table_orders()
+            orders = load_json('table_orders.json', {})
             room_occupancy = load_json('room_occupancy.json', {})
             room_charges = load_json('room_charges.json', [])
             
@@ -453,7 +441,7 @@ def transfer_table_to_room(table_id, raw_room_number, user_name, mode='restauran
                 else:
                     del orders[str_table_id]
                 
-                if not save_table_orders(orders):
+                if not save_json('table_orders.json', orders):
                     raise TransferError("Falha ao gravar arquivo de mesas")
                     
             except Exception as e:
@@ -488,7 +476,7 @@ def return_charge_to_restaurant(charge_id, user_name, target_table_id=None):
     try:
         with file_lock(lock_file):
             room_charges = load_json('room_charges.json', [])
-            orders = load_table_orders()
+            orders = load_json('table_orders.json', {})
             
             # 1. Find Charge
             charge = next((c for c in room_charges if c['id'] == charge_id), None)
@@ -568,7 +556,7 @@ def return_charge_to_restaurant(charge_id, user_name, target_table_id=None):
             room_charges = [c for c in room_charges if c['id'] != charge_id]
             
             # 4. Save
-            if not save_table_orders(orders):
+            if not save_json('table_orders.json', orders):
                 raise TransferError("Falha ao restaurar mesa.")
                 
             if not save_json('room_charges.json', room_charges):

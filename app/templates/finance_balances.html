@@ -122,9 +122,7 @@
 
             <!-- Results Area -->
             <div id="resultsArea" class="d-none">
-                <div class="row" id="cardsContainer">
-                    <!-- Cards will be injected here -->
-                </div>
+                <div class="row" id="cardsContainer"></div>
                 
                 <div class="card mt-4">
                     <div class="card-header bg-light d-flex justify-content-between align-items-center">
@@ -161,6 +159,10 @@
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <div id="anomalyAlert" class="alert alert-warning d-none mt-4">
+                <i class="bi bi-exclamation-triangle-fill"></i> Foram identificadas possíveis divergências entre saldos e movimentos em alguns caixas. Reveja os valores destacados para auditoria.
             </div>
 
             <!-- No Data Message -->
@@ -283,7 +285,13 @@
 <script>
     const currentYear = new Date().getFullYear();
     const currentMonth = new Date().getMonth() + 1;
-    let currentData = []; // Store data for details view
+    const isAdminUser = "{{ session.get('role', '') }}" === "admin";
+    let currentData = [];
+    let currentFilters = {
+        period_type: 'monthly',
+        year: String(currentYear),
+        specific_value: String(currentMonth)
+    };
 
     // Initialize Filters
     function initFilters() {
@@ -346,6 +354,11 @@
     async function loadBalanceData() {
         const formData = new FormData(document.getElementById('balanceFilterForm'));
         const params = new URLSearchParams(formData);
+        currentFilters = {
+            period_type: formData.get('period_type') || 'monthly',
+            year: formData.get('year') || String(currentYear),
+            specific_value: formData.get('specific_value') || String(currentMonth)
+        };
         
         document.getElementById('loadingIndicator').classList.remove('d-none');
         document.getElementById('resultsArea').classList.add('d-none');
@@ -385,26 +398,43 @@
         let totalIn = 0;
         let totalOut = 0;
         let totalFinal = 0;
-
+    
         items.forEach((item, index) => {
-            // Update Totals
             totalInitial += item.initial_balance;
             totalIn += item.total_in;
             totalOut += item.total_out;
             totalFinal += item.final_balance;
 
-            // Create Card
             const cardCol = document.createElement('div');
+            const hasContinuity = !!item.has_continuity_issue;
+            const cardBorderClass = (item.has_anomaly || hasContinuity) ? 'border-warning border-2' : 'border-0';
+            const anomalyBadge = item.has_anomaly
+                ? '<span class="badge bg-warning text-dark ms-2">Divergência pendente</span>'
+                : (item.has_approved_divergence
+                    ? '<span class="badge bg-secondary text-light ms-2">Divergência aprovada</span>'
+                    : '');
+            const continuityBadge = hasContinuity
+                ? '<span class="badge bg-info text-dark ms-2">Alerta de continuidade</span>'
+                : '';
+            const finalClass = item.final_balance >= 0 ? 'text-success' : 'text-danger';
+            const adminNotice = item.has_anomaly && isAdminUser
+                ? '<small class="text-warning d-block mt-2">Diferença pendente de aprovação.</small>'
+                : '';
+            const approveButton = item.has_anomaly && isAdminUser && item.type_key ? `
+                <button class="btn btn-sm btn-warning mt-2 w-100" onclick="approveDivergences('${item.type_key}')">
+                    <i class="bi bi-check-circle"></i> Aprovar divergências
+                </button>
+            ` : '';
             cardCol.className = 'col-md-4 mb-4';
             cardCol.innerHTML = `
-                <div class="card h-100 shadow-sm border-0">
+                <div class="card h-100 shadow-sm ${cardBorderClass}">
                     <div class="card-body">
                         <div class="d-flex align-items-center mb-3">
                             <div class="rounded-circle bg-primary bg-opacity-10 p-3 me-3">
                                 <i class="bi bi-wallet2 text-primary fs-4"></i>
                             </div>
                             <div>
-                                <h6 class="card-subtitle text-muted text-uppercase small">${item.type_label}</h6>
+                                <h6 class="card-subtitle text-muted text-uppercase small">${item.type_label}${anomalyBadge}${continuityBadge}</h6>
                                 <h5 class="card-title mb-0">${item.user}</h5>
                             </div>
                         </div>
@@ -415,7 +445,7 @@
                             </div>
                             <div class="col-6 text-end">
                                 <small class="text-muted d-block">Saldo Final</small>
-                                <span class="fw-bold text-primary">${formatCurrency(item.final_balance)}</span>
+                                <span class="fw-bold ${finalClass}">${formatCurrency(item.final_balance)}</span>
                             </div>
                             <div class="col-6">
                                 <small class="text-muted d-block">Entradas</small>
@@ -426,10 +456,12 @@
                                 <span class="text-danger small"><i class="bi bi-arrow-down"></i> ${formatCurrency(item.total_out)}</span>
                             </div>
                         </div>
+                        ${adminNotice}
                         <div class="mt-3 text-center">
-                            <button class="btn btn-sm btn-outline-primary w-100" onclick="openDetailsModal(${index})">
+                            <button class="btn btn-sm btn-outline-primary w-100 mb-1" onclick="openDetailsModal(${index})">
                                 <i class="bi bi-eye"></i> Ver Detalhes
                             </button>
+                            ${approveButton}
                         </div>
                     </div>
                 </div>
@@ -474,10 +506,31 @@
         if (item.sessions && item.sessions.length > 0) {
             item.sessions.forEach((s, sIdx) => {
                 const tr = document.createElement('tr');
-                // Use transactions_count from backend if available, fallback to transactions array length
                 const transCount = s.transactions_count !== undefined ? s.transactions_count : (s.transactions ? s.transactions.length : 0);
                 const hasTrans = transCount > 0;
-                const collapseId = `session-trans-${index}-${sIdx}`; // Unique ID using item index + session index
+                const collapseId = `session-trans-${index}-${sIdx}`;
+                const hasDiff = Math.abs(s.difference || 0) > 0.01;
+                const approved = !!s.difference_approved;
+                const continuityIssue = !!s.continuity_issue;
+                const diffClass = hasDiff ? (approved ? 'text-secondary' : 'text-danger') : 'text-muted';
+                const diffText = hasDiff ? `Dif: ${formatCurrency(s.difference)}` : '';
+                const continuityText = continuityIssue ? 'Abertura diferente do fechamento anterior' : '';
+                const statusBadge = hasDiff ? (approved
+                    ? '<span class="badge bg-secondary text-light">Divergência aprovada</span>'
+                    : '<span class="badge bg-warning text-dark">Divergência pendente</span>') : '';
+                const approveBtn = isAdminUser && hasDiff && !approved ? `
+                    <button class="btn btn-sm btn-outline-warning ms-2" onclick="approveSessionDivergence('${s.id}')">
+                        <i class="bi bi-check-circle"></i>
+                    </button>
+                ` : '';
+                let closingSummary = '';
+                const cashVal = s.closing_cash !== undefined && s.closing_cash !== null ? s.closing_cash : null;
+                const nonCashVal = s.closing_non_cash !== undefined && s.closing_non_cash !== null ? s.closing_non_cash : null;
+                if (cashVal !== null || nonCashVal !== null) {
+                    const cashNum = cashVal !== null ? cashVal : 0;
+                    const nonCashNum = nonCashVal !== null ? nonCashVal : 0;
+                    closingSummary = `<div class="small text-muted">Dinheiro: ${formatCurrency(cashNum)} | Outras: ${formatCurrency(nonCashNum)}</div>`;
+                }
                 
                 tr.innerHTML = `
                     <td>
@@ -491,7 +544,13 @@
                     <td>${s.closed_at || '-'}</td>
                     <td>${s.user || '-'}</td>
                     <td class="text-end">${formatCurrency(s.opening_balance || 0)}</td>
-                    <td class="text-end fw-bold">${formatCurrency(s.closing_balance || 0)}</td>
+                    <td class="text-end fw-bold">
+                        ${formatCurrency(s.closing_balance || 0)}
+                        ${closingSummary}
+                        ${diffText ? `<div class="small ${diffClass}">${diffText}</div>` : ''}
+                        ${continuityText ? `<div class="small text-danger">${continuityText}</div>` : ''}
+                        ${statusBadge ? `<div class="mt-1 d-flex justify-content-end align-items-center gap-1">${statusBadge}${approveBtn}</div>` : ''}
+                    </td>
                 `;
                 tbody.appendChild(tr);
 
@@ -558,16 +617,33 @@
             return;
         }
 
-        let totalValue = 0;
+        let totalCash = 0;
+        let totalAll = 0;
 
         const rows = transactions.map(t => {
             const isOut = ['withdrawal', 'out'].includes(t.type);
             const colorClass = isOut ? 'text-danger' : 'text-success';
             const sign = isOut ? '-' : '+';
             const amount = parseFloat(t.amount || 0);
+
+            const method = (t.payment_method || '').toString().toLowerCase();
+            const tType = (t.type || '').toString().toLowerCase();
+            let isCash = false;
+            if (method.includes('dinheiro') || method.includes('espécie') || method.includes('especie')) {
+                isCash = true;
+            } else if (['supply', 'suprimento', 'bleeding', 'sangria'].includes(tType)) {
+                isCash = true;
+            } else if (method.includes('transfer') || method.includes('transferência') || method.includes('transferencia')) {
+                isCash = true;
+            }
             
-            if (isOut) totalValue -= amount;
-            else totalValue += amount;
+            if (isOut) {
+                totalAll -= amount;
+                if (isCash) totalCash -= amount;
+            } else {
+                totalAll += amount;
+                if (isCash) totalCash += amount;
+            }
 
             const timeStr = t.timestamp && t.timestamp.includes(' ') ? t.timestamp.split(' ')[1] : t.timestamp;
             
@@ -598,13 +674,72 @@
                     </tbody>
                     <tfoot class="table-light">
                         <tr class="fw-bold small">
-                            <td colspan="3" class="text-end">Total do Período:</td>
-                            <td class="text-end ${totalValue >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(totalValue)}</td>
+                            <td colspan="3" class="text-end">Total em dinheiro:</td>
+                            <td class="text-end ${totalCash >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(totalCash)}</td>
+                        </tr>
+                        <tr class="fw-bold small">
+                            <td colspan="3" class="text-end">Total geral (todas as formas):</td>
+                            <td class="text-end ${totalAll >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(totalAll)}</td>
                         </tr>
                     </tfoot>
                 </table>
             </div>
         `;
+    }
+
+    async function approveDivergences(typeKey) {
+        if (!isAdminUser) {
+            alert('Apenas administradores podem aprovar divergências.');
+            return;
+        }
+        if (!confirm('Confirmar aprovação das divergências deste caixa para o período selecionado?')) {
+            return;
+        }
+        try {
+            const response = await fetch('/api/finance/balances/approve_divergences', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    type_key: typeKey,
+                    period_type: currentFilters.period_type,
+                    year: currentFilters.year,
+                    specific_value: currentFilters.specific_value
+                })
+            });
+            const result = await response.json();
+            if (!response.ok || !result.success) {
+                alert('Erro ao aprovar divergências: ' + (result.message || 'Falha na operação.'));
+                return;
+            }
+            alert('Divergências aprovadas com sucesso.');
+            loadBalanceData();
+        } catch (e) {
+            alert('Erro de comunicação: ' + e.message);
+        }
+    }
+
+    async function approveSessionDivergence(sessionId) {
+        if (!isAdminUser) {
+            alert('Apenas administradores podem aprovar divergências.');
+            return;
+        }
+        if (!confirm('Confirmar aprovação desta divergência de sessão?')) {
+            return;
+        }
+        try {
+            const response = await fetch(`/api/finance/session/${sessionId}/approve_divergence`, {
+                method: 'POST'
+            });
+            const result = await response.json();
+            if (!response.ok || !result.success) {
+                alert('Erro ao aprovar divergência da sessão: ' + (result.message || 'Falha na operação.'));
+                return;
+            }
+            alert('Divergência da sessão aprovada com sucesso.');
+            loadBalanceData();
+        } catch (e) {
+            alert('Erro de comunicação: ' + e.message);
+        }
     }
 
 
