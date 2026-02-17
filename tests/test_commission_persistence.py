@@ -5,7 +5,7 @@ import json
 import shutil
 from unittest.mock import patch, MagicMock
 from app import app
-from services.transfer_service import transfer_table_to_room, TransferError
+from app.services.transfer_service import transfer_table_to_room, TransferError
 
 # Setup paths for test
 TEST_DIR = 'tests/temp_data'
@@ -62,7 +62,7 @@ def setup_data():
     if os.path.exists(TEST_DIR):
         shutil.rmtree(TEST_DIR)
 
-@patch('services.transfer_service.get_data_path')
+@patch('app.services.transfer_service.get_data_path')
 def test_transfer_persistence_service_fee_removed(mock_get_data_path, setup_data):
     # Mock get_data_path to return our test files
     def side_effect(filename):
@@ -89,7 +89,7 @@ def test_transfer_persistence_service_fee_removed(mock_get_data_path, setup_data
     # Verify flags
     assert any(f['type'] == 'service_removed' for f in charge.get('flags', []))
 
-@patch('services.transfer_service.get_data_path')
+@patch('app.services.transfer_service.get_data_path')
 def test_transfer_persistence_service_fee_included(mock_get_data_path, setup_data):
     # Mock get_data_path
     def side_effect(filename):

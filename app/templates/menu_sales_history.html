@@ -1,0 +1,315 @@
+{% extends 'base.html' %}
+{% block title %}Histórico de Vendas{% endblock %}
+{% block content %}
+<div class="container-fluid mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3><i class="bi bi-clipboard-data"></i> Histórico de Vendas</h3>
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.admin_dashboard') }}">Admin</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Histórico de Vendas</li>
+      </ol>
+    </nav>
+  </div>
+
+  <div class="card mb-3">
+    <div class="card-body">
+      <div class="row g-2">
+        <div class="col-md-3">
+          <label class="form-label small mb-1">Data inicial</label>
+          <input type="date" id="salesStartDate" class="form-control form-control-sm">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label small mb-1">Data final</label>
+          <input type="date" id="salesEndDate" class="form-control form-control-sm">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label small mb-1">Status</label>
+          <select id="salesStatus" class="form-select form-select-sm">
+            <option value="concluidas" selected>Concluídas</option>
+            <option value="canceladas">Canceladas</option>
+            <option value="todas">Todas</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label small mb-1">Produtos</label>
+          <select id="salesProducts" class="form-select form-select-sm" multiple>
+            {% for item in menu_items %}
+            <option value="{{ item.name }}">{{ item.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="d-flex justify-content-between align-items-center mt-2">
+        <div class="small text-muted" id="salesValidationMsg"></div>
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-sm btn-outline-secondary" onclick="resetSalesHistoryFilters()">Limpar</button>
+          <button type="button" class="btn btn-sm btn-primary" onclick="applySalesHistoryFilters()">Aplicar Filtros</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mb-3">
+    <div class="col-md-3">
+      <div class="border rounded p-2">
+        <div class="small text-muted">Qtd. total vendida</div>
+        <div class="fw-bold" id="salesSummaryTotalVendida">0</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="border rounded p-2">
+        <div class="small text-muted">Qtd. cancelada</div>
+        <div class="fw-bold" id="salesSummaryCancelada">0</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="border rounded p-2">
+        <div class="small text-muted">Qtd. líquida</div>
+        <div class="fw-bold" id="salesSummaryLiquida">0</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="border rounded p-2">
+        <div class="small text-muted">Valor total</div>
+        <div class="fw-bold" id="salesSummaryValor">R$ 0,00</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <div class="d-flex align-items-center gap-2">
+      <label class="small mb-0">Registros por página</label>
+      <select id="salesPageSize" class="form-select form-select-sm" style="width: auto;" onchange="changeSalesPageSize()">
+        <option value="10">10</option>
+        <option value="25" selected>25</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+      </select>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <button type="button" class="btn btn-sm btn-outline-success" onclick="exportSalesHistory('xlsx')"><i class="bi bi-file-earmark-excel"></i> Excel</button>
+      <button type="button" class="btn btn-sm btn-outline-danger" onclick="exportSalesHistory('pdf')"><i class="bi bi-file-earmark-pdf"></i> PDF</button>
+    </div>
+  </div>
+
+  <div id="salesHistoryLoading" class="text-center py-3" style="display: none;">
+    <div class="spinner-border text-primary" role="status"></div>
+    <div class="mt-2 small text-muted">Carregando vendas...</div>
+  </div>
+  <div id="salesHistoryError" class="alert alert-danger py-2" style="display: none;"></div>
+
+  <div class="table-responsive">
+    <table class="table table-sm table-hover table-striped mb-2">
+      <thead class="table-light">
+        <tr>
+          <th>ID</th>
+          <th>Produto</th>
+          <th class="text-end">Quantidade</th>
+          <th class="text-end">Valor Total</th>
+          <th>Data/Hora</th>
+          <th>Status</th>
+          <th>Cliente</th>
+        </tr>
+      </thead>
+      <tbody id="salesHistoryTbody"></tbody>
+    </table>
+  </div>
+
+  <div class="d-flex justify-content-between align-items-center mt-2">
+    <div class="small text-muted" id="salesPageInfo">Página 1 de 1</div>
+    <div class="btn-group btn-group-sm" role="group">
+      <button type="button" class="btn btn-outline-secondary" onclick="changeSalesPage(-1)">Anterior</button>
+      <button type="button" class="btn btn-outline-secondary" onclick="changeSalesPage(1)">Próxima</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let salesCurrentPage = 1;
+let salesPageSize = 25;
+let salesTotalPages = 1;
+
+function formatCurrencyBR(value) {
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0);
+}
+
+function resetSalesHistoryFilters() {
+  const startInput = document.getElementById('salesStartDate');
+  const endInput = document.getElementById('salesEndDate');
+  const statusSel = document.getElementById('salesStatus');
+  const prodSel = document.getElementById('salesProducts');
+  if (startInput) startInput.value = '';
+  if (endInput) endInput.value = '';
+  if (statusSel) statusSel.value = 'concluidas';
+  if (prodSel) {
+    for (let i = 0; i < prodSel.options.length; i++) {
+      prodSel.options[i].selected = false;
+    }
+  }
+  salesCurrentPage = 1;
+  loadSalesHistory();
+}
+
+function applySalesHistoryFilters() {
+  salesCurrentPage = 1;
+  loadSalesHistory();
+}
+
+function changeSalesPage(delta) {
+  const newPage = salesCurrentPage + delta;
+  if (newPage < 1 || newPage > salesTotalPages) return;
+  salesCurrentPage = newPage;
+  loadSalesHistory();
+}
+
+function changeSalesPageSize() {
+  const sel = document.getElementById('salesPageSize');
+  if (!sel) return;
+  const val = parseInt(sel.value, 10);
+  if ([10, 25, 50, 100].indexOf(val) === -1) return;
+  salesPageSize = val;
+  salesCurrentPage = 1;
+  loadSalesHistory();
+}
+
+function buildSalesHistoryParams(includePage) {
+  const params = new URLSearchParams();
+  const startInput = document.getElementById('salesStartDate');
+  const endInput = document.getElementById('salesEndDate');
+  const statusSel = document.getElementById('salesStatus');
+  const prodSel = document.getElementById('salesProducts');
+  const now = new Date();
+  const validationMsg = document.getElementById('salesValidationMsg');
+  if (validationMsg) validationMsg.textContent = '';
+  let startDateStr = '';
+  let endDateStr = '';
+  if (startInput && startInput.value) {
+    const d = new Date(startInput.value);
+    if (d > now) {
+      if (validationMsg) validationMsg.textContent = 'Data inicial não pode ser futura.';
+      return null;
+    }
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const yy = d.getFullYear();
+    startDateStr = dd + '/' + mm + '/' + yy;
+    params.set('start_date', startDateStr);
+  }
+  if (endInput && endInput.value) {
+    const d = new Date(endInput.value);
+    if (d > now) {
+      if (validationMsg) validationMsg.textContent = 'Data final não pode ser futura.';
+      return null;
+    }
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const yy = d.getFullYear();
+    endDateStr = dd + '/' + mm + '/' + yy;
+    params.set('end_date', endDateStr);
+  }
+  if (startDateStr && endDateStr) {
+    const partsStart = startDateStr.split('/');
+    const partsEnd = endDateStr.split('/');
+    const dStart = new Date(partsStart[2], partsStart[1] - 1, partsStart[0]);
+    const dEnd = new Date(partsEnd[2], partsEnd[1] - 1, partsEnd[0]);
+    if (dStart > dEnd) {
+      if (validationMsg) validationMsg.textContent = 'Data inicial maior que a final.';
+      return null;
+    }
+  }
+  if (statusSel && statusSel.value) {
+    params.set('status', statusSel.value);
+  }
+  if (prodSel) {
+    const selected = [];
+    for (let i = 0; i < prodSel.options.length; i++) {
+      if (prodSel.options[i].selected) selected.push(prodSel.options[i].value);
+    }
+    if (selected.length > 0) {
+      params.set('products', selected.join(','));
+    }
+  }
+  if (includePage) {
+    params.set('page', String(salesCurrentPage));
+    params.set('page_size', String(salesPageSize));
+  }
+  return params;
+}
+
+function loadSalesHistory() {
+  const loading = document.getElementById('salesHistoryLoading');
+  const errorBox = document.getElementById('salesHistoryError');
+  const tbody = document.getElementById('salesHistoryTbody');
+  const info = document.getElementById('salesPageInfo');
+  if (!tbody) return;
+  const params = buildSalesHistoryParams(true);
+  if (!params) return;
+  if (loading) loading.style.display = 'block';
+  if (errorBox) {
+    errorBox.style.display = 'none';
+    errorBox.textContent = '';
+  }
+  tbody.innerHTML = '';
+  fetch('/api/menu/sales-history?' + params.toString())
+    .then(res => res.json())
+    .then(data => {
+      if (!data.success) {
+        if (errorBox) {
+          errorBox.style.display = 'block';
+          errorBox.textContent = data.error || 'Erro ao carregar histórico.';
+        }
+        return;
+      }
+      const items = data.items || [];
+      items.forEach(it => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="small">${it.sale_id}</td>
+          <td class="small">${it.product}</td>
+          <td class="small text-end">${Number(it.qty).toFixed(2)}</td>
+          <td class="small text-end">${formatCurrencyBR(it.total)}</td>
+          <td class="small">${it.timestamp || ''}</td>
+          <td class="small">${it.status}</td>
+          <td class="small">${it.customer || ''}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+      const totalCount = data.total_count || 0;
+      salesTotalPages = totalCount ? Math.ceil(totalCount / salesPageSize) : 1;
+      if (info) {
+        info.textContent = 'Página ' + salesCurrentPage + ' de ' + salesTotalPages + ' (' + totalCount + ' registros)';
+      }
+      const summary = data.summary || {};
+      const elTot = document.getElementById('salesSummaryTotalVendida');
+      const elCanc = document.getElementById('salesSummaryCancelada');
+      const elLiq = document.getElementById('salesSummaryLiquida');
+      const elVal = document.getElementById('salesSummaryValor');
+      if (elTot) elTot.textContent = (summary.total_vendida || 0).toFixed(2);
+      if (elCanc) elCanc.textContent = (summary.total_cancelada || 0).toFixed(2);
+      if (elLiq) elLiq.textContent = (summary.quantidade_liquida || 0).toFixed(2);
+      if (elVal) elVal.textContent = formatCurrencyBR(summary.valor_total || 0);
+    })
+    .catch(err => {
+      if (errorBox) {
+        errorBox.style.display = 'block';
+        errorBox.textContent = 'Erro de conexão: ' + err;
+      }
+    })
+    .finally(() => {
+      if (loading) loading.style.display = 'none';
+    });
+}
+
+function exportSalesHistory(fmt) {
+  const params = buildSalesHistoryParams(false);
+  if (!params) return;
+  params.set('format', fmt || 'xlsx');
+  window.location.href = '/menu/sales-history/export?' + params.toString();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadSalesHistory();
+});
+</script>
+{% endblock %}

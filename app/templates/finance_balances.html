@@ -162,7 +162,7 @@
             </div>
 
             <div id="anomalyAlert" class="alert alert-warning d-none mt-4">
-                <i class="bi bi-exclamation-triangle-fill"></i> Foram identificadas possíveis divergências entre saldos e movimentos em alguns caixas. Reveja os valores destacados para auditoria.
+                <i class="bi bi-exclamation-triangle-fill"></i> Foram identificadas possíveis divergências entre saldos em espécie e movimentações em dinheiro (somente dinheiro) em alguns caixas. Reveja os valores destacados para auditoria.
             </div>
 
             <!-- No Data Message -->
@@ -513,7 +513,8 @@
                 const approved = !!s.difference_approved;
                 const continuityIssue = !!s.continuity_issue;
                 const diffClass = hasDiff ? (approved ? 'text-secondary' : 'text-danger') : 'text-muted';
-                const diffText = hasDiff ? `Dif: ${formatCurrency(s.difference)}` : '';
+                const diffLabel = 'Diferença de caixa (somente dinheiro)';
+                const diffText = hasDiff ? `${diffLabel}: ${formatCurrency(s.difference)}` : '';
                 const continuityText = continuityIssue ? 'Abertura diferente do fechamento anterior' : '';
                 const statusBadge = hasDiff ? (approved
                     ? '<span class="badge bg-secondary text-light">Divergência aprovada</span>'

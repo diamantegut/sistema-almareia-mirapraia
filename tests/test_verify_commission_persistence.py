@@ -2,9 +2,13 @@
 import pytest
 import json
 import os
+import sys
 import uuid
 from datetime import datetime
-from services.transfer_service import transfer_table_to_room
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from app.services.transfer_service import transfer_table_to_room
 
 # Mock data paths
 @pytest.fixture
@@ -15,7 +19,7 @@ def mock_data_paths(monkeypatch, tmp_path):
     def mock_get_data_path(filename):
         return str(data_dir / filename)
     
-    monkeypatch.setattr("services.transfer_service.get_data_path", mock_get_data_path)
+    monkeypatch.setattr("app.services.transfer_service.get_data_path", mock_get_data_path)
     return data_dir
 
 def test_commission_persistence_on_transfer(mock_data_paths):

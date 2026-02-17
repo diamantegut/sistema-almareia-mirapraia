@@ -120,6 +120,7 @@ from app.services.commission_service import (
 )
 import app.services.commission_service as _commission_module
 import app.services.cashier_service as _cashier_module
+from app.utils.logger import log_action as _legacy_log_action
 import types
 
 sys.modules.setdefault('commission_service', _commission_module)
@@ -131,3 +132,6 @@ if services_pkg is None:
 
 sys.modules.setdefault('services.cashier_service', _cashier_module)
 setattr(services_pkg, 'cashier_service', _cashier_module)
+setattr(services_pkg, 'transfer_service', __import__('app.services.transfer_service', fromlist=['*']))
+
+log_action = _legacy_log_action

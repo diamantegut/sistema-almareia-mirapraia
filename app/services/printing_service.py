@@ -430,22 +430,32 @@ def print_order_items(table_id, waiter_name, new_items, printers_config, product
 
         logger.info(f"Processing print order for Table {table_id} (Items: {len(new_items)})")
         
-        # Create a map of product name -> printer_id
+        # Create maps of product flags and printer routing
         product_printer_map = {}
+        product_flags = {}
         for p in products_db:
-            should_print = p.get('should_print', True)
-            if should_print and 'printer_id' in p and p['printer_id']:
-                product_printer_map[p['name']] = p['printer_id']
+            name = p.get('name')
+            if not name:
+                continue
+            printer_id = p.get('printer_id')
+            product_printer_map[name] = printer_id
+            product_flags[name] = {
+                'should_print': p.get('should_print', True),
+                'printer_id': printer_id
+            }
                 
-        # Group items by (printer_id, category)
-        jobs = {} # (printer_id, category) -> list of items
+        jobs = {}
         
         for item in new_items:
             p_name = item['name']
+            flags = product_flags.get(p_name, {})
+            should_print_flag = flags.get('should_print', True)
             printer_id = product_printer_map.get(p_name)
             
+            if not should_print_flag or printer_id == 'no_print':
+                continue
+            
             if not printer_id:
-                # Fallback to default kitchen printer
                 default_kitchen = get_default_printer('kitchen')
                 if default_kitchen:
                     printer_id = default_kitchen['id']

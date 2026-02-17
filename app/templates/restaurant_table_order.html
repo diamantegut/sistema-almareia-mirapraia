@@ -619,21 +619,36 @@
                                             {% endif %}
                                             <div>
                                                 {{ item.name }}
-                                                {% if item.flavor %} <br><small class="text-muted">{{ item.flavor }}</small>{% endif %}
-                                                {% if item.complements %}
-                                                <div class="small text-muted" style="font-size: 0.85em;">
-                                                    {% for c in item.complements %}
-                                                        {% if c.name is defined %}
-                                                            + {{ c.name }} (R$ {{ "%.2f"|format(c.price) }})<br>
-                                                        {% else %}
-                                                            + {{ c }}<br>
-                                                        {% endif %}
-                                                    {% endfor %}
+                                                <button class="btn btn-sm btn-link p-0 ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#group-{{ item.ids[0] }}" aria-expanded="false" aria-controls="group-{{ item.ids[0] }}">
+                                                    Detalhes ({{ item.children|length }})
+                                                </button>
+                                                <div class="collapse mt-1" id="group-{{ item.ids[0] }}">
+                                                    <div class="small text-muted" style="font-size: 0.85em;">
+                                                        {% for ch in item.children %}
+                                                        <div class="border-start ps-2 mb-1">
+                                                            <div><strong>{{ ch.qty|int if ch.qty % 1 == 0 else "%.1f"|format(ch.qty) }}x</strong>{% if ch.flavor %} • Sabor: {{ ch.flavor }}{% endif %}</div>
+                                                            {% if ch.accompaniments %}
+                                                                {% for a in ch.accompaniments %}
+                                                                    <div>- {{ a }}</div>
+                                                                {% endfor %}
+                                                            {% endif %}
+                                                            {% if ch.complements %}
+                                                                {% for c in ch.complements %}
+                                                                    <div>+ {{ c.name if c.name is defined else c }}</div>
+                                                                {% endfor %}
+                                                            {% endif %}
+                                                            {% if ch.questions_answers %}
+                                                                {% for qa in ch.questions_answers %}
+                                                                    <div>&gt; {{ qa.question }}: {{ qa.answer }}</div>
+                                                                {% endfor %}
+                                                            {% endif %}
+                                                            {% if ch.observations %}
+                                                                <div class="text-danger"><i class="bi bi-pencil-fill"></i> {{ ch.observations|join(', ') }}</div>
+                                                            {% endif %}
+                                                        </div>
+                                                        {% endfor %}
+                                                    </div>
                                                 </div>
-                                                {% endif %}
-                                                {% for obs in item.observations %}
-                                                <div class="text-danger small" style="font-size: 0.85em;"><i class="bi bi-pencil-fill"></i> {{ obs }}</div>
-                                                {% endfor %}
                                             </div>
                                         </div>
                                     </td>
@@ -785,6 +800,13 @@
                                         <div class="small text-muted">
                                             {% for c in item.complements %}
                                             + {{ c.name }}<br>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                        {% if item.accompaniments %}
+                                        <div class="small text-muted">
+                                            {% for a in item.accompaniments %}
+                                            - {{ a }}<br>
                                             {% endfor %}
                                         </div>
                                         {% endif %}

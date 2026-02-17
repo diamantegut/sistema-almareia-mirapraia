@@ -525,7 +525,13 @@ def get_balance_data(period_type, year, specific_value=None):
                 cash_out = data.get('cash_total_out', data['total_out'])
                 calculated_final = data['initial_balance'] + cash_in - cash_out
                 data['calculated_final'] = calculated_final
-                difference = data['final_balance'] - calculated_final
+                # Diferença de caixa (somente dinheiro): usar closing_cash da última sessão se disponível
+                try:
+                    last_simple_session = data['sessions'][-1] if data.get('sessions') else None
+                    final_cash = float(last_simple_session.get('closing_cash', 0.0)) if last_simple_session else 0.0
+                except Exception:
+                    final_cash = 0.0
+                difference = final_cash - calculated_final
                 data['difference'] = difference
                 data['has_anomaly'] = has_unapproved
                 data['has_approved_divergence'] = abs(difference) > 0.01 and not has_unapproved

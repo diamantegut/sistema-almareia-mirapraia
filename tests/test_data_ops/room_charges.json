@@ -1,27 +1,31 @@
 [
     {
-        "id": "CHARGE_33_20260204140312_900a98_REST",
+        "id": "CHARGE_33_20260217091345_4ae3c5_REST",
         "room_number": "33",
         "table_id": "33",
         "total": 5.5,
         "items": [
             {
-                "id": "3ed208e8-d0f1-4be8-b38c-22f1bc625507",
+                "id": "7a2ac2d4-c2cd-4321-b00e-dd8ad643de8d",
+                "product_id": "1",
+                "name": "Coca Cola",
+                "price": 5.0,
+                "qty": 1.0,
+                "category": "Bebidas",
+                "created_at": "17/02/2026 09:13",
+                "waiter": "GarcomZ",
                 "printed": false,
                 "print_status": "error",
-                "name": "Coca Cola",
-                "flavor": null,
-                "qty": 1.0,
-                "price": 5.0,
                 "complements": [],
-                "accompaniments": [],
-                "questions_answers": [],
                 "observations": [],
-                "category": "Bebidas",
-                "service_fee_exempt": false,
-                "source": "restaurant",
-                "waiter": "GarcomZ",
-                "created_at": "04/02/2026 14:03"
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": null,
+                "cest": null,
+                "cfop": null,
+                "origin": 0,
+                "tax_info": null
             }
         ],
         "service_fee": 0.5,
@@ -29,10 +33,10 @@
         "flags": [],
         "waiter": "GarcomZ",
         "waiter_breakdown": {
-            "GarcomZ": 5.5
+            "GarcomZ": 11.0
         },
         "service_fee_removed": false,
-        "date": "04/02/2026 14:03",
+        "date": "17/02/2026 09:13",
         "status": "pending",
         "type": "restaurant"
     }
