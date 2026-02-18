@@ -390,6 +390,8 @@ def governance_launch_frigobar():
             
         menu_items = load_menu_items()
         product_map = {str(p['id']): p for p in menu_items}
+        products_insumos = load_products()
+        insumo_map = {str(i.get('id')): i for i in products_insumos if i.get('id') is not None}
         
         room_charges = load_room_charges()
         
@@ -405,6 +407,50 @@ def governance_launch_frigobar():
                 product = product_map[p_id]
                 price = float(product['price'])
                 item_total = qty * price
+                
+                if product.get('recipe'):
+                    try:
+                        for ingred in product['recipe']:
+                            raw_ing_id = ingred.get('ingredient_id')
+                            insumo_data = None
+                            ing_key = None
+
+                            if raw_ing_id is not None:
+                                ing_key = str(raw_ing_id)
+                                insumo_data = insumo_map.get(ing_key)
+                            else:
+                                ing_name = ingred.get('ingredient')
+                                if ing_name:
+                                    insumo_data = next((i for i in products_insumos if i.get('name') == ing_name), None)
+                                    if insumo_data and insumo_data.get('id') is not None:
+                                        ing_key = str(insumo_data.get('id'))
+                                    else:
+                                        ing_key = ing_name
+
+                            if not insumo_data:
+                                continue
+
+                            try:
+                                ing_qty = float(ingred.get('qty', 0))
+                            except (TypeError, ValueError):
+                                continue
+
+                            total_needed = ing_qty * qty
+
+                            entry_data = {
+                                'id': f"SALE_GOV_{room_num}_{datetime.now().strftime('%Y%m%d%H%M%S')}_{ing_key}",
+                                'user': session.get('user', 'Governança'),
+                                'product': insumo_data['name'],
+                                'supplier': f"VENDA: Frigobar Quarto {room_num}",
+                                'qty': -total_needed,
+                                'price': insumo_data.get('price', 0),
+                                'invoice': f"Frigobar: {product.get('name')}",
+                                'date': datetime.now().strftime('%d/%m/%Y'),
+                                'entry_date': datetime.now().strftime('%d/%m/%Y %H:%M')
+                            }
+                            save_stock_entry(entry_data)
+                    except Exception as e:
+                        current_app.logger.error(f"Stock deduction error (Governance Frigobar): {e}")
                 
                 order_item = {
                     'id': p_id,

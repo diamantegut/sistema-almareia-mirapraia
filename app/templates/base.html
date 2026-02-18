@@ -66,7 +66,7 @@
 
               {% if session.get('role') == 'admin' or session.get('department') == 'Recursos Humanos' or 'rh' in session.get('permissions', []) %}
               <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('hr.hr_dashboard') }}">RH</a>
+                <a class="nav-link" href="{{ url_for('main.service_page', service_id='rh') }}">RH</a>
               </li>
               {% endif %}
 

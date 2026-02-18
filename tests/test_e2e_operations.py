@@ -43,8 +43,8 @@ class TestE2EOperations:
         self.patcher_scm_path = patch('system_config_manager.get_data_path', side_effect=side_effect_get_data_path)
         self.patcher_scm_path.start()
 
-        # Patch services.transfer_service.get_data_path explicitly
-        self.patcher_transfer_path = patch('services.transfer_service.get_data_path', side_effect=side_effect_get_data_path)
+        # Patch app.services.transfer_service.get_data_path explicitly
+        self.patcher_transfer_path = patch('app.services.transfer_service.get_data_path', side_effect=side_effect_get_data_path)
         self.patcher_transfer_path.start()
         
         # Create necessary empty JSON files
@@ -93,18 +93,36 @@ class TestE2EOperations:
 
         # Patch file path constants in app module to point to test_dir
         self.original_constants = {}
-        constants_to_patch = [
+        app_constants_to_patch = [
             'PAYABLES_FILE', 'PAYMENT_METHODS_FILE', 'PRODUCTS_FILE', 
             'ROOM_OCCUPANCY_FILE', 'TABLE_ORDERS_FILE', 'CASHIER_SESSIONS_FILE',
             'USERS_FILE', 'FISCAL_SETTINGS_FILE', 'STOCK_FILE', 'STOCK_ENTRIES_FILE',
             'ROOM_CHARGES_FILE', 'MENU_ITEMS_FILE'
         ]
         
-        for const in constants_to_patch:
+        for const in app_constants_to_patch:
             if hasattr(app, const):
                 self.original_constants[const] = getattr(app, const)
                 filename = os.path.basename(getattr(app, const))
                 setattr(app, const, os.path.join(self.test_dir, filename))
+
+        # Patch data_service file path constants so load_* helpers use test_dir
+        try:
+            from app.services import data_service
+            self.original_data_service_constants = {}
+            data_service_constants_to_patch = [
+                'PAYABLES_FILE', 'PAYMENT_METHODS_FILE', 'PRODUCTS_FILE',
+                'ROOM_OCCUPANCY_FILE', 'TABLE_ORDERS_FILE', 'CASHIER_SESSIONS_FILE',
+                'USERS_FILE', 'FISCAL_SETTINGS_FILE', 'STOCK_FILE', 'STOCK_ENTRIES_FILE',
+                'ROOM_CHARGES_FILE', 'MENU_ITEMS_FILE'
+            ]
+            for const in data_service_constants_to_patch:
+                if hasattr(data_service, const):
+                    self.original_data_service_constants[const] = getattr(data_service, const)
+                    filename = os.path.basename(getattr(data_service, const))
+                    setattr(data_service, const, os.path.join(self.test_dir, filename))
+        except Exception:
+            self.original_data_service_constants = {}
 
         # Also patch services.cashier_service.CASHIER_SESSIONS_FILE if it exists separately
         self.patcher_cashier_file = patch('services.cashier_service.CASHIER_SESSIONS_FILE', os.path.join(self.test_dir, 'cashier_sessions.json'))
@@ -119,6 +137,10 @@ class TestE2EOperations:
         self.patcher_cashier_file.stop()
         for const, value in self.original_constants.items():
             setattr(app, const, value)
+        if hasattr(self, 'original_data_service_constants'):
+            from app.services import data_service
+            for const, value in self.original_data_service_constants.items():
+                setattr(data_service, const, value)
             
     def test_commission_ranking_logic(self):
         """Test commission ranking generation with granted and removed commissions"""
@@ -302,13 +324,12 @@ class TestE2EOperations:
             'cancellation_reason': 'Customer changed mind'
         }, follow_redirects=True)
         
-        # 4. Verify Stock Returned (8 + 1 = 9)
-        # Note: remove_item only decrements quantity by 1, so only 1 Burger (1 Carne) is returned
+        # 4. Verify Stock Returned (8 + 2 = 10)
         with open(os.path.join(self.test_dir, 'stock_entries.json'), 'r') as f:
             entries = json.load(f)
             
         balance = sum(e['qty'] for e in entries if e['product'] == 'Carne')
-        assert balance == 9.0
+        assert balance == 10.0
 
     def test_transfer_to_room_button_without_room_number(self):
         """Test transfer to room button logic where room number is implicit in the order"""

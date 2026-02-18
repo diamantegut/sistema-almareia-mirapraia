@@ -233,6 +233,9 @@
 
                 <!-- Actions -->
                 <div class="d-grid gap-2">
+                    <button type="button" class="btn btn-outline-primary shadow-sm" onclick="openLocalXmlModal()">
+                        <i class="bi bi-folder2-open me-2"></i>Notas já baixadas
+                    </button>
                     <button type="submit" class="btn btn-success btn-lg shadow-sm">
                         <i class="bi bi-check-lg me-2"></i>Confirmar Entrada
                     </button>
@@ -281,6 +284,53 @@
                         </tbody>
                     </table>
                 </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" onclick="syncNfeXmls(this)">
+                    <i class="bi bi-download me-1"></i>Baixar XMLs para pasta
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Local XML Modal -->
+<div class="modal fade" id="localXmlModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-folder2-open me-2"></i>Notas fiscais já baixadas</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info small">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Lista os arquivos XML que já foram baixados para a pasta fiscal configurada. Selecione um para preencher a entrada.
+                </div>
+                <div id="localXmlLoading" class="text-center py-5 d-none">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2 text-muted">Carregando XMLs locais...</p>
+                </div>
+                <div id="localXmlError" class="alert alert-danger d-none"></div>
+                <div class="table-responsive" id="localXmlTableContainer">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="text-center">Ação</th>
+                                <th>Arquivo</th>
+                                <th>Status</th>
+                                <th>Caminho</th>
+                                <th>Modificado em</th>
+                            </tr>
+                        </thead>
+                        <tbody id="localXmlTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Fechar</button>
             </div>
         </div>
     </div>
@@ -668,6 +718,78 @@
         new bootstrap.Modal(document.getElementById('helpModal')).show();
     }
 
+    function openLocalXmlModal() {
+        const modal = new bootstrap.Modal(document.getElementById('localXmlModal'));
+        modal.show();
+        const loading = document.getElementById('localXmlLoading');
+        const table = document.getElementById('localXmlTableContainer');
+        const errorDiv = document.getElementById('localXmlError');
+        const tbody = document.getElementById('localXmlTableBody');
+        loading.classList.remove('d-none');
+        table.classList.add('d-none');
+        errorDiv.classList.add('d-none');
+        tbody.innerHTML = '';
+        fetch('/stock/entry/list-local-xml')
+        .then(r => r.json())
+        .then(data => {
+            loading.classList.add('d-none');
+            if (data.error) {
+                errorDiv.textContent = data.error;
+                errorDiv.classList.remove('d-none');
+                return;
+            }
+            if (!data.documents || data.documents.length === 0) {
+                errorDiv.textContent = 'Nenhum XML encontrado na pasta configurada.';
+                errorDiv.classList.remove('d-none');
+                errorDiv.classList.replace('alert-danger', 'alert-warning');
+                return;
+            }
+            table.classList.remove('d-none');
+            data.documents.forEach(doc => {
+                const tr = document.createElement('tr');
+                const modified = doc.modified ? formatDateTimeBR(doc.modified) : '';
+                const statusLabel = doc.used ? 'Conferida' : 'Pendente';
+                const statusClass = doc.used ? 'success' : 'secondary';
+                tr.innerHTML = `
+                    <td class="text-center">
+                        <button class="btn btn-sm btn-primary" onclick="loadLocalXml('${doc.path.replace(/'/g, "\\'")}')">
+                            <i class="bi bi-box-arrow-in-down me-1"></i>Usar
+                        </button>
+                    </td>
+                    <td>${doc.name}</td>
+                    <td><span class="badge bg-${statusClass}">${statusLabel}</span></td>
+                    <td><small class="text-muted font-monospace">${doc.path}</small></td>
+                    <td>${modified}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        })
+        .catch(err => {
+            loading.classList.add('d-none');
+            errorDiv.textContent = 'Erro ao carregar XMLs locais: ' + err.message;
+            errorDiv.classList.remove('d-none');
+        });
+    }
+
+    function loadLocalXml(path) {
+        const modalEl = document.getElementById('localXmlModal');
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) modal.hide();
+        showToast('Carregando XML local...', 'info');
+        fetch('/stock/entry/load-local-xml', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ path })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) throw new Error(data.error);
+            fillFormWithNfeData(data);
+            showToast('Nota carregada do XML local com sucesso!', 'success');
+        })
+        .catch(err => showToast('Erro ao carregar XML local: ' + err.message, 'danger'));
+    }
+
     function openNfeList() {
         const modal = new bootstrap.Modal(document.getElementById('nfeListModal'));
         modal.show();
@@ -705,19 +827,15 @@
                 const tr = document.createElement('tr');
                 const date = formatDateBR(doc.date ? doc.date.split('T')[0] : '');
                 const amount = formatMoney(doc.amount || 0);
-                
-                // Prepare XML content safe string if available
-                const hasXml = !!doc.xml_content;
-                const importBtn = hasXml 
-                    ? `<button class="btn btn-sm btn-primary" onclick='importNfeContent(${JSON.stringify(doc.xml_content)})'><i class="bi bi-download me-1"></i>Importar</button>`
-                    : `<button class="btn btn-sm btn-outline-secondary" disabled title="XML ainda não disponível (manifestação pendente)">Pendente</button>`;
-                
+                const status = doc.status || '';
+                const badgeClass = (status === 'recebida' || status === 'importada') ? 'success' : 'secondary';
+                const importBtn = `<button class="btn btn-sm btn-outline-secondary" disabled title="Importação individual desabilitada. Use o botão &quot;Baixar XMLs para pasta&quot; abaixo.">Indisponível</button>`;
                 tr.innerHTML = `
                     <td>${date}</td>
                     <td>${doc.issuer}</td>
                     <td>${amount}</td>
                     <td><small class="text-muted font-monospace">${doc.key}</small></td>
-                    <td><span class="badge bg-${doc.status === 'recebida' ? 'success' : 'secondary'}">${doc.status}</span></td>
+                    <td><span class="badge bg-${badgeClass}">${status}</span></td>
                     <td class="text-end">${importBtn}</td>
                 `;
                 tbody.appendChild(tr);
@@ -752,6 +870,32 @@
         .catch(err => showToast('Erro ao importar: ' + err.message, 'danger'));
     }
 
+    function syncNfeXmls(button) {
+        if (button) {
+            button.disabled = true;
+        }
+        showToast('Sincronizando XMLs com a SEFAZ...', 'info');
+        fetch('/stock/nfe/sync', {
+            method: 'POST'
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) throw new Error(data.error);
+            const count = data.synced_count || 0;
+            if (count > 0) {
+                showToast('Foram baixados ' + count + ' XML(s).', 'success');
+            } else {
+                showToast('Nenhum novo XML para baixar.', 'info');
+            }
+        })
+        .catch(err => showToast('Erro ao sincronizar XMLs: ' + err.message, 'danger'))
+        .finally(() => {
+            if (button) {
+                button.disabled = false;
+            }
+        });
+    }
+
     function fillFormWithNfeData(data) {
         // Reuse logic from handleXmlUpload
         document.getElementById('supplierName').value = data.supplier;
@@ -784,6 +928,15 @@
         if (!dateStr) return '';
         const [y, m, d] = dateStr.split('-');
         return `${d}/${m}/${y}`;
+    }
+
+    function formatDateTimeBR(isoStr) {
+        if (!isoStr) return '';
+        const parts = isoStr.split('T');
+        const datePart = parts[0];
+        const timePart = parts[1] ? parts[1].split('.')[0] : '';
+        const [y, m, d] = datePart.split('-');
+        return timePart ? `${d}/${m}/${y} ${timePart}` : `${d}/${m}/${y}`;
     }
 </script>
 {% endblock %}

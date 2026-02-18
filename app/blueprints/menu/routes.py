@@ -18,7 +18,405 @@ from werkzeug.utils import secure_filename
 import os
 from datetime import datetime
 import traceback
+import io
+import xlsxwriter
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import mm
+from app.services.data_service import load_sales_history
+from app.services.system_config_manager import ACTION_LOGS_DIR, SALES_HISTORY_FILE
+import os
+from flask import send_file
+import json
+import unicodedata
 
+# Simple cache for flattened sales
+_SALES_CACHE = {'mtime': None, 'items': []}
+
+def _parse_date_ddmmyyyy(s):
+    try:
+        return datetime.strptime(s, '%d/%m/%Y')
+    except Exception:
+        return None
+
+def _format_sale_display_id(item):
+    raw_id = str(item.get('sale_id') or '')
+    status_str = str(item.get('status') or '').lower()
+    if status_str == 'closed':
+        prefix = 'VENDA-'
+    elif status_str == 'cancelled':
+        prefix = 'CANCEL-'
+    else:
+        prefix = ''
+    return prefix + raw_id
+
+def _norm_name(s):
+    if not s:
+        return ''
+    s = s.strip().lower()
+    return ''.join(c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn')
+
+def _name_matches(name, norm_filters):
+    if not norm_filters:
+        return True
+    n = _norm_name(name)
+    for f in norm_filters:
+        if not f:
+            continue
+        if n == f or n.startswith(f) or f in n:
+            return True
+    return False
+
+def _get_sales_flat():
+    try:
+        mtime = os.path.getmtime(SALES_HISTORY_FILE)
+    except Exception:
+        mtime = None
+    if _SALES_CACHE.get('mtime') == mtime and _SALES_CACHE.get('items'):
+        return _SALES_CACHE['items']
+    data = load_sales_history()
+    items = []
+    if isinstance(data, dict):
+        data = list(data.values())
+    for order in data or []:
+        closed_at = order.get('closed_at')
+        status = order.get('status', 'closed')
+        close_id = order.get('close_id') or order.get('id') or ''
+        customer = order.get('customer_name') or ''
+        try:
+            ts = datetime.strptime(closed_at, '%d/%m/%Y %H:%M') if closed_at else None
+        except Exception:
+            ts = None
+        for it in order.get('items', []):
+            try:
+                qty = float(it.get('qty', 0) or 0)
+            except Exception:
+                qty = 0.0
+            base_price = 0.0
+            try:
+                base_price = float(it.get('price', 0) or 0)
+            except Exception:
+                base_price = 0.0
+            comps_total = 0.0
+            for comp in it.get('complements', []) or []:
+                try:
+                    comps_total += float(comp.get('price', 0) or 0)
+                except Exception:
+                    pass
+            total_val = qty * (base_price + comps_total)
+            items.append({
+                'sale_id': close_id,
+                'product': it.get('name'),
+                'product_id': it.get('product_id'),
+                'qty': qty,
+                'total': round(total_val, 2),
+                'timestamp': ts,
+                'timestamp_str': closed_at or '',
+                'status': status,
+                'customer': customer
+            })
+    _SALES_CACHE['mtime'] = mtime
+    _SALES_CACHE['items'] = items
+    return items
+
+def _get_cancellations_from_logs(start_dt, end_dt, products_set):
+    results = []
+    try:
+        if not os.path.isdir(ACTION_LOGS_DIR):
+            return results
+        norm_filters = set(_norm_name(p) for p in products_set) if products_set else set()
+        for fname in os.listdir(ACTION_LOGS_DIR):
+            if not fname.endswith('.json'):
+                continue
+            try:
+                y, m, d = fname.replace('.json', '').split('-')
+                day_dt = datetime(int(y), int(m), int(d))
+            except Exception:
+                continue
+            if day_dt.date() < start_dt.date() or day_dt.date() > end_dt.date():
+                continue
+            path = os.path.join(ACTION_LOGS_DIR, fname)
+            try:
+                with open(path, 'r', encoding='utf-8') as f:
+                    logs = json.load(f)
+            except Exception:
+                logs = []
+            for log in logs or []:
+                if str(log.get('action', '')).lower() not in ['item removido', 'cancelamento mesa']:
+                    continue
+                ts_str = log.get('timestamp') or ''
+                try:
+                    ts = datetime.strptime(ts_str, '%d/%m/%Y %H:%M:%S')
+                except Exception:
+                    ts = day_dt
+                details = log.get('details', '')
+                prod_name = None
+                if isinstance(details, str):
+                    if 'Item ' in details and ' removido' in details:
+                        try:
+                            seg = details.split('Item ', 1)[1]
+                            prod_name = seg.split(' removido', 1)[0].strip()
+                        except Exception:
+                            prod_name = None
+                elif isinstance(details, dict):
+                    prod_name = details.get('item') or details.get('name')
+                if prod_name and (not products_set or _name_matches(prod_name, norm_filters)):
+                    results.append({
+                        'sale_id': f"CANCEL_{log.get('id','')}",
+                        'product': prod_name,
+                        'qty': 1.0,
+                        'total': 0.0,
+                        'timestamp': ts,
+                        'timestamp_str': ts.strftime('%d/%m/%Y %H:%M:%S'),
+                        'status': 'cancelled',
+                        'customer': ''
+                    })
+    except Exception:
+        pass
+    return results
+
+@menu_bp.route('/api/menu/sales-history')
+@login_required
+def menu_sales_history_api():
+    user_role = session.get('role', '')
+    allowed_roles = ['super', 'admin', 'gerente', 'recepcao', 'supervisor', 'diretor']
+    if not any(role in user_role for role in allowed_roles):
+        return jsonify({'success': False, 'error': 'Acesso negado'}), 403
+    products_param = request.args.get('products', '')
+    products = [p.strip() for p in products_param.split(',') if p.strip()]
+    product_ids_param = request.args.get('product_ids', '')
+    product_ids = [p.strip() for p in product_ids_param.split(',') if p.strip()]
+    norm_prod_set = set(_norm_name(p) for p in products)
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    status = request.args.get('status', 'concluidas').lower()
+    try:
+        page = int(request.args.get('page', 1))
+        page_size = int(request.args.get('page_size', 25))
+    except Exception:
+        page, page_size = 1, 25
+    if page_size not in [10, 25, 50, 100]:
+        page_size = 25
+    now = datetime.now()
+    sdt = _parse_date_ddmmyyyy(start_date) if start_date else None
+    edt = _parse_date_ddmmyyyy(end_date) if end_date else None
+    if sdt and sdt.date() > now.date():
+        return jsonify({'success': False, 'error': 'Data inicial no futuro'}), 400
+    if edt and edt.date() > now.date():
+        return jsonify({'success': False, 'error': 'Data final no futuro'}), 400
+    if sdt and edt and sdt > edt:
+        return jsonify({'success': False, 'error': 'Data inicial maior que a final'}), 400
+    all_items = _get_sales_flat()
+    prod_set = set(products)
+    prod_id_set = set(product_ids)
+    filtered = []
+    for it in all_items:
+        if prod_id_set:
+            pid = (it.get('product_id') or '')
+            if pid in prod_id_set:
+                pass
+            elif prod_set and _name_matches(it['product'], norm_prod_set):
+                pass
+            else:
+                continue
+        elif products:
+            if not _name_matches(it['product'], norm_prod_set):
+                continue
+        if sdt and it['timestamp'] and it['timestamp'] < sdt:
+            continue
+        if edt and it['timestamp'] and it['timestamp'] > (edt.replace(hour=23, minute=59, second=59)):
+            continue
+        if status in ['concluidas', 'concluídas'] and str(it['status']).lower() != 'closed':
+            continue
+        filtered.append(it)
+    if status == 'canceladas':
+        s = sdt or datetime.min
+        e = edt or datetime.max
+        canc = _get_cancellations_from_logs(s, e, prod_set)
+        filtered = canc
+    elif status == 'todas':
+        s = sdt or datetime.min
+        e = edt or datetime.max
+        canc = _get_cancellations_from_logs(s, e, prod_set)
+        filtered = filtered + canc
+        filtered.sort(key=lambda x: x['timestamp'] or datetime.min)
+    total_count = len(filtered)
+    start_idx = max(0, (page - 1) * page_size)
+    end_idx = start_idx + page_size
+    page_items = filtered[start_idx:end_idx]
+    total_qty = sum(it['qty'] for it in filtered if str(it['status']).lower() == 'closed')
+    cancelled_qty = sum(1 for it in filtered if str(it['status']).lower() == 'cancelled')
+    net_qty = total_qty - cancelled_qty
+    total_value = round(sum(it['total'] for it in filtered if str(it['status']).lower() == 'closed'), 2)
+    return jsonify({
+        'success': True,
+        'items': [
+            {
+                'sale_id': _format_sale_display_id(it),
+                'product': it['product'],
+                'qty': it['qty'],
+                'total': it['total'],
+                'timestamp': it['timestamp_str'],
+                'status': 'concluída' if str(it['status']).lower() == 'closed' else 'cancelada',
+                'customer': it['customer']
+            } for it in page_items
+        ],
+        'total_count': total_count,
+        'summary': {
+            'total_vendida': total_qty,
+            'total_cancelada': cancelled_qty,
+            'quantidade_liquida': net_qty,
+            'valor_total': total_value
+        }
+    })
+
+@menu_bp.route('/menu/sales-history/export')
+@login_required
+def menu_sales_history_export():
+    user_role = session.get('role', '')
+    allowed_roles = ['super', 'admin', 'gerente', 'recepcao', 'supervisor', 'diretor']
+    if not any(role in user_role for role in allowed_roles):
+        return jsonify({'success': False, 'error': 'Acesso negado'}), 403
+    products_param = request.args.get('products', '')
+    products = [p.strip() for p in products_param.split(',') if p.strip()]
+    product_ids_param = request.args.get('product_ids', '')
+    product_ids = [p.strip() for p in product_ids_param.split(',') if p.strip()]
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    status = request.args.get('status', 'concluidas').lower()
+    fmt = request.args.get('format', 'xlsx').lower()
+    now = datetime.now()
+    sdt = _parse_date_ddmmyyyy(start_date) if start_date else None
+    edt = _parse_date_ddmmyyyy(end_date) if end_date else None
+    if sdt and sdt.date() > now.date():
+        return jsonify({'success': False, 'error': 'Data inicial no futuro'}), 400
+    if edt and edt.date() > now.date():
+        return jsonify({'success': False, 'error': 'Data final no futuro'}), 400
+    if sdt and edt and sdt > edt:
+        return jsonify({'success': False, 'error': 'Data inicial maior que a final'}), 400
+    items = []
+    all_items = _get_sales_flat()
+    prod_set = set(products)
+    norm_prod_set = set(_norm_name(p) for p in products)
+    prod_id_set = set(product_ids)
+    for it in all_items:
+        if prod_id_set:
+            pid = (it.get('product_id') or '')
+            if pid in prod_id_set:
+                pass
+            elif prod_set and _name_matches(it['product'], norm_prod_set):
+                pass
+            else:
+                continue
+        elif products:
+            if not _name_matches(it['product'], norm_prod_set):
+                continue
+        if sdt and it['timestamp'] and it['timestamp'] < sdt:
+            continue
+        if edt and it['timestamp'] and it['timestamp'] > (edt.replace(hour=23, minute=59, second=59)):
+            continue
+        if status in ['concluidas', 'concluídas'] and str(it['status']).lower() != 'closed':
+            continue
+        items.append(it)
+    if status == 'canceladas' or status == 'todas':
+        s = sdt or datetime.min
+        e = edt or datetime.max
+        canc = _get_cancellations_from_logs(s, e, prod_set)
+        if status == 'canceladas':
+            items = canc
+        else:
+            items = items + canc
+            items.sort(key=lambda x: x['timestamp'] or datetime.min)
+    total_qty = sum(it['qty'] for it in items if str(it['status']).lower() == 'closed')
+    cancelled_qty = sum(1 for it in items if str(it['status']).lower() == 'cancelled')
+    net_qty = total_qty - cancelled_qty
+    total_value = round(sum(it['total'] for it in items if str(it['status']).lower() == 'closed'), 2)
+    if fmt == 'pdf':
+        output = io.BytesIO()
+        c = canvas.Canvas(output, pagesize=A4)
+        width, height = A4
+        y = height - 20*mm
+        title = "Histórico de Vendas"
+        c.setFont("Helvetica-Bold", 14)
+        c.drawString(20*mm, y, title)
+        y -= 10*mm
+        c.setFont("Helvetica", 10)
+        c.drawString(20*mm, y, f"Período: {start_date or '-'} a {end_date or '-'}  Status: {status}")
+        y -= 8*mm
+        c.drawString(20*mm, y, f"Produtos: {', '.join(products) if products else 'Todos'}")
+        y -= 10*mm
+        c.setFont("Helvetica-Bold", 10)
+        c.drawString(20*mm, y, "ID")
+        c.drawString(60*mm, y, "Produto")
+        c.drawString(120*mm, y, "Qtde")
+        c.drawString(140*mm, y, "Valor")
+        c.drawString(165*mm, y, "Data/Hora")
+        y -= 6*mm
+        c.setFont("Helvetica", 10)
+        for it in items:
+            display_id = _format_sale_display_id(it)
+            if y < 20*mm:
+                c.showPage()
+                y = height - 20*mm
+            c.drawString(20*mm, y, str(display_id)[:18])
+            c.drawString(60*mm, y, (it['product'] or '')[:25])
+            c.drawRightString(135*mm, y, f"{it['qty']:.2f}")
+            c.drawRightString(160*mm, y, f"R$ {it['total']:.2f}")
+            c.drawString(165*mm, y, it.get('timestamp_str') or '')
+            y -= 6*mm
+        y -= 6*mm
+        c.setFont("Helvetica-Bold", 10)
+        c.drawString(20*mm, y, f"Total vendida: {total_qty:.2f}  Cancelada: {cancelled_qty:.2f}  Líquida: {net_qty:.2f}  Valor total: R$ {total_value:.2f}")
+        c.save()
+        output.seek(0)
+        filename = f"historico_vendas_{datetime.now().strftime('%Y%m%d%H%M%S')}.pdf"
+        return send_file(output, download_name=filename, as_attachment=True)
+    output = io.BytesIO()
+    wb = xlsxwriter.Workbook(output)
+    ws = wb.add_worksheet('Vendas')
+    bold = wb.add_format({'bold': True})
+    money = wb.add_format({'num_format': 'R$ #,##0.00'})
+    headers = ['ID', 'Produto', 'Quantidade', 'Valor', 'Data/Hora', 'Status', 'Cliente']
+    for col, h in enumerate(headers):
+        ws.write(0, col, h, bold)
+    row = 1
+    for it in items:
+        display_id = _format_sale_display_id(it)
+        ws.write(row, 0, display_id)
+        ws.write(row, 1, it['product'])
+        ws.write_number(row, 2, it['qty'])
+        ws.write_number(row, 3, it['total'], money)
+        ws.write(row, 4, it.get('timestamp_str') or '')
+        ws.write(row, 5, 'concluída' if str(it['status']).lower() == 'closed' else 'cancelada')
+        ws.write(row, 6, it.get('customer') or '')
+        row += 1
+    ws2 = wb.add_worksheet('Resumo')
+    ws2.write(0, 0, 'Total vendida', bold)
+    ws2.write(0, 1, total_qty)
+    ws2.write(1, 0, 'Total cancelada', bold)
+    ws2.write(1, 1, cancelled_qty)
+    ws2.write(2, 0, 'Quantidade líquida', bold)
+    ws2.write(2, 1, net_qty)
+    ws2.write(3, 0, 'Valor total', bold)
+    ws2.write_number(3, 1, total_value, money)
+    wb.close()
+    output.seek(0)
+    filename = f"historico_vendas_{datetime.now().strftime('%Y%m%d%H%M%S')}.xlsx"
+    return send_file(output, download_name=filename, as_attachment=True)
+
+@menu_bp.route('/menu/sales-history')
+@login_required
+def menu_sales_history_page():
+    user_role = session.get('role', '')
+    allowed_roles = ['super', 'admin', 'gerente', 'recepcao', 'supervisor', 'diretor']
+    if not any(role in user_role for role in allowed_roles):
+        return redirect(url_for('main.index'))
+    # Reuse menu items to populate product selector
+    try:
+        items = load_menu_items()
+    except Exception:
+        items = []
+    return render_template('menu_sales_history.html', menu_items=items)
 @menu_bp.route('/api/menu/digital-category-order', methods=['POST'])
 @login_required
 def save_digital_menu_order():

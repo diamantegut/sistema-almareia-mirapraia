@@ -4,10 +4,9 @@ from unittest.mock import patch, MagicMock
 import os
 import sys
 
-# Add project root to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from services.transfer_service import transfer_table_to_room, TransferError
+from app.services.transfer_service import transfer_table_to_room, TransferError
 
 class TestTransferService(unittest.TestCase):
     
@@ -28,10 +27,10 @@ class TestTransferService(unittest.TestCase):
         }
         self.mock_charges = []
 
-    @patch('services.transfer_service.load_json')
-    @patch('services.transfer_service.save_json')
-    @patch('services.transfer_service.file_lock')
-    @patch('services.transfer_service.log_action')
+    @patch('app.services.transfer_service.load_json')
+    @patch('app.services.transfer_service.save_json')
+    @patch('app.services.transfer_service.file_lock')
+    @patch('app.services.transfer_service.log_action')
     def test_transfer_success(self, mock_log, mock_lock, mock_save, mock_load):
         # Setup mocks
         mock_load.side_effect = [self.mock_orders, self.mock_occupancy, self.mock_charges]
@@ -66,9 +65,9 @@ class TestTransferService(unittest.TestCase):
         self.assertEqual(saved_orders["10"]['items'], [])
         self.assertEqual(saved_orders["10"]['total'], 0)
 
-    @patch('services.transfer_service.load_json')
-    @patch('services.transfer_service.save_json')
-    @patch('services.transfer_service.file_lock')
+    @patch('app.services.transfer_service.load_json')
+    @patch('app.services.transfer_service.save_json')
+    @patch('app.services.transfer_service.file_lock')
     def test_room_not_found(self, mock_lock, mock_save, mock_load):
         mock_load.side_effect = [self.mock_orders, self.mock_occupancy, self.mock_charges]
         mock_lock.return_value.__enter__.return_value = None
@@ -78,9 +77,9 @@ class TestTransferService(unittest.TestCase):
         
         self.assertIn("não encontrado", str(cm.exception))
 
-    @patch('services.transfer_service.load_json')
-    @patch('services.transfer_service.save_json')
-    @patch('services.transfer_service.file_lock')
+    @patch('app.services.transfer_service.load_json')
+    @patch('app.services.transfer_service.save_json')
+    @patch('app.services.transfer_service.file_lock')
     def test_room_wrong_status(self, mock_lock, mock_save, mock_load):
         mock_load.side_effect = [self.mock_orders, self.mock_occupancy, self.mock_charges]
         mock_lock.return_value.__enter__.return_value = None
@@ -90,9 +89,9 @@ class TestTransferService(unittest.TestCase):
         
         self.assertIn("não está ocupado", str(cm.exception))
 
-    @patch('services.transfer_service.load_json')
-    @patch('services.transfer_service.save_json')
-    @patch('services.transfer_service.file_lock')
+    @patch('app.services.transfer_service.load_json')
+    @patch('app.services.transfer_service.save_json')
+    @patch('app.services.transfer_service.file_lock')
     def test_fuzzy_room_match(self, mock_lock, mock_save, mock_load):
         # Test "0101" -> "101"
         mock_load.side_effect = [self.mock_orders, self.mock_occupancy, self.mock_charges]
@@ -103,10 +102,10 @@ class TestTransferService(unittest.TestCase):
         self.assertTrue(success)
         self.assertIn("101", msg)
 
-    @patch('services.transfer_service.load_json')
-    @patch('services.transfer_service.save_json')
-    @patch('services.transfer_service.file_lock')
-    @patch('services.transfer_service.log_action')
+    @patch('app.services.transfer_service.load_json')
+    @patch('app.services.transfer_service.save_json')
+    @patch('app.services.transfer_service.file_lock')
+    @patch('app.services.transfer_service.log_action')
     def test_revert_on_table_save_fail(self, mock_log, mock_lock, mock_save, mock_load):
         mock_load.side_effect = [self.mock_orders, self.mock_occupancy, self.mock_charges]
         mock_lock.return_value.__enter__.return_value = None

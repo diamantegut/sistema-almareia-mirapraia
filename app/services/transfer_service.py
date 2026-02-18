@@ -257,10 +257,7 @@ def transfer_table_to_room(table_id, raw_room_number, user_name, mode='restauran
                     is_cover_name = 'couvert artistico' in name
                     is_cover_item = is_auto_cover or is_cover_name
 
-                    if is_cover_item:
-                        cover_items_total += item_val
-                    else:
-                        noncover_items_total += item_val
+                    if not is_cover_item:
                         w = item.get('waiter') or order.get('waiter') or 'Garçom'
                         waiter_totals[w] = waiter_totals.get(w, 0.0) + item_val
                         total_item_value_for_breakdown += item_val

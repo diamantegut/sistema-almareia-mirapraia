@@ -15,20 +15,6 @@
     </div>
 
     <div class="row g-4">
-        <!-- User Management -->
-        <div class="col-md-6 col-lg-3">
-            <div class="card h-100 shadow-sm border-0">
-                <div class="card-body text-center">
-                    <div class="mb-3 text-primary">
-                        <i class="bi bi-people-fill display-4"></i>
-                    </div>
-                    <h5 class="card-title">Usuários e Acessos</h5>
-                    <p class="card-text text-muted small">Gerencie usuários, permissões e senhas.</p>
-                    <a href="{{ url_for('admin.admin_users') }}" class="btn btn-outline-primary w-100">Acessar</a>
-                </div>
-            </div>
-        </div>
-
         <!-- Reports -->
         <div class="col-md-6 col-lg-3">
             <div class="card h-100 shadow-sm border-0">
@@ -39,6 +25,20 @@
                     <h5 class="card-title">Relatórios</h5>
                     <p class="card-text text-muted small">Vendas, estoque e performance.</p>
                     <a href="{{ url_for('reports.reports') }}" class="btn btn-outline-success w-100">Acessar</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Histórico de Vendas (Geral) -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body text-center">
+                    <div class="mb-3 text-primary">
+                        <i class="bi bi-clipboard-data display-4"></i>
+                    </div>
+                    <h5 class="card-title">Histórico de Vendas</h5>
+                    <p class="card-text text-muted small">Consulta geral por produtos, período e status.</p>
+                    <a href="{{ url_for('menu.menu_sales_history_page') }}" class="btn btn-outline-primary w-100">Abrir</a>
                 </div>
             </div>
         </div>
@@ -150,20 +150,6 @@
                     <h5 class="card-title">Backups</h5>
                     <p class="card-text text-muted small">Gerenciamento e restauração de dados.</p>
                     <a href="{{ url_for('admin.admin_backups_view') }}" class="btn btn-outline-primary w-100">Gerenciar</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- HR (Optional but useful) -->
-        <div class="col-md-6 col-lg-3">
-            <div class="card h-100 shadow-sm border-0">
-                <div class="card-body text-center">
-                    <div class="mb-3" style="color: #fd7e14;">
-                        <i class="bi bi-person-badge display-4"></i>
-                    </div>
-                    <h5 class="card-title">Recursos Humanos</h5>
-                    <p class="card-text text-muted small">Gestão de funcionários e documentos.</p>
-                    <a href="{{ url_for('hr.hr_dashboard') }}" class="btn w-100" style="color: #fd7e14; border-color: #fd7e14;">Acessar RH</a>
                 </div>
             </div>
         </div>

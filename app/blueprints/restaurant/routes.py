@@ -803,6 +803,8 @@ def restaurant_table_order(table_id):
                 room_number = str_table_id
             else:
                 customer_type = request.form.get('customer_type')
+                if customer_type == 'comum':
+                    customer_type = 'passante'
                 if customer_type not in ['passante', 'hospede', 'funcionario']:
                     flash('Tipo de cliente inválido.')
                     return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
@@ -1005,15 +1007,75 @@ def restaurant_table_order(table_id):
                         flash(msg)
                         return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
 
-                # Validation: Check if printed
                 if target_item.get('printed', False) or target_item.get('print_status') == 'printed':
-                    # Block if not Supervisor+ (However, if we passed Permission Check, we are effectively authorized)
-                    # But if the requirement implies strict role check for printed items specifically:
-                    # We can assume that if a waiter provided a password, it WAS a supervisor's password.
-                    # So we just proceed. 
-                    # But to be safe and explicit, we can log it differently.
                     pass
-                
+
+                try:
+                    menu_items = load_menu_items()
+                    products_insumos = load_products()
+                except Exception as e:
+                    current_app.logger.error(f"Error loading data for restaurant cancellation stock: {e}")
+                    menu_items = []
+                    products_insumos = []
+
+                insumo_map = {str(i.get('id')): i for i in products_insumos if i.get('id') is not None}
+
+                product_def = None
+                prod_id = target_item.get('product_id')
+                if prod_id:
+                    product_def = next((p for p in menu_items if str(p.get('id')) == str(prod_id)), None)
+                if not product_def:
+                    product_def = next((p for p in menu_items if p.get('name') == target_item.get('name')), None)
+
+                if product_def and product_def.get('recipe'):
+                    try:
+                        try:
+                            qty_removed = float(target_item.get('qty', 1))
+                        except (TypeError, ValueError):
+                            qty_removed = 1.0
+
+                        for ingred in product_def['recipe']:
+                            raw_ing_id = ingred.get('ingredient_id')
+                            insumo_data = None
+                            ing_key = None
+
+                            if raw_ing_id is not None:
+                                ing_key = str(raw_ing_id)
+                                insumo_data = insumo_map.get(ing_key)
+                            else:
+                                ing_name = ingred.get('ingredient')
+                                if ing_name:
+                                    insumo_data = next((i for i in products_insumos if i.get('name') == ing_name), None)
+                                    if insumo_data and insumo_data.get('id') is not None:
+                                        ing_key = str(insumo_data.get('id'))
+                                    else:
+                                        ing_key = ing_name
+
+                            if not insumo_data:
+                                continue
+
+                            try:
+                                ing_qty = float(ingred.get('qty', 0))
+                            except (TypeError, ValueError):
+                                continue
+
+                            total_refund = ing_qty * qty_removed
+
+                            entry_data = {
+                                'id': f"REFUND_REST_{table_id}_{datetime.now().strftime('%Y%m%d%H%M%S')}_{ing_key}",
+                                'user': session.get('user', 'Sistema'),
+                                'product': insumo_data['name'],
+                                'supplier': f"ESTORNO: Mesa {table_id}",
+                                'qty': total_refund,
+                                'price': insumo_data.get('price', 0),
+                                'invoice': f"Cancelamento: {target_item.get('name')}",
+                                'date': datetime.now().strftime('%d/%m/%Y'),
+                                'entry_date': datetime.now().strftime('%d/%m/%Y %H:%M')
+                            }
+                            save_stock_entry(entry_data)
+                    except Exception as e:
+                        current_app.logger.error(f"Stock refund error (Restaurant): {e}")
+
                 # Remove
                 items.remove(target_item)
                 
@@ -1079,6 +1141,9 @@ def restaurant_table_order(table_id):
 
                 menu_items = load_menu_items()
                 products_map = {str(p['id']): p for p in menu_items}
+
+                products_insumos = load_products()
+                insumo_map = {str(i['id']): i for i in products_insumos if i.get('id') is not None}
                 
                 all_comps = load_complements()
                 comp_map = {str(c['id']): c for c in all_comps}
@@ -1133,6 +1198,50 @@ def restaurant_table_order(table_id):
                     if qty <= 0: 
                         errors.append(f"Quantidade deve ser positiva para '{product['name']}'.")
                         continue
+
+                    if product.get('recipe'):
+                        try:
+                            for ingred in product['recipe']:
+                                raw_ing_id = ingred.get('ingredient_id')
+                                insumo_data = None
+                                ing_key = None
+
+                                if raw_ing_id is not None:
+                                    ing_key = str(raw_ing_id)
+                                    insumo_data = insumo_map.get(ing_key)
+                                else:
+                                    ing_name = ingred.get('ingredient')
+                                    if ing_name:
+                                        insumo_data = next((i for i in products_insumos if i.get('name') == ing_name), None)
+                                        if insumo_data and insumo_data.get('id') is not None:
+                                            ing_key = str(insumo_data.get('id'))
+                                        else:
+                                            ing_key = ing_name
+
+                                if not insumo_data:
+                                    continue
+
+                                try:
+                                    ing_qty = float(ingred.get('qty', 0))
+                                except (TypeError, ValueError):
+                                    continue
+
+                                total_needed = ing_qty * qty
+
+                                entry_data = {
+                                    'id': f"SALE_REST_{table_id}_{datetime.now().strftime('%Y%m%d%H%M%S')}_{ing_key}",
+                                    'user': session.get('user', 'Sistema'),
+                                    'product': insumo_data['name'],
+                                    'supplier': f"VENDA: Mesa {table_id}",
+                                    'qty': -total_needed,
+                                    'price': insumo_data.get('price', 0),
+                                    'invoice': f"Venda Restaurante: {product.get('name')}",
+                                    'date': datetime.now().strftime('%d/%m/%Y'),
+                                    'entry_date': datetime.now().strftime('%d/%m/%Y %H:%M')
+                                }
+                                save_stock_entry(entry_data)
+                        except Exception as e:
+                            current_app.logger.error(f"Stock deduction error (Restaurant): {e}")
                     
                     # Prepare Item
                     order_item = {
@@ -1932,6 +2041,13 @@ def restaurant_table_order(table_id):
         elif action == 'transfer_to_room':
             room_number = request.form.get('room_number')
             if not room_number:
+                order = orders.get(str_table_id)
+                if order:
+                    inferred_room = order.get('room_number')
+                    if not inferred_room and is_room:
+                        inferred_room = str_table_id
+                    room_number = inferred_room
+            if not room_number:
                 flash('Número do quarto obrigatório.')
                 return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
             
@@ -2115,41 +2231,23 @@ def restaurant_table_order(table_id):
         
         for item in items:
             try:
-                # Create a unique key for grouping
-                comps_list = item.get('complements', [])
-                comps_key = tuple()
-                if comps_list:
-                    if isinstance(comps_list[0], dict):
-                        comps_key = tuple(sorted([(c.get('name', ''), float(c.get('price', 0))) for c in comps_list]))
-                    else:
-                        comps_key = tuple(sorted([str(c) for c in comps_list]))
-
-                obs_list = item.get('observations', [])
-                obs_key = tuple(sorted(obs_list)) if obs_list else tuple()
-                
+                # Group by product name and unit price only
                 key = (
                     item.get('name'),
-                    item.get('flavor'),
-                    comps_key,
-                    obs_key,
-                    float(item.get('price', 0)),
-                    item.get('print_status', 'pending' if not item.get('printed') else 'printed'),
-                    item.get('printed', False)
+                    float(item.get('price', 0))
                 )
                 
                 if key not in groups:
                     groups[key] = {
                         'name': item.get('name'),
-                        'flavor': item.get('flavor'),
-                        'complements': item.get('complements', []),
-                        'observations': item.get('observations', []),
                         'price': float(item.get('price', 0)),
                         'qty': 0.0,
                         'total': 0.0,
                         'ids': [],
-                        'print_status': item.get('print_status', 'pending' if not item.get('printed') else 'printed'),
-                        'printed': item.get('printed', False),
-                        'last_item_qty': 0.0
+                        'print_status': 'printed' if item.get('printed') else item.get('print_status', 'pending'),
+                        'printed': bool(item.get('printed', False)),
+                        'last_item_qty': 0.0,
+                        'children': []
                     }
                 
                 qty = float(item.get('qty', 0))
@@ -2162,9 +2260,32 @@ def restaurant_table_order(table_id):
                 for c in item.get('complements', []):
                     if isinstance(c, dict):
                         comp_total += float(c.get('price', 0))
-                
                 item_total = qty * (float(item.get('price', 0)) + comp_total)
                 groups[key]['total'] += item_total
+
+                # Attach child details for dropdown
+                groups[key]['children'].append({
+                    'id': item.get('id'),
+                    'qty': qty,
+                    'flavor': item.get('flavor'),
+                    'complements': item.get('complements', []),
+                    'accompaniments': item.get('accompaniments', []),
+                    'observations': item.get('observations', []),
+                    'questions_answers': item.get('questions_answers', []),
+                    'waiter': item.get('waiter'),
+                    'printed': item.get('printed', False),
+                    'print_status': item.get('print_status', 'pending' if not item.get('printed') else 'printed'),
+                    'created_at': item.get('created_at')
+                })
+
+                # Aggregate print status for the group
+                child_status = item.get('print_status', 'pending' if not item.get('printed') else 'printed')
+                if child_status == 'error':
+                    groups[key]['print_status'] = 'error'
+                    groups[key]['printed'] = False
+                elif child_status != 'printed':
+                    groups[key]['print_status'] = 'pending'
+                    groups[key]['printed'] = False
             except Exception as e:
                 print(f"Error grouping item {item.get('name')}: {e}")
                 continue
