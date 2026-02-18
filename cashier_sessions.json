@@ -6865,13 +6865,378 @@
         "closed_by": "eduardo"
     },
     {
-        "id": "SESSION_RESTAURANT_20260218074723_Angelo",
-        "user": "Angelo",
+        "id": "SESSION_GUEST_CONSUMPTION_20260218084332_luiz",
+        "user": "luiz",
+        "type": "guest_consumption",
+        "entity": "Hotel Almareia",
+        "opened_at": "18/02/2026 08:43",
+        "opening_balance": 0.0,
+        "transactions": [
+            {
+                "id": "TX_20260218091053_f579d5",
+                "type": "sale",
+                "amount": 1272.9199999999996,
+                "description": "Fechamento Conta Quarto 22 - Adriana e José",
+                "payment_method": "Credito Angelo",
+                "timestamp": "18/02/2026 09:10",
+                "user": "luiz",
+                "details": {
+                    "room_number": "22",
+                    "guest_name": "Adriana e José",
+                    "category": "Baixa de Conta",
+                    "waiter_breakdown": {
+                        "guilherme": 172.92,
+                        "welington": 186.45,
+                        "henrique": 547.6900000000002,
+                        "edson": 18.59,
+                        "erique": 437.1400000000002,
+                        "adailton": 430.7600000000002,
+                        "filipe": 219.12000000000012
+                    }
+                }
+            },
+            {
+                "id": "TX_20260218093255_d736bc",
+                "type": "sale",
+                "amount": 2278.507,
+                "description": "Fechamento Conta Quarto 02 - ATIANE MONTEIRO E FABIO MONTEIRO",
+                "payment_method": "Credito Angelo",
+                "timestamp": "18/02/2026 09:32",
+                "user": "luiz",
+                "details": {
+                    "room_number": "02",
+                    "guest_name": "ATIANE MONTEIRO E FABIO MONTEIRO",
+                    "category": "Baixa de Conta",
+                    "waiter_breakdown": {
+                        "adailton": 455.4,
+                        "welington": 1223.398,
+                        "edson": 185.35000000000002,
+                        "henrique": 808.1699999999998,
+                        "erique": 216.59000000000003,
+                        "leo": 567.358
+                    }
+                }
+            },
+            {
+                "id": "TX_20260218094959_d17ec7",
+                "type": "sale",
+                "amount": 2581.1399999999994,
+                "description": "Fechamento Conta Quarto 11 - Virginia Oswaldo e Ana Luiza",
+                "payment_method": "Credito Angelo",
+                "timestamp": "18/02/2026 09:49",
+                "user": "luiz",
+                "details": {
+                    "room_number": "11",
+                    "guest_name": "Virginia Oswaldo e Ana Luiza",
+                    "category": "Baixa de Conta",
+                    "waiter_breakdown": {
+                        "adailton": 705.8699999999999,
+                        "erique": 512.2699999999999,
+                        "henrique": 350.9,
+                        "edson": 933.8999999999997,
+                        "leo": 515.5699999999999,
+                        "guilherme": 284.2399999999999,
+                        "welington": 434.16999999999985,
+                        "filipe": 197.77999999999997
+                    }
+                }
+            },
+            {
+                "id": "TX_20260218102440_4d5bca",
+                "type": "sale",
+                "amount": 1242.1000000000001,
+                "description": "Fechamento Conta Quarto 33 - PATRICIA Fruchtengarten  e RENATO FRUCHTENGARTEN",
+                "payment_method": "Credito Angelo",
+                "timestamp": "18/02/2026 10:24",
+                "user": "luiz",
+                "details": {
+                    "room_number": "33",
+                    "guest_name": "PATRICIA Fruchtengarten  e RENATO FRUCHTENGARTEN",
+                    "category": "Baixa de Conta",
+                    "waiter_breakdown": {
+                        "leo": 248.05,
+                        "henrique": 213.72999999999988,
+                        "adailton": 330.33,
+                        "erique": 524.37,
+                        "filipe": 150.14999999999992,
+                        "edson": 67.64999999999996,
+                        "welington": 200.53
+                    }
+                }
+            },
+            {
+                "id": "TX_20260218104812_9148dd",
+                "type": "sale",
+                "amount": 1515.87,
+                "description": "Fechamento Conta Quarto 15 - Jessica E Walter",
+                "payment_method": "Credito Angelo",
+                "timestamp": "18/02/2026 10:48",
+                "user": "luiz",
+                "details": {
+                    "room_number": "15",
+                    "guest_name": "Jessica E Walter",
+                    "category": "Baixa de Conta",
+                    "waiter_breakdown": {
+                        "erique": 432.84999999999997,
+                        "henrique": 348.47999999999996,
+                        "welington": 1241.24,
+                        "leo": 65.56,
+                        "filipe": 43.56000000000001,
+                        "adailton": 144.32,
+                        "edson": 122.75999999999999,
+                        "eduardo": 41.57999999999999
+                    }
+                }
+            },
+            {
+                "id": "TX_20260218113057_3949c4",
+                "type": "sale",
+                "amount": 1686.51,
+                "description": "Fechamento Conta Quarto 32 - JOÃO BATISTA e Marileia de Miranda",
+                "payment_method": "Credito Angelo",
+                "timestamp": "18/02/2026 11:30",
+                "user": "luiz",
+                "details": {
+                    "room_number": "32",
+                    "guest_name": "JOÃO BATISTA e Marileia de Miranda",
+                    "category": "Baixa de Conta",
+                    "waiter_breakdown": {
+                        "erique": 84.14999999999999,
+                        "guilherme": 243.76000000000005,
+                        "leo": 312.17999999999995,
+                        "henrique": 505.34000000000015,
+                        "edson": 149.71000000000004,
+                        "adailton": 1018.0499999999998,
+                        "filipe": 28.380000000000006
+                    }
+                }
+            },
+            {
+                "id": "TX_20260218115304_4c602e",
+                "type": "sale",
+                "amount": 1096.32,
+                "description": "Fechamento Conta Quarto 34 - KELY E NILTON",
+                "payment_method": "Pix QR Angelo",
+                "timestamp": "18/02/2026 11:53",
+                "user": "luiz",
+                "details": {
+                    "room_number": "34",
+                    "guest_name": "KELY E NILTON",
+                    "category": "Baixa de Conta",
+                    "waiter_breakdown": {
+                        "edson": 287.1,
+                        "filipe": 310.74999999999994,
+                        "erique": 218.45999999999992,
+                        "welington": 19.579999999999995,
+                        "leo": 827.4200000000001,
+                        "henrique": 19.580000000000005
+                    }
+                }
+            },
+            {
+                "id": "TX_20260218120835_f71e57",
+                "type": "sale",
+                "amount": 1181.7679999999998,
+                "description": "Fechamento Conta Quarto 16 - ALAN  E ROBERTO ",
+                "payment_method": "Credito Angelo",
+                "timestamp": "18/02/2026 12:08",
+                "user": "luiz",
+                "details": {
+                    "room_number": "16",
+                    "guest_name": "ALAN  E ROBERTO ",
+                    "category": "Baixa de Conta",
+                    "waiter_breakdown": {
+                        "edson": 98.33999999999997,
+                        "welington": 1553.1559999999997,
+                        "erique": 109.33999999999999,
+                        "henrique": 439.3399999999999,
+                        "leo": 50.37999999999999
+                    }
+                }
+            },
+            {
+                "id": "TX_20260218122248_c44d39",
+                "type": "sale",
+                "amount": 2476.99,
+                "description": "Fechamento Conta Quarto 03 - Lucas e Natalia",
+                "payment_method": "Pix QR Angelo",
+                "timestamp": "18/02/2026 12:22",
+                "user": "luiz",
+                "details": {
+                    "room_number": "03",
+                    "guest_name": "Lucas e Natalia",
+                    "category": "Baixa de Conta",
+                    "waiter_breakdown": {
+                        "filipe": 55.769999999999996,
+                        "welington": 1963.1699999999998,
+                        "henrique": 134.96999999999997,
+                        "edson": 133.31999999999996,
+                        "eduardo": 127.49000000000001,
+                        "erique": 340.2299999999999,
+                        "leo": 74.35999999999999,
+                        "guilherme": 159.9399999999999
+                    }
+                }
+            }
+        ],
+        "status": "open",
+        "closed_at": null,
+        "closing_balance": null,
+        "difference": null
+    },
+    {
+        "id": "SESSION_RESTAURANT_20260218115810_luiz",
+        "user": "luiz",
         "type": "restaurant",
         "entity": "Restaurante Mirapraia",
-        "opened_at": "18/02/2026 07:47",
-        "opening_balance": 0.0,
-        "transactions": [],
+        "opened_at": "18/02/2026 11:58",
+        "opening_balance": 1118.75,
+        "transactions": [
+            {
+                "id": "TX_20260218123444_135bde",
+                "type": "out",
+                "amount": 10.0,
+                "description": "troco para Sra. Silvia Ap 33 pagamento da estadia ",
+                "payment_method": "dinheiro",
+                "timestamp": "18/02/2026 12:34",
+                "user": "luiz",
+                "details": {
+                    "idempotency_key": "1e2fbdd7-58e2-4411-8cd6-e271b37c011e"
+                }
+            },
+            {
+                "id": "TX_20260218125601_501450",
+                "type": "sale",
+                "amount": 675.18,
+                "description": "Venda Mesa 40 - Credito MIrapraia Pagseguro",
+                "payment_method": "Credito MIrapraia Pagseguro",
+                "timestamp": "18/02/2026 12:56",
+                "user": "guilherme",
+                "details": {}
+            },
+            {
+                "id": "TX_20260218125825_2ef857",
+                "type": "sale",
+                "amount": 168.85,
+                "description": "Venda Mesa 93 - Credito MIrapraia Pagseguro",
+                "payment_method": "Credito MIrapraia Pagseguro",
+                "timestamp": "18/02/2026 12:58",
+                "user": "guilherme",
+                "details": {}
+            },
+            {
+                "id": "TX_20260218140453_95dc03",
+                "type": "out",
+                "amount": 380.0,
+                "description": "Pagar 10 barras de queijo geusa",
+                "payment_method": "dinheiro",
+                "timestamp": "18/02/2026 14:04",
+                "user": "eduardo",
+                "details": {
+                    "idempotency_key": "00d6b291-9b37-417c-96a2-ffafac19ca9a"
+                }
+            },
+            {
+                "id": "TX_20260218141049_f9cac2",
+                "type": "sale",
+                "amount": 116.27,
+                "description": "Venda Mesa 41 - Debito Mirapraia Pagseguro",
+                "payment_method": "Debito Mirapraia Pagseguro",
+                "timestamp": "18/02/2026 14:10",
+                "user": "eduardo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260218141203_414edb",
+                "type": "sale",
+                "amount": 295.02,
+                "description": "Venda Mesa 45 - PIX Maquininha CNPJ",
+                "payment_method": "PIX Maquininha CNPJ",
+                "timestamp": "18/02/2026 14:12",
+                "user": "eduardo",
+                "details": {}
+            },
+            {
+                "id": "TX_20260218141728_7c0501",
+                "type": "sale",
+                "amount": 408.53,
+                "description": "Venda Mesa 54 - Credito MIrapraia Pagseguro",
+                "payment_method": "Credito MIrapraia Pagseguro",
+                "timestamp": "18/02/2026 14:17",
+                "user": "guilherme",
+                "details": {}
+            },
+            {
+                "id": "TX_20260218144359_b1ba9e",
+                "type": "sale",
+                "amount": 230.5,
+                "description": "Venda Mesa 53 - Credito MIrapraia Pagseguro",
+                "payment_method": "Credito MIrapraia Pagseguro",
+                "timestamp": "18/02/2026 14:43",
+                "user": "eduardo",
+                "details": {
+                    "payment_group_id": "3e23d612-30dc-4f23-8196-a6ea4db9a81d",
+                    "total_payment_group_amount": 461.0,
+                    "payment_method_code": "Credito MIrapraia Pagseguro"
+                }
+            },
+            {
+                "id": "TX_20260218144359_8a9e5d",
+                "type": "sale",
+                "amount": 230.5,
+                "description": "Venda Mesa 53 - PIX Maquininha CNPJ",
+                "payment_method": "PIX Maquininha CNPJ",
+                "timestamp": "18/02/2026 14:43",
+                "user": "eduardo",
+                "details": {
+                    "payment_group_id": "3e23d612-30dc-4f23-8196-a6ea4db9a81d",
+                    "total_payment_group_amount": 461.0,
+                    "payment_method_code": "PIX Maquininha CNPJ"
+                }
+            },
+            {
+                "id": "TX_20260218144547_bb25d4",
+                "type": "sale",
+                "amount": 244.93,
+                "description": "Venda Mesa 47 - Credito MIrapraia Pagseguro",
+                "payment_method": "Credito MIrapraia Pagseguro",
+                "timestamp": "18/02/2026 14:45",
+                "user": "eduardo",
+                "details": {
+                    "payment_group_id": "909690cb-7a6c-4d73-89ad-7f6211cbfab6",
+                    "total_payment_group_amount": 734.8,
+                    "payment_method_code": "Credito MIrapraia Pagseguro"
+                }
+            },
+            {
+                "id": "TX_20260218144547_09efaf",
+                "type": "sale",
+                "amount": 244.93,
+                "description": "Venda Mesa 47 - Credito MIrapraia Pagseguro",
+                "payment_method": "Credito MIrapraia Pagseguro",
+                "timestamp": "18/02/2026 14:45",
+                "user": "eduardo",
+                "details": {
+                    "payment_group_id": "909690cb-7a6c-4d73-89ad-7f6211cbfab6",
+                    "total_payment_group_amount": 734.8,
+                    "payment_method_code": "Credito MIrapraia Pagseguro"
+                }
+            },
+            {
+                "id": "TX_20260218144547_0dcc38",
+                "type": "sale",
+                "amount": 244.94,
+                "description": "Venda Mesa 47 - Credito MIrapraia Pagseguro",
+                "payment_method": "Credito MIrapraia Pagseguro",
+                "timestamp": "18/02/2026 14:45",
+                "user": "eduardo",
+                "details": {
+                    "payment_group_id": "909690cb-7a6c-4d73-89ad-7f6211cbfab6",
+                    "total_payment_group_amount": 734.8,
+                    "payment_method_code": "Credito MIrapraia Pagseguro"
+                }
+            }
+        ],
         "status": "open",
         "closed_at": null,
         "closing_balance": null,

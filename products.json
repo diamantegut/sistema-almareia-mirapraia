@@ -42,11 +42,16 @@
             "DIEGO"
         ],
         "category": "Bruto Carnes",
-        "min_stock": 20.0,
+        "min_stock": 10.0,
         "package_size": 1.0,
         "purchase_unit": "kilograma",
         "frequency": "Quinzenal",
-        "is_internal": false
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": ""
     },
     {
         "id": "4",
@@ -526,11 +531,16 @@
             "ceasa"
         ],
         "category": "Condimento",
-        "min_stock": 2.0,
+        "min_stock": 1.0,
         "package_size": 1.0,
         "purchase_unit": "kilograma",
-        "frequency": "Mensal",
-        "is_internal": false
+        "frequency": "Semanal",
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": ""
     },
     {
         "id": "39",
@@ -590,11 +600,16 @@
             "ceasa"
         ],
         "category": "Condimento",
-        "min_stock": 2.0,
+        "min_stock": 1.0,
         "package_size": 1.0,
         "purchase_unit": "kilograma",
-        "frequency": "Sem Frequência",
-        "is_internal": false
+        "frequency": "Quinzenal",
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": ""
     },
     {
         "id": "44",
@@ -1452,9 +1467,10 @@
         "name": "Massa de Pastel",
         "department": "Estoques",
         "unit": "Kilogramas",
-        "price": 0.0,
+        "price": 3.35,
         "suppliers": [
-            "Estoque Inicial"
+            "Estoque Inicial",
+            "Mercado"
         ],
         "category": "Frios",
         "min_stock": 0.0
@@ -1555,9 +1571,14 @@
         "category": "Mercearia (Liquido)",
         "min_stock": 2.0,
         "package_size": 1.0,
-        "purchase_unit": "caixa",
-        "frequency": "Mensal",
-        "is_internal": false
+        "purchase_unit": "unidade",
+        "frequency": "Semanal",
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": ""
     },
     {
         "id": "119",
@@ -2082,14 +2103,24 @@
     {
         "id": "156",
         "name": "Farinha de Trigo",
-        "department": "Estoques",
+        "department": "Cozinha",
         "unit": "Kilogramas",
         "price": 4.29,
         "suppliers": [
-            "Estoque Inicial"
+            "atacamax",
+            "KarneKeijo"
         ],
         "category": "Mercearia Seca",
-        "min_stock": 0.0
+        "min_stock": 20.0,
+        "package_size": 1.0,
+        "purchase_unit": "fardo",
+        "frequency": "Semanal",
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": ""
     },
     {
         "id": "157",
@@ -2106,14 +2137,23 @@
     {
         "id": "158",
         "name": "Feijão Carioca",
-        "department": "Estoques",
+        "department": "Cozinha",
         "unit": "Kilogramas",
         "price": 7.65,
         "suppliers": [
             "Estoque Inicial"
         ],
         "category": "Mercearia Seca",
-        "min_stock": 0.0
+        "min_stock": 0.0,
+        "package_size": 1.0,
+        "purchase_unit": "",
+        "frequency": "Sem Frequência",
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": ""
     },
     {
         "id": "159",
@@ -2905,7 +2945,12 @@
         "package_size": 1.0,
         "purchase_unit": "NÃO SE COMPRA",
         "frequency": "Sem Frequência",
-        "is_internal": false
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": ""
     },
     {
         "id": "220",
@@ -3261,11 +3306,16 @@
             "ceasa"
         ],
         "category": "Verduras",
-        "min_stock": 20.0,
+        "min_stock": 1.0,
         "package_size": 1.0,
-        "purchase_unit": "kilograma",
-        "frequency": "Sem Frequência",
-        "is_internal": false
+        "purchase_unit": "unidade",
+        "frequency": "Semanal",
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": ""
     },
     {
         "id": "248",
@@ -3274,14 +3324,19 @@
         "unit": "Kilogramas",
         "price": 10.0,
         "suppliers": [
-            "ceasa"
+            "CEASA"
         ],
         "category": "Verduras",
         "min_stock": 4.0,
         "package_size": 1.0,
-        "purchase_unit": "unidadde",
-        "frequency": "Sem Frequência",
-        "is_internal": false
+        "purchase_unit": "unidade",
+        "frequency": "Semanal",
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": ""
     },
     {
         "id": "249",
@@ -3455,7 +3510,7 @@
         "name": "Cenoura",
         "department": "Cozinha",
         "unit": "Kilogramas",
-        "price": 6.8,
+        "price": 4.65,
         "suppliers": [
             "ceasa",
             "Mercado"
@@ -3489,9 +3544,10 @@
         "name": "Coentro",
         "department": "Estoques",
         "unit": "Kilogramas",
-        "price": 0.0,
+        "price": 2.35,
         "suppliers": [
-            "Estoque Inicial"
+            "Estoque Inicial",
+            "Mercado"
         ],
         "category": "Verduras",
         "min_stock": 0.0
@@ -3573,9 +3629,10 @@
         "name": "Pimentão Verde",
         "department": "Estoques",
         "unit": "Kilogramas",
-        "price": 0.0,
+        "price": 4.99,
         "suppliers": [
-            "Estoque Inicial"
+            "Estoque Inicial",
+            "Mercado"
         ],
         "category": "Verduras",
         "min_stock": 0.0
@@ -5225,22 +5282,6 @@
         "min_stock": 0.4772727272727273
     },
     {
-        "id": "392",
-        "name": "Açucar Sachet",
-        "department": "Serviço",
-        "unit": "Unidades",
-        "price": 0.04,
-        "suppliers": [
-            "atacamax"
-        ],
-        "category": "Artigos de Bar e Copa",
-        "min_stock": 1.0,
-        "package_size": 1.0,
-        "purchase_unit": "caixa",
-        "frequency": "Mensal",
-        "is_internal": false
-    },
-    {
         "id": "393",
         "name": "Adoçante Liquido",
         "department": "Serviço",
@@ -5524,15 +5565,20 @@
         "unit": "Kilogramas",
         "price": 5.39,
         "suppliers": [
-            "ceasa",
+            "Ceasa",
             "Mercado"
         ],
         "category": "Frutas",
-        "min_stock": 20.0,
+        "min_stock": 12.0,
         "package_size": 1.0,
         "purchase_unit": "unidade",
-        "frequency": "Sem Frequência",
-        "is_internal": false
+        "frequency": "Semanal",
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": ""
     },
     {
         "id": "415",
@@ -5691,9 +5737,10 @@
         "name": "Maracujá",
         "department": "Estoques",
         "unit": "Kilogramas",
-        "price": 6.07,
+        "price": 9.95,
         "suppliers": [
-            "Estoque Inicial"
+            "Estoque Inicial",
+            "Mercado"
         ],
         "category": "Frutas",
         "min_stock": 0.0
@@ -10158,14 +10205,24 @@
     {
         "id": "776",
         "name": "Macarrão funcionarios",
-        "department": "Estoques",
+        "department": "Estoque",
         "unit": "Unidades",
         "price": 2.68,
         "suppliers": [
-            "Estoque Inicial"
+            "atacamax",
+            "KarneKeijo"
         ],
         "category": "Estoque Principal - Cozinha",
-        "min_stock": 0.0
+        "min_stock": 32.0,
+        "package_size": 1.0,
+        "purchase_unit": "fardo",
+        "frequency": "Semanal",
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": ""
     },
     {
         "id": "777",
@@ -10587,76 +10644,6 @@
         "is_internal": false
     },
     {
-        "id": "800",
-        "name": "Açucar",
-        "department": "Estoque",
-        "unit": "Kilogramas",
-        "price": 3.14,
-        "category": "Estoque Principal - cozinha",
-        "min_stock": 30.0,
-        "package_size": 1.0,
-        "purchase_unit": "fardo",
-        "frequency": "Semanal",
-        "suppliers": [
-            "atacamax"
-        ],
-        "is_internal": false,
-        "ncm": "",
-        "cest": "",
-        "icms_rate": 0.0,
-        "anp_code": "",
-        "cfop_default": ""
-    },
-    {
-        "id": "801",
-        "name": "Charque desfiada",
-        "department": "Cozinha",
-        "unit": "Kilogramas",
-        "price": 64.07,
-        "category": "Confeitaria",
-        "min_stock": 8.0,
-        "package_size": 1.0,
-        "purchase_unit": "kilograma",
-        "frequency": "Semanal",
-        "suppliers": [
-            "KarneKeijo",
-            "farmaggio"
-        ],
-        "is_internal": false
-    },
-    {
-        "id": "800",
-        "name": "Açucar",
-        "department": "Estoque",
-        "unit": "Litros",
-        "price": 3.14,
-        "category": "Estoque Principal - cozinha",
-        "min_stock": 30.0,
-        "package_size": 1.0,
-        "purchase_unit": "fardo",
-        "frequency": "Semanal",
-        "suppliers": [
-            "atacamax"
-        ],
-        "is_internal": false
-    },
-    {
-        "id": "801",
-        "name": "Farinha de Trigo",
-        "department": "Estoque",
-        "unit": "Kilogramas",
-        "price": 4.32,
-        "category": "Estoque Principal - cozinha",
-        "min_stock": 30.0,
-        "package_size": 1.0,
-        "purchase_unit": "fardo",
-        "frequency": "Semanal",
-        "suppliers": [
-            "atacamax"
-        ],
-        "is_internal": false
-    },
-    {
         "id": "802",
         "name": "leite de coco",
         "department": "Estoque",
@@ -10781,6 +10768,225 @@
         "frequency": "Semanal",
         "suppliers": [
             "grasi"
+        ],
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": ""
+    },
+    {
+        "id": "810",
+        "name": "Stella artois longue neck",
+        "department": "Estoque",
+        "unit": "Litros",
+        "price": 5.46,
+        "category": "Estoque Principal - Bar",
+        "min_stock": 240.0,
+        "package_size": 1.0,
+        "purchase_unit": "fardo",
+        "frequency": "Semanal",
+        "suppliers": [
+            "ambev",
+            "pit stop"
+        ],
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": ""
+    },
+    {
+        "id": "811",
+        "name": "Farinha Panko",
+        "department": "Estoque",
+        "unit": "Kilogramas",
+        "price": 5.0,
+        "category": "Estoque Principal - cozinha",
+        "min_stock": 20.0,
+        "package_size": 1.0,
+        "purchase_unit": "caixa",
+        "frequency": "Quinzenal",
+        "suppliers": [
+            "atacamax"
+        ],
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": ""
+    },
+    {
+        "id": "814",
+        "name": "sal refinado",
+        "department": "Estoque",
+        "unit": "Kilogramas",
+        "price": 1.78,
+        "category": "Estoque Principal - cozinha",
+        "min_stock": 30.0,
+        "package_size": 1.0,
+        "purchase_unit": "fardo",
+        "frequency": "Semanal",
+        "suppliers": [
+            "atacamax",
+            "KarneKeijo"
+        ],
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": ""
+    },
+    {
+        "id": "815",
+        "name": "Papel Higiênico BigRool",
+        "department": "Estoque",
+        "unit": "Litros",
+        "price": 7.63,
+        "category": "Estoque Principal - Limpeza",
+        "min_stock": 32.0,
+        "package_size": 1.0,
+        "purchase_unit": "fardo",
+        "frequency": "Semanal",
+        "suppliers": [
+            "P&R",
+            "ceasa ( grazi )"
+        ],
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": ""
+    },
+    {
+        "id": "816",
+        "name": " Papel Interfolha",
+        "department": "Estoque",
+        "unit": "Unidades",
+        "price": 65.76,
+        "category": "Estoque Principal - Limpeza",
+        "min_stock": 20.0,
+        "package_size": 1.0,
+        "purchase_unit": "caixa",
+        "frequency": "Semanal",
+        "suppliers": [
+            "P&R e MKCLEAN",
+            "limpeza"
+        ],
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": ""
+    },
+    {
+        "id": "817",
+        "name": "Papel toalha",
+        "department": "Estoque",
+        "unit": "Litros",
+        "price": 12.49,
+        "category": "Estoque Principal - Limpeza",
+        "min_stock": 36.0,
+        "package_size": 1.0,
+        "purchase_unit": "fardo",
+        "frequency": "Semanal",
+        "suppliers": [
+            "P&R",
+            "ceasa ( grazi )"
+        ],
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": ""
+    },
+    {
+        "id": "818",
+        "name": "Água micelar",
+        "department": "Estoque",
+        "unit": "Litros",
+        "price": 1.43,
+        "category": "Estoque Principal - governança",
+        "min_stock": 2.0,
+        "package_size": 1.0,
+        "purchase_unit": "caixa",
+        "frequency": "Mensal",
+        "suppliers": [
+            "Harus",
+            "Kalyda"
+        ],
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": ""
+    },
+    {
+        "id": "816",
+        "name": "Stella artois longue neck",
+        "department": "Serviço",
+        "unit": "Litros",
+        "price": 5.46,
+        "category": "Cervejas",
+        "min_stock": 48.0,
+        "package_size": 1.0,
+        "purchase_unit": "fardo",
+        "frequency": "Semanal",
+        "suppliers": [
+            "ambev",
+            "pit stop"
+        ],
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": ""
+    },
+    {
+        "id": "815",
+        "name": "Farinha de Trigo ( principal )",
+        "department": "Estoque",
+        "unit": "Kilogramas",
+        "price": 4.29,
+        "category": "Estoque Principal - cozinha",
+        "min_stock": 40.0,
+        "package_size": 1.0,
+        "purchase_unit": "fardo",
+        "frequency": "Semanal",
+        "suppliers": [
+            "atacamax",
+            "KarneKeijo"
+        ],
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": ""
+    },
+    {
+        "id": "814",
+        "name": "Feijão Carioca",
+        "department": "Estoque",
+        "unit": "Kilogramas",
+        "price": 7.65,
+        "category": "Estoque Principal - cozinha",
+        "min_stock": 40.0,
+        "package_size": 1.0,
+        "purchase_unit": "fardo",
+        "frequency": "Semanal",
+        "suppliers": [
+            "atacamax",
+            "KarneKeijo"
         ],
         "is_internal": false,
         "ncm": "",
