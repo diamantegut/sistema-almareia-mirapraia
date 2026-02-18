@@ -1092,25 +1092,25 @@ def list_local_nfe_xml():
                     file_path = os.path.join(root_dir, name)
                     rel_path = os.path.relpath(file_path, base_storage_path)
                     stat = os.stat(file_path)
-                     modified_dt = datetime.fromtimestamp(stat.st_mtime)
-                     if modified_dt < limit_date:
-                         continue
-                     access_key = None
-                     items_count = 0
-                     try:
-                         tree = ET.parse(file_path)
-                         root = tree.getroot()
-                         parsed = _parse_nfe_xml(root)
-                         access_key = parsed.get('access_key')
-                         items_count = len(parsed.get('items', []))
-                     except Exception:
-                         parsed = {}
-                     entries_for_key = []
-                     if access_key:
-                         for entry in entries:
-                             if entry.get('access_key') == access_key:
-                                 entries_for_key.append(entry)
-                     used = bool(items_count and len(entries_for_key) >= items_count)
+                    modified_dt = datetime.fromtimestamp(stat.st_mtime)
+                    if modified_dt < limit_date:
+                        continue
+                    access_key = None
+                    items_count = 0
+                    try:
+                        tree = ET.parse(file_path)
+                        root = tree.getroot()
+                        parsed = _parse_nfe_xml(root)
+                        access_key = parsed.get('access_key')
+                        items_count = len(parsed.get('items', []))
+                    except Exception:
+                        parsed = {}
+                    entries_for_key = []
+                    if access_key:
+                        for entry in entries:
+                            if entry.get('access_key') == access_key:
+                                entries_for_key.append(entry)
+                    used = bool(items_count and len(entries_for_key) >= items_count)
                     documents.append({
                         'id': rel_path.replace('\\', '/'),
                         'name': name,
