@@ -404,7 +404,7 @@
         });
         
         // Supplier Datalist (From suppliers variable)
-        const suppliers = {{ suppliers | tojson | safe }};
+        const suppliers = JSON.parse('{{ (suppliers | default([])) | tojson | safe }}');
         const supplierList = document.getElementById('supplierList');
         suppliers.forEach(s => {
             const option = document.createElement('option');

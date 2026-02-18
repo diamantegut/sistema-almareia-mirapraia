@@ -102,6 +102,11 @@ class TestFiscalValidation(unittest.TestCase):
         self.assertEqual(nfe_items[0]['prod']['CEST'], '0300700')
         self.assertEqual(nfe_items[0]['prod']['CFOP'], '5102')
 
+        # Verify Sandbox Environment configuration
+        self.assertEqual(args[0], "https://api.sandbox.nuvemfiscal.com.br/nfce")
+        self.assertEqual(payload['ambiente'], 'homologacao')
+        self.assertEqual(payload['infNFe']['ide']['tpAmb'], 2)
+
     @patch('app.services.fiscal_service.get_access_token')
     def test_emit_invoice_missing_data_fallback(self, mock_get_token):
         mock_get_token.return_value = "fake_token"

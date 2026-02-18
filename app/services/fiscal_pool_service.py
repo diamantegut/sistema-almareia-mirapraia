@@ -203,6 +203,23 @@ class FiscalPoolService:
             'history': []
         }
         
+        # Snapshot minimal fiscal config at the time of export for stability on later emission
+        try:
+            # Lazy import to avoid circular import at module import time
+            from app.services.fiscal_service import load_fiscal_settings, get_fiscal_integration
+            settings = load_fiscal_settings()
+            integ = get_fiscal_integration(settings, cnpj_emitente)
+            if integ:
+                entry['fiscal_snapshot'] = {
+                    'sefaz_environment': integ.get('sefaz_environment', integ.get('environment', 'production')),
+                    'environment': integ.get('environment', 'production'),
+                    'serie': integ.get('serie'),
+                    'ie_emitente': integ.get('ie_emitente'),
+                    'CRT': integ.get('CRT', integ.get('crt'))
+                }
+        except Exception:
+            pass
+        
         pool.append(entry)
         FiscalPoolService._save_pool(pool)
         
@@ -254,6 +271,25 @@ class FiscalPoolService:
         except Exception as e:
             print(f"Exception syncing fiscal entry {entry['id']}: {e}")
             return False
+
+    @staticmethod
+    def set_xml_ready(entry_id, ready=True, xml_path=None):
+        """
+        Marks an entry as having its XML available and optionally stores the path.
+        """
+        pool = FiscalPoolService._load_pool()
+        for entry in pool:
+            if entry['id'] == entry_id:
+                entry['xml_ready'] = bool(ready)
+                if xml_path:
+                    entry['xml_path'] = xml_path
+                try:
+                    with open(FISCAL_POOL_FILE, 'w', encoding='utf-8') as f:
+                        json.dump(pool, f, indent=4, ensure_ascii=False)
+                    return True
+                except Exception:
+                    return False
+        return False
 
     @staticmethod
     def get_pool(filters=None):

@@ -768,7 +768,8 @@ def admin_security_settings():
 from app.services.printer_manager import load_printers, save_printers, load_printer_settings, save_printer_settings
 from app.services.printing_service import test_printer_connection
 from app.services.data_service import load_menu_items, save_menu_items
-from app.services.fiscal_service import load_fiscal_settings, save_fiscal_settings, FiscalPoolService, get_access_token
+from app.services.fiscal_service import load_fiscal_settings, save_fiscal_settings, FiscalPoolService, get_access_token, get_fiscal_integration, download_xml
+from app.services.system_config_manager import get_data_path
 
 @admin_bp.route('/config/printers', methods=['GET', 'POST'])
 @login_required
@@ -950,6 +951,12 @@ def fiscal_config():
         env_val = request.form.get('environment')
         integration['environment'] = 'homologation' if env_val == '2' else 'production'
         
+        sefaz_env_val = request.form.get('sefaz_environment')
+        if sefaz_env_val == '2':
+            integration['sefaz_environment'] = 'homologation'
+        else:
+            integration['sefaz_environment'] = 'production'
+        
         integration['client_id'] = request.form.get('client_id')
         integration['client_secret'] = request.form.get('client_secret')
         integration['csc_id'] = request.form.get('csc_id')
@@ -1044,6 +1051,11 @@ def fiscal_pool_action():
             else:
                 return jsonify({'success': False, 'error': "Nenhuma emissão processada (Item não encontrado, já emitido ou status inválido)."})
         except Exception as e:
+            try:
+                # Persist the error into the pool so it appears no modal
+                FiscalPoolService.update_status(entry_id, 'failed', user=session.get('user'), error_msg=str(e))
+            except Exception:
+                pass
             traceback.print_exc()
             return jsonify({'success': False, 'error': f"Erro interno ao emitir: {str(e)}"})
             
@@ -1063,6 +1075,85 @@ def fiscal_pool_action():
     return jsonify({'success': True, 'message': msg})
 
 import traceback
+
+@admin_bp.route('/admin/fiscal/pool/open_xml', methods=['POST'])
+@login_required
+def fiscal_pool_open_xml():
+    if session.get('role') != 'admin':
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 403
+    data = request.json or {}
+    entry_id = data.get('entry_id')
+    if not entry_id:
+        return jsonify({'success': False, 'error': 'ID ausente'}), 400
+    entry = FiscalPoolService.get_entry(entry_id)
+    if not entry:
+        return jsonify({'success': False, 'error': 'Entrada não encontrada'}), 404
+    if entry.get('status') != 'emitted':
+        return jsonify({'success': False, 'error': 'Nota ainda não emitida'}), 400
+    fiscal_doc_uuid = entry.get('fiscal_doc_uuid')
+    if not fiscal_doc_uuid:
+        return jsonify({'success': False, 'error': 'UUID fiscal ausente'}), 400
+    try:
+        settings = load_fiscal_settings()
+        payment_methods = entry.get('payment_methods', [])
+        target_cnpj = None
+        for pm in payment_methods:
+            if pm.get('fiscal_cnpj'):
+                target_cnpj = pm.get('fiscal_cnpj')
+                break
+        integration_settings = get_fiscal_integration(settings, target_cnpj)
+        base_dir = get_data_path(os.path.join('fiscal', 'xmls', 'emitted'))
+        found_path = None
+        for root, dirs, files in os.walk(base_dir):
+            name = f"{fiscal_doc_uuid}.xml"
+            if name in files:
+                found_path = os.path.join(root, name)
+                break
+        if not found_path:
+            try:
+                found_path = download_xml(fiscal_doc_uuid, integration_settings)
+            except Exception:
+                found_path = None
+        # If we still don't have the exact file, open the emitted folder as a fallback
+        if not found_path or not os.path.exists(found_path):
+            base_dir = get_data_path(os.path.join('fiscal', 'xmls', 'emitted'))
+            try:
+                subprocess.Popen(['explorer', base_dir])
+                resp = {'success': True, 'message': 'XML ainda não disponível. Pasta aberta.'}
+                return jsonify(resp)
+            except Exception:
+                return jsonify({'success': False, 'error': 'XML não encontrado'}), 404
+        else:
+            try:
+                subprocess.Popen(['explorer', '/select,', found_path])
+            except Exception:
+                # If select fails, open the directory
+                try:
+                    subprocess.Popen(['explorer', os.path.dirname(found_path)])
+                    resp2 = {'success': True, 'message': 'Pasta aberta.'}
+                    return jsonify(resp2)
+                except Exception:
+                    return jsonify({'success': False, 'error': 'Falha ao abrir pasta'}), 500
+            return jsonify({'success': True})
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@admin_bp.route('/admin/fiscal/pool/xml_status', methods=['POST'])
+@login_required
+def fiscal_pool_xml_status():
+    if session.get('role') != 'admin':
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 403
+    data = request.json or {}
+    entry_id = data.get('entry_id')
+    if not entry_id:
+        return jsonify({'success': False, 'error': 'ID ausente'}), 400
+    entry = FiscalPoolService.get_entry(entry_id)
+    if not entry:
+        return jsonify({'success': False, 'error': 'Entrada não encontrada'}), 404
+    ready = bool(entry.get('xml_ready'))
+    xml_path = entry.get('xml_path')
+    return jsonify({'success': True, 'ready': ready, 'xml_path': xml_path})
 
 @admin_bp.route('/api/fiscal/receive', methods=['POST'])
 def api_fiscal_receive():

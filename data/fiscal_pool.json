@@ -14722,9 +14722,9 @@
             "name": "",
             "type": "passante"
         },
-        "status": "failed",
+        "status": "emitted",
         "notes": "Mesa 40",
-        "fiscal_doc_uuid": null,
+        "fiscal_doc_uuid": "nfc_3a1f87e33f354f41b843f25c2e8202a7",
         "history": [
             {
                 "timestamp": "2026-02-14 21:52:39",
@@ -14732,8 +14732,18 @@
                 "from": "pending",
                 "to": "failed",
                 "user": "Sistema"
+            },
+            {
+                "timestamp": "2026-02-18 08:43:33",
+                "action": "status_change",
+                "from": "failed",
+                "to": "emitted",
+                "user": "Sistema",
+                "details": null
             }
-        ]
+        ],
+        "fiscal_serie": 8,
+        "fiscal_number": 656
     },
     {
         "id": "34bac839-0346-48ef-9eef-b9d4b8c68e32",
@@ -43180,6 +43190,14 @@
                 "to": "failed",
                 "user": "Sistema",
                 "details": "Erro Nuvem Fiscal: Validation failed"
+            },
+            {
+                "timestamp": "2026-02-18 08:37:14",
+                "action": "status_change",
+                "from": "failed",
+                "to": "failed",
+                "user": "Sistema",
+                "details": "Erro Nuvem Fiscal: Validation failed"
             }
         ],
         "last_error": "Erro Nuvem Fiscal: Validation failed"
@@ -43236,9 +43254,17 @@
                 "to": "failed",
                 "user": "Sistema",
                 "details": "Falha na autenticação com Nuvem Fiscal."
+            },
+            {
+                "timestamp": "2026-02-18 08:37:25",
+                "action": "status_change",
+                "from": "failed",
+                "to": "failed",
+                "user": "Sistema",
+                "details": "Erro Nuvem Fiscal: Validation failed"
             }
         ],
-        "last_error": "Falha na autenticação com Nuvem Fiscal."
+        "last_error": "Erro Nuvem Fiscal: Validation failed"
     },
     {
         "id": "dcefa3af-7fe0-4d79-b3dc-51d3005bcf14",
@@ -53448,6 +53474,14 @@
                 "to": "failed",
                 "user": "Sistema",
                 "details": "Erro Nuvem Fiscal: Validation failed"
+            },
+            {
+                "timestamp": "2026-02-18 08:52:17",
+                "action": "status_change",
+                "from": "failed",
+                "to": "failed",
+                "user": "Sistema",
+                "details": "Erro Nuvem Fiscal: Validation failed"
             }
         ],
         "last_error": "Erro Nuvem Fiscal: Validation failed"
@@ -53610,9 +53644,9 @@
             "name": "",
             "type": "passante"
         },
-        "status": "failed",
+        "status": "emitted",
         "notes": "Mesa 41",
-        "fiscal_doc_uuid": null,
+        "fiscal_doc_uuid": "nfc_3a1f87f965384c22b78d48ec70c78e79",
         "history": [
             {
                 "timestamp": "2026-02-17 22:27:12",
@@ -53621,8 +53655,314 @@
                 "to": "failed",
                 "user": "Sistema",
                 "details": "Erro Nuvem Fiscal: Validation failed"
+            },
+            {
+                "timestamp": "2026-02-18 08:33:29",
+                "action": "status_change",
+                "from": "failed",
+                "to": "failed",
+                "user": "Sistema",
+                "details": "Erro Nuvem Fiscal: Validation failed"
+            },
+            {
+                "timestamp": "2026-02-18 08:52:08",
+                "action": "status_change",
+                "from": "failed",
+                "to": "failed",
+                "user": "Sistema",
+                "details": "Erro Nuvem Fiscal: Validation failed"
+            },
+            {
+                "timestamp": "2026-02-18 08:55:43",
+                "action": "status_change",
+                "from": "failed",
+                "to": "failed",
+                "user": "Sistema",
+                "details": "Erro Nuvem Fiscal: Validation failed"
+            },
+            {
+                "timestamp": "2026-02-18 08:56:42",
+                "action": "status_change",
+                "from": "failed",
+                "to": "failed",
+                "user": "Sistema",
+                "details": "Erro Nuvem Fiscal: Validation failed"
+            },
+            {
+                "timestamp": "2026-02-18 08:59:01",
+                "action": "status_change",
+                "from": "failed",
+                "to": "failed",
+                "user": "Sistema",
+                "details": "Erro Nuvem Fiscal: Validation failed"
+            },
+            {
+                "timestamp": "2026-02-18 08:59:15",
+                "action": "status_change",
+                "from": "failed",
+                "to": "failed",
+                "user": "Sistema",
+                "details": "Erro Nuvem Fiscal: Validation failed"
+            },
+            {
+                "timestamp": "2026-02-18 09:01:44",
+                "action": "status_change",
+                "from": "failed",
+                "to": "failed",
+                "user": "Sistema",
+                "details": "Erro Nuvem Fiscal: Validation failed | Detalhes: InvalidFormat: O campo 'infNFe.det[0].prod.CEST' não corresponde ao formato esperado ^([0-9]{7})$ ; InvalidFormat: O campo 'infNFe.det[2].prod.CEST' não corresponde ao formato esperado ^([0-9]{7})$"
+            },
+            {
+                "timestamp": "2026-02-18 09:07:44",
+                "action": "status_change",
+                "from": "failed",
+                "to": "emitted",
+                "user": "Sistema",
+                "details": null
             }
         ],
-        "last_error": "Erro Nuvem Fiscal: Validation failed"
+        "last_error": "Erro Nuvem Fiscal: Validation failed | Detalhes: InvalidFormat: O campo 'infNFe.det[0].prod.CEST' não corresponde ao formato esperado ^([0-9]{7})$ ; InvalidFormat: O campo 'infNFe.det[2].prod.CEST' não corresponde ao formato esperado ^([0-9]{7})$",
+        "fiscal_serie": 8,
+        "fiscal_number": 657
+    },
+    {
+        "id": "f3fe9e43-d719-40d8-b1f8-3aafff57718c",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "MESA_40_202602180753",
+        "closed_at": "2026-02-18 07:53:39",
+        "closed_by": "admin_tester",
+        "total_amount": 44.0,
+        "fiscal_amount": 44.0,
+        "items": [
+            {
+                "id": "b1ac79d9-9025-46ca-a347-6b834297dcb1",
+                "product_id": "3",
+                "name": "Pizza",
+                "price": 40.0,
+                "qty": 1.0,
+                "category": "Refeição",
+                "created_at": "18/02/2026 07:53",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "00000000",
+                "cest": null,
+                "cfop": null,
+                "origin": null,
+                "tax_info": null,
+                "total": 40.0,
+                "tax_situation": null,
+                "icms_rate": null,
+                "pis_cst": null,
+                "cofins_cst": null
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 20.0,
+                "is_fiscal": true
+            },
+            {
+                "method": "Cartão Crédito",
+                "amount": 24.0,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "cfa67554-c122-4461-adcc-4704a0989fa9",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "MESA_40_202602180753",
+        "closed_at": "2026-02-18 07:53:56",
+        "closed_by": "admin_tester",
+        "total_amount": 44.0,
+        "fiscal_amount": 44.0,
+        "items": [
+            {
+                "id": "5506bdf4-fbb8-4a38-9a21-d19af42c9050",
+                "product_id": "3",
+                "name": "Pizza",
+                "price": 40.0,
+                "qty": 1.0,
+                "category": "Refeição",
+                "created_at": "18/02/2026 07:53",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "00000000",
+                "cest": null,
+                "cfop": null,
+                "origin": null,
+                "tax_info": null,
+                "total": 40.0,
+                "tax_situation": null,
+                "icms_rate": null,
+                "pis_cst": null,
+                "cofins_cst": null
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 20.0,
+                "is_fiscal": true
+            },
+            {
+                "method": "Dinheiro",
+                "amount": 24.0,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "failed",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": [
+            {
+                "timestamp": "2026-02-18 08:56:30",
+                "action": "status_change",
+                "from": "pending",
+                "to": "failed",
+                "user": "Sistema",
+                "details": "Erro Nuvem Fiscal: Validation failed: O campo 'infNFe.det[0].prod.CFOP' é obrigatório"
+            }
+        ],
+        "last_error": "Erro Nuvem Fiscal: Validation failed: O campo 'infNFe.det[0].prod.CFOP' é obrigatório"
+    },
+    {
+        "id": "b2b149d7-4a77-4fda-bafa-6ee1309a9c79",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "MESA_40_202602180754",
+        "closed_at": "2026-02-18 07:54:46",
+        "closed_by": "admin_tester",
+        "total_amount": 40.0,
+        "fiscal_amount": 40.0,
+        "items": [
+            {
+                "id": "6795180a-dd4a-44af-a003-b16aa585b72c",
+                "product_id": "3",
+                "name": "Pizza",
+                "price": 40.0,
+                "qty": 1.0,
+                "category": "Refeição",
+                "created_at": "18/02/2026 07:54",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "00000000",
+                "cest": null,
+                "cfop": null,
+                "origin": null,
+                "tax_info": null,
+                "total": 40.0,
+                "tax_situation": null,
+                "icms_rate": null,
+                "pis_cst": null,
+                "cofins_cst": null
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 40.0,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "a1462ede-9dd9-4c48-b167-ee45ea51e1a8",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "MESA_40_202602180755",
+        "closed_at": "2026-02-18 07:55:19",
+        "closed_by": "admin_tester",
+        "total_amount": 55.00000000000001,
+        "fiscal_amount": 55.0,
+        "items": [
+            {
+                "id": "528e302f-cf77-41a4-bbae-0bdde52d23df",
+                "product_id": "1",
+                "name": "Água",
+                "price": 5.0,
+                "qty": 10.0,
+                "category": "Bebidas",
+                "created_at": "18/02/2026 07:55",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "00000000",
+                "cest": null,
+                "cfop": null,
+                "origin": null,
+                "tax_info": null,
+                "total": 50.0,
+                "tax_situation": null,
+                "icms_rate": null,
+                "pis_cst": null,
+                "cofins_cst": null
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 55.0,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
     }
 ]

@@ -6,6 +6,7 @@ import time
 import re
 import csv
 import uuid
+import threading
 from datetime import datetime
 from app.services.system_config_manager import (
     get_data_path, get_fiscal_path, PENDING_FISCAL_EMISSIONS_FILE, 
@@ -271,7 +272,10 @@ def increment_fiscal_number(settings, cnpj):
             logger.error(f"No integration found for CNPJ {cnpj} to increment number.")
             return False
 
-        current_number = int(target_integration.get('next_number', 1))
+        try:
+            current_number = int(target_integration.get('next_number', 1))
+        except Exception:
+            current_number = 1
         target_integration['next_number'] = str(current_number + 1)
         
         save_fiscal_settings(settings)
@@ -352,7 +356,14 @@ def process_pending_emissions(settings=None, specific_id=None):
         
         # Get specific integration settings for this emission's CNPJ
         emission_cnpj = emission.get('cnpj_emitente')
-        integration_settings = get_fiscal_integration(settings, emission_cnpj)
+        integration_settings = get_fiscal_integration(settings, emission_cnpj).copy()
+        
+        # If a fiscal snapshot exists on the entry, prefer those values to keep historical config
+        snap = emission.get('fiscal_snapshot') or {}
+        if isinstance(snap, dict) and snap:
+            for k in ['sefaz_environment', 'environment', 'serie', 'ie_emitente', 'CRT', 'crt']:
+                if snap.get(k) is not None:
+                    integration_settings[k] = snap.get(k)
         
         if not integration_settings:
             logger.error(f"No fiscal integration found for CNPJ {emission_cnpj}. Skipping emission {emission['id']}")
@@ -415,7 +426,25 @@ def process_pending_emissions(settings=None, specific_id=None):
                 xml_path = download_xml(nfe_id, integration_settings)
                 if xml_path:
                     if source == 'queue': emission['xml_path'] = xml_path
+                    if source == 'pool':
+                        try:
+                            FiscalPoolService.set_xml_ready(emission['id'], True, xml_path)
+                        except Exception:
+                            pass
                     logger.info(f"XML saved at {xml_path}")
+                else:
+                    # Schedule a delayed attempt 30s later and mark ready when done
+                    def _delayed_fetch():
+                        try:
+                            delayed_path = download_xml(nfe_id, integration_settings)
+                            if delayed_path and source == 'pool':
+                                FiscalPoolService.set_xml_ready(emission['id'], True, delayed_path)
+                        except Exception as _e:
+                            logger.error(f"Delayed XML fetch failed for {nfe_id}: {_e}")
+                    try:
+                        threading.Timer(30.0, _delayed_fetch).start()
+                    except Exception:
+                        pass
             except Exception as e:
                 logger.error(f"Failed to download XML for {nfe_id}: {e}")
             
@@ -505,8 +534,10 @@ def sync_nfce_company_settings(integration_settings):
     base_url = "https://api.sandbox.nuvemfiscal.com.br" if integration_settings.get('environment') == 'homologation' else "https://api.nuvemfiscal.com.br"
     api_url = f"{base_url}/empresas/{cnpj_emitente}/nfce"
 
+    sefaz_env = integration_settings.get('sefaz_environment', integration_settings.get('environment', 'production'))
+
     payload = {
-        "ambiente": "homologacao" if integration_settings.get('environment') == 'homologation' else "producao"
+        "ambiente": "homologacao" if sefaz_env == 'homologation' else "producao"
     }
 
     crt = integration_settings.get('CRT', integration_settings.get('crt', 3))
@@ -569,20 +600,20 @@ def download_xml(nfe_id, settings):
     }
 
     try:
-        response = requests.get(api_url, headers=headers)
-        if response.status_code == 200:
-            # Ensure directory exists with structure: fiscal_xmls/{CNPJ}/{YYYY-MM}/
+        attempts = 5
+        response = None
+        for _ in range(attempts):
+            response = requests.get(api_url, headers=headers)
+            if response.status_code == 200:
+                break
+            time.sleep(2)
+        if response and response.status_code == 200:
+            # Ensure directory exists with structure under DATA: data/fiscal/xmls/emitted/{YYYY}/{MM}/
             cnpj = settings.get('cnpj_emitente', 'unknown_cnpj')
             year_month = datetime.now().strftime('%Y/%m')
             
-            # Use configured path or default fiscal path
-            base_path = settings.get('xml_storage_path')
-            if base_path:
-                if not os.path.isabs(base_path):
-                    base_path = os.path.join(os.getcwd(), base_path)
-            else:
-                base_path = get_fiscal_path('xmls')
-                
+            # Always save emitted XMLs under DATA directory
+            base_path = get_data_path(os.path.join('fiscal', 'xmls'))
             xml_dir = os.path.join(base_path, 'emitted', year_month)
             if not os.path.exists(xml_dir):
                 os.makedirs(xml_dir)
@@ -590,6 +621,35 @@ def download_xml(nfe_id, settings):
             file_path = os.path.join(xml_dir, f"{nfe_id}.xml")
             with open(file_path, 'wb') as f:
                 f.write(response.content)
+            
+            # Also save a copy named by the 44-digit chave, if detectable
+            try:
+                import xml.etree.ElementTree as ET
+                import re as _re
+                root = ET.fromstring(response.content)
+                chave = None
+                # Try infNFe Id attribute
+                for elem in root.iter():
+                    tag = elem.tag.split('}')[-1]
+                    if tag == 'infNFe':
+                        _id = elem.attrib.get('Id') or elem.attrib.get('id')
+                        if _id:
+                            only_digits = _re.sub(r'[^0-9]', '', _id)
+                            if len(only_digits) == 44:
+                                chave = only_digits
+                                break
+                    if tag == 'chNFe' and elem.text:
+                        only_digits = _re.sub(r'[^0-9]', '', elem.text)
+                        if len(only_digits) == 44:
+                            chave = only_digits
+                            break
+                if chave:
+                    chave_path = os.path.join(xml_dir, f"{chave}.xml")
+                    if not os.path.exists(chave_path):
+                        with open(chave_path, 'wb') as f2:
+                            f2.write(response.content)
+            except Exception:
+                pass
             
             # Validation: Check if file exists and has content
             if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
@@ -599,7 +659,9 @@ def download_xml(nfe_id, settings):
                 logger.error(f"XML save failed validation at {file_path}")
                 return None
         else:
-            logger.error(f"Error downloading XML: {response.status_code} - {response.text}")
+            status = response.status_code if response is not None else 'N/A'
+            text = response.text if response is not None else ''
+            logger.error(f"Error downloading XML: {status} - {text}")
             return None
     except Exception as e:
         logger.error(f"Exception downloading XML: {e}")
@@ -868,8 +930,8 @@ def list_received_nfes(settings):
 
     base_url = "https://api.sandbox.nuvemfiscal.com.br" if settings.get('environment') == 'homologation' else "https://api.nuvemfiscal.com.br"
     
-    # Map internal environment name to API expected values (pt-br)
-    env_param = "homologacao" if settings.get('environment') == 'homologation' else "producao"
+    sefaz_env = settings.get('sefaz_environment', settings.get('environment', 'production'))
+    env_param = "homologacao" if sefaz_env == 'homologation' else "producao"
     
     # Clean CNPJ (remove non-digits just in case, though it looks clean in settings)
     cnpj = settings.get('cnpj_emitente', '').replace('.', '').replace('/', '').replace('-', '')
@@ -1002,10 +1064,8 @@ def sync_received_nfes(settings):
         logger.error(f"Sync NFe Error: {error}")
         return {"error": error, "synced_count": 0}
         
-    # Get storage path from settings or default
-    base_storage_path = settings.get('xml_storage_path', 'fiscal_documents/xmls')
-    if not os.path.isabs(base_storage_path):
-        base_storage_path = os.path.join(os.getcwd(), base_storage_path)
+    # Always store received XMLs under DATA directory for consistency
+    base_storage_path = get_data_path(os.path.join('fiscal', 'xmls'))
     
     if not os.path.exists(base_storage_path):
         try:
@@ -1032,7 +1092,8 @@ def sync_received_nfes(settings):
         except:
             year_month = datetime.now().strftime("%Y/%m")
 
-        target_dir = os.path.join(base_storage_path, year_month)
+        # Save under DATA/fiscal/xmls/received/YYYY/MM
+        target_dir = os.path.join(base_storage_path, 'received', year_month)
         if not os.path.exists(target_dir):
             os.makedirs(target_dir)
 
@@ -1142,10 +1203,15 @@ def emit_invoice(transaction, settings, order_items, customer_cpf_cnpj=None):
                 "indTot": 1,
             }
             
-            # Only add CEST if it has a valid value (not empty)
+            # Only add CEST if it has 7 digits; otherwise omit to avoid validation error
             cest = item.get('cest')
-            if cest and cest.strip():
-                 prod_data["CEST"] = cest.strip()
+            if cest:
+                try:
+                    _digits = re.sub(r'\\D', '', str(cest))
+                    if len(_digits) == 7:
+                        prod_data["CEST"] = _digits
+                except Exception:
+                    pass
     
             nfe_item = {
                 "nItem": nItem,
@@ -1153,7 +1219,7 @@ def emit_invoice(transaction, settings, order_items, customer_cpf_cnpj=None):
                 "imposto": {
                     "ICMS": {
                         "ICMSSN102": {
-                            "orig": int(item.get('origin', 0)),
+                            "orig": int(item.get('origin', 0) or 0),
                             "CSOSN": "102"
                         }
                     },
@@ -1208,23 +1274,39 @@ def emit_invoice(transaction, settings, order_items, customer_cpf_cnpj=None):
     # For now, default to 1, but allow override
     tp_emis = transaction.get('tpEmis', 1)
     
+    def _to_int(val, default_val):
+        try:
+            if val is None: 
+                return int(default_val)
+            if isinstance(val, str) and val.strip() == "":
+                return int(default_val)
+            return int(val)
+        except Exception:
+            return int(default_val)
+
+    serie_val = _to_int(settings.get('serie', 1), 1)
+    nnum_val = _to_int(settings.get('next_number', 1), 1)
+
+    sefaz_env = settings.get('sefaz_environment', settings.get('environment', 'production'))
+    is_homolog = sefaz_env == 'homologation'
+
     payload = {
-        "ambiente": "homologacao" if settings.get('environment') == 'homologation' else "producao",
+        "ambiente": "homologacao" if is_homolog else "producao",
         "infNFe": {
             "versao": "4.00",
             "ide": {
                 "cUF": 26, # PE (Integer)
                 "natOp": "Venda ao Consumidor",
                 "mod": 65,
-                "serie": int(settings.get('serie', 1)),
-                "nNF": int(settings.get('next_number', 1)),
+                "serie": serie_val,
+                "nNF": nnum_val,
                 "dhEmi": datetime.now().strftime("%Y-%m-%dT%H:%M:%S-03:00"), # UTC-3
                 "tpNF": 1,
                 "idDest": 1,
                 "cMunFG": "2614857", # Tamandaré - PE
                 "tpImp": 4,
                 "tpEmis": tp_emis, # 1=Normal, 9=Offline
-                "tpAmb": 2 if settings.get('environment') == 'homologation' else 1,
+                "tpAmb": 2 if is_homolog else 1,
                 "finNFe": 1,
                 "indFinal": 1,
                 "indPres": 1,
@@ -1323,14 +1405,95 @@ def emit_invoice(transaction, settings, order_items, customer_cpf_cnpj=None):
             }
         else:
             logger.error(f"Nuvem Fiscal Error: {response.status_code} - {response.text}")
-            # Try to parse error
             try:
                 err_data = response.json()
-                msg = err_data.get('error', {}).get('message') or err_data.get('message') or response.text
-            except:
+            except Exception:
+                err_data = None
+
+            msg = None
+            details_txt = ""
+
+            if isinstance(err_data, dict):
+                base_msg = None
+                # Common locations for a human-readable message
+                if isinstance(err_data.get('error'), dict):
+                    base_msg = err_data.get('error', {}).get('message')
+                if not base_msg:
+                    base_msg = err_data.get('message') or err_data.get('title')
+                if base_msg:
+                    msg = base_msg
+
+                parts = []
+                # Nuvem Fiscal may return errors under multiple shapes:
+                # 1) error.details: [ { field, message } ]
+                # 2) errors: [ { field/name/code, message/detail } ] or errors: { field: [msg1, msg2] }
+                # 3) issues / invalidParams / violations (fallback)
+                if isinstance(err_data.get('error', {}).get('details'), list):
+                    for d in err_data['error']['details'][:10]:
+                        field = d.get('field') or d.get('name') or d.get('code')
+                        dmsg = d.get('message') or d.get('detail') or str(d)
+                        parts.append(f"{field}: {dmsg}" if field else str(dmsg))
+                elif isinstance(err_data.get('error', {}).get('errors'), list):
+                    for d in err_data['error']['errors'][:10]:
+                        if isinstance(d, dict):
+                            field = d.get('field') or d.get('name') or d.get('code')
+                            dmsg = d.get('message') or d.get('detail') or str(d)
+                            parts.append(f"{field}: {dmsg}" if field else str(dmsg))
+                        else:
+                            parts.append(str(d))
+                elif isinstance(err_data.get('error', {}).get('errors'), dict):
+                    for k, v in list(err_data['error']['errors'].items())[:10]:
+                        if isinstance(v, list) and v:
+                            parts.append(f"{k}: {v[0]}")
+                        else:
+                            parts.append(f"{k}: {str(v)}")
+                elif isinstance(err_data.get('errors'), list):
+                    for d in err_data['errors'][:10]:
+                        if isinstance(d, dict):
+                            field = d.get('field') or d.get('name') or d.get('code')
+                            dmsg = d.get('message') or d.get('detail') or str(d)
+                            parts.append(f"{field}: {dmsg}" if field else str(dmsg))
+                        else:
+                            parts.append(str(d))
+                elif isinstance(err_data.get('errors'), dict):
+                    for k, v in list(err_data['errors'].items())[:10]:
+                        if isinstance(v, list) and v:
+                            parts.append(f"{k}: {v[0]}")
+                        else:
+                            parts.append(f"{k}: {str(v)}")
+                elif isinstance(err_data.get('error', {}).get('violations'), list):
+                    for d in err_data['error']['violations'][:10]:
+                        field = d.get('field') or d.get('propertyPath')
+                        dmsg = d.get('message') or str(d)
+                        parts.append(f"{field}: {dmsg}" if field else str(dmsg))
+                elif isinstance(err_data.get('issues'), list):
+                    for d in err_data['issues'][:10]:
+                        field = d.get('field') or d.get('path') or d.get('pointer')
+                        dmsg = d.get('message') or d.get('detail') or d.get('description') or str(d)
+                        parts.append(f"{field}: {dmsg}" if field else str(dmsg))
+                elif isinstance(err_data.get('invalidParams'), list):
+                    for d in err_data['invalidParams'][:10]:
+                        field = d.get('name') or d.get('param') or d.get('field')
+                        dmsg = d.get('reason') or d.get('message') or str(d)
+                        parts.append(f"{field}: {dmsg}" if field else str(dmsg))
+                elif isinstance(err_data.get('violations'), list):
+                    for d in err_data['violations'][:10]:
+                        field = d.get('field') or d.get('propertyPath')
+                        dmsg = d.get('message') or str(d)
+                        parts.append(f"{field}: {dmsg}" if field else str(dmsg))
+
+                if parts:
+                    details_txt = " | Detalhes: " + " ; ".join(parts)
+                else:
+                    try:
+                        details_txt = " | Detalhes: " + json.dumps(err_data)[:600]
+                    except Exception:
+                        pass
+
+            if not msg:
                 msg = f"Status {response.status_code}: {response.text}"
-                
-            return {"success": False, "message": f"Erro Nuvem Fiscal: {msg}"}
+
+            return {"success": False, "message": f"Erro Nuvem Fiscal: {msg}{details_txt}"}
 
     except Exception as e:
         logger.error(f"Error emitting invoice: {e}")

@@ -51089,5 +51089,240 @@
                 "type": "final_payment"
             }
         ]
+    },
+    {
+        "items": [
+            {
+                "id": "b1ac79d9-9025-46ca-a347-6b834297dcb1",
+                "product_id": "3",
+                "name": "Pizza",
+                "price": 40.0,
+                "qty": 1.0,
+                "category": "Refeição",
+                "created_at": "18/02/2026 07:53",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": null,
+                "cest": null,
+                "cfop": null,
+                "origin": 0,
+                "tax_info": null
+            }
+        ],
+        "total": 40.0,
+        "status": "closed",
+        "opened_at": "18/02/2026 07:53",
+        "num_adults": 2,
+        "customer_type": "passante",
+        "customer_name": "Cliente Teste",
+        "room_number": null,
+        "waiter": "garcom1",
+        "staff_name": null,
+        "is_breakfast": true,
+        "partial_payments": [],
+        "total_paid": 0.0,
+        "closed_at": "18/02/2026 07:53",
+        "final_total": 44.0,
+        "discount": 0.0,
+        "closed_by": "admin_tester",
+        "close_id": "CLOSE_20260218075339_40_6d818a",
+        "payments": [
+            {
+                "id": "4918db60-b4a6-4975-b776-be5264a966ac",
+                "timestamp": "18/02/2026 07:53",
+                "amount": 20.0,
+                "method": "Dinheiro",
+                "user": "admin_tester",
+                "type": "final_payment"
+            },
+            {
+                "id": "ef1516cb-a3e4-4d1a-8e72-1a42f2ba5bb2",
+                "timestamp": "18/02/2026 07:53",
+                "amount": 24.0,
+                "method": "Cartão Crédito",
+                "user": "admin_tester",
+                "type": "final_payment"
+            }
+        ]
+    },
+    {
+        "items": [
+            {
+                "id": "5506bdf4-fbb8-4a38-9a21-d19af42c9050",
+                "product_id": "3",
+                "name": "Pizza",
+                "price": 40.0,
+                "qty": 1.0,
+                "category": "Refeição",
+                "created_at": "18/02/2026 07:53",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": null,
+                "cest": null,
+                "cfop": null,
+                "origin": 0,
+                "tax_info": null
+            }
+        ],
+        "total": 40.0,
+        "status": "closed",
+        "opened_at": "18/02/2026 07:53",
+        "num_adults": 2,
+        "customer_type": "passante",
+        "customer_name": "Cliente Teste",
+        "room_number": null,
+        "waiter": "garcom1",
+        "staff_name": null,
+        "is_breakfast": true,
+        "partial_payments": [
+            {
+                "id": "d937eb7b-1349-4456-877b-cfcb4ed7e111",
+                "timestamp": "18/02/2026 07:53",
+                "amount": 20.0,
+                "method": "Dinheiro",
+                "user": "admin_tester"
+            }
+        ],
+        "total_paid": 20.0,
+        "closed_at": "18/02/2026 07:53",
+        "final_total": 44.0,
+        "discount": 0.0,
+        "closed_by": "admin_tester",
+        "close_id": "CLOSE_20260218075355_40_8e4da4",
+        "payments": [
+            {
+                "id": "d937eb7b-1349-4456-877b-cfcb4ed7e111",
+                "timestamp": "18/02/2026 07:53",
+                "amount": 20.0,
+                "method": "Dinheiro",
+                "user": "admin_tester"
+            },
+            {
+                "id": "09ecc8e1-8b4a-4d35-9252-27975f90c3c5",
+                "timestamp": "18/02/2026 07:53",
+                "amount": 24.0,
+                "method": "Dinheiro",
+                "user": "admin_tester",
+                "type": "final_payment"
+            }
+        ]
+    },
+    {
+        "items": [
+            {
+                "id": "6795180a-dd4a-44af-a003-b16aa585b72c",
+                "product_id": "3",
+                "name": "Pizza",
+                "price": 40.0,
+                "qty": 1.0,
+                "category": "Refeição",
+                "created_at": "18/02/2026 07:54",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": null,
+                "cest": null,
+                "cfop": null,
+                "origin": 0,
+                "tax_info": null
+            }
+        ],
+        "total": 40.0,
+        "status": "closed",
+        "opened_at": "18/02/2026 07:54",
+        "num_adults": 2,
+        "customer_type": "passante",
+        "customer_name": "Cliente Teste",
+        "room_number": null,
+        "waiter": "garcom1",
+        "staff_name": null,
+        "is_breakfast": true,
+        "partial_payments": [],
+        "total_paid": 0.0,
+        "closed_at": "18/02/2026 07:54",
+        "final_total": 40.0,
+        "discount": 0.0,
+        "closed_by": "admin_tester",
+        "close_id": "CLOSE_20260218075446_40_b1b53a",
+        "payments": [
+            {
+                "id": "30b128e5-0e4c-46a8-91db-d8cc51d6e293",
+                "timestamp": "18/02/2026 07:54",
+                "amount": 40.0,
+                "method": "Dinheiro",
+                "user": "admin_tester",
+                "type": "final_payment"
+            }
+        ]
+    },
+    {
+        "items": [
+            {
+                "id": "528e302f-cf77-41a4-bbae-0bdde52d23df",
+                "product_id": "1",
+                "name": "Água",
+                "price": 5.0,
+                "qty": 10.0,
+                "category": "Bebidas",
+                "created_at": "18/02/2026 07:55",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": null,
+                "cest": null,
+                "cfop": null,
+                "origin": 0,
+                "tax_info": null
+            }
+        ],
+        "total": 50.0,
+        "status": "closed",
+        "opened_at": "18/02/2026 07:55",
+        "num_adults": 2,
+        "customer_type": "passante",
+        "customer_name": "Cliente Teste",
+        "room_number": null,
+        "waiter": "garcom1",
+        "staff_name": null,
+        "is_breakfast": true,
+        "partial_payments": [],
+        "total_paid": 0.0,
+        "closed_at": "18/02/2026 07:55",
+        "final_total": 55.00000000000001,
+        "discount": 0.0,
+        "closed_by": "admin_tester",
+        "close_id": "CLOSE_20260218075519_40_f77a72",
+        "payments": [
+            {
+                "id": "2f21af10-f399-4f3b-b1e0-d8215c0a7b15",
+                "timestamp": "18/02/2026 07:55",
+                "amount": 55.0,
+                "method": "Dinheiro",
+                "user": "admin_tester",
+                "type": "final_payment"
+            }
+        ]
     }
 ]

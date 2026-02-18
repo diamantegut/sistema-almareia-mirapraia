@@ -297,7 +297,9 @@
                                 </td>
                                 <td>
                                     {% if t.payment_method == 'Múltiplos' %}
-                                        <button class="btn btn-sm btn-outline-secondary" onclick="showPaymentDetails({{ t.details.payment_details|tojson|forceescape }})">
+                                        <button class="btn btn-sm btn-outline-secondary"
+                                                data-payments='{{ t.details.payment_details|tojson|safe }}'
+                                                onclick="showPaymentDetails(JSON.parse(this.dataset.payments))">
                                             <i class="bi bi-info-circle"></i> Múltiplos
                                         </button>
                                     {% else %}
@@ -1642,9 +1644,9 @@ function submitPrintReport() {
 
 <script>
     // Infinite Scroll / Pagination Logic
-    let currentPage = {{ current_page|default(1) }};
+    let currentPage = Number('{{ current_page|default(1) }}');
     let isLoading = false;
-    let hasMore = {{ 'true' if has_more else 'false' }};
+    let hasMore = '{{ "true" if has_more else "false" }}' === 'true';
 
     function loadMoreTransactions() {
         if (isLoading || !hasMore) return;
