@@ -39611,7 +39611,7 @@
         "id": "CHARGE_95_20260213162821_89484a_REST",
         "room_number": "01",
         "table_id": "95",
-        "total": 316.25,
+        "total": 469.15,
         "items": [
             {
                 "id": "3495cf24-00f5-4a9e-ad46-37724d7a9f0f",
@@ -39704,9 +39704,19 @@
                         "answer": "Normal"
                     }
                 ]
+            },
+            {
+                "id": "ed80886b-57f8-44bc-b0ab-f92a27aeb7ed",
+                "name": "Vinho Branco Vista Calma Torrontés",
+                "qty": 1.0,
+                "price": 139.0,
+                "category": "Vinhos",
+                "source": "reception_edit",
+                "added_at": "17/02/2026 09:31",
+                "added_by": "Angelo"
             }
         ],
-        "service_fee": 28.75,
+        "service_fee": 42.650000000000006,
         "discount": 0,
         "flags": [],
         "waiter": "welington",
@@ -39716,7 +39726,18 @@
         "service_fee_removed": false,
         "date": "13/02/2026 16:28",
         "status": "pending",
-        "type": "restaurant"
+        "type": "restaurant",
+        "audit_log": [
+            {
+                "timestamp": "17/02/2026 09:31:44",
+                "user": "Angelo",
+                "changes": [
+                    "Item Adicionado: Vinho Branco Vista Calma Torrontés (x1.0)",
+                    "Recálculo Total: 316.25 -> 469.15"
+                ],
+                "justification": "teste"
+            }
+        ]
     },
     {
         "id": "CHARGE_93_20260213162832_407e35_REST",

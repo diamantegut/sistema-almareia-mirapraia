@@ -26,7 +26,7 @@ from app.services.system_config_manager import (
 )
 from app.services.logger_service import LoggerService, log_system_action
 from app.services.fiscal_service import (
-    load_fiscal_settings, list_received_nfes, consult_nfe_sefaz
+    load_fiscal_settings, list_received_nfes, consult_nfe_sefaz, sync_received_nfes
 )
 from app.services.import_sales import process_sales_files
 
@@ -886,18 +886,28 @@ def _parse_nfe_xml(root):
     for det in dets:
         prod = det.find('nfe:prod', ns) or det.find('prod')
         if prod is not None:
-            qty = float(prod.find('nfe:qCom', ns).text)
-            price = float(prod.find('nfe:vUnCom', ns).text)
-            code = prod.find('nfe:cProd', ns).text if prod.find('nfe:cProd', ns) is not None else ""
-            unit = prod.find('nfe:uCom', ns).text if prod.find('nfe:uCom', ns) is not None else ""
-            
-            items.append({
-                'code': code,
-                'name': prod.find('nfe:xProd', ns).text,
-                'qty': qty,
-                'unit': unit,
-                'price': price
-            })
+            try:
+                qty_node = prod.find('nfe:qCom', ns) or prod.find('qCom')
+                price_node = prod.find('nfe:vUnCom', ns) or prod.find('vUnCom')
+                qty_text = qty_node.text if qty_node is not None else "0"
+                price_text = price_node.text if price_node is not None else "0"
+                qty = float(str(qty_text).replace(',', '.'))
+                price = float(str(price_text).replace(',', '.'))
+                code_node = prod.find('nfe:cProd', ns) or prod.find('cProd')
+                unit_node = prod.find('nfe:uCom', ns) or prod.find('uCom')
+                name_node = prod.find('nfe:xProd', ns) or prod.find('xProd')
+                code = code_node.text if code_node is not None else ""
+                unit = unit_node.text if unit_node is not None else ""
+                name = name_node.text if name_node is not None else ""
+                items.append({
+                    'code': code,
+                    'name': name,
+                    'qty': qty,
+                    'unit': unit,
+                    'price': price
+                })
+            except Exception:
+                continue
             
     return {
         'supplier': supplier_name, 
@@ -993,24 +1003,163 @@ def list_nfe_dfe_route():
              return jsonify({'error': 'Nenhuma integração fiscal configurada para consulta.'}), 400
              
         documents, error = list_received_nfes(target_integration)
-        if error: return jsonify({'error': error}), 500
+        if error:
+            return jsonify({'error': error}), 500
+        
+        entries = load_stock_entries()
+        imported_keys = set()
+        for entry in entries:
+            key_val = entry.get('access_key') or entry.get('invoice_access_key') or entry.get('nfe_key')
+            if key_val:
+                imported_keys.add(key_val)
         
         formatted_docs = []
         if documents:
             for doc in documents:
                 emit = doc.get('emitente', {}) or doc.get('emit', {})
+                key = doc.get('access_key') or doc.get('chave')
+                status = doc.get('status', 'recebida')
+                if key in imported_keys:
+                    status = 'importada'
                 formatted_docs.append({
-                    'key': doc.get('access_key') or doc.get('chave'),
+                    'key': key,
                     'issuer': emit.get('nome') or emit.get('xNome', 'Desconhecido'),
                     'cnpj': emit.get('cpf_cnpj') or emit.get('cnpj', ''),
                     'amount': doc.get('total_amount') or doc.get('total', 0),
                     'date': doc.get('created_at', '') or doc.get('issued_at', ''),
-                    'status': doc.get('status', 'recebida'),
-                    'xml_content': doc.get('xml_content') # Pass XML content if available (for sefaz_direto)
+                    'status': status,
+                    'xml_content': doc.get('xml_content')
                 })
         return jsonify({'documents': formatted_docs})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@stock_bp.route('/stock/nfe/sync', methods=['POST'])
+@login_required
+def sync_nfe_xmls():
+    try:
+        settings = load_fiscal_settings()
+        integrations = settings.get('integrations', [])
+        if not integrations and settings.get('provider'):
+            integrations = [settings]
+        target_integration = None
+        for integ in integrations:
+            if integ.get('provider') == 'sefaz_direto':
+                target_integration = integ
+                break
+        if not target_integration:
+            for integ in integrations:
+                if integ.get('provider') == 'nuvem_fiscal':
+                    target_integration = integ
+                    break
+        if not target_integration:
+            return jsonify({'error': 'Nenhuma integração fiscal configurada para sincronização.'}), 400
+        result = sync_received_nfes(target_integration)
+        if isinstance(result, dict):
+            return jsonify(result)
+        return jsonify({'synced_count': 0})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@stock_bp.route('/stock/entry/list-local-xml', methods=['GET'])
+@login_required
+def list_local_nfe_xml():
+    try:
+        entries = load_stock_entries()
+        now = datetime.now()
+        limit_date = now - timedelta(days=7)
+        settings = load_fiscal_settings()
+        integrations = settings.get('integrations', [])
+        if not integrations and settings.get('provider'):
+            integrations = [settings]
+        target_integration = None
+        for integ in integrations:
+            if integ.get('provider') == 'sefaz_direto':
+                target_integration = integ
+                break
+        if not target_integration and integrations:
+            target_integration = integrations[0]
+        base_storage_path = target_integration.get('xml_storage_path', 'fiscal_documents/xmls') if target_integration else 'fiscal_documents/xmls'
+        if not os.path.isabs(base_storage_path):
+            base_storage_path = os.path.join(os.getcwd(), base_storage_path)
+        documents = []
+        if os.path.exists(base_storage_path):
+            import xml.etree.ElementTree as ET
+            for root_dir, dirs, files in os.walk(base_storage_path):
+                for name in files:
+                    if not name.lower().endswith('.xml'):
+                        continue
+                    file_path = os.path.join(root_dir, name)
+                    rel_path = os.path.relpath(file_path, base_storage_path)
+                    stat = os.stat(file_path)
+                     modified_dt = datetime.fromtimestamp(stat.st_mtime)
+                     if modified_dt < limit_date:
+                         continue
+                     access_key = None
+                     items_count = 0
+                     try:
+                         tree = ET.parse(file_path)
+                         root = tree.getroot()
+                         parsed = _parse_nfe_xml(root)
+                         access_key = parsed.get('access_key')
+                         items_count = len(parsed.get('items', []))
+                     except Exception:
+                         parsed = {}
+                     entries_for_key = []
+                     if access_key:
+                         for entry in entries:
+                             if entry.get('access_key') == access_key:
+                                 entries_for_key.append(entry)
+                     used = bool(items_count and len(entries_for_key) >= items_count)
+                    documents.append({
+                        'id': rel_path.replace('\\', '/'),
+                        'name': name,
+                        'path': rel_path.replace('\\', '/'),
+                        'size': stat.st_size,
+                        'modified': modified_dt.isoformat(),
+                        'access_key': access_key,
+                        'items_count': items_count,
+                        'entries_count': len(entries_for_key),
+                        'used': used
+                    })
+        documents.sort(key=lambda d: d.get('modified', ''), reverse=True)
+        return jsonify({'documents': documents})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@stock_bp.route('/stock/entry/load-local-xml', methods=['POST'])
+@login_required
+def load_local_nfe_xml():
+    try:
+        data = request.get_json() or {}
+        rel_path = data.get('path')
+        if not rel_path:
+            return jsonify({'error': 'Caminho não informado'}), 400
+        settings = load_fiscal_settings()
+        integrations = settings.get('integrations', [])
+        if not integrations and settings.get('provider'):
+            integrations = [settings]
+        target_integration = None
+        for integ in integrations:
+            if integ.get('provider') == 'sefaz_direto':
+                target_integration = integ
+                break
+        if not target_integration and integrations:
+            target_integration = integrations[0]
+        base_storage_path = target_integration.get('xml_storage_path', 'fiscal_documents/xmls') if target_integration else 'fiscal_documents/xmls'
+        if not os.path.isabs(base_storage_path):
+            base_storage_path = os.path.join(os.getcwd(), base_storage_path)
+        safe_rel = rel_path.replace('\\', '/').lstrip('/').replace('..', '')
+        file_path = os.path.join(base_storage_path, safe_rel)
+        if not os.path.exists(file_path):
+            return jsonify({'error': 'Arquivo não encontrado'}), 404
+        import xml.etree.ElementTree as ET
+        tree = ET.parse(file_path)
+        root = tree.getroot()
+        parsed = _parse_nfe_xml(root)
+        return jsonify(parsed)
+    except Exception as e:
+        return jsonify({'error': f'Erro ao carregar XML local: {str(e)}'}), 500
 
 @stock_bp.route('/stock/update_min_stock', methods=['POST'])
 @login_required

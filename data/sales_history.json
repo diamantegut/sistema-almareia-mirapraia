@@ -39136,5 +39136,817 @@
         "payment_method": "Room Charge",
         "room_charge": "31",
         "final_total": 547.7999999999998
+    },
+    {
+        "items": [
+            {
+                "id": "8152a064-cad9-4347-a2d9-5de8ab91bdc1",
+                "product_id": "1",
+                "name": "Coca Cola",
+                "price": 5.0,
+                "qty": 1.0,
+                "category": "Bebidas",
+                "created_at": "17/02/2026 09:10",
+                "waiter": "GarcomZ",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": null,
+                "cest": null,
+                "cfop": null,
+                "origin": 0,
+                "tax_info": null
+            }
+        ],
+        "total": 5.0,
+        "status": "open",
+        "opened_at": "17/02/2026 09:10",
+        "num_adults": 2,
+        "customer_type": "hospede",
+        "customer_name": "",
+        "room_number": "33",
+        "waiter": "",
+        "staff_name": null,
+        "is_breakfast": true,
+        "partial_payments": [],
+        "total_paid": 0.0,
+        "closed_at": "17/02/2026 09:11",
+        "payment_method": "Room Charge",
+        "room_charge": "33",
+        "final_total": 5.5
+    },
+    {
+        "items": [
+            {
+                "id": "7a2ac2d4-c2cd-4321-b00e-dd8ad643de8d",
+                "product_id": "1",
+                "name": "Coca Cola",
+                "price": 5.0,
+                "qty": 1.0,
+                "category": "Bebidas",
+                "created_at": "17/02/2026 09:13",
+                "waiter": "GarcomZ",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": null,
+                "cest": null,
+                "cfop": null,
+                "origin": 0,
+                "tax_info": null
+            }
+        ],
+        "total": 5.0,
+        "status": "open",
+        "opened_at": "17/02/2026 09:13",
+        "num_adults": 2,
+        "customer_type": "hospede",
+        "customer_name": "",
+        "room_number": "33",
+        "waiter": "",
+        "staff_name": null,
+        "is_breakfast": true,
+        "partial_payments": [],
+        "total_paid": 0.0,
+        "closed_at": "17/02/2026 09:13",
+        "payment_method": "Room Charge",
+        "room_charge": "33",
+        "final_total": 5.5
+    },
+    {
+        "items": [
+            {
+                "name": "Burger",
+                "price": 20,
+                "qty": 1,
+                "source": "restaurant"
+            },
+            {
+                "name": "Coke",
+                "price": 5,
+                "qty": 1,
+                "source": "minibar"
+            }
+        ],
+        "total": 25,
+        "waiter": "John",
+        "closed_at": "17/02/2026 09:48",
+        "payment_method": "Room Charge",
+        "room_charge": "101",
+        "final_total": 27.0
+    },
+    {
+        "items": [
+            {
+                "name": "Burger",
+                "price": 20,
+                "qty": 1,
+                "source": "restaurant"
+            },
+            {
+                "name": "Coke",
+                "price": 5,
+                "qty": 1,
+                "source": "minibar"
+            }
+        ],
+        "total": 25,
+        "waiter": "John",
+        "closed_at": "17/02/2026 09:48",
+        "payment_method": "Room Charge",
+        "room_charge": "101",
+        "final_total": 27.0
+    },
+    {
+        "items": [
+            {
+                "name": "Burger",
+                "price": 20,
+                "qty": 1,
+                "source": "restaurant"
+            },
+            {
+                "name": "Coke",
+                "price": 5,
+                "qty": 1,
+                "source": "minibar"
+            }
+        ],
+        "total": 25,
+        "waiter": "John",
+        "closed_at": "17/02/2026 09:48",
+        "payment_method": "Room Charge",
+        "room_charge": "101",
+        "final_total": 27.0
+    },
+    {
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 100.0,
+                "qty": 1,
+                "waiter": "Waiter1"
+            }
+        ],
+        "total": 100.0,
+        "waiter": "Waiter1",
+        "service_fee_removed": true,
+        "customer_type": "hospede",
+        "room_number": "01",
+        "closed_at": "17/02/2026 09:48",
+        "payment_method": "Room Charge",
+        "room_charge": "01",
+        "final_total": 100.0
+    },
+    {
+        "items": [
+            {
+                "name": "Item 2",
+                "price": 100.0,
+                "qty": 1,
+                "waiter": "Waiter1"
+            }
+        ],
+        "total": 110.0,
+        "waiter": "Waiter1",
+        "service_fee_removed": false,
+        "customer_type": "hospede",
+        "room_number": "01",
+        "closed_at": "17/02/2026 09:48",
+        "payment_method": "Room Charge",
+        "room_charge": "01",
+        "final_total": 110.0
+    },
+    {
+        "items": [
+            {
+                "id": "item1",
+                "name": "Burger",
+                "qty": 1,
+                "price": 50.0,
+                "waiter": "Waiter A"
+            },
+            {
+                "id": "item2",
+                "name": "Coke",
+                "qty": 2,
+                "price": 10.0,
+                "waiter": "Waiter B"
+            }
+        ],
+        "total": 70.0,
+        "waiter": "Waiter A",
+        "status": "open",
+        "closed_at": "17/02/2026 09:48",
+        "payment_method": "Room Charge",
+        "room_charge": "10",
+        "final_total": 77.0
+    },
+    {
+        "items": [
+            {
+                "name": "Burger",
+                "price": 20,
+                "qty": 1,
+                "source": "restaurant"
+            },
+            {
+                "name": "Coke",
+                "price": 5,
+                "qty": 1,
+                "source": "minibar"
+            }
+        ],
+        "total": 25,
+        "waiter": "John",
+        "closed_at": "17/02/2026 09:49",
+        "payment_method": "Room Charge",
+        "room_charge": "101",
+        "final_total": 27.0
+    },
+    {
+        "items": [
+            {
+                "name": "Burger",
+                "price": 20,
+                "qty": 1,
+                "source": "restaurant"
+            },
+            {
+                "name": "Coke",
+                "price": 5,
+                "qty": 1,
+                "source": "minibar"
+            }
+        ],
+        "total": 25,
+        "waiter": "John",
+        "closed_at": "17/02/2026 09:49",
+        "payment_method": "Room Charge",
+        "room_charge": "101",
+        "final_total": 27.0
+    },
+    {
+        "items": [
+            {
+                "name": "Burger",
+                "price": 20,
+                "qty": 1,
+                "source": "restaurant"
+            },
+            {
+                "name": "Coke",
+                "price": 5,
+                "qty": 1,
+                "source": "minibar"
+            }
+        ],
+        "total": 25,
+        "waiter": "John",
+        "closed_at": "17/02/2026 09:49",
+        "payment_method": "Room Charge",
+        "room_charge": "101",
+        "final_total": 27.0
+    },
+    {
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 100.0,
+                "qty": 1,
+                "waiter": "Waiter1"
+            }
+        ],
+        "total": 100.0,
+        "waiter": "Waiter1",
+        "service_fee_removed": true,
+        "customer_type": "hospede",
+        "room_number": "01",
+        "closed_at": "17/02/2026 09:49",
+        "payment_method": "Room Charge",
+        "room_charge": "01",
+        "final_total": 100.0
+    },
+    {
+        "items": [
+            {
+                "name": "Item 2",
+                "price": 100.0,
+                "qty": 1,
+                "waiter": "Waiter1"
+            }
+        ],
+        "total": 110.0,
+        "waiter": "Waiter1",
+        "service_fee_removed": false,
+        "customer_type": "hospede",
+        "room_number": "01",
+        "closed_at": "17/02/2026 09:49",
+        "payment_method": "Room Charge",
+        "room_charge": "01",
+        "final_total": 110.0
+    },
+    {
+        "items": [
+            {
+                "id": "item1",
+                "name": "Burger",
+                "qty": 1,
+                "price": 50.0,
+                "waiter": "Waiter A"
+            },
+            {
+                "id": "item2",
+                "name": "Coke",
+                "qty": 2,
+                "price": 10.0,
+                "waiter": "Waiter B"
+            }
+        ],
+        "total": 70.0,
+        "waiter": "Waiter A",
+        "status": "open",
+        "closed_at": "17/02/2026 09:49",
+        "payment_method": "Room Charge",
+        "room_charge": "10",
+        "final_total": 77.0
+    },
+    {
+        "items": [
+            {
+                "id": "4d7693e6-2440-4434-afa2-b848dca97847",
+                "product_id": "3",
+                "name": "Pizza",
+                "price": 40.0,
+                "qty": 1.0,
+                "category": "Refeição",
+                "created_at": "17/02/2026 11:57",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": null,
+                "cest": null,
+                "cfop": null,
+                "origin": 0,
+                "tax_info": null
+            }
+        ],
+        "total": 40.0,
+        "status": "closed",
+        "opened_at": "17/02/2026 11:57",
+        "num_adults": 2,
+        "customer_type": "passante",
+        "customer_name": "Cliente Teste",
+        "room_number": null,
+        "waiter": "garcom1",
+        "staff_name": null,
+        "is_breakfast": false,
+        "partial_payments": [],
+        "total_paid": 0.0,
+        "closed_at": "17/02/2026 11:57",
+        "final_total": 44.0,
+        "discount": 0.0,
+        "closed_by": "admin_tester",
+        "close_id": "CLOSE_20260217115750_40_aec84e",
+        "payments": [
+            {
+                "id": "4c3302f8-f934-4d42-852d-86127e24aaae",
+                "timestamp": "17/02/2026 11:57",
+                "amount": 20.0,
+                "method": "Dinheiro",
+                "user": "admin_tester",
+                "type": "final_payment"
+            },
+            {
+                "id": "2a42bf44-8349-492f-bfe8-384781db1d83",
+                "timestamp": "17/02/2026 11:57",
+                "amount": 24.0,
+                "method": "Cartão Crédito",
+                "user": "admin_tester",
+                "type": "final_payment"
+            }
+        ]
+    },
+    {
+        "items": [
+            {
+                "id": "0df707c5-cac4-4ace-a110-84f5d4017e6d",
+                "product_id": "3",
+                "name": "Pizza",
+                "price": 40.0,
+                "qty": 1.0,
+                "category": "Refeição",
+                "created_at": "17/02/2026 11:57",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": null,
+                "cest": null,
+                "cfop": null,
+                "origin": 0,
+                "tax_info": null
+            }
+        ],
+        "total": 40.0,
+        "status": "closed",
+        "opened_at": "17/02/2026 11:57",
+        "num_adults": 2,
+        "customer_type": "passante",
+        "customer_name": "Cliente Teste",
+        "room_number": null,
+        "waiter": "garcom1",
+        "staff_name": null,
+        "is_breakfast": false,
+        "partial_payments": [
+            {
+                "id": "d8528061-2b00-4fa3-8faf-51036b00d949",
+                "timestamp": "17/02/2026 11:58",
+                "amount": 20.0,
+                "method": "Dinheiro",
+                "user": "admin_tester"
+            }
+        ],
+        "total_paid": 20.0,
+        "closed_at": "17/02/2026 11:58",
+        "final_total": 44.0,
+        "discount": 0.0,
+        "closed_by": "admin_tester",
+        "close_id": "CLOSE_20260217115807_40_7ae94c",
+        "payments": [
+            {
+                "id": "d8528061-2b00-4fa3-8faf-51036b00d949",
+                "timestamp": "17/02/2026 11:58",
+                "amount": 20.0,
+                "method": "Dinheiro",
+                "user": "admin_tester"
+            },
+            {
+                "id": "1feb85d9-a4c7-47e6-9611-0506d1faad0e",
+                "timestamp": "17/02/2026 11:58",
+                "amount": 24.0,
+                "method": "Dinheiro",
+                "user": "admin_tester",
+                "type": "final_payment"
+            }
+        ]
+    },
+    {
+        "items": [
+            {
+                "id": "3f67bcda-2c3f-4695-99c2-a3dfa93921b3",
+                "product_id": "3",
+                "name": "Pizza",
+                "price": 40.0,
+                "qty": 1.0,
+                "category": "Refeição",
+                "created_at": "17/02/2026 11:58",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": null,
+                "cest": null,
+                "cfop": null,
+                "origin": 0,
+                "tax_info": null
+            }
+        ],
+        "total": 40.0,
+        "status": "closed",
+        "opened_at": "17/02/2026 11:58",
+        "num_adults": 2,
+        "customer_type": "passante",
+        "customer_name": "Cliente Teste",
+        "room_number": null,
+        "waiter": "garcom1",
+        "staff_name": null,
+        "is_breakfast": false,
+        "partial_payments": [],
+        "total_paid": 0.0,
+        "closed_at": "17/02/2026 11:58",
+        "final_total": 40.0,
+        "discount": 0.0,
+        "closed_by": "admin_tester",
+        "close_id": "CLOSE_20260217115858_40_3a6752",
+        "payments": [
+            {
+                "id": "e21d4e72-eaec-41a5-93b1-240c8e161b4f",
+                "timestamp": "17/02/2026 11:58",
+                "amount": 40.0,
+                "method": "Dinheiro",
+                "user": "admin_tester",
+                "type": "final_payment"
+            }
+        ]
+    },
+    {
+        "items": [
+            {
+                "id": "c87959e8-6d9a-4b80-9068-273503b64486",
+                "product_id": "1",
+                "name": "Água",
+                "price": 5.0,
+                "qty": 10.0,
+                "category": "Bebidas",
+                "created_at": "17/02/2026 11:59",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": null,
+                "cest": null,
+                "cfop": null,
+                "origin": 0,
+                "tax_info": null
+            }
+        ],
+        "total": 50.0,
+        "status": "closed",
+        "opened_at": "17/02/2026 11:59",
+        "num_adults": 2,
+        "customer_type": "passante",
+        "customer_name": "Cliente Teste",
+        "room_number": null,
+        "waiter": "garcom1",
+        "staff_name": null,
+        "is_breakfast": false,
+        "partial_payments": [],
+        "total_paid": 0.0,
+        "closed_at": "17/02/2026 11:59",
+        "final_total": 55.00000000000001,
+        "discount": 0.0,
+        "closed_by": "admin_tester",
+        "close_id": "CLOSE_20260217115931_40_3478ce",
+        "payments": [
+            {
+                "id": "70bdc033-ab21-4463-9e88-753d9fb743a6",
+                "timestamp": "17/02/2026 11:59",
+                "amount": 55.0,
+                "method": "Dinheiro",
+                "user": "admin_tester",
+                "type": "final_payment"
+            }
+        ]
+    },
+    {
+        "items": [
+            {
+                "id": "a966cc73-9c4f-44bb-a993-685c6c33b879",
+                "product_id": "3",
+                "name": "Pizza",
+                "price": 40.0,
+                "qty": 1.0,
+                "category": "Refeição",
+                "created_at": "17/02/2026 12:49",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": null,
+                "cest": null,
+                "cfop": null,
+                "origin": 0,
+                "tax_info": null
+            }
+        ],
+        "total": 40.0,
+        "status": "closed",
+        "opened_at": "17/02/2026 12:49",
+        "num_adults": 2,
+        "customer_type": "passante",
+        "customer_name": "Cliente Teste",
+        "room_number": null,
+        "waiter": "garcom1",
+        "staff_name": null,
+        "is_breakfast": false,
+        "partial_payments": [],
+        "total_paid": 0.0,
+        "closed_at": "17/02/2026 12:49",
+        "final_total": 44.0,
+        "discount": 0.0,
+        "closed_by": "admin_tester",
+        "close_id": "CLOSE_20260217124929_40_ff699a",
+        "payments": [
+            {
+                "id": "ac8fd852-0c31-4f01-9c6f-881828eaf0d6",
+                "timestamp": "17/02/2026 12:49",
+                "amount": 20.0,
+                "method": "Dinheiro",
+                "user": "admin_tester",
+                "type": "final_payment"
+            },
+            {
+                "id": "c4bc4f4d-fcb8-4d38-afa2-e7f552bf3d15",
+                "timestamp": "17/02/2026 12:49",
+                "amount": 24.0,
+                "method": "Cartão Crédito",
+                "user": "admin_tester",
+                "type": "final_payment"
+            }
+        ]
+    },
+    {
+        "items": [
+            {
+                "id": "88eca8fa-c546-4dfa-be8e-c8729f9ef595",
+                "product_id": "3",
+                "name": "Pizza",
+                "price": 40.0,
+                "qty": 1.0,
+                "category": "Refeição",
+                "created_at": "17/02/2026 12:49",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": null,
+                "cest": null,
+                "cfop": null,
+                "origin": 0,
+                "tax_info": null
+            }
+        ],
+        "total": 40.0,
+        "status": "closed",
+        "opened_at": "17/02/2026 12:49",
+        "num_adults": 2,
+        "customer_type": "passante",
+        "customer_name": "Cliente Teste",
+        "room_number": null,
+        "waiter": "garcom1",
+        "staff_name": null,
+        "is_breakfast": false,
+        "partial_payments": [
+            {
+                "id": "143ffb17-b4e8-47aa-b033-e31f141bc02f",
+                "timestamp": "17/02/2026 12:49",
+                "amount": 20.0,
+                "method": "Dinheiro",
+                "user": "admin_tester"
+            }
+        ],
+        "total_paid": 20.0,
+        "closed_at": "17/02/2026 12:49",
+        "final_total": 44.0,
+        "discount": 0.0,
+        "closed_by": "admin_tester",
+        "close_id": "CLOSE_20260217124945_40_dbbebc",
+        "payments": [
+            {
+                "id": "143ffb17-b4e8-47aa-b033-e31f141bc02f",
+                "timestamp": "17/02/2026 12:49",
+                "amount": 20.0,
+                "method": "Dinheiro",
+                "user": "admin_tester"
+            },
+            {
+                "id": "faf08fd5-407f-4955-bf7e-9fdad7f29542",
+                "timestamp": "17/02/2026 12:49",
+                "amount": 24.0,
+                "method": "Dinheiro",
+                "user": "admin_tester",
+                "type": "final_payment"
+            }
+        ]
+    },
+    {
+        "items": [
+            {
+                "id": "0fbd61b0-2478-477a-9bf4-695f596db83b",
+                "product_id": "3",
+                "name": "Pizza",
+                "price": 40.0,
+                "qty": 1.0,
+                "category": "Refeição",
+                "created_at": "17/02/2026 12:50",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": null,
+                "cest": null,
+                "cfop": null,
+                "origin": 0,
+                "tax_info": null
+            }
+        ],
+        "total": 40.0,
+        "status": "closed",
+        "opened_at": "17/02/2026 12:50",
+        "num_adults": 2,
+        "customer_type": "passante",
+        "customer_name": "Cliente Teste",
+        "room_number": null,
+        "waiter": "garcom1",
+        "staff_name": null,
+        "is_breakfast": false,
+        "partial_payments": [],
+        "total_paid": 0.0,
+        "closed_at": "17/02/2026 12:50",
+        "final_total": 40.0,
+        "discount": 0.0,
+        "closed_by": "admin_tester",
+        "close_id": "CLOSE_20260217125036_40_efc251",
+        "payments": [
+            {
+                "id": "b24fc679-75dd-4c51-8667-eb28056435ab",
+                "timestamp": "17/02/2026 12:50",
+                "amount": 40.0,
+                "method": "Dinheiro",
+                "user": "admin_tester",
+                "type": "final_payment"
+            }
+        ]
+    },
+    {
+        "items": [
+            {
+                "id": "95e95472-8d92-4b05-a4cb-c32e2b9343ae",
+                "product_id": "1",
+                "name": "Água",
+                "price": 5.0,
+                "qty": 10.0,
+                "category": "Bebidas",
+                "created_at": "17/02/2026 12:50",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": null,
+                "cest": null,
+                "cfop": null,
+                "origin": 0,
+                "tax_info": null
+            }
+        ],
+        "total": 50.0,
+        "status": "closed",
+        "opened_at": "17/02/2026 12:50",
+        "num_adults": 2,
+        "customer_type": "passante",
+        "customer_name": "Cliente Teste",
+        "room_number": null,
+        "waiter": "garcom1",
+        "staff_name": null,
+        "is_breakfast": false,
+        "partial_payments": [],
+        "total_paid": 0.0,
+        "closed_at": "17/02/2026 12:51",
+        "final_total": 55.00000000000001,
+        "discount": 0.0,
+        "closed_by": "admin_tester",
+        "close_id": "CLOSE_20260217125109_40_a8a0bf",
+        "payments": [
+            {
+                "id": "4bd3fe7b-f970-4938-9412-6ebc2fc48cb3",
+                "timestamp": "17/02/2026 12:51",
+                "amount": 55.0,
+                "method": "Dinheiro",
+                "user": "admin_tester",
+                "type": "final_payment"
+            }
+        ]
     }
 ]

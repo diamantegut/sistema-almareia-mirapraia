@@ -42878,5 +42878,570 @@
             }
         ],
         "last_error": "Erro Nuvem Fiscal: Validation failed"
+    },
+    {
+        "id": "6392eff6-8a07-46b5-8e35-c59c5fc7e4ea",
+        "origin": "reception_charge",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "CHARGE_CHARGE_TEST_1",
+        "closed_at": "2026-02-17 09:07:52",
+        "closed_by": "admin",
+        "total_amount": 110.0,
+        "fiscal_amount": 0.0,
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 100.0,
+                "qty": 1.0,
+                "total": 100.0,
+                "ncm": "00000000"
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": null,
+                "amount": 110.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "room_number": "101",
+            "guest_name": "Hóspede"
+        },
+        "status": "pending",
+        "notes": null,
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "1d83ff99-b00f-403b-b426-cec610897eee",
+        "origin": "reception_charge",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "CHARGE_CHARGE_TEST_1",
+        "closed_at": "2026-02-17 09:10:50",
+        "closed_by": "admin",
+        "total_amount": 110.0,
+        "fiscal_amount": 0.0,
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 100.0,
+                "qty": 1.0,
+                "total": 100.0,
+                "ncm": "00000000"
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": null,
+                "amount": 110.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "room_number": "101",
+            "guest_name": "Hóspede"
+        },
+        "status": "pending",
+        "notes": null,
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "22e8878e-1fbb-4dbd-8b4e-95328f22aa13",
+        "origin": "reception_charge",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "CHARGE_CHARGE_TEST_1",
+        "closed_at": "2026-02-17 09:13:11",
+        "closed_by": "admin",
+        "total_amount": 110.0,
+        "fiscal_amount": 0.0,
+        "items": [
+            {
+                "name": "Item 1",
+                "price": 100.0,
+                "qty": 1.0,
+                "total": 100.0,
+                "ncm": "00000000"
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": null,
+                "amount": 110.0,
+                "is_fiscal": false
+            }
+        ],
+        "customer": {
+            "room_number": "101",
+            "guest_name": "Hóspede"
+        },
+        "status": "pending",
+        "notes": null,
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "3557f3e8-7a04-4300-8fc5-814b94bb19a6",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "MESA_40_202602171157",
+        "closed_at": "2026-02-17 11:57:50",
+        "closed_by": "admin_tester",
+        "total_amount": 44.0,
+        "fiscal_amount": 44.0,
+        "items": [
+            {
+                "id": "4d7693e6-2440-4434-afa2-b848dca97847",
+                "product_id": "3",
+                "name": "Pizza",
+                "price": 40.0,
+                "qty": 1.0,
+                "category": "Refeição",
+                "created_at": "17/02/2026 11:57",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "00000000",
+                "cest": null,
+                "cfop": null,
+                "origin": null,
+                "tax_info": null,
+                "total": 40.0,
+                "tax_situation": null,
+                "icms_rate": null,
+                "pis_cst": null,
+                "cofins_cst": null
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 20.0,
+                "is_fiscal": true
+            },
+            {
+                "method": "Cartão Crédito",
+                "amount": 24.0,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "5a5cfcb4-262b-48f4-b379-0f346caa5484",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "MESA_40_202602171158",
+        "closed_at": "2026-02-17 11:58:07",
+        "closed_by": "admin_tester",
+        "total_amount": 44.0,
+        "fiscal_amount": 44.0,
+        "items": [
+            {
+                "id": "0df707c5-cac4-4ace-a110-84f5d4017e6d",
+                "product_id": "3",
+                "name": "Pizza",
+                "price": 40.0,
+                "qty": 1.0,
+                "category": "Refeição",
+                "created_at": "17/02/2026 11:57",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "00000000",
+                "cest": null,
+                "cfop": null,
+                "origin": null,
+                "tax_info": null,
+                "total": 40.0,
+                "tax_situation": null,
+                "icms_rate": null,
+                "pis_cst": null,
+                "cofins_cst": null
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 20.0,
+                "is_fiscal": true
+            },
+            {
+                "method": "Dinheiro",
+                "amount": 24.0,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "3e79aef0-6728-4caa-a4d5-e327c8419827",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "MESA_40_202602171158",
+        "closed_at": "2026-02-17 11:58:58",
+        "closed_by": "admin_tester",
+        "total_amount": 40.0,
+        "fiscal_amount": 40.0,
+        "items": [
+            {
+                "id": "3f67bcda-2c3f-4695-99c2-a3dfa93921b3",
+                "product_id": "3",
+                "name": "Pizza",
+                "price": 40.0,
+                "qty": 1.0,
+                "category": "Refeição",
+                "created_at": "17/02/2026 11:58",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "00000000",
+                "cest": null,
+                "cfop": null,
+                "origin": null,
+                "tax_info": null,
+                "total": 40.0,
+                "tax_situation": null,
+                "icms_rate": null,
+                "pis_cst": null,
+                "cofins_cst": null
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 40.0,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "5b90cca4-ebf2-4820-99fc-7dd3be66720c",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "MESA_40_202602171159",
+        "closed_at": "2026-02-17 11:59:31",
+        "closed_by": "admin_tester",
+        "total_amount": 55.00000000000001,
+        "fiscal_amount": 55.0,
+        "items": [
+            {
+                "id": "c87959e8-6d9a-4b80-9068-273503b64486",
+                "product_id": "1",
+                "name": "Água",
+                "price": 5.0,
+                "qty": 10.0,
+                "category": "Bebidas",
+                "created_at": "17/02/2026 11:59",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "00000000",
+                "cest": null,
+                "cfop": null,
+                "origin": null,
+                "tax_info": null,
+                "total": 50.0,
+                "tax_situation": null,
+                "icms_rate": null,
+                "pis_cst": null,
+                "cofins_cst": null
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 55.0,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "1bfe8f07-4633-4368-ac20-1c801021b262",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "MESA_40_202602171249",
+        "closed_at": "2026-02-17 12:49:29",
+        "closed_by": "admin_tester",
+        "total_amount": 44.0,
+        "fiscal_amount": 44.0,
+        "items": [
+            {
+                "id": "a966cc73-9c4f-44bb-a993-685c6c33b879",
+                "product_id": "3",
+                "name": "Pizza",
+                "price": 40.0,
+                "qty": 1.0,
+                "category": "Refeição",
+                "created_at": "17/02/2026 12:49",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "00000000",
+                "cest": null,
+                "cfop": null,
+                "origin": null,
+                "tax_info": null,
+                "total": 40.0,
+                "tax_situation": null,
+                "icms_rate": null,
+                "pis_cst": null,
+                "cofins_cst": null
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 20.0,
+                "is_fiscal": true
+            },
+            {
+                "method": "Cartão Crédito",
+                "amount": 24.0,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "777953a6-5fe3-4c55-984a-50d8f5871aeb",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "MESA_40_202602171249",
+        "closed_at": "2026-02-17 12:49:46",
+        "closed_by": "admin_tester",
+        "total_amount": 44.0,
+        "fiscal_amount": 44.0,
+        "items": [
+            {
+                "id": "88eca8fa-c546-4dfa-be8e-c8729f9ef595",
+                "product_id": "3",
+                "name": "Pizza",
+                "price": 40.0,
+                "qty": 1.0,
+                "category": "Refeição",
+                "created_at": "17/02/2026 12:49",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "00000000",
+                "cest": null,
+                "cfop": null,
+                "origin": null,
+                "tax_info": null,
+                "total": 40.0,
+                "tax_situation": null,
+                "icms_rate": null,
+                "pis_cst": null,
+                "cofins_cst": null
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 20.0,
+                "is_fiscal": true
+            },
+            {
+                "method": "Dinheiro",
+                "amount": 24.0,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "c63c75ee-8816-4d61-81a7-3923ba50450b",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "MESA_40_202602171250",
+        "closed_at": "2026-02-17 12:50:36",
+        "closed_by": "admin_tester",
+        "total_amount": 40.0,
+        "fiscal_amount": 40.0,
+        "items": [
+            {
+                "id": "0fbd61b0-2478-477a-9bf4-695f596db83b",
+                "product_id": "3",
+                "name": "Pizza",
+                "price": 40.0,
+                "qty": 1.0,
+                "category": "Refeição",
+                "created_at": "17/02/2026 12:50",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "00000000",
+                "cest": null,
+                "cfop": null,
+                "origin": null,
+                "tax_info": null,
+                "total": 40.0,
+                "tax_situation": null,
+                "icms_rate": null,
+                "pis_cst": null,
+                "cofins_cst": null
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 40.0,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
+    },
+    {
+        "id": "ff7507e7-ab53-42c2-801b-117264938753",
+        "origin": "restaurant",
+        "fiscal_type": "nfce",
+        "cnpj_emitente": "28952732000109",
+        "original_id": "MESA_40_202602171251",
+        "closed_at": "2026-02-17 12:51:09",
+        "closed_by": "admin_tester",
+        "total_amount": 55.00000000000001,
+        "fiscal_amount": 55.0,
+        "items": [
+            {
+                "id": "95e95472-8d92-4b05-a4cb-c32e2b9343ae",
+                "product_id": "1",
+                "name": "Água",
+                "price": 5.0,
+                "qty": 10.0,
+                "category": "Bebidas",
+                "created_at": "17/02/2026 12:50",
+                "waiter": "garcom1",
+                "printed": false,
+                "print_status": "error",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "00000000",
+                "cest": null,
+                "cfop": null,
+                "origin": null,
+                "tax_info": null,
+                "total": 50.0,
+                "tax_situation": null,
+                "icms_rate": null,
+                "pis_cst": null,
+                "cofins_cst": null
+            }
+        ],
+        "payment_methods": [
+            {
+                "method": "Dinheiro",
+                "amount": 55.0,
+                "is_fiscal": true
+            }
+        ],
+        "customer": {
+            "name": "Cliente Teste",
+            "type": "passante"
+        },
+        "status": "pending",
+        "notes": "Mesa 40",
+        "fiscal_doc_uuid": null,
+        "history": []
     }
 ]
