@@ -58,6 +58,7 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
     const kdsUpdateUrl = "{{ url_for('kitchen.kitchen_kds_update_status') }}";
     const kdsMarkReceivedUrl = "{{ url_for('kitchen.kitchen_kds_mark_received') }}";
     const kdsLocalDone = new Set();
+    let kdsOverlayTimer = null;
 
     function formatTimeFromIso(isoString) {
         if (!isoString) return "";
@@ -138,12 +139,26 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
         const clone = card.cloneNode(true);
         content.appendChild(clone);
         overlay.classList.add("show");
+        if (kdsOverlayTimer) {
+            clearTimeout(kdsOverlayTimer);
+            kdsOverlayTimer = null;
+        }
+        kdsOverlayTimer = setTimeout(function () {
+            const currentOverlay = document.getElementById("kds-overlay");
+            if (currentOverlay && currentOverlay.classList.contains("show")) {
+                closeKdsOverlay();
+            }
+        }, 10000);
     }
 
     function closeKdsOverlay() {
         const overlay = document.getElementById("kds-overlay");
         const content = document.getElementById("kds-overlay-content");
         if (!overlay || !content) return;
+        if (kdsOverlayTimer) {
+            clearTimeout(kdsOverlayTimer);
+            kdsOverlayTimer = null;
+        }
         content.innerHTML = "";
         overlay.classList.remove("show");
     }
@@ -234,7 +249,13 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
             actionBtn.type = "button";
             actionBtn.className = "btn btn-sm ms-2 kds-card-action";
             actionBtn.dataset.tableId = order.table_id || "";
-            actionBtn.dataset.itemIds = JSON.stringify(items.map(i => i.id).filter(Boolean));
+            // IDs por status para evitar atualizar tudo de uma vez
+            const idsPending = items.filter(i => i.status === "pending").map(i => i.id).filter(Boolean);
+            const idsPreparing = items.filter(i => i.status === "preparing").map(i => i.id).filter(Boolean);
+            const idsDone = items.filter(i => i.status === "done").map(i => i.id).filter(Boolean);
+            actionBtn.dataset.pendingIds = JSON.stringify(idsPending);
+            actionBtn.dataset.preparingIds = JSON.stringify(idsPreparing);
+            actionBtn.dataset.doneIds = JSON.stringify(idsDone);
             actionBtn.dataset.status = cardStatus;
             if (cardStatus === "pending") {
                 actionBtn.textContent = "Pendente";
@@ -249,13 +270,10 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
             actionBtn.addEventListener("click", function (ev) {
                 ev.stopPropagation();
                 const tableId = actionBtn.dataset.tableId || "";
-                let ids = [];
-                try {
-                    ids = JSON.parse(actionBtn.dataset.itemIds || "[]");
-                } catch (e) {
-                    ids = [];
-                }
-                if (!tableId || !ids.length) return;
+                const getIds = (key) => {
+                    try { return JSON.parse(actionBtn.dataset[key] || "[]"); } catch { return []; }
+                };
+                if (!tableId) return;
                 const current = actionBtn.dataset.status || "pending";
                 let next = "preparing";
                 if (current === "pending") {
@@ -278,7 +296,10 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
                 } else if (next === "archived") {
                     actionBtn.textContent = "Arquivando...";
                 }
+                // Determina quais itens mudar baseado no passo
                 if (next === "archived") {
+                    const ids = getIds("doneIds");
+                    if (!ids.length) { fetchKdsData(); return; }
                     const colEl = card.parentElement;
                     if (colEl) {
                         colEl.remove();
@@ -287,6 +308,8 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
                     }
                     markItemsReceived(tableId, ids).then(fetchKdsData);
                 } else {
+                    const ids = next === "preparing" ? getIds("pendingIds") : getIds("preparingIds");
+                    if (!ids.length) { fetchKdsData(); return; }
                     updateItemsStatus(tableId, ids, next).then(fetchKdsData);
                 }
             });

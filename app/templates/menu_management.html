@@ -194,6 +194,7 @@
         </div>
         <div class="card-body p-3">
             <form method="POST" class="maintenance-form w-100" id="productForm" enctype="multipart/form-data">
+                <input type="hidden" name="return_url" value="{{ request.full_path }}">
                 <input type="hidden" id="product_id" name="id">
                 <input type="hidden" id="current_image" name="current_image">
                 <input type="hidden" id="current_video" name="current_video">
@@ -533,14 +534,28 @@
                             {% if not item.ncm %}
                             <span class="badge bg-warning text-dark" style="font-size: 0.65em;">! Fiscal</span>
                             {% endif %}
+                            {% set r = item.recipe %}
+                            {% if item.no_preparation %}
+                                <div class="small text-warning mt-1"><i class="bi bi-exclamation-triangle"></i> Não possui modo de preparo</div>
+                            {% elif r %}
+                                {% if r is mapping and (not r.get('instructions')) %}
+                                <div class="small text-warning mt-1"><i class="bi bi-exclamation-triangle"></i> Não possui modo de preparo</div>
+                                {% elif r is sequence and (r is not string) %}
+                                <div class="small text-warning mt-1"><i class="bi bi-exclamation-triangle"></i> Não possui modo de preparo</div>
+                                {% endif %}
+                            {% endif %}
                         </td>
                         <td><span class="badge bg-light text-dark border">{{ item.category }}</span></td>
                         <td>R$ {{ "%.2f"|format(item.price) }}</td>
                         <td class="small text-muted">{{ item.printer_name if item.printer_id != 'no_print' else '-' }}</td>
                         <td class="text-nowrap">
                             <!-- Ficha Técnica -->
-                            {% if item.recipe|length > 0 %}
+                            {% if item.recipe and item.recipe.ingredients and item.recipe.instructions %}
                             <span class="badge bg-success" title="Com Ficha Técnica" style="font-size: 0.7em; cursor: help;">
+                                <i class="bi bi-receipt"></i> FT
+                            </span>
+                            {% elif item.recipe %}
+                            <span class="badge bg-warning text-dark" title="Possui insumos mas não possui modo de preparo" style="font-size: 0.7em; cursor: help;">
                                 <i class="bi bi-receipt"></i> FT
                             </span>
                             {% else %}

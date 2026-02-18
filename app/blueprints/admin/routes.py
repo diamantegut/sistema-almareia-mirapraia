@@ -258,6 +258,9 @@ def admin_users():
             # BLOCKED FOR ACTIVE USERS
             flash('Ação não permitida. Para excluir, o usuário deve ser demitido primeiro.')
         
+        return_url = request.form.get('return_url')
+        if return_url:
+            return redirect(return_url)
         return redirect(url_for('admin.admin_users'))
         
     # Organizar usuários por departamento para exibição

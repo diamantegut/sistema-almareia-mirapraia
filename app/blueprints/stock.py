@@ -338,7 +338,29 @@ def stock_products():
                 else:
                     flash('Produto já existe para este departamento.')
         
-        return redirect(url_for('stock.stock_products'))
+        return_url = request.form.get('return_url')
+        if return_url:
+            return redirect(return_url)
+
+        dept_q = (request.form.get('current_department') or '').strip()
+        cat_q = (request.form.get('current_category') or '').strip()
+        search_q = (request.form.get('current_search') or '').strip()
+        sort_q = (request.form.get('current_sort') or '').strip()
+        filter_q = (request.form.get('current_filter') or '').strip()
+
+        redirect_params = {}
+        if dept_q:
+            redirect_params['department'] = dept_q
+        if cat_q:
+            redirect_params['category'] = cat_q
+        if search_q:
+            redirect_params['search'] = search_q
+        if sort_q:
+            redirect_params['sort'] = sort_q
+        if filter_q:
+            redirect_params['filter'] = filter_q
+
+        return redirect(url_for('stock.stock_products', **redirect_params))
 
     try:
         products = load_products()

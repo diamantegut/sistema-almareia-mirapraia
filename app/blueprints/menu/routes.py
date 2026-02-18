@@ -1057,12 +1057,18 @@ def menu_management():
                 )
 
             flash('Produto salvo com sucesso!')
+            return_url = request.form.get('return_url')
+            if return_url:
+                return redirect(return_url)
             return redirect(url_for('menu.menu_management'))
             
         except Exception as e:
             current_app.logger.error(f"Error saving product: {e}")
             current_app.logger.error(traceback.format_exc())
             flash(f'Erro ao salvar produto: {e}')
+            return_url = request.form.get('return_url')
+            if return_url:
+                return redirect(return_url)
             return redirect(url_for('menu.menu_management'))
 
     # GET Request

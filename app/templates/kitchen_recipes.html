@@ -1,0 +1,444 @@
+{% extends "base.html" %}
+
+{% block title %}Receitas - Cozinha{% endblock %}
+
+{% block content %}
+<div class="service-page">
+    <div class="service-header">
+        <span class="service-icon"><i class="bi bi-journal-text"></i></span>
+        <h2>Receitas da Cozinha</h2>
+    </div>
+
+    <div class="mb-3 d-flex justify-content-between align-items-center">
+        <a href="{{ url_for('main.service_page', service_id='cozinha') }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#recipeModal">
+            <i class="bi bi-plus-circle"></i> Nova Receita
+        </button>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <p class="text-muted mb-0">
+                Use esta tela para montar a ficha técnica de novos produtos da cozinha, vinculando insumos do estoque.
+                Após salvar, o produto ficará disponível para ajuste completo em <strong>Cardápio / Gestão de Menu</strong>.
+            </p>
+        </div>
+    </div>
+
+    <!-- Produtos do cardápio sem ficha técnica (sem insumos e sem preparo) -->
+    {% if menu_products_pending and menu_products_pending|length > 0 %}
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="mb-3"><i class="bi bi-exclamation-circle text-warning"></i> Produtos do cardápio pendentes de receita</h5>
+            <div class="row g-3">
+                {% for p in menu_products_pending %}
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="card h-100 border-warning-subtle">
+                        {% if p.image_url %}
+                        <img src="{{ p.image_url }}" class="card-img-top" alt="{{ p.name }}" style="object-fit: cover; max-height: 140px;">
+                        {% endif %}
+                        <div class="card-body d-flex flex-column">
+                            <h6 class="card-title">{{ p.name }}</h6>
+                            <div class="mt-auto">
+                                <button type="button"
+                                        class="btn btn-sm btn-primary"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#recipeModal"
+                                        data-menu-product='{{ p|tojson }}'>
+                                    Adicionar Ficha Técnica
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row g-3">
+        {% if recipes %}
+            {% for recipe in recipes %}
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm">
+                    {% if recipe.image_url %}
+                    <img src="{{ recipe.image_url }}" class="card-img-top" alt="{{ recipe.name }}" style="object-fit: cover; max-height: 180px;">
+                    {% endif %}
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ recipe.name }}</h5>
+                        <p class="card-text small text-muted mb-2">
+                            {% if recipe.menu_product_id %}
+                                Vinculado ao cardápio (ID: {{ recipe.menu_product_id }}).
+                            {% else %}
+                                Aguardando envio ao cardápio.
+                            {% endif %}
+                        </p>
+                        <p class="card-text small mb-2">
+                            <strong>Insumos:</strong>
+                            {% if recipe.ingredients %}
+                                {{ recipe.ingredients|length }} itens
+                            {% else %}
+                                Nenhum insumo definido
+                            {% endif %}
+                        </p>
+                        <p class="card-text small text-muted flex-grow-1">
+                            Criado em {{ recipe.created_at }}
+                        </p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <button type="button"
+                                    class="btn btn-outline-primary btn-sm"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#recipeModal"
+                                    data-recipe="{{ recipe|tojson }}">
+                                Editar
+                            </button>
+                            {% if not recipe.menu_product_id %}
+                            <form method="POST" action="{{ url_for('kitchen.kitchen_recipe_publish', recipe_id=recipe.id) }}">
+                                <button type="submit" class="btn btn-success btn-sm">
+                                    Enviar para Cardápio
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+        <div class="col-12">
+            <div class="alert alert-info text-center p-4">
+                <h5 class="mb-2">Nenhuma receita cadastrada</h5>
+                <p class="mb-3">Comece criando uma nova receita da cozinha com ficha técnica completa.</p>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#recipeModal">
+                    Nova Receita
+                </button>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal Nova/Editar Receita -->
+125→<div class="modal fade" id="recipeModal" tabindex="-1">
+126→    <div class="modal-dialog modal-lg modal-dialog-scrollable" style="max-height: 80vh; margin-top: 1.25rem; margin-bottom: 1.25rem;">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('kitchen.kitchen_recipe_save') }}" enctype="multipart/form-data" id="recipeForm">
+                <div class="modal-header">
+                    <h5 class="modal-title">Nova Receita</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" style="overflow-y: auto; max-height: calc(80vh - 140px);">
+                    <input type="hidden" name="recipe_id" id="recipe_id">
+                    <input type="hidden" name="menu_product_id" id="menu_product_id">
+
+                    <!-- Selecionar produto do cardápio (opcional) -->
+                    <div class="mb-3">
+                        <label class="form-label">Selecionar produto do cardápio (opcional)</label>
+                        <select class="form-select" id="selectMenuProduct">
+                            <option value="">— Não selecionar —</option>
+                            {% for mp in menu_products %}
+                            <option value="{{ mp.id }}" data-product='{{ mp|tojson }}'>{{ mp.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">Selecione para editar diretamente a ficha técnica do produto.</div>
+                    </div>
+
+                    <!-- Passo 1: Dados básicos e insumos -->
+                    <h6 class="fw-bold mb-2">Passo 1 - Ficha Técnica (Insumos)</h6>
+                    <div class="mb-3">
+                        <label class="form-label">Nome do Produto</label>
+                        <input type="text" class="form-control" name="name" id="recipe_name" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Insumos</label>
+                        <div class="table-responsive">
+                            <table class="table table-sm align-middle">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 45%;">Insumo</th>
+                                        <th style="width: 20%;">Quantidade</th>
+                                        <th style="width: 20%;">Unidade</th>
+                                        <th style="width: 15%;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ingredientsTableBody">
+                                </tbody>
+                            </table>
+                        </div>
+                        <button type="button" class="btn btn-outline-success btn-sm" onclick="addIngredientRow()">
+                            <i class="bi bi-plus-circle"></i> Adicionar Insumo
+                        </button>
+                    </div>
+
+                    <hr>
+
+                    <!-- Passo 2: Modo de preparo -->
+                    <h6 class="fw-bold mb-2">Passo 2 - Modo de Preparo</h6>
+                    <div class="mb-3">
+                        <label class="form-label">Descrição do modo de preparo</label>
+183→                        <textarea class="form-control" name="instructions" id="recipe_instructions" rows="3" placeholder="Descreva o passo a passo do preparo..."></textarea>
+                    </div>
+
+                    <hr>
+
+                    <!-- Passo 3: Foto -->
+                    <h6 class="fw-bold mb-2">Passo 3 - Foto do Produto</h6>
+                    <div class="mb-3">
+                        <label class="form-label">Imagem (será redimensionada para o cardápio virtual)</label>
+                        <input type="file" class="form-control" name="image" id="recipe_image" accept="image/*" onchange="previewRecipeImage(this)">
+                        <div class="mt-2">
+                            <img id="recipeImagePreview" src="" alt="Pré-visualização" style="max-width: 200px; display: none; border-radius: 0.5rem;">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-outline-danger me-auto"
+                            id="markNoRecipeBtn"
+                            style="display: none;"
+                            onclick="markNoRecipe()">
+                        Não possui receita
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar Receita</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Novo Insumo (atalho para /stock/products) -->
+<div class="modal fade" id="newInsumoModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cadastrar Novo Insumo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Este insumo não foi encontrado no cadastro de produtos do estoque.</p>
+                <p class="mb-0">Abra o módulo de <strong>Estoque / Produtos</strong> para cadastrá-lo e depois retorne para completar a receita.</p>
+            </div>
+            <div class="modal-footer">
+                <a href="{{ url_for('stock.stock_products') }}" class="btn btn-outline-primary">Abrir /stock/products</a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form id="markNoRecipeForm"
+      method="POST"
+      action="{{ url_for('kitchen.kitchen_recipe_mark_no_recipe') }}"
+      style="display: none;">
+    <input type="hidden" name="menu_product_id" id="mark_no_recipe_product_id">
+</form>
+
+<script type="application/json" id="insumosData">{{ insumos|tojson }}</script>
+<script>
+    const allInsumos = JSON.parse(document.getElementById('insumosData').textContent);
+
+    function buildInsumoDatalistOptions() {
+        return allInsumos.map(p => `<option value="${p.name}">${p.unit || ''}</option>`).join('');
+    }
+
+    function addIngredientRow(data) {
+        const tbody = document.getElementById('ingredientsTableBody');
+        const tr = document.createElement('tr');
+        const nameVal = data && data.name ? data.name : '';
+        const qtyVal = data && data.qty ? data.qty : '';
+        const unitVal = data && data.unit ? data.unit : '';
+
+        tr.innerHTML = `
+            <td>
+                <input type="text" name="ingredient_name[]" class="form-control form-control-sm ingredient-name" list="insumosList" value="${nameVal}">
+            </td>
+            <td>
+                <input type="number" step="0.01" min="0" name="ingredient_qty[]" class="form-control form-control-sm" value="${qtyVal}">
+            </td>
+            <td>
+                <input type="text" name="ingredient_unit[]" class="form-control form-control-sm" value="${unitVal}">
+            </td>
+            <td class="text-end">
+                <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeIngredientRow(this)">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+
+        const inputName = tr.querySelector('.ingredient-name');
+        inputName.addEventListener('blur', function () {
+            const val = (inputName.value || '').trim();
+            if (!val) return;
+            const exists = allInsumos.some(p => (p.name || '').toLowerCase() === val.toLowerCase());
+            if (!exists) {
+                const modal = new bootstrap.Modal(document.getElementById('newInsumoModal'));
+                modal.show();
+            }
+        });
+    }
+
+    function removeIngredientRow(btn) {
+        const tbody = document.getElementById('ingredientsTableBody');
+        if (tbody.rows.length > 1) {
+            btn.closest('tr').remove();
+        } else {
+            btn.closest('tr').querySelectorAll('input').forEach(i => i.value = '');
+        }
+    }
+
+    function previewRecipeImage(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const img = document.getElementById('recipeImagePreview');
+                img.src = e.target.result;
+                img.style.display = 'block';
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const modalEl = document.getElementById('recipeModal');
+        const form = document.getElementById('recipeForm');
+        const nameInput = document.getElementById('recipe_name');
+        const instructionsInput = document.getElementById('recipe_instructions');
+        const idInput = document.getElementById('recipe_id');
+        const menuProductIdInput = document.getElementById('menu_product_id');
+        const imgPreview = document.getElementById('recipeImagePreview');
+        const selectMenuProduct = document.getElementById('selectMenuProduct');
+        const markNoRecipeBtn = document.getElementById('markNoRecipeBtn');
+
+        modalEl.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const raw = button ? button.getAttribute('data-recipe') : null;
+            const rawMenuProduct = button ? button.getAttribute('data-menu-product') : null;
+            const tbody = document.getElementById('ingredientsTableBody');
+            tbody.innerHTML = '';
+            if (!raw) {
+                form.reset();
+                idInput.value = '';
+                menuProductIdInput.value = '';
+                imgPreview.src = '';
+                imgPreview.style.display = 'none';
+                document.querySelector('#recipeModal .modal-title').textContent = 'Nova Receita';
+                // Se veio de um card de produto pendente
+                if (rawMenuProduct) {
+                    try {
+                        const mp = JSON.parse(rawMenuProduct);
+                        menuProductIdInput.value = mp.id != null ? String(mp.id) : '';
+                        nameInput.value = mp.name || '';
+                        // Seleciona no dropdown
+                        if (selectMenuProduct) {
+                            for (const opt of selectMenuProduct.options) {
+                                if (String(opt.value) === String(mp.id)) { opt.selected = true; break; }
+                            }
+                        }
+                    } catch (e) {}
+                }
+                if (markNoRecipeBtn) {
+                    markNoRecipeBtn.style.display = menuProductIdInput.value ? 'inline-block' : 'none';
+                }
+                addIngredientRow();
+                return;
+            }
+            let recipe;
+            try {
+                recipe = JSON.parse(raw);
+            } catch (e) {
+                recipe = null;
+            }
+            form.reset();
+            idInput.value = recipe && recipe.id ? recipe.id : '';
+            menuProductIdInput.value = '';
+            nameInput.value = recipe && recipe.name ? recipe.name : '';
+            instructionsInput.value = recipe && recipe.instructions ? recipe.instructions : '';
+            imgPreview.src = recipe && recipe.image_url ? recipe.image_url : '';
+            imgPreview.style.display = recipe && recipe.image_url ? 'block' : 'none';
+            document.querySelector('#recipeModal .modal-title').textContent = 'Editar Receita';
+            if (recipe && Array.isArray(recipe.ingredients) && recipe.ingredients.length) {
+                recipe.ingredients.forEach(ing => addIngredientRow(ing));
+            } else {
+                addIngredientRow();
+            }
+            if (markNoRecipeBtn) {
+                markNoRecipeBtn.style.display = 'none';
+            }
+        });
+
+        // Seleção de produto do cardápio
+        if (selectMenuProduct) {
+            selectMenuProduct.addEventListener('change', function () {
+                const opt = this.options[this.selectedIndex];
+                const data = opt ? opt.getAttribute('data-product') : null;
+                const tbody = document.getElementById('ingredientsTableBody');
+                tbody.innerHTML = '';
+                if (!data) {
+                    // Limpa contexto de produto do cardápio
+                    menuProductIdInput.value = '';
+                    nameInput.value = '';
+                    instructionsInput.value = '';
+                    if (markNoRecipeBtn) {
+                        markNoRecipeBtn.style.display = 'none';
+                    }
+                    addIngredientRow();
+                    return;
+                }
+                try {
+                    const mp = JSON.parse(data);
+                    menuProductIdInput.value = mp.id != null ? String(mp.id) : '';
+                    nameInput.value = mp.name || '';
+                    const rec = mp.recipe || {};
+                    const instr = rec.instructions || '';
+                    const ings = rec.ingredients || [];
+                    instructionsInput.value = instr;
+                    if (Array.isArray(ings) && ings.length) {
+                        ings.forEach(ing => addIngredientRow({ name: ing.name, qty: ing.qty, unit: ing.unit }));
+                    } else {
+                        addIngredientRow();
+                    }
+                    if (markNoRecipeBtn) {
+                        markNoRecipeBtn.style.display = 'inline-block';
+                    }
+                } catch (e) {
+                    menuProductIdInput.value = '';
+                    nameInput.value = '';
+                    instructionsInput.value = '';
+                    addIngredientRow();
+                    if (markNoRecipeBtn) {
+                        markNoRecipeBtn.style.display = 'none';
+                    }
+                }
+            });
+        }
+
+        const existing = document.getElementById('insumosList');
+        if (!existing) {
+            const datalist = document.createElement('datalist');
+            datalist.id = 'insumosList';
+            datalist.innerHTML = buildInsumoDatalistOptions();
+            document.body.appendChild(datalist);
+        }
+    });
+
+    function markNoRecipe() {
+        if (!window.confirm('Confirmar: marcar este produto como "não possui receita"? Ele será removido da lista de pendentes.')) {
+            return;
+        }
+        const menuProductIdInput = document.getElementById('menu_product_id');
+        const hiddenId = document.getElementById('mark_no_recipe_product_id');
+        const form = document.getElementById('markNoRecipeForm');
+        if (!menuProductIdInput || !hiddenId || !form) return;
+        const val = (menuProductIdInput.value || '').trim();
+        if (!val) return;
+        hiddenId.value = val;
+        form.submit();
+    }
+</script>
+{% endblock %}

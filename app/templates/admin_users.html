@@ -54,6 +54,7 @@
     <div class="card" style="margin-bottom: 30px;">
         <h3>Adicionar Novo Usuário</h3>
         <form method="POST" action="{{ url_for('admin.admin_users') }}">
+            <input type="hidden" name="return_url" value="{{ request.full_path }}">
             <input type="hidden" name="action" value="add">
             <div class="form-row">
                 <div class="form-group">

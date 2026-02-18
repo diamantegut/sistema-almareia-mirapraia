@@ -130,6 +130,12 @@
         <h3 id="formTitle">Adicionar Novo Insumo</h3>
         <form method="POST" class="maintenance-form" style="max-width: 100%;" id="productForm">
             <input type="hidden" id="product_id" name="id">
+            <input type="hidden" name="return_url" value="{{ request.full_path }}">
+            <input type="hidden" name="current_department" value="{{ request.args.get('department', '') }}">
+            <input type="hidden" name="current_category" value="{{ request.args.get('category', '') }}">
+            <input type="hidden" name="current_search" value="{{ request.args.get('search', '') }}">
+            <input type="hidden" name="current_sort" value="{{ request.args.get('sort', '') }}">
+            <input type="hidden" name="current_filter" value="{{ request.args.get('filter', '') }}">
             <h4 style="background-color: #e8f6f3; padding: 10px 15px; border-left: 5px solid #1abc9c; color: #2c3e50; margin-top: 0; margin-bottom: 16px; border-radius: 4px; font-size: 1.1em;"><i class="bi bi-box-seam"></i> Informações do Insumo e Estoque</h4>
 
             <div class="form-row" style="margin-bottom: 12px;">
@@ -389,7 +395,7 @@
                             <div class="table-actions">
                                 <button 
                                     data-product="{{ product|tojson|forceescape }}"
-                                    onclick="editProduct(JSON.parse(this.dataset.product))" 
+                                    onclick="openEditProductModal(JSON.parse(this.dataset.product))" 
                                     class="action-btn" 
                                     style="padding: 5px 10px; font-size: 0.8em; background-color: #f39c12; min-width: 36px; min-height: 36px;" 
                                     title="Editar" aria-label="Editar"><i class="bi bi-pencil"></i></button>
@@ -459,6 +465,122 @@
         </form>
     </div>
 </div>
+
+<div id="editProductModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);">
+    <div style="background-color: #fefefe; margin: 5% auto; padding: 20px; border: 1px solid #888; width: 90%; max-width: 900px; border-radius: 8px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h3 style="margin: 0;">Editar Insumo</h3>
+            <span onclick="closeEditProductModal()" style="color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+        </div>
+        <form method="POST" action="{{ url_for('stock.stock_products') }}" id="editProductForm">
+            <input type="hidden" name="id" id="edit_product_id">
+            <input type="hidden" name="return_url" value="{{ request.full_path }}">
+            <input type="hidden" name="current_department" value="{{ request.args.get('department', '') }}">
+            <input type="hidden" name="current_category" value="{{ request.args.get('category', '') }}">
+            <input type="hidden" name="current_search" value="{{ request.args.get('search', '') }}">
+            <input type="hidden" name="current_sort" value="{{ request.args.get('sort', '') }}">
+            <input type="hidden" name="current_filter" value="{{ request.args.get('filter', '') }}">
+
+            <h4 style="background-color: #e8f6f3; padding: 10px 15px; border-left: 5px solid #1abc9c; color: #2c3e50; margin-top: 0; margin-bottom: 16px; border-radius: 4px; font-size: 1.0em;">
+                <i class="bi bi-box-seam"></i> Informações do Insumo e Estoque
+            </h4>
+
+            <div class="form-row" style="margin-bottom: 12px;">
+                <div class="form-group" style="flex: 2;">
+                    <label for="edit_name">Nome do Insumo:</label>
+                    <input type="text" id="edit_name" name="name" required style="padding: 6px;">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label for="edit_department">Estoque:</label>
+                    <select id="edit_department" name="department" required style="padding: 6px;">
+                        {% for dept in departments %}
+                        <option value="{{ dept }}">{{ dept }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="form-row" style="margin-bottom: 12px;">
+                <div class="form-group" style="flex: 1;">
+                    <label for="edit_category">Categoria:</label>
+                    <input type="text" id="edit_category" name="category" required style="padding: 6px;">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label for="edit_unit">Unidade:</label>
+                    <select id="edit_unit" name="unit" required style="padding: 6px;">
+                        <option value="Unidades">Unidades</option>
+                        <option value="Litros">Litros</option>
+                        <option value="Gramas">Gramas</option>
+                        <option value="Kilogramas">Kilogramas</option>
+                        <option value="Garrafa">Garrafa</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label for="edit_price">Preço Unitário (R$):</label>
+                    <input type="number" id="edit_price" name="price" step="0.01" min="0" required style="padding: 6px;">
+                </div>
+            </div>
+            <h4 style="background-color: #fef9e7; padding: 10px 15px; border-left: 5px solid #f1c40f; color: #2c3e50; margin-top: 16px; margin-bottom: 16px; border-radius: 4px; font-size: 1.0em;">
+                <i class="bi bi-cart"></i> Informações de Compra
+            </h4>
+            <div class="form-row" style="margin-bottom: 12px;">
+                <div class="form-group" style="flex: 1;">
+                    <label for="edit_min_stock">Estoque Mínimo:</label>
+                    <input type="number" id="edit_min_stock" name="min_stock" step="0.01" min="0" required style="padding: 6px;">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label for="edit_frequency">Frequência de Compra:</label>
+                    <select id="edit_frequency" name="frequency" style="padding: 6px;">
+                        <option value="Sem Frequência">Sem Frequência</option>
+                        <option value="Semanal">Semanal</option>
+                        <option value="Quinzenal">Quinzenal</option>
+                        <option value="Mensal">Mensal</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label for="edit_package_size">Tamanho da Embalagem:</label>
+                    <input type="number" id="edit_package_size" name="package_size" step="0.01" min="1" style="padding: 6px;">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label for="edit_purchase_unit">Unidade de Compra:</label>
+                    <input type="text" id="edit_purchase_unit" name="purchase_unit" style="padding: 6px;">
+                </div>
+            </div>
+            <div class="form-row" style="margin-bottom: 12px;">
+                <div class="form-group" style="flex: 1;">
+                    <label for="edit_ncm">NCM</label>
+                    <input type="text" id="edit_ncm" name="ncm" style="padding: 6px;">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label for="edit_cest">CEST</label>
+                    <input type="text" id="edit_cest" name="cest" style="padding: 6px;">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label for="edit_icms_rate">Alíquota ICMS (%)</label>
+                    <input type="number" id="edit_icms_rate" name="icms_rate" step="0.01" style="padding: 6px;">
+                </div>
+            </div>
+            <div class="form-row" style="margin-bottom: 12px;">
+                <div class="form-group" style="flex: 1;">
+                    <label for="edit_anp_code">Código ANP</label>
+                    <input type="text" id="edit_anp_code" name="anp_code" style="padding: 6px;">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label for="edit_cfop_default">CFOP Padrão</label>
+                    <input type="text" id="edit_cfop_default" name="cfop_default" style="padding: 6px;">
+                </div>
+            </div>
+            <div style="margin-bottom: 12px;">
+                <label>Fornecedores (1 a 3):</label>
+                <div id="editSuppliersContainer"></div>
+                <button type="button" class="action-btn" style="background-color: #95a5a6; font-size: 0.8em; padding: 5px 10px;" onclick="addEditSupplier()">Adicionar Fornecedor</button>
+            </div>
+            <div style="text-align: right; margin-top: 16px;">
+                <button type="button" class="cancel-link" onclick="closeEditProductModal()">Cancelar</button>
+                <button type="submit" class="action-btn" style="background-color: #27ae60;">Salvar</button>
+            </div>
+        </form>
+    </div>
+    </div>
 
 <!-- Stock Edit Modal -->
 <div id="stockEditModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);">
@@ -727,6 +849,8 @@ window.onclick = function(event) {
     if (event.target == historyModal) historyModal.style.display = "none";
     const smartReviewModal = document.getElementById('smartReviewModal');
     if (event.target == smartReviewModal) smartReviewModal.style.display = "none";
+    const editProductModal = document.getElementById('editProductModal');
+    if (event.target == editProductModal) editProductModal.style.display = "none";
 }
 
 let currentSmartSuggestions = [];
@@ -949,48 +1073,7 @@ function suggestMinStock() {
 }
 
 function editProduct(product) {
-    toggleForm();
-    document.getElementById('formTitle').innerText = 'Editar Insumo';
-    document.getElementById('product_id').value = product.id;
-    document.getElementById('name').value = product.name;
-    document.getElementById('department').value = product.department;
-    document.getElementById('category').value = product.category;
-    document.getElementById('unit').value = product.unit;
-    document.getElementById('price').value = product.price;
-    document.getElementById('min_stock').value = product.min_stock;
-    document.getElementById('frequency').value = product.frequency || 'Sem Frequência';
-    document.getElementById('package_size').value = product.package_size || 1;
-    document.getElementById('purchase_unit').value = product.purchase_unit || '';
-    
-    // New Fiscal Fields
-    document.getElementById('ncm').value = product.ncm || '';
-    document.getElementById('cest').value = product.cest || '';
-    document.getElementById('icms_rate').value = product.icms_rate || '';
-    document.getElementById('anp_code').value = product.anp_code || '';
-    document.getElementById('cfop_default').value = product.cfop_default || '';
-
-    const container = document.getElementById('suppliersContainer');
-    container.innerHTML = '';
-    
-    if (product.suppliers && product.suppliers.length > 0) {
-        product.suppliers.forEach(s => {
-            const div = document.createElement('div');
-            div.className = 'supplier-row';
-            div.style.marginBottom = '10px';
-            div.style.display = 'flex';
-            div.style.gap = '10px';
-            div.innerHTML = `
-                <input type="text" name="suppliers[]" list="suppliersList" value="${s}" required placeholder="Nome do Fornecedor" style="flex: 1; padding: 6px;">
-                <button type="button" class="action-btn" style="background-color: #e74c3c; padding: 2px 8px; margin: 0;" onclick="this.parentElement.remove()"><i class="bi bi-trash"></i></button>
-            `;
-            container.appendChild(div);
-        });
-    } else {
-        container.innerHTML = `
-            <div class="supplier-row" style="margin-bottom: 10px; display: flex; gap: 10px;">
-                <input type="text" name="suppliers[]" list="suppliersList" required placeholder="Nome do Fornecedor 1" style="flex: 1; padding: 6px;">
-            </div>`;
-    }
+    openEditProductModal(product);
 }
 
 function addSupplier() {
@@ -1006,6 +1089,74 @@ function addSupplier() {
     div.style.gap = '10px';
     div.innerHTML = `
         <input type="text" name="suppliers[]" list="suppliersList" required placeholder="Nome do Fornecedor" style="flex: 1; padding: 6px;">
+        <button type="button" class="action-btn" style="background-color: #e74c3c; padding: 2px 8px; margin: 0;" onclick="this.parentElement.remove()"><i class="bi bi-trash"></i></button>
+    `;
+    container.appendChild(div);
+}
+
+function openEditProductModal(product) {
+    document.getElementById('edit_product_id').value = product.id || '';
+    document.getElementById('edit_name').value = product.name || '';
+    document.getElementById('edit_department').value = product.department || 'Geral';
+    document.getElementById('edit_category').value = product.category || '';
+    document.getElementById('edit_unit').value = product.unit || 'Unidades';
+    document.getElementById('edit_price').value = product.price || 0;
+    document.getElementById('edit_min_stock').value = product.min_stock || 0;
+    document.getElementById('edit_frequency').value = product.frequency || 'Sem Frequência';
+    document.getElementById('edit_package_size').value = product.package_size || 1;
+    document.getElementById('edit_purchase_unit').value = product.purchase_unit || '';
+    document.getElementById('edit_ncm').value = product.ncm || '';
+    document.getElementById('edit_cest').value = product.cest || '';
+    document.getElementById('edit_icms_rate').value = product.icms_rate || '';
+    document.getElementById('edit_anp_code').value = product.anp_code || '';
+    document.getElementById('edit_cfop_default').value = product.cfop_default || '';
+
+    const container = document.getElementById('editSuppliersContainer');
+    container.innerHTML = '';
+    if (product.suppliers && product.suppliers.length > 0) {
+        product.suppliers.forEach(s => {
+            const div = document.createElement('div');
+            div.className = 'supplier-row';
+            div.style.marginBottom = '10px';
+            div.style.display = 'flex';
+            div.style.gap = '10px';
+            div.innerHTML = `
+                <input type="text" name="suppliers[]" list="suppliersList" value="${s}" required style="flex: 1; padding: 6px;">
+                <button type="button" class="action-btn" style="background-color: #e74c3c; padding: 2px 8px; margin: 0;" onclick="this.parentElement.remove()"><i class="bi bi-trash"></i></button>
+            `;
+            container.appendChild(div);
+        });
+    } else {
+        const div = document.createElement('div');
+        div.className = 'supplier-row';
+        div.style.marginBottom = '10px';
+        div.style.display = 'flex';
+        div.style.gap = '10px';
+        div.innerHTML = `
+            <input type="text" name="suppliers[]" list="suppliersList" required style="flex: 1; padding: 6px;">
+        `;
+        container.appendChild(div);
+    }
+    document.getElementById('editProductModal').style.display = 'block';
+}
+
+function closeEditProductModal() {
+    document.getElementById('editProductModal').style.display = 'none';
+}
+
+function addEditSupplier() {
+    const container = document.getElementById('editSuppliersContainer');
+    if (container.children.length >= 3) {
+        alert('Máximo de 3 fornecedores.');
+        return;
+    }
+    const div = document.createElement('div');
+    div.className = 'supplier-row';
+    div.style.marginBottom = '10px';
+    div.style.display = 'flex';
+    div.style.gap = '10px';
+    div.innerHTML = `
+        <input type="text" name="suppliers[]" list="suppliersList" required style="flex: 1; padding: 6px;">
         <button type="button" class="action-btn" style="background-color: #e74c3c; padding: 2px 8px; margin: 0;" onclick="this.parentElement.remove()"><i class="bi bi-trash"></i></button>
     `;
     container.appendChild(div);

@@ -13,6 +13,9 @@ from app.services.data_service import (
 )
 from app.services.logger_service import LoggerService
 from app.services.kitchen_checklist_service import KitchenChecklistService
+from app.services.data_service import load_products, load_menu_items, save_menu_items
+from app.services.system_config_manager import get_data_path, PRODUCT_PHOTOS_DIR
+from werkzeug.utils import secure_filename
 from app.services.printing_service import get_default_printer
 
 kitchen_bp = Blueprint('kitchen', __name__)
@@ -935,7 +938,12 @@ def kitchen_checklist_manage():
 def kitchen_checklist_create():
     if request.method == 'POST':
         name = request.form.get('name')
-        list_type = request.form.get('type')
+        list_type = request.form.get('type') or 'quantity'
+        allowed_types = {'quantity', 'checklist'}
+        if list_type not in allowed_types:
+            flash('Tipo de lista inválido.')
+            insumos = KitchenChecklistService.get_insumos()
+            return render_template('kitchen_checklist_create.html', insumos=insumos)
         
         # Handle Items
         item_names = request.form.getlist('item_name[]')
@@ -970,7 +978,12 @@ def kitchen_checklist_edit(list_id):
         
     if request.method == 'POST':
         name = request.form.get('name')
-        list_type = request.form.get('type')
+        list_type = request.form.get('type') or target_list.get('type', 'quantity')
+        allowed_types = {'quantity', 'checklist'}
+        if list_type not in allowed_types:
+            flash('Tipo de lista inválido.')
+            insumos = KitchenChecklistService.get_insumos()
+            return render_template('kitchen_checklist_create.html', checklist=target_list, insumos=insumos, is_edit=True)
         
         item_names = request.form.getlist('item_name[]')
         item_units = request.form.getlist('item_unit[]')
@@ -992,6 +1005,8 @@ def kitchen_checklist_edit(list_id):
             })
             flash('Lista atualizada com sucesso!')
             return redirect(url_for('kitchen.kitchen_checklist_manage'))
+        else:
+            flash('Nome da lista e pelo menos um item são obrigatórios.')
             
     insumos = KitchenChecklistService.get_insumos()
     return render_template('kitchen_checklist_create.html', checklist=target_list, insumos=insumos, is_edit=True)
@@ -1049,3 +1064,286 @@ def kitchen_checklist_send_api():
         
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
+
+
+# --- Kitchen Recipes ---
+RECIPES_FILE = get_data_path('kitchen_recipes.json')
+
+
+def load_kitchen_recipes():
+    if not os.path.exists(RECIPES_FILE):
+        return []
+    try:
+        with open(RECIPES_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except (json.JSONDecodeError, FileNotFoundError):
+        return []
+
+
+def save_kitchen_recipes(recipes):
+    with open(RECIPES_FILE, 'w', encoding='utf-8') as f:
+        json.dump(recipes, f, indent=4, ensure_ascii=False)
+
+
+@kitchen_bp.route('/kitchen/recipes')
+@login_required
+def kitchen_recipes():
+    if session.get('role') not in ['admin', 'gerente'] and session.get('department') != 'Cozinha':
+        flash('Acesso restrito.')
+        return redirect(url_for('main.service_page', service_id='cozinha'))
+    recipes = load_kitchen_recipes()
+    for r in recipes:
+        if 'created_at' not in r:
+            r['created_at'] = datetime.now().strftime('%d/%m/%Y %H:%M')
+    insumos = load_products()
+    insumos_simple = [{'name': p.get('name'), 'unit': p.get('unit')} for p in insumos]
+    menu_items = load_menu_items()
+    menu_products_pending = []
+    menu_products_simple = []
+    for it in menu_items:
+        rec = it.get('recipe')
+        menu_products_simple.append({
+            'id': it.get('id'),
+            'name': it.get('name'),
+            'image_url': it.get('image_url') or '',
+            'recipe': rec or {}
+        })
+        # Itens marcados como "sem receita" não entram na lista pendente
+        if it.get('no_preparation'):
+            continue
+        include = False
+        if not rec:
+            include = True
+        elif isinstance(rec, dict):
+            ings = rec.get('ingredients') or []
+            instr = (rec.get('instructions') or '').strip()
+            # Apenas listar pendentes se não há insumos e não há preparo
+            if len(ings) == 0 and not instr:
+                include = True
+        else:
+            # Se for lista (insumos legados), não incluir segundo regra do usuário
+            include = False
+        if include:
+            menu_products_pending.append({
+                'id': it.get('id'),
+                'name': it.get('name'),
+                'image_url': it.get('image_url') or ''
+            })
+    return render_template('kitchen_recipes.html',
+                           recipes=recipes,
+                           insumos=insumos_simple,
+                           menu_products=menu_products_simple,
+                           menu_products_pending=menu_products_pending)
+
+
+@kitchen_bp.route('/kitchen/recipes/save', methods=['POST'])
+@login_required
+def kitchen_recipe_save():
+    if session.get('role') not in ['admin', 'gerente'] and session.get('department') != 'Cozinha':
+        flash('Acesso restrito.')
+        return redirect(url_for('main.service_page', service_id='cozinha'))
+    recipe_id = request.form.get('recipe_id') or str(uuid.uuid4())
+    menu_product_id = (request.form.get('menu_product_id') or '').strip()
+    name = (request.form.get('name') or '').strip()
+    instructions = (request.form.get('instructions') or '').strip()
+    ingredient_names = request.form.getlist('ingredient_name[]')
+    ingredient_qty = request.form.getlist('ingredient_qty[]')
+    ingredient_unit = request.form.getlist('ingredient_unit[]')
+    if not name:
+        flash('Nome da receita é obrigatório.')
+        return redirect(url_for('kitchen.kitchen_recipes'))
+    ingredients = []
+    for i, n in enumerate(ingredient_names):
+        n = (n or '').strip()
+        if not n:
+            continue
+        qty = ingredient_qty[i] if i < len(ingredient_qty) else ''
+        unit = ingredient_unit[i] if i < len(ingredient_unit) else ''
+        ingredients.append({'name': n, 'qty': qty, 'unit': unit})
+    if not ingredients:
+        flash('Inclua pelo menos um insumo na receita.')
+        return redirect(url_for('kitchen.kitchen_recipes'))
+    image_file = request.files.get('image')
+    image_filename = None
+    image_url = None
+    if image_file and image_file.filename:
+        try:
+            os.makedirs(PRODUCT_PHOTOS_DIR, exist_ok=True)
+            base_name = secure_filename(f"{recipe_id}_{image_file.filename}")
+            target_path = os.path.join(PRODUCT_PHOTOS_DIR, base_name)
+            try:
+                from PIL import Image, ImageOps
+                img = Image.open(image_file.stream)
+                img = ImageOps.exif_transpose(img)
+                max_size = (800, 800)
+                img.thumbnail(max_size)
+                if img.mode in ('RGBA', 'P'):
+                    bg = Image.new('RGB', img.size, (255, 255, 255))
+                    bg.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
+                    img = bg
+                # Preserve extension if present, default to .jpg
+                root, ext = os.path.splitext(base_name)
+                if not ext:
+                    ext = '.jpg'
+                final_name = root + ext
+                final_path = os.path.join(PRODUCT_PHOTOS_DIR, final_name)
+                img.save(final_path, quality=85, optimize=True)
+                image_filename = final_name
+            except Exception:
+                # Fallback: save original upload without processing
+                image_file.save(target_path)
+                image_filename = base_name
+            if image_filename:
+                image_url = f"/Produtos/Fotos/{image_filename}"
+        except Exception:
+            image_filename = None
+            image_url = None
+    # Se estiver editando diretamente um produto do menu
+    if menu_product_id:
+        items = load_menu_items()
+        target = None
+        for it in items:
+            if str(it.get('id')) == menu_product_id:
+                target = it
+                break
+        if not target:
+            flash('Produto do cardápio não encontrado.')
+            return redirect(url_for('kitchen.kitchen_recipes'))
+        target['recipe'] = {
+            'ingredients': ingredients,
+            'instructions': instructions
+        }
+        if image_filename:
+            target['image'] = image_filename
+            target['image_url'] = image_url or ''
+        save_menu_items(items)
+        flash('Ficha técnica atualizada no produto do cardápio.')
+        return redirect(url_for('kitchen.kitchen_recipes'))
+
+    recipes = load_kitchen_recipes()
+    now_str = datetime.now().strftime('%d/%m/%Y %H:%M')
+    found = False
+    for r in recipes:
+        if r.get('id') == recipe_id:
+            r.update({
+                'name': name,
+                'instructions': instructions,
+                'ingredients': ingredients,
+            })
+            if image_url:
+                r['image'] = image_filename
+                r['image_url'] = image_url
+            if 'created_at' not in r:
+                r['created_at'] = now_str
+            found = True
+            break
+    if not found:
+        recipes.append({
+            'id': recipe_id,
+            'name': name,
+            'instructions': instructions,
+            'ingredients': ingredients,
+            'created_at': now_str,
+            'image': image_filename,
+            'image_url': image_url,
+            'menu_product_id': None
+        })
+    save_kitchen_recipes(recipes)
+    flash('Receita salva com sucesso.')
+    return redirect(url_for('kitchen.kitchen_recipes'))
+
+
+@kitchen_bp.route('/kitchen/recipes/mark_no_recipe', methods=['POST'])
+@login_required
+def kitchen_recipe_mark_no_recipe():
+    if session.get('role') not in ['admin', 'gerente'] and session.get('department') != 'Cozinha':
+        flash('Acesso restrito.')
+        return redirect(url_for('main.service_page', service_id='cozinha'))
+    menu_product_id = (request.form.get('menu_product_id') or '').strip()
+    if not menu_product_id:
+        flash('Produto inválido.')
+        return redirect(url_for('kitchen.kitchen_recipes'))
+    items = load_menu_items()
+    target = None
+    for it in items:
+        if str(it.get('id')) == menu_product_id:
+            target = it
+            break
+    if not target:
+        flash('Produto do cardápio não encontrado.')
+        return redirect(url_for('kitchen.kitchen_recipes'))
+    target['no_preparation'] = True
+    save_menu_items(items)
+    flash('Produto marcado como "não possui receita". Ele não aparecerá mais na lista de pendentes.')
+    return redirect(url_for('kitchen.kitchen_recipes'))
+
+
+@kitchen_bp.route('/kitchen/recipes/publish/<recipe_id>', methods=['POST'])
+@login_required
+def kitchen_recipe_publish(recipe_id):
+    if session.get('role') not in ['admin', 'gerente'] and session.get('department') != 'Cozinha':
+        flash('Acesso restrito.')
+        return redirect(url_for('main.service_page', service_id='cozinha'))
+    recipes = load_kitchen_recipes()
+    target = next((r for r in recipes if r.get('id') == recipe_id), None)
+    if not target:
+        flash('Receita não encontrada.')
+        return redirect(url_for('kitchen.kitchen_recipes'))
+    if target.get('menu_product_id'):
+        flash('Receita já vinculada ao cardápio.')
+        return redirect(url_for('kitchen.kitchen_recipes'))
+    menu_items = load_menu_items()
+    new_id = str(uuid.uuid4())
+    ingredients = target.get('ingredients') or []
+    recipe_payload = {
+        'ingredients': ingredients,
+        'instructions': target.get('instructions') or ''
+    }
+    new_item = {
+        'id': new_id,
+        'name': target.get('name'),
+        'category': 'Cozinha',
+        'price': 0.0,
+        'cost_price': 0.0,
+        'printer_id': None,
+        'should_print': True,
+        'description': '',
+        'image': target.get('image'),
+        'image_url': target.get('image_url') or '',
+        'service_fee_exempt': False,
+        'visible_virtual_menu': False,
+        'highlight': False,
+        'active': True,
+        'recipe': recipe_payload,
+        'mandatory_questions': [],
+        'flavor_group_id': None,
+        'flavor_multiplier': 1.0,
+        'product_type': 'standard',
+        'has_accompaniments': False,
+        'allowed_accompaniments': [],
+        'ncm': '',
+        'cest': '',
+        'transparency_tax': '',
+        'fiscal_benefit_code': '',
+        'cfop': '',
+        'origin': '',
+        'tax_situation': '',
+        'icms_rate': 0.0,
+        'icms_base_reduction': 0.0,
+        'fcp_rate': 0.0,
+        'pis_cst': '',
+        'pis_rate': 0.0,
+        'cofins_cst': '',
+        'cofins_rate': 0.0,
+        'paused': False,
+        'pause_reason': ''
+    }
+    menu_items.append(new_item)
+    save_menu_items(menu_items)
+    for r in recipes:
+        if r.get('id') == recipe_id:
+            r['menu_product_id'] = new_id
+            break
+    save_kitchen_recipes(recipes)
+    flash('Produto criado no cardápio a partir da receita. Complete os dados em /menu/management.')
+    return redirect(url_for('kitchen.kitchen_recipes'))
