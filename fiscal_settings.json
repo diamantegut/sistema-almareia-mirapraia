@@ -2,18 +2,19 @@
     "integrations": [
         {
             "provider": "nuvem_fiscal",
-            "environment": "homologation",
+            "environment": "production",
             "api_token": "",
-            "client_id": "1t5mSZm3Gz0MGkC6AkR5",
-            "client_secret": "1rr3b29iClj6XZ65gnXvg6Tf13Y9ajbgXPjuu7wU",
+            "client_id": "5Wybc2u3jcQkyePmMLkr",
+            "client_secret": "uoDwLfMsNDAyb3g07o1hq43N0Lf7poEgFLaPdBq7",
             "cnpj_emitente": "28952732000109",
             "ie_emitente": "074353209",
-            "csc_token": "0B97FF6D-2F38-48A1-AF33-F7B89ABA62E0",
+            "csc_token": "C920F8E0-2DA4-4A5A-8964-0EE2BEC0E70E",
             "csc_id": "1",
             "serie": "8",
-            "next_number": "656",
+            "next_number": "658",
             "xml_storage_path": "fiscal_documents/xmls",
-            "description": "Mirapraia - Restaurante e Recepção (NFC-e)"
+            "description": "Mirapraia - Restaurante e Recepção (NFC-e)",
+            "sefaz_environment": "homologation"
         },
         {
             "provider": "nuvem_fiscal",
@@ -39,5 +40,5 @@
             "xml_storage_path": "fiscal_documents/xmls"
         }
     ],
-    "environment": "homologation"
+    "environment": "production"
 }
