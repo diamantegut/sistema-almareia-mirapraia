@@ -40,7 +40,9 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
 
     <div id="kds-orders-container">
         {% if station == 'bar' %}
-        <div class="kds-row-title">Pedidos Bar</div>
+        <div class="kds-row-title">Bar Drinks</div>
+        <div id="kds-orders-bar-drinks" class="kds-orders-strip"></div>
+        <div class="kds-row-title">Bar</div>
         <div id="kds-orders-bar" class="kds-orders-strip"></div>
         {% else %}
         <div class="kds-row-title">Pedidos Cozinha</div>
@@ -167,6 +169,7 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
         const isBar = kdsStation === "bar";
         const mainStrip = document.getElementById("kds-orders-main");
         const secondaryStrip = document.getElementById("kds-orders-secondary");
+        const barDrinksStrip = document.getElementById("kds-orders-bar-drinks");
         const barStrip = document.getElementById("kds-orders-bar");
         clearOrders();
         const orders = payload && Array.isArray(payload.orders) ? payload.orders : [];
@@ -178,7 +181,8 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
 
         const mainCards = [];
         const secondaryCards = [];
-        const barCards = [];
+        const barDrinksCards = [];
+        const barMainCards = [];
 
         function parseIso(ts) {
             if (!ts) return NaN;
@@ -199,7 +203,12 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
                 if (!Number.isFinite(ts)) ts = Date.now();
 
                 if (isBar) {
-                    barCards.push({ order, section, items, ts });
+                    const secName = (section.name || "").toString().toLowerCase();
+                    if (secName.indexOf("drink") !== -1) {
+                        barDrinksCards.push({ order, section, items, ts });
+                    } else {
+                        barMainCards.push({ order, section, items, ts });
+                    }
                 } else {
                     const secName = (section.name || "").toString().toLowerCase();
                     if (secName.indexOf("entrada") !== -1 || secName.indexOf("sobremesa") !== -1) {
@@ -214,7 +223,8 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
         function byTs(a, b) { return a.ts - b.ts; }
         mainCards.sort(byTs);
         secondaryCards.sort(byTs);
-        barCards.sort(byTs);
+        barDrinksCards.sort(byTs);
+        barMainCards.sort(byTs);
 
         function buildCardEl(order, section, items) {
             const col = document.createElement("div");
@@ -249,7 +259,6 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
             actionBtn.type = "button";
             actionBtn.className = "btn btn-sm ms-2 kds-card-action";
             actionBtn.dataset.tableId = order.table_id || "";
-            // IDs por status para evitar atualizar tudo de uma vez
             const idsPending = items.filter(i => i.status === "pending").map(i => i.id).filter(Boolean);
             const idsPreparing = items.filter(i => i.status === "preparing").map(i => i.id).filter(Boolean);
             const idsDone = items.filter(i => i.status === "done").map(i => i.id).filter(Boolean);
@@ -308,7 +317,17 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
                     }
                     markItemsReceived(tableId, ids).then(fetchKdsData);
                 } else {
-                    const ids = next === "preparing" ? getIds("pendingIds") : getIds("preparingIds");
+                    let ids = [];
+                    if (next === "preparing") {
+                        const pendingIds = getIds("pendingIds");
+                        const preparingIds = getIds("preparingIds");
+                        const allActive = pendingIds.concat(
+                            preparingIds.filter(id => !pendingIds.includes(id))
+                        );
+                        ids = allActive;
+                    } else {
+                        ids = getIds("preparingIds");
+                    }
                     if (!ids.length) { fetchKdsData(); return; }
                     updateItemsStatus(tableId, ids, next).then(fetchKdsData);
                 }
@@ -425,10 +444,17 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
             return col;
         }
 
-        if (isBar && barStrip) {
-            barCards.forEach(({ order, section, items }) => {
-                barStrip.appendChild(buildCardEl(order, section, items));
-            });
+        if (isBar) {
+            if (barDrinksStrip) {
+                barDrinksCards.forEach(({ order, section, items }) => {
+                    barDrinksStrip.appendChild(buildCardEl(order, section, items));
+                });
+            }
+            if (barStrip) {
+                barMainCards.forEach(({ order, section, items }) => {
+                    barStrip.appendChild(buildCardEl(order, section, items));
+                });
+            }
         } else {
             if (mainStrip) {
                 mainCards.forEach(({ order, section, items }) => {

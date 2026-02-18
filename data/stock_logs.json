@@ -55830,43 +55830,853 @@
         "details": "Venda Mesa 41"
     },
     {
-        "id": "a2e732af-c6d8-41b7-ad3d-8e5321de2765",
-        "date": "18/02/2026 07:53",
-        "user": "admin_tester",
+        "id": "f1e2f309-c04e-424f-83c2-25a234f730ee",
+        "date": "18/02/2026 08:44",
+        "user": "luiz",
         "department": "Restaurante",
         "action": "saida",
-        "product": "Pizza",
+        "product": "Arroz Parbolizado",
+        "qty": 1.0,
+        "details": "Transferência Quarto 11"
+    },
+    {
+        "id": "11100b56-c375-499b-9759-893d012bcf0d",
+        "date": "18/02/2026 08:55",
+        "user": "luiz",
+        "department": "Restaurante",
+        "action": "saida",
+        "product": "Café Capsula",
+        "qty": 2.0,
+        "details": "Transferência Quarto 03"
+    },
+    {
+        "id": "1958bbc5-a09c-4c75-944f-0a0e96a41ee1",
+        "date": "18/02/2026 09:40",
+        "user": "pedro",
+        "department": "Estoque",
+        "action": "Ajuste Manual",
+        "product": "Coca-Cola Zero",
+        "qty": -22.0,
+        "details": "Motivo: comferencia 17/02"
+    },
+    {
+        "id": "d18f8cf9-285e-42fd-9128-63d4c77ecd2a",
+        "date": "18/02/2026 09:42",
+        "user": "pedro",
+        "department": "Estoque",
+        "action": "Ajuste Manual",
+        "product": "Pitu",
+        "qty": 1.0,
+        "details": "Motivo: comferencia 17/02"
+    },
+    {
+        "id": "c0054666-9c88-48be-8e31-7bbab7401b94",
+        "date": "18/02/2026 09:42",
+        "user": "pedro",
+        "department": "Estoque",
+        "action": "Ajuste Manual",
+        "product": "Chateau Haut Gantelais",
+        "qty": -1.0,
+        "details": "Motivo: comferencia 17/02"
+    },
+    {
+        "id": "f09f9c2e-5f29-42c9-bc95-03dc14d243be",
+        "date": "18/02/2026 09:43",
+        "user": "pedro",
+        "department": "Estoque",
+        "action": "Ajuste Manual",
+        "product": "Agua Tônica",
+        "qty": 48.0,
+        "details": "Motivo: comferencia 17/02"
+    },
+    {
+        "id": "59125b65-c1dd-44a5-93ed-5e5a81614177",
+        "date": "18/02/2026 09:43",
+        "user": "pedro",
+        "department": "Estoque",
+        "action": "Ajuste Manual",
+        "product": "Corona Long Neck",
+        "qty": 192.0,
+        "details": "Motivo: comferencia 17/02"
+    },
+    {
+        "id": "3a47d36c-dcd3-4840-921d-ca2f2bd111f1",
+        "date": "18/02/2026 09:45",
+        "user": "pedro",
+        "department": "Estoque",
+        "action": "Ajuste Manual",
+        "product": "Água com Gás 500ml ( GOVERNAÇA )",
+        "qty": 60.0,
+        "details": "Motivo: comferencia 17/02"
+    },
+    {
+        "id": "b9265481-7b05-42db-8900-f7e73cccb133",
+        "date": "18/02/2026 09:45",
+        "user": "pedro",
+        "department": "Estoque",
+        "action": "Ajuste Manual",
+        "product": "Água com gás Pet 330ml/500ml",
+        "qty": -4.0,
+        "details": "Motivo: comferencia 17/02"
+    },
+    {
+        "id": "aad2894f-ee03-4427-ac98-ffe95f1dd2a0",
+        "date": "18/02/2026 10:10",
+        "user": "luiz",
+        "department": "Restaurante",
+        "action": "saida",
+        "product": "Arroz Parbolizado",
+        "qty": 1.0,
+        "details": "Transferência Quarto 31"
+    },
+    {
+        "id": "ff95b138-686f-4184-8c06-c43afd506cd2",
+        "date": "18/02/2026 11:06",
+        "user": "pedro",
+        "department": "Estoque",
+        "action": "Ajuste Manual",
+        "product": "Stella artois longue neck",
+        "qty": 240.0,
+        "details": "Motivo: comferencia 17/02"
+    },
+    {
+        "id": "e7cf4ef4-2d11-4455-a4f1-26299cf27ea2",
+        "date": "18/02/2026 11:07",
+        "user": "pedro",
+        "department": "Estoque",
+        "action": "Ajuste Manual",
+        "product": "biscoito casquinha mirapraia",
+        "qty": 12.0,
+        "details": "Motivo: comferencia 17/02"
+    },
+    {
+        "id": "a95c17fe-7571-445d-b04c-ccdf5d964c99",
+        "date": "18/02/2026 11:14",
+        "user": "pedro",
+        "department": "Estoque",
+        "action": "Ajuste Manual",
+        "product": "Farinha Panko",
+        "qty": -8.0,
+        "details": "Motivo: comferencia 17/02"
+    },
+    {
+        "id": "47c17ecc-d096-4610-8fe4-3c1569a30aa6",
+        "date": "18/02/2026 11:22",
+        "user": "pedro",
+        "department": "Estoque",
+        "action": "Ajuste Manual",
+        "product": "Ketchup",
+        "qty": 3.0,
+        "details": "Motivo: comferencia 17/02"
+    },
+    {
+        "id": "b787ae61-2254-492d-831a-1b5bccee1de9",
+        "date": "18/02/2026 11:26",
+        "user": "pedro",
+        "department": "Estoque",
+        "action": "Ajuste Manual",
+        "product": "Leite Integral",
+        "qty": -2.700000000000001,
+        "details": "Motivo: comferencia 17/02"
+    },
+    {
+        "id": "937701db-4db0-4686-929c-c1bb0aac8b82",
+        "date": "18/02/2026 11:27",
+        "user": "pedro",
+        "department": "Estoque",
+        "action": "Ajuste Manual",
+        "product": "Leite de Coco",
+        "qty": -12.0,
+        "details": "Motivo: comferencia 17/02"
+    },
+    {
+        "id": "1cc328d5-6285-449c-8145-737e2192fcb2",
+        "date": "18/02/2026 11:30",
+        "user": "pedro",
+        "department": "Estoque",
+        "action": "Ajuste Manual",
+        "product": "Óleo de soja ",
+        "qty": 18.0,
+        "details": "Motivo: comferencia 17/02"
+    },
+    {
+        "id": "1b0e6f03-8636-4507-b40e-3990f4a8b67e",
+        "date": "18/02/2026 11:41",
+        "user": "pedro",
+        "department": "Estoque",
+        "action": "Ajuste Manual",
+        "product": "Farinha de Trigo",
+        "qty": -20.0,
+        "details": "Motivo: comferencia 17/02"
+    },
+    {
+        "id": "eacb2f44-61e1-4d3b-b130-7c99043b70d0",
+        "date": "18/02/2026 11:42",
+        "user": "pedro",
+        "department": "Estoque",
+        "action": "Ajuste Manual",
+        "product": "Macarrão Funcionários",
+        "qty": 18.0,
+        "details": "Motivo: comferencia 17/02"
+    },
+    {
+        "id": "8d3b4b0e-6e96-4843-b4db-4f38b378e763",
+        "date": "18/02/2026 11:45",
+        "user": "pedro",
+        "department": "Estoque",
+        "action": "Ajuste Manual",
+        "product": "Açucar",
+        "qty": 30.0,
+        "details": "Motivo: comferencia 17/02"
+    },
+    {
+        "id": "b08768a9-dcfb-4e11-a577-e9d89df478eb",
+        "date": "18/02/2026 11:45",
+        "user": "pedro",
+        "department": "Estoque",
+        "action": "Ajuste Manual",
+        "product": "Feijão Carioca",
+        "qty": -5.0,
+        "details": "Motivo: comferencia 17/02"
+    },
+    {
+        "id": "9195364c-4bd6-42bb-ae3f-db60bd485b0e",
+        "date": "18/02/2026 11:46",
+        "user": "pedro",
+        "department": "Estoque",
+        "action": "Ajuste Manual",
+        "product": "Sal Grosso",
+        "qty": 4.0,
+        "details": "Motivo: comferencia 17/02"
+    },
+    {
+        "id": "a9cb9acf-7f87-4bde-ac11-b49b8ec43309",
+        "date": "18/02/2026 11:51",
+        "user": "pedro",
+        "department": "Estoque",
+        "action": "Ajuste Manual",
+        "product": "Papel Higiênico BigRool",
+        "qty": 2.0,
+        "details": "Motivo: comferencia 17/02"
+    },
+    {
+        "id": "f90acf50-38b2-4678-b4c6-c8b23f43d522",
+        "date": "18/02/2026 11:59",
+        "user": "luiz",
+        "department": "Restaurante",
+        "action": "saida",
+        "product": "Arroz Parbolizado",
+        "qty": 2.0,
+        "details": "Transferência Quarto 16"
+    },
+    {
+        "id": "f375c52c-6008-4d1e-9846-acb60e7ef981",
+        "date": "18/02/2026 12:12",
+        "user": "pedro",
+        "department": "Estoque",
+        "action": "Ajuste Manual",
+        "product": " Papel Interfolha",
+        "qty": 16.0,
+        "details": "Motivo: comferencia 17/02"
+    },
+    {
+        "id": "ae485399-8d46-43b2-8774-67a9ba743bc3",
+        "date": "18/02/2026 12:48",
+        "user": "pedro",
+        "department": "Estoque",
+        "action": "Ajuste Manual",
+        "product": "Sprite/Soda (BAR)",
+        "qty": -18.0,
+        "details": "Motivo: bar 17/02"
+    },
+    {
+        "id": "c52164a5-d524-433d-9ced-eb4b734718bf",
+        "date": "18/02/2026 12:48",
+        "user": "pedro",
+        "department": "Estoque",
+        "action": "Ajuste Manual",
+        "product": "Sprite/Soda",
+        "qty": 19.0,
+        "details": "Motivo: bar 17/02"
+    },
+    {
+        "id": "d3c3f2ca-10e0-45b7-bd19-f40b7fa7ef04",
+        "date": "18/02/2026 12:49",
+        "user": "pedro",
+        "department": "Estoque",
+        "action": "Ajuste Manual",
+        "product": "Coca-Cola Zero",
+        "qty": -134.0,
+        "details": "Motivo: bar 17/02"
+    },
+    {
+        "id": "328cd46c-3c31-4c5d-8210-cc35e6afac0c",
+        "date": "18/02/2026 12:49",
+        "user": "pedro",
+        "department": "Estoque",
+        "action": "Ajuste Manual",
+        "product": "Coca-Cola Zero (BAR)",
+        "qty": 36.0,
+        "details": "Motivo: bar 17/02"
+    },
+    {
+        "id": "35ca309f-851d-4fd7-aa86-8d1cff17d8b4",
+        "date": "18/02/2026 12:50",
+        "user": "pedro",
+        "department": "Estoque",
+        "action": "Ajuste Manual",
+        "product": "Corona Long Neck",
+        "qty": -96.0,
+        "details": "Motivo: bar 17/02"
+    },
+    {
+        "id": "c1d59e00-6246-4d8e-8e80-d12b364aa130",
+        "date": "18/02/2026 12:51",
+        "user": "pedro",
+        "department": "Estoque",
+        "action": "Ajuste Manual",
+        "product": "Corona Long Neck (BAR)",
+        "qty": 96.0,
+        "details": "Motivo: bar 17/02"
+    },
+    {
+        "id": "bee7f72e-3858-42d4-bb7c-fb3d61495183",
+        "date": "18/02/2026 12:56",
+        "user": "guilherme",
+        "department": "Restaurante",
+        "action": "saida",
+        "product": "Pescada Amarela G/GG (Premiium)",
+        "qty": 2.0,
+        "details": "Venda Mesa 40"
+    },
+    {
+        "id": "d057be26-f323-43f6-aaed-0337fe1339a4",
+        "date": "18/02/2026 12:56",
+        "user": "guilherme",
+        "department": "Restaurante",
+        "action": "saida",
+        "product": "Feijão Preto",
+        "qty": 3.0,
+        "details": "Venda Mesa 40"
+    },
+    {
+        "id": "307b79d0-0a49-4d19-96e4-6eb97321f163",
+        "date": "18/02/2026 12:56",
+        "user": "guilherme",
+        "department": "Restaurante",
+        "action": "saida",
+        "product": "Chimichuri",
         "qty": 1.0,
         "details": "Venda Mesa 40"
     },
     {
-        "id": "9cbc96bd-0884-48ee-be32-334cc355072d",
-        "date": "18/02/2026 07:53",
-        "user": "admin_tester",
+        "id": "cc9c8e11-9553-4cdb-9525-ea63aa5a4a96",
+        "date": "18/02/2026 12:56",
+        "user": "guilherme",
         "department": "Restaurante",
         "action": "saida",
-        "product": "Pizza",
+        "product": "Pimentão Verde",
         "qty": 1.0,
         "details": "Venda Mesa 40"
     },
     {
-        "id": "9daeca39-d994-4dba-a484-e4a2dbb6ab66",
-        "date": "18/02/2026 07:54",
-        "user": "admin_tester",
+        "id": "2b29e240-8465-4afd-9d52-d9f153705c8a",
+        "date": "18/02/2026 12:56",
+        "user": "guilherme",
         "department": "Restaurante",
         "action": "saida",
-        "product": "Pizza",
+        "product": "Uva Passa",
         "qty": 1.0,
         "details": "Venda Mesa 40"
     },
     {
-        "id": "4a5d9cd5-0b10-43b1-a9cf-437a0e195b50",
-        "date": "18/02/2026 07:55",
-        "user": "admin_tester",
+        "id": "84fd138e-7495-4043-9611-b5345c9d777a",
+        "date": "18/02/2026 12:56",
+        "user": "guilherme",
         "department": "Restaurante",
         "action": "saida",
-        "product": "Água",
-        "qty": 10.0,
+        "product": "Canela em Pau",
+        "qty": 1.0,
         "details": "Venda Mesa 40"
+    },
+    {
+        "id": "00622f36-e738-4661-a061-ee689771624b",
+        "date": "18/02/2026 12:56",
+        "user": "guilherme",
+        "department": "Restaurante",
+        "action": "saida",
+        "product": "Azeite Cozinha Galão 5l",
+        "qty": 1.0,
+        "details": "Venda Mesa 40"
+    },
+    {
+        "id": "1aedd026-4c8a-4093-a9c6-2005b368b579",
+        "date": "18/02/2026 12:56",
+        "user": "guilherme",
+        "department": "Restaurante",
+        "action": "saida",
+        "product": "Presunto",
+        "qty": 1.0,
+        "details": "Venda Mesa 40"
+    },
+    {
+        "id": "90651c68-b6e5-43cc-b166-eb19064abb23",
+        "date": "18/02/2026 12:56",
+        "user": "guilherme",
+        "department": "Restaurante",
+        "action": "saida",
+        "product": "Vinagre temperado",
+        "qty": 1.0,
+        "details": "Venda Mesa 40"
+    },
+    {
+        "id": "ad552c43-b35d-4473-baac-7bd163f980a5",
+        "date": "18/02/2026 12:58",
+        "user": "guilherme",
+        "department": "Restaurante",
+        "action": "saida",
+        "product": "Chocolate em pó",
+        "qty": 1.0,
+        "details": "Venda Mesa 93"
+    },
+    {
+        "id": "aad11733-9335-4626-ab0c-5367e9990c3a",
+        "date": "18/02/2026 12:58",
+        "user": "guilherme",
+        "department": "Restaurante",
+        "action": "saida",
+        "product": "Ervilha Congelada",
+        "qty": 1.0,
+        "details": "Venda Mesa 93"
+    },
+    {
+        "id": "443881ba-134c-4d9f-8f69-722ac407086c",
+        "date": "18/02/2026 12:58",
+        "user": "guilherme",
+        "department": "Restaurante",
+        "action": "saida",
+        "product": "Loc Sabonete 30ml Alfazema",
+        "qty": 1.0,
+        "details": "Venda Mesa 93"
+    },
+    {
+        "id": "1ba8d72d-8541-4fdf-bdc9-f23269216cb1",
+        "date": "18/02/2026 12:58",
+        "user": "guilherme",
+        "department": "Restaurante",
+        "action": "saida",
+        "product": "Chocolate em pó",
+        "qty": 1.0,
+        "details": "Venda Mesa 93"
+    },
+    {
+        "id": "171fbe5d-6e6e-429b-9e2f-35e86c2d2bbf",
+        "date": "18/02/2026 13:01",
+        "user": "pedro",
+        "department": "Estoque",
+        "action": "Ajuste Manual",
+        "product": "Leite Integral",
+        "qty": -12.0,
+        "details": "Motivo: cozinha 17/02"
+    },
+    {
+        "id": "28a88186-12d1-4af4-b1dd-36a24b8a51b8",
+        "date": "18/02/2026 13:03",
+        "user": "pedro",
+        "department": "Estoque",
+        "action": "Ajuste Manual",
+        "product": "Leite Integral",
+        "qty": 15.0,
+        "details": "Motivo: comferencia 15/02"
+    },
+    {
+        "id": "b4c7e9ad-89ce-4997-af40-32740d460031",
+        "date": "18/02/2026 13:03",
+        "user": "pedro",
+        "department": "Estoque",
+        "action": "Ajuste Manual",
+        "product": "Leite Integral",
+        "qty": 12.0,
+        "details": "Motivo: cozinha 17/02"
+    },
+    {
+        "id": "20dd86e6-0712-4cf2-b124-03c43988a3fe",
+        "date": "18/02/2026 13:06",
+        "user": "pedro",
+        "department": "Estoque",
+        "action": "Ajuste Manual",
+        "product": "Leite de Coco",
+        "qty": 12.0,
+        "details": "Motivo: cozinha 17/02"
+    },
+    {
+        "id": "2b544524-005d-436d-bc96-84078736670c",
+        "date": "18/02/2026 13:11",
+        "user": "pedro",
+        "department": "Estoque",
+        "action": "Ajuste Manual",
+        "product": "Farinha de Trigo",
+        "qty": 30.0,
+        "details": "Motivo: comferencia 17/02"
+    },
+    {
+        "id": "860a7c88-9468-4cd9-9d5e-e0b90cbf6a3f",
+        "date": "18/02/2026 13:18",
+        "user": "pedro",
+        "department": "Estoque",
+        "action": "Ajuste Manual",
+        "product": "Farinha de Trigo",
+        "qty": -33.0,
+        "details": "Motivo: comferencia 15/02"
+    },
+    {
+        "id": "cf2d8da5-a3e0-445c-a90b-dbae58085443",
+        "date": "18/02/2026 13:22",
+        "user": "pedro",
+        "department": "Estoque",
+        "action": "Ajuste Manual",
+        "product": "Farinha de Trigo ( principal )",
+        "qty": 40.0,
+        "details": "Motivo: comferencia 17/02"
+    },
+    {
+        "id": "bca272d3-8647-42ad-9134-9c2a55f7c423",
+        "date": "18/02/2026 13:22",
+        "user": "pedro",
+        "department": "Estoque",
+        "action": "Ajuste Manual",
+        "product": "Farinha de Trigo ( principal )",
+        "qty": -20.0,
+        "details": "Motivo: cozinha 17/02"
+    },
+    {
+        "id": "bb14fad7-2241-4961-a83f-1e3cb9dfd173",
+        "date": "18/02/2026 13:22",
+        "user": "pedro",
+        "department": "Estoque",
+        "action": "Ajuste Manual",
+        "product": "Farinha de Trigo",
+        "qty": 20.0,
+        "details": "Motivo: cozinha 17/02"
+    },
+    {
+        "id": "541e29e7-13ce-4d54-8fa3-68f37d199f31",
+        "date": "18/02/2026 13:40",
+        "user": "pedro",
+        "department": "Estoque",
+        "action": "Ajuste Manual",
+        "product": "Feijão Carioca",
+        "qty": -10.0,
+        "details": "Motivo: cozinha 17/02"
+    },
+    {
+        "id": "4c8d8e13-220d-4435-8f7a-e197497a8df2",
+        "date": "18/02/2026 14:00",
+        "user": "pedro",
+        "department": "Estoque",
+        "action": "Ajuste Manual",
+        "product": "Feijão Carioca",
+        "qty": 43.0,
+        "details": "Motivo: comferencia 15/02"
+    },
+    {
+        "id": "0b0d4be7-f0ba-4039-b0b8-2acb9fe69ef2",
+        "date": "18/02/2026 14:01",
+        "user": "pedro",
+        "department": "Estoque",
+        "action": "Ajuste Manual",
+        "product": "Feijão Carioca",
+        "qty": -43.0,
+        "details": "Motivo: comferencia 17/02"
+    },
+    {
+        "id": "5df899aa-5b9c-49a8-978b-e2c690ea8086",
+        "date": "18/02/2026 14:04",
+        "user": "pedro",
+        "department": "Estoque",
+        "action": "Ajuste Manual",
+        "product": "Feijão Carioca",
+        "qty": 33.0,
+        "details": "Motivo: comferencia 15/02"
+    },
+    {
+        "id": "d9126ca4-62fc-4a17-a4b2-df01932a7bdf",
+        "date": "18/02/2026 14:10",
+        "user": "eduardo",
+        "department": "Restaurante",
+        "action": "saida",
+        "product": "Goma de Tapioca",
+        "qty": 1.0,
+        "details": "Venda Mesa 41"
+    },
+    {
+        "id": "1efea331-7f85-497a-b92e-398d37d82ff9",
+        "date": "18/02/2026 14:10",
+        "user": "eduardo",
+        "department": "Restaurante",
+        "action": "saida",
+        "product": "Fermento Quimico",
+        "qty": 1.0,
+        "details": "Venda Mesa 41"
+    },
+    {
+        "id": "69898cc3-c515-4d55-b89e-f907bec94910",
+        "date": "18/02/2026 14:12",
+        "user": "eduardo",
+        "department": "Restaurante",
+        "action": "saida",
+        "product": "Doce de Leite",
+        "qty": 1.0,
+        "details": "Venda Mesa 45"
+    },
+    {
+        "id": "50a833a6-98ed-41c8-9e5f-eb9aaed775af",
+        "date": "18/02/2026 14:12",
+        "user": "eduardo",
+        "department": "Restaurante",
+        "action": "saida",
+        "product": "Mirtillo",
+        "qty": 1.0,
+        "details": "Venda Mesa 45"
+    },
+    {
+        "id": "bc1ffa2e-f51d-4503-b95e-db686e5ae4b4",
+        "date": "18/02/2026 14:12",
+        "user": "eduardo",
+        "department": "Restaurante",
+        "action": "saida",
+        "product": "Ostras Viva (GG)",
+        "qty": 1.0,
+        "details": "Venda Mesa 45"
+    },
+    {
+        "id": "ebca8d03-3057-44f5-9fed-d43160538fb9",
+        "date": "18/02/2026 14:12",
+        "user": "eduardo",
+        "department": "Restaurante",
+        "action": "saida",
+        "product": "Chimichuri",
+        "qty": 4.0,
+        "details": "Venda Mesa 45"
+    },
+    {
+        "id": "4a549624-6dd6-4003-bfca-4d7ce2408004",
+        "date": "18/02/2026 14:12",
+        "user": "eduardo",
+        "department": "Restaurante",
+        "action": "saida",
+        "product": "Doce de Leite",
+        "qty": 1.0,
+        "details": "Venda Mesa 45"
+    },
+    {
+        "id": "8f0eabbc-90bd-465e-bac4-192f640f476a",
+        "date": "18/02/2026 14:17",
+        "user": "guilherme",
+        "department": "Restaurante",
+        "action": "saida",
+        "product": "Pimentão Verde",
+        "qty": 1.0,
+        "details": "Venda Mesa 54"
+    },
+    {
+        "id": "dc682ddf-25cc-4325-89c2-f31105cb4170",
+        "date": "18/02/2026 14:17",
+        "user": "guilherme",
+        "department": "Restaurante",
+        "action": "saida",
+        "product": "Arroz Parbolizado",
+        "qty": 1.0,
+        "details": "Venda Mesa 54"
+    },
+    {
+        "id": "33edbfd7-d97d-477b-a5db-59ce110ab8c2",
+        "date": "18/02/2026 14:17",
+        "user": "guilherme",
+        "department": "Restaurante",
+        "action": "saida",
+        "product": "Doce de Leite",
+        "qty": 1.0,
+        "details": "Venda Mesa 54"
+    },
+    {
+        "id": "de6577ec-fe1a-421d-9d68-a1a0d5433dd6",
+        "date": "18/02/2026 14:17",
+        "user": "guilherme",
+        "department": "Restaurante",
+        "action": "saida",
+        "product": "Melão",
+        "qty": 1.0,
+        "details": "Venda Mesa 54"
+    },
+    {
+        "id": "8b7e762a-91ad-4798-82d0-408a619c2782",
+        "date": "18/02/2026 14:17",
+        "user": "guilherme",
+        "department": "Restaurante",
+        "action": "saida",
+        "product": "Coalhada de bufala",
+        "qty": 1.0,
+        "details": "Venda Mesa 54"
+    },
+    {
+        "id": "735ab1cc-a891-4316-a1c2-344e251243aa",
+        "date": "18/02/2026 14:17",
+        "user": "guilherme",
+        "department": "Restaurante",
+        "action": "saida",
+        "product": "Chocolate em pó",
+        "qty": 2.0,
+        "details": "Venda Mesa 54"
+    },
+    {
+        "id": "f8f0573f-1314-4ed7-8ed5-80cb4c0b673e",
+        "date": "18/02/2026 14:43",
+        "user": "eduardo",
+        "department": "Restaurante",
+        "action": "saida",
+        "product": "Presunto",
+        "qty": 1.0,
+        "details": "Venda Mesa 53"
+    },
+    {
+        "id": "67503a82-346b-4229-a491-9cc65561caf7",
+        "date": "18/02/2026 14:43",
+        "user": "eduardo",
+        "department": "Restaurante",
+        "action": "saida",
+        "product": "Couve",
+        "qty": 1.0,
+        "details": "Venda Mesa 53"
+    },
+    {
+        "id": "6fbaa16d-8662-42c5-985d-77213d14d9bd",
+        "date": "18/02/2026 14:43",
+        "user": "eduardo",
+        "department": "Restaurante",
+        "action": "saida",
+        "product": "Uva Passa",
+        "qty": 1.0,
+        "details": "Venda Mesa 53"
+    },
+    {
+        "id": "c7abfa14-f290-4575-98af-9aaa5c0fe5fd",
+        "date": "18/02/2026 14:43",
+        "user": "eduardo",
+        "department": "Restaurante",
+        "action": "saida",
+        "product": "Chimichuri",
+        "qty": 2.0,
+        "details": "Venda Mesa 53"
+    },
+    {
+        "id": "cf12b590-318e-491e-98fb-af26ce4132ad",
+        "date": "18/02/2026 14:44",
+        "user": "eduardo",
+        "department": "Restaurante",
+        "action": "saida",
+        "product": "Vinagre temperado",
+        "qty": 2.0,
+        "details": "Venda Mesa 53"
+    },
+    {
+        "id": "65a120bc-2cf8-4cd6-9091-5bcb9303ec31",
+        "date": "18/02/2026 14:44",
+        "user": "eduardo",
+        "department": "Restaurante",
+        "action": "saida",
+        "product": "Fermento Quimico",
+        "qty": 1.0,
+        "details": "Venda Mesa 53"
+    },
+    {
+        "id": "6f03e2a4-6cd5-4351-8ab4-b1d68b88cd8b",
+        "date": "18/02/2026 14:44",
+        "user": "eduardo",
+        "department": "Restaurante",
+        "action": "saida",
+        "product": "Filé Mingnon",
+        "qty": 1.0,
+        "details": "Venda Mesa 53"
+    },
+    {
+        "id": "1ad7d788-44a3-4c5e-8dfa-cef0dbcb87a9",
+        "date": "18/02/2026 14:44",
+        "user": "eduardo",
+        "department": "Restaurante",
+        "action": "saida",
+        "product": "Vinagre",
+        "qty": 1.0,
+        "details": "Venda Mesa 53"
+    },
+    {
+        "id": "91b55ec0-ad39-41b6-9f84-8d6618d108c1",
+        "date": "18/02/2026 14:44",
+        "user": "eduardo",
+        "department": "Restaurante",
+        "action": "saida",
+        "product": "Café Capsula",
+        "qty": 4.0,
+        "details": "Venda Mesa 53"
+    },
+    {
+        "id": "d8847b6b-3c45-46ab-8354-b101a547b77b",
+        "date": "18/02/2026 14:45",
+        "user": "eduardo",
+        "department": "Restaurante",
+        "action": "saida",
+        "product": "Canela em Pau",
+        "qty": 1.0,
+        "details": "Venda Mesa 47"
+    },
+    {
+        "id": "71420bdc-e285-402c-8afb-7cf0fc87e60e",
+        "date": "18/02/2026 14:45",
+        "user": "eduardo",
+        "department": "Restaurante",
+        "action": "saida",
+        "product": "Fermento Quimico",
+        "qty": 1.0,
+        "details": "Venda Mesa 47"
+    },
+    {
+        "id": "617c74ac-ab53-42ff-bc88-4b187e0f1347",
+        "date": "18/02/2026 14:45",
+        "user": "eduardo",
+        "department": "Restaurante",
+        "action": "saida",
+        "product": "Azeite Cozinha Galão 5l",
+        "qty": 1.0,
+        "details": "Venda Mesa 47"
+    },
+    {
+        "id": "1cff9fde-96dd-484e-ab0a-fc655369cae7",
+        "date": "18/02/2026 14:45",
+        "user": "eduardo",
+        "department": "Restaurante",
+        "action": "saida",
+        "product": "Ostras M",
+        "qty": 1.0,
+        "details": "Venda Mesa 47"
+    },
+    {
+        "id": "56c1f9fa-791d-4483-b57d-da4b1c9a63c5",
+        "date": "18/02/2026 14:45",
+        "user": "eduardo",
+        "department": "Restaurante",
+        "action": "saida",
+        "product": "Cupim na telha para 2pessoas",
+        "qty": 1.0,
+        "details": "Venda Mesa 47"
+    },
+    {
+        "id": "70d6a444-6b33-467c-9204-c24e894a9a87",
+        "date": "18/02/2026 14:45",
+        "user": "eduardo",
+        "department": "Restaurante",
+        "action": "saida",
+        "product": "Vinho Tinto Cozinha",
+        "qty": 1.0,
+        "details": "Venda Mesa 47"
     }
 ]
