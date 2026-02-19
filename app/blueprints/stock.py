@@ -9,7 +9,7 @@ from werkzeug.utils import secure_filename
 from app.utils.decorators import login_required
 from app.services.data_service import (
     load_products, save_products, load_stock_requests, save_stock_request, save_all_stock_requests,
-    load_stock_entries, save_stock_entry, load_suppliers, save_suppliers,
+    load_stock_entries, save_stock_entry, save_stock_entries, load_suppliers, save_suppliers,
     load_payables, save_payables,
     load_sales_products, save_sales_products, load_sales_history,
     load_stock_transfers, save_stock_transfers, load_settings, save_settings, log_stock_action,
@@ -2078,11 +2078,7 @@ def finish_conference(conf_id):
                 pass
 
     if updates_made:
-        # Use save_stock_entries logic? But here we appended to local list.
-        # We should use data_service save_stock_entries but it expects full list.
-        # So:
-        with open(STOCK_ENTRIES_FILE, 'w', encoding='utf-8') as f:
-            json.dump(stock_entries, f, indent=4, ensure_ascii=False)
+        save_stock_entries(stock_entries)
 
     conference['status'] = 'Finalizada'
     conference['finished_at'] = datetime.now().strftime('%d/%m/%Y %H:%M')

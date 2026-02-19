@@ -9,6 +9,7 @@ from app.services.system_config_manager import (
     SALES_HISTORY_FILE, SALES_PRODUCTS_FILE,
     CASHIER_SESSIONS_FILE, STOCK_FILE, STOCK_ENTRIES_FILE, SALES_DIR
 )
+from app.services.data_service import save_stock_entries, save_sales_history
 
 # Constants
 SALES_FOLDER = SALES_DIR
@@ -269,9 +270,9 @@ def process_sales_files():
         except Exception as e:
             messages.append(f"  -> Erro ao processar arquivo: {e}")
             
-    save_json(SALES_HISTORY_FILE, history_data)
+    save_sales_history(history_data)
     save_json(SALES_PRODUCTS_FILE, sales_products)
-    save_json(STOCK_ENTRIES_FILE, stock_entries)
+    save_stock_entries(stock_entries)
     
     messages.append(f"Concluído. {new_files_count} novos arquivos processados.")
     return "\n".join(messages)

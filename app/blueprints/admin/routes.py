@@ -1008,7 +1008,117 @@ def fiscal_pool_view():
     if session.get('role') != 'admin':
         return redirect(url_for('main.index'))
     pool = FiscalPoolService._load_pool()
-    return render_template('fiscal_pool.html', pool=pool)
+    selected_month = request.args.get('month')
+    if not selected_month:
+        selected_month = datetime.now().strftime('%Y-%m')
+    filtered_pool = []
+    for entry in pool:
+        try:
+            dt_str = entry.get('closed_at')
+            if not dt_str:
+                continue
+            try:
+                dt = datetime.strptime(dt_str, '%Y-%m-%d %H:%M:%S')
+            except ValueError:
+                try:
+                    dt = datetime.strptime(dt_str, '%Y-%m-%d')
+                except ValueError:
+                    continue
+            if dt.strftime('%Y-%m') == selected_month:
+                filtered_pool.append(entry)
+        except Exception:
+            continue
+    months = set()
+    for entry in pool:
+        try:
+            dt_str = entry.get('closed_at')
+            if not dt_str:
+                continue
+            try:
+                dt = datetime.strptime(dt_str, '%Y-%m-%d %H:%M:%S')
+            except ValueError:
+                try:
+                    dt = datetime.strptime(dt_str, '%Y-%m-%d')
+                except ValueError:
+                    continue
+            months.add(dt.strftime('%Y-%m'))
+        except Exception:
+            continue
+    months = sorted(months, reverse=True)
+    total_fiscal = 0.0
+    emitted_fiscal = 0.0
+    for e in filtered_pool:
+        val = 0.0
+        try:
+            val = float(e.get('fiscal_amount', 0.0) or 0.0)
+        except Exception:
+            val = 0.0
+        total_fiscal += val
+        if e.get('status') == 'emitted':
+            emitted_fiscal += val
+    pending_fiscal = total_fiscal - emitted_fiscal
+    return render_template('fiscal_pool.html', pool=filtered_pool, months=months, selected_month=selected_month, total_fiscal=round(total_fiscal, 2), emitted_fiscal=round(emitted_fiscal, 2), pending_fiscal=round(pending_fiscal, 2))
+
+@admin_bp.route('/admin/fiscal/pool/emit_until', methods=['POST'])
+@login_required
+def fiscal_pool_emit_until():
+    if session.get('role') != 'admin':
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 403
+    try:
+        payload = request.get_json(silent=True) or {}
+        selected_month = payload.get('month') or datetime.now().strftime('%Y-%m')
+        pool = FiscalPoolService._load_pool()
+        filtered = []
+        for entry in pool:
+            dt_str = entry.get('closed_at')
+            if not dt_str:
+                continue
+            dt = None
+            try:
+                dt = datetime.strptime(dt_str, '%Y-%m-%d %H:%M:%S')
+            except ValueError:
+                try:
+                    dt = datetime.strptime(dt_str, '%Y-%m-%d')
+                except ValueError:
+                    continue
+            if dt and dt.strftime('%Y-%m') == selected_month:
+                filtered.append(entry)
+        total_fiscal = 0.0
+        emitted_fiscal = 0.0
+        for e in filtered:
+            try:
+                val = float(e.get('fiscal_amount', 0.0) or 0.0)
+            except Exception:
+                val = 0.0
+            total_fiscal += val
+            if e.get('status') == 'emitted':
+                emitted_fiscal += val
+        remaining = round(total_fiscal - emitted_fiscal, 2)
+        if remaining <= 0:
+            return jsonify({'success': True, 'message': 'Não há saldo a emitir.', 'emitted': 0, 'failed': 0, 'remaining': remaining})
+        to_emit = [e for e in filtered if e.get('status') in ['pending', 'failed', 'error', 'error_config']]
+        to_emit.sort(key=lambda x: x.get('closed_at') or '')
+        from app.services.fiscal_service import process_pending_emissions
+        emitted_count = 0
+        failed_count = 0
+        for entry in to_emit:
+            if remaining <= 0:
+                break
+            res = process_pending_emissions(specific_id=entry['id'])
+            if res.get('success', 0) > 0:
+                updated = FiscalPoolService.get_entry(entry['id'])
+                if updated and updated.get('status') == 'emitted':
+                    try:
+                        val = float(updated.get('fiscal_amount', 0.0) or 0.0)
+                    except Exception:
+                        val = 0.0
+                    remaining = round(remaining - val, 2)
+                    emitted_count += 1
+            else:
+                failed_count += 1
+        return jsonify({'success': True, 'message': 'Processo concluído.', 'emitted': emitted_count, 'failed': failed_count, 'remaining': remaining})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @admin_bp.route('/admin/fiscal/pool/action', methods=['POST'])
 @login_required
@@ -1098,12 +1208,13 @@ def fiscal_pool_open_xml():
         return jsonify({'success': False, 'error': 'UUID fiscal ausente'}), 400
     try:
         settings = load_fiscal_settings()
-        payment_methods = entry.get('payment_methods', [])
-        target_cnpj = None
-        for pm in payment_methods:
-            if pm.get('fiscal_cnpj'):
-                target_cnpj = pm.get('fiscal_cnpj')
-                break
+        target_cnpj = entry.get('cnpj_emitente')
+        if not target_cnpj:
+            payment_methods = entry.get('payment_methods', [])
+            for pm in payment_methods:
+                if pm.get('fiscal_cnpj'):
+                    target_cnpj = pm.get('fiscal_cnpj')
+                    break
         integration_settings = get_fiscal_integration(settings, target_cnpj)
         base_dir = get_data_path(os.path.join('fiscal', 'xmls', 'emitted'))
         found_path = None
@@ -1142,6 +1253,53 @@ def fiscal_pool_open_xml():
         traceback.print_exc()
         return jsonify({'success': False, 'error': str(e)}), 500
 
+@admin_bp.route('/admin/fiscal/pool/open_pdf', methods=['POST'])
+@login_required
+def fiscal_pool_open_pdf():
+    if session.get('role') != 'admin':
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 403
+    data = request.json or {}
+    entry_id = data.get('entry_id')
+    if not entry_id:
+        return jsonify({'success': False, 'error': 'ID ausente'}), 400
+    entry = FiscalPoolService.get_entry(entry_id)
+    if not entry:
+        return jsonify({'success': False, 'error': 'Entrada não encontrada'}), 404
+    if entry.get('status') != 'emitted':
+        return jsonify({'success': False, 'error': 'Nota ainda não emitida'}), 400
+    nfe_uuid = entry.get('fiscal_doc_uuid')
+    if not nfe_uuid:
+        return jsonify({'success': False, 'error': 'UUID fiscal ausente'}), 400
+    try:
+        # Try existing path first
+        pdf_path = entry.get('pdf_path')
+        if not (pdf_path and os.path.exists(pdf_path)):
+            # Attempt fresh download
+            from app.services.fiscal_service import download_pdf
+            settings = load_fiscal_settings()
+            payment_methods = entry.get('payment_methods', [])
+            target_cnpj = None
+            for pm in payment_methods:
+                if pm.get('fiscal_cnpj'):
+                    target_cnpj = pm.get('fiscal_cnpj')
+                    break
+            integration_settings = get_fiscal_integration(settings, target_cnpj)
+            try:
+                pdf_path = download_pdf(nfe_uuid, integration_settings)
+                if pdf_path:
+                    try:
+                        FiscalPoolService.set_pdf_ready(entry_id, True, pdf_path)
+                    except Exception:
+                        pass
+            except Exception:
+                pdf_path = None
+        if not (pdf_path and os.path.exists(pdf_path)):
+            return jsonify({'success': False, 'error': 'PDF não encontrado'}), 404
+        filename = os.path.basename(pdf_path)
+        return send_file(pdf_path, as_attachment=True, download_name=filename)
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
 @admin_bp.route('/admin/fiscal/pool/xml_status', methods=['POST'])
 @login_required
 def fiscal_pool_xml_status():
@@ -1157,6 +1315,46 @@ def fiscal_pool_xml_status():
     ready = bool(entry.get('xml_ready'))
     xml_path = entry.get('xml_path')
     return jsonify({'success': True, 'ready': ready, 'xml_path': xml_path})
+
+@admin_bp.route('/admin/fiscal/pool/download_xml/<entry_id>')
+@login_required
+def fiscal_pool_download_xml(entry_id):
+    if session.get('role') != 'admin':
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 403
+    entry = FiscalPoolService.get_entry(entry_id)
+    if not entry:
+        return jsonify({'success': False, 'error': 'Entrada não encontrada'}), 404
+    if entry.get('status') != 'emitted':
+        return jsonify({'success': False, 'error': 'Nota ainda não emitida'}), 400
+    fiscal_doc_uuid = entry.get('fiscal_doc_uuid')
+    if not fiscal_doc_uuid:
+        return jsonify({'success': False, 'error': 'UUID fiscal ausente'}), 400
+    try:
+        settings = load_fiscal_settings()
+        target_cnpj = entry.get('cnpj_emitente')
+        if not target_cnpj:
+            payment_methods = entry.get('payment_methods', [])
+            for pm in payment_methods:
+                if pm.get('fiscal_cnpj'):
+                    target_cnpj = pm.get('fiscal_cnpj')
+                    break
+        integration_settings = get_fiscal_integration(settings, target_cnpj)
+        base_dir = get_data_path(os.path.join('fiscal', 'xmls', 'emitted'))
+        xml_path = entry.get('xml_path')
+        if not xml_path or not os.path.exists(xml_path):
+            try:
+                from app.services.fiscal_service import download_xml
+                xml_path = download_xml(fiscal_doc_uuid, integration_settings)
+            except Exception:
+                xml_path = None
+        if not xml_path or not os.path.exists(xml_path):
+            return jsonify({'success': False, 'error': 'XML não encontrado'}), 404
+        directory = os.path.dirname(xml_path)
+        filename = os.path.basename(xml_path)
+        return send_file(xml_path, as_attachment=True, download_name=filename)
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @admin_bp.route('/api/fiscal/receive', methods=['POST'])
 def api_fiscal_receive():

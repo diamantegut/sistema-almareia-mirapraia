@@ -8,7 +8,7 @@ from app.utils.decorators import login_required
 import uuid
 from app.services.data_service import (
     load_products, load_settings, save_settings, load_stock_entries,
-    save_stock_entry, load_stock_logs, STOCK_LOGS_FILE, STOCK_ENTRIES_FILE,
+    save_stock_entry, save_stock_entries, load_stock_logs, STOCK_LOGS_FILE, STOCK_ENTRIES_FILE,
     load_table_orders, save_table_orders, load_menu_items, load_printers
 )
 from app.services.logger_service import LoggerService
@@ -913,8 +913,7 @@ def delete_portion_entry(entry_id):
         deleted_count = initial_count - final_count
         
         if deleted_count > 0:
-            with open(STOCK_ENTRIES_FILE, 'w', encoding='utf-8') as f:
-                json.dump(entries, f, indent=4, ensure_ascii=False)
+            save_stock_entries(entries)
             flash(f'Porcionamento excluído com sucesso ({deleted_count} registros removidos).')
         else:
             flash('Nenhum registro removido.')
