@@ -66824,17 +66824,28 @@
             "name": "",
             "type": "passante"
         },
-        "status": "pending",
+        "status": "emitted",
         "notes": "Mesa 45",
-        "fiscal_doc_uuid": null,
-        "history": [],
+        "fiscal_doc_uuid": "nfc_3a1f89fdcec64177b5977f2e0f547260",
+        "history": [
+            {
+                "timestamp": "2026-02-18 18:31:47",
+                "action": "status_change",
+                "from": "pending",
+                "to": "emitted",
+                "user": "Sistema",
+                "details": null
+            }
+        ],
         "fiscal_snapshot": {
             "sefaz_environment": "homologation",
             "environment": "homologation",
             "serie": "8",
             "ie_emitente": "074353209",
             "CRT": null
-        }
+        },
+        "fiscal_serie": 8,
+        "fiscal_number": 657
     },
     {
         "id": "5e78ad03-48bc-4afa-af8a-f7109eb80b12",
@@ -67031,17 +67042,37 @@
             "name": "",
             "type": "passante"
         },
-        "status": "pending",
+        "status": "emitted",
         "notes": "Mesa 54",
-        "fiscal_doc_uuid": null,
-        "history": [],
+        "fiscal_doc_uuid": "nfc_3a1f89b439fc4734ade5851ab149c638",
+        "history": [
+            {
+                "timestamp": "2026-02-18 16:53:01",
+                "action": "status_change",
+                "from": "pending",
+                "to": "failed",
+                "user": "Sistema",
+                "details": "Erro Nuvem Fiscal: Validation failed: O campo 'infNFe.pag.detPag[0].vPag' não deve ter mais que 15 algarismos e 2 casas decimais. O valor informado tem 6 algarismos e 3 casas decimais. | Detalhes: ValidationError: O campo 'infNFe.pag.detPag[0].vPag' não deve ter mais que 15 algarismos e 2 casas decimais. O valor informado tem 6 algarismos e 3 casas decimais."
+            },
+            {
+                "timestamp": "2026-02-18 17:11:25",
+                "action": "status_change",
+                "from": "failed",
+                "to": "emitted",
+                "user": "Sistema",
+                "details": null
+            }
+        ],
         "fiscal_snapshot": {
             "sefaz_environment": "homologation",
             "environment": "homologation",
             "serie": "8",
             "ie_emitente": "074353209",
             "CRT": null
-        }
+        },
+        "last_error": "Erro Nuvem Fiscal: Validation failed: O campo 'infNFe.pag.detPag[0].vPag' não deve ter mais que 15 algarismos e 2 casas decimais. O valor informado tem 6 algarismos e 3 casas decimais. | Detalhes: ValidationError: O campo 'infNFe.pag.detPag[0].vPag' não deve ter mais que 15 algarismos e 2 casas decimais. O valor informado tem 6 algarismos e 3 casas decimais.",
+        "fiscal_serie": 8,
+        "fiscal_number": 656
     },
     {
         "id": "564fbb8e-99fc-4de3-bd24-4a2fbb40810c",
