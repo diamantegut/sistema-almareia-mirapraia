@@ -5,7 +5,7 @@ import threading
 import requests
 from datetime import datetime
 from app.services.system_config_manager import get_data_path, get_config_value, FISCAL_POOL_FILE
-from app.services.data_service import load_menu_items
+from app.services.data_service import load_menu_items, _backup_before_write, _save_json_atomic
 
 # FISCAL_POOL_FILE = get_data_path('fiscal_pool.json')
 
@@ -67,8 +67,8 @@ class FiscalPoolService:
             
             if modified:
                 try:
-                    with open(FISCAL_POOL_FILE, 'w', encoding='utf-8') as f:
-                        json.dump(pool, f, indent=4, ensure_ascii=False)
+                    _backup_before_write(FISCAL_POOL_FILE)
+                    _save_json_atomic(FISCAL_POOL_FILE, pool)
                 except: pass
                 
             return pool
@@ -78,9 +78,8 @@ class FiscalPoolService:
     @staticmethod
     def _save_pool(pool):
         try:
-            with open(FISCAL_POOL_FILE, 'w', encoding='utf-8') as f:
-                json.dump(pool, f, indent=4, ensure_ascii=False)
-            return True
+            _backup_before_write(FISCAL_POOL_FILE)
+            return _save_json_atomic(FISCAL_POOL_FILE, pool)
         except Exception:
             return False
 
@@ -283,6 +282,22 @@ class FiscalPoolService:
                 entry['xml_ready'] = bool(ready)
                 if xml_path:
                     entry['xml_path'] = xml_path
+                try:
+                    with open(FISCAL_POOL_FILE, 'w', encoding='utf-8') as f:
+                        json.dump(pool, f, indent=4, ensure_ascii=False)
+                    return True
+                except Exception:
+                    return False
+        return False
+
+    @staticmethod
+    def set_pdf_ready(entry_id, ready=True, pdf_path=None):
+        pool = FiscalPoolService._load_pool()
+        for entry in pool:
+            if entry['id'] == entry_id:
+                entry['pdf_ready'] = bool(ready)
+                if pdf_path:
+                    entry['pdf_path'] = pdf_path
                 try:
                     with open(FISCAL_POOL_FILE, 'w', encoding='utf-8') as f:
                         json.dump(pool, f, indent=4, ensure_ascii=False)

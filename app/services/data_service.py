@@ -19,7 +19,8 @@ from app.services.system_config_manager import (
     RESTAURANT_TABLE_SETTINGS_FILE, RESTAURANT_SETTINGS_FILE,
     CHECKLIST_ITEMS_FILE, INSPECTION_LOGS_FILE, CLEANING_STATUS_FILE,
     ARCHIVED_ORDERS_FILE, AUDIT_LOGS_FILE, USERS_FILE, EX_EMPLOYEES_FILE,
-    DEPARTMENTS
+    DEPARTMENTS, # for load/save helpers
+    get_backup_path
 )
 
 def format_room_number(room_num):
@@ -89,6 +90,29 @@ def _save_json_atomic(filepath, data):
             except: pass
         return False
 
+def _backup_before_write(filepath, max_backups=30):
+    try:
+        if not os.path.exists(filepath):
+            return
+        backup_root = get_backup_path('')
+        os.makedirs(backup_root, exist_ok=True)
+        base = os.path.basename(filepath)
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        backup_path = os.path.join(backup_root, f"{base}.{timestamp}.bak")
+        with open(filepath, 'r', encoding='utf-8') as src, open(backup_path, 'w', encoding='utf-8') as dst:
+            dst.write(src.read())
+        files = [f for f in os.listdir(backup_root) if f.startswith(base + '.')]
+        if len(files) > max_backups:
+            files.sort()
+            to_remove = files[0:len(files) - max_backups]
+            for name in to_remove:
+                try:
+                    os.remove(os.path.join(backup_root, name))
+                except OSError:
+                    pass
+    except Exception as e:
+        print(f"Error creating backup for {filepath}: {e}")
+
 # --- Settings ---
 def load_settings(): return _load_json(SETTINGS_FILE, {})
 def save_settings(settings): return _save_json(SETTINGS_FILE, settings)
@@ -120,7 +144,10 @@ def _get_room_charges_path():
         return ROOM_CHARGES_FILE
 
 def load_room_charges(): return _load_json(_get_room_charges_path(), [])
-def save_room_charges(charges): return _save_json_atomic(_get_room_charges_path(), charges)
+def save_room_charges(charges):
+    path = _get_room_charges_path()
+    _backup_before_write(path)
+    return _save_json_atomic(path, charges)
 
 # --- Room Occupancy ---
 def _get_room_occupancy_path():
@@ -157,7 +184,9 @@ def save_fiscal_settings(settings): return _save_json(FISCAL_SETTINGS_FILE, sett
 
 # --- Menu Items ---
 def load_menu_items(): return _load_json(MENU_ITEMS_FILE, [])
-def save_menu_items(items): return _save_json(MENU_ITEMS_FILE, items)
+def save_menu_items(items):
+    _backup_before_write(MENU_ITEMS_FILE)
+    return _save_json_atomic(MENU_ITEMS_FILE, items)
 
 # --- Complements ---
 def load_complements(): return _load_json(COMPLEMENTS_FILE, [])
@@ -250,7 +279,10 @@ def _get_cashier_sessions_path():
         return CASHIER_SESSIONS_FILE
 
 def load_cashier_sessions(): return _load_json(_get_cashier_sessions_path(), [])
-def save_cashier_sessions(sessions): return _save_json(_get_cashier_sessions_path(), sessions)
+def save_cashier_sessions(sessions):
+    path = _get_cashier_sessions_path()
+    _backup_before_write(path)
+    return _save_json_atomic(path, sessions)
 
 def get_current_cashier(user=None, cashier_type=None):
     # Delegate to centralized CashierService to ensure consistent logic
@@ -271,7 +303,9 @@ def save_sales_products(data): return _save_json(SALES_PRODUCTS_FILE, data)
 
 # --- Sales History ---
 def load_sales_history(): return _load_json(SALES_HISTORY_FILE, [])
-def save_sales_history(data): return _save_json(SALES_HISTORY_FILE, data)
+def save_sales_history(data):
+    _backup_before_write(SALES_HISTORY_FILE)
+    return _save_json_atomic(SALES_HISTORY_FILE, data)
 
 # --- Maintenance ---
 def load_maintenance_requests(): return _load_json(MAINTENANCE_FILE, [])
@@ -291,7 +325,9 @@ def load_stock_logs(): return _load_json(STOCK_LOGS_FILE, [])
 def save_stock_logs(data): return _save_json(STOCK_LOGS_FILE, data)
 
 def load_products(): return _load_json(PRODUCTS_FILE, [])
-def save_products(data): return _save_json(PRODUCTS_FILE, data)
+def save_products(data):
+    _backup_before_write(PRODUCTS_FILE)
+    return _save_json_atomic(PRODUCTS_FILE, data)
 
 def load_suppliers(): return _load_json(SUPPLIERS_FILE, [])
 def save_suppliers(data): return _save_json(SUPPLIERS_FILE, data)
@@ -311,7 +347,9 @@ def load_payables(): return _load_json(_get_payables_path(), [])
 def save_payables(data): return _save_json(_get_payables_path(), data)
 
 def load_stock_entries(): return _load_json(STOCK_ENTRIES_FILE, [])
-def save_stock_entries(data): return _save_json(STOCK_ENTRIES_FILE, data)
+def save_stock_entries(data):
+    _backup_before_write(STOCK_ENTRIES_FILE)
+    return _save_json_atomic(STOCK_ENTRIES_FILE, data)
 
 def save_stock_entry(entry):
     entries = load_stock_entries()

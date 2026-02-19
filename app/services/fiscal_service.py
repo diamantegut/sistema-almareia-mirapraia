@@ -7,10 +7,11 @@ import re
 import csv
 import uuid
 import threading
-from datetime import datetime
+from decimal import Decimal, ROUND_HALF_UP
+from datetime import datetime, timedelta
 from app.services.system_config_manager import (
     get_data_path, get_fiscal_path, PENDING_FISCAL_EMISSIONS_FILE, 
-    FISCAL_NSU_FILE, FISCAL_SETTINGS_FILE
+    FISCAL_NSU_FILE, FISCAL_SETTINGS_FILE, FISCAL_SEFAZ_BLOCK_FILE
 )
 from app.services.printing_service import print_fiscal_receipt
 from app.services.printer_manager import load_printer_settings, load_printers
@@ -21,6 +22,15 @@ from app.services.sefaz_service import SefazService
 logger = logging.getLogger(__name__)
 
 PENDING_EMISSIONS_FILE = PENDING_FISCAL_EMISSIONS_FILE
+
+def _round_money(val):
+    try:
+        return float(Decimal(str(val)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP))
+    except Exception:
+        try:
+            return round(float(val), 2)
+        except Exception:
+            return 0.0
 
 def load_pending_emissions():
     if not os.path.exists(PENDING_EMISSIONS_FILE):
@@ -448,32 +458,18 @@ def process_pending_emissions(settings=None, specific_id=None):
             except Exception as e:
                 logger.error(f"Failed to download XML for {nfe_id}: {e}")
             
-            # Print Receipt (Logic kept same)
             try:
-                p_settings = load_printer_settings()
-                fiscal_printer_id = p_settings.get('fiscal_printer_id')
-                printer = None
-                if fiscal_printer_id:
-                    printers = load_printers()
-                    printer = next((p for p in printers if p['id'] == fiscal_printer_id), None)
-                if not printer: printer = {} 
-
-                invoice_data = result.get('data', {})
-                if 'valor_total' not in invoice_data: invoice_data['valor_total'] = transaction['amount']
-                if 'ambiente' not in invoice_data: invoice_data['ambiente'] = integration_settings.get('environment', 'homologacao')
-                if 'items' not in invoice_data or not invoice_data['items']: invoice_data['items'] = emission.get('items', [])
-                
-                # QR Code logic (kept same)
-                if 'qrcode_url' not in invoice_data:
-                    candidates = ['url_consulta_qrcode', 'qr_code', 'url_qrcode', 'qrcode']
-                    for cand in candidates:
-                        if cand in invoice_data:
-                            invoice_data['qrcode_url'] = invoice_data[cand]
-                            break
-                            
-                print_fiscal_receipt(printer, invoice_data)
+                pdf_path = download_pdf(nfe_id, integration_settings)
+                if pdf_path:
+                    if source == 'queue':
+                        emission['pdf_path'] = pdf_path
+                    if source == 'pool':
+                        try:
+                            FiscalPoolService.set_pdf_ready(emission['id'], True, pdf_path)
+                        except Exception:
+                            pass
             except Exception as e:
-                logger.error(f"Error printing fiscal receipt: {e}")
+                logger.error(f"Failed to download PDF for {nfe_id}: {e}")
                 
             success_count += 1
         else:
@@ -581,6 +577,45 @@ def download_xml(nfe_id, settings):
     Downloads the XML for a given NFC-e ID and saves it locally.
     """
     if not nfe_id:
+        return None
+
+def download_pdf(nfe_id, settings):
+    if not nfe_id:
+        return None
+    client_id = settings.get('client_id')
+    client_secret = settings.get('client_secret')
+    token = get_access_token(client_id, client_secret)
+    if not token:
+        logger.error("Failed to authenticate for PDF download")
+        return None
+    base_url = "https://api.sandbox.nuvemfiscal.com.br" if settings.get('environment') == 'homologation' else "https://api.nuvemfiscal.com.br"
+    api_url = f"{base_url}/nfce/{nfe_id}/pdf"
+    headers = {"Authorization": f"Bearer {token}"}
+    try:
+        attempts = 5
+        response = None
+        for _ in range(attempts):
+            response = requests.get(api_url, headers=headers)
+            if response.status_code == 200:
+                break
+            time.sleep(2)
+        if response and response.status_code == 200:
+            year_month = datetime.now().strftime('%Y/%m')
+            base_path = get_data_path(os.path.join('fiscal', 'pdfs'))
+            pdf_dir = os.path.join(base_path, 'emitted', year_month)
+            if not os.path.exists(pdf_dir):
+                os.makedirs(pdf_dir)
+            file_path = os.path.join(pdf_dir, f"{nfe_id}.pdf")
+            with open(file_path, 'wb') as f:
+                f.write(response.content)
+            if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
+                return file_path
+            else:
+                return None
+        else:
+            return None
+    except Exception as e:
+        logger.error(f"Exception downloading PDF: {e}")
         return None
 
     client_id = settings.get('client_id')
@@ -825,6 +860,29 @@ def save_last_nsu(nsu):
     except Exception as e:
         logger.error(f"Error saving last NSU: {e}")
 
+def get_sefaz_block_until():
+    path = FISCAL_SEFAZ_BLOCK_FILE
+    if not os.path.exists(path):
+        return None
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        blocked_until_str = data.get('blocked_until')
+        if not blocked_until_str:
+            return None
+        return datetime.fromisoformat(blocked_until_str)
+    except Exception:
+        return None
+
+def set_sefaz_block_for_one_hour():
+    path = FISCAL_SEFAZ_BLOCK_FILE
+    try:
+        blocked_until = datetime.now() + timedelta(hours=1)
+        with open(path, 'w', encoding='utf-8') as f:
+            json.dump({'blocked_until': blocked_until.isoformat()}, f)
+    except Exception as e:
+        logger.error(f"Error saving SEFAZ block status: {e}")
+
 def _get_sefaz_service_instance(settings):
     pfx_path = settings.get('certificate_path')
     pfx_password = settings.get('certificate_password')
@@ -833,7 +891,6 @@ def _get_sefaz_service_instance(settings):
         return None
         
     if not os.path.isabs(pfx_path):
-        # Tenta em data/certs
         possible_path = os.path.join(os.getcwd(), 'data', 'certs', pfx_path)
         if os.path.exists(possible_path):
             pfx_path = possible_path
@@ -847,6 +904,9 @@ def _get_sefaz_service_instance(settings):
     return SefazService(pfx_path, pfx_password)
 
 def _list_received_nfes_sefaz(settings):
+    block_until = get_sefaz_block_until()
+    if block_until and datetime.now() < block_until:
+        return None, "As consultas DF-e foram temporariamente bloqueadas pela SEFAZ por 'Consumo Indevido'. Aguarde pelo menos 1 hora desde a primeira mensagem de bloqueio, evite novas tentativas repetidas nesse período e verifique se outro sistema (como contabilidade ou outro software) não está consultando DF-e com o mesmo certificado/CNPJ."
     service = _get_sefaz_service_instance(settings)
     if not service:
         return None, "Certificado digital não configurado ou inválido (verifique data/certs)."
@@ -857,20 +917,15 @@ def _list_received_nfes_sefaz(settings):
             last_nsu = str(get_last_nsu() or 0)
             ambiente = 2 if settings.get('environment') == 'homologation' else 1
             
-            # Consultar Distribuição
-            # Loop simples: tenta pegar até 50 documentos ou até esgotar (cStat 137)
-            # A API da SEFAZ retorna lote de até 50 docs.
-            
             all_documents = []
             
-            # Primeira chamada
             logger.info(f"Consultando SEFAZ Direto (NSU {last_nsu})...")
             result = service.consultar_distribuicao_dfe(cnpj, ult_nsu=last_nsu, ambiente=ambiente)
             
             if not result['success']:
-                # Tratamento específico para Consumo Indevido (656)
                 if str(result.get('cStat')) == '656':
-                    return None, "A SEFAZ bloqueou temporariamente novas consultas (Consumo Indevido). Aguarde 1 hora e tente novamente."
+                    set_sefaz_block_for_one_hour()
+                    return None, "A SEFAZ retornou 'Consumo Indevido' e bloqueou temporariamente novas consultas para este certificado. Aguarde pelo menos 1 hora antes de tentar novamente, evite ficar repetindo a consulta durante esse período e verifique se outro sistema (como contabilidade ou outro software) não está consultando DF-e com o mesmo certificado/CNPJ."
                 return None, f"Erro SEFAZ: {result.get('message')} (cStat: {result.get('cStat')})"
                 
             max_nsu_retorno = result.get('maxNSU')
@@ -1160,7 +1215,7 @@ def emit_invoice(transaction, settings, order_items, customer_cpf_cnpj=None):
         # Requested behavior: "emissão individual para cada instância" -> 1 line per unit
         
         qty_to_process = float(item['qty'])
-        price = float(item['price'])
+        price = _round_money(float(item['price']))
         
         # Determine if we should split
         # Only split if it's an integer quantity (e.g. 2 units, not 1.5kg)
@@ -1177,7 +1232,7 @@ def emit_invoice(transaction, settings, order_items, customer_cpf_cnpj=None):
             qty_per_line = 1.0
             
         for _ in range(iterations):
-            item_total = qty_per_line * price
+            item_total = _round_money(qty_per_line * price)
             
             # Determine NCM (Fallback to 21069090 - Preparacoes alimenticias)
             ncm = item.get('ncm')
@@ -1194,12 +1249,12 @@ def emit_invoice(transaction, settings, order_items, customer_cpf_cnpj=None):
                 "CFOP": item.get('cfop', '5102'),
                 "uCom": "UN",
                 "qCom": qty_per_line,
-                "vUnCom": price,
-                "vProd": item_total,
+                "vUnCom": _round_money(price),
+                "vProd": _round_money(item_total),
                 "cEANTrib": "SEM GTIN",
                 "uTrib": "UN",
                 "qTrib": qty_per_line,
-                "vUnTrib": price,
+                "vUnTrib": _round_money(price),
                 "indTot": 1,
             }
             
@@ -1261,7 +1316,7 @@ def emit_invoice(transaction, settings, order_items, customer_cpf_cnpj=None):
     pagamentos = [
         {
             "tPag": pay_code,
-            "vPag": transaction.get('amount', total_items),
+            "vPag": _round_money(transaction.get('amount', total_items)),
         }
     ]
 
@@ -1327,25 +1382,25 @@ def emit_invoice(transaction, settings, order_items, customer_cpf_cnpj=None):
             },
             "total": {
                 "ICMSTot": {
-                    "vBC": 0.00,
-                    "vICMS": 0.00,
-                    "vICMSDeson": 0.00,
-                    "vFCP": 0.00,
-                    "vBCST": 0.00,
-                    "vST": 0.00,
-                    "vFCPST": 0.00,
-                    "vFCPSTRet": 0.00,
-                    "vProd": total_items,
-                    "vFrete": 0.00,
-                    "vSeg": 0.00,
-                    "vDesc": 0.00,
-                    "vII": 0.00,
-                    "vIPI": 0.00,
-                    "vIPIDevol": 0.00,
-                    "vPIS": 0.00,
-                    "vCOFINS": 0.00,
-                    "vOutro": 0.00,
-                    "vNF": total_items
+                    "vBC": _round_money(0.00),
+                    "vICMS": _round_money(0.00),
+                    "vICMSDeson": _round_money(0.00),
+                    "vFCP": _round_money(0.00),
+                    "vBCST": _round_money(0.00),
+                    "vST": _round_money(0.00),
+                    "vFCPST": _round_money(0.00),
+                    "vFCPSTRet": _round_money(0.00),
+                    "vProd": _round_money(total_items),
+                    "vFrete": _round_money(0.00),
+                    "vSeg": _round_money(0.00),
+                    "vDesc": _round_money(0.00),
+                    "vII": _round_money(0.00),
+                    "vIPI": _round_money(0.00),
+                    "vIPIDevol": _round_money(0.00),
+                    "vPIS": _round_money(0.00),
+                    "vCOFINS": _round_money(0.00),
+                    "vOutro": _round_money(0.00),
+                    "vNF": _round_money(total_items)
                 }
             },
             "pag": {

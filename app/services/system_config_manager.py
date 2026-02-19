@@ -204,6 +204,7 @@ LAST_SYNC_FILE = get_data_path('last_sync.json')
 BACKUP_CONFIG_FILE = get_data_path('backup_config.json')
 PENDING_FISCAL_EMISSIONS_FILE = get_data_path('pending_fiscal_emissions.json')
 FISCAL_NSU_FILE = get_data_path('fiscal_nsu.json')
+FISCAL_SEFAZ_BLOCK_FILE = get_data_path('fiscal_sefaz_block.json')
 
 # Miscellaneous
 OBSERVATIONS_FILE = get_data_path('observations.json')
