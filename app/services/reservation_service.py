@@ -66,6 +66,193 @@ class ReservationService:
             
         return new_res
 
+    def _parse_excel_file(self, file_path):
+        parsed_items = []
+        try:
+            df = pd.read_excel(file_path)
+            
+            # Determine format based on columns
+            is_standard = 'Checkin/out' in df.columns and 'Responsável' in df.columns
+            
+            if is_standard:
+                for index, row in df.iterrows():
+                    # Parse Checkin/out "04/02/2026 - 06/02/2026"
+                    checkin_out = str(row.get('Checkin/out', ''))
+                    checkin = None
+                    checkout = None
+                    
+                    if ' - ' in checkin_out:
+                        parts = checkin_out.split(' - ')
+                        if len(parts) == 2:
+                            checkin = parts[0].strip()
+                            checkout = parts[1].strip()
+                    
+                    # Basic cleaning
+                    guest_name = str(row.get('Responsável', 'Unknown'))
+                    category = str(row.get('Categoria', 'Unknown'))
+                    status = str(row.get('Status do pagamento', 'Unknown'))
+                    channel = str(row.get('Canais', 'Unknown'))
+                    res_id = str(row.get('Id', ''))
+                    
+                    amount_str = str(row.get('Valor', ''))
+                    paid_amount_str = str(row.get('Valor pago', ''))
+                    to_receive_str = str(row.get('Valor a receber', ''))
+
+                    def parse_br_money(val_str):
+                        try:
+                            clean = str(val_str).replace('R$', '').replace('.', '').replace(',', '.').strip()
+                            if not clean: return 0.0
+                            return float(clean)
+                        except:
+                            return 0.0
+
+                    parsed_items.append({
+                        'id': res_id,
+                        'guest_name': guest_name,
+                        'checkin': checkin,
+                        'checkout': checkout,
+                        'category': category,
+                        'status': status,
+                        'channel': channel,
+                        'amount': amount_str,
+                        'paid_amount': paid_amount_str,
+                        'to_receive': to_receive_str,
+                        'amount_val': parse_br_money(amount_str),
+                        'paid_amount_val': parse_br_money(paid_amount_str),
+                        'to_receive_val': parse_br_money(to_receive_str),
+                        'source_file': os.path.basename(file_path)
+                    })
+            else:
+                # Import format (no headers or specific column indices)
+                df_no_header = pd.read_excel(file_path, header=None)
+                if df_no_header.shape[1] >= 10:
+                    start_row = 0
+                    if str(df_no_header.iloc[0, 2]).lower() in ['hóspede', 'nome', 'guest']:
+                        start_row = 1
+                        
+                    for index, row in df_no_header.iloc[start_row:].iterrows():
+                        try:
+                            # Col C (2): Name
+                            guest_name = str(row[2]).strip()
+                            if not guest_name or guest_name.lower() == 'nan': continue
+                            
+                            # Col D (3): Dates
+                            dates_raw = str(row[3]).strip()
+                            checkin, checkout = None, None
+                            if ' - ' in dates_raw:
+                                parts = dates_raw.split(' - ')
+                                if len(parts) == 2:
+                                    checkin = parts[0].strip()
+                                    checkout = parts[1].strip()
+                            
+                            # Col E (4): Category
+                            category = str(row[4]).strip()
+                            
+                            # Col G (6): Channel
+                            channel = str(row[6]).strip()
+                            
+                            # Col H (7): Total
+                            amount_val = row[7]
+                            
+                            # Col I (8): Paid
+                            paid_val = row[8]
+                            
+                            # Col J (9): To Receive
+                            to_receive_val = row[9]
+                            
+                            # Generate ID
+                            import hashlib
+                            res_id_raw = f"{guest_name}_{dates_raw}_{category}"
+                            res_id = hashlib.md5(res_id_raw.encode()).hexdigest()[:8]
+                            
+                            def format_money(val):
+                                try:
+                                    if isinstance(val, (int, float)): return f"{val:.2f}"
+                                    return str(val)
+                                except: return "0.00"
+                                
+                            def parse_money(val):
+                                try:
+                                    if isinstance(val, (int, float)): return float(val)
+                                    s = str(val).replace('R$', '').replace('.', '').replace(',', '.').strip()
+                                    return float(s) if s else 0.0
+                                except: return 0.0
+
+                            parsed_items.append({
+                                'id': res_id,
+                                'guest_name': guest_name,
+                                'checkin': checkin,
+                                'checkout': checkout,
+                                'category': category,
+                                'status': 'Importada',
+                                'channel': channel,
+                                'amount': format_money(amount_val),
+                                'paid_amount': format_money(paid_val),
+                                'to_receive': format_money(to_receive_val),
+                                'amount_val': parse_money(amount_val),
+                                'paid_amount_val': parse_money(paid_val),
+                                'to_receive_val': parse_money(to_receive_val),
+                                'source_file': os.path.basename(file_path)
+                            })
+                        except Exception:
+                            continue
+        except Exception as e:
+            print(f"Error reading reservations Excel {file_path}: {e}")
+        return parsed_items
+
+    def preview_import(self, temp_file_path):
+        """
+        Parses the temp file and compares with existing reservations to generate a preview report.
+        """
+        # 1. Parse new items
+        new_items = self._parse_excel_file(temp_file_path)
+        if not new_items:
+            return {'success': False, 'error': 'Nenhuma reserva válida encontrada ou formato incorreto.'}
+            
+        # 2. Get existing state
+        current_reservations = self.get_february_reservations()
+        
+        # 3. Compare
+        report = {
+            'total_found': len(new_items),
+            'new_entries': [],
+            'updates': [],
+            'conflicts': [] # If needed, for now 'updates' covers it
+        }
+        
+        # Index existing by ID and Composite Key
+        existing_map_id = {r['id']: r for r in current_reservations if r.get('id')}
+        existing_map_key = {}
+        for r in current_reservations:
+            name = str(r.get('guest_name', '')).lower().strip()
+            cin = str(r.get('checkin', '')).strip()
+            cout = str(r.get('checkout', '')).strip()
+            if name and cin and cout:
+                existing_map_key[f"{name}|{cin}|{cout}"] = r
+                
+        for item in new_items:
+            # Check match
+            match = None
+            if item.get('id') in existing_map_id:
+                match = existing_map_id[item['id']]
+            else:
+                key = f"{str(item.get('guest_name','')).lower().strip()}|{str(item.get('checkin','')).strip()}|{str(item.get('checkout','')).strip()}"
+                if key in existing_map_key:
+                    match = existing_map_key[key]
+            
+            if match:
+                # Check if data is actually different?
+                # For simplicity, we assume it's an update if it exists
+                # Maybe compare amount or status?
+                report['updates'].append({
+                    'new': item,
+                    'old': match
+                })
+            else:
+                report['new_entries'].append(item)
+                
+        return {'success': True, 'report': report}
+
     def get_february_reservations(self):
         """
         Reads all Excel files in the directory and returns a combined list of reservation dictionaries.
@@ -96,82 +283,60 @@ class ReservationService:
             # Exclude temporary files (~$)
             files = [f for f in files if not os.path.basename(f).startswith("~$")]
             
+            # Sort files by modification time (oldest first) to ensure updates overwrite older data
+            files.sort(key=os.path.getmtime)
+            
             for file_path in files:
-                try:
-                    df = pd.read_excel(file_path)
-                    
-                    # Columns: 'Estabelecimento', 'Id', 'Responsável', 'Checkin/out', 'Categoria', 
-                    # 'Status do pagamento', 'Canais', 'Valor', 'Valor pago', 'Valor a receber'
-                    
-                    for index, row in df.iterrows():
-                        # Parse Checkin/out "04/02/2026 - 06/02/2026"
-                        checkin_out = str(row.get('Checkin/out', ''))
-                        checkin = None
-                        checkout = None
-                        
-                        if ' - ' in checkin_out:
-                            parts = checkin_out.split(' - ')
-                            if len(parts) == 2:
-                                checkin = parts[0].strip()
-                                checkout = parts[1].strip()
-                        
-                        # Basic cleaning
-                        guest_name = str(row.get('Responsável', 'Unknown'))
-                        category = str(row.get('Categoria', 'Unknown'))
-                        status = str(row.get('Status do pagamento', 'Unknown'))
-                        channel = str(row.get('Canais', 'Unknown'))
-                        res_id = str(row.get('Id', ''))
-                        
-                        # Deduplicate by ID if necessary? 
-                        # If same ID exists in multiple files, we might have duplicates.
-                        # Let's assume files are distinct chunks or we should handle dedup.
-                        # For now, just append.
-                        
-                        amount_str = str(row.get('Valor', ''))
-                        paid_amount_str = str(row.get('Valor pago', ''))
-                        to_receive_str = str(row.get('Valor a receber', ''))
-    
-                        def parse_br_money(val_str):
-                            try:
-                                clean = str(val_str).replace('R$', '').replace('.', '').replace(',', '.').strip()
-                                if not clean: return 0.0
-                                return float(clean)
-                            except:
-                                return 0.0
-    
-                        all_reservations.append({
-                            'id': res_id,
-                            'guest_name': guest_name,
-                            'checkin': checkin,
-                            'checkout': checkout,
-                            'category': category,
-                            'status': status,
-                            'channel': channel,
-                            'amount': amount_str,
-                            'paid_amount': paid_amount_str,
-                            'to_receive': to_receive_str,
-                            'amount_val': parse_br_money(amount_str),
-                            'paid_amount_val': parse_br_money(paid_amount_str),
-                            'to_receive_val': parse_br_money(to_receive_str)
-                        })
-                        
-                except Exception as e:
-                    print(f"Error reading reservations Excel {file_path}: {e}")
-                    continue
+                parsed = self._parse_excel_file(file_path)
+                all_reservations.extend(parsed)
         
-        # Deduplicate based on ID (keep last found?)
+        # Deduplicate Logic
+        # Priority: Most recent file (already sorted by mtime)
+        # Key: ID (if present) OR (Guest Name + Checkin + Checkout)
         
-        # Deduplicate based on ID (keep last found?)
         unique_reservations = {}
+        
         for res in all_reservations:
-            if res['id']:
-                unique_reservations[res['id']] = res
+            # 1. Try by ID first
+            rid = res.get('id')
+            if rid and rid != 'nan' and rid != 'None':
+                unique_reservations[rid] = res
             else:
-                import uuid
-                unique_reservations[str(uuid.uuid4())] = res
-        for k, v in unique_reservations.items():
-            if not v.get('id'):
-                v['id'] = k
+                # 2. Try by Composite Key (Name + Dates)
+                # Normalize keys
+                name = str(res.get('guest_name', '')).lower().strip()
+                cin = str(res.get('checkin', '')).strip()
+                cout = str(res.get('checkout', '')).strip()
+                
+                if name and cin and cout:
+                    composite_key = f"{name}|{cin}|{cout}"
+                    # Check if we already have a reservation with this key (even if it has a different ID or generated ID)
+                    # This is tricky because unique_reservations is keyed by ID.
+                    # We need a secondary index or iterate.
+                    
+                    # Let's check if any existing reservation matches this composite key
+                    found_id = None
+                    for existing_id, existing_res in unique_reservations.items():
+                        e_name = str(existing_res.get('guest_name', '')).lower().strip()
+                        e_cin = str(existing_res.get('checkin', '')).strip()
+                        e_cout = str(existing_res.get('checkout', '')).strip()
+                        if e_name == name and e_cin == cin and e_cout == cout:
+                            found_id = existing_id
+                            break
+                    
+                    if found_id:
+                        # Update existing
+                        unique_reservations[found_id] = res
+                        # Ensure ID consistency
+                        res['id'] = found_id
+                    else:
+                        # New entry
+                        if not rid:
+                            import uuid
+                            rid = str(uuid.uuid4())[:8]
+                            res['id'] = rid
+                        unique_reservations[rid] = res
+
         return list(unique_reservations.values())
 
     def get_room_mapping(self):

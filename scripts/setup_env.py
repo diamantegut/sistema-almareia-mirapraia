@@ -26,7 +26,7 @@ def update_system_config(port):
     except Exception as e:
         print(f"[ERROR] Failed to update system_config.json: {e}")
 
-def update_ngrok_config(env, port, domain):
+def update_ngrok_config(env, port, domain, guest_domain=None):
     if not os.path.exists(NGROK_CONFIG_PATH):
         print(f"[WARN] {NGROK_CONFIG_PATH} not found.")
         return
@@ -50,6 +50,11 @@ def update_ngrok_config(env, port, domain):
                     tunnel['domain'] = domain
                     modified = True
                     print(f"[FIX] Updated {env} 'staff' tunnel domain to {domain}")
+            elif tunnel['name'] == 'guest_portal' and guest_domain:
+                if tunnel.get('domain') != guest_domain:
+                    tunnel['domain'] = guest_domain
+                    modified = True
+                    print(f"[FIX] Updated {env} 'guest_portal' tunnel domain to {guest_domain}")
         
         if modified or config[env]['port'] != int(port):
             with open(NGROK_CONFIG_PATH, 'w', encoding='utf-8') as f:
@@ -89,6 +94,7 @@ if __name__ == "__main__":
     parser.add_argument('--env', choices=['development', 'production'], help='Environment (development/production)')
     parser.add_argument('--port', required=True, type=int, help='Server port')
     parser.add_argument('--domain', help='Ngrok domain')
+    parser.add_argument('--guest-domain', help='Ngrok guest domain')
     parser.add_argument(
         '--no-ngrok',
         action='store_true',
@@ -106,7 +112,7 @@ if __name__ == "__main__":
             sys.exit(1)
 
         print(f"--- Atualizando configuracao do NGROK ({args.env.upper()}, Domain: {args.domain}) ---")
-        update_ngrok_config(args.env, args.port, args.domain)
+        update_ngrok_config(args.env, args.port, args.domain, args.guest_domain)
         update_settings(args.domain)
 
     print("---------------------------------------------------------------")

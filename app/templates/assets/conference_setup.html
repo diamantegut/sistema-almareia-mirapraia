@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Nova Conferência de Ativos{% endblock %}
+
+{% block content %}
+<div class="container mt-4" style="max-width: 600px;">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0"><i class="bi bi-clipboard-check"></i> Iniciar Conferência</h4>
+        </div>
+        <div class="card-body">
+            <p class="text-muted">Selecione o local e a categoria (opcional) para gerar a lista de verificação.</p>
+            
+            <form action="{{ url_for('assets.conference_run') }}" method="POST">
+                <div class="mb-3">
+                    <label for="location" class="form-label">Local *</label>
+                    <select class="form-select" id="location" name="location" required>
+                        <option value="">Selecione o Local...</option>
+                        {% for loc in locations %}
+                        <option value="{{ loc }}">{{ loc }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="category" class="form-label">Categoria</label>
+                    <select class="form-select" id="category" name="category">
+                        <option value="Todas">Todas as Categorias</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat }}">{{ cat }}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="form-text">Deixe como "Todas" para conferir tudo no local selecionado.</div>
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg">Gerar Lista de Conferência</button>
+                    <a href="{{ url_for('assets.index') }}" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

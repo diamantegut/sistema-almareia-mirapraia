@@ -5,6 +5,7 @@ import re
 import random
 import traceback
 import subprocess
+import shutil
 import csv
 import io
 from datetime import datetime, timedelta
@@ -106,7 +107,7 @@ def reception_rooms():
     is_valid, msg = verify_reception_integrity()
     if not is_valid:
         flash(f"ERRO CRÍTICO: {msg}", 'error')
-        log_system_action('Integrity Check Failed', 'Reception', msg)
+        log_action('Integrity Check Failed', f'Reception: {msg}', department='Recepção')
         return redirect(url_for('main.index'))
 
     # Permission Check
@@ -469,13 +470,13 @@ def reception_rooms():
             # 2. Validation
             valid_room, msg_room = validate_room_number(room_num_raw)
             if not valid_room:
-                log_system_action('Validation Error', 'Checkin', f"Invalid Room: {room_num_raw} - {msg_room}")
+                log_action('Validation Error', f"Checkin - Invalid Room: {room_num_raw} - {msg_room}", department='Recepção')
                 flash(f'Erro no Check-in: {msg_room}')
                 return redirect(url_for('reception.reception_rooms'))
             
             valid_name, msg_name = validate_required(guest_name, "Nome do Hóspede")
             if not valid_name:
-                log_system_action('Validation Error', 'Checkin', f"Invalid Name: {msg_name}")
+                log_action('Validation Error', f"Checkin - Invalid Name: {msg_name}", department='Recepção')
                 flash(f'Erro no Check-in: {msg_name}')
                 return redirect(url_for('reception.reception_rooms'))
 
@@ -486,28 +487,28 @@ def reception_rooms():
                 if len(digits) == 11:
                     valid_cpf, msg_cpf = validate_cpf(doc_id)
                     if not valid_cpf:
-                        log_system_action('Validation Error', 'Checkin', f"Invalid CPF: {doc_id} - {msg_cpf}")
+                        log_action('Validation Error', f"Checkin - Invalid CPF: {doc_id} - {msg_cpf}", department='Recepção')
                         flash(f'Erro no Check-in: {msg_cpf}')
                         return redirect(url_for('reception.reception_rooms'))
 
             if email:
                 valid_email, msg_email = validate_email(email)
                 if not valid_email:
-                    log_system_action('Validation Error', 'Checkin', f"Invalid Email: {email} - {msg_email}")
+                    log_action('Validation Error', f"Checkin - Invalid Email: {email} - {msg_email}", department='Recepção')
                     flash(f'Erro no Check-in: {msg_email}')
                     return redirect(url_for('reception.reception_rooms'))
 
             if phone:
                 valid_phone, msg_phone = validate_phone(phone)
                 if not valid_phone:
-                    log_system_action('Validation Error', 'Checkin', f"Invalid Phone: {phone} - {msg_phone}")
+                    log_action('Validation Error', f"Checkin - Invalid Phone: {phone} - {msg_phone}", department='Recepção')
                     flash(f'Erro no Check-in: {msg_phone}')
                     return redirect(url_for('reception.reception_rooms'))
 
             valid_in, msg_in = validate_date(checkin_date, '%Y-%m-%d')
             valid_out, msg_out = validate_date(checkout_date, '%Y-%m-%d')
             if not (valid_in and valid_out):
-                log_system_action('Validation Error', 'Checkin', f"Invalid Dates: {checkin_date}/{checkout_date} - {msg_in or msg_out}")
+                log_action('Validation Error', f"Checkin - Invalid Dates: {checkin_date}/{checkout_date} - {msg_in or msg_out}", department='Recepção')
                 flash(f'Erro no Check-in: {msg_in or msg_out}')
                 return redirect(url_for('reception.reception_rooms'))
 
@@ -527,12 +528,12 @@ def reception_rooms():
                 # Allow update ONLY if guest name matches exactly (Edit Check-in scenario)
                 # Otherwise, block to prevent overwrite
                 if current_guest.lower() != guest_name.lower():
-                    log_system_action('Checkin Blocked', 'Checkin', f"Attempt to overwrite occupied room {room_num} ({current_guest}) with {guest_name}")
+                    log_action('Checkin Blocked', f"Attempt to overwrite occupied room {room_num} ({current_guest}) with {guest_name}", department='Recepção')
                     flash(f'Erro: Quarto {room_num} já está ocupado por {current_guest}. Realize o check-out ou verifique o número do quarto.')
                     return redirect(url_for('reception.reception_rooms'))
                 else:
                     # It's an update for the same guest
-                    log_system_action('Checkin Update', 'Checkin', f"Updating info for {guest_name} in room {room_num}")
+                    log_action('Checkin Update', f"Updating info for {guest_name} in room {room_num}", department='Recepção')
             
             # Logic continues
             if room_num and guest_name:
@@ -1349,10 +1350,83 @@ def api_upload_reservations():
         target_dir = RESERVATIONS_DIR
         os.makedirs(target_dir, exist_ok=True)
         
+        # Save directly (Legacy behavior) OR implement import flow?
+        # The user requested "Import Button" -> "Preview" -> "Confirm".
+        # This endpoint seems to be the one I should use for the PREVIEW step or keep as legacy direct upload.
+        # Given the new requirements, I will repurpose this or add new ones.
+        # Let's keep this as "Legacy Direct Upload" if needed, but the new UI will use new endpoints.
+        
         save_path = os.path.join(target_dir, f"upload_{datetime.now().strftime('%Y%m%d%H%M%S')}_{file.filename}")
         file.save(save_path)
         
         return jsonify({'success': True, 'message': 'Arquivo carregado com sucesso.'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@reception_bp.route('/api/reception/import_preview', methods=['POST'])
+@login_required
+def api_import_preview():
+    try:
+        file = request.files.get('file')
+        if not file or not file.filename:
+             return jsonify({'success': False, 'error': 'Arquivo inválido'}), 400
+             
+        filename = file.filename.lower()
+        if not filename.endswith('.xlsx'):
+             return jsonify({'success': False, 'error': 'Formato não suportado. Use Excel (.xlsx).'}), 400
+        
+        # Save to temp
+        temp_dir = os.path.join(current_app.instance_path, 'temp_imports')
+        os.makedirs(temp_dir, exist_ok=True)
+        
+        temp_filename = f"temp_{datetime.now().strftime('%Y%m%d%H%M%S')}_{file.filename}"
+        temp_path = os.path.join(temp_dir, temp_filename)
+        file.save(temp_path)
+        
+        service = ReservationService()
+        result = service.preview_import(temp_path)
+        
+        if not result['success']:
+            os.remove(temp_path)
+            return jsonify(result), 400
+            
+        return jsonify({
+            'success': True,
+            'report': result['report'],
+            'token': temp_filename # Pass back token for confirmation
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@reception_bp.route('/api/reception/import_confirm', methods=['POST'])
+@login_required
+def api_import_confirm():
+    try:
+        data = request.json
+        token = data.get('token')
+        if not token:
+            return jsonify({'success': False, 'error': 'Token de importação inválido.'}), 400
+            
+        temp_dir = os.path.join(current_app.instance_path, 'temp_imports')
+        temp_path = os.path.join(temp_dir, token)
+        
+        if not os.path.exists(temp_path):
+            return jsonify({'success': False, 'error': 'Arquivo de importação expirou ou não existe.'}), 404
+            
+        # Move to permanent location
+        target_dir = RESERVATIONS_DIR
+        os.makedirs(target_dir, exist_ok=True)
+        
+        # Original filename is part of token: temp_TIMESTAMP_original.xlsx
+        # Let's keep a timestamp prefix but make it standard
+        final_name = f"imported_{token}"
+        final_path = os.path.join(target_dir, final_name)
+        
+        shutil.move(temp_path, final_path)
+        
+        log_action('Importação Reservas', f'Importado arquivo {final_name}', department='Recepção')
+        
+        return jsonify({'success': True, 'message': 'Importação concluída com sucesso.'})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
@@ -2702,7 +2776,7 @@ def reception_edit_charge():
         charge['audit_log'].append(audit_entry)
         
         save_room_charges(room_charges)
-        log_system_action('Edição de Conta', f"Conta {charge_id} editada: {', '.join(changes)}")
+        log_action('Edição de Conta', f"Conta {charge_id} editada: {', '.join(changes)}")
         flash('Conta atualizada com sucesso.')
     else:
         flash('Nenhuma alteração realizada.')
@@ -2747,7 +2821,7 @@ def reception_reservations_cashier():
             
             try:
                 CashierService.open_session('reception_reservations', current_user, initial_balance)
-                log_system_action('Caixa Aberto', f'Caixa Reservas aberto por {current_user} com R$ {initial_balance:.2f}', department='Recepção')
+                log_action('Caixa Aberto', f'Caixa Reservas aberto por {current_user} com R$ {initial_balance:.2f}', department='Recepção')
                 flash('Caixa de Reservas aberto com sucesso.')
             except ValueError as e:
                 flash(str(e))
@@ -2782,7 +2856,7 @@ def reception_reservations_cashier():
                         closing_cash=closing_cash,
                         closing_non_cash=closing_non_cash
                     )
-                    log_system_action('Caixa Fechado', f'Caixa Reservas fechado por {current_user}', department='Recepção')
+                    log_action('Caixa Fechado', f'Caixa Reservas fechado por {current_user}', department='Recepção')
                     flash('Caixa de Reservas fechado com sucesso.')
                 except Exception as e:
                     flash(f'Erro ao fechar caixa: {str(e)}')
@@ -2813,7 +2887,7 @@ def reception_reservations_cashier():
                             user=current_user
                         )
                         flash('Transferência realizada com sucesso.')
-                        log_system_action('Transferência Caixa', f'Reservas -> {target_cashier}: R$ {amount:.2f}', department='Recepção')
+                        log_action('Transferência Caixa', f'Reservas -> {target_cashier}: R$ {amount:.2f}', department='Recepção')
 
                     elif trans_type == 'sale':
                         # Idempotency Check
@@ -2871,7 +2945,7 @@ def reception_reservations_cashier():
                                     )
                                     logging.warning(f"DEBUG: Added transaction for {p_method_name}: {p_amount}")
                                     
-                                log_system_action('Transação Caixa', f'Reservas: Recebimento Múltiplo de R$ {amount:.2f} - {description}', department='Recepção')
+                                log_action('Transação Caixa', f'Reservas: Recebimento Múltiplo de R$ {amount:.2f} - {description}', department='Recepção')
                                 
                                 if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                                     return jsonify({'success': True, 'message': 'Recebimento múltiplo registrado com sucesso.'})
@@ -2900,7 +2974,7 @@ def reception_reservations_cashier():
                                 is_withdrawal=False,
                                 details={'idempotency_key': idempotency_key} if idempotency_key else None
                             )
-                            log_system_action('Transação Caixa', f'Reservas: Recebimento de R$ {amount:.2f} - {description}', department='Recepção')
+                            log_action('Transação Caixa', f'Reservas: Recebimento de R$ {amount:.2f} - {description}', department='Recepção')
                             
                             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                                 return jsonify({'success': True, 'message': 'Recebimento registrado com sucesso.'})
@@ -2929,7 +3003,7 @@ def reception_reservations_cashier():
                             is_withdrawal=False,
                             details={'idempotency_key': idempotency_key} if idempotency_key else None
                         )
-                        log_system_action('Transação Caixa', f'Reservas: Suprimento de R$ {amount:.2f} - {description}')
+                        log_action('Transação Caixa', f'Reservas: Suprimento de R$ {amount:.2f} - {description}', department='Recepção')
                         
                         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                             return jsonify({'success': True, 'message': 'Suprimento registrado com sucesso.'})
@@ -4090,3 +4164,141 @@ def print_individual_bills_route():
     except Exception as e:
         traceback.print_exc()
         return jsonify({'success': False, 'message': str(e)}), 500
+
+# --- Experience Management Routes ---
+
+from app.services.experience_service import ExperienceService
+
+@reception_bp.route('/reception/experiences')
+@login_required
+def reception_experiences():
+    user_role = session.get('role')
+    user_perms = session.get('permissions', [])
+    if user_role not in ['admin', 'gerente'] and 'recepcao' not in user_perms:
+        flash('Acesso restrito.')
+        return redirect(url_for('main.index'))
+        
+    experiences = ExperienceService.get_all_experiences()
+    # Sort by created_at desc
+    experiences.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+    
+    return render_template('reception_experiences.html', experiences=experiences)
+
+@reception_bp.route('/reception/experiences/create', methods=['POST'])
+@login_required
+def create_experience():
+    try:
+        # Process files
+        files = request.files.getlist('images')
+        saved_images = ExperienceService.process_images(files)
+        
+        # Process video
+        video_file = request.files.get('video')
+        saved_video = ExperienceService.process_video(video_file)
+        
+        data = {
+            'type': request.form.get('type'),
+            'name': request.form.get('name'),
+            'description': request.form.get('description'),
+            'duration': request.form.get('duration'),
+            'min_people': request.form.get('min_people', 1),
+            'max_people': request.form.get('max_people', 1),
+            'price': request.form.get('price'),
+            'images': saved_images,
+            'video': saved_video
+        }
+        
+        if ExperienceService.create_experience(data):
+            flash('Experiência criada com sucesso!', 'success')
+        else:
+            flash('Erro ao criar experiência.', 'error')
+            
+    except Exception as e:
+        print(f"Error creating experience: {e}")
+        flash(f'Erro: {str(e)}', 'error')
+        
+    return redirect(url_for('reception.reception_experiences'))
+
+@reception_bp.route('/reception/experiences/<exp_id>/update', methods=['POST'])
+@login_required
+def update_experience(exp_id):
+    try:
+        current_exp = ExperienceService.get_experience_by_id(exp_id)
+        if not current_exp:
+            flash('Experiência não encontrada.', 'error')
+            return redirect(url_for('reception.reception_experiences'))
+            
+        # Process new files
+        files = request.files.getlist('images')
+        new_images = ExperienceService.process_images(files)
+        
+        # Process new video (replace if provided)
+        video_file = request.files.get('video')
+        new_video = ExperienceService.process_video(video_file)
+        
+        # Combine images
+        final_images = current_exp.get('images', []) + new_images
+        
+        # Determine video (new or existing)
+        # If new video uploaded, replace. Else keep old.
+        # If user wants to delete video, that's a separate action not handled here yet (simple CRUD)
+        final_video = new_video if new_video else current_exp.get('video')
+        
+        data = {
+            'type': request.form.get('type'),
+            'name': request.form.get('name'),
+            'description': request.form.get('description'),
+            'duration': request.form.get('duration'),
+            'min_people': request.form.get('min_people'),
+            'max_people': request.form.get('max_people'),
+            'price': request.form.get('price'),
+            'images': final_images,
+            'video': final_video
+        }
+        
+        if ExperienceService.update_experience(exp_id, data):
+            flash('Experiência atualizada.', 'success')
+        else:
+            flash('Erro ao atualizar.', 'error')
+            
+    except Exception as e:
+        print(f"Error updating experience: {e}")
+        flash(f'Erro: {str(e)}', 'error')
+        
+    return redirect(url_for('reception.reception_experiences'))
+
+@reception_bp.route('/reception/experiences/<exp_id>/toggle', methods=['POST'])
+@login_required
+def toggle_experience(exp_id):
+    try:
+        new_state = ExperienceService.toggle_active(exp_id)
+        if new_state is not None:
+            return jsonify({'success': True, 'active': new_state})
+        return jsonify({'success': False, 'error': 'Not found'}), 404
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@reception_bp.route('/reception/experiences/<exp_id>/delete', methods=['POST'])
+@login_required
+def delete_experience(exp_id):
+    try:
+        if ExperienceService.delete_experience(exp_id):
+            return jsonify({'success': True})
+        return jsonify({'success': False, 'error': 'Not found'}), 404
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@reception_bp.route('/guest/experiences')
+def guest_experiences_menu():
+    # Public route (or requiring token if we implemented strict guest auth)
+    # For now public as requested ("Menu Digital")
+    experiences = ExperienceService.get_all_experiences(only_active=True)
+    
+    # Group by type?
+    grouped = {}
+    for e in experiences:
+        t = e.get('type', 'Outros')
+        if t not in grouped: grouped[t] = []
+        grouped[t].append(e)
+        
+    return render_template('guest_experiences_menu.html', grouped_experiences=grouped)

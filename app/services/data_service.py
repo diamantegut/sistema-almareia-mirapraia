@@ -11,7 +11,7 @@ from app.services.system_config_manager import (
     MAINTENANCE_FILE, STOCK_FILE, STOCK_LOGS_FILE, PRODUCTS_FILE,
     SUPPLIERS_FILE, PAYABLES_FILE, STOCK_ENTRIES_FILE,
     CONFERENCES_FILE, CONFERENCE_PRESETS_FILE, CONFERENCE_SKIPPED_FILE,
-    STOCK_TRANSFERS_FILE, TABLE_ORDERS_FILE,
+    STOCK_TRANSFERS_FILE, TABLE_ORDERS_FILE, FIXED_ASSETS_FILE, ASSET_CONFERENCES_FILE,
     ROOM_CHARGES_FILE, MENU_ITEMS_FILE, PAYMENT_METHODS_FILE, CASHIER_SESSIONS_FILE,
     ROOM_OCCUPANCY_FILE, QUALITY_AUDITS_FILE, PRINTERS_FILE, FISCAL_SETTINGS_FILE,
     COMPLEMENTS_FILE, OBSERVATIONS_FILE, PRODUCT_PHOTOS_DIR,
@@ -367,6 +367,13 @@ def save_conference_skipped_items(data): return _save_json(CONFERENCE_SKIPPED_FI
 
 def load_stock_transfers(): return _load_json(STOCK_TRANSFERS_FILE, [])
 def save_stock_transfers(data): return _save_json(STOCK_TRANSFERS_FILE, data)
+
+# --- Fixed Assets ---
+def load_fixed_assets(): return _load_json(FIXED_ASSETS_FILE, [])
+def save_fixed_assets(data): return _save_json(FIXED_ASSETS_FILE, data)
+
+def load_asset_conferences(): return _load_json(ASSET_CONFERENCES_FILE, [])
+def save_asset_conferences(data): return _save_json(ASSET_CONFERENCES_FILE, data)
 
 import shutil
 import logging

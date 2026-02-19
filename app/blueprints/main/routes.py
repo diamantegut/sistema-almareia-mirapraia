@@ -28,7 +28,9 @@ SERVICE_PAGES = [
         'id': 'principal',
         'name': 'Estoque Principal',
         'icon': 'bi bi-box-seam',
-        'actions': []
+        'actions': [
+            {'name': 'Ativo Imobilizado', 'url': 'assets.index', 'icon': 'bi bi-archive'}
+        ]
     },
     {
         'id': 'restaurante_mirapraia',

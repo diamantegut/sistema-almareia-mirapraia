@@ -81,24 +81,39 @@
             </div>
         </div>
 
-        <!-- Reservas -->
+        <!-- Caixa Reservas -->
         <div class="col">
             <div class="card h-100 shadow-sm hover-card">
                 <div class="card-body text-center p-4">
                     <div class="mb-3 text-primary">
-                        <i class="bi bi-calendar-check display-4"></i>
+                        <i class="bi bi-wallet2 display-4"></i>
                     </div>
-                    <h4 class="card-title">Reservas</h4>
-                    <p class="card-text text-muted">Mapa de reservas e disponibilidade.</p>
-                    <!-- Link to reception_reservations_cashier for now as placeholder or actual logic -->
+                    <h4 class="card-title">Caixa Reservas</h4>
+                    <p class="card-text text-muted">Fluxo de caixa exclusivo para reservas e pagamentos antecipados.</p>
                     <a href="{{ url_for('reception.reception_reservations_cashier') }}" class="btn btn-outline-primary w-100 stretched-link">
-                        Acessar Reservas
+                        Acessar Caixa Reservas
                     </a>
                 </div>
             </div>
         </div>
 
-        <!-- Pesquisa de Satisfação -->
+        <!-- Experiências de Hóspedes (Novo) -->
+        <div class="col">
+            <div class="card h-100 shadow-sm hover-card">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3 text-warning">
+                        <i class="bi bi-stars display-4"></i>
+                    </div>
+                    <h4 class="card-title">Experiências de Hóspedes</h4>
+                    <p class="card-text text-muted">Menu digital de atividades: gastronomia, passeios, bem-estar e mais.</p>
+                    <a href="{{ url_for('reception.reception_experiences') }}" class="btn btn-warning w-100 stretched-link text-dark">
+                        Gerenciar Experiências
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pesquisa de Satisfação (Restaurado) -->
         <div class="col">
             <div class="card h-100 shadow-sm hover-card">
                 <div class="card-body text-center p-4">
@@ -106,7 +121,7 @@
                         <i class="bi bi-emoji-smile-fill display-4"></i>
                     </div>
                     <h4 class="card-title">Pesquisa de Satisfação</h4>
-                    <p class="card-text text-muted">Criar pesquisas e editar perguntas para hóspedes e clientes do restaurante.</p>
+                    <p class="card-text text-muted">Gestão de feedback da estadia e questionários.</p>
                     <a href="{{ url_for('reception.reception_surveys') }}" class="btn btn-success w-100 stretched-link">
                         Configurar Pesquisas
                     </a>

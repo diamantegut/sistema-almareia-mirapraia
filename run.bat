@@ -32,6 +32,7 @@ if not exist "%BASE_DIR%\scripts\check_ngrok_config.py" (
 set "PYTHON=python"
 set "NGROK_ENV=development"
 set "NGROK_DOMAIN=syrupy-jaliyah-intracranial.ngrok-free.dev"
+set "GUEST_DOMAIN=hospedes.almareia.mirapraia.ngrok.app"
 
 echo.
 echo ===================================================
@@ -69,11 +70,15 @@ if not errorlevel 1 (
 
 echo.
 echo [INFO] Atualizando configuracao do sistema e do ngrok para a porta %server_port%.
-%PYTHON% "%BASE_DIR%\scripts\setup_env.py" --env %NGROK_ENV% --port %server_port% --domain %NGROK_DOMAIN%
+%PYTHON% "%BASE_DIR%\scripts\setup_env.py" --env %NGROK_ENV% --port %server_port% --domain %NGROK_DOMAIN% --guest-domain %GUEST_DOMAIN%
 
 echo.
 echo [INFO] Verificando consistencia da configuracao do ngrok...
 %PYTHON% "%BASE_DIR%\scripts\check_ngrok_config.py"
+
+echo.
+echo [INFO] Iniciando servico ngrok (tunnels)...
+start "Ngrok Service" /MIN %PYTHON% "%BASE_DIR%\scripts\manage_ngrok.py" %NGROK_ENV%
 
 goto START_SERVER
 

@@ -153,11 +153,14 @@ class LoggerService:
             'has_prev': pagination.has_prev
         }
 
-def log_system_action(action, details, user='Sistema', category='Geral'):
+def log_system_action(action, details, user='Sistema', category='Geral', **kwargs):
     """
     Helper function to maintain compatibility with legacy calls.
     Maps to LoggerService.log_acao.
     """
+    if 'department' in kwargs:
+        category = kwargs['department']
+
     return LoggerService.log_acao(
         acao=action,
         entidade=category,

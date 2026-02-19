@@ -1,0 +1,312 @@
+{% extends "base.html" %}
+
+{% block title %}Gerenciar Experiências - Almareia Mirapraia{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1"><i class="bi bi-stars text-warning"></i> Experiências de Hóspedes</h2>
+            <p class="text-muted mb-0">Gerencie o menu digital de atividades e serviços.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('reception.guest_experiences_menu') }}" target="_blank" class="btn btn-outline-info">
+                <i class="bi bi-box-arrow-up-right"></i> Ver Menu Digital
+            </a>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createExpModal">
+                <i class="bi bi-plus-lg"></i> Nova Experiência
+            </button>
+            <a href="{{ url_for('reception.reception_dashboard') }}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+        </div>
+    </div>
+
+    <!-- Filtros / Tabs -->
+    <ul class="nav nav-tabs mb-4" id="expTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button" role="tab">Todas</button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="expTabsContent">
+        <div class="tab-pane fade show active" id="all" role="tabpanel">
+            {% if not experiences %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-stars display-1 opacity-25"></i>
+                    <p class="mt-3">Nenhuma experiência cadastrada.</p>
+                    <button class="btn btn-primary mt-2" data-bs-toggle="modal" data-bs-target="#createExpModal">
+                        Cadastrar Primeira
+                    </button>
+                </div>
+            {% else %}
+                <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+                    {% for exp in experiences %}
+                    <div class="col">
+                        <div class="card h-100 shadow-sm border-0">
+                            <!-- Image Carousel -->
+                            {% if exp.images or exp.video %}
+                            <div id="carousel-{{ exp.id }}" class="carousel slide" data-bs-ride="carousel">
+                                <div class="carousel-inner">
+                                    {% if exp.video %}
+                                    <div class="carousel-item active">
+                                        <video class="d-block w-100" style="height: 200px; object-fit: cover;" controls>
+                                            <source src="{{ url_for('static', filename='uploads/experiences/' + exp.video) }}" type="video/mp4">
+                                            Seu navegador não suporta vídeos.
+                                        </video>
+                                    </div>
+                                    {% endif %}
+                                    {% for img in exp.images %}
+                                    <div class="carousel-item {% if loop.first and not exp.video %}active{% endif %}">
+                                        <img src="{{ url_for('static', filename='uploads/experiences/' + img) }}" class="d-block w-100" style="height: 200px; object-fit: cover;" alt="{{ exp.name }}">
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% if (exp.images|length + (1 if exp.video else 0)) > 1 %}
+                                <button class="carousel-control-prev" type="button" data-bs-target="#carousel-{{ exp.id }}" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Anterior</span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#carousel-{{ exp.id }}" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Próximo</span>
+                                </button>
+                                {% endif %}
+                            </div>
+                            {% else %}
+                            <div class="bg-light d-flex align-items-center justify-content-center text-muted" style="height: 200px;">
+                                <i class="bi bi-image fs-1"></i>
+                            </div>
+                            {% endif %}
+
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <span class="badge bg-info text-dark">{{ exp.type }}</span>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch" id="active-{{ exp.id }}" 
+                                               {% if exp.active %}checked{% endif %} 
+                                               onchange="toggleActive('{{ exp.id }}')">
+                                    </div>
+                                </div>
+                                <h5 class="card-title text-truncate" title="{{ exp.name }}">{{ exp.name }}</h5>
+                                <p class="card-text small text-muted text-truncate-3" style="min-height: 4.5em;">
+                                    {{ exp.description }}
+                                </p>
+                                
+                                <div class="d-flex gap-3 small text-muted mb-3">
+                                    <span><i class="bi bi-clock"></i> {{ exp.duration }}</span>
+                                    <span><i class="bi bi-people"></i> {{ exp.min_people }}-{{ exp.max_people }} pax</span>
+                                </div>
+                                
+                                {% if exp.price %}
+                                <div class="fw-bold text-primary mb-3">
+                                    {{ exp.price }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="card-footer bg-white border-top-0 d-flex justify-content-between">
+                                <button class="btn btn-sm btn-outline-secondary" onclick='openEditModal({{ exp|tojson }})'>
+                                    <i class="bi bi-pencil"></i> Editar
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteExperience('{{ exp.id }}')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Create Modal -->
+<div class="modal fade" id="createExpModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form action="{{ url_for('reception.create_experience') }}" method="POST" enctype="multipart/form-data">
+                <div class="modal-header">
+                    <h5 class="modal-title">Nova Experiência</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label class="form-label">Nome da Experiência *</label>
+                            <input type="text" class="form-control" name="name" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Tipo *</label>
+                            <select class="form-select" name="type" required>
+                                <option value="Gastronômica">Gastronômica</option>
+                                <option value="Passeios">Passeios</option>
+                                <option value="Bem-estar">Bem-estar</option>
+                                <option value="Ensaio Fotográfico">Ensaio Fotográfico</option>
+                                <option value="Romântico">Romântico</option>
+                                <option value="Outros">Outros</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Descrição Detalhada *</label>
+                            <textarea class="form-control" name="description" rows="4" required></textarea>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Duração Estimada</label>
+                            <input type="text" class="form-control" name="duration" placeholder="Ex: 2 horas">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Mín. Pessoas</label>
+                            <input type="number" class="form-control" name="min_people" value="1" min="1">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Máx. Pessoas</label>
+                            <input type="number" class="form-control" name="max_people" value="4" min="1">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Preço / Valor (Opcional)</label>
+                            <input type="text" class="form-control" name="price" placeholder="Ex: R$ 250,00 por pessoa">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Fotos (Max 6)</label>
+                            <input type="file" class="form-control" name="images" accept="image/*" multiple>
+                            <div class="form-text">Formatos: JPG, PNG. Serão redimensionadas automaticamente.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Vídeo (Opcional)</label>
+                            <input type="file" class="form-control" name="video" accept="video/mp4,video/quicktime,video/webm">
+                            <div class="form-text">Formatos: MP4, MOV, WEBM.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar Experiência</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="editExpModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form id="editForm" method="POST" enctype="multipart/form-data">
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Experiência</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label class="form-label">Nome da Experiência *</label>
+                            <input type="text" class="form-control" name="name" id="editName" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Tipo *</label>
+                            <select class="form-select" name="type" id="editType" required>
+                                <option value="Gastronômica">Gastronômica</option>
+                                <option value="Passeios">Passeios</option>
+                                <option value="Bem-estar">Bem-estar</option>
+                                <option value="Ensaio Fotográfico">Ensaio Fotográfico</option>
+                                <option value="Romântico">Romântico</option>
+                                <option value="Outros">Outros</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Descrição Detalhada *</label>
+                            <textarea class="form-control" name="description" id="editDescription" rows="4" required></textarea>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Duração Estimada</label>
+                            <input type="text" class="form-control" name="duration" id="editDuration">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Mín. Pessoas</label>
+                            <input type="number" class="form-control" name="min_people" id="editMinPeople" min="1">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Máx. Pessoas</label>
+                            <input type="number" class="form-control" name="max_people" id="editMaxPeople" min="1">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Preço / Valor (Opcional)</label>
+                            <input type="text" class="form-control" name="price" id="editPrice">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Adicionar Fotos</label>
+                            <input type="file" class="form-control" name="images" accept="image/*" multiple>
+                            <div class="form-text">Novas fotos serão adicionadas à galeria existente.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Substituir Vídeo</label>
+                            <input type="file" class="form-control" name="video" accept="video/mp4,video/quicktime,video/webm">
+                            <div class="form-text">O vídeo atual será substituído.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleActive(id) {
+        fetch(`/reception/experiences/${id}/toggle`, {method: 'POST'})
+            .then(r => r.json())
+            .then(data => {
+                if(!data.success) {
+                    alert('Erro ao alterar status');
+                    location.reload();
+                }
+            })
+            .catch(() => alert('Erro de conexão'));
+    }
+
+    function deleteExperience(id) {
+        if(!confirm('Tem certeza que deseja excluir esta experiência?')) return;
+        
+        fetch(`/reception/experiences/${id}/delete`, {method: 'POST'})
+            .then(r => r.json())
+            .then(data => {
+                if(data.success) {
+                    location.reload();
+                } else {
+                    alert('Erro ao excluir');
+                }
+            })
+            .catch(() => alert('Erro de conexão'));
+    }
+
+    function openEditModal(exp) {
+        var modal = new bootstrap.Modal(document.getElementById('editExpModal'));
+        var form = document.getElementById('editForm');
+        
+        form.action = `/reception/experiences/${exp.id}/update`;
+        
+        document.getElementById('editName').value = exp.name;
+        document.getElementById('editType').value = exp.type;
+        document.getElementById('editDescription').value = exp.description;
+        document.getElementById('editDuration').value = exp.duration || '';
+        document.getElementById('editMinPeople').value = exp.min_people || 1;
+        document.getElementById('editMaxPeople').value = exp.max_people || 1;
+        document.getElementById('editPrice').value = exp.price || '';
+        
+        modal.show();
+    }
+</script>
+
+<style>
+    .text-truncate-3 {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+</style>
+{% endblock %}

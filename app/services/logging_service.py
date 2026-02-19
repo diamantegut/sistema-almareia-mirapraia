@@ -30,10 +30,13 @@ def log_order_action(order_data, action="create", user="Sistema"):
     )
     return True
 
-def log_system_action(action, message=None, user="Sistema", category="Geral", details=None):
+def log_system_action(action, message=None, user="Sistema", category="Geral", details=None, **kwargs):
     """
     Logs system actions using centralized LoggerService.
     """
+    if 'department' in kwargs:
+        category = kwargs['department']
+
     entry_details = {}
     if details is not None and message is not None:
         entry_details = {

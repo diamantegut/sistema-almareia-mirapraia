@@ -38,7 +38,7 @@
                         <i class="bi bi-plus-circle-fill text-primary"></i> <span class="d-none d-xl-inline">Nova Reserva</span>
                     </button>
                     <div class="vr my-1"></div>
-                    <button class="btn btn-light btn-sm fw-medium d-flex align-items-center gap-2 action-btn" disabled data-bs-toggle="tooltip" title="Importar planilha de reservas (desativado)">
+                    <button class="btn btn-light btn-sm fw-medium d-flex align-items-center gap-2 action-btn" onclick="document.getElementById('fileUploadInput').click()" title="Importar planilha de reservas">
                         <i class="bi bi-cloud-upload-fill text-secondary"></i> <span class="d-none d-xl-inline">Importar</span>
                     </button>
                     <div class="vr my-1"></div>
@@ -47,7 +47,7 @@
                     </button>
                 </div>
                 
-                <input type="file" id="fileUploadInput" class="d-none" accept=".xlsx, .csv" disabled>
+                <input type="file" id="fileUploadInput" class="d-none" accept=".xlsx" onchange="handleFileSelect(this)">
 
                 <!-- Navigation & Cashier -->
                 <a href="{{ url_for('reception.reception_reservations_cashier') }}" class="btn btn-success btn-sm shadow-sm d-flex align-items-center gap-2 px-3 fw-bold">
@@ -2135,6 +2135,80 @@
         })
         .catch(function(err){ alert('Erro CEP: ' + (err && err.message ? err.message : 'desconhecido')); });
     }
+
+    // --- Drag to Create Fixes ---
+    // Override to support arguments from drag-select
+    window.openNewReservationModal = function(room, checkin, checkout) {
+        var modalEl = document.getElementById('newReservationModal');
+        if (!modalEl) return;
+        
+        var form = document.getElementById('newResForm');
+        // If form not found (e.g. if we matched the wrong modal), try to find inputs directly or use the other modal structure
+        // But based on analysis, we are using the first modal with id="newResForm"
+        
+        var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        
+        if (form) {
+            form.reset();
+            
+            // Set defaults
+            var channel = form.querySelector('[name="channel"]');
+            if (channel) channel.value = 'Direto';
+            
+            var status = form.querySelector('[name="status"]');
+            if (status) status.value = 'Pendente';
+            
+            // Set dates
+            if (checkin && checkout) {
+                // Input expects YYYY-MM-DD
+                // checkin/checkout are DD/MM/YYYY
+                var pIn = checkin.split('/');
+                var pOut = checkout.split('/');
+                if (pIn.length === 3) form.querySelector('[name="checkin"]').value = `${pIn[2]}-${pIn[1]}-${pIn[0]}`;
+                if (pOut.length === 3) form.querySelector('[name="checkout"]').value = `${pOut[2]}-${pOut[1]}-${pOut[0]}`;
+            }
+            
+            // Set Room/Category
+            var roomInput = form.querySelector('input[name="room_number"]');
+            if (!roomInput) {
+                roomInput = document.createElement('input');
+                roomInput.type = 'hidden';
+                roomInput.name = 'room_number';
+                form.appendChild(roomInput);
+            }
+            
+            if (room) {
+                roomInput.value = room;
+                if (window.roomCategoryMap && window.roomCategoryMap[room]) {
+                    var catSelect = form.querySelector('[name="category"]');
+                    if (catSelect) catSelect.value = window.roomCategoryMap[room];
+                }
+            } else {
+                roomInput.value = '';
+            }
+        }
+        
+        modal.show();
+    };
+
+    // Attach event listeners to empty cells
+    document.addEventListener('DOMContentLoaded', function() {
+        var cells = document.querySelectorAll('.droppable-cell');
+        cells.forEach(function(cell) {
+            // Remove old listeners if any (not easily possible without reference, but adding new ones is fine)
+            cell.addEventListener('mousedown', function(e) { startDraw(e, this); });
+            cell.addEventListener('mousemove', function(e) { continueDraw(e, this); });
+            cell.addEventListener('mouseup', function(e) { endDraw(e, this); });
+        });
+        
+        // Global mouseup to cancel drawing if released outside
+        document.addEventListener('mouseup', function() {
+            if (typeof isDrawing !== 'undefined' && isDrawing) {
+                isDrawing = false;
+                clearSelection();
+            }
+        });
+    });
 </script>
 
 <!-- New Reservation Modal -->
@@ -2257,10 +2331,10 @@
     }
 
     // --- New Reservation ---
-    function openNewReservationModal() {
-        var modal = new bootstrap.Modal(document.getElementById('newReservationModal'));
-        modal.show();
-    }
+    // function openNewReservationModal() {
+    //    var modal = new bootstrap.Modal(document.getElementById('newReservationModal'));
+    //    modal.show();
+    // }
     
     function submitNewReservation() {
         var form = document.getElementById('newResForm');
@@ -2720,9 +2794,7 @@
         });
     }
 </script>
-{% endblock %}
 
-{% block modals %}
 <div class="modal fade" id="docCameraModal" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -2838,4 +2910,232 @@
     </div>
   </div>
 </div>
+
+<!-- Modal de Importação -->
+<div class="modal fade" id="importModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-cloud-upload-fill text-primary"></i> Importar Reservas</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="btnCloseImport"></button>
+            </div>
+            <div class="modal-body">
+                
+                <div id="importStep2" class="d-none">
+                    <h6 class="fw-bold">Resultado da Análise</h6>
+                    <div class="alert alert-info py-2 small mb-2">
+                        Arquivo: <strong id="selectedFileName"></strong>
+                    </div>
+                    <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                        <table class="table table-sm table-striped" style="font-size: 0.85rem;">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th>Status</th>
+                                    <th>Hóspede</th>
+                                    <th>Período</th>
+                                    <th>Categoria</th>
+                                    <th>Valor</th>
+                                </tr>
+                            </thead>
+                            <tbody id="importPreviewTable">
+                                <!-- JS Populates -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-2 d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="badge bg-success" id="countNew">0 Novos</span>
+                            <span class="badge bg-warning text-dark" id="countUpdate">0 Atualizações</span>
+                        </div>
+                        <div class="text-muted small" id="importToken" style="display:none;"></div>
+                    </div>
+                </div>
+                
+                <div id="importLoading" class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                    <p class="mt-2 text-muted">Enviando e analisando arquivo...</p>
+                </div>
+                
+                <div id="importError" class="d-none alert alert-danger">
+                    <i class="bi bi-exclamation-triangle-fill"></i> <span id="importErrorMsg"></span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btnCancelImport">Cancelar</button>
+                <button type="button" class="btn btn-success d-none" id="btnConfirmImport" onclick="confirmImport()">Confirmar Importação</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Ensure function is globally available via declaration hoisting
+    function handleFileSelect(input) {
+        console.log("handleFileSelect triggered", input.files);
+        
+        if (!input.files || !input.files[0]) {
+            console.log("No file selected");
+            return;
+        }
+        
+        var file = input.files[0];
+        console.log("File selected:", file.name);
+        
+        try {
+            // Open Modal in Loading State
+            var modalEl = document.getElementById('importModal');
+            if (!modalEl) {
+                alert("Erro interno: Modal de importação não encontrado.");
+                return;
+            }
+            
+            var m;
+            if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                 m = bootstrap.Modal.getOrCreateInstance(modalEl);
+            } else {
+                 console.error("Bootstrap not loaded");
+                 alert("Erro: Bootstrap não carregado. Recarregue a página.");
+                 return;
+            }
+            
+            document.getElementById('importStep2').classList.add('d-none');
+            document.getElementById('importLoading').classList.remove('d-none');
+            document.getElementById('importError').classList.add('d-none');
+            document.getElementById('btnConfirmImport').classList.add('d-none');
+            document.getElementById('btnCancelImport').disabled = true;
+            document.getElementById('btnCloseImport').disabled = true;
+            document.getElementById('selectedFileName').textContent = file.name;
+            
+            console.log("Showing modal...");
+            m.show();
+            
+            // Send File
+            var formData = new FormData();
+            formData.append('file', file);
+            
+            console.log("Sending fetch request...");
+            fetch('/api/reception/import_preview', {
+                method: 'POST',
+                body: formData
+            })
+            .then(r => {
+                console.log("Fetch response received", r.status);
+                return r.json();
+            })
+            .then(data => {
+                console.log("Data received", data);
+                document.getElementById('importLoading').classList.add('d-none');
+                document.getElementById('btnCancelImport').disabled = false;
+                document.getElementById('btnCloseImport').disabled = false;
+                
+                if (data.success) {
+                    document.getElementById('importStep2').classList.remove('d-none');
+                    document.getElementById('btnConfirmImport').classList.remove('d-none');
+                    document.getElementById('importToken').textContent = data.token;
+                    
+                    var tbody = document.getElementById('importPreviewTable');
+                    tbody.innerHTML = '';
+                    
+                    var report = data.report;
+                    var countNew = 0;
+                    var countUpd = 0;
+                    
+                    if (report.new_entries) {
+                        report.new_entries.forEach(item => {
+                            countNew++;
+                            var tr = document.createElement('tr');
+                            tr.innerHTML = `
+                                <td><span class="badge bg-success">Novo</span></td>
+                                <td>${item.guest_name}</td>
+                                <td>${item.checkin} - ${item.checkout}</td>
+                                <td>${item.category}</td>
+                                <td>${item.amount}</td>
+                            `;
+                            tbody.appendChild(tr);
+                        });
+                    }
+                    
+                    if (report.updates) {
+                        report.updates.forEach(upd => {
+                            countUpd++;
+                            var item = upd.new;
+                            var tr = document.createElement('tr');
+                            tr.innerHTML = `
+                                <td><span class="badge bg-warning text-dark">Atualizar</span></td>
+                                <td>${item.guest_name}</td>
+                                <td>${item.checkin} - ${item.checkout}</td>
+                                <td>${item.category}</td>
+                                <td>${item.amount}</td>
+                            `;
+                            tbody.appendChild(tr);
+                        });
+                    }
+                    
+                    document.getElementById('countNew').textContent = countNew + ' Novos';
+                    document.getElementById('countUpdate').textContent = countUpd + ' Atualizações';
+                    
+                    if (countNew === 0 && countUpd === 0) {
+                        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Nenhuma alteração detectada.</td></tr>';
+                        document.getElementById('btnConfirmImport').disabled = true;
+                    } else {
+                        document.getElementById('btnConfirmImport').disabled = false;
+                    }
+                    
+                } else {
+                    console.error("Server returned error:", data.error);
+                    document.getElementById('importError').classList.remove('d-none');
+                    document.getElementById('importErrorMsg').textContent = data.error || 'Erro desconhecido';
+                }
+                // Clear input so same file can be selected again if cancelled
+                input.value = '';
+            })
+            .catch(err => {
+                console.error("Fetch error:", err);
+                document.getElementById('importLoading').classList.add('d-none');
+                document.getElementById('importError').classList.remove('d-none');
+                document.getElementById('importErrorMsg').textContent = 'Erro de comunicação com o servidor: ' + err.message;
+                document.getElementById('btnCancelImport').disabled = false;
+                document.getElementById('btnCloseImport').disabled = false;
+                input.value = '';
+            });
+        } catch (e) {
+            console.error("Exception in handleFileSelect:", e);
+            alert("Ocorreu um erro ao processar o arquivo: " + e.message);
+            input.value = '';
+        }
+    }
+
+
+function confirmImport() {
+    var token = document.getElementById('importToken').textContent;
+    if (!token) return;
+    
+    document.getElementById('btnConfirmImport').disabled = true;
+    document.getElementById('btnConfirmImport').textContent = 'Processando...';
+    
+    fetch('/api/reception/import_confirm', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({token: token})
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            alert("Importação realizada com sucesso!");
+            location.reload();
+        } else {
+            alert("Erro na importação: " + data.error);
+            document.getElementById('btnConfirmImport').disabled = false;
+            document.getElementById('btnConfirmImport').textContent = 'Confirmar Importação';
+        }
+    })
+    .catch(err => {
+        alert("Erro de comunicação.");
+        document.getElementById('btnConfirmImport').disabled = false;
+        document.getElementById('btnConfirmImport').textContent = 'Confirmar Importação';
+    });
+}
+</script>
 {% endblock %}

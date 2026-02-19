@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %}Transferência de Ativos{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Transferência de Insumos para Ativo Imobilizado</h2>
+    <p class="text-muted">Selecione os itens do estoque atual para migrar para o controle patrimonial.</p>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <input type="text" id="searchInput" class="form-control" placeholder="Pesquisar produtos no estoque...">
+        </div>
+    </div>
+
+    <form id="transferForm">
+        <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+            <table class="table table-sm table-hover" id="productsTable">
+                <thead class="table-light sticky-top">
+                    <tr>
+                        <th style="width: 40px;"><input type="checkbox" id="selectAll"></th>
+                        <th>Produto</th>
+                        <th>Categoria</th>
+                        <th>Estoque Atual</th>
+                        <th>Qtd. Transferir</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in products %}
+                    <tr data-id="{{ p.id }}" data-category="{{ p.category }}">
+                        <td>
+                            <input type="checkbox" class="product-check form-check-input" value="{{ p.id }}">
+                        </td>
+                        <td>{{ p.name }}</td>
+                        <td>
+                            <span class="badge bg-secondary">{{ p.category }}</span>
+                            {% if p.category in ['Alimentos', 'Bebidas', 'Limpeza', 'Descartáveis'] %}
+                                <i class="bi bi-exclamation-triangle text-warning" title="Categoria de consumo rápido"></i>
+                            {% endif %}
+                        </td>
+                        <td>{{ "%.2f"|format(p.balance or 0) }} {{ p.unit }}</td>
+                        <td>
+                            <input type="number" class="form-control form-control-sm qty-input" min="0" step="0.01" disabled placeholder="0 = Tudo" style="width: 100px;">
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card mt-4 bg-light">
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="justification" class="form-label">Justificativa da Transferência *</label>
+                    <textarea class="form-control" id="justification" rows="2" required></textarea>
+                </div>
+                
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="forceTransfer">
+                    <label class="form-check-label" for="forceTransfer">
+                        Forçar transferência de itens de consumo rápido (Alimentos, Bebidas, etc.)
+                    </label>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{{ url_for('assets.index') }}" class="btn btn-secondary">Cancelar</a>
+                    <button type="button" class="btn btn-primary" onclick="submitTransfer()">Confirmar Transferência</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Search
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        let value = this.value.toLowerCase();
+        let rows = document.querySelectorAll('#productsTable tbody tr');
+        rows.forEach(row => {
+            let text = row.innerText.toLowerCase();
+            row.style.display = text.includes(value) ? '' : 'none';
+        });
+    });
+
+    // Select All
+    document.getElementById('selectAll').addEventListener('change', function() {
+        let checkboxes = document.querySelectorAll('.product-check');
+        let visibleRows = Array.from(document.querySelectorAll('#productsTable tbody tr')).filter(r => r.style.display !== 'none');
+        
+        visibleRows.forEach(row => {
+            let cb = row.querySelector('.product-check');
+            cb.checked = this.checked;
+            toggleQty(cb);
+        });
+    });
+
+    // Toggle Quantity Input
+    document.querySelectorAll('.product-check').forEach(cb => {
+        cb.addEventListener('change', function() {
+            toggleQty(this);
+        });
+    });
+
+    function toggleQty(checkbox) {
+        let row = checkbox.closest('tr');
+        let qtyInput = row.querySelector('.qty-input');
+        qtyInput.disabled = !checkbox.checked;
+        if (checkbox.checked) {
+            qtyInput.focus();
+        } else {
+            qtyInput.value = '';
+        }
+    }
+
+    // Submit
+    function submitTransfer() {
+        let selected = [];
+        let force = document.getElementById('forceTransfer').checked;
+        let justification = document.getElementById('justification').value.trim();
+
+        if (!justification) {
+            alert('Por favor, informe uma justificativa.');
+            return;
+        }
+
+        document.querySelectorAll('.product-check:checked').forEach(cb => {
+            let row = cb.closest('tr');
+            let id = cb.value;
+            let qty = row.querySelector('.qty-input').value;
+            
+            // Allow 0 as valid (means transfer all)
+            if (qty !== '') {
+                selected.push({
+                    id: id,
+                    qty: parseFloat(qty),
+                    force: force
+                });
+            }
+        });
+
+        if (selected.length === 0) {
+            alert('Selecione pelo menos um item e informe a quantidade.');
+            return;
+        }
+
+        if (!confirm(`Confirma a transferência de ${selected.length} itens para o Ativo Imobilizado?`)) {
+            return;
+        }
+
+        fetch("{{ url_for('assets.transfer') }}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                items: selected,
+                justification: justification
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                window.location.href = "{{ url_for('assets.index') }}";
+            } else {
+                alert('Erro: ' + data.error);
+            }
+        })
+        .catch(err => {
+            alert('Erro de comunicação: ' + err);
+        });
+    }
+</script>
+{% endblock %}

@@ -269,22 +269,22 @@ def stock_products():
             cfop_default = request.form.get('cfop_default')
             
             try:
-                pkg_size_val = float(package_size.replace(',', '.')) if package_size else 1.0
+                pkg_size_val = float(str(package_size).replace(',', '.').strip()) if package_size and str(package_size).strip() else 1.0
             except (ValueError, AttributeError):
                 pkg_size_val = 1.0
             
             try:
-                price_val = float(price.replace(',', '.')) if price else 0.0
+                price_val = float(str(price).replace(',', '.').strip()) if price and str(price).strip() else 0.0
             except (ValueError, AttributeError):
                 price_val = 0.0
 
             try:
-                min_stock_val = float(min_stock.replace(',', '.')) if min_stock else 0.0
+                min_stock_val = float(str(min_stock).replace(',', '.').strip()) if min_stock and str(min_stock).strip() else 0.0
             except (ValueError, AttributeError):
                 min_stock_val = 0.0
 
             try:
-                icms_val = float(icms_rate.replace(',', '.')) if icms_rate else 0.0
+                icms_val = float(str(icms_rate).replace(',', '.').strip()) if icms_rate and str(icms_rate).strip() else 0.0
             except (ValueError, AttributeError):
                 icms_val = 0.0
 
