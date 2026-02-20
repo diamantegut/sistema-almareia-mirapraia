@@ -4,13 +4,18 @@
     <meta charset="UTF-8">
     <title>Relatório de Porcionamento - {{ date }}</title>
     <style>
-        body { font-family: sans-serif; font-size: 12px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        @page {
+            size: A4 landscape;
+            margin: 10mm;
+        }
+        body { font-family: sans-serif; font-size: 11px; margin: 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; }
+        th, td { border: 1px solid #ddd; padding: 4px; text-align: left; word-wrap: break-word; }
         th { background-color: #f2f2f2; }
-        .header { text-align: center; margin-bottom: 30px; }
+        .header { text-align: center; margin-bottom: 10px; }
         @media print {
             .no-print { display: none; }
+            body { font-size: 10px; }
         }
     </style>
 </head>
@@ -29,11 +34,16 @@
         <thead>
             <tr>
                 <th>Data/Hora</th>
-                <th>Produto Porcionado</th>
-                <th>Qtd (Kg)</th>
+                <th>Produto (Origem)</th>
+                <th>Qtd Bruta (Kg)</th>
+                <th>Kg Degelo</th>
+                <th>Kg Aparas</th>
+                <th>Kg Útil</th>
                 <th>Funcionário</th>
                 <th>Preço/Kg Bruto</th>
-                <th>Perda Gelo %</th>
+                <th>Rendimento %</th>
+                <th>Perda Total %</th>
+                <th>Custo/Kg Útil</th>
                 <th>Custo Total Líquido</th>
             </tr>
         </thead>
@@ -43,9 +53,14 @@
                 <td>{{ item.date }}</td>
                 <td>{{ item.product }}</td>
                 <td>{{ "%.3f"|format(item.qty_kg) }}</td>
+                <td>{{ "%.3f"|format(item.degelo_kg) }}</td>
+                <td>{{ "%.3f"|format(item.aparas_kg) }}</td>
+                <td>{{ "%.3f"|format(item.useful_kg) }}</td>
                 <td>{{ item.staff }}</td>
                 <td>R$ {{ "%.2f"|format(item.price_gross) }}</td>
-                <td>{{ "%.1f"|format(item.ice_loss_pct) }}%</td>
+                <td>{{ "%.1f"|format(item.yield_pct) }}%</td>
+                <td>{{ "%.1f"|format(item.waste_pct) }}%</td>
+                <td>R$ {{ "%.2f"|format(item.cost_per_useful_kg) }}</td>
                 <td>R$ {{ "%.2f"|format(item.total_cost) }}</td>
             </tr>
             {% endfor %}

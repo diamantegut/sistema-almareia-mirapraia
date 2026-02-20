@@ -9,21 +9,18 @@
         <h2>Histórico de Porcionamento</h2>
     </div>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <a href="{{ url_for('main.service_page', service_id='cozinha') }}" class="btn btn-secondary">
-            <i class="bi bi-arrow-left"></i> Voltar
+    <div class="mb-4" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+        <a href="{{ url_for('main.service_page', service_id='cozinha') }}" class="action-btn" style="background-color: #95a5a6; text-decoration: none;">
+            ← Voltar
         </a>
-        <div class="btn-group">
-            <a href="{{ url_for('kitchen.kitchen_reports_export', format='csv', start_date=start_date, end_date=end_date, products=selected_products) }}" class="btn btn-outline-success">
-                <i class="bi bi-file-earmark-spreadsheet"></i> Exportar CSV
-            </a>
-            <a href="{{ url_for('kitchen.kitchen_reports_export', format='pdf', start_date=start_date, end_date=end_date, products=selected_products) }}" target="_blank" class="btn btn-outline-danger">
-                <i class="bi bi-file-earmark-pdf"></i> Imprimir PDF
-            </a>
-        </div>
+        <a href="{{ url_for('kitchen.kitchen_reports_export', format='csv', start_date=start_date, end_date=end_date, products=selected_products) }}" class="action-btn" style="background-color: #27ae60; color: white; text-decoration: none;">
+            📊 Exportar CSV
+        </a>
+        <a href="{{ url_for('kitchen.kitchen_reports_export', format='pdf', start_date=start_date, end_date=end_date, products=selected_products) }}" target="_blank" class="action-btn" style="background-color: #c0392b; color: white; text-decoration: none;">
+            🖨 Imprimir PDF
+        </a>
     </div>
 
-    <!-- Stats Cards -->
     <div class="row g-3 mb-4">
         <div class="col-md-4">
             <div class="card bg-primary text-white h-100">
@@ -51,7 +48,6 @@
         </div>
     </div>
 
-    <!-- Filters -->
     <div class="card mb-4 shadow-sm">
         <div class="card-body bg-light">
             <form method="GET" action="{{ url_for('kitchen.kitchen_reports') }}" class="row g-3 align-items-end">
@@ -64,7 +60,7 @@
                         <input type="hidden" name="end_date" id="end_date" value="{{ end_date }}">
                     </div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <label class="form-label fw-bold">Filtrar por Produto</label>
                     <select name="products[]" id="product-select" multiple placeholder="Selecione produtos..." autocomplete="off">
                         {% for p in all_products %}
@@ -73,6 +69,14 @@
                     </select>
                 </div>
                 <div class="col-md-3">
+                    <label class="form-label fw-bold">Filtrar por Responsável</label>
+                    <select name="staff[]" id="staff-select" multiple placeholder="Selecione responsáveis..." autocomplete="off">
+                        {% for s in staff_options %}
+                        <option value="{{ s }}" {% if s in selected_staff %}selected{% endif %}>{{ s }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
                     <button type="submit" class="btn btn-primary w-100">
                         <i class="bi bi-funnel-fill"></i> Filtrar Resultados
                     </button>
@@ -81,7 +85,6 @@
         </div>
     </div>
 
-    <!-- Data Table -->
     <div class="card shadow-sm">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
@@ -90,8 +93,12 @@
                         <th>Data/Hora</th>
                         <th>Produto (Origem)</th>
                         <th>Qtd (Kg)</th>
+                        <th>Kg Degelo</th>
+                        <th>Kg Aparas</th>
+                        <th>Kg Útil</th>
                         <th>Preço/Kg (Bruto)</th>
-                        <th>Perda Gelo %</th>
+                        <th>Rendimento %</th>
+                        <th>Perda Total %</th>
                         <th>Custo Total (Líquido)</th>
                         <th>Responsável</th>
                         <th>Detalhes</th>
@@ -103,20 +110,37 @@
                         <td>{{ item.date }}</td>
                         <td class="fw-bold text-primary">{{ item.product }}</td>
                         <td>{{ "%.3f"|format(item.qty_kg) }}</td>
+                        <td>{{ "%.3f"|format(item.degelo_kg) }}</td>
+                        <td>{{ "%.3f"|format(item.aparas_kg) }}</td>
+                        <td>{{ "%.3f"|format(item.useful_kg) }}</td>
                         <td>R$ {{ "%.2f"|format(item.price_gross) }}</td>
                         <td>
-                            {% if item.ice_loss_pct > 10 %}
-                                <span class="badge bg-danger">{{ "%.1f"|format(item.ice_loss_pct) }}%</span>
-                            {% elif item.ice_loss_pct > 5 %}
-                                <span class="badge bg-warning text-dark">{{ "%.1f"|format(item.ice_loss_pct) }}%</span>
+                            {% if item.yield_pct < 65 %}
+                                <span class="badge bg-danger">{{ "%.1f"|format(item.yield_pct) }}%</span>
+                            {% elif item.yield_pct < 80 %}
+                                <span class="badge bg-warning text-dark">{{ "%.1f"|format(item.yield_pct) }}%</span>
                             {% else %}
-                                <span class="text-success">{{ "%.1f"|format(item.ice_loss_pct) }}%</span>
+                                <span class="text-success">{{ "%.1f"|format(item.yield_pct) }}%</span>
                             {% endif %}
                         </td>
+                        <td>{{ "%.1f"|format(item.waste_pct) }}%</td>
                         <td class="fw-bold">R$ {{ "%.2f"|format(item.total_cost_liquid) }}</td>
                         <td><small class="text-muted">{{ item.staff }}</small></td>
                         <td>
-                            <button type="button" class="btn btn-sm btn-link text-decoration-none" data-bs-toggle="popover" data-bs-trigger="focus" title="Detalhes" data-bs-content="{{ item.details }}">
+                            <button type="button" class="btn btn-sm btn-link text-decoration-none"
+                                    data-bs-toggle="popover"
+                                    data-bs-trigger="focus"
+                                    title="Detalhes"
+                                    data-bs-html="true"
+                                    data-bs-content="
+                                    <strong>Peso Bruto:</strong> {{ '%.3f'|format(item.qty_kg) }} kg<br>
+                                    <strong>Degelo:</strong> {{ '%.3f'|format(item.degelo_kg) }} kg<br>
+                                    <strong>Aparas:</strong> {{ '%.3f'|format(item.aparas_kg) }} kg<br>
+                                    <strong>Peso Útil:</strong> {{ '%.3f'|format(item.useful_kg) }} kg<br>
+                                    <strong>Rendimento:</strong> {{ '%.1f'|format(item.yield_pct) }}%<br>
+                                    <strong>Perda Total:</strong> {{ '%.1f'|format(item.waste_pct) }}%<br>
+                                    <strong>Custo por Kg Útil:</strong> R$ {{ '%.2f'|format(item.cost_per_useful_kg) }}<br>
+                                    <strong>Descrição:</strong> {{ item.details }}">
                                 <i class="bi bi-info-circle"></i> Ver
                             </button>
                         </td>
@@ -170,6 +194,13 @@
             plugins: ['remove_button', 'checkbox_options'],
             create: false,
             placeholder: "Selecione produtos...",
+            maxOptions: null
+        });
+
+        new TomSelect("#staff-select", {
+            plugins: ['remove_button', 'checkbox_options'],
+            create: false,
+            placeholder: "Selecione responsáveis...",
             maxOptions: null
         });
 

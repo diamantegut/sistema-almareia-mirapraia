@@ -1008,18 +1008,10 @@ def list_nfe_dfe_route():
             
         target_integration = None
         
-        # 1. Prioritize sefaz_direto (Free)
         for integ in integrations:
             if integ.get('provider') == 'sefaz_direto':
                 target_integration = integ
                 break
-                
-        # 2. Fallback to nuvem_fiscal (Paid)
-        if not target_integration:
-            for integ in integrations:
-                if integ.get('provider') == 'nuvem_fiscal':
-                    target_integration = integ
-                    break
                     
         if not target_integration:
              return jsonify({'error': 'Nenhuma integração fiscal configurada para consulta.'}), 400
@@ -1069,11 +1061,6 @@ def sync_nfe_xmls():
             if integ.get('provider') == 'sefaz_direto':
                 target_integration = integ
                 break
-        if not target_integration:
-            for integ in integrations:
-                if integ.get('provider') == 'nuvem_fiscal':
-                    target_integration = integ
-                    break
         if not target_integration:
             return jsonify({'error': 'Nenhuma integração fiscal configurada para sincronização.'}), 400
         result = sync_received_nfes(target_integration)

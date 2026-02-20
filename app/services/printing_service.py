@@ -1029,6 +1029,56 @@ def print_fiscal_receipt(printer_config, invoice_data):
         logger.error(f"Error printing fiscal receipt: {e}")
         return False, str(e)
 
+def format_portion_labels(labels):
+    ESC = b'\x1b'
+    GS = b'\x1d'
+    INIT = ESC + b'@'
+    CENTER = ESC + b'a' + b'\x01'
+    LEFT = ESC + b'a' + b'\x00'
+    BOLD = ESC + b'E' + b'\x01'
+    NO_BOLD = ESC + b'E' + b'\x00'
+    NORMAL = GS + b'!' + b'\x00'
+    SEPARATOR = b'--------------------------------\n'
+    CUT = GS + b'V' + b'\x41' + b'\x03'
+
+    cmd = b''
+    for label in labels:
+        name = label.get('name', '')
+        avg_weight = label.get('avg_weight', '')
+        date_str = label.get('date', '')
+        expiry_str = label.get('expiry', '')
+        user = label.get('user', '')
+
+        cmd += INIT
+        cmd += CENTER + BOLD
+        cmd += f"{name}\n".encode('cp850', errors='replace')
+        cmd += NO_BOLD + NORMAL
+        cmd += SEPARATOR
+        cmd += LEFT
+        cmd += f"Peso: {avg_weight}  Data: {date_str}\n".encode('cp850', errors='replace')
+        cmd += f"Val: {expiry_str}  Resp: {user}\n".encode('cp850', errors='replace')
+        cmd += b'\n'
+        cmd += CUT
+
+    return cmd
+
+def print_portion_labels(labels):
+    if not labels:
+        return False, "Nenhuma etiqueta para imprimir"
+
+    target_printer = get_default_printer('kitchen_portion')
+    if not target_printer:
+        return False, "Impressora de cozinha não configurada para etiquetas"
+
+    try:
+        data = format_portion_labels(labels)
+        if target_printer.get('type') == 'windows':
+            return send_to_windows_printer(target_printer.get('windows_name'), data)
+        return send_to_printer(target_printer.get('ip'), target_printer.get('port', 9100), data)
+    except Exception as e:
+        logger.error(f"Error printing portion labels: {e}")
+        return False, str(e)
+
 def format_individual_bill_thermal(room_num, guest_name, charges, total_amount):
     """
     Formats the individual bill for reception thermal printer (80mm).

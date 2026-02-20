@@ -476,22 +476,6 @@
                     </div>
                 </div>
             </div>
-            {% if session.get('role') == 'admin' %}
-            <div class="col">
-                <div class="card h-100 shadow-sm hover-card">
-                    <div class="card-body text-center p-4">
-                        <div class="mb-3 text-secondary">
-                            <i class="bi bi-gear display-4"></i>
-                        </div>
-                        <h4 class="card-title">Configurações</h4>
-                        <p class="card-text text-muted">Gerenciar categorias e regras de porcionamento.</p>
-                        <a href="{{ url_for('kitchen.kitchen_portion_settings') }}" class="btn btn-secondary w-100 stretched-link">
-                            Configurar
-                        </a>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
         {% endif %}
 
         <!-- MANUTENÇÃO -->

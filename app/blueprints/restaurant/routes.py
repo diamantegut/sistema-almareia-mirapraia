@@ -1144,6 +1144,8 @@ def restaurant_table_order(table_id):
 
                 products_insumos = load_products()
                 insumo_map = {str(i['id']): i for i in products_insumos if i.get('id') is not None}
+                flavor_groups = load_flavor_groups()
+                flavor_group_map = {str(g.get('id')): g for g in flavor_groups if g.get('id') is not None}
                 
                 all_comps = load_complements()
                 comp_map = {str(c['id']): c for c in all_comps}
@@ -1242,6 +1244,56 @@ def restaurant_table_order(table_id):
                                 save_stock_entry(entry_data)
                         except Exception as e:
                             current_app.logger.error(f"Stock deduction error (Restaurant): {e}")
+
+                    flavor_group_id = product.get('flavor_group_id')
+                    flavor_ids_raw = item_data.get('flavor_id')
+                    if flavor_group_id and flavor_ids_raw:
+                        group = flavor_group_map.get(str(flavor_group_id))
+                        if group and group.get('items'):
+                            if isinstance(flavor_ids_raw, str):
+                                flavor_ids_list = [f.strip() for f in flavor_ids_raw.split(',') if f and str(f).strip()]
+                            elif isinstance(flavor_ids_raw, list):
+                                flavor_ids_list = [str(f).strip() for f in flavor_ids_raw if f is not None and str(f).strip()]
+                            else:
+                                flavor_ids_list = []
+
+                            if flavor_ids_list:
+                                try:
+                                    multiplier = float(product.get('flavor_multiplier', 1.0) or 1.0)
+                                except (TypeError, ValueError):
+                                    multiplier = 1.0
+
+                                for fid in flavor_ids_list:
+                                    group_item = next((i for i in group['items'] if str(i.get('id')) == fid), None)
+                                    if not group_item:
+                                        continue
+
+                                    try:
+                                        unit_qty = float(group_item.get('qty', 0))
+                                    except (TypeError, ValueError):
+                                        continue
+
+                                    if unit_qty <= 0:
+                                        continue
+
+                                    insumo_data = insumo_map.get(str(group_item.get('id')))
+                                    if not insumo_data:
+                                        continue
+
+                                    total_needed = unit_qty * qty * multiplier
+
+                                    entry_data = {
+                                        'id': f"SALE_REST_FLAVOR_{table_id}_{datetime.now().strftime('%Y%m%d%H%M%S')}_{group_item.get('id')}",
+                                        'user': session.get('user', 'Sistema'),
+                                        'product': insumo_data['name'],
+                                        'supplier': f"VENDA: Mesa {table_id}",
+                                        'qty': -total_needed,
+                                        'price': insumo_data.get('price', 0),
+                                        'invoice': f"Sabor Restaurante: {product.get('name')}",
+                                        'date': datetime.now().strftime('%d/%m/%Y'),
+                                        'entry_date': datetime.now().strftime('%d/%m/%Y %H:%M')
+                                    }
+                                    save_stock_entry(entry_data)
                     
                     # Prepare Item
                     order_item = {

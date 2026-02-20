@@ -970,6 +970,8 @@ def list_received_nfes(settings):
     """
     if settings.get('provider') == 'sefaz_direto':
         return _list_received_nfes_sefaz(settings)
+    
+    return None, "Consulta DF-e via Nuvem Fiscal desativada. Configure a integração SEFAZ Direto para continuar usando DF-e."
 
     client_id = settings.get('client_id')
     client_secret = settings.get('client_secret')
