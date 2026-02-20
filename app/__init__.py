@@ -57,6 +57,15 @@ def create_app(config_name=None):
     app.register_blueprint(guest_portal_bp)
     from app.services.logger_service import LoggerService
     LoggerService.init_app(app)
+    
+    # Start Scheduler
+    if os.environ.get('WERKZEUG_RUN_MAIN') == 'true' or not app.debug:
+        try:
+            from app.services.scheduler_service import start_scheduler
+            start_scheduler()
+        except Exception as e:
+            print(f"Failed to start scheduler: {e}")
+
     import time
     from flask import request, g
 

@@ -9,12 +9,12 @@
         <h2>Receitas da Cozinha</h2>
     </div>
 
-    <div class="mb-3 d-flex justify-content-between align-items-center">
-        <a href="{{ url_for('main.service_page', service_id='cozinha') }}" class="btn btn-secondary">
-            <i class="bi bi-arrow-left"></i> Voltar
+    <div class="mb-3" style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <a href="{{ url_for('main.service_page', service_id='cozinha') }}" class="action-btn" style="background-color: #95a5a6; text-decoration: none;">
+            ← Voltar
         </a>
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#recipeModal">
-            <i class="bi bi-plus-circle"></i> Nova Receita
+        <button type="button" class="action-btn" style="background-color: #1e3a8a; color: white; border: none;" data-bs-toggle="modal" data-bs-target="#recipeModal">
+            ➕ Nova Receita
         </button>
     </div>
 

@@ -4,6 +4,7 @@ from flask import session, current_app
 import json
 import traceback
 import random
+import os
 from datetime import datetime, timedelta
 
 class LoggerService:
@@ -167,3 +168,33 @@ def log_system_action(action, details, user='Sistema', category='Geral', **kwarg
         detalhes=details,
         colaborador_id=user
     )
+
+def log_security_audit(event_type, details, user='Sistema', ip_address=None):
+    """
+    Registra eventos de segurança críticos em um arquivo JSONL separado (Shadow Log).
+    Isso garante que exclusões e cancelamentos tenham um rastro imutável fora do banco de dados principal.
+    Arquivo: data/security_audit.jsonl
+    """
+    try:
+        log_entry = {
+            'timestamp': datetime.now().isoformat(),
+            'event_type': event_type,
+            'user': user,
+            'ip_address': ip_address,
+            'details': details
+        }
+        
+        # Ensure directory exists
+        log_dir = os.path.join(os.getcwd(), 'data')
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
+            
+        log_file = os.path.join(log_dir, 'security_audit.jsonl')
+        
+        with open(log_file, 'a', encoding='utf-8') as f:
+            f.write(json.dumps(log_entry, ensure_ascii=False) + '\n')
+            
+        return True
+    except Exception as e:
+        print(f"CRITICAL SECURITY LOG FAILURE: {e}")
+        return False

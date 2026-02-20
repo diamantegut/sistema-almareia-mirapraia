@@ -172,6 +172,35 @@ try {
     }
 
     # Adicionar Exclusoes de Arquivos (/XF)
+    $ExcludeFiles = @(
+        "users.json", 
+        "products.json", 
+        "table_orders.json", 
+        "room_charges.json", 
+        "sales_history.json", 
+        "stock_entries.json", 
+        "stock_requests.json",
+        "suppliers.json", 
+        "system_status.json", 
+        "complements.json", 
+        "conferences.json", 
+        "printers.json", 
+        "settings.json", 
+        "last_sync.json", 
+        "checklist_items.json", 
+        "checklist_settings.json", 
+        "daily_checklists.json",
+        "manual_allocations.json",
+        "room_occupancy.json",
+        "whatsapp_messages.json",
+        "deleted_messages_log.json",
+        "stock_logs.json",
+        "stock_transfers.json",
+        "system_config.json",
+        "*.log",
+        "*.pyc"
+    )
+
     if ($ExcludeFiles.Count -gt 0) {
         $RoboOptions += "/XF"
         $RoboOptions += $ExcludeFiles

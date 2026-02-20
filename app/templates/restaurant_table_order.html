@@ -1657,12 +1657,24 @@
             return;
         }
 
-        // Use the last ID (stack behavior)
-        const itemId = ids[ids.length - 1];
-
-        if (!confirm('Remover 1 unidade de ' + itemName + '?')) {
-            return;
+        let qtyToRemove = 1;
+        
+        if (ids.length > 1) {
+             let input = prompt(`Quantas unidades de "${itemName}" deseja remover? (Máx: ${ids.length})`, "1");
+             if (input === null) return;
+             qtyToRemove = parseInt(input);
+             if (isNaN(qtyToRemove) || qtyToRemove <= 0 || qtyToRemove > ids.length) {
+                 alert('Quantidade inválida.');
+                 return;
+             }
+             if (!confirm(`Confirma a remoção de ${qtyToRemove} unidade(s) de "${itemName}"?`)) return;
+        } else {
+             if (!confirm('Remover 1 unidade de ' + itemName + '?')) return;
         }
+
+        // Get the last N IDs (stack behavior)
+        const idsToRemove = ids.slice(-qtyToRemove);
+        const itemId = idsToRemove[0]; // Legacy/Fallback
 
         // UI Feedback - Spinner
         const originalHtml = btn.innerHTML;
@@ -1672,6 +1684,7 @@
         const formData = new FormData();
         formData.append('action', 'remove_item');
         formData.append('item_id', itemId);
+        formData.append('item_ids', JSON.stringify(idsToRemove));
         formData.append('product_name', itemName);
         formData.append('cancellation_reason', reason);
 
@@ -1686,7 +1699,7 @@
         .then(data => {
             if (data.success) {
                 // Update IDs list
-                ids.pop(); // Remove used ID
+                ids.splice(-qtyToRemove, qtyToRemove); // Remove used IDs
                 btn.setAttribute('data-ids', JSON.stringify(ids));
 
                 // Update UI
@@ -1695,7 +1708,7 @@
                 const totalCell = row.querySelector('.item-total');
                 
                 let currentQty = parseFloat(qtyCell.innerText);
-                let newQty = currentQty - 1;
+                let newQty = currentQty - qtyToRemove;
 
                 if (newQty <= 0.001) { // Floating point safety
                     row.remove();
@@ -1784,6 +1797,13 @@
         }
     }
     let grandTotal = initialGrandTotal;
+    
+    // Initial adjustment for partial payments
+    if (paidAmount > 0) {
+        grandTotal -= paidAmount;
+        if (grandTotal < 0) grandTotal = 0;
+    }
+    
     let payments = [];
 
     window.formatCurrency = function(input) {

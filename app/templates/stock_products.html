@@ -789,6 +789,7 @@ function submitStockAdjustment() {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+            product_id: currentEditingProduct.id,
             product_name: currentEditingProduct.name,
             new_quantity: newQty,
             reason: reason

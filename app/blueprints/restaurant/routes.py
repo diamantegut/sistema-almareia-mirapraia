@@ -9,9 +9,10 @@ from app.services.data_service import (
     load_observations, save_observations, load_table_orders, save_table_orders,
     load_room_occupancy, format_room_number, load_breakfast_history,
     load_payment_methods, save_payment_methods,
-    save_sales_history, load_sales_history,
+    save_sales_history, load_sales_history, secure_save_sales_history,
     save_stock_entry, log_stock_action, load_products,
-    load_room_charges, save_room_charges, load_flavor_groups, load_settings
+    load_room_charges, save_room_charges, load_flavor_groups, load_settings,
+    load_bar_data, save_bar_data
 )
 from app.services.user_service import load_users
 from app.services.printer_manager import load_printers
@@ -23,7 +24,7 @@ from app.services.printing_service import (
 )
 from app.services.fiscal_service import load_fiscal_settings, process_pending_emissions
 from app.services.fiscal_pool_service import FiscalPoolService
-from app.services.logger_service import log_system_action
+from app.services.logger_service import log_system_action, log_security_audit
 from app.utils.logger import log_action
 from app.services.cashier_service import CashierService, file_lock
 from app.services.transfer_service import transfer_table_to_room, TransferError
@@ -959,8 +960,28 @@ def restaurant_table_order(table_id):
         elif action == 'remove_item':
             try:
                 item_id = request.form.get('item_id')
+                item_ids_json = request.form.get('item_ids')
                 reason = request.form.get('cancellation_reason')
                 
+                target_ids = []
+                if item_ids_json:
+                    try:
+                        target_ids = json.loads(item_ids_json)
+                        if not isinstance(target_ids, list):
+                            target_ids = []
+                    except:
+                        pass
+                
+                if not target_ids and item_id:
+                    target_ids = [item_id]
+                
+                if not target_ids:
+                    msg = 'Nenhum item selecionado.'
+                    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                         return jsonify({'success': False, 'error': msg})
+                    flash(msg)
+                    return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
+
                 if str_table_id not in orders:
                      msg = 'Mesa não encontrada.'
                      if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -970,15 +991,6 @@ def restaurant_table_order(table_id):
 
                 order = orders[str_table_id]
                 items = order.get('items', [])
-                
-                target_item = next((i for i in items if str(i.get('id')) == str(item_id)), None)
-                
-                if not target_item:
-                    msg = 'Item não encontrado.'
-                    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                         return jsonify({'success': False, 'error': msg})
-                    flash(msg)
-                    return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
                 
                 # Permission Check
                 if session.get('role') not in ['admin', 'gerente', 'supervisor']:
@@ -1007,9 +1019,6 @@ def restaurant_table_order(table_id):
                         flash(msg)
                         return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
 
-                if target_item.get('printed', False) or target_item.get('print_status') == 'printed':
-                    pass
-
                 try:
                     menu_items = load_menu_items()
                     products_insumos = load_products()
@@ -1019,89 +1028,120 @@ def restaurant_table_order(table_id):
                     products_insumos = []
 
                 insumo_map = {str(i.get('id')): i for i in products_insumos if i.get('id') is not None}
+                
+                removed_count = 0
+                last_removed_name = ""
+                
+                for tid in target_ids:
+                    target_item = next((i for i in items if str(i.get('id')) == str(tid)), None)
+                    if not target_item:
+                        continue
 
-                product_def = None
-                prod_id = target_item.get('product_id')
-                if prod_id:
-                    product_def = next((p for p in menu_items if str(p.get('id')) == str(prod_id)), None)
-                if not product_def:
-                    product_def = next((p for p in menu_items if p.get('name') == target_item.get('name')), None)
+                    product_def = None
+                    prod_id = target_item.get('product_id')
+                    if prod_id:
+                        product_def = next((p for p in menu_items if str(p.get('id')) == str(prod_id)), None)
+                    if not product_def:
+                        product_def = next((p for p in menu_items if p.get('name') == target_item.get('name')), None)
 
-                if product_def and product_def.get('recipe'):
-                    try:
+                    if product_def and product_def.get('recipe'):
                         try:
-                            qty_removed = float(target_item.get('qty', 1))
-                        except (TypeError, ValueError):
-                            qty_removed = 1.0
-
-                        for ingred in product_def['recipe']:
-                            raw_ing_id = ingred.get('ingredient_id')
-                            insumo_data = None
-                            ing_key = None
-
-                            if raw_ing_id is not None:
-                                ing_key = str(raw_ing_id)
-                                insumo_data = insumo_map.get(ing_key)
-                            else:
-                                ing_name = ingred.get('ingredient')
-                                if ing_name:
-                                    insumo_data = next((i for i in products_insumos if i.get('name') == ing_name), None)
-                                    if insumo_data and insumo_data.get('id') is not None:
-                                        ing_key = str(insumo_data.get('id'))
-                                    else:
-                                        ing_key = ing_name
-
-                            if not insumo_data:
-                                continue
-
                             try:
-                                ing_qty = float(ingred.get('qty', 0))
+                                qty_removed = float(target_item.get('qty', 1))
                             except (TypeError, ValueError):
-                                continue
+                                qty_removed = 1.0
 
-                            total_refund = ing_qty * qty_removed
+                            for ingred in product_def['recipe']:
+                                raw_ing_id = ingred.get('ingredient_id')
+                                insumo_data = None
+                                ing_key = None
 
-                            entry_data = {
-                                'id': f"REFUND_REST_{table_id}_{datetime.now().strftime('%Y%m%d%H%M%S')}_{ing_key}",
-                                'user': session.get('user', 'Sistema'),
-                                'product': insumo_data['name'],
-                                'supplier': f"ESTORNO: Mesa {table_id}",
-                                'qty': total_refund,
-                                'price': insumo_data.get('price', 0),
-                                'invoice': f"Cancelamento: {target_item.get('name')}",
-                                'date': datetime.now().strftime('%d/%m/%Y'),
-                                'entry_date': datetime.now().strftime('%d/%m/%Y %H:%M')
-                            }
-                            save_stock_entry(entry_data)
-                    except Exception as e:
-                        current_app.logger.error(f"Stock refund error (Restaurant): {e}")
+                                if raw_ing_id is not None:
+                                    ing_key = str(raw_ing_id)
+                                    insumo_data = insumo_map.get(ing_key)
+                                else:
+                                    ing_name = ingred.get('ingredient')
+                                    if ing_name:
+                                        insumo_data = next((i for i in products_insumos if i.get('name') == ing_name), None)
+                                        if insumo_data and insumo_data.get('id') is not None:
+                                            ing_key = str(insumo_data.get('id'))
+                                        else:
+                                            ing_key = ing_name
 
-                # Remove
-                items.remove(target_item)
+                                if not insumo_data:
+                                    continue
+
+                                try:
+                                    ing_qty = float(ingred.get('qty', 0))
+                                except (TypeError, ValueError):
+                                    continue
+
+                                total_refund = ing_qty * qty_removed
+                                
+                                # Use uuid for unique ID to avoid conflicts in batch
+                                entry_id = f"REFUND_REST_{table_id}_{datetime.now().strftime('%Y%m%d%H%M%S')}_{ing_key}_{uuid.uuid4().hex[:6]}"
+
+                                entry_data = {
+                                    'id': entry_id,
+                                    'user': session.get('user', 'Sistema'),
+                                    'product': insumo_data['name'],
+                                    'supplier': f"ESTORNO: Mesa {table_id}",
+                                    'qty': total_refund,
+                                    'price': insumo_data.get('price', 0),
+                                    'invoice': f"Cancelamento: {target_item.get('name')}",
+                                    'date': datetime.now().strftime('%d/%m/%Y'),
+                                    'entry_date': datetime.now().strftime('%d/%m/%Y %H:%M')
+                                }
+                                save_stock_entry(entry_data)
+                        except Exception as e:
+                            current_app.logger.error(f"Stock refund error (Restaurant): {e}")
+
+                    # Shadow Log (Security Audit) - Must happen before removal
+                    log_security_audit(
+                        event_type='ITEM_REMOVAL',
+                        details={
+                            'table_id': table_id,
+                            'item_removed': target_item,
+                            'reason': reason,
+                            'user_role': session.get('role'),
+                            'authorized_by': 'Supervisor Password' if session.get('role') not in ['admin', 'gerente', 'supervisor'] else 'Self'
+                        },
+                        user=session.get('user'),
+                        ip_address=request.remote_addr
+                    )
+
+                    # Remove
+                    items.remove(target_item)
+                    removed_count += 1
+                    last_removed_name = target_item['name']
                 
                 # Recalculate Total
                 total = 0
                 for item in items:
-                    item_price = item['price']
-                    comps_price = sum(c['price'] for c in item.get('complements', []))
-                    total += item['qty'] * (item_price + comps_price)
+                    # Ensure price/qty are floats
+                    item_price = float(item.get('price', 0))
+                    item_qty = float(item.get('qty', 1))
+                    comps_price = sum(float(c.get('price', 0)) for c in item.get('complements', []))
+                    total += item_qty * (item_price + comps_price)
                 order['total'] = total
                 
                 save_table_orders(orders)
                 
                 # Audit Log
-                log_action('Item Removido', 
-                           f'Item {target_item["name"]} removido da Mesa {table_id} por {session.get("user")}. Motivo: {reason}', 
-                           department='Restaurante')
+                log_msg = f'{removed_count}x Item(s) removido(s) da Mesa {table_id} por {session.get("user")}. Motivo: {reason}'
+                if removed_count == 1:
+                     log_msg = f'Item {last_removed_name} removido da Mesa {table_id} por {session.get("user")}. Motivo: {reason}'
+                
+                log_action('Item Removido', log_msg, department='Restaurante')
                 
                 if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                     return jsonify({
                         'success': True, 
                         'new_total': total,
-                        'message': 'Item removido com sucesso.'
+                        'message': 'Item(ns) removido(s) com sucesso.'
                     })
                 
-                flash('Item removido com sucesso.')
+                flash('Item(ns) removido(s) com sucesso.')
                 return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
                 
             except Exception as e:
@@ -1144,6 +1184,8 @@ def restaurant_table_order(table_id):
 
                 products_insumos = load_products()
                 insumo_map = {str(i['id']): i for i in products_insumos if i.get('id') is not None}
+                flavor_groups = load_flavor_groups()
+                flavor_group_map = {str(g.get('id')): g for g in flavor_groups if g.get('id') is not None}
                 
                 all_comps = load_complements()
                 comp_map = {str(c['id']): c for c in all_comps}
@@ -1242,6 +1284,56 @@ def restaurant_table_order(table_id):
                                 save_stock_entry(entry_data)
                         except Exception as e:
                             current_app.logger.error(f"Stock deduction error (Restaurant): {e}")
+
+                    flavor_group_id = product.get('flavor_group_id')
+                    flavor_ids_raw = item_data.get('flavor_id')
+                    if flavor_group_id and flavor_ids_raw:
+                        group = flavor_group_map.get(str(flavor_group_id))
+                        if group and group.get('items'):
+                            if isinstance(flavor_ids_raw, str):
+                                flavor_ids_list = [f.strip() for f in flavor_ids_raw.split(',') if f and str(f).strip()]
+                            elif isinstance(flavor_ids_raw, list):
+                                flavor_ids_list = [str(f).strip() for f in flavor_ids_raw if f is not None and str(f).strip()]
+                            else:
+                                flavor_ids_list = []
+
+                            if flavor_ids_list:
+                                try:
+                                    multiplier = float(product.get('flavor_multiplier', 1.0) or 1.0)
+                                except (TypeError, ValueError):
+                                    multiplier = 1.0
+
+                                for fid in flavor_ids_list:
+                                    group_item = next((i for i in group['items'] if str(i.get('id')) == fid), None)
+                                    if not group_item:
+                                        continue
+
+                                    try:
+                                        unit_qty = float(group_item.get('qty', 0))
+                                    except (TypeError, ValueError):
+                                        continue
+
+                                    if unit_qty <= 0:
+                                        continue
+
+                                    insumo_data = insumo_map.get(str(group_item.get('id')))
+                                    if not insumo_data:
+                                        continue
+
+                                    total_needed = unit_qty * qty * multiplier
+
+                                    entry_data = {
+                                        'id': f"SALE_REST_FLAVOR_{table_id}_{datetime.now().strftime('%Y%m%d%H%M%S')}_{group_item.get('id')}",
+                                        'user': session.get('user', 'Sistema'),
+                                        'product': insumo_data['name'],
+                                        'supplier': f"VENDA: Mesa {table_id}",
+                                        'qty': -total_needed,
+                                        'price': insumo_data.get('price', 0),
+                                        'invoice': f"Sabor Restaurante: {product.get('name')}",
+                                        'date': datetime.now().strftime('%d/%m/%Y'),
+                                        'entry_date': datetime.now().strftime('%d/%m/%Y %H:%M')
+                                    }
+                                    save_stock_entry(entry_data)
                     
                     # Prepare Item
                     order_item = {
@@ -1431,6 +1523,17 @@ def restaurant_table_order(table_id):
                         flash(f'Erro: Valor total pago (R$ {total_paid_all:.2f}) é menor que o total da conta (R$ {grand_total:.2f}). Falta R$ {remaining:.2f}.')
                         return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
                     
+                    # Validation: Prevent overcharging on non-cash methods (Critical Fix)
+                    needed = grand_total - already_paid
+                    if needed < 0: needed = 0
+                    
+                    new_non_cash = sum(float(p.get('amount', 0)) for p in payments if 'dinheiro' not in str(p.get('method', '')).lower())
+                    
+                    if new_non_cash > (needed + 0.05):
+                         current_app.logger.warning(f"Overpayment attempt blocked for table {table_id}. Needed: {needed}, Non-Cash Attempt: {new_non_cash}")
+                         flash(f'Erro: O valor em cartão/outros (R$ {new_non_cash:.2f}) excede o restante a pagar (R$ {needed:.2f}). Verifique os pagamentos parciais.')
+                         return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
+                    
                     current_cashier = get_current_cashier(cashier_type='restaurant')
                     if not current_cashier:
                         flash('Erro: Caixa fechado. Não é possível finalizar.')
@@ -1588,15 +1691,35 @@ def restaurant_table_order(table_id):
                 
                 order['payments'] = all_payments
                 sales_history.append(order)
-                if not save_sales_history(sales_history):
-                    flash('Erro ao salvar histórico de vendas.')
+                try:
+                    secure_save_sales_history(sales_history, session.get('user', 'Sistema'))
+                except Exception as e:
+                    flash(f'Erro ao salvar histórico de vendas (Segurança): {e}')
                     return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
+                
+                # Shadow Log (Security Audit) - Backup for Closure
+                log_security_audit(
+                    event_type='TABLE_CLOSE',
+                    details={
+                        'table_id': table_id,
+                        'full_order_dump': orders[str_table_id],
+                        'reason': 'Regular Close',
+                        'final_total': grand_total
+                    },
+                    user=session.get('user'),
+                    ip_address=request.remote_addr
+                )
                 
                 del orders[str_table_id]
                 if not save_table_orders(orders):
-                    sales_history = load_sales_history()
-                    sales_history = [s for s in sales_history if s.get('close_id') != close_id]
-                    save_sales_history(sales_history)
+                    # Rollback (manual) - Remove from sales history if table save fails
+                    # This is tricky with secure save, but let's try
+                    try:
+                        sales_history = load_sales_history()
+                        sales_history = [s for s in sales_history if s.get('close_id') != close_id]
+                        secure_save_sales_history(sales_history, session.get('user', 'Sistema'))
+                    except:
+                        pass
                     flash('Erro ao atualizar mesas. Tente novamente.')
                     return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
                 
@@ -1712,6 +1835,7 @@ def restaurant_table_order(table_id):
                      current_app.logger.info(f"Mesa {table_id} totalmente paga via parcial. Total Pago: {orders[str_table_id]['total_paid']:.2f}")
 
                 save_table_orders(orders)
+                log_action('Pagamento Parcial', f'Mesa {table_id}: R$ {amount:.2f} ({method}) por {session.get("user")}', department='Restaurante')
                 flash('Pagamento parcial registrado.')
 
         elif action == 'void_partial_payment':
@@ -1739,6 +1863,7 @@ def restaurant_table_order(table_id):
                         )
                      
                      save_table_orders(orders)
+                     log_action('Estorno Pagamento Parcial', f'Mesa {table_id}: R$ {to_remove["amount"]:.2f} ({to_remove["method"]}) por {session.get("user")}', department='Restaurante')
                      flash('Pagamento estornado.')
 
         elif action == 'pull_bill':
@@ -1815,6 +1940,18 @@ def restaurant_table_order(table_id):
                     print_cancellation_items(table_id, session.get('user'), orders[str_table_id]['items'], printers, menu_items, justification="Cancelamento Mesa")
                 except Exception as e:
                     current_app.logger.error(f"Erro ao imprimir cancelamento: {e}")
+                
+                # Shadow Log (Security Audit)
+                log_security_audit(
+                    event_type='TABLE_CANCELLATION',
+                    details={
+                        'table_id': table_id,
+                        'full_order_dump': orders[str_table_id],
+                        'reason': 'User Request (Cancel Button)'
+                    },
+                    user=session.get('user'),
+                    ip_address=request.remote_addr
+                )
                 
                 del orders[str_table_id]
                 save_table_orders(orders)
@@ -2085,7 +2222,12 @@ def restaurant_table_order(table_id):
                     order['discounts'].append({'type': 'staff', 'percent': 20, 'amount': discount_amount})
                     order['final_total'] = final_total
                     sales_history.append(order)
-                    save_sales_history(sales_history)
+                    try:
+                        secure_save_sales_history(sales_history, session.get('user', 'Sistema'))
+                    except Exception as e:
+                        current_app.logger.error(f"Erro secure_save em transfer_to_staff: {e}")
+                        flash('Erro ao salvar histórico. Tente novamente.')
+                        return redirect(url_for('restaurant.restaurant_tables'))
                     
                     # Lançar transação no caixa do Restaurante para consolidar consumo de funcionário nos relatórios
                     try:
@@ -2898,3 +3040,168 @@ def cancel_waiting_list_entry(id):
             session.pop('waiting_list_id', None)
         flash('Você saiu da fila.')
     return redirect(url_for('restaurant.public_waiting_list'))
+
+# --- Bar Module ---
+
+@restaurant_bp.route('/restaurant/bar')
+@login_required
+def bar_dashboard():
+    try:
+        bar_data = load_bar_data()
+        if not isinstance(bar_data, dict):
+            current_app.logger.warning(f"bar_data was not a dict ({type(bar_data)}), resetting.")
+            bar_data = {"storage_units": [], "checklists": [], "settings": {}}
+            
+        products_insumos = load_products()
+        if not isinstance(products_insumos, list):
+            products_insumos = []
+        
+        # Calculate restocking needs
+        restocking_needs = []
+        settings = bar_data.get('settings', {})
+        multiplier = 1.0
+        
+        # Check if today is Thursday, Friday or Saturday (3, 4, 5)
+        today_weekday = datetime.now().weekday()
+        if today_weekday in [3, 4, 5]:
+            multiplier = settings.get('thursday_saturday_multiplier', 1.4)
+            
+        for unit in bar_data.get('storage_units', []):
+            if not isinstance(unit, dict): continue
+            for item in unit.get('items', []):
+                if not isinstance(item, dict): continue
+                
+                try:
+                    current = float(item.get('current_stock', 0))
+                    min_stock = float(item.get('min_stock', 0))
+                    ideal = float(item.get('ideal_stock', 0))
+                except (ValueError, TypeError):
+                    continue
+                
+                status = 'ok'
+                if current <= min_stock:
+                    status = 'critical'
+                elif current < ideal:
+                    status = 'warning'
+                    
+                needed = max(0, (ideal * multiplier) - current)
+                
+                if needed > 0 or status == 'critical':
+                    restocking_needs.append({
+                        'unit_name': unit.get('name', 'Unidade'),
+                        'item_name': item.get('name', 'Item'),
+                        'current': current,
+                        'min': min_stock,
+                        'ideal': ideal,
+                        'needed': needed,
+                        'status': status
+                    })
+
+        return render_template('bar_dashboard.html', 
+                               bar_data=bar_data, 
+                               restocking_needs=restocking_needs,
+                               products=products_insumos,
+                               today_multiplier=multiplier)
+    except Exception as e:
+        current_app.logger.error(f"Error in bar_dashboard: {e}")
+        import traceback
+        traceback.print_exc()
+        return f"Erro ao carregar dashboard: {str(e)}", 500
+
+@restaurant_bp.route('/restaurant/bar/storage/add', methods=['POST'])
+@login_required
+def bar_add_storage():
+    try:
+        bar_data = load_bar_data()
+        if not isinstance(bar_data, dict):
+            bar_data = {"storage_units": []}
+            
+        name = request.form.get('name')
+        capacity = request.form.get('capacity')
+        
+        if name:
+            new_unit = {
+                'id': str(uuid.uuid4()),
+                'name': name,
+                'capacity': int(capacity) if capacity else 0,
+                'items': []
+            }
+            
+            # Ensure storage_units is a list
+            if 'storage_units' not in bar_data or not isinstance(bar_data['storage_units'], list):
+                bar_data['storage_units'] = []
+                
+            bar_data['storage_units'].append(new_unit)
+            save_bar_data(bar_data)
+            flash('Unidade de armazenamento adicionada.')
+        
+        return redirect(url_for('restaurant.bar_dashboard'))
+    except Exception as e:
+        current_app.logger.error(f"Error in bar_add_storage: {e}")
+        flash(f'Erro ao adicionar unidade: {str(e)}')
+        return redirect(url_for('restaurant.bar_dashboard'))
+
+@restaurant_bp.route('/restaurant/bar/item/add', methods=['POST'])
+@login_required
+def bar_add_item():
+    bar_data = load_bar_data()
+    unit_id = request.form.get('unit_id')
+    product_name = request.form.get('product_name')
+    min_stock = float(request.form.get('min_stock', 0))
+    ideal_stock = float(request.form.get('ideal_stock', 0))
+    current_stock = float(request.form.get('current_stock', 0))
+    
+    for unit in bar_data['storage_units']:
+        if unit['id'] == unit_id:
+            unit['items'].append({
+                'id': str(uuid.uuid4()),
+                'name': product_name,
+                'min_stock': min_stock,
+                'ideal_stock': ideal_stock,
+                'current_stock': current_stock
+            })
+            break
+            
+    save_bar_data(bar_data)
+    flash('Item adicionado.')
+    return redirect(url_for('restaurant.bar_dashboard'))
+
+@restaurant_bp.route('/restaurant/bar/item/update', methods=['POST'])
+@login_required
+def bar_update_item():
+    bar_data = load_bar_data()
+    unit_id = request.form.get('unit_id')
+    item_id = request.form.get('item_id')
+    current_stock = float(request.form.get('current_stock', 0))
+    
+    for unit in bar_data['storage_units']:
+        if unit['id'] == unit_id:
+            for item in unit['items']:
+                if item['id'] == item_id:
+                    item['current_stock'] = current_stock
+                    break
+            break
+            
+    save_bar_data(bar_data)
+    flash('Estoque atualizado.')
+    return redirect(url_for('restaurant.bar_dashboard'))
+    
+@restaurant_bp.route('/restaurant/bar/checklist/save', methods=['POST'])
+@login_required
+def bar_save_checklist():
+    bar_data = load_bar_data()
+    checklist_type = request.form.get('type') # daily/weekly
+    notes = request.form.get('notes')
+    
+    entry = {
+        'id': str(uuid.uuid4()),
+        'date': datetime.now().strftime('%d/%m/%Y %H:%M'),
+        'user': session.get('user'),
+        'type': checklist_type,
+        'notes': notes
+    }
+    
+    bar_data['checklists'].append(entry)
+    save_bar_data(bar_data)
+    flash('Checklist salvo.')
+    return redirect(url_for('restaurant.bar_dashboard'))

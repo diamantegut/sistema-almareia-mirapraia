@@ -23,7 +23,7 @@ Move-Safe "static" "$trash\static_legacy"
 Move-Safe "services" "$trash\services_legacy"
 
 # 4. Mover scripts soltos da raiz (exceto os essenciais)
-$keep = @("run.py", "clean_project.ps1", "production_run.py", "wsgi.py", "requirements.txt", "README.md", "checklist_items.json", "daily_checklists.json", "menu_items.json", "products.json", "users.json")
+$keep = @("run.py", "clean_project.ps1", "production_run.py", "wsgi.py", "requirements.txt", "README.md", "system_config.json", ".env")
 $scripts = Get-ChildItem -Path . -Filter "*.py"
 foreach ($s in $scripts) {
     if ($keep -notcontains $s.Name) {
@@ -32,5 +32,8 @@ foreach ($s in $scripts) {
          Move-Safe $s.FullName "$dest\$($s.Name)"
     }
 }
+
+# PROTEÇÃO DE DADOS: Não mover arquivos .json críticos
+Write-Host "Protegendo arquivos JSON na raiz..."
 
 Write-Host "Limpeza concluída! Arquivos movidos para _trash."

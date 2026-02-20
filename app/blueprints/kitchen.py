@@ -16,7 +16,7 @@ from app.services.kitchen_checklist_service import KitchenChecklistService
 from app.services.data_service import load_products, load_menu_items, save_menu_items
 from app.services.system_config_manager import get_data_path, PRODUCT_PHOTOS_DIR
 from werkzeug.utils import secure_filename
-from app.services.printing_service import get_default_printer
+from app.services.printing_service import get_default_printer, print_portion_labels
 
 kitchen_bp = Blueprint('kitchen', __name__)
 
@@ -368,8 +368,8 @@ def kitchen_kds_mark_received():
 @kitchen_bp.route('/kitchen/portion/settings', methods=['GET', 'POST'])
 @login_required
 def kitchen_portion_settings():
-    # Permissões: Admin
-    if session.get('role') != 'admin':
+    # Permissões: Supervisor, Gerente e Admin
+    if session.get('role') not in ['admin', 'gerente', 'supervisor']:
          flash('Acesso restrito.')
          return redirect(url_for('main.service_page', service_id='cozinha'))
 
@@ -496,6 +496,8 @@ def kitchen_portion():
         frozen_weight = request.form.get('frozen_weight')
         thawed_weight = request.form.get('thawed_weight')
         trim_weight = request.form.get('trim_weight')
+        component_names = request.form.getlist('component_product[]')
+        component_weights = request.form.getlist('component_weight[]')
         
         # New Multi-destination handling
         dest_names = request.form.getlist('dest_product[]')
@@ -585,52 +587,74 @@ def kitchen_portion():
             flash('Quantidades de entrada e saída devem ser positivas.')
             return redirect(url_for('kitchen.kitchen_portion'))
 
+        # Build optional multi-origin components
+        components = []
+        for i in range(len(component_names)):
+            name = component_names[i].strip() if i < len(component_names) and component_names[i] else ''
+            weight_str = component_weights[i] if i < len(component_weights) else ''
+            if not name and not weight_str:
+                continue
+            try:
+                weight_g = float(weight_str)
+            except (TypeError, ValueError):
+                weight_g = 0.0
+            if name and weight_g > 0:
+                components.append({'name': name, 'weight_g': weight_g})
+
         # Get product details for pricing
         origin_prod = next((p for p in products if p['name'] == origin_name), None)
-        
+
         # Calculate Losses
         thaw_loss_kg = frozen_weight_kg - thawed_weight_kg
         trim_loss_kg = trim_weight_kg
-        
-        # 1. Register Exit for Origin Product (Frozen Weight)
-        exit_entry = {
-            'id': datetime.now().strftime('%Y%m%d%H%M%S') + "_PORT_OUT",
-            'user': session['user'],
-            'product': origin_name,
-            'supplier': "PORCIONAMENTO (SAÍDA)",
-            'qty': -frozen_weight_kg,
-            'price': origin_prod.get('price', 0) if origin_prod else 0,
-            'invoice': f"Transf: {', '.join([d['name'] for d in parsed_destinations])} | Degelo: {thaw_loss_kg:.3f}kg | Aparas: {trim_loss_kg:.3f}kg",
-            'date': datetime.now().strftime('%d/%m/%Y'),
-            'entry_date': datetime.now().strftime('%d/%m/%Y %H:%M')
-        }
-        save_stock_entry(exit_entry)
 
-        # 2. Register Entry for Destination Products
+        labels = []
+
+        # 1. Register Exit for Origin Product(s)
         total_origin_cost = 0
-        if origin_prod and origin_prod.get('price'):
-             total_origin_cost = frozen_weight_kg * float(origin_prod['price'])
+
+        if components:
+            for comp in components:
+                comp_prod = next((p for p in products if p['name'] == comp['name']), None)
+                comp_weight_kg = comp['weight_g'] / 1000.0
+                price = float(comp_prod.get('price', 0)) if comp_prod and comp_prod.get('price') else 0
+                total_origin_cost += comp_weight_kg * price
+
+                exit_entry = {
+                    'id': datetime.now().strftime('%Y%m%d%H%M%S') + f"_PORT_OUT_{comp['name']}",
+                    'user': session['user'],
+                    'product': comp['name'],
+                    'supplier': "PORCIONAMENTO (SAÍDA)",
+                    'qty': -comp_weight_kg,
+                    'price': price,
+                    'invoice': f"Transf: {', '.join([d['name'] for d in parsed_destinations])} | Degelo: {thaw_loss_kg:.3f}kg | Aparas: {trim_loss_kg:.3f}kg",
+                    'date': datetime.now().strftime('%d/%m/%Y'),
+                    'entry_date': datetime.now().strftime('%d/%m/%Y %H:%M')
+                }
+                save_stock_entry(exit_entry)
+        else:
+            exit_entry = {
+                'id': datetime.now().strftime('%Y%m%d%H%M%S') + "_PORT_OUT",
+                'user': session['user'],
+                'product': origin_name,
+                'supplier': "PORCIONAMENTO (SAÍDA)",
+                'qty': -frozen_weight_kg,
+                'price': origin_prod.get('price', 0) if origin_prod else 0,
+                'invoice': f"Transf: {', '.join([d['name'] for d in parsed_destinations])} | Degelo: {thaw_loss_kg:.3f}kg | Aparas: {trim_loss_kg:.3f}kg",
+                'date': datetime.now().strftime('%d/%m/%Y'),
+                'entry_date': datetime.now().strftime('%d/%m/%Y %H:%M')
+            }
+            save_stock_entry(exit_entry)
+
+            if origin_prod and origin_prod.get('price'):
+                total_origin_cost = frozen_weight_kg * float(origin_prod['price'])
         
         for dest in parsed_destinations:
-            dest_prod = next((p for p in products if p['name'] == dest['name']), None)
-            
-            unit = dest_prod.get('unit', 'Kilogramas')
-            
             allocation_ratio = dest['qty_kg'] / total_output_weight_kg if total_output_weight_kg > 0 else 0
             total_dest_cost = total_origin_cost * allocation_ratio
-            
-            final_qty = 0
-            final_price = 0
-            
-            if unit in ['Unidade', 'UN', 'un', 'Unit']:
-                final_qty = dest['count']
-                final_price = total_dest_cost / final_qty if final_qty > 0 else 0
-            elif unit in ['Gramas', 'g', 'G']:
-                 final_qty = dest['qty_g']
-                 final_price = total_dest_cost / final_qty if final_qty > 0 else 0
-            else: # Default to KG
-                 final_qty = dest['qty_kg']
-                 final_price = total_dest_cost / final_qty if final_qty > 0 else 0
+
+            final_qty = dest['count']
+            final_price = total_dest_cost / final_qty if final_qty > 0 else 0
             
             entry_entry = {
                 'id': datetime.now().strftime('%Y%m%d%H%M%S') + f"_PORT_IN_{dest['name']}",
@@ -645,6 +669,31 @@ def kitchen_portion():
             }
             save_stock_entry(entry_entry)
 
+            avg_weight = None
+            if dest['count'] > 0:
+                avg_g = dest['qty_g'] / dest['count']
+                avg_weight = f"{avg_g:.0f} g"
+            else:
+                avg_weight = f"{dest['qty_g']:.0f} g"
+
+            label_data = {
+                'name': dest['name'],
+                'avg_weight': avg_weight,
+                'date': datetime.now().strftime('%d/%m/%Y'),
+                'expiry': (datetime.now() + timedelta(days=90)).strftime('%d/%m/%Y'),
+                'user': session.get('user', '')
+            }
+
+            copies = int(dest['count']) if dest['count'] and dest['count'] > 0 else 1
+            for _ in range(copies):
+                labels.append(label_data)
+
+        if labels:
+            try:
+                print_portion_labels(labels)
+            except Exception as e:
+                print(f"Error printing portion labels: {e}")
+
         flash(f'Porcionamento realizado com sucesso! Rendimento Global: {((total_output_weight_kg/frozen_weight_kg)*100):.1f}%')
         return redirect(url_for('main.service_page', service_id='cozinha'))
 
@@ -657,17 +706,16 @@ def kitchen_reports():
          flash('Acesso não autorizado.')
          return redirect(url_for('main.service_page', service_id='cozinha'))
 
-    # Filters
     start_date = request.args.get('start_date', '')
     end_date = request.args.get('end_date', '')
-    product_filters = request.args.getlist('products[]') # Multi-select
+    product_filters = request.args.getlist('products[]')
+    staff_filters = request.args.getlist('staff[]')
     page = int(request.args.get('page', 1))
     per_page = 20
     
     products = load_products()
     all_products = products
     
-    # Process Dates
     d_start = datetime.min
     d_end = datetime.max
     
@@ -686,8 +734,8 @@ def kitchen_reports():
             
     entries = load_stock_entries()
     
-    # Filter Portioning Entries (Outbound - Origin)
     filtered_data = []
+    staff_set = set()
     
     for entry in entries:
         if not ("_PORT_OUT" in entry['id'] or "PORCIONAMENTO (SAÍDA)" in str(entry.get('supplier', ''))):
@@ -706,23 +754,34 @@ def kitchen_reports():
             
         if product_filters and entry['product'] not in product_filters:
             continue
-            
-        # Process Data
+
+        staff_name = entry.get('user', 'N/A')
+        if staff_name:
+            staff_set.add(staff_name)
+        if staff_filters and staff_name not in staff_filters:
+            continue
+
         invoice_text = entry.get('invoice', '')
         degelo = 0.0
         aparas = 0.0
         
         degelo_match = re.search(r'Degelo:\s*([\d\.]+)kg', invoice_text)
-        if degelo_match: degelo = float(degelo_match.group(1))
+        if degelo_match:
+            degelo = float(degelo_match.group(1))
             
         aparas_match = re.search(r'Aparas:\s*([\d\.]+)kg', invoice_text)
-        if aparas_match: aparas = float(aparas_match.group(1))
+        if aparas_match:
+            aparas = float(aparas_match.group(1))
         
         input_weight_kg = abs(float(entry['qty']))
-        
+
+        useful_weight_kg = input_weight_kg - degelo - aparas
         degelo_percent = (degelo / input_weight_kg * 100) if input_weight_kg > 0 else 0
-        
+        waste_percent = ((degelo + aparas) / input_weight_kg * 100) if input_weight_kg > 0 else 0
+        yield_percent = (useful_weight_kg / input_weight_kg * 100) if input_weight_kg > 0 else 0
+
         total_cost = input_weight_kg * float(entry.get('price', 0))
+        cost_per_useful_kg = (total_cost / useful_weight_kg) if useful_weight_kg > 0 else 0.0
         
         filtered_data.append({
             'id': entry['id'],
@@ -730,40 +789,35 @@ def kitchen_reports():
             'date': e_date.strftime('%d/%m/%Y %H:%M'),
             'product': entry['product'],
             'qty_kg': input_weight_kg,
-            'staff': entry.get('user', 'N/A'),
+            'staff': staff_name,
             'price_gross': float(entry.get('price', 0)),
             'ice_loss_pct': degelo_percent,
-            'total_cost_liquid': total_cost, # Assumed as total value of batch
+            'waste_pct': waste_percent,
+            'yield_pct': yield_percent,
+            'degelo_kg': degelo,
+            'aparas_kg': aparas,
+            'useful_kg': useful_weight_kg,
+            'total_cost_liquid': total_cost,
+            'cost_per_useful_kg': cost_per_useful_kg,
             'details': invoice_text
         })
         
     # Sort by date desc
     filtered_data.sort(key=lambda x: x['date_obj'], reverse=True)
     
-    # Statistics
     stats = {
         'total_kg': sum(d['qty_kg'] for d in filtered_data),
         'total_value': sum(d['total_cost_liquid'] for d in filtered_data),
-        'count': len(filtered_data)
+        'count': len(filtered_data),
+        'avg_yield_pct': (sum(d['yield_pct'] for d in filtered_data) / len(filtered_data)) if filtered_data else 0.0,
+        'avg_waste_pct': (sum(d['waste_pct'] for d in filtered_data) / len(filtered_data)) if filtered_data else 0.0
     }
     
-    # Pagination
     total_items = len(filtered_data)
     total_pages = (total_items + per_page - 1) // per_page
     start_idx = (page - 1) * per_page
     end_idx = start_idx + per_page
     paginated_data = filtered_data[start_idx:end_idx]
-    
-    # Low Stock Alerts (Keep existing logic simplified)
-    low_stock_logs = load_stock_logs()
-    now = datetime.now()
-    low_stock_alerts = []
-    # ... (Simplified loading of alerts if needed, or keep it separate/ajax)
-    # For now, let's keep alerts minimal or remove if not requested in prompt (Prompt focused on portioning history)
-    # User said "adicione um histórico completo...". Didn't say remove alerts, but maybe alerts are less important here.
-    # I will preserve alerts logic but maybe minimized code or just pass empty if not needed.
-    # Actually, user just asked to ADD history. So I should keep existing features if possible.
-    # But for cleaner code, I'll focus on the requested features.
     
     return render_template('kitchen_reports.html',
                          data=paginated_data,
@@ -773,7 +827,9 @@ def kitchen_reports():
                          all_products=all_products,
                          start_date=start_date,
                          end_date=end_date,
-                         selected_products=product_filters)
+                         selected_products=product_filters,
+                         staff_options=sorted(staff_set),
+                         selected_staff=staff_filters)
 
 @kitchen_bp.route('/kitchen/reports/export')
 @login_required
@@ -782,10 +838,10 @@ def kitchen_reports_export():
     import io
     from flask import make_response
     
-    # Duplicate filter logic (should be refactored to a helper, but for now inline)
     start_date = request.args.get('start_date', '')
     end_date = request.args.get('end_date', '')
     product_filters = request.args.getlist('products[]')
+    staff_filters = request.args.getlist('staff[]')
     fmt = request.args.get('format', 'csv')
     
     entries = load_stock_entries()
@@ -808,38 +864,83 @@ def kitchen_reports_export():
              try: e_date = datetime.strptime(entry['date'], '%d/%m/%Y')
              except: continue
         if not (d_start <= e_date <= d_end): continue
-        if product_filters and entry['product'] not in product_filters: continue
-        
+        if product_filters and entry['product'] not in product_filters:
+            continue
+
+        staff_name = entry.get('user', 'N/A')
+        if staff_filters and staff_name not in staff_filters:
+            continue
+
         invoice_text = entry.get('invoice', '')
         degelo = 0.0
+        aparas = 0.0
+
         degelo_match = re.search(r'Degelo:\s*([\d\.]+)kg', invoice_text)
-        if degelo_match: degelo = float(degelo_match.group(1))
-        
+        if degelo_match:
+            degelo = float(degelo_match.group(1))
+
+        aparas_match = re.search(r'Aparas:\s*([\d\.]+)kg', invoice_text)
+        if aparas_match:
+            aparas = float(aparas_match.group(1))
+
         input_weight_kg = abs(float(entry['qty']))
+        useful_kg = input_weight_kg - degelo - aparas
+
         degelo_percent = (degelo / input_weight_kg * 100) if input_weight_kg > 0 else 0
+        waste_percent = ((degelo + aparas) / input_weight_kg * 100) if input_weight_kg > 0 else 0
+        yield_percent = (useful_kg / input_weight_kg * 100) if input_weight_kg > 0 else 0
+
         total_cost = input_weight_kg * float(entry.get('price', 0))
-        
+        cost_per_useful_kg = (total_cost / useful_kg) if useful_kg > 0 else 0.0
+
         filtered_data.append({
             'date': e_date.strftime('%d/%m/%Y %H:%M'),
             'product': entry['product'],
             'qty_kg': input_weight_kg,
-            'staff': entry.get('user', 'N/A'),
+            'staff': staff_name,
             'price_gross': float(entry.get('price', 0)),
             'ice_loss_pct': degelo_percent,
-            'total_cost': total_cost
+            'waste_pct': waste_percent,
+            'yield_pct': yield_percent,
+            'degelo_kg': degelo,
+            'aparas_kg': aparas,
+            'useful_kg': useful_kg,
+            'total_cost': total_cost,
+            'cost_per_useful_kg': cost_per_useful_kg
         })
     
     if fmt == 'csv':
         si = io.StringIO()
         cw = csv.writer(si, delimiter=';') # Excel friendly
-        cw.writerow(['Data/Hora', 'Produto', 'Qtd (Kg)', 'Funcionario', 'Preco Bruto/Kg', 'Perda Gelo %', 'Custo Total'])
+        cw.writerow([
+            'Data/Hora',
+            'Produto',
+            'Qtd Bruta (Kg)',
+            'Kg Degelo',
+            'Kg Aparas',
+            'Kg Útil',
+            'Rendimento %',
+            'Perda Total %',
+            'Funcionario',
+            'Preco Bruto/Kg',
+            'Perda Gelo %',
+            'Custo/ Kg Útil',
+            'Custo Total'
+        ])
         for row in filtered_data:
             cw.writerow([
-                row['date'], row['product'], 
+                row['date'],
+                row['product'],
                 f"{row['qty_kg']:.3f}".replace('.', ','),
+                f"{row['degelo_kg']:.3f}".replace('.', ','),
+                f"{row['aparas_kg']:.3f}".replace('.', ','),
+                f"{row['useful_kg']:.3f}".replace('.', ','),
+                f"{row['yield_pct']:.1f}".replace('.', ','),
+                f"{row['waste_pct']:.1f}".replace('.', ','),
                 row['staff'],
                 f"{row['price_gross']:.2f}".replace('.', ','),
                 f"{row['ice_loss_pct']:.1f}".replace('.', ','),
+                f"{row['cost_per_useful_kg']:.2f}".replace('.', ','),
                 f"{row['total_cost']:.2f}".replace('.', ',')
             ])
         output = make_response(si.getvalue())

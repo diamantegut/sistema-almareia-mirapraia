@@ -132,7 +132,18 @@ class SefazService:
         # Montar XML do pedido (distDFeInt) - Versão 1.01
         # cUFAutor: Deve ser a UF do interessado (26=PE), não 91 (AN) nem 35 (SP)
         # O CNPJ é de Pernambuco.
-        xml_body = f'<distDFeInt xmlns="http://www.portalfiscal.inf.br/nfe" versao="1.01"><tpAmb>{ambiente}</tpAmb><cUFAutor>26</cUFAutor><CNPJ>{cnpj}</CNPJ><distNSU><ultNSU>{ult_nsu}</ultNSU></distNSU></distDFeInt>'
+        # Ajuste: A SEFAZ exige que a tag distNSU contenha ultNSU com 15 dígitos.
+        # Ajuste 2: O XML deve ser bem formatado.
+        
+        # Corrigindo formato do XML para evitar rejeição
+        xml_body = f"""<distDFeInt xmlns="http://www.portalfiscal.inf.br/nfe" versao="1.01">
+    <tpAmb>{ambiente}</tpAmb>
+    <cUFAutor>91</cUFAutor>
+    <CNPJ>{cnpj}</CNPJ>
+    <distNSU>
+        <ultNSU>{ult_nsu.zfill(15)}</ultNSU>
+    </distNSU>
+</distDFeInt>"""
 
         envelope = self._build_soap_envelope(
             xml_body, 

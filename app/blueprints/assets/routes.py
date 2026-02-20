@@ -4,7 +4,7 @@ from app.utils.decorators import login_required
 from app.services.data_service import (
     load_fixed_assets, save_fixed_assets,
     load_products, save_stock_entry, log_stock_action,
-    load_users, save_products,
+    load_users, save_products, secure_save_products,
     load_asset_conferences, save_asset_conferences
 )
 from app.services.stock_service import get_product_balances
@@ -458,7 +458,10 @@ def transfer():
             
             if products_to_remove:
                 products = [p for p in products if p['id'] not in products_to_remove]
-                save_products(products)
+                try:
+                    secure_save_products(products, user_id=session.get('user', 'Sistema'))
+                except ValueError as e:
+                    return jsonify({'success': False, 'error': f'Erro ao atualizar produtos: {e}'})
                 
             return jsonify({'success': True, 'message': f'{transferred_count} itens transferidos.'})
             

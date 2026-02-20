@@ -236,7 +236,7 @@
                             <div class="form-text">Usada para extratos e relatórios de consumo na recepção.</div>
                         </div>
 
-                        <div class="col-md-6 mt-3">
+                        <div class="col-md-4 mt-3">
                             <label for="kitchen_printer_id" class="form-label">Impressora da Cozinha (Padrão)</label>
                             <select class="form-select no-search" id="kitchen_printer_id" name="kitchen_printer_id">
                                 <option value="">-- Nenhuma Selecionada --</option>
@@ -250,7 +250,21 @@
                             <div class="form-text">Fallback para pedidos de cozinha sem mapeamento específico.</div>
                         </div>
 
-                        <div class="col-md-6 mt-3">
+                        <div class="col-md-4 mt-3">
+                            <label for="kitchen_portion_printer_id" class="form-label">Impressora Cozinha (Porcionamento)</label>
+                            <select class="form-select no-search" id="kitchen_portion_printer_id" name="kitchen_portion_printer_id">
+                                <option value="">-- Nenhuma Selecionada --</option>
+                                {% set target_kitchen_portion = printer_settings.get('kitchen_portion_printer_id')|string if printer_settings else '' %}
+                                {% for printer in printers %}
+                                    <option value="{{ printer.id }}" {% if printer.id|string == target_kitchen_portion %}selected{% endif %}>
+                                        {{ printer.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">Usada para etiquetas de porcionamento de cozinha.</div>
+                        </div>
+
+                        <div class="col-md-4 mt-3">
                             <label for="bar_printer_id" class="form-label">Impressora do Bar (Padrão)</label>
                             <select class="form-select no-search" id="bar_printer_id" name="bar_printer_id">
                                 <option value="">-- Nenhuma Selecionada --</option>

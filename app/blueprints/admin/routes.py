@@ -883,6 +883,7 @@ def printers_config():
             printer_settings['fiscal_printer_id'] = request.form.get('fiscal_printer_id')
             printer_settings['reception_printer_id'] = request.form.get('reception_printer_id')
             printer_settings['kitchen_printer_id'] = request.form.get('kitchen_printer_id')
+            printer_settings['kitchen_portion_printer_id'] = request.form.get('kitchen_portion_printer_id')
             printer_settings['bar_printer_id'] = request.form.get('bar_printer_id')
             
             printer_settings['frigobar_filter_enabled'] = request.form.get('frigobar_filter_enabled') == 'on'
@@ -910,8 +911,11 @@ def printers_config():
                         updates += 1
             
             if updates > 0:
-                save_menu_items(menu_items)
-                flash(f'Mapeamento atualizado. {updates} itens modificados.')
+                try:
+                    secure_save_menu_items(menu_items, session.get('user', 'Sistema'))
+                    flash(f'Mapeamento atualizado. {updates} itens modificados.')
+                except Exception as e:
+                    flash(f'Erro de segurança ao salvar mapeamento: {e}')
             
             # Reload map for display
             return redirect(url_for('admin.printers_config'))

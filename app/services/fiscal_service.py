@@ -906,7 +906,10 @@ def _get_sefaz_service_instance(settings):
 def _list_received_nfes_sefaz(settings):
     block_until = get_sefaz_block_until()
     if block_until and datetime.now() < block_until:
-        return None, "As consultas DF-e foram temporariamente bloqueadas pela SEFAZ por 'Consumo Indevido'. Aguarde pelo menos 1 hora desde a primeira mensagem de bloqueio, evite novas tentativas repetidas nesse período e verifique se outro sistema (como contabilidade ou outro software) não está consultando DF-e com o mesmo certificado/CNPJ."
+        remaining = block_until - datetime.now()
+        minutes = int(remaining.total_seconds() / 60)
+        return None, f"As consultas DF-e foram temporariamente bloqueadas pela SEFAZ por 'Consumo Indevido'. Aguarde {minutes} minutos."
+    
     service = _get_sefaz_service_instance(settings)
     if not service:
         return None, "Certificado digital não configurado ou inválido (verifique data/certs)."
@@ -914,50 +917,118 @@ def _list_received_nfes_sefaz(settings):
     try:
         with service:
             cnpj = settings.get('cnpj_emitente')
-            last_nsu = str(get_last_nsu() or 0)
+            # last_nsu = str(get_last_nsu() or 0)
             ambiente = 2 if settings.get('environment') == 'homologation' else 1
             
             all_documents = []
+            max_pages = 50 # Aumentado para 50 para permitir catch-up mais rápido (até 2500 docs por execução)
+            page_count = 0
             
-            logger.info(f"Consultando SEFAZ Direto (NSU {last_nsu})...")
-            result = service.consultar_distribuicao_dfe(cnpj, ult_nsu=last_nsu, ambiente=ambiente)
-            
-            if not result['success']:
-                if str(result.get('cStat')) == '656':
-                    set_sefaz_block_for_one_hour()
-                    return None, "A SEFAZ retornou 'Consumo Indevido' e bloqueou temporariamente novas consultas para este certificado. Aguarde pelo menos 1 hora antes de tentar novamente, evite ficar repetindo a consulta durante esse período e verifique se outro sistema (como contabilidade ou outro software) não está consultando DF-e com o mesmo certificado/CNPJ."
-                return None, f"Erro SEFAZ: {result.get('message')} (cStat: {result.get('cStat')})"
+            while page_count < max_pages:
+                last_nsu = str(get_last_nsu() or 0)
+                logger.info(f"Consultando SEFAZ Direto (NSU {last_nsu})...")
+                result = service.consultar_distribuicao_dfe(cnpj, ult_nsu=last_nsu, ambiente=ambiente)
                 
-            max_nsu_retorno = result.get('maxNSU')
-            
-            for doc in result.get('documents', []):
-                parsed = service.parse_xml_content(doc['content'])
-                if parsed:
-                    normalized = {
-                        'id': parsed.get('access_key'),
-                        'access_key': parsed.get('access_key'),
-                        'chave': parsed.get('access_key'),
-                        'created_at': parsed.get('dhemi') or parsed.get('dh_evento') or datetime.now().isoformat(),
-                        'issued_at': parsed.get('dhemi'),
-                        'amount': float(parsed.get('vnf', 0) or 0),
-                        'total_amount': float(parsed.get('vnf', 0) or 0),
-                        'digest_value': parsed.get('digval'),
-                        'schema': doc.get('schema'),
-                        'type': parsed.get('type'),
-                        'nsu': doc.get('nsu'),
-                        'emitente': {
-                            'cpf_cnpj': parsed.get('cnpj_emitente'),
-                            'nome': parsed.get('nome_emitente'),
-                            'ie': parsed.get('ie_emitente')
-                        },
-                        'xml_content': doc.get('content') # Guarda XML bruto para salvar depois
-                    }
-                    all_documents.append(normalized)
-            
-            # Atualiza NSU
-            if max_nsu_retorno and int(max_nsu_retorno) > int(last_nsu):
-                save_last_nsu(max_nsu_retorno)
+                if not result['success']:
+                    if str(result.get('cStat')) == '656':
+                        set_sefaz_block_for_one_hour()
+                        msg = "A SEFAZ retornou 'Consumo Indevido' e bloqueou temporariamente novas consultas. Aguarde 1 hora."
+                        if all_documents:
+                            return all_documents, f"{msg} (Parcialmente sincronizado)"
+                        return None, msg
+                    
+                    # Se erro for 137 (Nenhum documento), paramos
+                    if str(result.get('cStat')) == '137':
+                        # Mas se tiver ultNSU, salvamos para não consultar o mesmo de novo
+                        ult_nsu_retorno = result.get('ultNSU')
+                        if ult_nsu_retorno and int(ult_nsu_retorno) > int(last_nsu):
+                            save_last_nsu(ult_nsu_retorno)
+                        break
+                        
+                    return None, f"Erro SEFAZ: {result.get('message')} (cStat: {result.get('cStat')})"
+                    
+                ult_nsu_retorno = result.get('ultNSU')
+                max_nsu_retorno = result.get('maxNSU')
                 
+                # --- LÓGICA DE FAST-FORWARD (PULAR PARA O FINAL) ---
+                # Se estamos muito atrasados (ex: > 50 notas de diferença) e é a primeira página,
+                # pulamos direto para as últimas 20 notas para evitar carregar histórico antigo (Janeiro, etc).
+                if page_count == 0 and max_nsu_retorno and last_nsu:
+                    diff = int(max_nsu_retorno) - int(last_nsu)
+                    # Se a diferença for grande (ex: > 50), pulamos
+                    if diff > 50:
+                        logger.warning(f"Fast-Forward: NSU atual {last_nsu} está muito atrasado em relação ao Max {max_nsu_retorno} (Diff: {diff}). Pulando para o final.")
+                        
+                        # Definimos o novo NSU para (Max - 20), para pegar apenas as últimas ~20 notas
+                        new_nsu = int(max_nsu_retorno) - 20
+                        if new_nsu < 0: new_nsu = 0
+                        
+                        # Salvamos o novo NSU e forçamos o loop a reiniciar com esse novo valor na próxima iteração
+                        # Mas como o SEFAZ pode bloquear se fizermos requests muito rápidos,
+                        # vamos salvar, pausar e fazer a próxima iteração buscar do novo ponto.
+                        save_last_nsu(str(new_nsu))
+                        
+                        # Limpamos documentos antigos dessa requisição pois não interessam ao usuário
+                        all_documents = [] 
+                        
+                        # Pausa de segurança
+                        time.sleep(2)
+                        
+                        # Reinicia o loop (page_count não incrementa ou resetamos?)
+                        # Vamos continuar o loop, mas agora o get_last_nsu() vai pegar o valor atualizado
+                        continue 
+                # ---------------------------------------------------
+                
+                # Log de progresso se estivermos atrasados
+                if max_nsu_retorno and ult_nsu_retorno:
+                    diff = int(max_nsu_retorno) - int(ult_nsu_retorno)
+                    if diff > 100:
+                        logger.info(f"Sincronização em andamento: Processado {ult_nsu_retorno}, Alvo {max_nsu_retorno} (Faltam ~{diff})")
+
+                # Se não avançou o NSU, paramos para evitar loop infinito
+                if ult_nsu_retorno and int(ult_nsu_retorno) <= int(last_nsu):
+                    break
+
+                batch_docs = []
+                for doc in result.get('documents', []):
+                    parsed = service.parse_xml_content(doc['content'])
+                    if parsed:
+                        normalized = {
+                            'id': parsed.get('access_key'),
+                            'access_key': parsed.get('access_key'),
+                            'chave': parsed.get('access_key'),
+                            'created_at': parsed.get('dhemi') or parsed.get('dh_evento') or datetime.now().isoformat(),
+                            'issued_at': parsed.get('dhemi'),
+                            'amount': float(parsed.get('vnf', 0) or 0),
+                            'total_amount': float(parsed.get('vnf', 0) or 0),
+                            'digest_value': parsed.get('digval'),
+                            'schema': doc.get('schema'),
+                            'type': parsed.get('type'),
+                            'nsu': doc.get('nsu'),
+                            'emitente': {
+                                'cpf_cnpj': parsed.get('cnpj_emitente'),
+                                'nome': parsed.get('nome_emitente'),
+                                'ie': parsed.get('ie_emitente')
+                            },
+                            'xml_content': doc.get('content') # Guarda XML bruto para salvar depois
+                        }
+                        batch_docs.append(normalized)
+                
+                all_documents.extend(batch_docs)
+                
+                # Atualiza NSU com o último pesquisado (ultNSU)
+                if ult_nsu_retorno:
+                    save_last_nsu(ult_nsu_retorno)
+                
+                page_count += 1
+                
+                # Se não tem mais documentos (ultNSU >= maxNSU), paramos
+                if max_nsu_retorno and ult_nsu_retorno and int(ult_nsu_retorno) >= int(max_nsu_retorno):
+                    break
+                    
+                # Pausa de 2 segundos para evitar Consumo Indevido (segurança extra)
+                time.sleep(2)
+            
             return all_documents, None
             
     except Exception as e:
@@ -970,6 +1041,8 @@ def list_received_nfes(settings):
     """
     if settings.get('provider') == 'sefaz_direto':
         return _list_received_nfes_sefaz(settings)
+    
+    return None, "Consulta DF-e via Nuvem Fiscal desativada. Configure a integração SEFAZ Direto para continuar usando DF-e."
 
     client_id = settings.get('client_id')
     client_secret = settings.get('client_secret')

@@ -9,6 +9,8 @@ from app.services.system_config_manager import (
     get_data_path, SYSTEM_STATUS_FILE, SETTINGS_FILE, FISCAL_SETTINGS_FILE,
     CLEANING_STATUS_FILE, ROOM_OCCUPANCY_FILE
 )
+from app.services.stock_security_service import StockSecurityService
+from app.services.menu_security_service import MenuSecurityService
 STATUS_FILE = SYSTEM_STATUS_FILE
 # SETTINGS_FILE already imported
 
@@ -173,6 +175,12 @@ def start_scheduler():
     
     # Daily Cleaning Status Update - Runs daily at 06:00 AM
     scheduler.add_job(update_daily_cleaning_status, 'cron', hour=6, minute=0)
+    
+    # Stock Anti-Overwrite Backup - Every 2 hours
+    scheduler.add_job(StockSecurityService.create_stock_backup, 'interval', hours=2)
+
+    # Menu/Sales Anti-Overwrite Backup - Every 2 hours
+    scheduler.add_job(MenuSecurityService.create_menu_sales_backup, 'interval', hours=2)
     
     # Backup Jobs are now handled by services/backup_service.py independently
     # scheduler.add_job(create_backup, 'interval', hours=12)

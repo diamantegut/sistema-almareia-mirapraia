@@ -1,5 +1,21 @@
 [
     {
+        "id": "99999",
+        "name": "Insumo de Teste",
+        "department": "Cozinha",
+        "unit": "Unidade",
+        "price": 10.0,
+        "category": "Teste",
+        "min_stock": 5.0,
+        "suppliers": [
+            "Fornecedor Teste"
+        ],
+        "package_size": 1.0,
+        "purchase_unit": "Unidade",
+        "frequency": "Diario",
+        "is_internal": false
+    },
+    {
         "id": "2",
         "name": "Filé Mingnon",
         "department": "Cozinha",
@@ -1237,18 +1253,6 @@
         "min_stock": 0.0
     },
     {
-        "id": "93",
-        "name": "Nutella",
-        "department": "Estoques",
-        "unit": "Kilogramas",
-        "price": 49.77,
-        "suppliers": [
-            "Estoque Inicial"
-        ],
-        "category": "Confeitaria",
-        "min_stock": 0.0
-    },
-    {
         "id": "94",
         "name": "Palmito",
         "department": "Estoques",
@@ -2178,14 +2182,25 @@
     {
         "id": "162",
         "name": "Fubá funicionarios",
-        "department": "Estoques",
+        "department": "Cozinha",
         "unit": "Unidades",
         "price": 1.62,
         "suppliers": [
-            "Estoque Inicial"
+            "atacamax",
+            "KarneKeijo",
+            "3 corações"
         ],
         "category": "Mercearia Seca",
-        "min_stock": 0.0
+        "min_stock": 15.0,
+        "package_size": 1.0,
+        "purchase_unit": "",
+        "frequency": "Sem Frequência",
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": ""
     },
     {
         "id": "163",
@@ -7798,6 +7813,102 @@
         "min_stock": 0.0
     },
     {
+        "id": "583",
+        "name": "Copo Americano",
+        "department": "Estoques",
+        "unit": "Unidades",
+        "price": 3.0,
+        "suppliers": [
+            "Estoque Inicial"
+        ],
+        "category": "Inventario",
+        "min_stock": 0.0
+    },
+    {
+        "id": "584",
+        "name": "copo de cerâmica pequeno",
+        "department": "Estoques",
+        "unit": "Unidades",
+        "price": 6.0,
+        "suppliers": [
+            "Estoque Inicial"
+        ],
+        "category": "Inventario",
+        "min_stock": 0.0
+    },
+    {
+        "id": "585",
+        "name": "Copo de dose ( confeitaria )",
+        "department": "Estoques",
+        "unit": "Unidades",
+        "price": 49.99,
+        "suppliers": [
+            "Estoque Inicial"
+        ],
+        "category": "Inventario",
+        "min_stock": 0.0
+    },
+    {
+        "id": "586",
+        "name": "Copo de Liquidificador Inox",
+        "department": "Estoques",
+        "unit": "Unidades",
+        "price": 284.0,
+        "suppliers": [
+            "Estoque Inicial"
+        ],
+        "category": "Inventario",
+        "min_stock": 0.0
+    },
+    {
+        "id": "587",
+        "name": "Copo de vidro pequeno",
+        "department": "Estoques",
+        "unit": "Unidades",
+        "price": 5.0,
+        "suppliers": [
+            "Estoque Inicial"
+        ],
+        "category": "Inventario",
+        "min_stock": 0.0
+    },
+    {
+        "id": "588",
+        "name": "copo para drinks",
+        "department": "Estoques",
+        "unit": "Unidades",
+        "price": 8.0,
+        "suppliers": [
+            "Estoque Inicial"
+        ],
+        "category": "Inventario",
+        "min_stock": 0.0
+    },
+    {
+        "id": "589",
+        "name": "Copo para Whisky",
+        "department": "Estoques",
+        "unit": "Unidades",
+        "price": 13.85,
+        "suppliers": [
+            "Estoque Inicial"
+        ],
+        "category": "Inventario",
+        "min_stock": 0.0
+    },
+    {
+        "id": "590",
+        "name": "Copos para Suco",
+        "department": "Estoques",
+        "unit": "Unidades",
+        "price": 8.35,
+        "suppliers": [
+            "Estoque Inicial"
+        ],
+        "category": "Inventario",
+        "min_stock": 0.0
+    },
+    {
         "id": "591",
         "name": "Coqueteira",
         "department": "Estoques",
@@ -8431,6 +8542,18 @@
         "department": "Estoques",
         "unit": "Unidades",
         "price": 6.0,
+        "suppliers": [
+            "Estoque Inicial"
+        ],
+        "category": "Inventario",
+        "min_stock": 0.0
+    },
+    {
+        "id": "644",
+        "name": "Motor de liquidificador ( sem o copo )",
+        "department": "Estoques",
+        "unit": "Unidades",
+        "price": 100.0,
         "suppliers": [
             "Estoque Inicial"
         ],
@@ -9652,18 +9775,24 @@
     {
         "id": "746",
         "name": "Açucar Sache a Caixa",
-        "department": "Serviço",
-        "unit": "Unidades",
+        "department": "Estoque",
+        "unit": "Kilogramas",
         "price": 15.83,
         "suppliers": [
-            "atacamax"
+            "atacamax",
+            "3 corações"
         ],
         "category": "Estoque Principal - Bar",
-        "min_stock": 1.0,
+        "min_stock": 2.0,
         "package_size": 1.0,
         "purchase_unit": "caixa",
         "frequency": "Mensal",
-        "is_internal": false
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": ""
     },
     {
         "id": "747",
@@ -10588,16 +10717,22 @@
         "name": "Nutella",
         "department": "Cozinha",
         "unit": "Kilogramas",
-        "price": 30.0,
-        "category": "recheio",
-        "min_stock": 0.0,
+        "price": 64.47,
+        "category": "Confeitaria",
+        "min_stock": 3.0,
         "package_size": 1.0,
-        "purchase_unit": "",
-        "frequency": "Semanal",
+        "purchase_unit": "kilograma",
+        "frequency": "Quinzenal",
         "suppliers": [
-            "casa"
+            "padeirão",
+            "atacamax"
         ],
-        "is_internal": false
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": ""
     },
     {
         "id": "807",
@@ -10696,28 +10831,6 @@
         "cfop_default": ""
     },
     {
-        "id": "814",
-        "name": "sal refinado",
-        "department": "Estoque",
-        "unit": "Kilogramas",
-        "price": 1.78,
-        "category": "Estoque Principal - cozinha",
-        "min_stock": 30.0,
-        "package_size": 1.0,
-        "purchase_unit": "fardo",
-        "frequency": "Semanal",
-        "suppliers": [
-            "atacamax",
-            "KarneKeijo"
-        ],
-        "is_internal": false,
-        "ncm": "",
-        "cest": "",
-        "icms_rate": 0.0,
-        "anp_code": "",
-        "cfop_default": ""
-    },
-    {
         "id": "815",
         "name": "Papel Higiênico BigRool",
         "department": "Estoque",
@@ -10731,28 +10844,6 @@
         "suppliers": [
             "P&R",
             "ceasa ( grazi )"
-        ],
-        "is_internal": false,
-        "ncm": "",
-        "cest": "",
-        "icms_rate": 0.0,
-        "anp_code": "",
-        "cfop_default": ""
-    },
-    {
-        "id": "816",
-        "name": " Papel Interfolha",
-        "department": "Estoque",
-        "unit": "Unidades",
-        "price": 65.76,
-        "category": "Estoque Principal - Limpeza",
-        "min_stock": 20.0,
-        "package_size": 1.0,
-        "purchase_unit": "caixa",
-        "frequency": "Semanal",
-        "suppliers": [
-            "P&R e MKCLEAN",
-            "limpeza"
         ],
         "is_internal": false,
         "ncm": "",
@@ -10806,28 +10897,6 @@
         "cfop_default": ""
     },
     {
-        "id": "816",
-        "name": "Stella artois longue neck",
-        "department": "Serviço",
-        "unit": "Litros",
-        "price": 5.46,
-        "category": "Cervejas",
-        "min_stock": 48.0,
-        "package_size": 1.0,
-        "purchase_unit": "fardo",
-        "frequency": "Semanal",
-        "suppliers": [
-            "ambev",
-            "pit stop"
-        ],
-        "is_internal": false,
-        "ncm": "",
-        "cest": "",
-        "icms_rate": 0.0,
-        "anp_code": "",
-        "cfop_default": ""
-    },
-    {
         "id": "815",
         "name": "Farinha de Trigo ( principal )",
         "department": "Estoque",
@@ -10850,13 +10919,79 @@
         "cfop_default": ""
     },
     {
-        "id": "814",
+        "id": "815",
+        "name": "Fubá funicionarios",
+        "department": "Estoque",
+        "unit": "Kilogramas",
+        "price": 2.99,
+        "category": "Estoque Principal - cozinha",
+        "min_stock": 30.0,
+        "package_size": 1.0,
+        "purchase_unit": "fardo",
+        "frequency": "Semanal",
+        "suppliers": [
+            "atacamax",
+            "KarneKeijo",
+            "3 corações"
+        ],
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": ""
+    },
+    {
+        "id": "815",
+        "name": "Cafe funcionarios",
+        "department": "Estoque",
+        "unit": "Kilogramas",
+        "price": 51.6,
+        "category": "Estoque Principal - cozinha",
+        "min_stock": 10.0,
+        "package_size": 1.0,
+        "purchase_unit": "kilograma",
+        "frequency": "Semanal",
+        "suppliers": [
+            "3 corações"
+        ],
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": ""
+    },
+    {
+        "id": "812",
+        "name": "Açucar",
+        "department": "Estoque",
+        "unit": "Kilogramas",
+        "price": 3.14,
+        "category": "Estoque Principal - cozinha",
+        "min_stock": 40.0,
+        "package_size": 1.0,
+        "purchase_unit": "fardo",
+        "frequency": "Semanal",
+        "suppliers": [
+            "atacamax",
+            "KarneKeijo"
+        ],
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": ""
+    },
+    {
+        "id": "813",
         "name": "Feijão Carioca",
         "department": "Estoque",
         "unit": "Kilogramas",
-        "price": 7.65,
+        "price": 8.48,
         "category": "Estoque Principal - cozinha",
-        "min_stock": 40.0,
+        "min_stock": 30.0,
         "package_size": 1.0,
         "purchase_unit": "fardo",
         "frequency": "Semanal",

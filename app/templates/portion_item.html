@@ -9,8 +9,13 @@
         <h2>Porcionar Item</h2>
     </div>
     
-    <div style="margin-bottom: 20px;">
+    <div style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
         <a href="{{ url_for('main.index') }}" class="action-btn" style="background-color: #95a5a6; text-decoration: none;">← Voltar</a>
+        {% if session.get('role') in ['admin', 'gerente', 'supervisor'] %}
+        <a href="{{ url_for('kitchen.kitchen_portion_settings') }}" class="action-btn" style="background-color: #34495e; text-decoration: none;">
+            ⚙ Configurações de Porcionamento
+        </a>
+        {% endif %}
     </div>
 
     <div class="card">
@@ -31,9 +36,43 @@
                 </div>
             </div>
 
-            <!-- Passo 2: Peso Congelado -->
+            <!-- Passo 2: Itens de Origem (Kits) -->
             <div class="step-section">
-                <h3>2. Peso Congelado (Saída do Estoque)</h3>
+                <h3>2. Itens de Origem (Opcional - Kits)</h3>
+                <p style="font-size: 0.9rem; color: #555;">
+                    Use esta seção quando estiver montando um kit com vários itens de origem
+                    (ex: Kit Paella com anéis de lula, marisco, polvo, camarão). Preencha os itens
+                    abaixo para que o sistema dê baixa em cada produto individualmente.
+                </p>
+                <div id="origin-components-rows">
+                    <div class="origin-component-row form-row" style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed #ddd;">
+                        <div class="form-group" style="flex: 2;">
+                            <label>Produto de Origem:</label>
+                            <select name="component_product[]" class="origin-component-select no-search" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
+                                <option value="">Selecione o produto...</option>
+                                {% for p in origin_products %}
+                                <option value="{{ p.name }}">{{ p.name }} ({{ p.unit | abbreviate_unit }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>Peso para o Kit (g):</label>
+                            <input type="number" name="component_weight[]" class="origin-component-weight-input" step="1" min="0" placeholder="0" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
+                        </div>
+                        <button type="button" class="remove-origin-row-btn" style="background: #e74c3c; color: white; border: none; padding: 0 15px; border-radius: 5px; margin-top: 25px; cursor: pointer; display: none;">✖</button>
+                    </div>
+                </div>
+                <button type="button" id="add-origin-row-btn" style="background: #1e3a8a; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; margin-top: 10px;">
+                    <i class="bi bi-plus-circle-fill"></i> Adicionar Outro Item de Origem
+                </button>
+                <small style="display:block; margin-top:8px; color:#7f8c8d;">
+                    Se não estiver montando um kit, você pode ignorar esta seção e usar apenas o produto de origem principal acima.
+                </small>
+            </div>
+
+            <!-- Passo 3: Peso Congelado -->
+            <div class="step-section">
+                <h3>3. Peso Congelado (Saída do Estoque)</h3>
                 <div class="form-group">
                     <label for="frozen_weight">Peso Bruto / Congelado (g):</label>
                     <div style="display: flex; gap: 10px; align-items: center;">
@@ -43,9 +82,9 @@
                 </div>
             </div>
 
-            <!-- Passo 3: Peso Descongelado -->
+            <!-- Passo 4: Peso Descongelado -->
             <div class="step-section">
-                <h3>3. Peso Descongelado</h3>
+                <h3>4. Peso Descongelado</h3>
                 <div class="form-group">
                     <label for="thawed_weight">Peso após descongelamento (g):</label>
                     <div style="display: flex; gap: 10px; align-items: center;">
@@ -56,9 +95,9 @@
                 </div>
             </div>
 
-            <!-- Passo 4: Aparas e Descartes -->
+            <!-- Passo 5: Aparas e Descartes -->
             <div class="step-section">
-                <h3>4. Aparas e Descartes</h3>
+                <h3>5. Aparas e Descartes</h3>
                 <div class="form-group">
                     <label for="trim_weight">Peso de Aparas/Limpeza (g):</label>
                     <div style="display: flex; gap: 10px; align-items: center;">
@@ -69,9 +108,9 @@
                 </div>
             </div>
 
-            <!-- Passo 5: Seleção da Porção Gerada -->
+            <!-- Passo 6: Seleção da Porção Gerada -->
             <div class="step-section">
-                <h3>5. Itens Gerados (Porções)</h3>
+                <h3>6. Itens Gerados (Porções)</h3>
                 <div id="destination-rows">
                     <div class="destination-row form-row" style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed #ddd;">
                         <div class="form-group" style="flex: 2;">
@@ -172,6 +211,8 @@
     const rowsContainer = document.getElementById('destination-rows');
     const addRowBtn = document.getElementById('add-row-btn');
     const rowTemplate = document.getElementById('row-template');
+    const originRowsContainer = document.getElementById('origin-components-rows');
+    const addOriginRowBtn = document.getElementById('add-origin-row-btn');
 
     // Initialize TomSelect for an element and store instance
     function initTomSelect(el) {
@@ -225,6 +266,7 @@
 
     // Init existing
     document.querySelectorAll('.dest-product-select').forEach(initTomSelect);
+    document.querySelectorAll('.origin-component-select').forEach(initTomSelect);
 
     function checkUnitCompatibility(originUnit, destUnit) {
         if (!originUnit || !destUnit) return true;
@@ -374,6 +416,36 @@
         }
     });
 
+    // Origin components dynamic rows
+    originRowsContainer.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-origin-row-btn')) {
+            e.target.closest('.origin-component-row').remove();
+            updateOriginRemoveButtons();
+        }
+    });
+
+    addOriginRowBtn.addEventListener('click', function() {
+        const firstRow = originRowsContainer.querySelector('.origin-component-row');
+        const clone = firstRow.cloneNode(true);
+        // Reset values
+        const select = clone.querySelector('.origin-component-select');
+        const weightInput = clone.querySelector('.origin-component-weight-input');
+        if (select) {
+            if (select.tomselect) {
+                select.tomselect.destroy();
+            }
+            select.value = "";
+        }
+        if (weightInput) {
+            weightInput.value = "";
+        }
+        originRowsContainer.appendChild(clone);
+        if (select) {
+            initTomSelect(select);
+        }
+        updateOriginRemoveButtons();
+    });
+
     addRowBtn.addEventListener('click', function() {
         // Clone from template
         const clone = rowTemplate.content.cloneNode(true);
@@ -419,6 +491,18 @@
         const rows = rowsContainer.querySelectorAll('.destination-row');
         rows.forEach(row => {
             const btn = row.querySelector('.remove-row-btn');
+            if (rows.length > 1) {
+                btn.style.display = 'block';
+            } else {
+                btn.style.display = 'none';
+            }
+        });
+    }
+
+    function updateOriginRemoveButtons() {
+        const rows = originRowsContainer.querySelectorAll('.origin-component-row');
+        rows.forEach(row => {
+            const btn = row.querySelector('.remove-origin-row-btn');
             if (rows.length > 1) {
                 btn.style.display = 'block';
             } else {

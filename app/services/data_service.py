@@ -19,6 +19,7 @@ from app.services.system_config_manager import (
     RESTAURANT_TABLE_SETTINGS_FILE, RESTAURANT_SETTINGS_FILE,
     CHECKLIST_ITEMS_FILE, INSPECTION_LOGS_FILE, CLEANING_STATUS_FILE,
     ARCHIVED_ORDERS_FILE, AUDIT_LOGS_FILE, USERS_FILE, EX_EMPLOYEES_FILE,
+    BAR_DATA_FILE,
     DEPARTMENTS, # for load/save helpers
     get_backup_path
 )
@@ -121,6 +122,20 @@ def save_settings(settings): return _save_json(SETTINGS_FILE, settings)
 def load_users(): return _load_json(USERS_FILE, [])
 def save_users(users): return _save_json(USERS_FILE, users)
 
+def load_bar_data():
+    default = {
+        "storage_units": [],
+        "checklists": [],
+        "audits": [],
+        "settings": {
+            "thursday_saturday_multiplier": 1.4
+        }
+    }
+    return _load_json(BAR_DATA_FILE, default=default)
+
+def save_bar_data(data):
+    return _save_json(BAR_DATA_FILE, data)
+
 def load_ex_employees(): return _load_json(EX_EMPLOYEES_FILE, [])
 def save_ex_employees(employees): return _save_json(EX_EMPLOYEES_FILE, employees)
 
@@ -184,9 +199,96 @@ def save_fiscal_settings(settings): return _save_json(FISCAL_SETTINGS_FILE, sett
 
 # --- Menu Items ---
 def load_menu_items(): return _load_json(MENU_ITEMS_FILE, [])
+
 def save_menu_items(items):
+    """
+    Legacy save function. Should be replaced by secure_save_menu_items where possible.
+    """
     _backup_before_write(MENU_ITEMS_FILE)
     return _save_json_atomic(MENU_ITEMS_FILE, items)
+
+def secure_save_menu_items(new_items, user_id='Sistema'):
+    """
+    Securely saves menu items with validation, auditing, and integrity checks.
+    """
+    try:
+        # 1. Load current state
+        old_items = load_menu_items()
+        old_map = {str(i.get('id')): i for i in old_items}
+        
+        processed_items = []
+        changes_detected = False
+        
+        # 2. Process changes
+        for item in new_items:
+            i_id = str(item.get('id'))
+            
+            # Validate
+            try:
+                MenuSecurityService.validate_menu_item(item)
+            except ValueError as e:
+                logging.error(f"Validation failed for menu item {item.get('name')}: {e}")
+                raise
+            
+            if i_id in old_map:
+                old_i = old_map[i_id]
+                
+                # Optimistic Locking
+                if 'version' in item and 'version' in old_i:
+                    if int(item['version']) != int(old_i['version']):
+                        raise ValueError(f"Conflito de edição detectado para {item.get('name')}. Recarregue a página.")
+                
+                # Generate Diff
+                diff = MenuSecurityService.generate_diff(old_i, item)
+                if diff:
+                    changes_detected = True
+                    item['version'] = int(old_i.get('version', 1)) + 1
+                    item['last_updated'] = datetime.now().isoformat()
+                    item['hash'] = MenuSecurityService.calculate_hash(item)
+                    
+                    MenuSecurityService.log_audit('UPDATE', user_id, i_id, {'name': item['name']}, diff)
+                else:
+                    item['version'] = old_i.get('version', 1)
+                    item['hash'] = old_i.get('hash', '')
+                    item['last_updated'] = old_i.get('last_updated', '')
+            else:
+                # New Item
+                changes_detected = True
+                item['version'] = 1
+                item['last_updated'] = datetime.now().isoformat()
+                item['hash'] = MenuSecurityService.calculate_hash(item)
+                MenuSecurityService.log_audit('CREATE', user_id, i_id, item)
+            
+            processed_items.append(item)
+            
+        # 3. Check for deletions
+        new_ids = set(str(i.get('id')) for i in processed_items)
+        for old_id, old_i in old_map.items():
+            if old_id not in new_ids:
+                changes_detected = True
+                MenuSecurityService.log_audit('DELETE', user_id, old_id, old_i)
+                
+        # 3.1. Detect Bulk Changes (Anti-Overwrite)
+        try:
+            is_bulk, bulk_details = MenuSecurityService.detect_bulk_changes(old_items, processed_items)
+            if is_bulk:
+                msg = f"SECURITY ALERT (MENU): {bulk_details}"
+                logging.warning(msg)
+                MenuSecurityService.log_audit('BULK_CHANGE_ALERT', user_id, 'ALL', {'message': msg})
+                MenuSecurityService.create_menu_sales_backup()
+        except Exception as e:
+            logging.error(f"Error detecting bulk menu changes: {e}")
+
+        # 4. Save if changes
+        if changes_detected:
+            _backup_before_write(MENU_ITEMS_FILE)
+            return _save_json_atomic(MENU_ITEMS_FILE, processed_items)
+        
+        return True
+        
+    except Exception as e:
+        logging.error(f"Secure Save Menu Error: {e}")
+        raise e
 
 # --- Complements ---
 def load_complements(): return _load_json(COMPLEMENTS_FILE, [])
@@ -303,9 +405,34 @@ def save_sales_products(data): return _save_json(SALES_PRODUCTS_FILE, data)
 
 # --- Sales History ---
 def load_sales_history(): return _load_json(SALES_HISTORY_FILE, [])
+
 def save_sales_history(data):
+    """
+    Legacy save function. Use secure_save_sales_history for critical operations.
+    """
     _backup_before_write(SALES_HISTORY_FILE)
     return _save_json_atomic(SALES_HISTORY_FILE, data)
+
+def secure_save_sales_history(new_data, user_id='Sistema'):
+    """
+    Securely saves sales history with backup and bulk deletion protection.
+    """
+    try:
+        old_data = load_sales_history()
+        
+        # Check for bulk deletion (if new list is significantly smaller)
+        if len(new_data) < len(old_data) * 0.8 and len(old_data) > 10:
+            msg = f"SECURITY ALERT (SALES): Potential bulk deletion detected. Old: {len(old_data)}, New: {len(new_data)}"
+            logging.warning(msg)
+            # Create backup before allowing this
+            MenuSecurityService.create_menu_sales_backup()
+            MenuSecurityService.log_audit('BULK_DELETE_ALERT_SALES', user_id, 'ALL', {'message': msg})
+            
+        _backup_before_write(SALES_HISTORY_FILE)
+        return _save_json_atomic(SALES_HISTORY_FILE, new_data)
+    except Exception as e:
+        logging.error(f"Secure Save Sales History Error: {e}")
+        raise e
 
 # --- Maintenance ---
 def load_maintenance_requests(): return _load_json(MAINTENANCE_FILE, [])
@@ -324,10 +451,107 @@ def save_stock_request(req):
 def load_stock_logs(): return _load_json(STOCK_LOGS_FILE, [])
 def save_stock_logs(data): return _save_json(STOCK_LOGS_FILE, data)
 
+from app.services.stock_security_service import StockSecurityService
+from app.services.menu_security_service import MenuSecurityService
+
 def load_products(): return _load_json(PRODUCTS_FILE, [])
+
 def save_products(data):
+    """
+    Legacy save function. Should be replaced by secure_save_products where possible.
+    Maintains basic backup and atomic write.
+    """
     _backup_before_write(PRODUCTS_FILE)
     return _save_json_atomic(PRODUCTS_FILE, data)
+
+def secure_save_products(new_products, user_id='Sistema'):
+    """
+    Securely saves products with validation, auditing, and integrity checks.
+    """
+    try:
+        # 1. Load current state for comparison
+        old_products = load_products()
+        old_map = {str(p.get('id')): p for p in old_products}
+        
+        # 2. Process changes
+        processed_products = []
+        changes_detected = False
+        
+        for p in new_products:
+            p_id = str(p.get('id'))
+            
+            # Validate
+            try:
+                StockSecurityService.validate_product(p)
+            except ValueError as e:
+                logging.error(f"Validation failed for product {p.get('name')}: {e}")
+                raise
+            
+            if p_id in old_map:
+                old_p = old_map[p_id]
+                
+                # Optimistic Locking
+                if 'version' in p and 'version' in old_p:
+                    if int(p['version']) != int(old_p['version']):
+                        raise ValueError(f"Conflito de edição detectado para {p.get('name')}. Recarregue a página.")
+                
+                # Generate Diff
+                diff = StockSecurityService.generate_diff(old_p, p)
+                if diff:
+                    changes_detected = True
+                    # Update Version and Hash
+                    p['version'] = int(old_p.get('version', 1)) + 1
+                    p['last_updated'] = datetime.now().isoformat()
+                    p['hash'] = StockSecurityService.calculate_hash(p)
+                    
+                    # Audit Log
+                    StockSecurityService.log_audit('UPDATE', user_id, p_id, {'name': p['name']}, diff)
+                else:
+                    # Keep existing metadata if no change
+                    p['version'] = old_p.get('version', 1)
+                    p['hash'] = old_p.get('hash', '')
+                    p['last_updated'] = old_p.get('last_updated', '')
+            else:
+                # New Product
+                changes_detected = True
+                p['version'] = 1
+                p['last_updated'] = datetime.now().isoformat()
+                p['hash'] = StockSecurityService.calculate_hash(p)
+                StockSecurityService.log_audit('CREATE', user_id, p_id, p)
+            
+            processed_products.append(p)
+            
+        # 3. Check for deletions
+        new_ids = set(str(p.get('id')) for p in processed_products)
+        for old_id, old_p in old_map.items():
+            if old_id not in new_ids:
+                changes_detected = True
+                StockSecurityService.log_audit('DELETE', user_id, old_id, old_p)
+
+        # 3.1. Detect Bulk Changes (Anti-Overwrite)
+        try:
+            is_bulk, bulk_details = StockSecurityService.detect_bulk_changes(old_products, processed_products)
+            if is_bulk:
+                msg = f"SECURITY ALERT: {bulk_details}"
+                logging.warning(msg)
+                StockSecurityService.log_audit('BULK_CHANGE_ALERT', user_id, 'ALL', {'message': msg})
+                # Trigger immediate backup for safety
+                StockSecurityService.create_stock_backup()
+        except Exception as e:
+            logging.error(f"Error detecting bulk changes: {e}")
+
+        # 4. Save if changes
+        if changes_detected:
+            # Create Checkpoint periodically or on critical changes? 
+            # Let's do standard backup first
+            _backup_before_write(PRODUCTS_FILE)
+            return _save_json_atomic(PRODUCTS_FILE, processed_products)
+        
+        return True
+        
+    except Exception as e:
+        logging.error(f"Secure Save Error: {e}")
+        raise e
 
 def load_suppliers(): return _load_json(SUPPLIERS_FILE, [])
 def save_suppliers(data): return _save_json(SUPPLIERS_FILE, data)

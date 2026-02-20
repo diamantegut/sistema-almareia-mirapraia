@@ -2,13 +2,14 @@ import os
 import json
 import math
 import uuid
+import difflib
 from datetime import datetime, timedelta
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify, current_app
 from werkzeug.utils import secure_filename
 
 from app.utils.decorators import login_required
 from app.services.data_service import (
-    load_products, save_products, load_stock_requests, save_stock_request, save_all_stock_requests,
+    load_products, save_products, secure_save_products, load_stock_requests, save_stock_request, save_all_stock_requests,
     load_stock_entries, save_stock_entry, save_stock_entries, load_suppliers, save_suppliers,
     load_payables, save_payables,
     load_sales_products, save_sales_products, load_sales_history,
@@ -19,7 +20,7 @@ from app.services.data_service import (
     load_conference_skipped_items, save_conference_skipped_items
 )
 from app.services.stock_service import (
-    calculate_suggested_min_stock, calculate_inventory, get_product_balances, calculate_smart_stock_suggestions
+    calculate_suggested_min_stock, calculate_inventory, get_product_balances, get_product_balances_by_id, calculate_smart_stock_suggestions
 )
 from app.services.system_config_manager import (
     SALES_EXCEL_PATH, DEPARTMENTS, STOCK_ENTRIES_FILE
@@ -108,26 +109,33 @@ def new_stock_request():
 @stock_bp.route('/api/stock/product-details', methods=['GET'])
 @login_required
 def api_get_product_details():
+    product_id = request.args.get('id')
     name = request.args.get('name')
-    if not name:
-        return jsonify({'success': False, 'error': 'Nome do produto obrigatório'})
+    if not name and not product_id:
+        return jsonify({'success': False, 'error': 'Identificador do produto obrigatório'})
 
     products = load_products()
     target_product = None
-    for p in products:
-        if normalize_text(p['name']) == normalize_text(name):
-            target_product = p
-            break
+    
+    if product_id:
+        target_product = next((p for p in products if str(p['id']) == str(product_id)), None)
+    
+    if not target_product and name:
+        for p in products:
+            if normalize_text(p['name']) == normalize_text(name):
+                target_product = p
+                break
             
     if not target_product:
         return jsonify({'success': False, 'error': 'Produto não encontrado no estoque'})
 
-    balances = get_product_balances()
-    current_balance = balances.get(target_product['name'], 0.0)
+    balances = get_product_balances_by_id(products)
+    current_balance = balances.get(str(target_product['id']), 0.0)
     
     return jsonify({
         'success': True,
         'product': {
+            'id': target_product['id'],
             'name': target_product['name'],
             'unit': target_product['unit'],
             'current_balance': current_balance
@@ -145,11 +153,12 @@ def api_adjust_stock():
         return jsonify({'success': False, 'error': 'Acesso não autorizado'})
 
     data = request.get_json()
+    product_id = data.get('product_id')
     product_name = data.get('product_name')
     new_quantity = data.get('new_quantity')
     reason = data.get('reason')
     
-    if not product_name or new_quantity is None or not reason:
+    if (not product_name and not product_id) or new_quantity is None or not reason:
         return jsonify({'success': False, 'error': 'Dados incompletos'})
         
     try:
@@ -159,16 +168,22 @@ def api_adjust_stock():
 
     products = load_products()
     target_product = None
-    for p in products:
-        if normalize_text(p['name']) == normalize_text(product_name):
-            target_product = p
-            break
+    
+    if product_id:
+        target_product = next((p for p in products if str(p['id']) == str(product_id)), None)
+    
+    if not target_product and product_name:
+        for p in products:
+            if normalize_text(p['name']) == normalize_text(product_name):
+                target_product = p
+                break
             
     if not target_product:
         return jsonify({'success': False, 'error': 'Produto não encontrado'})
         
-    balances = get_product_balances()
-    current_balance = balances.get(target_product['name'], 0.0)
+    # Use ID-based balance if available
+    balances = get_product_balances_by_id(products)
+    current_balance = balances.get(str(target_product['id']), 0.0)
     
     diff = new_qty_float - current_balance
     
@@ -178,6 +193,7 @@ def api_adjust_stock():
     entry = {
         "id": f"ADJUST_{datetime.now().strftime('%Y%m%d%H%M%S')}_{uuid.uuid4().hex[:6]}",
         "user": session.get('user', 'Sistema'),
+        "product_id": target_product['id'], # Save ID!
         "product": target_product['name'],
         "supplier": "Ajuste Manual",
         "qty": diff,
@@ -308,9 +324,12 @@ def stock_products():
                         p['anp_code'] = anp_code
                         p['cfop_default'] = cfop_default
                         break
-                save_products(products)
-                log_system_action('Produto Atualizado', {'id': product_id, 'name': name}, category='Estoque')
-                flash(f'Produto "{name}" atualizado com sucesso!')
+                try:
+                    secure_save_products(products, user_id=session.get('user', 'Sistema'))
+                    log_system_action('Produto Atualizado', {'id': product_id, 'name': name}, category='Estoque')
+                    flash(f'Produto "{name}" atualizado com sucesso!')
+                except ValueError as e:
+                    flash(f'Erro de validação/concorrência: {e}')
             else:
                 if not any(p['name'].lower() == name.lower() and p['department'] == department for p in products):
                     products.append({
@@ -332,9 +351,12 @@ def stock_products():
                         'anp_code': anp_code,
                         'cfop_default': cfop_default
                     })
-                    save_products(products)
-                    log_system_action('Produto Criado', {'name': name}, category='Estoque')
-                    flash(f'Produto "{name}" adicionado com sucesso!')
+                    try:
+                        secure_save_products(products, user_id=session.get('user', 'Sistema'))
+                        log_system_action('Produto Criado', {'name': name}, category='Estoque')
+                        flash(f'Produto "{name}" adicionado com sucesso!')
+                    except ValueError as e:
+                        flash(f'Erro ao criar produto: {e}')
                 else:
                     flash('Produto já existe para este departamento.')
         
@@ -364,7 +386,7 @@ def stock_products():
 
     try:
         products = load_products()
-        balances = get_product_balances()
+        balances = get_product_balances_by_id(products)
         raw_suppliers = load_suppliers()
     except Exception as e:
         current_app.logger.error(f"Error loading stock data: {e}")
@@ -376,7 +398,7 @@ def stock_products():
     # --- 1. Calcular saldos e valores (Necessário para filtros) ---
     for p in products:
         try:
-            p['balance'] = balances.get(p['name'], 0.0)
+            p['balance'] = balances.get(str(p['id']), 0.0)
             price = p.get('price', 0.0)
             if price is None: price = 0.0
             p['total_value'] = p['balance'] * float(price)
@@ -432,8 +454,22 @@ def stock_products():
     # Filtro: Busca (Nome)
     search_query = request.args.get('search')
     if search_query:
-        search_query = search_query.lower()
-        filtered_products = [p for p in filtered_products if search_query in p.get('name', '').lower()]
+        search_query_norm = normalize_text(search_query)
+        search_words = search_query_norm.split()
+
+        def is_match(product):
+            p_name_norm = normalize_text(product.get('name', ''))
+            if search_query_norm in p_name_norm: return True
+            
+            p_words = p_name_norm.split()
+            matches_found = 0
+            for sw in search_words:
+                # Substring match or Fuzzy match (cutoff=0.7 for 70% similarity)
+                if any(sw in pw for pw in p_words) or (len(sw) >= 3 and difflib.get_close_matches(sw, p_words, n=1, cutoff=0.7)):
+                    matches_found += 1
+            return matches_found == len(search_words)
+
+        filtered_products = [p for p in filtered_products if is_match(p)]
         
     # Filtro Especial: Baixo Estoque / Críticos
     special_filter = request.args.get('filter')
@@ -502,8 +538,11 @@ def api_create_product():
         'aliases': []
     }
     products.append(new_product)
-    save_products(products)
-    return jsonify({'success': True, 'product': new_product})
+    try:
+        secure_save_products(products, user_id=session.get('user', 'Sistema'))
+        return jsonify({'success': True, 'product': new_product})
+    except ValueError as e:
+        return jsonify({'success': False, 'error': str(e)})
 
 @stock_bp.route('/api/stock/product/alias', methods=['POST'])
 @login_required
@@ -532,8 +571,11 @@ def api_add_product_alias():
             break
             
     if updated:
-        save_products(products)
-        return jsonify({'success': True, 'message': 'Alias adicionado'})
+        try:
+            secure_save_products(products, user_id=session.get('user', 'Sistema'))
+            return jsonify({'success': True, 'message': 'Alias adicionado'})
+        except ValueError as e:
+            return jsonify({'success': False, 'error': str(e)})
     else:
         return jsonify({'success': False, 'error': 'Produto não encontrado ou alias já existe'})
 
@@ -571,16 +613,52 @@ def api_product_history(product_name):
         requests = load_stock_requests()
         transfers = load_stock_transfers()
         
+        # Helper for relaxed name matching (handles "Coca-Cola" vs "Coca Cola")
+        def names_match(n1, n2):
+            if n1 == n2: return True
+            # Strip punctuation and spaces for fuzzy match
+            c1 = n1.replace('-', '').replace('.', '').replace(' ', '')
+            c2 = n2.replace('-', '').replace('.', '').replace(' ', '')
+            return c1 == c2
+
         # 3. Process Entries (Purchases, Adjustments, Sales)
         for entry in entries:
             try:
-                entry_date = datetime.strptime(entry.get('date', ''), '%d/%m/%Y')
+                # Handle both 'date' (DD/MM/YYYY) and 'entry_date' (DD/MM/YYYY HH:MM)
+                date_str = entry.get('date', '')
+                time_str = entry.get('time', '')
+                
+                # Try to parse full datetime from entry_date first if available
+                entry_date = None
+                if entry.get('entry_date'):
+                    try:
+                        entry_date = datetime.strptime(entry.get('entry_date'), '%d/%m/%Y %H:%M')
+                    except ValueError: pass
+                
+                if not entry_date:
+                    try:
+                        entry_date = datetime.strptime(date_str, '%d/%m/%Y')
+                        if time_str:
+                            try:
+                                t = datetime.strptime(time_str, '%H:%M').time()
+                                entry_date = datetime.combine(entry_date.date(), t)
+                            except ValueError: pass
+                        else:
+                            # If no time, set to end of day so it appears in range? Or start?
+                            # Usually exact date matching requires care. 
+                            # Let's keep it as 00:00 but ensure range covers it.
+                            pass
+                    except ValueError:
+                        continue
+
                 # Check date range
+                # If start_date has time 00:00:00, it covers the whole day if we compare correctly.
+                # If entry has no time, it is 00:00:00.
                 if not (start_date <= entry_date <= end_date):
                     continue
                     
                 p_name = normalize_text(entry.get('product', ''))
-                if p_name == target_product:
+                if names_match(p_name, target_product):
                     qty = float(entry.get('qty', 0))
                     action = "Entrada" if qty >= 0 else "Saída"
                     details = f"Fornecedor: {entry.get('supplier', '-')}"
@@ -588,7 +666,7 @@ def api_product_history(product_name):
                         details += f" | Doc: {entry.get('invoice')}"
                         
                     history.append({
-                        'date': entry.get('date', '') + ' ' + entry.get('time', ''), # Some entries might not have time
+                        'date': entry_date.strftime('%d/%m/%Y %H:%M'),
                         'timestamp': entry_date.timestamp(),
                         'action': action,
                         'qty': qty,
@@ -614,7 +692,7 @@ def api_product_history(product_name):
                 items_found = []
                 if 'items_structured' in req:
                     for item in req['items_structured']:
-                        if normalize_text(item.get('name', '')) == target_product:
+                        if names_match(normalize_text(item.get('name', '')), target_product):
                             q = float(item.get('delivered_qty', item.get('qty', 0)))
                             items_found.append(q)
                 elif 'items' in req and isinstance(req['items'], str):
@@ -623,7 +701,7 @@ def api_product_history(product_name):
                          if 'x ' in part:
                              try:
                                  qty_str, name = part.split('x ', 1)
-                                 if normalize_text(name) == target_product:
+                                 if names_match(normalize_text(name), target_product):
                                      items_found.append(float(qty_str))
                              except: pass
                              
@@ -655,7 +733,7 @@ def api_product_history(product_name):
                 t_prod = normalize_text(t.get('product', ''))
                 
                 # Check if this transfer involves our product
-                if t_prod == target_product:
+                if names_match(t_prod, target_product):
                     # Determine if In or Out relative to context?
                     # The history is for the PRODUCT generically, or the specific stock context?
                     # Usually "History" implies the global movement or context-aware.
@@ -804,7 +882,12 @@ def stock_entry():
                             if original_name not in p['aliases']:
                                 p['aliases'].append(original_name)
                 
-                save_products(products)
+                try:
+                    secure_save_products(products, user_id=session.get('user', 'Sistema'))
+                except ValueError as e:
+                    # If save fails, we should technically revert stock entry... 
+                    # but simpler to just log/fail for now as this is a complex transaction
+                    return jsonify({'success': False, 'error': f'Erro ao atualizar produtos: {e}'})
                 
                 # --- Process Financials (Payables) ---
                 bills = financials.get('bills', [])
@@ -1008,18 +1091,10 @@ def list_nfe_dfe_route():
             
         target_integration = None
         
-        # 1. Prioritize sefaz_direto (Free)
         for integ in integrations:
             if integ.get('provider') == 'sefaz_direto':
                 target_integration = integ
                 break
-                
-        # 2. Fallback to nuvem_fiscal (Paid)
-        if not target_integration:
-            for integ in integrations:
-                if integ.get('provider') == 'nuvem_fiscal':
-                    target_integration = integ
-                    break
                     
         if not target_integration:
              return jsonify({'error': 'Nenhuma integração fiscal configurada para consulta.'}), 400
@@ -1069,11 +1144,6 @@ def sync_nfe_xmls():
             if integ.get('provider') == 'sefaz_direto':
                 target_integration = integ
                 break
-        if not target_integration:
-            for integ in integrations:
-                if integ.get('provider') == 'nuvem_fiscal':
-                    target_integration = integ
-                    break
         if not target_integration:
             return jsonify({'error': 'Nenhuma integração fiscal configurada para sincronização.'}), 400
         result = sync_received_nfes(target_integration)
@@ -1206,24 +1276,27 @@ def update_min_stock():
                 break
                 
         if updated:
-            save_products(products)
-            
-            # Log
-            LoggerService.log_acao(
-                acao='Ajuste de Estoque Mínimo (Individual)',
-                entidade='Estoque',
-                detalhes={
-                    'product_id': product_id,
-                    'product_name': product_name,
-                    'old_min': old_min,
-                    'new_min': new_min
-                },
-                nivel_severidade='INFO',
-                departamento_id='Estoque',
-                colaborador_id=session.get('user', 'Sistema')
-            )
-            
-            return jsonify({'success': True})
+            try:
+                secure_save_products(products, user_id=session.get('user', 'Sistema'))
+                
+                # Log
+                LoggerService.log_acao(
+                    acao='Ajuste de Estoque Mínimo (Individual)',
+                    entidade='Estoque',
+                    detalhes={
+                        'product_id': product_id,
+                        'product_name': product_name,
+                        'old_min': old_min,
+                        'new_min': new_min
+                    },
+                    nivel_severidade='INFO',
+                    departamento_id='Estoque',
+                    colaborador_id=session.get('user', 'Sistema')
+                )
+                
+                return jsonify({'success': True})
+            except ValueError as e:
+                return jsonify({'success': False, 'message': str(e)})
         else:
             return jsonify({'success': False, 'message': 'Produto não encontrado'})
             
@@ -1266,21 +1339,24 @@ def update_min_stock_bulk():
                     })
                     
         if count > 0:
-            save_products(products)
-            
-            LoggerService.log_acao(
-                acao='Ajuste de Estoque Mínimo (Em Massa/IA)',
-                entidade='Estoque',
-                detalhes={
-                    'count': count,
-                    'items': logs_details[:20] # Limit log size
-                },
-                nivel_severidade='INFO',
-                departamento_id='Estoque',
-                colaborador_id=session.get('user', 'Sistema')
-            )
-            
-            return jsonify({'success': True, 'count': count})
+            try:
+                secure_save_products(products, user_id=session.get('user', 'Sistema'))
+                
+                LoggerService.log_acao(
+                    acao='Ajuste de Estoque Mínimo (Em Massa/IA)',
+                    entidade='Estoque',
+                    detalhes={
+                        'count': count,
+                        'items': logs_details[:20] # Limit log size
+                    },
+                    nivel_severidade='INFO',
+                    departamento_id='Estoque',
+                    colaborador_id=session.get('user', 'Sistema')
+                )
+                
+                return jsonify({'success': True, 'count': count})
+            except ValueError as e:
+                return jsonify({'success': False, 'message': str(e)})
         else:
             return jsonify({'success': True, 'count': 0, 'message': 'Nenhuma alteração necessária'})
             
@@ -1628,19 +1704,23 @@ def delete_product(product_id):
         
     # Remove product
     products = [p for p in products if p['id'] != product_id]
-    save_products(products)
+    try:
+        secure_save_products(products, user_id=session.get('user', 'Sistema'))
+        
+        # Log Deletion
+        details = {'name': product['name'], 'id': product_id}
+        if 'reason' in locals():
+            details['reason'] = reason
+        if 'destination' in locals():
+            details['destination'] = destination
+
+        details['message'] = f'Produto "{product["name"]}" excluído.'
+        log_system_action('Produto Excluído', details, category='Estoque')
+
+        flash(f'Produto "{product["name"]}" excluído com sucesso.')
+    except ValueError as e:
+        flash(f'Erro ao excluir produto: {e}')
     
-    # Log Deletion
-    details = {'name': product['name'], 'id': product_id}
-    if 'reason' in locals():
-        details['reason'] = reason
-    if 'destination' in locals():
-        details['destination'] = destination
-
-    details['message'] = f'Produto "{product["name"]}" excluído.'
-    log_system_action('Produto Excluído', details, category='Estoque')
-
-    flash(f'Produto "{product["name"]}" excluído com sucesso.')
     return redirect(url_for('stock.stock_products'))
 
 # --- Helpers ---
@@ -2211,3 +2291,63 @@ from app.services.system_config_manager import PRODUCT_PHOTOS_DIR
 @stock_bp.route('/Produtos/Fotos/<path:filename>')
 def product_photos(filename):
     return send_from_directory(PRODUCT_PHOTOS_DIR, filename)
+
+# --- Security Routes ---
+from app.services.stock_security_service import StockSecurityService
+
+@stock_bp.route('/stock/security')
+@login_required
+def stock_security_dashboard():
+    if session.get('role') not in ['admin', 'super']:
+        return redirect(url_for('stock.stock_products'))
+    return render_template('stock_security.html')
+
+@stock_bp.route('/api/stock/security/integrity_check', methods=['POST'])
+@login_required
+def run_integrity_check():
+    if session.get('role') not in ['admin', 'super']:
+        return jsonify({'success': False, 'error': 'Acesso negado'}), 403
+        
+    try:
+        products = load_products()
+        anomalies = StockSecurityService.verify_integrity(products)
+        return jsonify({
+            'success': True,
+            'total_checked': len(products),
+            'anomalies': anomalies
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@stock_bp.route('/api/stock/security/checkpoint', methods=['POST'])
+@login_required
+def create_checkpoint():
+    if session.get('role') not in ['admin', 'super']:
+        return jsonify({'success': False, 'error': 'Acesso negado'}), 403
+        
+    path = StockSecurityService.create_checkpoint()
+    if path:
+        return jsonify({'success': True, 'path': path})
+    else:
+        return jsonify({'success': False, 'error': 'Falha ao criar checkpoint'}), 500
+
+@stock_bp.route('/api/stock/security/audit_logs', methods=['GET'])
+@login_required
+def get_audit_logs():
+    if session.get('role') not in ['admin', 'super']:
+        return jsonify({'success': False, 'error': 'Acesso negado'}), 403
+        
+    # Load today's logs for demo
+    try:
+        date_str = datetime.now().strftime('%Y-%m-%d')
+        # We need to construct path manually as it's dynamic
+        from app.services.system_config_manager import AUDIT_LOGS_FILE
+        audit_file = os.path.join(os.path.dirname(AUDIT_LOGS_FILE), f"stock_audit_{date_str}.json")
+        
+        logs = []
+        if os.path.exists(audit_file):
+            with open(audit_file, 'r', encoding='utf-8') as f:
+                logs = json.load(f)
+        return jsonify({'success': True, 'logs': logs})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500

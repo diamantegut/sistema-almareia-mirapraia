@@ -247,7 +247,7 @@
 </div>
 
 <!-- NFe List Modal -->
-<div class="modal fade" id="nfeListModal" tabindex="-1">
+<div class="modal fade" id="nfeListModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
@@ -276,7 +276,7 @@
                                 <th>Valor</th>
                                 <th>Chave de Acesso</th>
                                 <th>Status</th>
-                                <th class="text-end">Ação</th>
+                                <!-- <th class="text-end">Ação</th> -->
                             </tr>
                         </thead>
                         <tbody id="nfeTableBody">
@@ -791,8 +791,17 @@
     }
 
     function openNfeList() {
-        const modal = new bootstrap.Modal(document.getElementById('nfeListModal'));
+        const modalEl = document.getElementById('nfeListModal');
+        // Ensure aria-hidden is removed when modal opens
+        modalEl.removeAttribute('aria-hidden');
+        
+        const modal = new bootstrap.Modal(modalEl);
         modal.show();
+        
+        // Restore aria-hidden when modal closes
+        modalEl.addEventListener('hidden.bs.modal', function () {
+            modalEl.setAttribute('aria-hidden', 'true');
+        }, { once: true });
         
         const loading = document.getElementById('nfeLoading');
         const table = document.getElementById('nfeTableContainer');
@@ -829,21 +838,23 @@
                 const amount = formatMoney(doc.amount || 0);
                 const status = doc.status || '';
                 const badgeClass = (status === 'recebida' || status === 'importada') ? 'success' : 'secondary';
-                const importBtn = `<button class="btn btn-sm btn-outline-secondary" disabled title="Importação individual desabilitada. Use o botão &quot;Baixar XMLs para pasta&quot; abaixo.">Indisponível</button>`;
+                // const importBtn = `<button class="btn btn-sm btn-outline-secondary" disabled title="Importação individual desabilitada. Use o botão &quot;Baixar XMLs para pasta&quot; abaixo.">Indisponível</button>`;
                 tr.innerHTML = `
                     <td>${date}</td>
                     <td>${doc.issuer}</td>
                     <td>${amount}</td>
                     <td><small class="text-muted font-monospace">${doc.key}</small></td>
                     <td><span class="badge bg-${badgeClass}">${status}</span></td>
-                    <td class="text-end">${importBtn}</td>
+                    <!-- <td class="text-end">${importBtn}</td> -->
                 `;
                 tbody.appendChild(tr);
             });
         })
         .catch(err => {
             loading.classList.add('d-none');
-            errorDiv.textContent = 'Erro de conexão: ' + err.message;
+            // Check for 500 or network errors
+            console.error('NFe List Error:', err);
+            errorDiv.textContent = 'Erro ao consultar notas: ' + (err.message || 'Erro desconhecido');
             errorDiv.classList.remove('d-none');
         });
     }

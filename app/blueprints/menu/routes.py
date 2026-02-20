@@ -1,7 +1,7 @@
 from flask import render_template, request, redirect, url_for, session, flash, jsonify, current_app
 from . import menu_bp
 from app.services.data_service import (
-    load_menu_items, save_menu_items, load_settings, save_settings,
+    load_menu_items, save_menu_items, secure_save_menu_items, load_settings, save_settings,
     load_flavor_groups, save_flavor_groups, load_products,
     load_table_orders, load_printers,
     PRODUCT_PHOTOS_DIR
@@ -24,11 +24,12 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 from app.services.data_service import load_sales_history
-from app.services.system_config_manager import ACTION_LOGS_DIR, SALES_HISTORY_FILE
+from app.services.system_config_manager import ACTION_LOGS_DIR, SALES_HISTORY_FILE, AUDIT_LOGS_FILE
 import os
 from flask import send_file
 import json
 import unicodedata
+from app.services.menu_security_service import MenuSecurityService
 
 # Simple cache for flattened sales
 _SALES_CACHE = {'mtime': None, 'items': []}
@@ -68,12 +69,13 @@ def _name_matches(name, norm_filters):
     return False
 
 def _get_sales_flat():
-    try:
-        mtime = os.path.getmtime(SALES_HISTORY_FILE)
-    except Exception:
-        mtime = None
-    if _SALES_CACHE.get('mtime') == mtime and _SALES_CACHE.get('items'):
-        return _SALES_CACHE['items']
+    # Cache removed to ensure data consistency
+    # try:
+    #     mtime = os.path.getmtime(SALES_HISTORY_FILE)
+    # except Exception:
+    #     mtime = None
+    # if _SALES_CACHE.get('mtime') == mtime and _SALES_CACHE.get('items'):
+    #     return _SALES_CACHE['items']
     data = load_sales_history()
     items = []
     if isinstance(data, dict):
@@ -115,8 +117,9 @@ def _get_sales_flat():
                 'status': status,
                 'customer': customer
             })
-    _SALES_CACHE['mtime'] = mtime
-    _SALES_CACHE['items'] = items
+    # Update cache removed
+    # _SALES_CACHE['mtime'] = mtime
+    # _SALES_CACHE['items'] = items
     return items
 
 def _get_cancellations_from_logs(start_dt, end_dt, products_set):
@@ -239,7 +242,9 @@ def menu_sales_history_api():
         e = edt or datetime.max
         canc = _get_cancellations_from_logs(s, e, prod_set)
         filtered = filtered + canc
-        filtered.sort(key=lambda x: x['timestamp'] or datetime.min)
+        filtered.sort(key=lambda x: x['timestamp'] or datetime.min, reverse=True)
+    else:
+        filtered.sort(key=lambda x: x['timestamp'] or datetime.min, reverse=True)
     total_count = len(filtered)
     start_idx = max(0, (page - 1) * page_size)
     end_idx = start_idx + page_size
@@ -1045,7 +1050,12 @@ def menu_management():
                     colaborador_id=current_user
                 )
 
-            save_menu_items(menu_items)
+            # Save securely
+            try:
+                secure_save_menu_items(menu_items, current_user)
+            except ValueError as e:
+                flash(f'Erro de validação/conflito: {e}')
+                return redirect(url_for('menu.menu_management'))
             
             # Log Changes for History
             if not is_new_product and changes:
@@ -1179,7 +1189,12 @@ def delete_menu_item(item_id):
     item_name = next((i['name'] for i in menu_items if i.get('id') == item_id), 'Desconhecido')
     
     menu_items = [i for i in menu_items if i.get('id') != item_id]
-    save_menu_items(menu_items)
+    
+    try:
+        secure_save_menu_items(menu_items, session.get('user', 'Sistema'))
+    except ValueError as e:
+        flash(f'Erro ao excluir: {e}')
+        return redirect(url_for('menu.menu_management'))
     
     LoggerService.log_acao(
         acao='Cardápio Excluído',
@@ -1339,7 +1354,10 @@ def toggle_menu_item_active(item_id):
     for item in menu_items:
         if item.get('id') == item_id:
             item['active'] = not item.get('active', True)
-            save_menu_items(menu_items)
+            try:
+                secure_save_menu_items(menu_items, session.get('user', 'Sistema'))
+            except Exception as e:
+                return jsonify({'success': False, 'message': f'Erro de segurança: {e}'}), 500
             
             # Log System Action
             status_str = "ativado" if item['active'] else "desativado"
@@ -1427,8 +1445,11 @@ def flavor_config_update_product_limit():
                 break
                 
         if updated:
-            save_menu_items(menu_items)
-            return jsonify({'success': True, 'message': 'Limite atualizado com sucesso'})
+            try:
+                secure_save_menu_items(menu_items, session.get('user', 'Sistema'))
+                return jsonify({'success': True, 'message': 'Limite atualizado com sucesso'})
+            except Exception as e:
+                return jsonify({'success': False, 'message': f'Erro de segurança: {e}'}), 500
         else:
             return jsonify({'success': False, 'message': 'Produto não encontrado'}), 404
             
@@ -1561,3 +1582,61 @@ def flavor_config_delete_item():
             flash('Item removido do grupo.')
             
     return redirect(url_for('menu.flavor_config_endpoint'))
+
+@menu_bp.route('/menu/security')
+@login_required
+def menu_security_dashboard():
+    user_role = session.get('role')
+    if user_role not in ['admin', 'gerente', 'supervisor']:
+        flash('Acesso restrito.')
+        return redirect(url_for('menu.menu_management'))
+    return render_template('menu_security.html')
+
+@menu_bp.route('/api/menu/security/integrity_check', methods=['POST'])
+@login_required
+def api_menu_integrity_check():
+    user_role = session.get('role')
+    if user_role not in ['admin', 'gerente', 'supervisor']:
+        return jsonify({'success': False, 'error': 'Acesso restrito'}), 403
+    
+    result = MenuSecurityService.validate_integrity()
+    return jsonify(result)
+
+@menu_bp.route('/api/menu/security/checkpoint', methods=['POST'])
+@login_required
+def api_menu_checkpoint():
+    user_role = session.get('role')
+    if user_role not in ['admin', 'gerente', 'supervisor']:
+        return jsonify({'success': False, 'error': 'Acesso restrito'}), 403
+    
+    success, path_or_err = MenuSecurityService.create_checkpoint(session.get('user', 'Sistema'))
+    if success:
+        return jsonify({'success': True, 'path': path_or_err})
+    else:
+        return jsonify({'success': False, 'error': path_or_err})
+
+@menu_bp.route('/api/menu/security/audit_logs')
+@login_required
+def api_menu_audit_logs():
+    user_role = session.get('role')
+    if user_role not in ['admin', 'gerente', 'supervisor']:
+        return jsonify({'success': False, 'error': 'Acesso restrito'}), 403
+    
+    logs = []
+    try:
+        log_dir = os.path.dirname(AUDIT_LOGS_FILE)
+        if os.path.exists(log_dir):
+            files = sorted([f for f in os.listdir(log_dir) if f.startswith('menu_audit_')], reverse=True)
+            
+            for fname in files[:3]: 
+                with open(os.path.join(log_dir, fname), 'r', encoding='utf-8') as f:
+                    day_logs = json.load(f)
+                    logs.extend(day_logs)
+                    
+            logs.sort(key=lambda x: x['timestamp'], reverse=True)
+            logs = logs[:50]
+        
+    except Exception as e:
+        current_app.logger.error(f"Error loading menu audit logs: {e}")
+        
+    return jsonify({'logs': logs})

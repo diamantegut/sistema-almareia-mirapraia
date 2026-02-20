@@ -171,6 +171,7 @@ SUPPLIERS_FILE = get_data_path('suppliers.json')
 CONFERENCES_FILE = get_data_path('conferences.json')
 CONFERENCE_PRESETS_FILE = get_data_path('conference_presets.json')
 CONFERENCE_SKIPPED_FILE = get_data_path('conference_skipped_items.json')
+BAR_DATA_FILE = get_data_path('bar_data.json')
 
 # Hotel Operations
 ROOM_OCCUPANCY_FILE = get_data_path('room_occupancy.json')

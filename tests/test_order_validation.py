@@ -149,5 +149,68 @@ class TestRestaurantOrderIssue(unittest.TestCase):
             self.assertEqual(len(mock_orders['01']['items']), 1)
             self.assertEqual(mock_orders['01']['items'][0]['product_id'], "100") # Should resolve to ID
 
+    @patch('app.blueprints.restaurant.routes.save_stock_entry')
+    @patch('app.blueprints.restaurant.routes.load_products')
+    @patch('app.blueprints.restaurant.routes.load_flavor_groups')
+    @patch('app.blueprints.restaurant.routes.load_menu_items')
+    @patch('app.blueprints.restaurant.routes.load_table_orders')
+    @patch('app.blueprints.restaurant.routes.save_table_orders')
+    @patch('app.blueprints.restaurant.routes.log_system_action')
+    @patch('app.blueprints.restaurant.routes.load_complements')
+    @patch('app.blueprints.restaurant.routes.load_printers')
+    @patch('app.blueprints.restaurant.routes.print_order_items')
+    def test_flavor_stock_deduction(self, mock_print, mock_load_printers, mock_comps, mock_log_action, mock_save_orders, mock_load_orders, mock_load_menu, mock_flavor_groups, mock_load_products, mock_save_stock):
+        mock_menu = [
+            {
+                "id": "200",
+                "name": "Pizza Dois Sabores",
+                "category": "Pizzas",
+                "price": 50.0,
+                "active": True,
+                "flavor_group_id": "Sabores",
+                "flavor_multiplier": 1.0
+            }
+        ]
+        mock_orders = {"01": {"items": [], "status": "open", "total": 0}}
+        mock_flavor_groups.return_value = [
+            {
+                "id": "Sabores",
+                "name": "Sabores",
+                "items": [
+                    {"id": "131", "name": "Queijo Mussarela", "qty": 0.1, "is_simple": True},
+                    {"id": "69", "name": "Charque Desfiada", "qty": 0.2, "is_simple": True}
+                ]
+            }
+        ]
+        mock_load_products.return_value = [
+            {"id": "131", "name": "Queijo Mussarela", "price": 10.0},
+            {"id": "69", "name": "Charque Desfiada", "price": 15.0}
+        ]
+        mock_load_menu.return_value = mock_menu
+        mock_load_orders.return_value = mock_orders
+        mock_comps.return_value = []
+        mock_load_printers.return_value = []
+        mock_print.return_value = {'printed_ids': [], 'results': {}}
+
+        payload = {
+            "action": "add_batch_items",
+            "items_json": json.dumps([{
+                "product": "200",
+                "qty": 2,
+                "flavor_id": "131,69",
+                "flavor_name": "Queijo Mussarela + Charque Desfiada"
+            }])
+        }
+
+        response = self.client.post('/restaurant/table/01', data=payload, follow_redirects=True)
+
+        self.assertIn(b'Pedido enviado com sucesso', response.data)
+        self.assertGreaterEqual(mock_save_stock.call_count, 2)
+
+        calls = [c[0][0] for c in mock_save_stock.call_args_list]
+        entries = {(e['product'], round(e['qty'], 4)) for e in calls}
+        self.assertIn(("Queijo Mussarela", -0.2), entries)
+        self.assertIn(("Charque Desfiada", -0.4), entries)
+
 if __name__ == '__main__':
     unittest.main()

@@ -3571,6 +3571,7 @@ def reception_close_account(room_num):
         # Aggregate waiter breakdown
         from collections import defaultdict
         aggregated_waiter_breakdown = defaultdict(float)
+        has_commissionable_service_fee_charge = False
         
         for charge in pending_charges:
             # Update Status

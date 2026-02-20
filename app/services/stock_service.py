@@ -243,39 +243,88 @@ def calculate_smart_stock_suggestions():
         
     return suggestions
 
-def get_product_balances():
-    products = load_products()
+def get_product_balances_by_id(products=None):
+    if products is None:
+        products = load_products()
     entries = load_stock_entries()
     requests = load_stock_requests()
-    balances = {p['name']: 0.0 for p in products}
+    
+    # Map Name to List of IDs to handle legacy name-based entries
+    name_to_ids = {}
+    for p in products:
+        name = p['name']
+        if name not in name_to_ids:
+            name_to_ids[name] = []
+        name_to_ids[name].append(str(p['id']))
+        
+    balances = {str(p['id']): 0.0 for p in products}
     
     for entry in entries:
-        if entry['product'] in balances:
-            balances[entry['product']] += float(entry['qty'])
+        # If entry has product_id, use it
+        if entry.get('product_id'):
+            pid = str(entry['product_id'])
+            if pid in balances:
+                try:
+                    balances[pid] += float(entry['qty'])
+                except (ValueError, TypeError): pass
+        elif entry.get('product'):
+            # Legacy: use name
+            name = entry['product']
+            if name in name_to_ids:
+                # Assign to the first ID found for this name
+                target_id = name_to_ids[name][0]
+                if target_id in balances:
+                    try:
+                        balances[target_id] += float(entry['qty'])
+                    except (ValueError, TypeError): pass
             
     for req in requests:
-        # Only deduct stock if request is Completed (new flow) or Pending (legacy flow)
-        # New flow statuses: 'Pendente Almoxarifado', 'Aguardando Confirmação' -> Do NOT deduct yet
         if req.get('status') not in ['Pendente', 'Concluído']:
             continue
 
+        items = []
         if 'items_structured' in req:
-            for item in req['items_structured']:
-                if item['name'] in balances:
-                    # Use delivered_qty if available (partial delivery), else requested qty
-                    qty = float(item.get('delivered_qty', item['qty']))
-                    balances[item['name']] -= qty
+            items = req['items_structured']
         elif 'items' in req and isinstance(req['items'], str):
              parts = req['items'].split(', ')
              for part in parts:
                  try:
                      if 'x ' in part:
                          qty_str, name = part.split('x ', 1)
-                         if name in balances:
-                             balances[name] -= float(qty_str)
-                 except ValueError:
-                     pass
+                         items.append({'name': name, 'qty': qty_str})
+                 except ValueError: pass
+        
+        for item in items:
+            name = item.get('name')
+            pid = item.get('product_id')
+            
+            try:
+                qty = float(item.get('delivered_qty', item.get('qty', 0)))
+            except (ValueError, TypeError):
+                qty = 0.0
+            
+            if pid and str(pid) in balances:
+                balances[str(pid)] -= qty
+            elif name and name in name_to_ids:
+                target_id = name_to_ids[name][0]
+                if target_id in balances:
+                    balances[target_id] -= qty
+
     return balances
+
+def get_product_balances():
+    products = load_products()
+    balances_by_id = get_product_balances_by_id(products)
+    
+    # Aggregate by name for backward compatibility
+    balances_by_name = {}
+    for p in products:
+        pid = str(p['id'])
+        name = p['name']
+        val = balances_by_id.get(pid, 0.0)
+        balances_by_name[name] = balances_by_name.get(name, 0.0) + val
+        
+    return balances_by_name
 
 def calculate_inventory(products, entries, requests, transfers, target_dept='Geral'):
     print(f"DEBUG: Calculating for {target_dept}")
