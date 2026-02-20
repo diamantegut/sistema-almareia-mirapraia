@@ -4,25 +4,22 @@
         "patrimony_number": "PAT-00001",
         "description": "Insumo de Teste",
         "category": "Teste",
-        "acquisition_value": 20.0,
+        "acquisition_value": 10.0,
         "purchase_date": "2026-02-19",
-        "quantity": 2.0,
+        "quantity": 0.0,
         "supplier": "Transferido do Estoque",
         "condition": "Bom",
         "location": "A Definir",
-        "responsible": "",
-        "useful_life_years": 5.0,
-        "annual_depreciation_rate": 10.0,
+        "responsible": "Angelo",
+        "useful_life_years": 5,
+        "annual_depreciation_rate": 10,
         "created_at": "19/02/2026 12:29",
         "created_by": "Angelo",
         "transfer_history": {
             "from": "Estoque",
             "date": "19/02/2026 12:29",
             "justification": "ativo teste"
-        },
-        "min_stock": 0.0,
-        "updated_at": "19/02/2026 13:21",
-        "updated_by": "Angelo"
+        }
     },
     {
         "id": "4fc367b5-d7bb-49f6-8c5a-3e1c8c334132",
