@@ -1,115 +1,84 @@
 @echo off
-:: ========================================================
-::   AUTOMACAO GIT - ALMAREIA MIRAPRAIA
-::   Agora com PULL e PUSH separados por categoria
-:: ========================================================
-:menu
-cls
-echo ========================================================
-echo   AUTOMACAO GIT - ALMAREIA MIRAPRAIA
-echo ========================================================
-echo.
-echo [1] PULL COMPLETO (Projeto inteiro)
-echo [2] PUSH COMPLETO (Projeto inteiro)
-echo [3] PULL DATA APENAS (Somente pasta data)
-echo [4] PUSH DATA APENAS (Somente pasta data)
-echo [5] PULL SISTEMA (Exceto pasta data)
-echo [6] PUSH SISTEMA (Exceto pasta data)
-echo [7] STATUS (Verificar alteracoes pendentes)
-echo [8] SAIR
-echo.
-set /p opcao=Escolha uma opcao: 
+TITLE Git Automation - Sistema Almareia Mirapraia
+CLS
+ECHO ========================================================
+ECHO    GIT AUTOMATION MANAGER
+ECHO ========================================================
+ECHO.
+ECHO  [System Code - Main Branch]
+ECHO  1. Pull System Code (No Data)
+ECHO  2. Push System Code (No Data)
+ECHO.
+ECHO  [Data Folder - Data Branch]
+ECHO  3. Pull Data Only
+ECHO  4. Push Data Only
+ECHO.
+ECHO  [Combined Operations]
+ECHO  5. Pull Everything (System + Data)
+ECHO  6. Push Everything (System + Data)
+ECHO.
+ECHO ========================================================
+SET /P choice="Enter choice (1-6): "
 
-if "%opcao%"=="1" goto pull_full
-if "%opcao%"=="2" goto push_full
-if "%opcao%"=="3" goto pull_data
-if "%opcao%"=="4" goto push_data
-if "%opcao%"=="5" goto pull_system
-if "%opcao%"=="6" goto push_system
-if "%opcao%"=="7" goto status
-if "%opcao%"=="8" goto sair
-goto menu
+IF "%choice%"=="1" GOTO PULL_SYS
+IF "%choice%"=="2" GOTO PUSH_SYS
+IF "%choice%"=="3" GOTO PULL_DATA
+IF "%choice%"=="4" GOTO PUSH_DATA
+IF "%choice%"=="5" GOTO PULL_ALL
+IF "%choice%"=="6" GOTO PUSH_ALL
+GOTO END
 
-:pull_full
-echo.
-echo === PULL COMPLETO ===
+:PULL_SYS
+ECHO.
+ECHO [Pulling System Code...]
 git pull origin main
-pause
-goto menu
+GOTO END
 
-:push_full
-echo.
-echo === PREPARANDO PUSH COMPLETO ===
-git add .
-set msg=
-set /p msg=Digite a mensagem do commit (Enter para "Atualizacao Completa"): 
-if "%msg%"=="" set msg=Atualizacao Completa
-git commit -m "%msg%"
-echo.
-echo === ENVIANDO (PUSH COMPLETO) ===
+:PUSH_SYS
+ECHO.
+ECHO [Pushing System Code...]
 git push origin main
-pause
-goto menu
+GOTO END
 
-:pull_data
-echo.
-echo === PULL DATA APENAS ===
-echo Sincronizando apenas a pasta ^'data^' com o remoto...
-git fetch origin main
-git checkout origin/main -- data
-echo.
-echo [OK] Pasta ^'data^' atualizada a partir de origin/main sem alterar outros arquivos.
-pause
-goto menu
+:PULL_DATA
+ECHO.
+ECHO [Pulling Data Folder...]
+cd data
+git pull origin data-branch
+cd ..
+GOTO END
 
-:push_data
-echo.
-echo === PUSH DATA APENAS ===
-git add data
-set msg=
-set /p msg=Mensagem do commit para DATA (Enter para "Atualizacao DATA"): 
-if "%msg%"=="" set msg=Atualizacao DATA
-git commit -m "%msg%"
-echo.
-echo === ENVIANDO ALTERACOES DE DATA ===
+:PUSH_DATA
+ECHO.
+ECHO [Pushing Data Folder...]
+cd data
+git push origin data-branch
+cd ..
+GOTO END
+
+:PULL_ALL
+ECHO.
+ECHO [Pulling System Code...]
+git pull origin main
+ECHO.
+ECHO [Pulling Data Folder...]
+cd data
+git pull origin data-branch
+cd ..
+GOTO END
+
+:PUSH_ALL
+ECHO.
+ECHO [Pushing System Code...]
 git push origin main
-pause
-goto menu
+ECHO.
+ECHO [Pushing Data Folder...]
+cd data
+git push origin data-branch
+cd ..
+GOTO END
 
-:pull_system
-echo.
-echo === PULL SISTEMA (EXCETO DATA) ===
-echo Atualizando arquivos do sistema a partir do remoto, preservando ^'data^' local...
-git fetch origin main
-git checkout origin/main -- .
-git checkout HEAD -- data
-echo.
-echo [OK] Sistema atualizado. Pasta ^'data^' preservada.
-pause
-goto menu
-
-:push_system
-echo.
-echo === PUSH SISTEMA (EXCETO DATA) ===
-git add .
-git reset HEAD data
-set msg=
-set /p msg=Mensagem do commit para SISTEMA (Enter para "Atualizacao SISTEMA"): 
-if "%msg%"=="" set msg=Atualizacao SISTEMA
-git commit -m "%msg%"
-echo.
-echo === ENVIANDO ALTERACOES DO SISTEMA ===
-git push origin main
-pause
-goto menu
-
-:status
-echo.
-echo === Status atual ===
-git status
-echo.
-pause
-goto menu
-
-:sair
-exit
+:END
+ECHO.
+ECHO Operation Complete.
+PAUSE
