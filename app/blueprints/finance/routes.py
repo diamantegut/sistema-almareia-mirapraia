@@ -2691,8 +2691,66 @@ def fiscal_print(entry_id):
                             invoice_data['valor_total'] = float(elem.text.replace(',', '.'))
                         except Exception:
                             pass
+
+                items = []
+                for det in root.iter():
+                    tag = det.tag.split('}')[-1]
+                    if tag != 'det':
+                        continue
+                    prod = None
+                    for child in list(det):
+                        ctag = child.tag.split('}')[-1]
+                        if ctag == 'prod':
+                            prod = child
+                            break
+                    if prod is None:
+                        continue
+                    data = {}
+                    for child in list(prod):
+                        ctag = child.tag.split('}')[-1]
+                        if ctag == 'cProd':
+                            data['code'] = (child.text or '').strip()
+                        elif ctag == 'xProd':
+                            data['name'] = (child.text or '').strip()
+                        elif ctag == 'qCom':
+                            try:
+                                data['qty'] = float(str(child.text).replace(',', '.'))
+                            except Exception:
+                                data['qty'] = 0.0
+                        elif ctag == 'uCom':
+                            data['unit'] = (child.text or '').strip()
+                        elif ctag == 'vUnCom':
+                            try:
+                                data['unit_price'] = float(str(child.text).replace(',', '.'))
+                            except Exception:
+                                data['unit_price'] = 0.0
+                        elif ctag == 'vProd':
+                            try:
+                                data['total'] = float(str(child.text).replace(',', '.'))
+                            except Exception:
+                                data['total'] = 0.0
+                    if data:
+                        items.append(data)
+
+                if items:
+                    invoice_data['items'] = items
+
             except Exception:
                 pass
+        else:
+            items = []
+            for it in entry.get('items', []):
+                data = {
+                    'code': str(it.get('id') or it.get('code') or ''),
+                    'name': str(it.get('name') or ''),
+                    'qty': float(it.get('qty', 0.0) or 0.0),
+                    'unit': str(it.get('unit', 'UN') or 'UN'),
+                    'unit_price': float(it.get('price', 0.0) or 0.0),
+                }
+                data['total'] = round(data['qty'] * data['unit_price'], 2)
+                items.append(data)
+            if items:
+                invoice_data['items'] = items
 
         ok, err = print_fiscal_receipt({}, invoice_data)
         if not ok:

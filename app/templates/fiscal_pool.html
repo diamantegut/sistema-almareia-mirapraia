@@ -273,6 +273,9 @@ function viewDetails(id) {
                     <button class="btn btn-danger btn-sm" onclick="downloadPdf('${entry.id}')">
                       <i class="bi bi-file-earmark-pdf"></i> Baixar PDF da Nota
                     </button>
+                    <button class="btn btn-primary btn-sm" onclick="printInvoice('${entry.id}')">
+                      <i class="bi bi-printer"></i> Imprimir Nota
+                    </button>
                   </div>
                   <div id="xml-status-${entry.id}" class="form-text mt-1 text-muted">
                     ${entry.xml_ready ? 'XML disponível.' : 'Aguardando disponibilidade do XML...'}
@@ -349,7 +352,20 @@ async function openXmlFolder(id) {
 }
 
 async function printInvoice(id) {
-    alert('Impressão substituída por salvamento de PDF. Use "Abrir PDF da Nota".');
+    try {
+        const url = '{{ url_for("finance.fiscal_print", entry_id="__ENTRY_ID__") }}'.replace('__ENTRY_ID__', id);
+        const resp = await fetch(url, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'}
+        });
+        const data = await resp.json().catch(() => ({}));
+        if (!resp.ok || !data.success) {
+            throw new Error(data.error || data.message || 'Falha ao enviar impressão para a impressora fiscal');
+        }
+        alert('Comando de impressão enviado para a impressora fiscal (80mm).');
+    } catch (e) {
+        alert('Erro ao imprimir nota na impressora térmica: ' + e.message);
+    }
 }
 
 async function pollXmlStatus(id, attempts=6, intervalMs=5000) {

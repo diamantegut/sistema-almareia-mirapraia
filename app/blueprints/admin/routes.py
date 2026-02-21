@@ -968,12 +968,26 @@ def fiscal_config():
         integration['client_secret'] = request.form.get('client_secret')
         integration['csc_id'] = request.form.get('csc_id')
         integration['csc_token'] = request.form.get('csc_token')
+        integration['serie'] = request.form.get('serie') or integration.get('serie')
+        integration['next_number'] = request.form.get('next_number') or integration.get('next_number')
+        crt_val = request.form.get('crt')
+        if crt_val:
+            integration['CRT'] = crt_val
         
         # Legacy/Root compatibility (optional, but good for safety if other parts read root)
         settings['environment'] = integration['environment']
         
         save_fiscal_settings(settings)
-        flash('Configurações fiscais salvas.')
+
+        try:
+            from app.services.fiscal_service import sync_nfce_company_settings
+            sync_result = sync_nfce_company_settings(integration)
+            if sync_result.get('success'):
+                flash('Configurações fiscais salvas e sincronizadas com a Nuvem Fiscal.')
+            else:
+                flash(f"Configurações salvas, mas falha ao sincronizar com a Nuvem Fiscal: {sync_result.get('message')}")
+        except Exception as e:
+            flash(f"Configurações salvas, mas ocorreu erro ao sincronizar com a Nuvem Fiscal: {e}")
         
     return render_template('fiscal_config.html', settings=settings)
 
@@ -989,16 +1003,16 @@ def fiscal_test_connection():
     env_val = data.get('environment') # 1 or 2
     
     scope = "nfce" # Default scope for testing connection
-    
-    # We don't really need env_val for get_access_token as auth URL is same?
-    # Actually auth URL is https://auth.nuvemfiscal.com.br/oauth/token for both?
-    # Docs say: https://auth.nuvemfiscal.com.br/oauth/token
-    # Yes, Auth is unified.
+    if env_val == '2':
+        base_url = "https://api.sandbox.nuvemfiscal.com.br"
+    else:
+        base_url = "https://api.nuvemfiscal.com.br"
+    audience = base_url + "/"
     
     if not client_id or not client_secret:
         return jsonify({'success': False, 'message': 'Credenciais ausentes.'}), 400
         
-    token = get_access_token(client_id, client_secret, scope=scope)
+    token = get_access_token(client_id, client_secret, scope=scope, audience=audience)
     
     if token:
         return jsonify({'success': True, 'token_preview': f"{token[:10]}..."})

@@ -8,6 +8,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, sessio
 from werkzeug.utils import secure_filename
 
 from app.utils.decorators import login_required
+from app.utils.lock import file_lock
 from app.services.data_service import (
     load_products, save_products, secure_save_products, load_stock_requests, save_stock_request, save_all_stock_requests,
     load_stock_entries, save_stock_entry, save_stock_entries, load_suppliers, save_suppliers,
@@ -23,7 +24,7 @@ from app.services.stock_service import (
     calculate_suggested_min_stock, calculate_inventory, get_product_balances, get_product_balances_by_id, calculate_smart_stock_suggestions
 )
 from app.services.system_config_manager import (
-    SALES_EXCEL_PATH, DEPARTMENTS, STOCK_ENTRIES_FILE
+    SALES_EXCEL_PATH, DEPARTMENTS, STOCK_ENTRIES_FILE, PRODUCTS_FILE
 )
 from app.services.logger_service import LoggerService, log_system_action
 from app.services.fiscal_service import (
@@ -304,61 +305,76 @@ def stock_products():
             except (ValueError, AttributeError):
                 icms_val = 0.0
 
-            if product_id:
-                for p in products:
-                    if p.get('id') == product_id:
-                        p['name'] = name
-                        p['department'] = department
-                        p['unit'] = unit
-                        p['price'] = price_val
-                        p['category'] = category
-                        p['min_stock'] = min_stock_val
-                        p['package_size'] = pkg_size_val
-                        p['purchase_unit'] = purchase_unit
-                        p['frequency'] = frequency
-                        p['suppliers'] = suppliers_list
-                        p['is_internal'] = (category == 'Porcionado')
-                        p['ncm'] = ncm
-                        p['cest'] = cest
-                        p['icms_rate'] = icms_val
-                        p['anp_code'] = anp_code
-                        p['cfop_default'] = cfop_default
-                        break
-                try:
-                    secure_save_products(products, user_id=session.get('user', 'Sistema'))
-                    log_system_action('Produto Atualizado', {'id': product_id, 'name': name}, category='Estoque')
-                    flash(f'Produto "{name}" atualizado com sucesso!')
-                except ValueError as e:
-                    flash(f'Erro de validação/concorrência: {e}')
-            else:
-                if not any(p['name'].lower() == name.lower() and p['department'] == department for p in products):
-                    products.append({
-                        'id': str(len(products) + 1),
-                        'name': name,
-                        'department': department,
-                        'unit': unit,
-                        'price': price_val,
-                        'category': category,
-                        'min_stock': min_stock_val,
-                        'package_size': pkg_size_val,
-                        'purchase_unit': purchase_unit,
-                        'frequency': frequency,
-                        'suppliers': suppliers_list,
-                        'is_internal': (category == 'Porcionado'),
-                        'ncm': ncm,
-                        'cest': cest,
-                        'icms_rate': icms_val,
-                        'anp_code': anp_code,
-                        'cfop_default': cfop_default
-                    })
-                    try:
-                        secure_save_products(products, user_id=session.get('user', 'Sistema'))
-                        log_system_action('Produto Criado', {'name': name}, category='Estoque')
-                        flash(f'Produto "{name}" adicionado com sucesso!')
-                    except ValueError as e:
-                        flash(f'Erro ao criar produto: {e}')
+            with file_lock(PRODUCTS_FILE):
+                # Re-load products to ensure we have the latest version before modification
+                products = load_products()
+                
+                if product_id:
+                    updated = False
+                    for p in products:
+                        if p.get('id') == product_id:
+                            p['name'] = name
+                            p['department'] = department
+                            p['unit'] = unit
+                            p['price'] = price_val
+                            p['category'] = category
+                            p['min_stock'] = min_stock_val
+                            p['package_size'] = pkg_size_val
+                            p['purchase_unit'] = purchase_unit
+                            p['frequency'] = frequency
+                            p['suppliers'] = suppliers_list
+                            p['is_internal'] = (category == 'Porcionado')
+                            p['ncm'] = ncm
+                            p['cest'] = cest
+                            p['icms_rate'] = icms_val
+                            p['anp_code'] = anp_code
+                            p['cfop_default'] = cfop_default
+                            updated = True
+                            break
+                    
+                    if updated:
+                        try:
+                            secure_save_products(products, user_id=session.get('user', 'Sistema'))
+                            log_system_action('Produto Atualizado', {'id': product_id, 'name': name}, category='Estoque')
+                            flash(f'Produto "{name}" atualizado com sucesso!')
+                        except ValueError as e:
+                            flash(f'Erro de validação/concorrência: {e}')
+                    else:
+                        flash('Produto não encontrado para atualização.')
                 else:
-                    flash('Produto já existe para este departamento.')
+                    if not any(p['name'].lower() == name.lower() and p['department'] == department for p in products):
+                        # Generate ID safely avoiding collisions
+                        new_id = str(len(products) + 1)
+                        while any(p['id'] == new_id for p in products):
+                            new_id = str(int(new_id) + 1)
+                            
+                        products.append({
+                            'id': new_id,
+                            'name': name,
+                            'department': department,
+                            'unit': unit,
+                            'price': price_val,
+                            'category': category,
+                            'min_stock': min_stock_val,
+                            'package_size': pkg_size_val,
+                            'purchase_unit': purchase_unit,
+                            'frequency': frequency,
+                            'suppliers': suppliers_list,
+                            'is_internal': (category == 'Porcionado'),
+                            'ncm': ncm,
+                            'cest': cest,
+                            'icms_rate': icms_val,
+                            'anp_code': anp_code,
+                            'cfop_default': cfop_default
+                        })
+                        try:
+                            secure_save_products(products, user_id=session.get('user', 'Sistema'))
+                            log_system_action('Produto Criado', {'name': name}, category='Estoque')
+                            flash(f'Produto "{name}" adicionado com sucesso!')
+                        except ValueError as e:
+                            flash(f'Erro ao criar produto: {e}')
+                    else:
+                        flash('Produto já existe para este departamento.')
         
         return_url = request.form.get('return_url')
         if return_url:
@@ -518,31 +534,32 @@ def api_create_product():
     if not name or not department:
         return jsonify({'success': False, 'error': 'Nome e Departamento são obrigatórios.'})
         
-    products = load_products()
-    if any(normalize_text(p['name']) == normalize_text(name) for p in products):
-         return jsonify({'success': False, 'error': 'Produto já existe.'})
-         
-    new_id = str(len(products) + 1)
-    while any(p['id'] == new_id for p in products):
-        new_id = str(int(new_id) + 1)
-        
-    new_product = {
-        'id': new_id,
-        'name': name,
-        'department': department,
-        'unit': unit or 'Un',
-        'price': float(price) if price else 0.0,
-        'category': 'Geral',
-        'min_stock': 0.0,
-        'suppliers': [],
-        'aliases': []
-    }
-    products.append(new_product)
-    try:
-        secure_save_products(products, user_id=session.get('user', 'Sistema'))
-        return jsonify({'success': True, 'product': new_product})
-    except ValueError as e:
-        return jsonify({'success': False, 'error': str(e)})
+    with file_lock(PRODUCTS_FILE):
+        products = load_products()
+        if any(normalize_text(p['name']) == normalize_text(name) for p in products):
+             return jsonify({'success': False, 'error': 'Produto já existe.'})
+             
+        new_id = str(len(products) + 1)
+        while any(p['id'] == new_id for p in products):
+            new_id = str(int(new_id) + 1)
+            
+        new_product = {
+            'id': new_id,
+            'name': name,
+            'department': department,
+            'unit': unit or 'Un',
+            'price': float(price) if price else 0.0,
+            'category': 'Geral',
+            'min_stock': 0.0,
+            'suppliers': [],
+            'aliases': []
+        }
+        products.append(new_product)
+        try:
+            secure_save_products(products, user_id=session.get('user', 'Sistema'))
+            return jsonify({'success': True, 'product': new_product})
+        except ValueError as e:
+            return jsonify({'success': False, 'error': str(e)})
 
 @stock_bp.route('/api/stock/product/alias', methods=['POST'])
 @login_required
@@ -559,25 +576,26 @@ def api_add_product_alias():
     if not product_name or not alias:
         return jsonify({'success': False, 'error': 'Nome do produto e alias são obrigatórios'})
         
-    products = load_products()
-    updated = False
-    for p in products:
-        if normalize_text(p['name']) == normalize_text(product_name):
-            if 'aliases' not in p:
-                p['aliases'] = []
-            if alias not in p['aliases']:
-                p['aliases'].append(alias)
-                updated = True
-            break
-            
-    if updated:
-        try:
-            secure_save_products(products, user_id=session.get('user', 'Sistema'))
-            return jsonify({'success': True, 'message': 'Alias adicionado'})
-        except ValueError as e:
-            return jsonify({'success': False, 'error': str(e)})
-    else:
-        return jsonify({'success': False, 'error': 'Produto não encontrado ou alias já existe'})
+    with file_lock(PRODUCTS_FILE):
+        products = load_products()
+        updated = False
+        for p in products:
+            if normalize_text(p['name']) == normalize_text(product_name):
+                if 'aliases' not in p:
+                    p['aliases'] = []
+                if alias not in p['aliases']:
+                    p['aliases'].append(alias)
+                    updated = True
+                break
+                
+        if updated:
+            try:
+                secure_save_products(products, user_id=session.get('user', 'Sistema'))
+                return jsonify({'success': True, 'message': 'Alias adicionado'})
+            except ValueError as e:
+                return jsonify({'success': False, 'error': str(e)})
+        else:
+            return jsonify({'success': False, 'error': 'Produto não encontrado ou alias já existe'})
 
 @stock_bp.route('/api/stock/history/<path:product_name>', methods=['GET'])
 @login_required
@@ -814,80 +832,81 @@ def stock_entry():
                      flash('Nenhum item adicionado.')
                      return redirect(url_for('stock.stock_entry'))
                 
-                products = load_products()
-                products_map = {p['name']: p for p in products}
-                
-                # Update Suppliers List
-                suppliers = load_suppliers()
-                # Ensure suppliers is a list of dicts
-                valid_suppliers = [s for s in suppliers if isinstance(s, dict)]
-                supplier_names = {s.get('name', '').strip().lower() for s in valid_suppliers}
-                
-                if supplier and supplier.strip().lower() not in supplier_names:
-                    import uuid
-                    new_sup = {
-                        "id": str(uuid.uuid4()),
-                        "name": supplier.strip(),
-                        "category": "Geral",
-                        "active": True,
-                        "created_at": datetime.now().isoformat()
-                    }
-                    suppliers.append(new_sup)
-                    save_suppliers(suppliers)
-                
-                count = 0
-                for item in items:
-                    product_name = item.get('name') or item.get('product') # New vs Old key
-                    try:
-                        qty = float(item.get('qty'))
-                        price = float(item.get('price'))
-                    except:
-                        continue
-                        
-                    entry_id = datetime.now().strftime('%Y%m%d%H%M%S') + f"{count:03d}"
-                    count += 1
+                with file_lock(PRODUCTS_FILE):
+                    products = load_products()
+                    products_map = {p['name']: p for p in products}
                     
-                    item_supplier = item.get('supplier') or supplier
+                    # Update Suppliers List
+                    suppliers = load_suppliers()
+                    # Ensure suppliers is a list of dicts
+                    valid_suppliers = [s for s in suppliers if isinstance(s, dict)]
+                    supplier_names = {s.get('name', '').strip().lower() for s in valid_suppliers}
+                    
+                    if supplier and supplier.strip().lower() not in supplier_names:
+                        import uuid
+                        new_sup = {
+                            "id": str(uuid.uuid4()),
+                            "name": supplier.strip(),
+                            "category": "Geral",
+                            "active": True,
+                            "created_at": datetime.now().isoformat()
+                        }
+                        suppliers.append(new_sup)
+                        save_suppliers(suppliers)
+                    
+                    count = 0
+                    for item in items:
+                        product_name = item.get('name') or item.get('product') # New vs Old key
+                        try:
+                            qty = float(item.get('qty'))
+                            price = float(item.get('price'))
+                        except:
+                            continue
+                            
+                        entry_id = datetime.now().strftime('%Y%m%d%H%M%S') + f"{count:03d}"
+                        count += 1
+                        
+                        item_supplier = item.get('supplier') or supplier
 
-                    entry_data = {
-                        'id': entry_id,
-                        'user': session['user'],
-                        'product': product_name,
-                        'supplier': item_supplier,
-                        'qty': qty,
-                        'price': price,
-                        'invoice': invoice,
-                        'invoice_serial': invoice_serial,
-                        'access_key': access_key,
-                        'date': formatted_date,
-                        'entry_date': datetime.now().strftime('%d/%m/%Y %H:%M'),
-                        'expiry': item.get('expiry'),
-                        'batch': item.get('batch'),
-                        'unit': item.get('unit')
-                    }
-                    save_stock_entry(entry_data)
-                    
-                    if product_name in products_map:
-                        p = products_map[product_name]
-                        p['price'] = price
-                        if 'suppliers' not in p:
-                            p['suppliers'] = []
-                        if item_supplier and item_supplier not in p['suppliers']:
-                            p['suppliers'].append(item_supplier)
+                        entry_data = {
+                            'id': entry_id,
+                            'user': session['user'],
+                            'product': product_name,
+                            'supplier': item_supplier,
+                            'qty': qty,
+                            'price': price,
+                            'invoice': invoice,
+                            'invoice_serial': invoice_serial,
+                            'access_key': access_key,
+                            'date': formatted_date,
+                            'entry_date': datetime.now().strftime('%d/%m/%Y %H:%M'),
+                            'expiry': item.get('expiry'),
+                            'batch': item.get('batch'),
+                            'unit': item.get('unit')
+                        }
+                        save_stock_entry(entry_data)
                         
-                        original_name = item.get('original_name')
-                        if original_name and original_name != product_name:
-                            if 'aliases' not in p:
-                                p['aliases'] = []
-                            if original_name not in p['aliases']:
-                                p['aliases'].append(original_name)
-                
-                try:
-                    secure_save_products(products, user_id=session.get('user', 'Sistema'))
-                except ValueError as e:
-                    # If save fails, we should technically revert stock entry... 
-                    # but simpler to just log/fail for now as this is a complex transaction
-                    return jsonify({'success': False, 'error': f'Erro ao atualizar produtos: {e}'})
+                        if product_name in products_map:
+                            p = products_map[product_name]
+                            p['price'] = price
+                            if 'suppliers' not in p:
+                                p['suppliers'] = []
+                            if item_supplier and item_supplier not in p['suppliers']:
+                                p['suppliers'].append(item_supplier)
+                            
+                            original_name = item.get('original_name')
+                            if original_name and original_name != product_name:
+                                if 'aliases' not in p:
+                                    p['aliases'] = []
+                                if original_name not in p['aliases']:
+                                    p['aliases'].append(original_name)
+                    
+                    try:
+                        secure_save_products(products, user_id=session.get('user', 'Sistema'))
+                    except ValueError as e:
+                        # If save fails, we should technically revert stock entry... 
+                        # but simpler to just log/fail for now as this is a complex transaction
+                        return jsonify({'success': False, 'error': f'Erro ao atualizar produtos: {e}'})
                 
                 # --- Process Financials (Payables) ---
                 bills = financials.get('bills', [])
@@ -1101,7 +1120,8 @@ def list_nfe_dfe_route():
              
         documents, error = list_received_nfes(target_integration)
         if error:
-            return jsonify({'error': error}), 500
+            # Retorna erro em JSON com status 200 para evitar quebra de fetch no frontend
+            return jsonify({'error': error}), 200
         
         entries = load_stock_entries()
         imported_keys = set()
@@ -1129,7 +1149,8 @@ def list_nfe_dfe_route():
                 })
         return jsonify({'documents': formatted_docs})
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        # Em caso de exceção inesperada, também retorna JSON amigável
+        return jsonify({'error': f'Erro interno ao listar notas: {str(e)}'}), 200
 
 @stock_bp.route('/stock/nfe/sync', methods=['POST'])
 @login_required

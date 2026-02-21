@@ -838,14 +838,12 @@
                 const amount = formatMoney(doc.amount || 0);
                 const status = doc.status || '';
                 const badgeClass = (status === 'recebida' || status === 'importada') ? 'success' : 'secondary';
-                // const importBtn = `<button class="btn btn-sm btn-outline-secondary" disabled title="Importação individual desabilitada. Use o botão &quot;Baixar XMLs para pasta&quot; abaixo.">Indisponível</button>`;
                 tr.innerHTML = `
                     <td>${date}</td>
                     <td>${doc.issuer}</td>
                     <td>${amount}</td>
                     <td><small class="text-muted font-monospace">${doc.key}</small></td>
                     <td><span class="badge bg-${badgeClass}">${status}</span></td>
-                    <!-- <td class="text-end">${importBtn}</td> -->
                 `;
                 tbody.appendChild(tr);
             });

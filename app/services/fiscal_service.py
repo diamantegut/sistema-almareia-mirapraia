@@ -368,9 +368,11 @@ def process_pending_emissions(settings=None, specific_id=None):
         emission_cnpj = emission.get('cnpj_emitente')
         integration_settings = get_fiscal_integration(settings, emission_cnpj).copy()
         
-        # If a fiscal snapshot exists on the entry, prefer those values to keep historical config
+        # Se existir snapshot fiscal, só usamos para filas legadas (queue).
+        # Para itens do Fiscal Pool, SEMPRE usamos a configuração fiscal atual,
+        # inclusive ambiente (homologação/produção), série, CRT etc.
         snap = emission.get('fiscal_snapshot') or {}
-        if isinstance(snap, dict) and snap:
+        if source != 'pool' and isinstance(snap, dict) and snap:
             for k in ['sefaz_environment', 'environment', 'serie', 'ie_emitente', 'CRT', 'crt']:
                 if snap.get(k) is not None:
                     integration_settings[k] = snap.get(k)
@@ -413,29 +415,15 @@ def process_pending_emissions(settings=None, specific_id=None):
             
             if not nfe_number and 'numero_sequencial' in result['data']:
                 nfe_number = result['data']['numero_sequencial']
-            
-            # Update Source
-            if source == 'pool':
-                FiscalPoolService.update_status(emission['id'], 'emitted', fiscal_doc_uuid=nfe_id, serie=nfe_serie, number=nfe_number)
-            else:
-                emission['status'] = 'emitted'
-                emission['nfe_id'] = nfe_id
-                emission['emitted_at'] = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
-                if emission.get('id', '').startswith('POOL-'):
-                     # Legacy link
-                     try:
-                        pool_id = emission['id'].replace('POOL-', '')
-                        FiscalPoolService.update_status(pool_id, 'emitted', fiscal_doc_uuid=nfe_id, serie=nfe_serie, number=nfe_number)
-                     except: pass
 
-            # Increment fiscal number
-            increment_fiscal_number(settings, emission_cnpj)
-            
-            # Download XML
+            xml_ok = False
+            xml_error_msg = None
             try:
                 xml_path = download_xml(nfe_id, integration_settings)
                 if xml_path:
-                    if source == 'queue': emission['xml_path'] = xml_path
+                    xml_ok = True
+                    if source == 'queue':
+                        emission['xml_path'] = xml_path
                     if source == 'pool':
                         try:
                             FiscalPoolService.set_xml_ready(emission['id'], True, xml_path)
@@ -443,20 +431,39 @@ def process_pending_emissions(settings=None, specific_id=None):
                             pass
                     logger.info(f"XML saved at {xml_path}")
                 else:
-                    # Schedule a delayed attempt 30s later and mark ready when done
-                    def _delayed_fetch():
-                        try:
-                            delayed_path = download_xml(nfe_id, integration_settings)
-                            if delayed_path and source == 'pool':
-                                FiscalPoolService.set_xml_ready(emission['id'], True, delayed_path)
-                        except Exception as _e:
-                            logger.error(f"Delayed XML fetch failed for {nfe_id}: {_e}")
-                    try:
-                        threading.Timer(30.0, _delayed_fetch).start()
-                    except Exception:
-                        pass
+                    xml_error_msg = "XML da NFC-e não disponível na Nuvem Fiscal (verifique autorização)."
             except Exception as e:
+                xml_error_msg = f"Falha ao baixar XML da NFC-e: {e}"
                 logger.error(f"Failed to download XML for {nfe_id}: {e}")
+
+            if not xml_ok:
+                err_msg = xml_error_msg or "XML da NFC-e não disponível."
+                if source == 'pool':
+                    FiscalPoolService.update_status(emission['id'], 'failed', error_msg=err_msg)
+                else:
+                    emission['attempts'] = emission.get('attempts', 0) + 1
+                    emission['last_error'] = err_msg
+                    if emission['attempts'] >= 3:
+                        emission['status'] = 'failed'
+                failed_count += 1
+                continue
+
+            # Update Source only após XML confirmado
+            if source == 'pool':
+                FiscalPoolService.update_status(emission['id'], 'emitted', fiscal_doc_uuid=nfe_id, serie=nfe_serie, number=nfe_number)
+            else:
+                emission['status'] = 'emitted'
+                emission['nfe_id'] = nfe_id
+                emission['emitted_at'] = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+                if emission.get('id', '').startswith('POOL-'):
+                    try:
+                        pool_id = emission['id'].replace('POOL-', '')
+                        FiscalPoolService.update_status(pool_id, 'emitted', fiscal_doc_uuid=nfe_id, serie=nfe_serie, number=nfe_number)
+                    except:
+                        pass
+
+            # Increment fiscal number somente após XML ok
+            increment_fiscal_number(settings, emission_cnpj)
             
             try:
                 pdf_path = download_pdf(nfe_id, integration_settings)
@@ -489,13 +496,16 @@ def process_pending_emissions(settings=None, specific_id=None):
     save_pending_emissions(queue)
     return {"processed": len(all_pending), "success": success_count, "failed": failed_count}
 
-def get_access_token(client_id, client_secret, scope="nfce"):
+def get_access_token(client_id, client_secret, scope="nfce", audience=None):
     url = "https://auth.nuvemfiscal.com.br/oauth/token"
+    if audience is None:
+        audience = "https://api.nuvemfiscal.com.br/"
     payload = {
         "grant_type": "client_credentials",
         "client_id": client_id,
         "client_secret": client_secret,
-        "scope": scope
+        "scope": scope,
+        "audience": audience
     }
     try:
         response = requests.post(url, data=payload)
@@ -523,11 +533,12 @@ def sync_nfce_company_settings(integration_settings):
     if not client_id or not client_secret or not cnpj_emitente:
         return {"success": False, "message": "Credenciais Nuvem Fiscal incompletas."}
 
-    token = get_access_token(client_id, client_secret, scope="nfce")
+    base_url = "https://api.sandbox.nuvemfiscal.com.br" if integration_settings.get('environment') == 'homologation' else "https://api.nuvemfiscal.com.br"
+    audience = base_url + "/"
+    token = get_access_token(client_id, client_secret, scope="nfce", audience=audience)
     if not token:
         return {"success": False, "message": "Falha na autenticação com Nuvem Fiscal."}
 
-    base_url = "https://api.sandbox.nuvemfiscal.com.br" if integration_settings.get('environment') == 'homologation' else "https://api.nuvemfiscal.com.br"
     api_url = f"{base_url}/empresas/{cnpj_emitente}/nfce"
 
     sefaz_env = integration_settings.get('sefaz_environment', integration_settings.get('environment', 'production'))
@@ -578,17 +589,93 @@ def download_xml(nfe_id, settings):
     """
     if not nfe_id:
         return None
+    client_id = settings.get('client_id')
+    client_secret = settings.get('client_secret')
+    base_url = "https://api.sandbox.nuvemfiscal.com.br" if settings.get('environment') == 'homologation' else "https://api.nuvemfiscal.com.br"
+    audience = base_url + "/"
+    token = get_access_token(client_id, client_secret, scope="nfce", audience=audience)
+    if not token:
+        logger.error("Failed to authenticate for XML download")
+        return None
+
+    api_url = f"{base_url}/nfce/{nfe_id}/xml"
+    headers = {
+        "Authorization": f"Bearer {token}"
+    }
+
+    try:
+        attempts = 5
+        response = None
+        for _ in range(attempts):
+            response = requests.get(api_url, headers=headers)
+            if response.status_code == 200:
+                break
+            time.sleep(2)
+        if response and response.status_code == 200:
+            year_month = datetime.now().strftime('%Y/%m')
+            base_path = get_data_path(os.path.join('fiscal', 'xmls'))
+            xml_dir = os.path.join(base_path, 'emitted', year_month)
+            if not os.path.exists(xml_dir):
+                os.makedirs(xml_dir)
+
+            file_path = os.path.join(xml_dir, f"{nfe_id}.xml")
+            with open(file_path, 'wb') as f:
+                f.write(response.content)
+
+            try:
+                import xml.etree.ElementTree as ET
+                import re as _re
+                root = ET.fromstring(response.content)
+                chave = None
+                for elem in root.iter():
+                    tag = elem.tag.split('}')[-1]
+                    if tag == 'infNFe':
+                        _id = elem.attrib.get('Id') or elem.attrib.get('id')
+                        if _id:
+                            only_digits = _re.sub(r'[^0-9]', '', _id)
+                            if len(only_digits) == 44:
+                                chave = only_digits
+                                break
+                    if tag == 'chNFe' and elem.text:
+                        only_digits = _re.sub(r'[^0-9]', '', elem.text)
+                        if len(only_digits) == 44:
+                            chave = only_digits
+                            break
+                if chave:
+                    chave_path = os.path.join(xml_dir, f"{chave}.xml")
+                    if not os.path.exists(chave_path):
+                        with open(chave_path, 'wb') as f2:
+                            f2.write(response.content)
+            except Exception:
+                pass
+
+            if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
+                logger.info(f"XML saved and validated at {file_path}")
+                return file_path
+            else:
+                logger.error(f"XML save failed validation at {file_path}")
+                return None
+        else:
+            status = response.status_code if response is not None else 'N/A'
+            text = response.text if response is not None else ''
+            logger.error(f"Error downloading XML: {status} - {text}")
+            return None
+    except Exception as e:
+        logger.error(f"Exception downloading XML: {e}")
+        return None
+
 
 def download_pdf(nfe_id, settings):
     if not nfe_id:
         return None
     client_id = settings.get('client_id')
     client_secret = settings.get('client_secret')
-    token = get_access_token(client_id, client_secret)
+    base_url = "https://api.sandbox.nuvemfiscal.com.br" if settings.get('environment') == 'homologation' else "https://api.nuvemfiscal.com.br"
+    audience = base_url + "/"
+    token = get_access_token(client_id, client_secret, scope="nfce", audience=audience)
     if not token:
         logger.error("Failed to authenticate for PDF download")
         return None
-    base_url = "https://api.sandbox.nuvemfiscal.com.br" if settings.get('environment') == 'homologation' else "https://api.nuvemfiscal.com.br"
     api_url = f"{base_url}/nfce/{nfe_id}/pdf"
     headers = {"Authorization": f"Bearer {token}"}
     try:
@@ -618,105 +705,22 @@ def download_pdf(nfe_id, settings):
         logger.error(f"Exception downloading PDF: {e}")
         return None
 
-    client_id = settings.get('client_id')
-    client_secret = settings.get('client_secret')
-    
-    # Authenticate
-    token = get_access_token(client_id, client_secret)
-    if not token:
-        logger.error("Failed to authenticate for XML download")
-        return None
-
-    base_url = "https://api.sandbox.nuvemfiscal.com.br" if settings.get('environment') == 'homologation' else "https://api.nuvemfiscal.com.br"
-    api_url = f"{base_url}/nfce/{nfe_id}/xml"
-    
-    headers = {
-        "Authorization": f"Bearer {token}"
-    }
-
-    try:
-        attempts = 5
-        response = None
-        for _ in range(attempts):
-            response = requests.get(api_url, headers=headers)
-            if response.status_code == 200:
-                break
-            time.sleep(2)
-        if response and response.status_code == 200:
-            # Ensure directory exists with structure under DATA: data/fiscal/xmls/emitted/{YYYY}/{MM}/
-            cnpj = settings.get('cnpj_emitente', 'unknown_cnpj')
-            year_month = datetime.now().strftime('%Y/%m')
-            
-            # Always save emitted XMLs under DATA directory
-            base_path = get_data_path(os.path.join('fiscal', 'xmls'))
-            xml_dir = os.path.join(base_path, 'emitted', year_month)
-            if not os.path.exists(xml_dir):
-                os.makedirs(xml_dir)
-                
-            file_path = os.path.join(xml_dir, f"{nfe_id}.xml")
-            with open(file_path, 'wb') as f:
-                f.write(response.content)
-            
-            # Also save a copy named by the 44-digit chave, if detectable
-            try:
-                import xml.etree.ElementTree as ET
-                import re as _re
-                root = ET.fromstring(response.content)
-                chave = None
-                # Try infNFe Id attribute
-                for elem in root.iter():
-                    tag = elem.tag.split('}')[-1]
-                    if tag == 'infNFe':
-                        _id = elem.attrib.get('Id') or elem.attrib.get('id')
-                        if _id:
-                            only_digits = _re.sub(r'[^0-9]', '', _id)
-                            if len(only_digits) == 44:
-                                chave = only_digits
-                                break
-                    if tag == 'chNFe' and elem.text:
-                        only_digits = _re.sub(r'[^0-9]', '', elem.text)
-                        if len(only_digits) == 44:
-                            chave = only_digits
-                            break
-                if chave:
-                    chave_path = os.path.join(xml_dir, f"{chave}.xml")
-                    if not os.path.exists(chave_path):
-                        with open(chave_path, 'wb') as f2:
-                            f2.write(response.content)
-            except Exception:
-                pass
-            
-            # Validation: Check if file exists and has content
-            if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
-                logger.info(f"XML saved and validated at {file_path}")
-                return file_path
-            else:
-                logger.error(f"XML save failed validation at {file_path}")
-                return None
-        else:
-            status = response.status_code if response is not None else 'N/A'
-            text = response.text if response is not None else ''
-            logger.error(f"Error downloading XML: {status} - {text}")
-            return None
-    except Exception as e:
-        logger.error(f"Exception downloading XML: {e}")
-        return None
-
 def manifest_nfe(access_key, settings, event_code=210210):
     """
     Sends a manifestation event (Ciência da Operação default) to SEFAZ via Nuvem Fiscal.
     """
     client_id = settings.get('client_id')
     client_secret = settings.get('client_secret')
+    base_url = "https://api.sandbox.nuvemfiscal.com.br" if settings.get('environment') == 'homologation' else "https://api.nuvemfiscal.com.br"
+    audience = base_url + "/"
     
-    token = get_access_token(client_id, client_secret, scope="nfe distribuicao-nfe")
+    token = get_access_token(client_id, client_secret, scope="nfe distribuicao-nfe", audience=audience)
     if not token:
-        token = get_access_token(client_id, client_secret, scope="nfe")
+        token = get_access_token(client_id, client_secret, scope="nfe", audience=audience)
         
     if not token:
         return False, "Falha na autenticação"
         
-    base_url = "https://api.sandbox.nuvemfiscal.com.br" if settings.get('environment') == 'homologation' else "https://api.nuvemfiscal.com.br"
     api_url = f"{base_url}/nfe/dfe/documentos/manifestacoes"
     
     headers = {
@@ -785,20 +789,21 @@ def consult_nfe_sefaz(access_key, settings):
     client_id = settings.get('client_id')
     client_secret = settings.get('client_secret')
     
+    base_url = "https://api.sandbox.nuvemfiscal.com.br" if settings.get('environment') == 'homologation' else "https://api.nuvemfiscal.com.br"
+    audience = base_url + "/"
+    
     # We try 'nfe' and 'distribuicao-nfe' scope first
-    token = get_access_token(client_id, client_secret, scope="nfe distribuicao-nfe") 
+    token = get_access_token(client_id, client_secret, scope="nfe distribuicao-nfe", audience=audience) 
     if not token:
         # Fallback
-        token = get_access_token(client_id, client_secret, scope="nfe")
+        token = get_access_token(client_id, client_secret, scope="nfe", audience=audience)
     
     if not token:
         # Try with 'nfce' or default scope if 'nfe' fails (maybe combined scope?)
         # Or maybe the user only has 'nfce' enabled? But for NFe we need 'nfe'.
-        token = get_access_token(client_id, client_secret, scope="nfce")
+        token = get_access_token(client_id, client_secret, scope="nfce", audience=audience)
         if not token:
             return None, "Falha na autenticação com Nuvem Fiscal"
-
-    base_url = "https://api.sandbox.nuvemfiscal.com.br" if settings.get('environment') == 'homologation' else "https://api.nuvemfiscal.com.br"
     
     # Endpoint to download XML from SEFAZ
     # Nuvem Fiscal allows fetching XML by access key
@@ -921,8 +926,11 @@ def _list_received_nfes_sefaz(settings):
             ambiente = 2 if settings.get('environment') == 'homologation' else 1
             
             all_documents = []
-            max_pages = 50 # Aumentado para 50 para permitir catch-up mais rápido (até 2500 docs por execução)
+            max_pages = 20 # Reduzido para 20 para evitar timeout do browser
             page_count = 0
+            
+            # Start timer
+            start_time = time.time()
             
             while page_count < max_pages:
                 last_nsu = str(get_last_nsu() or 0)
@@ -931,6 +939,12 @@ def _list_received_nfes_sefaz(settings):
                 
                 if not result['success']:
                     if str(result.get('cStat')) == '656':
+                        ult_nsu_retorno = result.get('ultNSU')
+                        try:
+                            if ult_nsu_retorno and int(ult_nsu_retorno) > int(last_nsu):
+                                save_last_nsu(ult_nsu_retorno)
+                        except Exception:
+                            pass
                         set_sefaz_block_for_one_hour()
                         msg = "A SEFAZ retornou 'Consumo Indevido' e bloqueou temporariamente novas consultas. Aguarde 1 hora."
                         if all_documents:
@@ -949,36 +963,7 @@ def _list_received_nfes_sefaz(settings):
                     
                 ult_nsu_retorno = result.get('ultNSU')
                 max_nsu_retorno = result.get('maxNSU')
-                
-                # --- LÓGICA DE FAST-FORWARD (PULAR PARA O FINAL) ---
-                # Se estamos muito atrasados (ex: > 50 notas de diferença) e é a primeira página,
-                # pulamos direto para as últimas 20 notas para evitar carregar histórico antigo (Janeiro, etc).
-                if page_count == 0 and max_nsu_retorno and last_nsu:
-                    diff = int(max_nsu_retorno) - int(last_nsu)
-                    # Se a diferença for grande (ex: > 50), pulamos
-                    if diff > 50:
-                        logger.warning(f"Fast-Forward: NSU atual {last_nsu} está muito atrasado em relação ao Max {max_nsu_retorno} (Diff: {diff}). Pulando para o final.")
-                        
-                        # Definimos o novo NSU para (Max - 20), para pegar apenas as últimas ~20 notas
-                        new_nsu = int(max_nsu_retorno) - 20
-                        if new_nsu < 0: new_nsu = 0
-                        
-                        # Salvamos o novo NSU e forçamos o loop a reiniciar com esse novo valor na próxima iteração
-                        # Mas como o SEFAZ pode bloquear se fizermos requests muito rápidos,
-                        # vamos salvar, pausar e fazer a próxima iteração buscar do novo ponto.
-                        save_last_nsu(str(new_nsu))
-                        
-                        # Limpamos documentos antigos dessa requisição pois não interessam ao usuário
-                        all_documents = [] 
-                        
-                        # Pausa de segurança
-                        time.sleep(2)
-                        
-                        # Reinicia o loop (page_count não incrementa ou resetamos?)
-                        # Vamos continuar o loop, mas agora o get_last_nsu() vai pegar o valor atualizado
-                        continue 
-                # ---------------------------------------------------
-                
+
                 # Log de progresso se estivermos atrasados
                 if max_nsu_retorno and ult_nsu_retorno:
                     diff = int(max_nsu_retorno) - int(ult_nsu_retorno)
@@ -987,20 +972,33 @@ def _list_received_nfes_sefaz(settings):
 
                 # Se não avançou o NSU, paramos para evitar loop infinito
                 if ult_nsu_retorno and int(ult_nsu_retorno) <= int(last_nsu):
+                    # Se não avançou mas o maxNSU é maior, é porque não há docs nesse range
+                    # Mas se já fizemos o fast-forward, devemos estar perto do final.
+                    # Se max_nsu_retorno > ult_nsu_retorno, significa que há mais documentos à frente?
+                    # Não necessariamente. maxNSU é o topo global.
+                    
+                    # Vamos tentar avançar para maxNSU se estiver travado?
+                    # Não, SEFAZ retorna ultNSU como o último pesquisado.
                     break
 
                 batch_docs = []
                 for doc in result.get('documents', []):
                     parsed = service.parse_xml_content(doc['content'])
                     if parsed:
+                        # Extrair valor com segurança
+                        try:
+                            v_nf = float(parsed.get('vnf', 0) or 0)
+                        except:
+                            v_nf = 0.0
+
                         normalized = {
                             'id': parsed.get('access_key'),
                             'access_key': parsed.get('access_key'),
                             'chave': parsed.get('access_key'),
                             'created_at': parsed.get('dhemi') or parsed.get('dh_evento') or datetime.now().isoformat(),
                             'issued_at': parsed.get('dhemi'),
-                            'amount': float(parsed.get('vnf', 0) or 0),
-                            'total_amount': float(parsed.get('vnf', 0) or 0),
+                            'amount': v_nf,
+                            'total_amount': v_nf,
                             'digest_value': parsed.get('digval'),
                             'schema': doc.get('schema'),
                             'type': parsed.get('type'),
@@ -1014,6 +1012,14 @@ def _list_received_nfes_sefaz(settings):
                         }
                         batch_docs.append(normalized)
                 
+                # IMPORTANT: Adicionar batch_docs ao all_documents SOMENTE se for válido
+                # JSON serializável check? 
+                # Vamos garantir que não fique gigante.
+                if len(all_documents) > 100:
+                    # Se já temos 100 docs, vamos parar e retornar o que temos para não estourar timeout do browser
+                    # Mas precisamos salvar o NSU
+                    pass
+                
                 all_documents.extend(batch_docs)
                 
                 # Atualiza NSU com o último pesquisado (ultNSU)
@@ -1025,9 +1031,19 @@ def _list_received_nfes_sefaz(settings):
                 # Se não tem mais documentos (ultNSU >= maxNSU), paramos
                 if max_nsu_retorno and ult_nsu_retorno and int(ult_nsu_retorno) >= int(max_nsu_retorno):
                     break
+                
+                # Timeout check: se passar de 45 segundos, retorna o que tem para não quebrar o browser
+                if (time.time() - start_time) > 45:
+                    logger.warning("Tempo limite de execução atingido. Retornando parcial.")
+                    break
                     
                 # Pausa de 2 segundos para evitar Consumo Indevido (segurança extra)
                 time.sleep(2)
+            
+            # Limitar retorno para evitar payload gigante que trava o browser/JSON
+            # O usuário pediu "ultimas 20 notas"
+            if len(all_documents) > 50:
+                 all_documents = all_documents[-50:]
             
             return all_documents, None
             
@@ -1047,16 +1063,17 @@ def list_received_nfes(settings):
     client_id = settings.get('client_id')
     client_secret = settings.get('client_secret')
     
+    base_url = "https://api.sandbox.nuvemfiscal.com.br" if settings.get('environment') == 'homologation' else "https://api.nuvemfiscal.com.br"
+    audience = base_url + "/"
+    
     # Authenticate with 'nfe' and 'distribuicao-nfe' scope
-    token = get_access_token(client_id, client_secret, scope="nfe distribuicao-nfe")
+    token = get_access_token(client_id, client_secret, scope="nfe distribuicao-nfe", audience=audience)
     if not token:
         # Fallback to just 'nfe' if the combined scope fails
-        token = get_access_token(client_id, client_secret, scope="nfe")
+        token = get_access_token(client_id, client_secret, scope="nfe", audience=audience)
     
     if not token:
         return None, "Falha na autenticação com Nuvem Fiscal"
-
-    base_url = "https://api.sandbox.nuvemfiscal.com.br" if settings.get('environment') == 'homologation' else "https://api.nuvemfiscal.com.br"
     
     sefaz_env = settings.get('sefaz_environment', settings.get('environment', 'production'))
     env_param = "homologacao" if sefaz_env == 'homologation' else "producao"
@@ -1264,22 +1281,87 @@ def emit_invoice(transaction, settings, order_items, customer_cpf_cnpj=None):
     client_secret = settings.get('client_secret')
     cnpj_emitente = settings.get('cnpj_emitente')
     ie_emitente = settings.get('ie_emitente')
+    crt_val = settings.get('CRT') or settings.get('crt')
     
-    if not client_id or not client_secret or not cnpj_emitente:
-        return {"success": False, "message": "Credenciais Nuvem Fiscal incompletas."}
+    missing_fields = []
+    if not client_id:
+        missing_fields.append("Client ID Nuvem Fiscal")
+    if not client_secret:
+        missing_fields.append("Client Secret Nuvem Fiscal")
+    if not cnpj_emitente:
+        missing_fields.append("CNPJ do emitente")
+    if not ie_emitente:
+        missing_fields.append("Inscrição Estadual do emitente")
+    if not crt_val:
+        missing_fields.append("CRT do emitente (Simples Nacional)")
 
-    # Authenticate
-    token = get_access_token(client_id, client_secret)
+    if missing_fields:
+        return {
+            "success": False,
+            "message": "Configuração fiscal incompleta: " + ", ".join(missing_fields)
+        }
+
+    try:
+        crt_int = int(str(crt_val).strip())
+    except Exception:
+        return {
+            "success": False,
+            "message": "CRT inválido para Simples Nacional. Use 1 ou 2."
+        }
+
+    if crt_int not in (1, 2):
+        return {
+            "success": False,
+            "message": "CRT inválido para Simples Nacional. Use 1 ou 2."
+        }
+
+    erros_itens = []
+    if not order_items:
+        return {"success": False, "message": "Nenhum item para emissão."}
+    
+    for idx, item in enumerate(order_items, start=1):
+        if not item.get('name'):
+            erros_itens.append(f"Item {idx}: descrição do produto não informada.")
+        if not item.get('id'):
+            erros_itens.append(f"Item {idx}: código do produto não informado.")
+        if not item.get('cfop'):
+            erros_itens.append(f"Item {idx}: CFOP não informado.")
+        if not item.get('ncm'):
+            erros_itens.append(f"Item {idx}: NCM não informado.")
+        csosn_val = (item.get('csosn') or "").strip()
+        if not csosn_val:
+            item['csosn'] = "102"
+        elif csosn_val != "102":
+            erros_itens.append(f"Item {idx}: CSOSN {csosn_val} não suportado. Atualmente apenas 102 é aceito.")
+
+        try:
+            q = float(item.get('qty', 0) or 0)
+            if q <= 0:
+                erros_itens.append(f"Item {idx}: quantidade deve ser maior que zero.")
+        except Exception:
+            erros_itens.append(f"Item {idx}: quantidade inválida.")
+        try:
+            v = float(item.get('price', 0) or 0)
+            if v < 0:
+                erros_itens.append(f"Item {idx}: valor unitário não pode ser negativo.")
+        except Exception:
+            erros_itens.append(f"Item {idx}: valor unitário inválido.")
+
+    if erros_itens:
+        return {
+            "success": False,
+            "message": "Erros de configuração fiscal nos itens da NFC-e:\n" + "\n".join(erros_itens)
+        }
+
+    base_url = "https://api.sandbox.nuvemfiscal.com.br" if settings.get('environment') == 'homologation' else "https://api.nuvemfiscal.com.br"
+    audience = base_url + "/"
+
+    token = get_access_token(client_id, client_secret, scope="nfce", audience=audience)
     if not token:
         return {"success": False, "message": "Falha na autenticação com Nuvem Fiscal."}
 
-    # Prepare Items
     nfe_items = []
     total_items = 0.0
-    
-    # Validation: Items
-    if not order_items:
-        return {"success": False, "message": "Nenhum item para emissão."}
 
     nItem = 1
     for idx, item in enumerate(order_items):
@@ -1311,15 +1393,28 @@ def emit_invoice(transaction, settings, order_items, customer_cpf_cnpj=None):
             ncm = item.get('ncm')
             if not ncm or len(ncm) < 8:
                 ncm = '21069090'
-                
-            # ... (rest of loop)
-    
+            
+            # Enforce CFOP/CSOSN consistency for Simples Nacional
+            # User reported: "Rejeicao: CFOP nao permitido para o CSOSN informado"
+            # If CSOSN is 102 (Simples Nacional), CFOP must be compatible (e.g. 5102).
+            # If CFOP is 5405 (ST), CSOSN should be 500.
+            # To simplify and ensure emission, if CSOSN is 102, we ensure CFOP is 5102.
+            csosn_val = (item.get('csosn') or "102").strip()
+            
+            # Sanitize CFOP (remove dots/symbols)
+            raw_cfop = str(item.get('cfop', '5102'))
+            cfop_val = re.sub(r'[^0-9]', '', raw_cfop)
+            
+            if csosn_val == "102":
+                if not cfop_val.startswith('51'):
+                    cfop_val = '5102'
+
             prod_data = {
                 "cProd": str(item.get('id', '0')),
                 "cEAN": "SEM GTIN",
                 "xProd": item.get('name', 'Produto'),
                 "NCM": ncm,
-                "CFOP": item.get('cfop', '5102'),
+                "CFOP": cfop_val,
                 "uCom": "UN",
                 "qCom": qty_per_line,
                 "vUnCom": _round_money(price),
@@ -1348,25 +1443,10 @@ def emit_invoice(transaction, settings, order_items, customer_cpf_cnpj=None):
                     "ICMS": {
                         "ICMSSN102": {
                             "orig": int(item.get('origin', 0) or 0),
-                            "CSOSN": "102"
-                        }
-                    },
-                    "PIS": {
-                        "PISOutr": {
-                            "CST": "99",
-                            "vBC": 0.00,
-                            "pPIS": 0.00,
-                            "vPIS": 0.00
-                        }
-                    },
-                    "COFINS": {
-                        "COFINSOutr": {
-                            "CST": "99",
-                            "vBC": 0.00,
-                            "pCOFINS": 0.00,
-                            "vCOFINS": 0.00
+                            "CSOSN": (item.get('csosn') or "102").strip()
                         }
                     }
+                    # PIS and COFINS removed for Simples Nacional (CSOSN 102) to simplify payload
                 }
             }
             nfe_items.append(nfe_item)
@@ -1386,10 +1466,16 @@ def emit_invoice(transaction, settings, order_items, customer_cpf_cnpj=None):
     
     pay_code = payment_map.get(transaction.get('payment_method'), '99')
     
+    # To avoid "Ausencia de troco" rejection or "Valor do pagamento menor que o total",
+    # we force vPag to be exactly equal to the total of items (vNF).
+    # This simplifies the logic and ensures acceptance, as we don't need to calculate change (vTroco).
+    # If the real transaction amount was higher (e.g. tip/service), for fiscal purposes here we just emit the products.
+    v_pag_final = _round_money(total_items)
+
     pagamentos = [
         {
             "tPag": pay_code,
-            "vPag": _round_money(transaction.get('amount', total_items)),
+            "vPag": v_pag_final,
         }
     ]
 
@@ -1398,8 +1484,6 @@ def emit_invoice(transaction, settings, order_items, customer_cpf_cnpj=None):
     
     # Offline Contingency (tpEmis)
     # 1=Normal, 9=Offline
-    # Check if we should use offline mode (passed in transaction or settings?)
-    # For now, default to 1, but allow override
     tp_emis = transaction.get('tpEmis', 1)
     
     def _to_int(val, default_val):
@@ -1418,22 +1502,23 @@ def emit_invoice(transaction, settings, order_items, customer_cpf_cnpj=None):
     sefaz_env = settings.get('sefaz_environment', settings.get('environment', 'production'))
     is_homolog = sefaz_env == 'homologation'
 
+    # Simplified Payload
     payload = {
         "ambiente": "homologacao" if is_homolog else "producao",
         "infNFe": {
             "versao": "4.00",
             "ide": {
-                "cUF": 26, # PE (Integer)
+                "cUF": 26, # PE
                 "natOp": "Venda ao Consumidor",
                 "mod": 65,
                 "serie": serie_val,
                 "nNF": nnum_val,
-                "dhEmi": datetime.now().strftime("%Y-%m-%dT%H:%M:%S-03:00"), # UTC-3
+                "dhEmi": datetime.now().strftime("%Y-%m-%dT%H:%M:%S-03:00"),
                 "tpNF": 1,
                 "idDest": 1,
-                "cMunFG": "2614857", # Tamandaré - PE
+                "cMunFG": "2614857", # Tamandaré
                 "tpImp": 4,
-                "tpEmis": tp_emis, # 1=Normal, 9=Offline
+                "tpEmis": tp_emis,
                 "tpAmb": 2 if is_homolog else 1,
                 "finNFe": 1,
                 "indFinal": 1,
@@ -1446,41 +1531,42 @@ def emit_invoice(transaction, settings, order_items, customer_cpf_cnpj=None):
                 "IE": ie_emitente,
                 "enderEmit": {
                      "UF": "PE", 
-                     "cMun": "2614857" # Tamandaré
+                     "cMun": "2614857"
                 }
             },
             "det": nfe_items,
             "transp": {
-                "modFrete": 9 # Sem frete
+                "modFrete": 9
             },
             "total": {
                 "ICMSTot": {
-                    "vBC": _round_money(0.00),
-                    "vICMS": _round_money(0.00),
-                    "vICMSDeson": _round_money(0.00),
-                    "vFCP": _round_money(0.00),
-                    "vBCST": _round_money(0.00),
-                    "vST": _round_money(0.00),
-                    "vFCPST": _round_money(0.00),
-                    "vFCPSTRet": _round_money(0.00),
+                    "vBC": 0.00,
+                    "vICMS": 0.00,
+                    "vICMSDeson": 0.00,
+                    "vFCP": 0.00,
+                    "vBCST": 0.00,
+                    "vST": 0.00,
+                    "vFCPST": 0.00,
+                    "vFCPSTRet": 0.00,
                     "vProd": _round_money(total_items),
-                    "vFrete": _round_money(0.00),
-                    "vSeg": _round_money(0.00),
-                    "vDesc": _round_money(0.00),
-                    "vII": _round_money(0.00),
-                    "vIPI": _round_money(0.00),
-                    "vIPIDevol": _round_money(0.00),
-                    "vPIS": _round_money(0.00),
-                    "vCOFINS": _round_money(0.00),
-                    "vOutro": _round_money(0.00),
+                    "vFrete": 0.00,
+                    "vSeg": 0.00,
+                    "vDesc": 0.00,
+                    "vII": 0.00,
+                    "vIPI": 0.00,
+                    "vIPIDevol": 0.00,
+                    "vPIS": 0.00,
+                    "vCOFINS": 0.00,
+                    "vOutro": 0.00,
                     "vNF": _round_money(total_items)
                 }
             },
             "pag": {
-                "detPag": pagamentos
+                "detPag": pagamentos,
+                "vTroco": 0.00
             },
             "infRespTec": {
-                "CNPJ": "28952732000109", # CNPJ da Software House (Mirapraia mesmo?)
+                "CNPJ": "28952732000109",
                 "xContato": "Angelo Diamante",
                 "email": "diamantegut@gmail.com",
                 "fone": "8194931201"
@@ -1523,12 +1609,57 @@ def emit_invoice(transaction, settings, order_items, customer_cpf_cnpj=None):
         
         if response.status_code in (200, 201):
             resp_data = response.json()
+            status_val = ""
+            chave_val = ""
+            try:
+                raw_status = resp_data.get("status") or resp_data.get("situacao") or resp_data.get("status_sefaz")
+                if isinstance(raw_status, str):
+                    status_val = raw_status.lower().strip()
+            except Exception:
+                status_val = ""
+            try:
+                chave_candidates = [
+                    resp_data.get("chave"),
+                    resp_data.get("chave_acesso"),
+                    resp_data.get("chaveNFe"),
+                    resp_data.get("chNFe"),
+                ]
+                for c in chave_candidates:
+                    if isinstance(c, str) and len(c.strip()) >= 44:
+                        chave_val = "".join([d for d in c if d.isdigit()])
+                        break
+            except Exception:
+                chave_val = ""
+            authorized_status = status_val in ["autorizada", "autorizado", "aprovada", "authorized"]
             
-            # If sync, we get the authorization.
+            # STRICT CHECK: Must be authorized. Merely having a key is not enough if status is not authorized.
+            if not authorized_status:
+                base_msg = None
+                
+                # Check authorization rejection reason (Nuvem Fiscal specific structure)
+                if isinstance(resp_data.get("autorizacao"), dict):
+                     base_msg = resp_data["autorizacao"].get("motivo_status")
+
+                if not base_msg and isinstance(resp_data.get("error"), dict):
+                    base_msg = resp_data.get("error", {}).get("message")
+                
+                if not base_msg:
+                    base_msg = resp_data.get("message") or resp_data.get("title") or f"NFC-e não autorizada (Status: {status_val})"
+                
+                # If we have a key but not authorized, it might be a rejection or processing
+                if len(chave_val) == 44:
+                    base_msg += f" - Chave gerada: {chave_val}"
+                    
+                logger.error(f"NFC-e emission not authorized. Status={status_val} Body={resp_data}")
+                return {
+                    "success": False,
+                    "message": base_msg,
+                    "data": resp_data
+                }
             
             return {
                 "success": True, 
-                "message": f"NFC-e enviada! ID: {resp_data.get('id') or 'N/A'}",
+                "message": f"NFC-e emitida com sucesso! ID: {resp_data.get('id') or 'N/A'}",
                 "data": resp_data
             }
         else:

@@ -77,17 +77,21 @@ class SefazService:
         if self._temp_dir:
             self._temp_dir.cleanup()
 
-    def _build_soap_envelope(self, body_content, method_name, namespace):
-        # A SEFAZ utiliza SOAP 1.2
-        # Envelope simplificado sem namespaces XSI/XSD não utilizados para evitar ruído
-        return f'<soap12:Envelope xmlns:soap12="http://www.w3.org/2003/05/soap-envelope"><soap12:Body><{method_name} xmlns="{namespace}"><nfeDadosMsg>{body_content}</nfeDadosMsg></{method_name}></soap12:Body></soap12:Envelope>'
-
-    def consultar_distribuicao_dfe(self, cnpj, ult_nsu="0", ambiente=1):
-        """
-        Envia evento de Ciência da Operação (210210) para a SEFAZ.
-        """
-        xml_evento = self._gerar_xml_evento(chave_acesso, cnpj, "210210", "Ciencia da Operacao", ambiente)
-        return self._enviar_evento(xml_evento, ambiente)
+    def _build_soap_envelope(self, body_content, method_name=None, namespace=None):
+        return (
+            '<?xml version="1.0" encoding="utf-8"?>'
+            '<soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" '
+            'xmlns:xsd="http://www.w3.org/2001/XMLSchema" '
+            'xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">'
+            '<soap12:Body>'
+            '<nfeDistDFeInteresse xmlns="http://www.portalfiscal.inf.br/nfe/wsdl/NFeDistribuicaoDFe">'
+            '<nfeDadosMsg xmlns="http://www.portalfiscal.inf.br/nfe/wsdl/NFeDistribuicaoDFe">'
+            f'{body_content}'
+            '</nfeDadosMsg>'
+            '</nfeDistDFeInteresse>'
+            '</soap12:Body>'
+            '</soap12:Envelope>'
+        )
 
     def confirmar_operacao(self, chave_acesso, cnpj, ambiente=1):
         """
@@ -129,26 +133,21 @@ class SefazService:
         if int(ambiente) == 2:
             url = "https://hom1.nfe.fazenda.gov.br/NFeDistribuicaoDFe/NFeDistribuicaoDFe.asmx"
 
-        # Montar XML do pedido (distDFeInt) - Versão 1.01
-        # cUFAutor: Deve ser a UF do interessado (26=PE), não 91 (AN) nem 35 (SP)
-        # O CNPJ é de Pernambuco.
-        # Ajuste: A SEFAZ exige que a tag distNSU contenha ultNSU com 15 dígitos.
-        # Ajuste 2: O XML deve ser bem formatado.
-        
-        # Corrigindo formato do XML para evitar rejeição
-        xml_body = f"""<distDFeInt xmlns="http://www.portalfiscal.inf.br/nfe" versao="1.01">
-    <tpAmb>{ambiente}</tpAmb>
-    <cUFAutor>91</cUFAutor>
-    <CNPJ>{cnpj}</CNPJ>
-    <distNSU>
-        <ultNSU>{ult_nsu.zfill(15)}</ultNSU>
-    </distNSU>
-</distDFeInt>"""
+        xml_body = (
+            '<distDFeInt xmlns="http://www.portalfiscal.inf.br/nfe" versao="1.01">'
+            f'<tpAmb>{ambiente}</tpAmb>'
+            '<cUFAutor>26</cUFAutor>'
+            f'<CNPJ>{cnpj}</CNPJ>'
+            '<distNSU>'
+            f'<ultNSU>{ult_nsu.zfill(15)}</ultNSU>'
+            '</distNSU>'
+            '</distDFeInt>'
+        )
 
         envelope = self._build_soap_envelope(
             xml_body, 
-            "nfeDistDFeInteresse", 
-            "http://www.portalfiscal.inf.br/nfe/wsdl/NFeDistribuicaoDFe"
+            None, 
+            None
         )
 
         return self._enviar_soap_distribuicao(envelope, url)
@@ -164,13 +163,21 @@ class SefazService:
         if int(ambiente) == 2:
             url = "https://hom1.nfe.fazenda.gov.br/NFeDistribuicaoDFe/NFeDistribuicaoDFe.asmx"
         
-        # Versão 1.01
-        xml_body = f'<distDFeInt xmlns="http://www.portalfiscal.inf.br/nfe" versao="1.01"><tpAmb>{ambiente}</tpAmb><cUFAutor>91</cUFAutor><CNPJ>{cnpj}</CNPJ><consChNFe><chNFe>{chave}</chNFe></consChNFe></distDFeInt>'
+        xml_body = (
+            '<distDFeInt xmlns="http://www.portalfiscal.inf.br/nfe" versao="1.01">'
+            f'<tpAmb>{ambiente}</tpAmb>'
+            '<cUFAutor>26</cUFAutor>'
+            f'<CNPJ>{cnpj}</CNPJ>'
+            '<consChNFe>'
+            f'<chNFe>{chave}</chNFe>'
+            '</consChNFe>'
+            '</distDFeInt>'
+        )
 
         envelope = self._build_soap_envelope(
             xml_body, 
-            "nfeDistDFeInteresse", 
-            "http://www.portalfiscal.inf.br/nfe/wsdl/NFeDistribuicaoDFe"
+            None, 
+            None
         )
         
         return self._enviar_soap_distribuicao(envelope, url)
@@ -180,9 +187,11 @@ class SefazService:
             url = URL_DISTRIBUICAO # Fallback
             
         headers = {
-            "Content-Type": "application/soap+xml; charset=utf-8; action=\"http://www.portalfiscal.inf.br/nfe/wsdl/NFeDistribuicaoDFe/nfeDistDFeInteresse\"",
+            "Content-Type": "application/soap+xml; charset=utf-8",
+            "SOAPAction": "http://www.portalfiscal.inf.br/nfe/wsdl/NFeDistribuicaoDFe/nfeDistDFeInteresse",
         }
         try:
+            logger.info(f"SEFAZ SOAP Request Envelope: {envelope}")
             response = requests.post(
                 url,
                 data=envelope,

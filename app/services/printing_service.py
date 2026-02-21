@@ -967,7 +967,7 @@ def print_cancellation_items(table_id, waiter_name, cancelled_items, printers_co
             except Exception as e:
                 print(f"Error printing cancellation: {e}")
 
-def format_fiscal_receipt(invoice_data, printer_width=32):
+def format_fiscal_receipt(invoice_data, printer_width=40):
     # ... (Keep existing) ...
     ESC = b'\x1b'
     GS = b'\x1d'
@@ -978,7 +978,7 @@ def format_fiscal_receipt(invoice_data, printer_width=32):
     NORMAL = GS + b'!' + b'\x00'
     BOLD = ESC + b'E' + b'\x01'
     NO_BOLD = ESC + b'E' + b'\x00'
-    SEPARATOR = b'--------------------------------\n'
+    SEPARATOR = ('-' * printer_width + '\n').encode('ascii')
     
     env = invoice_data.get('ambiente', 'homologacao')
     auth = invoice_data.get('autorizacao', {})
@@ -996,14 +996,39 @@ def format_fiscal_receipt(invoice_data, printer_width=32):
     
     cmd += LEFT + b'ITEM CODIGO DESCRICAO\nQTD UN VL UNIT(R$) ST VL ITEM(R$)\n' + SEPARATOR
     
-    # Items would go here if passed in detail, assuming invoice_data structure matches standard
+    items = invoice_data.get('items') or []
+    idx = 1
+    for item in items:
+        name = str(item.get('name', '')) or ''
+        code = str(item.get('code', '')) or ''
+        qty = float(item.get('qty', 0.0) or 0.0)
+        unit = str(item.get('unit', 'UN') or 'UN')
+        unit_price = float(item.get('unit_price', 0.0) or 0.0)
+        total = float(item.get('total', 0.0) or 0.0)
+        header = f"{idx:>3} {code[:6]:<6} {name}"
+        line1 = header[:printer_width]
+        line2 = f"{qty:>4.2f} {unit:<2} {unit_price:>9.2f}    {total:>9.2f}"
+        cmd += LEFT + line1.encode('cp850', errors='replace') + b'\n'
+        cmd += LEFT + line2.encode('cp850', errors='replace') + b'\n'
+        idx += 1
+    if items:
+        cmd += SEPARATOR
     
     cmd += RIGHT
     total_val = invoice_data.get('valor_total', 0.0)
     cmd += BOLD + f"VALOR TOTAL R$ {total_val:.2f}\n".encode('cp850', errors='replace') + NO_BOLD + SEPARATOR
     
     cmd += CENTER + b'Consulta via Leitor de QR Code\n\n'
-    cmd += LEFT + f"Chave de Acesso:\n{chave}\nProtocolo: {proto}\nData: {data_emi}\n".encode('cp850', errors='replace')
+    info_lines = []
+    if chave:
+        info_lines.append("Chave de Acesso:")
+        info_lines.append(chave)
+    if proto:
+        info_lines.append(f"Protocolo: {proto}")
+    if data_emi:
+        info_lines.append(f"Data: {data_emi}")
+    if info_lines:
+        cmd += LEFT + ("\n".join(info_lines) + "\n").encode('cp850', errors='replace')
     cmd += b'\n' + CENTER + b'Consulte pela Chave de Acesso em:\nhttp://nfce.sefaz.pe.gov.br/\n'
     cmd += b'\n\n\n\n' + GS + b'V' + b'\x41' + b'\x03'
     return cmd
@@ -1019,7 +1044,7 @@ def print_fiscal_receipt(printer_config, invoice_data):
             else:
                 return False, "Impressora Fiscal não configurada"
 
-        data = format_fiscal_receipt(invoice_data)
+        data = format_fiscal_receipt(invoice_data, printer_width=40)
         
         if target_printer.get('type') == 'windows':
             return send_to_windows_printer(target_printer.get('windows_name'), data)

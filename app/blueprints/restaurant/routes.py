@@ -28,7 +28,7 @@ from app.services.logger_service import log_system_action, log_security_audit
 from app.utils.logger import log_action
 from app.services.cashier_service import CashierService, file_lock
 from app.services.transfer_service import transfer_table_to_room, TransferError
-from app.services.system_config_manager import TABLE_ORDERS_FILE
+from app.services.system_config_manager import TABLE_ORDERS_FILE, SALES_HISTORY_FILE, STOCK_ENTRIES_FILE
 from app.utils.validators import (
     validate_required, sanitize_input, validate_room_number
 )
@@ -1092,7 +1092,8 @@ def restaurant_table_order(table_id):
                                     'date': datetime.now().strftime('%d/%m/%Y'),
                                     'entry_date': datetime.now().strftime('%d/%m/%Y %H:%M')
                                 }
-                                save_stock_entry(entry_data)
+                                with file_lock(STOCK_ENTRIES_FILE):
+                                    save_stock_entry(entry_data)
                         except Exception as e:
                             current_app.logger.error(f"Stock refund error (Restaurant): {e}")
 
@@ -1281,7 +1282,8 @@ def restaurant_table_order(table_id):
                                     'date': datetime.now().strftime('%d/%m/%Y'),
                                     'entry_date': datetime.now().strftime('%d/%m/%Y %H:%M')
                                 }
-                                save_stock_entry(entry_data)
+                                with file_lock(STOCK_ENTRIES_FILE):
+                                    save_stock_entry(entry_data)
                         except Exception as e:
                             current_app.logger.error(f"Stock deduction error (Restaurant): {e}")
 
@@ -1333,7 +1335,8 @@ def restaurant_table_order(table_id):
                                         'date': datetime.now().strftime('%d/%m/%Y'),
                                         'entry_date': datetime.now().strftime('%d/%m/%Y %H:%M')
                                     }
-                                    save_stock_entry(entry_data)
+                                    with file_lock(STOCK_ENTRIES_FILE):
+                                        save_stock_entry(entry_data)
                     
                     # Prepare Item
                     order_item = {
@@ -1622,17 +1625,18 @@ def restaurant_table_order(table_id):
                             department='Restaurante'
                         )
                         # Create Entry
-                        save_stock_entry({
-                            'id': str(uuid.uuid4()),
-                            'date': datetime.now().strftime('%d/%m/%Y'),
-                            'product': product_obj['name'],
-                            'qty': -abs(qty),
-                            'unit': product_obj.get('unit', 'un'),
-                            'price': product_obj.get('price', 0),
-                            'supplier': 'Venda',
-                            'invoice': f"Mesa {table_id}",
-                            'user': session.get('user')
-                        })
+                        with file_lock(STOCK_ENTRIES_FILE):
+                            save_stock_entry({
+                                'id': str(uuid.uuid4()),
+                                'date': datetime.now().strftime('%d/%m/%Y'),
+                                'product': product_obj['name'],
+                                'qty': -abs(qty),
+                                'unit': product_obj.get('unit', 'un'),
+                                'price': product_obj.get('price', 0),
+                                'supplier': 'Venda',
+                                'invoice': f"Mesa {table_id}",
+                                'user': session.get('user')
+                            })
                         
                         # Check Low Stock
                         # We need to fetch the balance.
@@ -1660,12 +1664,7 @@ def restaurant_table_order(table_id):
                     printers_config = load_printers()
                     print_consolidated_stock_warning(low_stock_items, printers_config)
 
-                sales_history = load_sales_history()
-                if not isinstance(sales_history, list):
-                    if isinstance(sales_history, dict):
-                        sales_history = list(sales_history.values())
-                    else:
-                        sales_history = []
+
 
                 close_id = f"CLOSE_{datetime.now().strftime('%Y%m%d%H%M%S')}_{table_id}_{uuid.uuid4().hex[:6]}"
                 order['closed_at'] = datetime.now().strftime('%d/%m/%Y %H:%M')
@@ -1690,12 +1689,21 @@ def restaurant_table_order(table_id):
                     })
                 
                 order['payments'] = all_payments
-                sales_history.append(order)
-                try:
-                    secure_save_sales_history(sales_history, session.get('user', 'Sistema'))
-                except Exception as e:
-                    flash(f'Erro ao salvar histórico de vendas (Segurança): {e}')
-                    return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
+                
+                with file_lock(SALES_HISTORY_FILE):
+                    sales_history = load_sales_history()
+                    if not isinstance(sales_history, list):
+                        if isinstance(sales_history, dict):
+                            sales_history = list(sales_history.values())
+                        else:
+                            sales_history = []
+                    
+                    sales_history.append(order)
+                    try:
+                        secure_save_sales_history(sales_history, session.get('user', 'Sistema'))
+                    except Exception as e:
+                        flash(f'Erro ao salvar histórico de vendas (Segurança): {e}')
+                        return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
                 
                 # Shadow Log (Security Audit) - Backup for Closure
                 log_security_audit(
@@ -2206,10 +2214,9 @@ def restaurant_table_order(table_id):
                 if order.get('customer_type') != 'funcionario':
                     flash('Erro: Esta não é uma conta de funcionário.')
                 else:
-                    sales_history = load_sales_history()
-                    order['closed_at'] = datetime.now().strftime('%d/%m/%Y %H:%M')
                     # Padroniza método de pagamento com acento para relatórios/financeiro
                     order['payment_method'] = 'Conta Funcionário'
+                    order['closed_at'] = datetime.now().strftime('%d/%m/%Y %H:%M')
                     # Aplica regra: isento de taxa + 20% de desconto
                     try:
                         subtotal = float(order.get('total', 0) or 0)
@@ -2221,13 +2228,16 @@ def restaurant_table_order(table_id):
                     order['discounts'] = order.get('discounts', [])
                     order['discounts'].append({'type': 'staff', 'percent': 20, 'amount': discount_amount})
                     order['final_total'] = final_total
-                    sales_history.append(order)
-                    try:
-                        secure_save_sales_history(sales_history, session.get('user', 'Sistema'))
-                    except Exception as e:
-                        current_app.logger.error(f"Erro secure_save em transfer_to_staff: {e}")
-                        flash('Erro ao salvar histórico. Tente novamente.')
-                        return redirect(url_for('restaurant.restaurant_tables'))
+                    
+                    with file_lock(SALES_HISTORY_FILE):
+                        sales_history = load_sales_history()
+                        sales_history.append(order)
+                        try:
+                            secure_save_sales_history(sales_history, session.get('user', 'Sistema'))
+                        except Exception as e:
+                            current_app.logger.error(f"Erro secure_save em transfer_to_staff: {e}")
+                            flash('Erro ao salvar histórico. Tente novamente.')
+                            return redirect(url_for('restaurant.restaurant_tables'))
                     
                     # Lançar transação no caixa do Restaurante para consolidar consumo de funcionário nos relatórios
                     try:
@@ -2269,17 +2279,18 @@ def restaurant_table_order(table_id):
                                 details=f"Consumo Funcionario {order.get('staff_name')}",
                                 department='Restaurante'
                             )
-                            save_stock_entry({
-                                'id': str(uuid.uuid4()),
-                                'date': datetime.now().strftime('%d/%m/%Y'),
-                                'product': product_obj['name'],
-                                'qty': -abs(qty),
-                                'unit': product_obj.get('unit', 'un'),
-                                'price': product_obj.get('price', 0),
-                                'supplier': 'Consumo Interno',
-                                'invoice': f"Func {order.get('staff_name')}",
-                                'user': session.get('user')
-                            })
+                            with file_lock(STOCK_ENTRIES_FILE):
+                                save_stock_entry({
+                                    'id': str(uuid.uuid4()),
+                                    'date': datetime.now().strftime('%d/%m/%Y'),
+                                    'product': product_obj['name'],
+                                    'qty': -abs(qty),
+                                    'unit': product_obj.get('unit', 'un'),
+                                    'price': product_obj.get('price', 0),
+                                    'supplier': 'Consumo Interno',
+                                    'invoice': f"Func {order.get('staff_name')}",
+                                    'user': session.get('user')
+                                })
 
                     del orders[str_table_id]
                     save_table_orders(orders)
