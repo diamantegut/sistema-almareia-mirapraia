@@ -1,0 +1,31 @@
+{
+    "buttons": [
+        {
+            "id": "restaurant",
+            "title": "Restaurante",
+            "type": "grid",
+            "media_type": "image",
+            "media_url": "",
+            "action": "open_menu",
+            "order": 1
+        },
+        {
+            "id": "attractions",
+            "title": "Atrações do Dia",
+            "type": "list",
+            "media_type": "image",
+            "media_url": "",
+            "action": "open_attractions",
+            "order": 2
+        },
+        {
+            "id": "tours",
+            "title": "Passeios",
+            "type": "grid",
+            "media_type": "image",
+            "media_url": "",
+            "action": "open_tours",
+            "order": 3
+        }
+    ]
+}

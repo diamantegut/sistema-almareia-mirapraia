@@ -1,0 +1,19 @@
+{
+    "id": "session_new",
+    "user": "test_user",
+    "status": "open",
+    "type": "reception_room_billing",
+    "transactions": [
+        {
+            "id": "TRANS_20260128220500_c95c6a",
+            "type": "in",
+            "category": "Baixa de Conta",
+            "description": "Fechamento Conta Quarto 101 - John Doe",
+            "amount": 11.0,
+            "payment_method": "credit_card",
+            "timestamp": "28/01/2026 22:05",
+            "time": "22:05",
+            "user": "test_user"
+        }
+    ]
+}

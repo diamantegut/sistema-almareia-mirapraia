@@ -1,0 +1,34 @@
+{
+    "environment": "production",
+    "port": 5000,
+    "last_update": "2026-02-15 12:45:47",
+    "tunnels": [
+        {
+            "name": "pre-checkin",
+            "url": "https://checkinalmareia.ngrok.app",
+            "domain": "checkinalmareia.ngrok.app",
+            "port": 5000,
+            "description": "Pr\u00e9-Checkin Digital",
+            "status": "active",
+            "timestamp": "2026-02-15 12:45:46"
+        },
+        {
+            "name": "staff",
+            "url": "https://syrupy-jaliyah-intracranial.ngrok-free.dev",
+            "domain": "syrupy-jaliyah-intracranial.ngrok-free.dev",
+            "port": 5000,
+            "description": "Acesso Colaboradores",
+            "status": "active",
+            "timestamp": "2026-02-15 12:45:47"
+        },
+        {
+            "name": "menu",
+            "url": "https://menu.mirapraia.ngrok.app",
+            "domain": "menu.mirapraia.ngrok.app",
+            "port": 5000,
+            "description": "Card\u00e1pio Digital",
+            "status": "active",
+            "timestamp": "2026-02-15 12:45:47"
+        }
+    ]
+}

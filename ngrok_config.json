@@ -1,0 +1,44 @@
+{
+    "development": {
+        "port": 5001,
+        "tunnels": [
+            {
+                "name": "pre-checkin",
+                "domain": "checkinalmareia.ngrok.app",
+                "description": "Pr\u00e9-Checkin Digital"
+            },
+            {
+                "name": "staff",
+                "domain": "syrupy-jaliyah-intracranial.ngrok-free.dev",
+                "description": "Acesso Colaboradores"
+            },
+            {
+                "name": "menu",
+                "domain": "menu.mirapraia.ngrok.app",
+                "port_override": 5000,
+                "description": "Card\u00e1pio Digital"
+            }
+        ]
+    },
+    "production": {
+        "port": 5000,
+        "tunnels": [
+            {
+                "name": "pre-checkin",
+                "domain": "checkinalmareia.ngrok.app",
+                "description": "Pr\u00e9-Checkin Digital"
+            },
+            {
+                "name": "staff",
+                "domain": "syrupy-jaliyah-intracranial.ngrok-free.dev",
+                "description": "Acesso Colaboradores"
+            },
+            {
+                "name": "menu",
+                "domain": "menu.mirapraia.ngrok.app",
+                "port_override": 5000,
+                "description": "Card\u00e1pio Digital"
+            }
+        ]
+    }
+}

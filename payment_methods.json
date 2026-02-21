@@ -1,0 +1,165 @@
+[
+    {
+        "id": "dinheiro",
+        "name": "Dinheiro",
+        "available_in": [
+            "restaurant",
+            "reception"
+        ],
+        "is_fiscal": false
+    },
+    {
+        "id": "pixmaquininhacnpj",
+        "name": "PIX Maquininha CNPJ",
+        "available_in": [
+            "restaurant"
+        ],
+        "is_fiscal": true,
+        "fiscal_cnpj": "28952732000109"
+    },
+    {
+        "id": "creditomirapraiapagseguro",
+        "name": "Credito MIrapraia Pagseguro",
+        "available_in": [
+            "restaurant"
+        ],
+        "is_fiscal": true,
+        "fiscal_cnpj": "28952732000109"
+    },
+    {
+        "id": "debitomirapraiapagseguro",
+        "name": "Debito Mirapraia Pagseguro",
+        "available_in": [
+            "restaurant"
+        ],
+        "is_fiscal": true,
+        "fiscal_cnpj": "28952732000109"
+    },
+    {
+        "id": "pixemailalmareia",
+        "name": "PIX Email Almareia",
+        "available_in": [
+            "reception"
+        ],
+        "is_fiscal": true,
+        "fiscal_cnpj": "46500590000112"
+    },
+    {
+        "id": "debitoangelo",
+        "name": "Debito Angelo",
+        "available_in": [
+            "reception"
+        ],
+        "is_fiscal": false,
+        "fiscal_cnpj": ""
+    },
+    {
+        "id": "creditoangelo",
+        "name": "Credito Angelo",
+        "available_in": [
+            "reception"
+        ],
+        "is_fiscal": false,
+        "fiscal_cnpj": ""
+    },
+    {
+        "id": "creditograsi",
+        "name": "Credito Grasi",
+        "available_in": [
+            "reception"
+        ],
+        "is_fiscal": false,
+        "fiscal_cnpj": ""
+    },
+    {
+        "id": "debitograsi",
+        "name": "Debito Grasi",
+        "available_in": [
+            "reception"
+        ],
+        "is_fiscal": false,
+        "fiscal_cnpj": ""
+    },
+    {
+        "id": "pixcnpj28952732000109",
+        "name": "PIX CNPJ 28952732000109",
+        "available_in": [
+            "restaurant",
+            "reception"
+        ],
+        "is_fiscal": true,
+        "fiscal_cnpj": "28952732000109"
+    },
+    {
+        "id": "creditomirapraiarede",
+        "name": "Credito Mirapraia REDE",
+        "available_in": [
+            "reception"
+        ],
+        "is_fiscal": true,
+        "fiscal_cnpj": "28952732000109"
+    },
+    {
+        "id": "debitomirapraiarede",
+        "name": "Debito Mirapraia REDE",
+        "available_in": [
+            "reception"
+        ],
+        "is_fiscal": true,
+        "fiscal_cnpj": "28952732000109"
+    },
+    {
+        "id": "creditoalmareiarede",
+        "name": "Credito Almareia Rede",
+        "available_in": [
+            "reception"
+        ],
+        "is_fiscal": true,
+        "fiscal_cnpj": "46500590000112"
+    },
+    {
+        "id": "debitoalmareiarede",
+        "name": "Debito Almareia Rede",
+        "available_in": [
+            "reception"
+        ],
+        "is_fiscal": true,
+        "fiscal_cnpj": "46500590000112"
+    },
+    {
+        "id": "creditolinkdepagamento",
+        "name": "Credito Link de Pagamento",
+        "available_in": [
+            "reception"
+        ],
+        "is_fiscal": true,
+        "fiscal_cnpj": "46500590000112"
+    },
+    {
+        "id": "debitolinkdepagamento",
+        "name": "Debito Link de Pagamento",
+        "available_in": [
+            "reception"
+        ],
+        "is_fiscal": true,
+        "fiscal_cnpj": "46500590000112"
+    },
+    {
+        "id": "pixqrangelo",
+        "name": "Pix QR Angelo",
+        "available_in": [
+            "reception"
+        ],
+        "is_fiscal": false,
+        "fiscal_cnpj": ""
+    },
+    {
+        "id": "pixqrgrasi",
+        "name": "Pix QR Grasi",
+        "available_in": [
+            "reception"
+        ],
+        "is_fiscal": false,
+        "fiscal_cnpj": ""
+    }
+]

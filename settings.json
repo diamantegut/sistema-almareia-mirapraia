@@ -1,0 +1,109 @@
+{
+    "assinafy_api_token": "YOUR_API_TOKEN_HERE",
+    "assinafy_account_id": "YOUR_ACCOUNT_ID_HERE",
+    "category_order": [
+        "Cervejas",
+        "Drinks",
+        "Refrigerante",
+        "Sucos e \u00c1guas",
+        "Caf\u00e9 da manh\u00e3",
+        "Entradas",
+        "Sobremesas",
+        "Especiais da Casa",
+        "Por\u00e7\u00f5es",
+        "Pratos",
+        "Vinhos",
+        "Doses",
+        "Bebidas Quentes Garrafas",
+        "Frigobar",
+        "Jantar Rom\u00e2ntico"
+    ],
+    "portionable_categories": [
+        "Bruto Carnes",
+        "Frios",
+        "Proteina"
+    ],
+    "portionable_dest_categories": [],
+    "portioning_rules": [
+        {
+            "origin": "Frios",
+            "destinations": [
+                "Porcionados frios"
+            ]
+        },
+        {
+            "origin": "Bruto Carnes",
+            "destinations": [
+                "Acompanhamento",
+                "Porcionados Carnes",
+                "Porcionados Entradas"
+            ]
+        }
+    ],
+    "product_portioning_rules": [
+        {
+            "origin": "Fil\u00e9 Mignon Inteiro",
+            "destinations": [
+                "Fil\u00e9 Mignon Tornedor 100G",
+                "Fil\u00e9 Mignon Tornedor 200G",
+                "Fil\u00e9 mignon medalh\u00e3o",
+                "Fil\u00e9 mignon parmegiana",
+                "Fil\u00e9 mignon tiras",
+                "Fil\u00e9 para risotto"
+            ]
+        }
+    ],
+    "external_access_link": "https://syrupy-jaliyah-intracranial.ngrok-free.dev",
+    "category_printer_map": {
+        "Bebidas Quentes Garrafas": "97e342f3-2ba7-4dc3-9afd-b299b4c7b777",
+        "Caf\u00e9 da manh\u00e3": "71e0b2b7-668d-45b3-b69a-d69ff63dc77a",
+        "Cervejas": "97e342f3-2ba7-4dc3-9afd-b299b4c7b777",
+        "Doses": "97e342f3-2ba7-4dc3-9afd-b299b4c7b777",
+        "Drinks": "8922ded4-3c22-4984-81ee-292ee3ca0e7a",
+        "Entradas": "71e0b2b7-668d-45b3-b69a-d69ff63dc77a",
+        "Especiais da Casa": "2",
+        "Frigobar": "97e342f3-2ba7-4dc3-9afd-b299b4c7b777",
+        "Por\u00e7\u00f5es": "2",
+        "Pratos": "2",
+        "Refrigerante": "97e342f3-2ba7-4dc3-9afd-b299b4c7b777",
+        "Sobremesas": "011be714-de43-4d09-b9b7-3e6e47a33168",
+        "Sucos e \u00c1guas": "97e342f3-2ba7-4dc3-9afd-b299b4c7b777",
+        "Vinhos": "97e342f3-2ba7-4dc3-9afd-b299b4c7b777"
+    },
+    "category_colors": {
+        "Cervejas": "#0061bd",
+        "Drinks": "#0061bd",
+        "Refrigerante": "#0061bd",
+        "Sucos e \u00c1guas": "#0061bd",
+        "Caf\u00e9 da manh\u00e3": "#e37226",
+        "Entradas": "#da2525",
+        "Sobremesas": "#da2525",
+        "Especiais da Casa": "#da2525",
+        "Por\u00e7\u00f5es": "#da2525",
+        "Pratos": "#da2525",
+        "Vinhos": "#700000",
+        "Doses": "#700000",
+        "Bebidas Quentes Garrafas": "#700000",
+        "Frigobar": "#ad9f00",
+        "Jantar Rom\u00e2ntico": "#ffd500"
+    },
+    "digital_menu_category_order": [
+        "Caf\u00e9 da manh\u00e3",
+        "Drinks",
+        "Entradas",
+        "Especiais da Casa",
+        "Pratos",
+        "Por\u00e7\u00f5es",
+        "Sobremesas",
+        "Refrigerante",
+        "Sucos e \u00c1guas",
+        "Teste",
+        "Cervejas",
+        "Vinhos",
+        "Doses",
+        "Bebidas Quentes Garrafas",
+        "Frigobar"
+    ],
+    "whatsapp_external_access_link": "https://mirapraiawhatts.ngrok.app",
+    "queue_external_access_link": "https://fila.mirapraia.ngrok.app"
+}
