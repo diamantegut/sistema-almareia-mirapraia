@@ -822,7 +822,9 @@ def format_bill(table_id, items, subtotal, service_fee, total, waiter_name, gues
         if room_number:
             cmd += f"QUARTO: {room_number}\n".encode('cp850', errors='replace')
         if guest_name:
-            cmd += f"HOSPEDE: {guest_name[:20]}\n".encode('cp850', errors='replace') # Truncate to fit
+            # Reduce font size for guest name by using normal font instead of Double Height
+            cmd += NO_BOLD + NORMAL
+            cmd += f"HOSPEDE: {guest_name[:25]}\n".encode('cp850', errors='replace') 
         cmd += NO_BOLD + NORMAL
         cmd += SEPARATOR
 

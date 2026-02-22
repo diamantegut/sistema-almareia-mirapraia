@@ -16,6 +16,7 @@ from app.utils.decorators import login_required
 from .utils import rescue_menu_items_fiscal_from_excel
 from werkzeug.utils import secure_filename
 import os
+import re
 from datetime import datetime
 import traceback
 import io
@@ -115,7 +116,9 @@ def _get_sales_flat():
                 'timestamp': ts,
                 'timestamp_str': closed_at or '',
                 'status': status,
-                'customer': customer
+                'customer': customer,
+                'user': order.get('waiter') or order.get('staff_name') or '',
+                'justification': ''
             })
     # Update cache removed
     # _SALES_CACHE['mtime'] = mtime
@@ -145,7 +148,8 @@ def _get_cancellations_from_logs(start_dt, end_dt, products_set):
             except Exception:
                 logs = []
             for log in logs or []:
-                if str(log.get('action', '')).lower() not in ['item removido', 'cancelamento mesa']:
+                action = str(log.get('action', '')).lower()
+                if action not in ['item removido', 'cancelamento mesa', 'edição de conta', 'edicao de conta']:
                     continue
                 ts_str = log.get('timestamp') or ''
                 try:
@@ -153,16 +157,55 @@ def _get_cancellations_from_logs(start_dt, end_dt, products_set):
                 except Exception:
                     ts = day_dt
                 details = log.get('details', '')
+                
+                # New Logic for Edição de Conta (Multi-item)
+                if 'edição de conta' in action or 'edicao de conta' in action:
+                    if isinstance(details, str):
+                        # Pattern: Item Removido: (.+?) \(x([\d\.]+)\)(?: - Justificativa: (.+?))?(?:, |$| Recálculo)
+                        matches = re.findall(r"Item Removido: (.+?) \(x([\d\.]+)\)(?: - Justificativa: (.+?))?(?:, |$| Recálculo)", details)
+                        for idx, (name, qty_str, justif) in enumerate(matches):
+                            prod_name = name.strip()
+                            try:
+                                qty = float(qty_str)
+                            except:
+                                qty = 1.0
+                                
+                            if prod_name and (not products_set or _name_matches(prod_name, norm_filters)):
+                                results.append({
+                                    'sale_id': f"CANCEL_{log.get('id','')}_{idx}",
+                                    'product': prod_name,
+                                    'qty': qty,
+                                    'total': 0.0,
+                                    'timestamp': ts,
+                                    'timestamp_str': ts.strftime('%d/%m/%Y %H:%M:%S'),
+                                    'status': 'cancelled',
+                                    'customer': f"Edição Conta ({log.get('user','')})",
+                                    'user': log.get('user', ''),
+                                    'justification': justif.strip() if justif else ''
+                                })
+                    continue
+
+                # Legacy Logic for Item Removido
                 prod_name = None
+                justif = ''
                 if isinstance(details, str):
                     if 'Item ' in details and ' removido' in details:
                         try:
-                            seg = details.split('Item ', 1)[1]
-                            prod_name = seg.split(' removido', 1)[0].strip()
+                            # Try to extract justification from legacy format if present
+                            # Format usually: "Item X removido da mesa Y. Motivo: Z"
+                            parts = details.split('Item ', 1)[1].split(' removido', 1)
+                            prod_name = parts[0].strip()
+                            rest = parts[1]
+                            if 'Motivo: ' in rest:
+                                justif = rest.split('Motivo: ', 1)[1].strip()
+                            elif 'Justificativa: ' in rest:
+                                justif = rest.split('Justificativa: ', 1)[1].strip()
                         except Exception:
                             prod_name = None
                 elif isinstance(details, dict):
                     prod_name = details.get('item') or details.get('name')
+                    justif = details.get('reason') or details.get('justification') or ''
+                
                 if prod_name and (not products_set or _name_matches(prod_name, norm_filters)):
                     results.append({
                         'sale_id': f"CANCEL_{log.get('id','')}",
@@ -172,7 +215,9 @@ def _get_cancellations_from_logs(start_dt, end_dt, products_set):
                         'timestamp': ts,
                         'timestamp_str': ts.strftime('%d/%m/%Y %H:%M:%S'),
                         'status': 'cancelled',
-                        'customer': ''
+                        'customer': '',
+                        'user': log.get('user', ''),
+                        'justification': justif
                     })
     except Exception:
         pass
@@ -263,7 +308,9 @@ def menu_sales_history_api():
                 'total': it['total'],
                 'timestamp': it['timestamp_str'],
                 'status': 'concluída' if str(it['status']).lower() == 'closed' else 'cancelada',
-                'customer': it['customer']
+                'customer': it['customer'],
+                'user': it.get('user', ''),
+                'justification': it.get('justification', '')
             } for it in page_items
         ],
         'total_count': total_count,
@@ -381,19 +428,19 @@ def menu_sales_history_export():
     ws = wb.add_worksheet('Vendas')
     bold = wb.add_format({'bold': True})
     money = wb.add_format({'num_format': 'R$ #,##0.00'})
-    headers = ['ID', 'Produto', 'Quantidade', 'Valor', 'Data/Hora', 'Status', 'Cliente']
+    headers = ['Produto', 'Quantidade', 'Valor', 'Data/Hora', 'Status', 'Cliente', 'Colaborador', 'Justificativa']
     for col, h in enumerate(headers):
         ws.write(0, col, h, bold)
     row = 1
     for it in items:
-        display_id = _format_sale_display_id(it)
-        ws.write(row, 0, display_id)
-        ws.write(row, 1, it['product'])
-        ws.write_number(row, 2, it['qty'])
-        ws.write_number(row, 3, it['total'], money)
-        ws.write(row, 4, it.get('timestamp_str') or '')
-        ws.write(row, 5, 'concluída' if str(it['status']).lower() == 'closed' else 'cancelada')
-        ws.write(row, 6, it.get('customer') or '')
+        ws.write(row, 0, it['product'])
+        ws.write_number(row, 1, it['qty'])
+        ws.write_number(row, 2, it['total'], money)
+        ws.write(row, 3, it.get('timestamp_str') or '')
+        ws.write(row, 4, 'concluída' if str(it['status']).lower() == 'closed' else 'cancelada')
+        ws.write(row, 5, it.get('customer') or '')
+        ws.write(row, 6, it.get('user') or '')
+        ws.write(row, 7, it.get('justification') or '')
         row += 1
     ws2 = wb.add_worksheet('Resumo')
     ws2.write(0, 0, 'Total vendida', bold)

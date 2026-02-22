@@ -1,0 +1,39 @@
+Searching 54 sessions for 3 targets...
+
+[MATCH FOUND]
+Target: {'date': '17/02/2026', 'time': '17:10', 'amount': 500.0, 'user': 'eduardo'}
+Transaction: ID=TX_20260217171059_38bdcb, Amount=500.0, User=eduardo, Time=17/02/2026 17:10
+Details: {
+  "payment_group_id": "8845ea10-c994-4924-b34d-b5ed24aaff20",
+  "total_payment_group_amount": 920.6,
+  "payment_method_code": "PIX Maquininha CNPJ",
+  "service_fee_removed": true
+}
+Description: Venda Mesa 46 - PIX Maquininha CNPJ
+Service Fee Removed: None
+ORIGIN: Table=None, Room=None, RelatedCharge=None
+
+[MATCH FOUND]
+Target: {'date': '17/02/2026', 'time': '17:10', 'amount': 420.6, 'user': 'eduardo'}
+Transaction: ID=TX_20260217171059_0ff917, Amount=420.6, User=eduardo, Time=17/02/2026 17:10
+Details: {
+  "payment_group_id": "8845ea10-c994-4924-b34d-b5ed24aaff20",
+  "total_payment_group_amount": 920.6,
+  "payment_method_code": "PIX Maquininha CNPJ",
+  "service_fee_removed": true
+}
+Description: Venda Mesa 46 - PIX Maquininha CNPJ
+Service Fee Removed: None
+ORIGIN: Table=None, Room=None, RelatedCharge=None
+
+[MATCH FOUND]
+Target: {'date': '18/02/2026', 'time': '16:42', 'amount': 518.07, 'user': 'guilherme'}
+Transaction: ID=TX_20260218164252_d32b4b, Amount=518.07, User=guilherme, Time=18/02/2026 16:42
+Details: {
+  "service_fee_removed": true
+}
+Description: Venda Mesa 54 - Credito MIrapraia Pagseguro
+Service Fee Removed: None
+ORIGIN: Table=None, Room=None, RelatedCharge=None
+
+Total matches found: 3

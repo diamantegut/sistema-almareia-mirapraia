@@ -456,19 +456,45 @@ from app.services.menu_security_service import MenuSecurityService
 
 def load_products(): return _load_json(PRODUCTS_FILE, [])
 
+from app.utils.lock import file_lock
+from app.services.system_config_manager import PRODUCTS_FILE
+
 def save_products(data):
     """
     Legacy save function. Should be replaced by secure_save_products where possible.
     Maintains basic backup and atomic write.
     """
-    _backup_before_write(PRODUCTS_FILE)
-    return _save_json_atomic(PRODUCTS_FILE, data)
+    with file_lock(PRODUCTS_FILE):
+        _backup_before_write(PRODUCTS_FILE)
+        return _save_json_atomic(PRODUCTS_FILE, data)
 
 def secure_save_products(new_products, user_id='Sistema'):
     """
     Securely saves products with validation, auditing, and integrity checks.
     """
     try:
+        # We don't lock HERE because the caller should have locked to ensure atomicity 
+        # of the whole read-modify-write cycle.
+        # But if the caller didn't lock, we are still vulnerable to race conditions 
+        # between load_products() (step 1) and _save_json_atomic() (step 4).
+        
+        # However, locking here implies we might deadlock if the caller already locked?
+        # file_lock is NOT reentrant if using simple os.open/fcntl?
+        # Our implementation uses a .lock file. If the same process tries to lock again, it will block itself if it doesn't check owner.
+        # Our file_lock implementation in app/utils/lock.py:
+        # fd = os.open(lock_path, os.O_CREAT | os.O_EXCL | os.O_RDWR)
+        # It is NOT reentrant.
+        
+        # So we MUST NOT lock here if the caller already locked.
+        # But we can't easily know.
+        
+        # Strategy:
+        # The caller MUST lock.
+        # If we lock here, we break callers that correctly locked.
+        
+        # The issue the user is reporting is "Conflito de edição".
+        # This happens at step 2 (Optimistic Locking check).
+        
         # 1. Load current state for comparison
         old_products = load_products()
         old_map = {str(p.get('id')): p for p in old_products}
@@ -491,9 +517,18 @@ def secure_save_products(new_products, user_id='Sistema'):
                 old_p = old_map[p_id]
                 
                 # Optimistic Locking
+                # If we are in a lock, old_p should be identical to what the caller loaded.
+                # If they differ, it means the caller modified 'p' but didn't update 'version',
+                # OR the caller loaded stale data (didn't lock before load).
+                
                 if 'version' in p and 'version' in old_p:
                     if int(p['version']) != int(old_p['version']):
-                        raise ValueError(f"Conflito de edição detectado para {p.get('name')}. Recarregue a página.")
+                         # If we are here, it means mismatch.
+                         # If the caller held the lock, this shouldn't happen unless:
+                         # The caller loaded data, THEN acquired lock? (Bad pattern)
+                         # My fix in stock.py does: with lock: load(); modify(); save(). Correct.
+                         
+                         raise ValueError(f"Conflito de edição detectado para {p.get('name')}. Recarregue a página.")
                 
                 # Generate Diff
                 diff = StockSecurityService.generate_diff(old_p, p)

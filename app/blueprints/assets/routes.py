@@ -309,161 +309,166 @@ def edit(asset_id):
     users = load_users()
     return render_template('assets/form.html', asset=asset, users=users)
 
+from app.utils.lock import file_lock
+from app.services.system_config_manager import PRODUCTS_FILE
+
 @assets_bp.route('/service/principal/assets/transfer', methods=['GET', 'POST'])
 @login_required
 def transfer():
     if request.method == 'POST':
         # Batch Transfer Logic
         try:
-            selected_items = request.form.getlist('items[]') # List of product IDs or Names
-            # Actually, usually better to send a JSON or structured form
-            # Let's assume the form sends 'product_id' and 'qty' and 'new_details'
-            
-            # Since it's a batch transfer from Stock -> Assets
-            # We need to receive a list of {product_id, qty_to_transfer, asset_details}
-            # Or simpler: Select items from stock, and for each create an asset entry.
-            
-            # Let's support a JSON payload for complex batch operations if coming from JS
-            # Or form data if simple.
-            # Given requirements: "selecionar múltiplos itens... e migrá-los"
-            
-            # Implementation:
-            # 1. Iterate over submitted items
-            # 2. Deduct from Stock
-            # 3. Create Asset
-            # 4. Log
-            
-            data = request.json # Expecting JSON from a smarter frontend
-            if not data:
-                return jsonify({'success': False, 'error': 'Dados inválidos'}), 400
+            # We must lock early because we are reading AND writing products
+            with file_lock(PRODUCTS_FILE):
+                selected_items = request.form.getlist('items[]') # List of product IDs or Names
+                # Actually, usually better to send a JSON or structured form
+                # Let's assume the form sends 'product_id' and 'qty' and 'new_details'
                 
-            items = data.get('items', [])
-            justification = data.get('justification')
-            
-            if not items:
-                return jsonify({'success': False, 'error': 'Nenhum item selecionado'}), 400
+                # Since it's a batch transfer from Stock -> Assets
+                # We need to receive a list of {product_id, qty_to_transfer, asset_details}
+                # Or simpler: Select items from stock, and for each create an asset entry.
                 
-            products = load_products()
-            assets = load_fixed_assets()
-            balances = get_product_balances()
-            
-            # Find max ID for sequential numbering
-            max_id = 0
-            for a in assets:
-                try:
-                    curr_id = int(a.get('patrimony_number', 'PAT-0').split('-')[1])
-                    if curr_id > max_id:
-                        max_id = curr_id
-                except:
-                    pass
-            
-            transferred_count = 0
-            products_to_remove = []
-            
-            for item in items:
-                prod_id = item.get('id')
-                qty_input = item.get('qty', 0)
-                qty_transfer = 0.0
+                # Let's support a JSON payload for complex batch operations if coming from JS
+                # Or form data if simple.
+                # Given requirements: "selecionar múltiplos itens... e migrá-los"
                 
-                try:
-                     qty_transfer = float(qty_input)
-                except:
-                     qty_transfer = 0.0
+                # Implementation:
+                # 1. Iterate over submitted items
+                # 2. Deduct from Stock
+                # 3. Create Asset
+                # 4. Log
                 
-                product = next((p for p in products if str(p['id']) == str(prod_id)), None)
-                if not product:
-                    continue
+                data = request.json # Expecting JSON from a smarter frontend
+                if not data:
+                    return jsonify({'success': False, 'error': 'Dados inválidos'}), 400
                     
-                # Special logic for 0.00: Transfer ALL and Remove from Stock
-                remove_from_stock = False
-                if qty_transfer == 0:
-                    current_balance = balances.get(product['name'], 0.0)
-                    if current_balance <= 0:
-                        # Skip if nothing to transfer? Or transfer 0 just to archive?
-                        # User said "transferir tudo". If balance is 0 or negative, maybe we still archive?
-                        # Let's assume we transfer whatever balance is there.
+                items = data.get('items', [])
+                justification = data.get('justification')
+                
+                if not items:
+                    return jsonify({'success': False, 'error': 'Nenhum item selecionado'}), 400
+                    
+                products = load_products()
+                assets = load_fixed_assets()
+                balances = get_product_balances()
+                
+                # Find max ID for sequential numbering
+                max_id = 0
+                for a in assets:
+                    try:
+                        curr_id = int(a.get('patrimony_number', 'PAT-0').split('-')[1])
+                        if curr_id > max_id:
+                            max_id = curr_id
+                    except:
                         pass
-                    qty_transfer = current_balance
-                    remove_from_stock = True
+                
+                transferred_count = 0
+                products_to_remove = []
+                
+                for item in items:
+                    prod_id = item.get('id')
+                    qty_input = item.get('qty', 0)
+                    qty_transfer = 0.0
                     
-                if qty_transfer <= 0 and not remove_from_stock:
-                     # If user typed 0 and balance is 0, we still might want to remove?
-                     # Let's assume if input is 0, we ALWAYS remove.
-                     pass
-
-                # Validation: Prevent "consumo rápido"
-                # Heuristic: Category check? Or manual override?
-                # User asked for validation. Let's block if category is 'Alimentos', 'Bebidas' unless overridden?
-                # For now, let's just warn or allow user to filter in UI.
-                # Backend validation:
-                blocked_categories = ['Alimentos', 'Bebidas', 'Limpeza', 'Descartáveis']
-                if product.get('category') in blocked_categories and not item.get('force', False):
-                     return jsonify({'success': False, 'error': f"Item {product['name']} é de categoria restrita ({product.get('category')})."}), 400
-                
-                # Deduct Stock
-                log_stock_action(
-                    user=session.get('user'),
-                    action='saida',
-                    product=product['name'],
-                    qty=qty_transfer,
-                    details=f"Transferência para Ativo Imobilizado: {justification}",
-                    department='Principal'
-                )
-                
-                save_stock_entry({
-                    'id': str(uuid.uuid4()),
-                    'date': datetime.now().strftime('%d/%m/%Y'),
-                    'product': product['name'],
-                    'qty': -abs(qty_transfer),
-                    'unit': product.get('unit', 'un'),
-                    'price': product.get('price', 0),
-                    'supplier': 'Transferência Ativo',
-                    'invoice': 'Interno',
-                    'user': session.get('user')
-                })
-                
-                # Create Asset
-                max_id += 1
-                new_pat_id = f"PAT-{max_id:05d}"
-                
-                new_asset = {
-                    'id': str(uuid.uuid4()),
-                    'patrimony_number': new_pat_id,
-                    'description': product['name'],
-                    'category': product.get('category', 'Geral'), # Keep Category
-                    'acquisition_value': float(product.get('price', 0)), # Use current stock price
-                    'purchase_date': datetime.now().strftime('%Y-%m-%d'), # Today as transfer date? Or keep original?
-                    'quantity': qty_transfer,
-                    'supplier': 'Transferido do Estoque',
-                    'condition': 'Bom', # Default
-                    'location': 'A Definir',
-                    'responsible': session.get('user'),
-                    'useful_life_years': 5, # Default
-                    'annual_depreciation_rate': 10, # Default
-                    'created_at': datetime.now().strftime('%d/%m/%Y %H:%M'),
-                    'created_by': session.get('user'),
-                    'transfer_history': {
-                        'from': 'Estoque',
-                        'date': datetime.now().strftime('%d/%m/%Y %H:%M'),
-                        'justification': justification
+                    try:
+                         qty_transfer = float(qty_input)
+                    except:
+                         qty_transfer = 0.0
+                    
+                    product = next((p for p in products if str(p['id']) == str(prod_id)), None)
+                    if not product:
+                        continue
+                        
+                    # Special logic for 0.00: Transfer ALL and Remove from Stock
+                    remove_from_stock = False
+                    if qty_transfer == 0:
+                        current_balance = balances.get(product['name'], 0.0)
+                        if current_balance <= 0:
+                            # Skip if nothing to transfer? Or transfer 0 just to archive?
+                            # User said "transferir tudo". If balance is 0 or negative, maybe we still archive?
+                            # Let's assume we transfer whatever balance is there.
+                            pass
+                        qty_transfer = current_balance
+                        remove_from_stock = True
+                        
+                    if qty_transfer <= 0 and not remove_from_stock:
+                         # If user typed 0 and balance is 0, we still might want to remove?
+                         # Let's assume if input is 0, we ALWAYS remove.
+                         pass
+    
+                    # Validation: Prevent "consumo rápido"
+                    # Heuristic: Category check? Or manual override?
+                    # User asked for validation. Let's block if category is 'Alimentos', 'Bebidas' unless overridden?
+                    # For now, let's just warn or allow user to filter in UI.
+                    # Backend validation:
+                    blocked_categories = ['Alimentos', 'Bebidas', 'Limpeza', 'Descartáveis']
+                    if product.get('category') in blocked_categories and not item.get('force', False):
+                         return jsonify({'success': False, 'error': f"Item {product['name']} é de categoria restrita ({product.get('category')})."}), 400
+                    
+                    # Deduct Stock
+                    log_stock_action(
+                        user=session.get('user'),
+                        action='saida',
+                        product=product['name'],
+                        qty=qty_transfer,
+                        details=f"Transferência para Ativo Imobilizado: {justification}",
+                        department='Principal'
+                    )
+                    
+                    save_stock_entry({
+                        'id': str(uuid.uuid4()),
+                        'date': datetime.now().strftime('%d/%m/%Y'),
+                        'product': product['name'],
+                        'qty': -abs(qty_transfer),
+                        'unit': product.get('unit', 'un'),
+                        'price': product.get('price', 0),
+                        'supplier': 'Transferência Ativo',
+                        'invoice': 'Interno',
+                        'user': session.get('user')
+                    })
+                    
+                    # Create Asset
+                    max_id += 1
+                    new_pat_id = f"PAT-{max_id:05d}"
+                    
+                    new_asset = {
+                        'id': str(uuid.uuid4()),
+                        'patrimony_number': new_pat_id,
+                        'description': product['name'],
+                        'category': product.get('category', 'Geral'), # Keep Category
+                        'acquisition_value': float(product.get('price', 0)), # Use current stock price
+                        'purchase_date': datetime.now().strftime('%Y-%m-%d'), # Today as transfer date? Or keep original?
+                        'quantity': qty_transfer,
+                        'supplier': 'Transferido do Estoque',
+                        'condition': 'Bom', # Default
+                        'location': 'A Definir',
+                        'responsible': session.get('user'),
+                        'useful_life_years': 5, # Default
+                        'annual_depreciation_rate': 10, # Default
+                        'created_at': datetime.now().strftime('%d/%m/%Y %H:%M'),
+                        'created_by': session.get('user'),
+                        'transfer_history': {
+                            'from': 'Estoque',
+                            'date': datetime.now().strftime('%d/%m/%Y %H:%M'),
+                            'justification': justification
+                        }
                     }
-                }
-                assets.append(new_asset)
-                transferred_count += 1
+                    assets.append(new_asset)
+                    transferred_count += 1
+                    
+                    if remove_from_stock:
+                        products_to_remove.append(product['id'])
+                    
+                save_fixed_assets(assets)
                 
-                if remove_from_stock:
-                    products_to_remove.append(product['id'])
+                if products_to_remove:
+                    products = [p for p in products if p['id'] not in products_to_remove]
+                    try:
+                        secure_save_products(products, user_id=session.get('user', 'Sistema'))
+                    except ValueError as e:
+                        return jsonify({'success': False, 'error': f'Erro ao atualizar produtos: {e}'})
                 
-            save_fixed_assets(assets)
-            
-            if products_to_remove:
-                products = [p for p in products if p['id'] not in products_to_remove]
-                try:
-                    secure_save_products(products, user_id=session.get('user', 'Sistema'))
-                except ValueError as e:
-                    return jsonify({'success': False, 'error': f'Erro ao atualizar produtos: {e}'})
-                
-            return jsonify({'success': True, 'message': f'{transferred_count} itens transferidos.'})
+                return jsonify({'success': True, 'message': f'{transferred_count} itens transferidos.'})
             
         except Exception as e:
             return jsonify({'success': False, 'error': str(e)}), 500

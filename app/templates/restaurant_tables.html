@@ -173,6 +173,10 @@
                                         </span>
                                     </div>
                                 {% endif %}
+
+                                {% if order.waiter %}
+                                    <div class="text-muted text-truncate mt-1" style="font-size: 0.6em;">Aberto por: {{ order.waiter }}</div>
+                                {% endif %}
                             {% else %}
                                 {% if not is_occupied_room %}
                                     <div class="status-indicator free"></div>
@@ -219,6 +223,10 @@
                             <div class="card h-100 border-info bg-light">
                                 <div class="card-body p-2 text-center">
                                     <div class="fw-bold text-truncate">{{ users[order.staff_name].full_name if order.staff_name in users else order.staff_name }}</div>
+                                    <!-- Show who opened the table -->
+                                    {% if order.opened_by %}
+                                        <div class="text-muted text-truncate" style="font-size: 0.7em;">Aberto por: {{ order.opened_by }}</div>
+                                    {% endif %}
                                     <!-- Value hidden -->
                                     <div class="text-muted" style="font-size: 0.7em;">Desde: {{ order.opened_at }}</div>
                                 </div>

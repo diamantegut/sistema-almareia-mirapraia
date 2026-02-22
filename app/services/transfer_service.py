@@ -367,6 +367,7 @@ def transfer_table_to_room(table_id, raw_room_number, user_name, mode='restauran
                 
                 order_to_archive = copy.deepcopy(order)
                 order_to_archive['closed_at'] = datetime.now().strftime('%d/%m/%Y %H:%M')
+                order_to_archive['status'] = 'closed'
                 order_to_archive['payment_method'] = 'Room Charge'
                 order_to_archive['room_charge'] = target_key
                 order_to_archive['final_total'] = sum(c['total'] for c in new_charges) # Total transferred

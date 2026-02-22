@@ -1691,6 +1691,38 @@ def restaurant_table_order(table_id):
                 
                 order['payments'] = all_payments
                 
+                # Calculate Waiter Breakdown (Commission Split)
+                try:
+                    wb_totals = {}
+                    wb_total_val = 0.0
+                    for item in order.get('items', []):
+                        try:
+                            name_lower = (item.get('name') or '').lower()
+                            is_auto_cover = item.get('source') == 'auto_cover_activation'
+                            is_cover_name = 'couvert artistico' in name_lower
+                            is_cover = is_auto_cover or is_cover_name
+                            
+                            if not is_cover:
+                                qty = float(item.get('qty', 1))
+                                price = float(item.get('price', 0))
+                                comps = sum(float(c.get('price', 0)) for c in item.get('complements', []))
+                                val = qty * (price + comps)
+                                
+                                w = item.get('waiter') or order.get('waiter') or 'Garçom'
+                                wb_totals[w] = wb_totals.get(w, 0.0) + val
+                                wb_total_val += val
+                        except:
+                            continue
+                            
+                    if wb_total_val > 0:
+                        # Normalize to grand_total to ensure full allocation
+                        ratio = grand_total / wb_total_val
+                        order['waiter_breakdown'] = {k: v * ratio for k, v in wb_totals.items()}
+                    else:
+                        order['waiter_breakdown'] = {order.get('waiter') or 'Garçom': grand_total}
+                except Exception as e:
+                    current_app.logger.error(f"Error calculating waiter breakdown: {e}")
+                
                 with file_lock(SALES_HISTORY_FILE):
                     sales_history = load_sales_history()
                     if not isinstance(sales_history, list):

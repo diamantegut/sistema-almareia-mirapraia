@@ -26,9 +26,9 @@
         <div class="col-md-3">
           <label class="form-label small mb-1">Status</label>
           <select id="salesStatus" class="form-select form-select-sm">
-            <option value="concluidas" selected>Concluídas</option>
+            <option value="concluidas">Concluídas</option>
             <option value="canceladas">Canceladas</option>
-            <option value="todas">Todas</option>
+            <option value="todas" selected>Todas</option>
           </select>
         </div>
         <div class="col-md-3">
@@ -103,13 +103,14 @@
     <table class="table table-sm table-hover table-striped mb-2">
       <thead class="table-light">
         <tr>
-          <th>ID</th>
           <th>Produto</th>
           <th class="text-end">Quantidade</th>
           <th class="text-end">Valor Total</th>
           <th>Data/Hora</th>
           <th>Status</th>
           <th>Cliente</th>
+          <th>Colaborador</th>
+          <th>Justificativa</th>
         </tr>
       </thead>
       <tbody id="salesHistoryTbody"></tbody>
@@ -141,7 +142,7 @@ function resetSalesHistoryFilters() {
   const prodSel = document.getElementById('salesProducts');
   if (startInput) startInput.value = '';
   if (endInput) endInput.value = '';
-  if (statusSel) statusSel.value = 'concluidas';
+  if (statusSel) statusSel.value = 'todas';
   if (prodSel) {
     for (let i = 0; i < prodSel.options.length; i++) {
       prodSel.options[i].selected = false;
@@ -265,13 +266,14 @@ function loadSalesHistory() {
       items.forEach(it => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td class="small">${it.sale_id}</td>
           <td class="small">${it.product}</td>
           <td class="small text-end">${Number(it.qty).toFixed(2)}</td>
           <td class="small text-end">${formatCurrencyBR(it.total)}</td>
           <td class="small">${it.timestamp || ''}</td>
           <td class="small">${it.status}</td>
           <td class="small">${it.customer || ''}</td>
+          <td class="small">${it.user || ''}</td>
+          <td class="small text-muted">${it.justification || ''}</td>
         `;
         tbody.appendChild(tr);
       });

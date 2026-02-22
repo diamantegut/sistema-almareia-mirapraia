@@ -1984,8 +1984,11 @@ def commission_ranking():
             ref = f"charge:{related_charge_id}"
         else:
             table_id = details.get('table_id')
+            room_number = details.get('room_number')
             if table_id:
                 ref = f"table:{table_id}"
+            elif room_number:
+                ref = f"room:{room_number}"
             else:
                 ref = f"tx:{transaction.get('id', '-')}"
         return f"{ref}|{timestamp}|{operator}"
@@ -2047,6 +2050,41 @@ def commission_ranking():
                         
                         if start_date_comp <= t_date <= end_date_comp:
                                 waiter_breakdown = _get_waiter_breakdown(transaction)
+                                
+                                # Try to calculate breakdown from items if missing (for legacy or direct sales)
+                                if not waiter_breakdown and transaction.get('items'):
+                                    try:
+                                        temp_totals = {}
+                                        temp_total_val = 0.0
+                                        for item in transaction['items']:
+                                            try:
+                                                qty = float(item.get('qty', 1))
+                                                price = float(item.get('price', 0))
+                                                comps = sum(float(c.get('price', 0)) for c in item.get('complements', []))
+                                                val = qty * (price + comps)
+                                                
+                                                # Check for cover/service exempt if needed, but for commission usually we take all
+                                                # But original logic excluded cover? 
+                                                # Transfer service excluded cover. 
+                                                # Let's keep it simple: split everything based on waiter.
+                                                
+                                                w_name = item.get('waiter')
+                                                if not w_name:
+                                                    w_name = transaction.get('waiter') or transaction.get('user') or 'Sem Garçom'
+                                                
+                                                temp_totals[w_name] = temp_totals.get(w_name, 0.0) + val
+                                                temp_total_val += val
+                                            except:
+                                                continue
+                                        
+                                        if temp_total_val > 0:
+                                            # Normalize to transaction amount (handle discounts/service fee mismatch)
+                                            trans_amount = float(transaction.get('amount', 0))
+                                            ratio = trans_amount / temp_total_val if temp_total_val > 0 else 0
+                                            waiter_breakdown = {k: v * ratio for k, v in temp_totals.items()}
+                                    except Exception:
+                                        pass
+
                                 is_removed = is_service_fee_removed_for_transaction(transaction)
 
                                 audit_counters['total_transactions'] += 1
@@ -2056,33 +2094,47 @@ def commission_ranking():
                                     audit_counters['eligible_transactions'] += 1
 
                                 if waiter_breakdown:
+                                    # Distribute by breakdown
                                     for w, amt in waiter_breakdown.items():
+                                        if not w: w = 'Sem Colaborador'
+                                        try:
+                                            f_amt = float(amt)
+                                        except:
+                                            f_amt = 0.0
+                                            
                                         if w not in waiter_stats:
                                             waiter_stats[w] = {'total': 0.0, 'count': 0, 'commissionable': 0.0}
                                         
-                                        try:
-                                            amt_float = float(amt)
-                                        except Exception:
-                                            amt_float = 0.0
-                                        waiter_stats[w]['total'] += amt_float
-                                        waiter_stats[w]['count'] += 1
-                                        if not is_removed:
-                                            waiter_stats[w]['commissionable'] += amt_float
+                                        waiter_stats[w]['total'] += f_amt
+                                        # Count is tricky with split. Fractional count? or just +1 per involvement?
+                                        # Let's add 1 to the main waiter (max share) or just +1 to everyone?
+                                        # Adding +1 to everyone inflates count. Let's add 1 if it's the main share?
+                                        # For simplicity, let's just increment count for everyone involved (participation).
+                                        waiter_stats[w]['count'] += 1 
                                         
-                                        total_sales_period += amt_float
+                                        if not is_removed:
+                                            waiter_stats[w]['commissionable'] += f_amt
+                                            
+                                    total_sales_period += float(transaction.get('amount', 0))
                                 else:
-                                    waiter = transaction.get('waiter')
+                                    # Fallback Logic
+                                    user_collab = transaction.get('user')
+                                    if not user_collab:
+                                        user_collab = transaction.get('waiter')
+                                    if not user_collab:
+                                        user_collab = 'Sem Colaborador'
+                                    
+                                    waiter = user_collab
                                     amount = float(transaction.get('amount', 0))
                                     
-                                    if waiter:
-                                        if waiter not in waiter_stats:
-                                            waiter_stats[waiter] = {'total': 0.0, 'count': 0, 'commissionable': 0.0}
-                                        waiter_stats[waiter]['total'] += amount
-                                        waiter_stats[waiter]['count'] += 1
-                                        if not is_removed:
-                                            waiter_stats[waiter]['commissionable'] += amount
-                                        
-                                        total_sales_period += amount
+                                    if waiter not in waiter_stats:
+                                        waiter_stats[waiter] = {'total': 0.0, 'count': 0, 'commissionable': 0.0}
+                                    waiter_stats[waiter]['total'] += amount
+                                    waiter_stats[waiter]['count'] += 1
+                                    if not is_removed:
+                                        waiter_stats[waiter]['commissionable'] += amount
+                                    
+                                    total_sales_period += amount
 
                                 if is_removed:
                                     group_key = _get_removed_group_key(transaction, session_data)
@@ -2091,7 +2143,17 @@ def commission_ranking():
                                         details = transaction.get('details') or {}
                                         related_charge_id = transaction.get('related_charge_id') or details.get('related_charge_id')
                                         table_id = details.get('table_id')
-                                        ref_label = f"Quarto/Conta {related_charge_id}" if related_charge_id else (f"Mesa {table_id}" if table_id else "-")
+                                        room_number = details.get('room_number')
+
+                                        if related_charge_id:
+                                            ref_label = f"Quarto/Conta {related_charge_id}"
+                                        elif table_id:
+                                            ref_label = f"Mesa {table_id}"
+                                        elif room_number:
+                                            ref_label = f"Quarto {room_number}"
+                                        else:
+                                            ref_label = "-"
+
                                         group = {
                                             'timestamp': transaction.get('timestamp') or '-',
                                             'reference': ref_label,
