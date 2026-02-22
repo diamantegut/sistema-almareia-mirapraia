@@ -385,6 +385,8 @@ def get_balance_data(period_type, year, specific_value=None):
                 'type_key': s_type,
                 'initial_balance': 0.0,
                 'total_in': 0.0,      # total de todas as entradas (todas as formas)
+                'received_in': 0.0,   # recebido no caixa (dinheiro, cartão, pix)
+                'transferred_in': 0.0,# transferido (quarto, crédito)
                 'total_out': 0.0,     # total de todas as saídas (todas as formas)
                 'cash_total_in': 0.0, # entradas apenas em dinheiro
                 'cash_total_out': 0.0,# saídas apenas em dinheiro
@@ -431,16 +433,28 @@ def get_balance_data(period_type, year, specific_value=None):
                         is_cash = True
 
                     # Totais gerais (todas as formas de pagamento)
+                    is_received = True
+                    if 'room' in method or 'quarto' in method or 'credito' in method:
+                        is_received = False
+                        
                     if t_type in ['out', 'withdrawal', 'refund']:
                         data['total_out'] += abs(amount)
                     elif t_type in ['in', 'deposit', 'sale']:
                         if amount >= 0:
                             data['total_in'] += abs(amount)
+                            if is_received:
+                                data['received_in'] += abs(amount)
+                            else:
+                                data['transferred_in'] += abs(amount)
                         else:
                             data['total_out'] += abs(amount)
                     else:
                         if amount >= 0:
                             data['total_in'] += abs(amount)
+                            if is_received:
+                                data['received_in'] += abs(amount)
+                            else:
+                                data['transferred_in'] += abs(amount)
                         else:
                             data['total_out'] += abs(amount)
 
@@ -917,6 +931,8 @@ def finance_balances_data():
             'user': label,
             'initial_balance': values['initial_balance'],
             'total_in': values['total_in'],
+            'received_in': values.get('received_in', 0.0),
+            'transferred_in': values.get('transferred_in', 0.0),
             'total_out': values['total_out'],
             'final_balance': values['final_balance'],
             'calculated_final': values.get('calculated_final', values.get('final_balance', 0.0)),

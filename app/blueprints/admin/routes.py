@@ -7,12 +7,12 @@ import time
 import threading
 import subprocess
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 from . import admin_bp
 from app.utils.decorators import login_required
 from app.services.logger_service import LoggerService
 from app.services.system_config_manager import DEPARTMENTS
-from app.services.data_service import load_users, save_users, load_ex_employees, normalize_text
+from app.services.data_service import load_users, save_users, load_ex_employees, normalize_text, load_sales_history, load_menu_items, load_cashier_sessions
 from app.services.rh_service import load_reset_requests
 from app.services.backup_service import backup_service
 from app.services.logging_service import get_logs, export_logs_to_csv
@@ -594,6 +594,582 @@ def api_search_logs():
         return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+# --- Sales Dashboard ---
+@admin_bp.route('/admin/sales/dashboard')
+@login_required
+def admin_sales_dashboard():
+    if session.get('role') not in ['admin', 'gerente']:
+        flash('Acesso restrito.')
+        return redirect(url_for('main.index'))
+    
+    # Get Categories for Filter
+    categories = set()
+    for item in load_menu_items():
+        if item.get('category'):
+            categories.add(item['category'])
+            
+    return render_template('admin_sales_dashboard.html', categories=sorted(list(categories)))
+
+from reportlab.lib.pagesizes import A4
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.units import inch
+
+@admin_bp.route('/admin/api/sales/analysis')
+@login_required
+def api_sales_analysis():
+    if session.get('role') not in ['admin', 'gerente']:
+        return jsonify({'error': 'Unauthorized'}), 403
+        
+    try:
+        start_date = request.args.get('start_date')
+        end_date = request.args.get('end_date')
+        
+        # Defaults to today if not provided
+        if not start_date:
+            start_date = datetime.now().strftime('%Y-%m-%d')
+        if not end_date:
+            end_date = start_date
+            
+        category_filter = request.args.get('category')
+            
+        try:
+            start_dt = datetime.strptime(start_date, '%Y-%m-%d')
+            end_dt = datetime.strptime(end_date, '%Y-%m-%d')
+            # Adjust end_dt to include the whole day
+            end_dt = end_dt.replace(hour=23, minute=59, second=59)
+        except ValueError:
+            return jsonify({'error': 'Invalid date format'}), 400
+
+        sales_history = load_sales_history()
+        if not isinstance(sales_history, list):
+            current_app.logger.error(f"sales_history is not a list: {type(sales_history)}")
+            sales_history = []
+
+        # Normalize menu items map (by ID and by Name for fallback)
+        menu_items_by_id = {}
+        menu_items_by_name = {}
+        
+        loaded_menu_items = load_menu_items()
+        if not isinstance(loaded_menu_items, list):
+            loaded_menu_items = []
+
+        for item in loaded_menu_items:
+            if not isinstance(item, dict): continue
+            menu_items_by_id[str(item.get('id'))] = item
+            if item.get('name'):
+                menu_items_by_name[normalize_text(item.get('name'))] = item
+                
+        filtered_orders = []
+        filtered_orders_ids = set()
+        
+        total_revenue = 0.0
+        total_cost = 0.0
+        total_items_sold = 0.0
+        
+        guest_stats = {'count': 0, 'revenue': 0.0, 'items': 0}
+        passenger_stats = {'count': 0, 'revenue': 0.0, 'items': 0}
+        
+        expected_passenger_revenue = 0.0
+        guest_paid_at_cashier_revenue = 0.0
+        transferred_to_rooms_revenue = 0.0
+        
+        product_stats = {}
+        hourly_sales = {h: 0.0 for h in range(24)}
+        attendant_stats = {}
+        
+        daily_sales = {}
+
+        room_transfer_items = []
+        room_transfer_products = {}
+        room_transfer_order_ids = set()
+        room_transfer_items_count = 0.0
+        
+        def safe_float(val):
+            try:
+                if isinstance(val, str):
+                    val = val.replace(',', '.')
+                return float(val)
+            except (ValueError, TypeError):
+                return 0.0
+
+        for order in sales_history:
+            if not isinstance(order, dict):
+                continue
+            
+            closed_at_str = order.get('closed_at')
+            if not closed_at_str:
+                continue
+            
+            try:
+                closed_at = datetime.strptime(closed_at_str, '%d/%m/%Y %H:%M')
+            except ValueError:
+                continue
+                
+            if not (start_dt <= closed_at <= end_dt):
+                continue
+
+            order_has_matching_items = False
+            
+            order_attendant = order.get('waiter') or order.get('closed_by') or 'Desconhecido'
+            if not order_attendant:
+                order_attendant = 'Desconhecido'
+            
+            is_guest = False
+            if order.get('customer_type') == 'hospede' or order.get('room_number'):
+                is_guest = True
+            
+            is_transferred = False
+            pm = str(order.get('payment_method') or '').lower()
+            if 'room' in pm or 'quarto' in pm or order.get('room_charge'):
+                is_transferred = True
+
+            order_id = order.get('id') or order.get('close_id') or order.get('table_id')
+            is_room_transfer_order = is_guest and is_transferred
+            skip_room_transfer_for_order = False
+            if is_room_transfer_order and order_id and order_id in room_transfer_order_ids:
+                skip_room_transfer_for_order = True
+            
+            order_revenue = 0.0
+            order_items_count = 0.0
+
+            items = order.get('items')
+            if not isinstance(items, list):
+                items = []
+
+            for item in items:
+                if not isinstance(item, dict):
+                    continue
+                
+                p_id = str(item.get('product_id') or item.get('id') or 'unknown')
+                qty = safe_float(item.get('qty', 0))
+                price = safe_float(item.get('price', 0))
+                name = item.get('name', 'Desconhecido')
+                
+                cost_unit = 0.0
+                category = 'Outros'
+                
+                menu_item = menu_items_by_id.get(p_id)
+                
+                if not menu_item:
+                    menu_item = menu_items_by_name.get(normalize_text(name))
+                
+                if menu_item:
+                    cost_unit = safe_float(menu_item.get('cost_price', 0))
+                    category = menu_item.get('category', 'Outros')
+                    name = menu_item.get('name', name)
+                
+                if category_filter and category != category_filter:
+                    continue
+                
+                order_has_matching_items = True
+                
+                revenue = price * qty
+                cost = cost_unit * qty
+                
+                total_revenue += revenue
+                total_cost += cost
+                total_items_sold += qty
+                
+                order_revenue += revenue
+                order_items_count += qty
+                
+                if p_id not in product_stats:
+                    product_stats[p_id] = {
+                        'name': name,
+                        'category': category,
+                        'qty': 0.0,
+                        'revenue': 0.0,
+                        'cost': 0.0
+                    }
+                
+                product_stats[p_id]['qty'] += qty
+                product_stats[p_id]['revenue'] += revenue
+                product_stats[p_id]['cost'] += cost
+                
+                hour = closed_at.hour
+                hourly_sales[hour] += revenue
+                
+                day_key = closed_at.strftime('%Y-%m-%d')
+                daily_sales[day_key] = daily_sales.get(day_key, 0) + revenue
+                
+                if order_attendant not in attendant_stats:
+                    attendant_stats[order_attendant] = {'orders': set(), 'revenue': 0.0, 'items': 0}
+                
+                attendant_stats[order_attendant]['revenue'] += revenue
+                attendant_stats[order_attendant]['items'] += qty
+                attendant_stats[order_attendant]['orders'].add(order_id)
+
+                if is_room_transfer_order and not skip_room_transfer_for_order:
+                    room_number = order.get('room_charge') or order.get('room_number')
+                    guest_name = order.get('customer_name') or 'Hóspede'
+                    room_transfer_items.append({
+                        'order_id': order_id,
+                        'product_id': p_id,
+                        'product_name': name,
+                        'qty': qty,
+                        'unit_price': price,
+                        'total': revenue,
+                        'room_number': room_number,
+                        'guest_name': guest_name,
+                        'closed_at': closed_at_str
+                    })
+                    room_transfer_items_count += qty
+                    if p_id not in room_transfer_products:
+                        room_transfer_products[p_id] = {
+                            'product_id': p_id,
+                            'name': name,
+                            'qty': 0.0,
+                            'revenue': 0.0
+                        }
+                    room_transfer_products[p_id]['qty'] += qty
+                    room_transfer_products[p_id]['revenue'] += revenue
+
+            if order_has_matching_items:
+                filtered_orders.append(order)
+                filtered_orders_ids.add(order_id)
+                
+                if is_guest:
+                    guest_stats['count'] += 1
+                    guest_stats['revenue'] += order_revenue
+                    guest_stats['items'] += order_items_count
+                    
+                    if is_transferred:
+                        transferred_to_rooms_revenue += order_revenue
+                    else:
+                        guest_paid_at_cashier_revenue += order_revenue
+                else:
+                    passenger_stats['count'] += 1
+                    passenger_stats['revenue'] += order_revenue
+                    passenger_stats['items'] += order_items_count
+                    
+                    if not is_transferred:
+                        expected_passenger_revenue += order_revenue
+
+                if is_room_transfer_order and not skip_room_transfer_for_order and order_id:
+                    room_transfer_order_ids.add(order_id)
+
+        # Calculate Cashier Received (Restaurant)
+        cashier_sessions = load_cashier_sessions()
+        if not isinstance(cashier_sessions, list):
+            cashier_sessions = []
+
+        received_restaurant_revenue = 0.0
+        
+        for session_data in cashier_sessions:
+            if not isinstance(session_data, dict): continue
+            
+            stype = session_data.get('type')
+            if stype not in ['restaurant', 'restaurant_service']:
+                continue
+            
+            transactions = session_data.get('transactions')
+            if not isinstance(transactions, list):
+                transactions = []
+
+            for tx in transactions:
+                if not isinstance(tx, dict): continue
+                
+                if tx.get('type') == 'sale':
+                    tx_ts_str = tx.get('timestamp')
+                    if not tx_ts_str: continue
+                    try:
+                        tx_ts = datetime.strptime(tx_ts_str, '%d/%m/%Y %H:%M')
+                    except:
+                        continue
+                        
+                    if start_dt <= tx_ts <= end_dt:
+                        method = str(tx.get('payment_method') or '').lower()
+                        # Exclude Room Charges from received_restaurant_revenue
+                        # Because received_restaurant_revenue should represent PHYSICAL cash/card received at cashier
+                        if 'room' in method or 'quarto' in method or 'credito' in method:
+                            if 'room' in method or 'quarto' in method:
+                                continue
+                        
+                        amount = safe_float(tx.get('amount', 0))
+                        received_restaurant_revenue += amount
+
+        total_expected_cashier = expected_passenger_revenue + guest_paid_at_cashier_revenue
+        discrepancy_val = received_restaurant_revenue - total_expected_cashier
+        discrepancy_pct = (discrepancy_val / total_expected_cashier * 100) if total_expected_cashier > 0 else 0
+        
+        has_alert = abs(discrepancy_pct) > 2.0
+
+        products_list = []
+        for p_id, stats in product_stats.items():
+            profit = stats['revenue'] - stats['cost']
+            margin_pct = (profit / stats['revenue'] * 100) if stats['revenue'] > 0 else 0
+            
+            products_list.append({
+                'id': p_id,
+                'name': stats['name'],
+                'category': stats['category'],
+                'qty': stats['qty'],
+                'revenue': stats['revenue'],
+                'cost': stats['cost'],
+                'profit': profit,
+                'margin_pct': margin_pct
+            })
+            
+        products_list.sort(key=lambda x: x['profit'], reverse=True)
+        
+        accumulated_profit = 0
+        total_profit = total_revenue - total_cost
+        
+        abc_data = []
+        for p in products_list:
+            accumulated_profit += p['profit']
+            p['accumulated_profit_pct'] = (accumulated_profit / total_profit * 100) if total_profit > 0 else 0
+            
+            if p['accumulated_profit_pct'] <= 80:
+                p['abc_class'] = 'A'
+            elif p['accumulated_profit_pct'] <= 95:
+                p['abc_class'] = 'B'
+            else:
+                p['abc_class'] = 'C'
+            abc_data.append(p)
+
+        hourly_data = [{'hour': h, 'sales': hourly_sales[h]} for h in range(24)]
+        
+        daily_trend = [{'date': k, 'value': v} for k, v in sorted(daily_sales.items())]
+
+        attendants_list = []
+        for name, stats in attendant_stats.items():
+            order_count = len(stats['orders'])
+            avg_ticket = stats['revenue'] / order_count if order_count > 0 else 0
+            attendants_list.append({
+                'name': name,
+                'orders': order_count,
+                'revenue': stats['revenue'],
+                'items': stats['items'],
+                'avg_ticket': avg_ticket
+            })
+        attendants_list.sort(key=lambda x: x['revenue'], reverse=True)
+
+        orders_list = []
+        for order in filtered_orders:
+            orders_list.append({
+                'id': order.get('id') or order.get('close_id'),
+                'time': order.get('closed_at'),
+                'waiter': order.get('waiter') or order.get('closed_by') or 'Desconhecido',
+                'total': safe_float(order.get('total', 0)),
+                'items_count': len(order.get('items', [])),
+                'status': order.get('status', 'closed')
+            })
+        orders_list.sort(key=lambda x: datetime.strptime(x['time'], '%d/%m/%Y %H:%M') if x['time'] else datetime.min, reverse=True)
+
+        room_transfer_products_list = list(room_transfer_products.values())
+
+        if request.args.get('export') == 'pdf':
+            output = io.BytesIO()
+            doc = SimpleDocTemplate(output, pagesize=A4, title="Relatório de Vendas")
+            elements = []
+            styles = getSampleStyleSheet()
+            
+            # Title
+            elements.append(Paragraph(f"Relatório de Vendas - {start_date} a {end_date}", styles['Title']))
+            elements.append(Spacer(1, 0.2 * inch))
+            
+            # Summary
+            elements.append(Paragraph("Resumo Geral", styles['Heading2']))
+            summary_data = [
+                ['Métrica', 'Valor'],
+                ['Receita Total', f"R$ {total_revenue:.2f}"],
+                ['Custo Total', f"R$ {total_cost:.2f}"],
+                ['Lucro Bruto', f"R$ {total_profit:.2f}"],
+                ['Margem %', f"{(total_profit / total_revenue * 100) if total_revenue > 0 else 0:.1f}%"],
+                ['Pedidos', str(len(filtered_orders))],
+                ['Itens Vendidos', f"{total_items_sold:.0f}"]
+            ]
+            t_summary = Table(summary_data, colWidths=[3*inch, 2*inch])
+            t_summary.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (1, 0), colors.grey),
+                ('TEXTCOLOR', (0, 0), (1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black)
+            ]))
+            elements.append(t_summary)
+            elements.append(Spacer(1, 0.2 * inch))
+            
+            elements.append(Paragraph("Análise de Atendimento (Hóspedes vs Passageiros)", styles['Heading2']))
+            guest_data = [
+                ['Métrica', 'Valor'],
+                ['Total Hóspedes Atendidos', str(guest_stats['count'])],
+                ['Receita Hóspedes', f"R$ {guest_stats['revenue']:.2f}"],
+                ['  - Transferido para Quartos', f"R$ {transferred_to_rooms_revenue:.2f}"],
+                ['  - Pago no Caixa', f"R$ {guest_paid_at_cashier_revenue:.2f}"],
+                ['Total Passageiros Atendidos', str(passenger_stats['count'])],
+                ['Receita Passageiros', f"R$ {passenger_stats['revenue']:.2f}"],
+                ['Total Esperado em Caixa', f"R$ {total_expected_cashier:.2f}"],
+                ['Recebido em Caixa (Restaurante)', f"R$ {received_restaurant_revenue:.2f}"],
+                ['Divergência', f"R$ {discrepancy_val:.2f} ({discrepancy_pct:.1f}%)"],
+                ['Alerta', 'SIM' if has_alert else 'NÃO']
+            ]
+            t_guest = Table(guest_data, colWidths=[3.5*inch, 2*inch])
+            t_guest.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (1, 0), colors.grey),
+                ('TEXTCOLOR', (0, 0), (1, 0), colors.whitesmoke),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                ('TEXTCOLOR', (1, 8), (1, 8), colors.red if has_alert else colors.black)
+            ]))
+            elements.append(t_guest)
+            elements.append(Spacer(1, 0.2 * inch))
+
+            if room_transfer_items:
+                elements.append(Paragraph("Transferências para Quartos (Detalhado)", styles['Heading2']))
+                rt_data = [['Data/Hora', 'Quarto', 'Hóspede', 'Produto', 'Qtd', 'Total']]
+                for rt in room_transfer_items[:50]:
+                    rt_data.append([
+                        rt.get('closed_at', ''),
+                        str(rt.get('room_number') or ''),
+                        (rt.get('guest_name') or '')[:20],
+                        (rt.get('product_name') or '')[:20],
+                        f"{rt.get('qty', 0):.0f}",
+                        f"R$ {rt.get('total', 0):.2f}"
+                    ])
+                t_rt = Table(rt_data, colWidths=[1.2*inch, 0.7*inch, 1.5*inch, 1.8*inch, 0.6*inch, 0.9*inch])
+                t_rt.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                    ('GRID', (0, 0), (-1, -1), 0.5, colors.grey)
+                ]))
+                elements.append(t_rt)
+                elements.append(Spacer(1, 0.2 * inch))
+            
+            # Products (Top 20)
+            elements.append(Paragraph("Produtos Mais Vendidos (Top 20)", styles['Heading2']))
+            prod_data = [['Produto', 'Qtd', 'Receita', 'Lucro']]
+            for p in products_list[:20]:
+                prod_data.append([
+                    p['name'][:30],
+                    f"{p['qty']:.0f}",
+                    f"R$ {p['revenue']:.2f}",
+                    f"R$ {p['profit']:.2f}"
+                ])
+            t_prod = Table(prod_data, colWidths=[3*inch, 0.8*inch, 1.2*inch, 1.2*inch])
+            t_prod.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey)
+            ]))
+            elements.append(t_prod)
+            
+            doc.build(elements)
+            output.seek(0)
+            
+            filename = f"relatorio_vendas_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+            return send_file(
+                output,
+                mimetype='application/pdf',
+                as_attachment=True,
+                download_name=filename
+            )
+
+        if request.args.get('export') == 'excel':
+            output = io.BytesIO()
+            with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+                # Summary Sheet
+                summary_data = [
+                    {'Metric': 'Receita Total', 'Value': total_revenue},
+                    {'Metric': 'Custo Total', 'Value': total_cost},
+                    {'Metric': 'Lucro Bruto', 'Value': total_profit},
+                    {'Metric': 'Margem %', 'Value': (total_profit / total_revenue * 100) if total_revenue > 0 else 0},
+                    {'Metric': 'Pedidos', 'Value': len(filtered_orders)},
+                    {'Metric': 'Itens Vendidos', 'Value': total_items_sold}
+                ]
+                pd.DataFrame(summary_data).to_excel(writer, sheet_name='Resumo', index=False)
+                
+                guest_data = [
+                    {'Metric': 'Total Hóspedes Atendidos (Pedidos)', 'Value': guest_stats['count']},
+                    {'Metric': 'Receita Hóspedes', 'Value': guest_stats['revenue']},
+                    {'Metric': 'Itens Hóspedes', 'Value': guest_stats['items']},
+                    {'Metric': 'Transferido para Quartos', 'Value': transferred_to_rooms_revenue},
+                    {'Metric': 'Pago no Caixa (Hóspedes)', 'Value': guest_paid_at_cashier_revenue},
+                    {'Metric': 'Total Passageiros Atendidos (Pedidos)', 'Value': passenger_stats['count']},
+                    {'Metric': 'Receita Passageiros', 'Value': passenger_stats['revenue']},
+                    {'Metric': 'Itens Passageiros', 'Value': passenger_stats['items']},
+                    {'Metric': 'Esperado em Caixa (Passageiros)', 'Value': expected_passenger_revenue},
+                    {'Metric': 'Total Esperado em Caixa', 'Value': total_expected_cashier},
+                    {'Metric': 'Recebido em Caixa (Restaurante)', 'Value': received_restaurant_revenue},
+                    {'Metric': 'Divergência (Valor)', 'Value': discrepancy_val},
+                    {'Metric': 'Divergência (%)', 'Value': discrepancy_pct},
+                    {'Metric': 'Alerta de Divergência', 'Value': 'SIM' if has_alert else 'NÃO'}
+                ]
+                pd.DataFrame(guest_data).to_excel(writer, sheet_name='Análise Atendimento', index=False)
+                
+                if room_transfer_items:
+                    pd.DataFrame(room_transfer_items).to_excel(writer, sheet_name='Transf Quartos Detalhe', index=False)
+                if room_transfer_products_list:
+                    pd.DataFrame(room_transfer_products_list).to_excel(writer, sheet_name='Transf Quartos Produtos', index=False)
+                
+                # Products Sheet
+                if products_list:
+                    pd.DataFrame(products_list).to_excel(writer, sheet_name='Produtos ABC', index=False)
+                
+                # Attendants Sheet
+                if attendants_list:
+                    pd.DataFrame(attendants_list).to_excel(writer, sheet_name='Atendentes', index=False)
+                    
+                # Orders Sheet
+                if orders_list:
+                    pd.DataFrame(orders_list).to_excel(writer, sheet_name='Pedidos', index=False)
+                    
+            output.seek(0)
+            filename = f"analise_vendas_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+            return send_file(
+                output,
+                mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                as_attachment=True,
+                download_name=filename
+            )
+
+        return jsonify({
+            'summary': {
+                'revenue': total_revenue,
+                'cost': total_cost,
+                'profit': total_profit,
+                'margin_pct': (total_profit / total_revenue * 100) if total_revenue > 0 else 0,
+                'orders_count': len(filtered_orders),
+                'items_sold': total_items_sold
+            },
+            'guest_analysis': {
+                'guests': guest_stats,
+                'passengers': passenger_stats,
+                'expected_passenger': expected_passenger_revenue,
+                'guest_paid_at_cashier': guest_paid_at_cashier_revenue,
+                'total_expected_cashier': total_expected_cashier,
+                'received_restaurant': received_restaurant_revenue,
+                'transferred_to_rooms': transferred_to_rooms_revenue,
+                'discrepancy_val': discrepancy_val,
+                'discrepancy_pct': discrepancy_pct,
+                'has_alert': has_alert
+            },
+            'room_transfers': {
+                'summary': {
+                    'orders_count': len(room_transfer_order_ids),
+                    'items_count': room_transfer_items_count,
+                    'revenue': transferred_to_rooms_revenue
+                },
+                'items': room_transfer_items,
+                'products': room_transfer_products_list
+            },
+            'products': abc_data,
+            'hourly': hourly_data,
+            'daily_trend': daily_trend,
+            'attendants': attendants_list,
+            'orders': orders_list
+        })
+        
+    except Exception as e:
+        current_app.logger.error(f"Erro no dashboard de vendas: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': f'Erro interno: {str(e)}'}), 500
 
 @admin_bp.route('/api/admin/logs/export')
 @login_required

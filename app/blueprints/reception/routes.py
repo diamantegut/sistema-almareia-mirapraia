@@ -693,6 +693,9 @@ def reception_rooms():
         pending_rooms = []
         payment_methods = []
 
+    printers = load_printers()
+    printer_settings = load_printer_settings()
+
     return render_template('reception_rooms.html', 
                            occupancy=occupancy, 
                            cleaning_status=cleaning_status,
@@ -702,7 +705,9 @@ def reception_rooms():
                            payment_methods=payment_methods,
                            products=products,
                            upcoming_checkins=upcoming_checkins,
-                           today=datetime.now().strftime('%Y-%m-%d'))
+                           today=datetime.now().strftime('%Y-%m-%d'),
+                           printers=printers,
+                           printer_settings=printer_settings)
 
 @reception_bp.route('/reception/cashier', methods=['GET', 'POST'])
 @login_required

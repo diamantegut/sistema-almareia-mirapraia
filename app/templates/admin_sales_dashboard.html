@@ -1,0 +1,732 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard de Vendas - Restaurante{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-graph-up-arrow"></i> Análise de Vendas do Restaurante</h2>
+        <div>
+            <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+            <button class="btn btn-success" onclick="exportReport()">
+                <i class="bi bi-file-earmark-excel"></i> Exportar Relatório
+            </button>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form id="filterForm" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label">Período</label>
+                    <div class="input-group">
+                        <input type="date" class="form-control" id="start_date" name="start_date">
+                        <span class="input-group-text">até</span>
+                        <input type="date" class="form-control" id="end_date" name="end_date">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-primary w-100" onclick="loadDashboard()">
+                        <i class="bi bi-funnel"></i> Filtrar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading" class="text-center py-5" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Carregando...</span>
+        </div>
+        <p class="mt-2 text-muted">Processando dados de vendas...</p>
+    </div>
+
+    <!-- Dashboard Content -->
+    <div id="dashboardContent" style="display: none;">
+        
+        <!-- Discrepancy Alert -->
+        <div id="discrepancyAlert" class="alert alert-danger shadow-sm mb-4" style="display: none;">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-exclamation-triangle-fill fs-3 me-3"></i>
+                <div>
+                    <h5 class="alert-heading mb-1">Atenção: Divergência de Caixa Detectada!</h5>
+                    <p class="mb-0">
+                        O valor recebido no caixa (<span id="alert_received" class="fw-bold">R$ 0,00</span>) 
+                        difere do esperado para passageiros (<span id="alert_expected" class="fw-bold">R$ 0,00</span>) 
+                        em <span id="alert_diff_pct" class="fw-bold">0%</span>.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Guest vs Passenger Cards -->
+        <div class="row g-4 mb-4">
+            <!-- Guests -->
+            <div class="col-md-6">
+                <div class="card shadow-sm border-start border-primary border-5 h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="text-primary text-uppercase mb-2"><i class="bi bi-person-badge"></i> Hóspedes</h6>
+                                <h3 class="mb-0" id="guest_revenue">R$ 0,00</h3>
+                                <div class="mt-2 text-muted">
+                                    <span id="guest_count" class="fw-bold">0</span> pedidos / <span id="guest_items">0</span> itens
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <small class="d-block text-muted">Transferido para Quartos</small>
+                                <span id="guest_transferred" class="text-primary fw-bold">R$ 0,00</span>
+                                <small class="d-block text-muted mt-1">Pago no Caixa</small>
+                                <span id="guest_paid_cashier" class="text-secondary fw-bold">R$ 0,00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Passengers -->
+            <div class="col-md-6">
+                <div class="card shadow-sm border-start border-success border-5 h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="text-success text-uppercase mb-2"><i class="bi bi-people"></i> Passageiros/Passantes</h6>
+                                <h3 class="mb-0" id="passenger_revenue">R$ 0,00</h3>
+                                <div class="mt-2 text-muted">
+                                    <span id="passenger_count" class="fw-bold">0</span> pedidos / <span id="passenger_items">0</span> itens
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <small class="d-block text-muted">Recebido em Caixa (Restaurante)</small>
+                                <span id="passenger_received" class="text-success fw-bold">R$ 0,00</span>
+                                <div class="small mt-1 text-muted" title="Esperado com base nos pedidos de passageiros + hóspedes (caixa)">
+                                    Esperado Total: <span id="passenger_expected">R$ 0,00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="card shadow-sm border-start border-primary border-5">
+                    <div class="card-body">
+                        <h6 class="text-muted text-uppercase mb-2">Faturamento Total</h6>
+                        <h3 class="mb-0" id="kpi_revenue">R$ 0,00</h3>
+                        <small class="text-muted"><span id="kpi_orders">0</span> pedidos</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm border-start border-danger border-5">
+                    <div class="card-body">
+                        <h6 class="text-muted text-uppercase mb-2">Custo Estimado</h6>
+                        <h3 class="mb-0" id="kpi_cost">R$ 0,00</h3>
+                        <small class="text-muted"><span id="kpi_items">0</span> itens vendidos</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm border-start border-success border-5">
+                    <div class="card-body">
+                        <h6 class="text-muted text-uppercase mb-2">Lucro Bruto</h6>
+                        <h3 class="mb-0" id="kpi_profit">R$ 0,00</h3>
+                        <small class="text-success fw-bold" id="kpi_margin">0%</small> <small class="text-muted">margem</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm border-start border-info border-5">
+                    <div class="card-body">
+                        <h6 class="text-muted text-uppercase mb-2">Ticket Médio</h6>
+                        <h3 class="mb-0" id="kpi_ticket">R$ 0,00</h3>
+                        <small class="text-muted">por pedido</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 1 -->
+        <div class="row g-4 mb-4">
+            <!-- Hourly Sales -->
+            <div class="col-md-8">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-white">
+                        <h5 class="card-title mb-0">Vendas por Horário</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="hourlyChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+            <!-- Attendant Share -->
+            <div class="col-md-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-white">
+                        <h5 class="card-title mb-0">Performance por Atendente</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="attendantChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 2 -->
+        <div class="row g-4 mb-4">
+            <!-- Daily Trend -->
+            <div class="col-md-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white">
+                        <h5 class="card-title mb-0">Evolução Diária de Vendas</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="trendChart" height="250"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <ul class="nav nav-tabs card-header-tabs" id="analysisTabs" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-abc">Curva ABC (Produtos)</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-attendants">Ranking Atendentes</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-orders">Histórico de Pedidos</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-room-transfers">Transferências p/ Quartos</button>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body">
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" id="tab-abc">
+                        <div class="d-flex justify-content-end mb-2">
+                            <div class="input-group input-group-sm" style="max-width: 280px;">
+                                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                <input type="text" id="filter_abc" class="form-control" placeholder="Filtrar por produto ou categoria">
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped" id="abcTable">
+                                <thead>
+                                    <tr>
+                                        <th>Rank</th>
+                                        <th>Produto</th>
+                                        <th>Categoria</th>
+                                        <th>Qtd</th>
+                                        <th>Receita</th>
+                                        <th>Lucro</th>
+                                        <th>Margem %</th>
+                                        <th>% Acumulado</th>
+                                        <th>Classe</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="tab-attendants">
+                        <div class="d-flex justify-content-end mb-2">
+                            <div class="input-group input-group-sm" style="max-width: 260px;">
+                                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                <input type="text" id="filter_attendants" class="form-control" placeholder="Filtrar por atendente">
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="attendantTable">
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Pedidos</th>
+                                        <th>Itens Vendidos</th>
+                                        <th>Total Vendas</th>
+                                        <th>Ticket Médio</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="tab-orders">
+                        <div class="d-flex justify-content-end mb-2">
+                            <div class="input-group input-group-sm" style="max-width: 320px;">
+                                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                <input type="text" id="filter_orders" class="form-control" placeholder="Filtrar por ID, atendente ou status">
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="ordersTable">
+                                <thead>
+                                    <tr>
+                                        <th>Data/Hora</th>
+                                        <th>ID</th>
+                                        <th>Atendente</th>
+                                        <th>Itens</th>
+                                        <th>Total</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="tab-room-transfers">
+                        <div class="d-flex justify-content-end mb-2">
+                            <div class="input-group input-group-sm" style="max-width: 340px;">
+                                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                <input type="text" id="filter_room_transfers" class="form-control" placeholder="Filtrar por quarto, hóspede ou produto">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <div class="card shadow-sm h-100">
+                                    <div class="card-body">
+                                        <h6 class="text-muted text-uppercase mb-2">Receita Transferida</h6>
+                                        <h4 id="rt_revenue">R$ 0,00</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card shadow-sm h-100">
+                                    <div class="card-body">
+                                        <h6 class="text-muted text-uppercase mb-2">Pedidos com Transferência</h6>
+                                        <h4 id="rt_orders">0</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card shadow-sm h-100">
+                                    <div class="card-body">
+                                        <h6 class="text-muted text-uppercase mb-2">Itens Transferidos</h6>
+                                        <h4 id="rt_items">0</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="roomTransferTable">
+                                <thead>
+                                    <tr>
+                                        <th>Data/Hora</th>
+                                        <th>Quarto</th>
+                                        <th>Hóspede</th>
+                                        <th>Produto</th>
+                                        <th>Qtd</th>
+                                        <th>Valor Total</th>
+                                        <th>Pedido</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    let charts = {};
+    let currentAbcProducts = [];
+    let currentAttendants = [];
+    let currentOrders = [];
+    let currentRoomTransferItems = [];
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set default date range (today)
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('start_date').value = today;
+        document.getElementById('end_date').value = today;
+
+        loadDashboard();
+
+        const abcInput = document.getElementById('filter_abc');
+        if (abcInput) {
+            abcInput.addEventListener('input', function() {
+                const term = this.value.toLowerCase().trim();
+                if (!term) {
+                    renderAbcTable(currentAbcProducts);
+                    return;
+                }
+                const filtered = currentAbcProducts.filter(p => {
+                    const name = (p.name || '').toLowerCase();
+                    const cat = (p.category || '').toLowerCase();
+                    return name.includes(term) || cat.includes(term);
+                });
+                renderAbcTable(filtered);
+            });
+        }
+
+        const attInput = document.getElementById('filter_attendants');
+        if (attInput) {
+            attInput.addEventListener('input', function() {
+                const term = this.value.toLowerCase().trim();
+                if (!term) {
+                    renderAttendantTable(currentAttendants);
+                    return;
+                }
+                const filtered = currentAttendants.filter(a => {
+                    const name = (a.name || '').toLowerCase();
+                    return name.includes(term);
+                });
+                renderAttendantTable(filtered);
+            });
+        }
+
+        const ordersInput = document.getElementById('filter_orders');
+        if (ordersInput) {
+            ordersInput.addEventListener('input', function() {
+                const term = this.value.toLowerCase().trim();
+                if (!term) {
+                    renderOrdersTable(currentOrders);
+                    return;
+                }
+                const filtered = currentOrders.filter(o => {
+                    const id = (o.id || '').toLowerCase();
+                    const waiter = (o.waiter || '').toLowerCase();
+                    const status = (o.status || '').toLowerCase();
+                    return id.includes(term) || waiter.includes(term) || status.includes(term);
+                });
+                renderOrdersTable(filtered);
+            });
+        }
+
+        const rtInput = document.getElementById('filter_room_transfers');
+        if (rtInput) {
+            rtInput.addEventListener('input', function() {
+                const term = this.value.toLowerCase().trim();
+                if (!term) {
+                    renderRoomTransferTable(currentRoomTransferItems);
+                    return;
+                }
+                const filtered = currentRoomTransferItems.filter(it => {
+                    const room = String(it.room_number || '').toLowerCase();
+                    const guest = (it.guest_name || '').toLowerCase();
+                    const product = (it.product_name || '').toLowerCase();
+                    return room.includes(term) || guest.includes(term) || product.includes(term);
+                });
+                renderRoomTransferTable(filtered);
+            });
+        }
+    });
+
+    function formatCurrency(value) {
+        return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+    }
+
+    function formatNumber(value) {
+        return new Intl.NumberFormat('pt-BR').format(value);
+    }
+
+    function loadDashboard() {
+        const startDate = document.getElementById('start_date').value;
+        const endDate = document.getElementById('end_date').value;
+        
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('dashboardContent').style.display = 'none';
+
+        fetch(`/admin/api/sales/analysis?start_date=${startDate}&end_date=${endDate}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert('Erro ao carregar dados: ' + data.error);
+                    return;
+                }
+                renderDashboard(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Erro de conexão ao carregar dashboard.');
+            })
+            .finally(() => {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('dashboardContent').style.display = 'block';
+            });
+    }
+
+    function renderDashboard(data) {
+        currentAbcProducts = data.products || [];
+        currentAttendants = data.attendants || [];
+        currentOrders = data.orders || [];
+        currentRoomTransferItems = (data.room_transfers && data.room_transfers.items) ? data.room_transfers.items : [];
+
+        // 1. KPIs
+        document.getElementById('kpi_revenue').textContent = formatCurrency(data.summary.revenue);
+        document.getElementById('kpi_cost').textContent = formatCurrency(data.summary.cost);
+        document.getElementById('kpi_profit').textContent = formatCurrency(data.summary.profit);
+        document.getElementById('kpi_margin').textContent = data.summary.margin_pct.toFixed(1) + '%';
+        document.getElementById('kpi_orders').textContent = formatNumber(data.summary.orders_count);
+        document.getElementById('kpi_items').textContent = formatNumber(data.summary.items_sold);
+        
+        const ticket = data.summary.orders_count > 0 ? data.summary.revenue / data.summary.orders_count : 0;
+        document.getElementById('kpi_ticket').textContent = formatCurrency(ticket);
+
+        // 2. Guest vs Passenger Analysis
+        if (data.guest_analysis) {
+            const ga = data.guest_analysis;
+            
+            // Guest Card
+            document.getElementById('guest_revenue').textContent = formatCurrency(ga.guests.revenue);
+            document.getElementById('guest_count').textContent = formatNumber(ga.guests.count);
+            document.getElementById('guest_items').textContent = formatNumber(ga.guests.items);
+            document.getElementById('guest_transferred').textContent = formatCurrency(ga.transferred_to_rooms);
+            if (document.getElementById('guest_paid_cashier')) {
+                document.getElementById('guest_paid_cashier').textContent = formatCurrency(ga.guest_paid_at_cashier);
+            }
+            
+            // Passenger Card
+            document.getElementById('passenger_revenue').textContent = formatCurrency(ga.passengers.revenue);
+            document.getElementById('passenger_count').textContent = formatNumber(ga.passengers.count);
+            document.getElementById('passenger_items').textContent = formatNumber(ga.passengers.items);
+            document.getElementById('passenger_received').textContent = formatCurrency(ga.received_restaurant);
+            
+            // Update Expected to Total
+            const totalExpected = ga.total_expected_cashier || ga.expected_passenger;
+            document.getElementById('passenger_expected').textContent = formatCurrency(totalExpected);
+            
+            // Alert
+            if (ga.has_alert) {
+                document.getElementById('discrepancyAlert').style.display = 'block';
+                document.getElementById('alert_received').textContent = formatCurrency(ga.received_restaurant);
+                document.getElementById('alert_expected').textContent = formatCurrency(totalExpected);
+                document.getElementById('alert_diff_pct').textContent = ga.discrepancy_pct.toFixed(2) + '%';
+            } else {
+                document.getElementById('discrepancyAlert').style.display = 'none';
+            }
+        }
+
+        // 3. Charts
+        renderHourlyChart(data.hourly);
+        renderAttendantChart(data.attendants);
+        renderTrendChart(data.daily_trend);
+
+        // 3. Tables
+        renderAbcTable(currentAbcProducts);
+        renderAttendantTable(currentAttendants);
+        renderOrdersTable(currentOrders);
+        if (data.room_transfers) {
+            renderRoomTransferSection(data.room_transfers);
+        }
+    }
+
+    function renderOrdersTable(orders) {
+        const tbody = document.querySelector('#ordersTable tbody');
+        tbody.innerHTML = '';
+        
+        orders.forEach(o => {
+            const tr = document.createElement('tr');
+            const idValue = o.id ? String(o.id) : '';
+            const idDisplay = idValue ? `<small>${idValue.substring(0, 8)}...</small>` : '';
+            const timeDisplay = o.time || '';
+            const waiterDisplay = o.waiter || '';
+            const statusDisplay = o.status || '';
+            tr.innerHTML = `
+                <td>${timeDisplay}</td>
+                <td>${idDisplay}</td>
+                <td>${waiterDisplay}</td>
+                <td>${o.items_count}</td>
+                <td>${formatCurrency(o.total)}</td>
+                <td><span class="badge bg-secondary">${statusDisplay}</span></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderRoomTransferSection(roomTransfers) {
+        const summary = roomTransfers.summary || {};
+        if (document.getElementById('rt_revenue')) {
+            document.getElementById('rt_revenue').textContent = formatCurrency(summary.revenue || 0);
+        }
+        if (document.getElementById('rt_orders')) {
+            document.getElementById('rt_orders').textContent = formatNumber(summary.orders_count || 0);
+        }
+        if (document.getElementById('rt_items')) {
+            document.getElementById('rt_items').textContent = formatNumber(summary.items_count || 0);
+        }
+        renderRoomTransferTable(roomTransfers.items || []);
+    }
+
+    function renderRoomTransferTable(items) {
+        const tbody = document.querySelector('#roomTransferTable tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        items.forEach(it => {
+            const tr = document.createElement('tr');
+            const orderId = it.order_id || '';
+            const orderShort = orderId ? `${orderId.substring(0, 8)}...` : '';
+            tr.innerHTML = `
+                <td>${it.closed_at || ''}</td>
+                <td>${it.room_number || ''}</td>
+                <td>${it.guest_name || ''}</td>
+                <td>${it.product_name || ''}</td>
+                <td>${formatNumber(it.qty || 0)}</td>
+                <td>${formatCurrency(it.total || 0)}</td>
+                <td><small>${orderShort}</small></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderHourlyChart(data) {
+        const ctx = document.getElementById('hourlyChart').getContext('2d');
+        if (charts.hourly) charts.hourly.destroy();
+
+        charts.hourly = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.map(d => d.hour + 'h'),
+                datasets: [{
+                    label: 'Vendas (R$)',
+                    data: data.map(d => d.sales),
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    }
+
+    function renderAttendantChart(data) {
+        const ctx = document.getElementById('attendantChart').getContext('2d');
+        if (charts.attendant) charts.attendant.destroy();
+
+        // Top 5 + Others
+        let chartData = data.slice(0, 5);
+        if (data.length > 5) {
+            const othersRevenue = data.slice(5).reduce((acc, curr) => acc + curr.revenue, 0);
+            chartData.push({ name: 'Outros', revenue: othersRevenue });
+        }
+
+        charts.attendant = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: chartData.map(d => d.name),
+                datasets: [{
+                    data: chartData.map(d => d.revenue),
+                    backgroundColor: [
+                        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#C9CBCF'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true
+            }
+        });
+    }
+
+    function renderTrendChart(data) {
+        const ctx = document.getElementById('trendChart').getContext('2d');
+        if (charts.trend) charts.trend.destroy();
+
+        charts.trend = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.map(d => {
+                    const parts = d.date.split('-');
+                    return `${parts[2]}/${parts[1]}`;
+                }),
+                datasets: [{
+                    label: 'Vendas Diárias (R$)',
+                    data: data.map(d => d.value),
+                    borderColor: '#2ecc71',
+                    tension: 0.1,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    }
+
+    function renderAbcTable(products) {
+        const tbody = document.querySelector('#abcTable tbody');
+        tbody.innerHTML = '';
+        
+        products.forEach((p, index) => {
+            const tr = document.createElement('tr');
+            let badgeClass = 'bg-secondary';
+            if (p.abc_class === 'A') badgeClass = 'bg-success';
+            if (p.abc_class === 'B') badgeClass = 'bg-warning text-dark';
+            if (p.abc_class === 'C') badgeClass = 'bg-danger';
+
+            tr.innerHTML = `
+                <td>${index + 1}</td>
+                <td class="fw-bold">${p.name}</td>
+                <td>${p.category}</td>
+                <td>${formatNumber(p.qty)}</td>
+                <td>${formatCurrency(p.revenue)}</td>
+                <td class="text-success">${formatCurrency(p.profit)}</td>
+                <td>${p.margin_pct.toFixed(1)}%</td>
+                <td>${p.accumulated_profit_pct.toFixed(1)}%</td>
+                <td><span class="badge ${badgeClass}">${p.abc_class}</span></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderAttendantTable(attendants) {
+        const tbody = document.querySelector('#attendantTable tbody');
+        tbody.innerHTML = '';
+
+        attendants.forEach(a => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${a.name}</td>
+                <td>${a.orders}</td>
+                <td>${formatNumber(a.items)}</td>
+                <td>${formatCurrency(a.revenue)}</td>
+                <td>${formatCurrency(a.avg_ticket)}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function exportReport() {
+        const startDate = document.getElementById('start_date').value;
+        const endDate = document.getElementById('end_date').value;
+        const category = document.getElementById('category').value;
+        
+        // Ask for format
+        const format = prompt("Digite 'excel' ou 'pdf' para escolher o formato:", "excel");
+        if (!format || (format !== 'excel' && format !== 'pdf')) return;
+
+        let url = `/admin/api/sales/analysis?start_date=${startDate}&end_date=${endDate}&export=${format}`;
+        if (category) url += `&category=${encodeURIComponent(category)}`;
+        
+        window.location.href = url;
+    }
+</script>
+{% endblock %}

@@ -25,6 +25,7 @@ from app.services.printing_service import (
 from app.services.fiscal_service import load_fiscal_settings, process_pending_emissions
 from app.services.fiscal_pool_service import FiscalPoolService
 from app.services.logger_service import log_system_action, log_security_audit
+from app.services.data_service import load_stock_entries
 from app.utils.logger import log_action
 from app.services.cashier_service import CashierService, file_lock
 from app.services.transfer_service import transfer_table_to_room, TransferError
@@ -3118,6 +3119,297 @@ def bar_dashboard():
         import traceback
         traceback.print_exc()
         return f"Erro ao carregar dashboard: {str(e)}", 500
+
+@restaurant_bp.route('/restaurant/bar/analise')
+@login_required
+def bar_comparative_dashboard():
+    try:
+        def _parse_dt(s):
+            from datetime import datetime
+            if not s:
+                return None
+            for fmt in ('%d/%m/%Y %H:%M', '%d/%m/%Y %H:%M:%S', '%d/%m/%Y'):
+                try:
+                    dt = datetime.strptime(s, fmt)
+                    if fmt == '%d/%m/%Y':
+                        from datetime import time
+                        dt = datetime.combine(dt.date(), time(0, 0))
+                    return dt
+                except Exception:
+                    continue
+            return None
+        sessions = CashierService._load_sessions()
+        restaurant_types = {'restaurant', 'restaurant_service'}
+        closed_sessions = [
+            s for s in sessions
+            if isinstance(s, dict)
+            and str(s.get('status', '')).lower() == 'closed'
+            and s.get('type') in restaurant_types
+        ]
+        from datetime import datetime, timedelta
+        def _closed_key(s):
+            dt = _parse_dt(s.get('closed_at'))
+            return dt or datetime.min
+        closed_sessions.sort(key=_closed_key, reverse=True)
+        if not closed_sessions:
+            flash('Nenhum expediente fechado do restaurante encontrado.')
+            return redirect(url_for('restaurant.bar_dashboard'))
+        session_id = request.args.get('session_id')
+        start_param = request.args.get('start')
+        end_param = request.args.get('end')
+        selected_session = None
+        if session_id:
+            selected_session = next((s for s in closed_sessions if s.get('id') == session_id), None)
+            if not selected_session:
+                flash('Sessão selecionada não encontrada ou não está encerrada.')
+                return redirect(url_for('restaurant.bar_comparative_dashboard'))
+        else:
+            selected_session = closed_sessions[0]
+        start_dt = _parse_dt(start_param) if start_param else _parse_dt(selected_session.get('opened_at'))
+        end_dt = _parse_dt(end_param) if end_param else _parse_dt(selected_session.get('closed_at'))
+        if not start_dt or not end_dt:
+            flash('Período inválido para análise.')
+            return redirect(url_for('restaurant.bar_dashboard'))
+        if end_dt < start_dt:
+            flash('Data final anterior à data inicial.')
+            return redirect(url_for('restaurant.bar_dashboard'))
+        sess_open = _parse_dt(selected_session.get('opened_at')) or start_dt
+        sess_close = _parse_dt(selected_session.get('closed_at')) or end_dt
+        if not (sess_open <= start_dt <= sess_close and sess_open <= end_dt <= sess_close):
+            flash('O dashboard só processa dados de expedientes já finalizados. Ajuste o período selecionado.')
+            return redirect(url_for('restaurant.bar_comparative_dashboard', session_id=selected_session.get('id')))
+        entries = load_stock_entries()
+        analysis = {}
+        def _parse_entry_dt(e):
+            ts = e.get('entry_date') or e.get('timestamp') or e.get('date')
+            dt = _parse_dt(ts)
+            return dt
+        for e in entries:
+            if not isinstance(e, dict):
+                continue
+            product = e.get('product') or ''
+            try:
+                qty = float(e.get('qty', 0) or 0)
+            except Exception:
+                continue
+            dt = _parse_entry_dt(e)
+            if not dt:
+                continue
+            if dt < start_dt or dt > end_dt:
+                continue
+            if product not in analysis:
+                analysis[product] = {'sold': 0.0, 'restocked': 0.0}
+            if qty < 0:
+                analysis[product]['sold'] += abs(qty)
+            elif qty > 0:
+                analysis[product]['restocked'] += qty
+        threshold = 0.05
+        rows = []
+        total_sold = 0.0
+        total_restocked = 0.0
+        for name, agg in analysis.items():
+            s = round(agg['sold'], 3)
+            r = round(agg['restocked'], 3)
+            total_sold += s
+            total_restocked += r
+            diff = r - s
+            base = s if s > 0 else (r if r > 0 else 1.0)
+            pct = (abs(diff) / base) if base else 0.0
+            flag = pct >= threshold and (s > 0 or r > 0)
+            rows.append({
+                'product': name,
+                'sold': s,
+                'restocked': r,
+                'difference': round(diff, 3),
+                'pct': round(pct * 100.0, 2),
+                'flag': flag
+            })
+        rows.sort(key=lambda x: x['pct'], reverse=True)
+        sel_options = [
+            {
+                'id': s.get('id'),
+                'label': f"{s.get('opened_at','?')} → {s.get('closed_at','?')} ({s.get('user','')})"
+            } for s in closed_sessions
+        ]
+        return render_template(
+            'bar_comparative.html',
+            rows=rows,
+            total_sold=round(total_sold, 3),
+            total_restocked=round(total_restocked, 3),
+            threshold_pct=int(threshold * 100),
+            session_options=sel_options,
+            selected_session_id=selected_session.get('id'),
+            start_str=start_dt.strftime('%d/%m/%Y %H:%M'),
+            end_str=end_dt.strftime('%d/%m/%Y %H:%M')
+        )
+    except Exception as e:
+        current_app.logger.error(f"Error in bar_comparative_dashboard: {e}")
+        import traceback
+        traceback.print_exc()
+        return f"Erro ao carregar análise comparativa: {str(e)}", 500
+
+@restaurant_bp.route('/restaurant/bar/analise/export')
+@login_required
+def bar_comparative_export():
+    try:
+        with current_app.test_request_context(query_string=request.query_string):
+            def _parse_dt(s):
+                from datetime import datetime, time
+                if not s:
+                    return None
+                for fmt in ('%d/%m/%Y %H:%M', '%d/%m/%Y %H:%M:%S', '%d/%m/%Y'):
+                    try:
+                        dt = datetime.strptime(s, fmt)
+                        if fmt == '%d/%m/%Y':
+                            dt = datetime.combine(dt.date(), time(0, 0))
+                        return dt
+                    except Exception:
+                        continue
+                return None
+            from datetime import datetime
+            fmt = request.args.get('format', 'xlsx').lower()
+            session_id = request.args.get('session_id')
+            start_param = request.args.get('start')
+            end_param = request.args.get('end')
+            sessions = CashierService._load_sessions()
+            restaurant_types = {'restaurant', 'restaurant_service'}
+            closed_sessions = [
+                s for s in sessions
+                if isinstance(s, dict)
+                and str(s.get('status', '')).lower() == 'closed'
+                and s.get('type') in restaurant_types
+            ]
+            if not closed_sessions:
+                return "Nenhum expediente fechado", 400
+            if session_id:
+                selected_session = next((s for s in closed_sessions if s.get('id') == session_id), None)
+                if not selected_session:
+                    return "Sessão inválida", 400
+            else:
+                def _ck(s):
+                    dt = _parse_dt(s.get('closed_at'))
+                    return dt or datetime.min
+                selected_session = sorted(closed_sessions, key=_ck, reverse=True)[0]
+            start_dt = _parse_dt(start_param) if start_param else _parse_dt(selected_session.get('opened_at'))
+            end_dt = _parse_dt(end_param) if end_param else _parse_dt(selected_session.get('closed_at'))
+            if not start_dt or not end_dt or end_dt < start_dt:
+                return "Período inválido", 400
+            entries = load_stock_entries()
+            analysis = {}
+            def _ed(e):
+                ts = e.get('entry_date') or e.get('timestamp') or e.get('date')
+                return _parse_dt(ts)
+            for e in entries:
+                if not isinstance(e, dict):
+                    continue
+                pname = e.get('product') or ''
+                try:
+                    qty = float(e.get('qty', 0) or 0)
+                except Exception:
+                    continue
+                dt = _ed(e)
+                if not dt or dt < start_dt or dt > end_dt:
+                    continue
+                if pname not in analysis:
+                    analysis[pname] = {'sold': 0.0, 'restocked': 0.0}
+                if qty < 0:
+                    analysis[pname]['sold'] += abs(qty)
+                elif qty > 0:
+                    analysis[pname]['restocked'] += qty
+            rows = []
+            total_sold = 0.0
+            total_restocked = 0.0
+            for name, agg in analysis.items():
+                s = round(agg['sold'], 3)
+                r = round(agg['restocked'], 3)
+                total_sold += s
+                total_restocked += r
+                diff = r - s
+                base = s if s > 0 else (r if r > 0 else 1.0)
+                pct = (abs(diff) / base) if base else 0.0
+                rows.append({
+                    'product': name,
+                    'sold': s,
+                    'restocked': r,
+                    'difference': round(diff, 3),
+                    'pct': round(pct * 100.0, 2)
+                })
+            rows.sort(key=lambda x: x['pct'], reverse=True)
+            if fmt == 'pdf':
+                import io
+                from reportlab.pdfgen import canvas
+                from reportlab.lib.pagesizes import A4
+                from reportlab.lib.units import mm
+                output = io.BytesIO()
+                c = canvas.Canvas(output, pagesize=A4)
+                width, height = A4
+                y = height - 20*mm
+                c.setFont("Helvetica-Bold", 14)
+                c.drawString(20*mm, y, "Análise Comparativa — Bar")
+                y -= 8*mm
+                period_label = f"{start_dt.strftime('%d/%m/%Y %H:%M')} a {end_dt.strftime('%d/%m/%Y %H:%M')}"
+                c.setFont("Helvetica", 10)
+                c.drawString(20*mm, y, f"Período: {period_label}")
+                y -= 8*mm
+                c.setFont("Helvetica-Bold", 10)
+                c.drawString(20*mm, y, "Produto")
+                c.drawRightString(120*mm, y, "Vendido")
+                c.drawRightString(150*mm, y, "Reposto")
+                c.drawRightString(180*mm, y, "Diferença")
+                c.drawRightString(200*mm, y, "%")
+                y -= 6*mm
+                c.setFont("Helvetica", 10)
+                for r in rows:
+                    if y < 20*mm:
+                        c.showPage()
+                        y = height - 20*mm
+                        c.setFont("Helvetica", 10)
+                    c.drawString(20*mm, y, (r['product'] or '')[:45])
+                    c.drawRightString(120*mm, y, f"{r['sold']:.3f}")
+                    c.drawRightString(150*mm, y, f"{r['restocked']:.3f}")
+                    c.drawRightString(180*mm, y, f"{r['difference']:.3f}")
+                    c.drawRightString(200*mm, y, f"{r['pct']:.2f}%")
+                    y -= 6*mm
+                y -= 8*mm
+                c.setFont("Helvetica-Bold", 10)
+                c.drawString(20*mm, y, f"Total vendido: {total_sold:.3f}    Total reposto: {total_restocked:.3f}")
+                c.save()
+                output.seek(0)
+                filename = f"analise_bar_{datetime.now().strftime('%Y%m%d%H%M%S')}.pdf"
+                return send_file(output, download_name=filename, as_attachment=True)
+            else:
+                import io
+                import xlsxwriter
+                output = io.BytesIO()
+                wb = xlsxwriter.Workbook(output)
+                ws = wb.add_worksheet('Análise')
+                bold = wb.add_format({'bold': True})
+                percent = wb.add_format({'num_format': '0.00%'})
+                headers = ['Produto', 'Vendido', 'Reposto', 'Diferença', 'Diferença %']
+                for col, h in enumerate(headers):
+                    ws.write(0, col, h, bold)
+                row = 1
+                for r in rows:
+                    ws.write(row, 0, r['product'])
+                    ws.write_number(row, 1, r['sold'])
+                    ws.write_number(row, 2, r['restocked'])
+                    ws.write_number(row, 3, r['difference'])
+                    ws.write_number(row, 4, r['pct'] / 100.0, percent)
+                    row += 1
+                ws2 = wb.add_worksheet('Resumo')
+                ws2.write(0, 0, 'Total Vendido', bold)
+                ws2.write_number(0, 1, total_sold)
+                ws2.write(1, 0, 'Total Reposto', bold)
+                ws2.write_number(1, 1, total_restocked)
+                wb.close()
+                output.seek(0)
+                filename = f"analise_bar_{datetime.now().strftime('%Y%m%d%H%M%S')}.xlsx"
+                return send_file(output, download_name=filename, as_attachment=True)
+    except Exception as e:
+        current_app.logger.error(f"Error in bar_comparative_export: {e}")
+        import traceback
+        traceback.print_exc()
+        return f"Erro ao exportar análise: {str(e)}", 500
 
 @restaurant_bp.route('/restaurant/bar/storage/add', methods=['POST'])
 @login_required

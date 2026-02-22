@@ -184,6 +184,13 @@
                                                     <button type="button" class="btn btn-outline-dark" onclick="openPrintConsumptionModal('{{ room_num }}')">
                                                         <i class="bi bi-printer"></i> Imprimir Relatório
                                                     </button>
+                                                    <button type="button" class="btn btn-outline-primary ms-2"
+                                                            data-room="{{ room_num }}"
+                                                            data-guest="{{ data.guest_name if data else 'Hóspede' }}"
+                                                            data-charges="{{ grouped_charges[room_num]|tojson|forceescape }}"
+                                                            onclick="openIndividualBillsModal(this)">
+                                                        <i class="bi bi-receipt-cutoff"></i> Imprimir 80mm
+                                                    </button>
                                                     <button type="button" class="btn btn-success ms-2" onclick="openCloseAccountModal('{{ room_num }}', '{{ room_total }}')">
                                                         <i class="bi bi-check-circle"></i> Dar Baixa na Conta
                                                     </button>
@@ -903,6 +910,55 @@
     </div>
 </div>
 
+<!-- Individual Bills Print Modal -->
+<div class="modal fade" id="individualBillsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title"><i class="bi bi-receipt-cutoff"></i> Imprimir Contas Individuais</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Selecione as contas que deseja imprimir (Formato Térmico 80mm):</p>
+                <input type="hidden" id="indivRoomNumber">
+                <input type="hidden" id="indivGuestName">
+                
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="selectAllBills" checked onchange="toggleAllBills(this)">
+                        <label class="form-check-label fw-bold" for="selectAllBills">
+                            Selecionar Todos
+                        </label>
+                    </div>
+                    <div class="list-group mt-2" id="billsList" style="max-height: 200px; overflow-y: auto;">
+                        <!-- JS populated -->
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Impressora</label>
+                    <select class="form-select" id="indivPrinterSelect">
+                        <option value="">Selecione...</option>
+                        {% for p in printers %}
+                        <option value="{{ p.id }}" {% if printer_settings.get('default_reception_printer_id') == p.id %}selected{% endif %}>
+                            {{ p.name }} ({{ p.ip }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div id="indivPrintResult" class="alert d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="submitIndividualBillsPrint()" id="btnIndivPrint">
+                    <i class="bi bi-printer-fill"></i> Imprimir Selecionados
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Cancel Confirmation Modal -->
 <div class="modal fade" id="cancelConsumptionModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
@@ -1575,7 +1631,120 @@
                 `;
             });
     }
-    
+
+    function openIndividualBillsModal(btn) {
+        const roomNum = btn.dataset.room;
+        const guestName = btn.dataset.guest;
+        const chargesJson = btn.dataset.charges;
+        
+        document.getElementById('indivRoomNumber').value = roomNum;
+        document.getElementById('indivGuestName').value = guestName;
+        
+        let charges = [];
+        try {
+            charges = JSON.parse(chargesJson || '[]');
+        } catch(e) {
+            console.error("Error parsing charges", e);
+        }
+        
+        const list = document.getElementById('billsList');
+        list.innerHTML = '';
+        
+        if (charges.length === 0) {
+            list.innerHTML = '<div class="list-group-item text-muted">Nenhuma conta pendente.</div>';
+        } else {
+            charges.forEach(c => {
+                const date = c.date || 'N/A';
+                const total = parseFloat(c.total || 0).toFixed(2);
+                const desc = (c.items && c.items.length > 0) 
+                    ? c.items.map(i => `${i.qty}x ${i.name}`).join(', ').substring(0, 30) + '...'
+                    : 'Consumo Diverso';
+                
+                const item = document.createElement('label');
+                item.className = 'list-group-item d-flex gap-2';
+                item.innerHTML = `
+                    <input class="form-check-input flex-shrink-0 bill-checkbox" type="checkbox" value="${c.id}" checked>
+                    <span>
+                        <small class="fw-bold d-block">${date} - R$ ${total}</small>
+                        <small class="text-muted">${desc}</small>
+                    </span>
+                `;
+                list.appendChild(item);
+            });
+        }
+        
+        document.getElementById('selectAllBills').checked = true;
+        document.getElementById('indivPrintResult').className = 'alert d-none';
+        
+        const modal = new bootstrap.Modal(document.getElementById('individualBillsModal'));
+        modal.show();
+    }
+
+    function toggleAllBills(checkbox) {
+        const checkboxes = document.querySelectorAll('.bill-checkbox');
+        checkboxes.forEach(cb => cb.checked = checkbox.checked);
+    }
+
+    function submitIndividualBillsPrint() {
+        const roomNum = document.getElementById('indivRoomNumber').value;
+        const guestName = document.getElementById('indivGuestName').value;
+        const printerId = document.getElementById('indivPrinterSelect').value;
+        const btn = document.getElementById('btnIndivPrint');
+        const resultDiv = document.getElementById('indivPrintResult');
+        
+        if (!printerId) {
+            alert('Selecione uma impressora.');
+            return;
+        }
+        
+        const selectedIds = Array.from(document.querySelectorAll('.bill-checkbox:checked')).map(cb => cb.value);
+        
+        if (selectedIds.length === 0) {
+            alert('Selecione pelo menos uma conta para imprimir.');
+            return;
+        }
+        
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Imprimindo...';
+        resultDiv.className = 'alert d-none';
+        
+        fetch('/reception/print_individual_bills', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                room_number: roomNum,
+                guest_name: guestName,
+                printer_id: printerId,
+                selected_charge_ids: selectedIds
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                resultDiv.className = 'alert alert-success';
+                resultDiv.textContent = data.message;
+                resultDiv.classList.remove('d-none');
+                setTimeout(() => {
+                    bootstrap.Modal.getInstance(document.getElementById('individualBillsModal')).hide();
+                }, 1500);
+            } else {
+                resultDiv.className = 'alert alert-danger';
+                resultDiv.textContent = 'Erro: ' + data.message;
+                resultDiv.classList.remove('d-none');
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            resultDiv.className = 'alert alert-danger';
+            resultDiv.textContent = 'Erro de comunicação.';
+            resultDiv.classList.remove('d-none');
+        })
+        .finally(() => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-printer-fill"></i> Imprimir Selecionados';
+        });
+    }
+
     function printReport() {
         // We can open a new window with the content of #printPreviewContent
         const content = document.getElementById('printPreviewContent').innerHTML;

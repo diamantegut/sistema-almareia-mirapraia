@@ -405,6 +405,9 @@
             totalOut += item.total_out;
             totalFinal += item.final_balance;
 
+            const receivedIn = item.received_in || 0;
+            const transferredIn = item.transferred_in || 0;
+
             const cardCol = document.createElement('div');
             const hasContinuity = !!item.has_continuity_issue;
             const cardBorderClass = (item.has_anomaly || hasContinuity) ? 'border-warning border-2' : 'border-0';
@@ -450,6 +453,7 @@
                             <div class="col-6">
                                 <small class="text-muted d-block">Entradas</small>
                                 <span class="text-success small"><i class="bi bi-arrow-up"></i> ${formatCurrency(item.total_in)}</span>
+                                ${transferredIn > 0 ? `<div class="text-muted" style="font-size:0.75rem">Recebido: ${formatCurrency(receivedIn)}</div><div class="text-muted" style="font-size:0.75rem">Transferido: ${formatCurrency(transferredIn)}</div>` : ''}
                             </div>
                             <div class="col-6 text-end">
                                 <small class="text-muted d-block">Saídas</small>
