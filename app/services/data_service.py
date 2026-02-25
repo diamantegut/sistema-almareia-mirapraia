@@ -615,6 +615,29 @@ def save_stock_entry(entry):
     entries.append(entry)
     save_stock_entries(entries)
 
+def add_stock_entries_batch(new_entries):
+    """
+    Adds multiple stock entries with deduplication check based on 'id'.
+    Does NOT handle locking; caller must ensure concurrency control if needed.
+    """
+    entries = load_stock_entries()
+    existing_ids = set(e.get('id') for e in entries if e.get('id'))
+    
+    added_count = 0
+    for entry in new_entries:
+        if entry.get('id') and entry['id'] not in existing_ids:
+            entries.append(entry)
+            existing_ids.add(entry['id'])
+            added_count += 1
+        elif not entry.get('id'):
+            # If no ID, append anyway (legacy support) but ideally all should have IDs
+            entries.append(entry)
+            added_count += 1
+            
+    if added_count > 0:
+        save_stock_entries(entries)
+    return added_count
+
 def load_conferences(): return _load_json(CONFERENCES_FILE, [])
 def save_conferences(data): return _save_json(CONFERENCES_FILE, data)
 

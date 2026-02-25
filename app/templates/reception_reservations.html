@@ -1,6 +1,320 @@
 {% extends "base.html" %}
 
-{% block title %}Mapa de Reservas - Recepção{% endblock %}
+{% block title %}Mapa de Reservas - Recepção<!-- Companion Modal -->
+<div class="modal fade" id="companionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Adicionar/Editar Acompanhante</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="companionForm">
+                    <!-- Search/Link Section -->
+                    <div class="card mb-3 bg-light border-0">
+                        <div class="card-body">
+                            <label class="form-label fw-bold">Vincular a Hóspede Existente</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="compSearch" placeholder="Buscar por Nome ou CPF/Documento...">
+                                <button class="btn btn-outline-primary" type="button" onclick="searchCompanion()">Buscar</button>
+                            </div>
+                            <div id="compSearchResults" class="list-group mt-2" style="display:none; max-height: 200px; overflow-y: auto;"></div>
+                        </div>
+                    </div>
+
+                    <h6 class="fw-bold mb-3">Dados Pessoais</h6>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Nome Completo *</label>
+                            <input type="text" class="form-control" id="compName" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Data de Nascimento *</label>
+                            <input type="date" class="form-control" id="compDob" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Tipo Documento *</label>
+                            <select class="form-select" id="compDocType">
+                                <option value="rg">RG</option>
+                                <option value="cpf">CPF</option>
+                                <option value="cnh">CNH</option>
+                                <option value="passaporte">Passaporte</option>
+                                <option value="rne">RNE</option>
+                            </select>
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label">Número Documento *</label>
+                            <input type="text" class="form-control" id="compDocId" required>
+                        </div>
+                    </div>
+
+                    <h6 class="fw-bold mb-3 mt-4">Informações Operacionais</h6>
+                    <div class="mb-3">
+                        <label class="form-label">Restrições Alimentares</label>
+                        <div class="d-flex gap-3 flex-wrap">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="compDietGluten">
+                                <label class="form-check-label" for="compDietGluten">Sem Glúten</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="compDietLactose">
+                                <label class="form-check-label" for="compDietLactose">Sem Lactose</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="compDietVegan">
+                                <label class="form-check-label" for="compDietVegan">Vegano</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="compDietVegetarian">
+                                <label class="form-check-label" for="compDietVegetarian">Vegetariano</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Necessidades Especiais / Acessibilidade</label>
+                        <textarea class="form-control" id="compSpecialNeeds" rows="2" placeholder="Ex: Cadeirante, dificuldade de locomoção..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Observações Gerais</label>
+                        <textarea class="form-control" id="compObservations" rows="2"></textarea>
+                    </div>
+                    
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="compLGPD" required>
+                        <label class="form-check-label small text-muted" for="compLGPD">
+                            Confirmo que o hóspede forneceu consentimento explícito para o armazenamento de seus dados pessoais e biométricos, conforme a LGPD.
+                        </label>
+                    </div>
+                    
+                    <input type="hidden" id="compLinkedGuestId">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="saveCompanion()">Salvar Acompanhante</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Companion Management
+    var currentCompanions = [];
+
+    function renderCompanions(list) {
+        currentCompanions = list || [];
+        var container = document.getElementById('companionsList');
+        if (!list || list.length === 0) {
+            container.innerHTML = '<div class="text-center text-muted py-3">Nenhum acompanhante cadastrado.</div>';
+            return;
+        }
+        
+        var html = '';
+        list.forEach(function(c){
+            var restrictions = c.operational_info ? (c.operational_info.dietary_restrictions || []).join(', ') : '';
+            var needs = c.operational_info ? c.operational_info.special_needs : '';
+            
+            html += `
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="fw-bold">${c.name}</div>
+                    <div class="small text-muted">
+                        ${c.doc_type ? c.doc_type.toUpperCase() : 'DOC'}: ${c.doc_id || '-'} | 
+                        Nasc: ${c.dob ? formatDateToBR(c.dob) : '-'}
+                    </div>
+                    ${restrictions ? `<div class="small text-danger"><i class="bi bi-exclamation-triangle"></i> ${restrictions}</div>` : ''}
+                    ${needs ? `<div class="small text-info"><i class="bi bi-person-wheelchair"></i> ${needs}</div>` : ''}
+                </div>
+                <button class="btn btn-sm btn-outline-danger" onclick="deleteCompanion('${c.id}')" title="Remover">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+            `;
+        });
+        container.innerHTML = html;
+    }
+
+    function openCompanionModal() {
+        // Reset form
+        document.getElementById('companionForm').reset();
+        document.getElementById('compSearchResults').style.display = 'none';
+        document.getElementById('compLinkedGuestId').value = '';
+        
+        var m = new bootstrap.Modal(document.getElementById('companionModal'));
+        m.show();
+    }
+
+    function searchCompanion() {
+        var q = document.getElementById('compSearch').value;
+        if (!q || q.length < 3) { alert('Digite pelo menos 3 caracteres.'); return; }
+        
+        var btn = document.querySelector('button[onclick="searchCompanion()"]');
+        btn.disabled = true;
+        btn.textContent = 'Buscando...';
+        
+        fetch('/api/guest/search?q=' + encodeURIComponent(q))
+        .then(res => res.json())
+        .then(data => {
+            var resDiv = document.getElementById('compSearchResults');
+            resDiv.style.display = 'block';
+            
+            if (!data.success || !data.results || data.results.length === 0) {
+                resDiv.innerHTML = '<div class="list-group-item text-muted">Nenhum resultado encontrado.</div>';
+            } else {
+                var html = '';
+                data.results.forEach(function(g){
+                    html += `
+                    <button type="button" class="list-group-item list-group-item-action" onclick='selectSearchResult(${JSON.stringify(g)})'>
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">${g.name}</h6>
+                            <small>${g.last_stay ? 'Última: ' + g.last_stay : 'Novo'}</small>
+                        </div>
+                        <small class="text-muted">DOC: ${g.doc_id || '-'} | Nasc: ${g.dob || '-'}</small>
+                    </button>
+                    `;
+                });
+                resDiv.innerHTML = html;
+            }
+        })
+        .catch(err => alert('Erro na busca.'))
+        .finally(() => {
+            btn.disabled = false;
+            btn.textContent = 'Buscar';
+        });
+    }
+
+    function selectSearchResult(g) {
+        document.getElementById('compName').value = g.name || '';
+        document.getElementById('compDob').value = g.dob || ''; // Ensure YYYY-MM-DD
+        document.getElementById('compDocId').value = g.doc_id || '';
+        document.getElementById('compLinkedGuestId').value = g.id || '';
+        
+        // Auto-fill op info if available
+        if (g.operational_info) {
+            var op = g.operational_info;
+            var r = op.dietary_restrictions || [];
+            document.getElementById('compDietGluten').checked = r.includes('gluten_free');
+            document.getElementById('compDietLactose').checked = r.includes('lactose_free');
+            document.getElementById('compDietVegan').checked = r.includes('vegan');
+            document.getElementById('compDietVegetarian').checked = r.includes('vegetarian');
+            document.getElementById('compSpecialNeeds').value = op.special_needs || '';
+            document.getElementById('compObservations').value = op.allergies || op.observations || '';
+        }
+        
+        document.getElementById('compSearchResults').style.display = 'none';
+    }
+
+    function saveCompanion() {
+        var resIdEl = document.getElementById('guestResId');
+        var resId = resIdEl ? resIdEl.value : '';
+        if (!resId && typeof window !== 'undefined' && window.currentReservationId) resId = window.currentReservationId;
+        
+        if (!resId) { alert('Reserva não encontrada.'); return; }
+        
+        var name = document.getElementById('compName').value;
+        var dob = document.getElementById('compDob').value;
+        var docId = document.getElementById('compDocId').value;
+        var docType = document.getElementById('compDocType').value;
+        
+        if (!name || !dob || !docId) { alert('Preencha os campos obrigatórios (Nome, Data Nasc, Documento).'); return; }
+        
+        if (!document.getElementById('compLGPD').checked) {
+            alert('É necessário confirmar o consentimento LGPD.');
+            return;
+        }
+        
+        // Validate DOB (Minimum age check?)
+        // Simple check
+        var d = new Date(dob);
+        if (isNaN(d.getTime())) { alert('Data de nascimento inválida.'); return; }
+        
+        if (docType === 'cpf') {
+             var cpf = docId.replace(/\D/g, '');
+             if (cpf.length !== 11) { alert('CPF inválido (deve ter 11 dígitos).'); return; }
+        }
+        
+        var restrictions = [];
+        if(document.getElementById('compDietGluten').checked) restrictions.push('gluten_free');
+        if(document.getElementById('compDietLactose').checked) restrictions.push('lactose_free');
+        if(document.getElementById('compDietVegan').checked) restrictions.push('vegan');
+        if(document.getElementById('compDietVegetarian').checked) restrictions.push('vegetarian');
+        
+        var companion = {
+            name: name,
+            dob: dob,
+            doc_id: docId,
+            doc_type: docType,
+            linked_guest_id: document.getElementById('compLinkedGuestId').value,
+            operational_info: {
+                dietary_restrictions: restrictions,
+                special_needs: document.getElementById('compSpecialNeeds').value,
+                observations: document.getElementById('compObservations').value
+            }
+        };
+        
+        var btn = document.querySelector('button[onclick="saveCompanion()"]');
+        btn.disabled = true;
+        btn.textContent = 'Salvando...';
+        
+        fetch('/api/guest/add_companion', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                reservation_id: resId,
+                companion: companion
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                // Add to local list and re-render
+                currentCompanions.push(data.companion);
+                renderCompanions(currentCompanions);
+                
+                var m = bootstrap.Modal.getInstance(document.getElementById('companionModal'));
+                m.hide();
+                alert('Acompanhante adicionado!');
+            } else {
+                alert('Erro: ' + data.error);
+            }
+        })
+        .catch(err => alert('Erro ao salvar.'))
+        .finally(() => {
+            btn.disabled = false;
+            btn.textContent = 'Salvar Acompanhante';
+        });
+    }
+
+    function deleteCompanion(compId) {
+        if (!confirm('Remover este acompanhante?')) return;
+        
+        var resIdEl = document.getElementById('guestResId');
+        var resId = resIdEl ? resIdEl.value : '';
+        if (!resId && typeof window !== 'undefined' && window.currentReservationId) resId = window.currentReservationId;
+        
+        fetch('/api/guest/remove_companion', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                reservation_id: resId,
+                companion_id: compId
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                currentCompanions = currentCompanions.filter(c => c.id !== compId);
+                renderCompanions(currentCompanions);
+            } else {
+                alert('Erro: ' + data.error);
+            }
+        })
+        .catch(err => alert('Erro ao remover.'));
+    }
+</script>
+{% endblock %}
 
 {% block content %}
 <div class="container-fluid px-4 py-4 bg-light min-vh-100">
@@ -31,32 +345,50 @@
 
         <!-- Action Toolbar -->
         <div class="col-lg-7 col-md-6">
-            <div class="d-flex justify-content-md-end gap-2 flex-wrap">
-                <!-- Main Actions -->
-                <div class="bg-white p-1 rounded shadow-sm d-flex gap-1 border">
-                    <button class="btn btn-light btn-sm fw-medium d-flex align-items-center gap-2 action-btn" onclick="openNewReservationModal()" title="Criar nova reserva manualmente">
-                        <i class="bi bi-plus-circle-fill text-primary"></i> <span class="d-none d-xl-inline">Nova Reserva</span>
-                    </button>
-                    <div class="vr my-1"></div>
-                    <button class="btn btn-light btn-sm fw-medium d-flex align-items-center gap-2 action-btn" onclick="document.getElementById('fileUploadInput').click()" title="Importar planilha de reservas">
-                        <i class="bi bi-cloud-upload-fill text-secondary"></i> <span class="d-none d-xl-inline">Importar</span>
-                    </button>
-                    <div class="vr my-1"></div>
-                    <button class="btn btn-light btn-sm fw-medium d-flex align-items-center gap-2 action-btn" disabled data-bs-toggle="tooltip" title="Executar algoritmo de pré-alocação (desativado)">
-                        <i class="bi bi-magic text-warning"></i> <span class="d-none d-xl-inline">Pré-alocação</span>
-                    </button>
+            <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap">
+                <!-- Search Box -->
+                <div class="position-relative flex-grow-1 me-2" style="max-width: 350px; min-width: 200px;">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" class="form-control border-start-0 ps-0" id="reservationSearch" placeholder="Buscar por nome ou CPF..." autocomplete="off">
+                        <button class="btn btn-outline-secondary border-start-0" type="button" id="clearSearch" style="display: none;"><i class="bi bi-x"></i></button>
+                    </div>
+                    <!-- Results Dropdown -->
+                    <div id="reservationSearchResults" class="list-group position-absolute w-100 shadow-lg mt-1" style="display:none; max-height: 400px; overflow-y: auto; z-index: 1050; top: 100%;"></div>
                 </div>
-                
-                <input type="file" id="fileUploadInput" class="d-none" accept=".xlsx" onchange="handleFileSelect(this)">
 
-                <!-- Navigation & Cashier -->
-                <a href="{{ url_for('reception.reception_reservations_cashier') }}" class="btn btn-success btn-sm shadow-sm d-flex align-items-center gap-2 px-3 fw-bold">
-                    <i class="bi bi-wallet2"></i> Caixa
-                </a>
-                
-                <a href="{{ url_for('reception.reception_dashboard') }}" class="btn btn-outline-secondary btn-sm shadow-sm d-flex align-items-center gap-2 px-3">
-                    <i class="bi bi-arrow-return-left"></i> Voltar
-                </a>
+                <!-- Actions -->
+                <div class="d-flex justify-content-end gap-2 flex-wrap flex-grow-1">
+                    <!-- Main Actions -->
+                    <div class="bg-white p-1 rounded shadow-sm d-flex gap-1 border">
+                        <button class="btn btn-light btn-sm fw-medium d-flex align-items-center gap-2 action-btn" onclick="openNewReservationModal()" title="Criar nova reserva manualmente">
+                            <i class="bi bi-plus-circle-fill text-primary"></i> <span class="d-none d-xl-inline">Nova Reserva</span>
+                        </button>
+                        <div class="vr my-1"></div>
+                        <button class="btn btn-light btn-sm fw-medium d-flex align-items-center gap-2 action-btn" onclick="document.getElementById('fileUploadInput').click()" title="Importar planilha de reservas">
+                            <i class="bi bi-cloud-upload-fill text-secondary"></i> <span class="d-none d-xl-inline">Importar</span>
+                        </button>
+                        <div class="vr my-1"></div>
+                        <button class="btn btn-light btn-sm fw-medium d-flex align-items-center gap-2 action-btn" onclick="openUnallocatedModal()" title="Ver reservas não alocadas e conflitos">
+                            <i class="bi bi-exclamation-triangle-fill text-danger"></i> <span class="d-none d-xl-inline">Conflitos</span>
+                        </button>
+                        <div class="vr my-1"></div>
+                        <button class="btn btn-light btn-sm fw-medium d-flex align-items-center gap-2 action-btn" disabled data-bs-toggle="tooltip" title="Executar algoritmo de pré-alocação (desativado)">
+                            <i class="bi bi-magic text-warning"></i> <span class="d-none d-xl-inline">Pré-alocação</span>
+                        </button>
+                    </div>
+                    
+                    <input type="file" id="fileUploadInput" class="d-none" accept=".xlsx" onchange="handleFileSelect(this)">
+    
+                    <!-- Navigation & Cashier -->
+                    <a href="{{ url_for('reception.reception_reservations_cashier') }}" class="btn btn-success btn-sm shadow-sm d-flex align-items-center gap-2 px-3 fw-bold">
+                        <i class="bi bi-wallet2"></i> Caixa
+                    </a>
+                    
+                    <a href="{{ url_for('reception.reception_dashboard') }}" class="btn btn-outline-secondary btn-sm shadow-sm d-flex align-items-center gap-2 px-3">
+                        <i class="bi bi-arrow-return-left"></i> Voltar
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -1103,6 +1435,49 @@
         }
         try { window.currentReservationId = id || window.currentReservationId || ''; } catch(e) {}
         
+        // Clear previous data
+        if (typeof renderCompanions === 'function') renderCompanions([]);
+        
+        // --- Check-in Action Button Logic ---
+        var checkinBtn = document.getElementById('modalCheckinActionBtn');
+        if (checkinBtn) {
+            checkinBtn.style.display = 'none'; // Default hidden
+            // Logic: If status is NOT Checked-in and date is Today or Tomorrow
+            if (status !== 'Checked-in' && checkin) {
+                // Parse checkin date DD/MM/YYYY
+                var parts = checkin.split('/');
+                if (parts.length === 3) {
+                    var cDate = new Date(parts[2], parts[1]-1, parts[0]);
+                    var today = new Date();
+                    today.setHours(0,0,0,0);
+                    
+                    // Allow checkin if date is today or past (late checkin) or tomorrow (early)
+                    // Let's be flexible: Today - 1 day <= Checkin <= Today + 1 day
+                    var diffDays = (cDate - today) / (1000 * 60 * 60 * 24);
+                    
+                    if (diffDays <= 1) { // Up to tomorrow. Late checkins also allowed.
+                        checkinBtn.style.display = 'inline-block';
+                        checkinBtn.onclick = function() {
+                            // Determine Room (allocated)
+                            // We need to fetch allocated room or ask user?
+                            // The modal doesn't have room info explicitly passed in arguments usually?
+                            // Wait, 'category' is passed.
+                            // We should probably redirect to reception/rooms and let the auto-matcher handle it
+                            // OR pass the room if we know it.
+                            // The grid cell has the room!
+                            // But openReservationModal arguments don't include room.
+                            // Let's see if we can find it or just redirect generic.
+                            
+                            // Simplest: Redirect to Reception Rooms with reservation_id
+                            // The Reception Rooms page will handle the lookup via upcoming_checkins
+                            window.location.href = `/reception/rooms?open_checkin=true&reservation_id=${id}`;
+                        };
+                    }
+                }
+            }
+        }
+        // ------------------------------------
+
         if(document.getElementById('guestPhone')) {
             // Reset fields
             document.getElementById('guestPhone').value = '';
@@ -1153,7 +1528,9 @@
                             var pd = parseFloat(String(r.paid_amount || '0').replace(',', '.')) || 0;
                             var tr = Math.max(0, amt - pd).toFixed(2).replace('.', ',');
                             setVal('resToReceiveInput', r.to_receive || tr);
-                            if(data.data.reservation && data.data.reservation.avg_daily_paid) {
+                            if(data.data.reservation && data.data.reservation.avg_daily_total !== undefined) {
+                                document.getElementById('modalAvgDaily').textContent = 'R$ ' + parseFloat(data.data.reservation.avg_daily_total).toFixed(2);
+                            } else if(data.data.reservation && data.data.reservation.avg_daily_paid) {
                                 document.getElementById('modalAvgDaily').textContent = 'R$ ' + data.data.reservation.avg_daily_paid.toFixed(2);
                             } else {
                                 document.getElementById('modalAvgDaily').textContent = 'R$ 0.00';
@@ -1217,6 +1594,9 @@
                                     var comm = op.commemorative_dates || [];
                                     document.getElementById('opCommemorative').value = comm.join(', ');
                                 }
+                                
+                                // Companions
+                                renderCompanions(guestData.companions || []);
                             }
                         }
                     })
@@ -1268,7 +1648,7 @@
                 var dIn = new Date(partsIn[2], partsIn[1]-1, partsIn[0]);
                 var dOut = new Date(partsOut[2], partsOut[1]-1, partsOut[0]);
                 var days = Math.max(1, Math.round((dOut - dIn)/(1000*60*60*24)));
-                var avg = pd / days;
+                var avg = amt / days;
                 var avgEl = document.getElementById('modalAvgDaily');
                 if (avgEl) avgEl.textContent = 'R$ ' + avg.toFixed(2).replace('.', ',');
             } catch(_) {}
@@ -2512,6 +2892,9 @@
           <li class="nav-item" role="presentation">
             <button class="nav-link" id="operational-tab" data-bs-toggle="tab" data-bs-target="#operational" type="button" role="tab">Operacional</button>
           </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="companions-tab" data-bs-toggle="tab" data-bs-target="#companions" type="button" role="tab">Acompanhantes</button>
+          </li>
         </ul>
         
         <div class="tab-content" id="resTabContent">
@@ -2520,6 +2903,7 @@
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <div class="fw-bold">Dados da Reserva</div>
                 <div>
+                    <button type="button" id="modalCheckinActionBtn" class="btn btn-sm btn-success me-2" style="display:none;"><i class="bi bi-box-arrow-in-right"></i> Fazer Check-in</button>
                     <button type="button" id="resEditToggle" class="btn btn-sm btn-outline-secondary">Editar</button>
                     <button type="button" id="resSaveBtn" class="btn btn-sm btn-primary d-none">Salvar</button>
                 </div>
@@ -2578,11 +2962,11 @@
             
             <div class="row mb-3">
                 <div class="col-12">
-                     <small class="text-muted d-block">Valor Médio da Diária (Paga)</small>
-                     <strong id="modalAvgDaily" class="text-primary fs-5 res-readonly">R$ 0.00</strong>
-                     <div class="res-edit d-none">
-                        <span class="text-muted">Recalculado automaticamente com base no pago e número de diárias.</span>
-                     </div>
+                    <small class="text-muted d-block">Valor Médio da Diária</small>
+                    <strong id="modalAvgDaily" class="text-primary fs-5 res-readonly">R$ 0.00</strong>
+                    <div class="res-edit d-none">
+                       <span class="text-muted">Calculado com base no valor total e número de diárias.</span>
+                    </div>
                 </div>
             </div>
             
@@ -2718,6 +3102,21 @@
              <div class="mb-3">
                  <label class="form-label">Datas Comemorativas</label>
                  <input type="text" class="form-control" id="opCommemorative" placeholder="Ex: Aniversário em 25/10">
+             </div>
+          </div>
+
+          <!-- Companions Tab -->
+          <div class="tab-pane fade" id="companions" role="tabpanel">
+             <div class="d-flex justify-content-between align-items-center mb-3">
+                 <h6 class="mb-0">Lista de Acompanhantes</h6>
+                 <button type="button" class="btn btn-sm btn-primary" onclick="openCompanionModal()">
+                     <i class="bi bi-person-plus-fill"></i> Adicionar Acompanhante
+                 </button>
+             </div>
+             
+             <div id="companionsList" class="list-group mb-3">
+                 <!-- Populated by JS -->
+                 <div class="text-center text-muted py-3">Nenhum acompanhante cadastrado.</div>
              </div>
           </div>
         </div>
@@ -3041,14 +3440,16 @@
                     var report = data.report;
                     var countNew = 0;
                     var countUpd = 0;
+                    var countConflict = 0;
                     
+                    // 1. New Entries
                     if (report.new_entries) {
                         report.new_entries.forEach(item => {
                             countNew++;
                             var tr = document.createElement('tr');
                             tr.innerHTML = `
                                 <td><span class="badge bg-success">Novo</span></td>
-                                <td>${item.guest_name}</td>
+                                <td>${item.guest_name || 'Sem nome'}</td>
                                 <td>${item.checkin} - ${item.checkout}</td>
                                 <td>${item.category}</td>
                                 <td>${item.amount}</td>
@@ -3057,14 +3458,49 @@
                         });
                     }
                     
+                    // 2. Updates
                     if (report.updates) {
-                        report.updates.forEach(upd => {
+                        report.updates.forEach(item => {
                             countUpd++;
-                            var item = upd.new;
+                            // Check if item is wrapped or direct (backend sends direct item now)
+                            var dataItem = item.new || item; 
+                            
+                            var changesText = "";
+                            if (dataItem.changes && dataItem.changes.length > 0) {
+                                changesText = ` <i class="bi bi-info-circle" data-bs-toggle="tooltip" title="${dataItem.changes.join(', ')}"></i>`;
+                            }
+
                             var tr = document.createElement('tr');
                             tr.innerHTML = `
                                 <td><span class="badge bg-warning text-dark">Atualizar</span></td>
-                                <td>${item.guest_name}</td>
+                                <td>${dataItem.guest_name || 'Sem nome'}${changesText}</td>
+                                <td>${dataItem.checkin} - ${dataItem.checkout}</td>
+                                <td>${dataItem.category}</td>
+                                <td>${dataItem.amount}</td>
+                            `;
+                            tbody.appendChild(tr);
+                        });
+                    }
+
+                    // 3. Conflicts
+                    if (report.conflicts) {
+                        report.conflicts.forEach(c => {
+                            countConflict++;
+                            var item = c.item || c; 
+                            var reason = c.reason || 'Conflito';
+                            
+                            var detailsHtml = '';
+                            if (c.details && c.details.details && Array.isArray(c.details.details)) {
+                                // Escape quotes for tooltip attribute
+                                var tooltipText = c.details.details.join('<br>').replace(/"/g, '&quot;');
+                                detailsHtml = ` <i class="bi bi-info-circle text-danger" data-bs-toggle="tooltip" data-bs-html="true" title="${tooltipText}"></i>`;
+                            }
+                            
+                            var tr = document.createElement('tr');
+                            tr.classList.add('table-danger'); 
+                            tr.innerHTML = `
+                                <td><span class="badge bg-danger">Conflito</span></td>
+                                <td>${item.guest_name || 'Sem nome'} <br><small class="text-danger">${reason}</small>${detailsHtml}</td>
                                 <td>${item.checkin} - ${item.checkout}</td>
                                 <td>${item.category}</td>
                                 <td>${item.amount}</td>
@@ -3073,10 +3509,22 @@
                         });
                     }
                     
-                    document.getElementById('countNew').textContent = countNew + ' Novos';
-                    document.getElementById('countUpdate').textContent = countUpd + ' Atualizações';
+                    // Update Summary
+                    var summaryText = [];
+                    if (countNew > 0) summaryText.push(`${countNew} Novos`);
+                    if (countUpd > 0) summaryText.push(`${countUpd} Atualizações`);
+                    if (countConflict > 0) summaryText.push(`${countConflict} Conflitos (serão salvos separadamente)`);
                     
-                    if (countNew === 0 && countUpd === 0) {
+                    document.getElementById('countNew').textContent = summaryText.join(', ') || 'Nenhuma alteração';
+                    document.getElementById('countUpdate').textContent = ''; // Clear old separate element if needed, or we can just use one.
+                    
+                    // Initialize tooltips
+                    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+                    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                      return new bootstrap.Tooltip(tooltipTriggerEl)
+                    })
+
+                    if (countNew === 0 && countUpd === 0 && countConflict === 0) {
                         tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Nenhuma alteração detectada.</td></tr>';
                         document.getElementById('btnConfirmImport').disabled = true;
                     } else {
@@ -3137,5 +3585,369 @@ function confirmImport() {
         document.getElementById('btnConfirmImport').textContent = 'Confirmar Importação';
     });
 }
+</script>
+
+<!-- Search Logic -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('reservationSearch');
+        const clearBtn = document.getElementById('clearSearch');
+        const resultsDropdown = document.getElementById('reservationSearchResults');
+        const searchIcon = searchInput.parentElement.querySelector('.bi-search');
+        let searchTimeout = null;
+
+        // Debounce function
+        function debounce(func, wait) {
+            return function(...args) {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+
+        // Toggle loading state
+        function toggleLoading(isLoading) {
+            if (isLoading) {
+                if (searchIcon) {
+                    searchIcon.classList.remove('bi-search');
+                    searchIcon.classList.add('spinner-border', 'spinner-border-sm');
+                }
+            } else {
+                if (searchIcon) {
+                    searchIcon.classList.remove('spinner-border', 'spinner-border-sm');
+                    searchIcon.classList.add('bi-search');
+                }
+            }
+        }
+
+        // Perform search
+        const performSearch = debounce(function() {
+            const query = searchInput.value.trim();
+            
+            // Toggle clear button
+            clearBtn.style.display = query.length > 0 ? 'block' : 'none';
+
+            if (query.length < 3) {
+                resultsDropdown.style.display = 'none';
+                resultsDropdown.innerHTML = '';
+                return;
+            }
+
+            toggleLoading(true);
+            resultsDropdown.style.display = 'block';
+            resultsDropdown.innerHTML = '<div class="list-group-item text-muted"><span class="spinner-border spinner-border-sm me-2"></span>Buscando...</div>';
+
+            fetch(`/api/reception/reservations/search?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    resultsDropdown.innerHTML = '';
+                    
+                    if (!data.success || data.results.length === 0) {
+                        resultsDropdown.innerHTML = '<div class="list-group-item text-muted">Nenhuma reserva encontrada</div>';
+                        return;
+                    }
+
+                    data.results.forEach(res => {
+                        const item = document.createElement('a');
+                        item.href = '#';
+                        item.className = 'list-group-item list-group-item-action';
+                        
+                        const statusClass = res.status === 'Pago' ? 'text-success' : (res.status === 'Cancelada' ? 'text-danger' : 'text-warning');
+                        
+                        item.innerHTML = `
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">${res.guest_name || 'Hóspede sem nome'}</h6>
+                                <small class="${statusClass} fw-bold">${res.status || 'N/A'}</small>
+                            </div>
+                            <p class="mb-1 small">
+                                <i class="bi bi-calendar-event"></i> ${res.checkin} - ${res.checkout}<br>
+                                <i class="bi bi-door-closed"></i> ${res.room_number ? 'Quarto ' + res.room_number : 'Não alocado'} 
+                                <span class="badge bg-light text-dark border ms-2">${res.category || ''}</span>
+                            </p>
+                            <small class="text-muted">ID: ${res.id}</small>
+                        `;
+
+                        item.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            // Close dropdown
+                            resultsDropdown.style.display = 'none';
+                            
+                            // Open modal using existing function
+                            if (typeof openReservationModal === 'function') {
+                                openReservationModal(
+                                    res.guest_name,
+                                    res.checkin,
+                                    res.checkout,
+                                    res.category,
+                                    res.status,
+                                    res.channel,
+                                    res.amount,
+                                    res.paid_amount,
+                                    res.to_receive,
+                                    res.id,
+                                    'manual'
+                                );
+                            } else {
+                                console.error('openReservationModal function not found');
+                            }
+                        });
+
+                        resultsDropdown.appendChild(item);
+                    });
+                })
+                .catch(err => {
+                    console.error('Search error:', err);
+                    resultsDropdown.innerHTML = '<div class="list-group-item text-danger">Erro ao buscar reservas</div>';
+                })
+                .finally(() => {
+                    toggleLoading(false);
+                });
+        }, 300);
+
+        // Event Listeners
+        if (searchInput) {
+            searchInput.addEventListener('input', performSearch);
+            
+            // Format CPF while typing (basic masking)
+            searchInput.addEventListener('input', function(e) {
+                let v = e.target.value;
+                // Only apply mask if it looks like they are typing numbers for CPF
+                if (/^\d+$/.test(v.replace(/[^\d]/g, '')) && v.length <= 14) {
+                    // This is a simple visual aid, backend handles cleanup
+                }
+            });
+        }
+        
+        if (clearBtn) {
+            clearBtn.addEventListener('click', function() {
+                searchInput.value = '';
+                resultsDropdown.style.display = 'none';
+                resultsDropdown.innerHTML = '';
+                clearBtn.style.display = 'none';
+                searchInput.focus();
+            });
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (searchInput && resultsDropdown && !searchInput.contains(e.target) && !resultsDropdown.contains(e.target)) {
+                resultsDropdown.style.display = 'none';
+            }
+        });
+    });
+</script>
+
+<!-- Unallocated Reservations Modal -->
+<div class="modal fade" id="unallocatedModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="bi bi-exclamation-triangle-fill me-2"></i>Reservas Não Alocadas / Conflitos</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body bg-light">
+                <!-- Filters -->
+                <div class="card mb-3 border-0 shadow-sm">
+                    <div class="card-body py-2">
+                        <div class="row g-2 align-items-center">
+                            <div class="col-md-4">
+                                <label class="small text-muted mb-1">Período (Início - Fim)</label>
+                                <div class="input-group input-group-sm">
+                                    <input type="date" class="form-control" id="filterConflictStartDate" onchange="loadUnallocatedReservations()" placeholder="Início">
+                                    <span class="input-group-text">-</span>
+                                    <input type="date" class="form-control" id="filterConflictEndDate" onchange="loadUnallocatedReservations()" placeholder="Fim">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="small text-muted mb-1">Categoria</label>
+                                <select class="form-select form-select-sm" id="filterConflictCategory" onchange="loadUnallocatedReservations()">
+                                    <option value="">Todas</option>
+                                    <option value="Standard">Standard</option>
+                                    <option value="Luxo">Luxo</option>
+                                    <option value="Master">Master</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="small text-muted mb-1">Hóspede</label>
+                                <input type="text" class="form-control form-control-sm" id="filterConflictGuest" placeholder="Nome..." onkeyup="debounceLoadUnallocated()">
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end">
+                                <button class="btn btn-sm btn-outline-secondary w-100" onclick="clearConflictFilters()">Limpar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Table -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-0 table-responsive" style="max-height: 500px;">
+                        <table class="table table-hover mb-0 align-middle">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th>Data Importação</th>
+                                    <th>Hóspede</th>
+                                    <th>Período Solicitado</th>
+                                    <th>Categoria</th>
+                                    <th>Motivo / Conflito</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="unallocatedTableBody">
+                                <!-- Loaded via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let conflictDebounceTimer;
+
+    function openUnallocatedModal() {
+        const modal = new bootstrap.Modal(document.getElementById('unallocatedModal'));
+        modal.show();
+        loadUnallocatedReservations();
+    }
+
+    function debounceLoadUnallocated() {
+        clearTimeout(conflictDebounceTimer);
+        conflictDebounceTimer = setTimeout(loadUnallocatedReservations, 500);
+    }
+
+    function clearConflictFilters() {
+        document.getElementById('filterConflictStartDate').value = '';
+        document.getElementById('filterConflictEndDate').value = '';
+        document.getElementById('filterConflictCategory').value = '';
+        document.getElementById('filterConflictGuest').value = '';
+        loadUnallocatedReservations();
+    }
+
+    function loadUnallocatedReservations() {
+        const tbody = document.getElementById('unallocatedTableBody');
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4"><div class="spinner-border text-primary"></div></td></tr>';
+
+        const startDate = document.getElementById('filterConflictStartDate').value;
+        const endDate = document.getElementById('filterConflictEndDate').value;
+        const category = document.getElementById('filterConflictCategory').value;
+        const guest = document.getElementById('filterConflictGuest').value;
+
+        const params = new URLSearchParams();
+        if (startDate) params.append('start_date', startDate);
+        if (endDate) params.append('end_date', endDate);
+        if (category) params.append('category', category);
+        if (guest) params.append('guest_name', guest);
+
+        fetch(`/api/reception/unallocated_reservations?${params.toString()}`)
+            .then(res => res.json())
+            .then(data => {
+                if (!data.success) {
+                    tbody.innerHTML = `<tr><td colspan="6" class="text-center text-danger py-4">Erro: ${data.error}</td></tr>`;
+                    return;
+                }
+
+                if (data.results.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">Nenhuma reserva não alocada encontrada com os filtros atuais.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = data.results.map(item => {
+                    // Format timestamp
+                    const ts = new Date(item.imported_at).toLocaleString('pt-BR');
+                    
+                    // Format conflict details
+                    let conflictHtml = '<span class="badge bg-warning text-dark">Conflito Desconhecido</span>';
+                    const reason = item.conflict_details || item.conflict_reason;
+                    
+                    if (reason) {
+                        const d = reason;
+                        if (typeof d === 'string') {
+                             conflictHtml = `<span class="badge bg-danger">Erro</span><br><small class="text-muted text-wrap" style="max-width:200px;display:inline-block;">${d}</small>`;
+                        } else if (d.type === 'no_availability') {
+                            conflictHtml = `<span class="badge bg-danger">Sem Disponibilidade</span><br><small class="text-muted">Categoria cheia</small>`;
+                        } else if (d.type === 'collision') {
+                            conflictHtml = `<span class="badge bg-danger">Colisão</span><br><small class="text-muted">Com: ${d.conflicting_reservation || '?'}</small>`;
+                        }
+                    }
+
+                    return `
+                        <tr>
+                            <td><small>${ts}</small></td>
+                            <td class="fw-bold">${item.guest_name || 'Sem Nome'}</td>
+                            <td>${item.checkin} <i class="bi bi-arrow-right small text-muted"></i> ${item.checkout}</td>
+                            <td>${item.category}</td>
+                            <td>${conflictHtml}</td>
+                            <td>
+                                <div class="btn-group">
+                                    <button class="btn btn-sm btn-outline-primary" onclick='showConflictDetails(${JSON.stringify(item)})' title="Ver Detalhes">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteUnallocatedReservation(${item.original_index})" title="Remover da lista">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            })
+            .catch(err => {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center text-danger py-4">Erro de comunicação.</td></tr>`;
+            });
+    }
+
+    function showConflictDetails(item) {
+        let reason = 'N/A';
+        const d = item.conflict_details || item.conflict_reason;
+        
+        if (d) {
+            if (typeof d === 'string') {
+                reason = d;
+            } else {
+                reason = JSON.stringify(d, null, 2);
+            }
+        }
+
+        const details = `
+Detalhes do Conflito:
+---------------------
+Hóspede: ${item.guest_name}
+Data: ${item.checkin} a ${item.checkout}
+Categoria: ${item.category}
+Valor: ${item.amount}
+Importado em: ${item.imported_at}
+
+Motivo: ${reason}
+
+Esta reserva não foi criada no sistema principal.
+Use o botão "Remover" para limpar este item da lista se não for mais necessário.
+        `;
+        alert(details);
+    }
+
+    function deleteUnallocatedReservation(index) {
+        if (!confirm('Tem certeza que deseja remover este item da lista de conflitos? Esta ação não pode ser desfeita.')) return;
+
+        fetch('/api/reception/unallocated_reservations/delete', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ index: index })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                loadUnallocatedReservations(); // Reload list
+            } else {
+                alert('Erro ao remover item: ' + data.error);
+            }
+        })
+        .catch(err => {
+            alert('Erro de comunicação ao tentar remover o item.');
+        });
+    }
 </script>
 {% endblock %}

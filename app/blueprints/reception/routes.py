@@ -32,6 +32,7 @@ from app.services.cashier_service import CashierService
 from app.services.fiscal_pool_service import FiscalPoolService
 from app.services import waiting_list_service
 from app.services.reservation_service import ReservationService
+from app.services import checklist_service
 from app.utils.validators import (
     validate_required, validate_phone, validate_cpf, validate_email, 
     sanitize_input, validate_date, validate_room_number
@@ -126,7 +127,7 @@ def reception_rooms():
 
     occupancy = load_room_occupancy()
     cleaning_status = load_cleaning_status()
-    checklist_items = load_checklist_items()
+    checklist_items = checklist_service.load_checklist_items()
     
     # Pre-allocation integration
     upcoming_checkins = {}
@@ -268,18 +269,31 @@ def reception_rooms():
         
         if action == 'add_checklist_item':
             new_item = request.form.get('item_name')
-            if new_item and new_item not in checklist_items:
-                checklist_items.append(new_item)
-                save_checklist_items(checklist_items)
-                flash('Item adicionado ao checklist.')
+            if new_item:
+                # Check for duplicate
+                existing = next((i for i in checklist_items if (i.get('name') if isinstance(i, dict) else i) == new_item), None)
+                if not existing:
+                    checklist_service.add_catalog_item(new_item, 'Recepção', 'un', 'Recepção')
+                    flash('Item adicionado ao checklist.')
+                else:
+                    flash('Item já existe no checklist.')
             return redirect(url_for('reception.reception_rooms'))
             
         if action == 'delete_checklist_item':
-            item_to_delete = request.form.get('item_name')
-            if item_to_delete in checklist_items:
-                checklist_items.remove(item_to_delete)
-                save_checklist_items(checklist_items)
+            item_id = request.form.get('item_id')
+            item_name = request.form.get('item_name')
+            
+            if item_id:
+                checklist_service.remove_catalog_item(item_id)
                 flash('Item removido do checklist.')
+            elif item_name:
+                # Legacy support: find by name
+                items = checklist_service.load_checklist_items()
+                found = next((i for i in items if i.get('name') == item_name), None)
+                if found:
+                    checklist_service.remove_catalog_item(found['id'])
+                    flash('Item removido do checklist.')
+
             return redirect(url_for('reception.reception_rooms'))
 
         if action == 'inspect_room':
@@ -546,12 +560,31 @@ def reception_rooms():
                 except ValueError:
                     pass # Already validated above, but safety net
 
+                # 3. Update Reservation Status (if linked)
+                reservation_id = request.form.get('reservation_id')
+                
+                # Heuristic: Try to find reservation if not provided but matches upcoming
+                if not reservation_id and room_num in upcoming_checkins:
+                    upcoming = upcoming_checkins[room_num]
+                    # Fuzzy match name? Or just assume if it's the allocated room for today
+                    if upcoming.get('guest', '').lower() == guest_name.lower():
+                        reservation_id = upcoming.get('id')
+
+                if reservation_id:
+                    try:
+                        res_service = ReservationService()
+                        res_service.update_reservation_status(reservation_id, 'Checked-in')
+                        log_action('Reservation Updated', f"Reservation {reservation_id} status set to Checked-in", department='Recepção')
+                    except Exception as e:
+                        print(f"Error updating reservation status: {e}")
+
                 occupancy[room_num] = {
                     'guest_name': guest_name,
                     'checkin': checkin_date,
                     'checkout': checkout_date,
                     'num_adults': num_adults,
-                    'checked_in_at': datetime.now().strftime('%d/%m/%Y %H:%M')
+                    'checked_in_at': datetime.now().strftime('%d/%m/%Y %H:%M'),
+                    'reservation_id': reservation_id # Link stored
                 }
                 save_room_occupancy(occupancy)
                 
@@ -1418,20 +1451,58 @@ def api_import_confirm():
         if not os.path.exists(temp_path):
             return jsonify({'success': False, 'error': 'Arquivo de importação expirou ou não existe.'}), 404
             
-        # Move to permanent location
-        target_dir = RESERVATIONS_DIR
-        os.makedirs(target_dir, exist_ok=True)
+        service = ReservationService()
+        result = service.process_import_confirm(temp_path, token)
         
-        # Original filename is part of token: temp_TIMESTAMP_original.xlsx
-        # Let's keep a timestamp prefix but make it standard
-        final_name = f"imported_{token}"
-        final_path = os.path.join(target_dir, final_name)
+        if result.get('success'):
+            # Cleanup temp file
+            try:
+                os.remove(temp_path)
+            except:
+                pass
+            
+            log_action('Importação Reservas', f"Importação concluída. Importados: {result['summary']['imported']}, Conflitos: {result['summary']['conflicts']}", department='Recepção')
+            return jsonify(result)
+        else:
+            return jsonify(result), 400
+            
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@reception_bp.route('/api/reception/unallocated_reservations')
+@login_required
+def api_unallocated_reservations():
+    try:
+        service = ReservationService()
+        filters = {
+            'date': request.args.get('date'),
+            'start_date': request.args.get('start_date'),
+            'end_date': request.args.get('end_date'),
+            'category': request.args.get('category'),
+            'guest_name': request.args.get('guest_name')
+        }
+        # Clean empty filters
+        filters = {k: v for k, v in filters.items() if v}
         
-        shutil.move(temp_path, final_path)
-        
-        log_action('Importação Reservas', f'Importado arquivo {final_name}', department='Recepção')
-        
-        return jsonify({'success': True, 'message': 'Importação concluída com sucesso.'})
+        results = service.get_unallocated_reservations(filters)
+        return jsonify({'success': True, 'results': results})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@reception_bp.route('/api/reception/unallocated_reservations/delete', methods=['POST'])
+@login_required
+def api_delete_unallocated_reservation():
+    try:
+        data = request.json
+        index = data.get('index')
+        if index is None:
+            return jsonify({'success': False, 'error': 'Índice obrigatório.'}), 400
+            
+        service = ReservationService()
+        if service.delete_unallocated_reservation(int(index)):
+            return jsonify({'success': True})
+        else:
+            return jsonify({'success': False, 'error': 'Falha ao remover item.'}), 400
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
@@ -1500,6 +1571,23 @@ def api_run_pre_allocation():
         service = ReservationService()
         actions = service.auto_pre_allocate(window_hours=24)
         return jsonify({'success': True, 'actions': actions})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@reception_bp.route('/api/reception/reservations/search')
+@login_required
+def api_search_reservations():
+    query = request.args.get('q', '').strip()
+    if not query:
+        return jsonify({'success': True, 'results': []})
+    
+    if len(query) < 3:
+        return jsonify({'success': False, 'error': 'Digite pelo menos 3 caracteres.'}), 400
+
+    try:
+        service = ReservationService()
+        results = service.search_reservations(query)
+        return jsonify({'success': True, 'results': results})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
@@ -3890,6 +3978,75 @@ def api_guest_update():
         service = ReservationService()
         service.update_guest_details(res_id, data)
         
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@reception_bp.route('/api/guest/search')
+@login_required
+def api_guest_search():
+    try:
+        query = request.args.get('q', '').strip()
+        if not query:
+            return jsonify({'success': True, 'results': []})
+        
+        from app.services.guest_manager import guest_manager
+        results = guest_manager.search_guests(query)
+        return jsonify({'success': True, 'results': results})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@reception_bp.route('/api/guest/add_companion', methods=['POST'])
+@login_required
+def api_guest_add_companion():
+    try:
+        data = request.json
+        res_id = data.get('reservation_id')
+        companion = data.get('companion')
+        
+        if not res_id or not companion:
+            return jsonify({'success': False, 'error': 'Dados incompletos'}), 400
+            
+        service = ReservationService()
+        details = service.get_guest_details(res_id)
+        
+        if 'companions' not in details:
+            details['companions'] = []
+            
+        # Add ID if not present
+        if 'id' not in companion:
+            import uuid
+            companion['id'] = str(uuid.uuid4())
+            
+        # Timestamp and Audit
+        companion['created_at'] = datetime.now().strftime('%d/%m/%Y %H:%M')
+        companion['created_by'] = session.get('user')
+            
+        details['companions'].append(companion)
+        service.update_guest_details(res_id, {'companions': details['companions']})
+        
+        return jsonify({'success': True, 'companion': companion})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@reception_bp.route('/api/guest/remove_companion', methods=['POST'])
+@login_required
+def api_guest_remove_companion():
+    try:
+        data = request.json
+        res_id = data.get('reservation_id')
+        comp_id = data.get('companion_id')
+        
+        if not res_id or not comp_id:
+            return jsonify({'success': False, 'error': 'Dados incompletos'}), 400
+            
+        service = ReservationService()
+        details = service.get_guest_details(res_id)
+        
+        if 'companions' in details:
+            details['companions'] = [c for c in details['companions'] if str(c.get('id')) != str(comp_id)]
+            service.update_guest_details(res_id, {'companions': details['companions']})
+            
         return jsonify({'success': True})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500

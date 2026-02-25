@@ -10,7 +10,7 @@ from app.services.data_service import (
     load_room_occupancy, format_room_number, load_breakfast_history,
     load_payment_methods, save_payment_methods,
     save_sales_history, load_sales_history, secure_save_sales_history,
-    save_stock_entry, log_stock_action, load_products,
+    save_stock_entry, log_stock_action, load_products, add_stock_entries_batch,
     load_room_charges, save_room_charges, load_flavor_groups, load_settings,
     load_bar_data, save_bar_data
 )
@@ -1586,9 +1586,10 @@ def restaurant_table_order(table_id):
                             details=details
                         )
                 
-                # Deduct Stock
+                # Deduct Stock (Batch Processing with Deduplication)
                 products_db = load_products()
                 low_stock_items = []
+                stock_entries_to_add = []
                 
                 for item in order['items']:
                     # Find product by ID first, then name
@@ -1601,22 +1602,13 @@ def restaurant_table_order(table_id):
                     if product_obj:
                         qty = item['qty']
                         
-                        # Get current balance BEFORE deduction (approximate, since we don't have real-time balance in product_obj)
-                        # We should calculate it or assume product_obj might have it if loaded recently?
-                        # Actually load_products() might not calculate balance.
-                        # But we are about to save an entry.
-                        # Let's calculate balance AFTER deduction? Or check min_stock.
-                        
-                        # We need to know the CURRENT balance. get_product_balances() is expensive?
-                        # Let's assume we can get it or we should calculate it.
-                        # For now, let's proceed with logging and THEN check balance if possible, 
-                        # or just blindly check if we can.
-                        # The system seems to rely on 'balance' being calculated elsewhere or on the fly.
-                        
-                        # Let's use get_product_balances() just for the affected items? No, it calculates all.
-                        # Optimization: We can't easily get single balance without iterating all entries.
-                        # But we can do it for these items.
-                        
+                        # Generate Deterministic ID based on Item ID to prevent duplication
+                        item_uuid = item.get('id')
+                        if item_uuid:
+                            entry_id = f"SALE_{item_uuid}"
+                        else:
+                            entry_id = str(uuid.uuid4())
+
                         log_stock_action(
                             user=session.get('user'),
                             action='saida',
@@ -1625,19 +1617,26 @@ def restaurant_table_order(table_id):
                             details=f"Venda Mesa {table_id}",
                             department='Restaurante'
                         )
-                        # Create Entry
-                        with file_lock(STOCK_ENTRIES_FILE):
-                            save_stock_entry({
-                                'id': str(uuid.uuid4()),
-                                'date': datetime.now().strftime('%d/%m/%Y'),
-                                'product': product_obj['name'],
-                                'qty': -abs(qty),
-                                'unit': product_obj.get('unit', 'un'),
-                                'price': product_obj.get('price', 0),
-                                'supplier': 'Venda',
-                                'invoice': f"Mesa {table_id}",
-                                'user': session.get('user')
-                            })
+                        
+                        # Prepare Entry
+                        stock_entries_to_add.append({
+                            'id': entry_id,
+                            'date': datetime.now().strftime('%d/%m/%Y'),
+                            'product': product_obj['name'],
+                            'qty': -abs(qty),
+                            'unit': product_obj.get('unit', 'un'),
+                            'price': product_obj.get('price', 0),
+                            'supplier': 'Venda',
+                            'invoice': f"Mesa {table_id}",
+                            'user': session.get('user')
+                        })
+
+                # Execute Batch Save with Deduplication
+                if stock_entries_to_add:
+                    with file_lock(STOCK_ENTRIES_FILE):
+                        added_count = add_stock_entries_batch(stock_entries_to_add)
+                        if added_count < len(stock_entries_to_add):
+                            current_app.logger.warning(f"Stock Deduplication: Skipped {len(stock_entries_to_add) - added_count} duplicate entries for Table {table_id}")
                         
                         # Check Low Stock
                         # We need to fetch the balance.

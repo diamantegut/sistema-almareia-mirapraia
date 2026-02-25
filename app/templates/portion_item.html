@@ -27,12 +27,7 @@
                 <h3>1. Selecionar Item (Origem)</h3>
                 <div class="form-group">
                     <label for="origin_product">Produto a Porcionar:</label>
-                    <select id="origin_product" name="origin_product" required style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
-                        <option value="" disabled selected>Selecione o produto...</option>
-                        {% for p in origin_products %}
-                        <option value="{{ p.name }}" data-unit="{{ p.unit }}" data-category="{{ p.category }}">{{ p.name }} ({{ p.unit | abbreviate_unit }})</option>
-                        {% endfor %}
-                    </select>
+                    <input type="text" id="origin_product" name="origin_product" list="originProductsList" required placeholder="Digite para buscar..." style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ddd;" autocomplete="off">
                 </div>
             </div>
 
@@ -40,35 +35,38 @@
             <div class="step-section">
                 <h3>2. Itens de Origem (Opcional - Kits)</h3>
                 <p style="font-size: 0.9rem; color: #555;">
-                    Use esta seção quando estiver montando um kit com vários itens de origem
-                    (ex: Kit Paella com anéis de lula, marisco, polvo, camarão). Preencha os itens
-                    abaixo para que o sistema dê baixa em cada produto individualmente.
+                    Use esta seção quando estiver montando um kit com vários itens de origem.
                 </p>
-                <div id="origin-components-rows">
-                    <div class="origin-component-row form-row" style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed #ddd;">
-                        <div class="form-group" style="flex: 2;">
-                            <label>Produto de Origem:</label>
-                            <select name="component_product[]" class="origin-component-select no-search" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
-                                <option value="">Selecione o produto...</option>
-                                {% for p in origin_products %}
-                                <option value="{{ p.name }}">{{ p.name }} ({{ p.unit | abbreviate_unit }})</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="form-group" style="flex: 1;">
-                            <label>Peso para o Kit (g):</label>
-                            <input type="number" name="component_weight[]" class="origin-component-weight-input" step="1" min="0" placeholder="0" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
-                        </div>
-                        <button type="button" class="remove-origin-row-btn" style="background: #e74c3c; color: white; border: none; padding: 0 15px; border-radius: 5px; margin-top: 25px; cursor: pointer; display: none;">✖</button>
-                    </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle" style="background: white; border-radius: 5px; overflow: hidden;">
+                        <thead style="background: #ecf0f1;">
+                            <tr>
+                                <th style="width: 60%; padding: 10px;">Produto de Origem</th>
+                                <th style="width: 30%; padding: 10px;">Peso (g)</th>
+                                <th style="width: 10%; padding: 10px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="origin-components-rows">
+                            <!-- Rows will be added here -->
+                        </tbody>
+                    </table>
                 </div>
+
                 <button type="button" id="add-origin-row-btn" style="background: #1e3a8a; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; margin-top: 10px;">
-                    <i class="bi bi-plus-circle-fill"></i> Adicionar Outro Item de Origem
+                    <i class="bi bi-plus-circle-fill"></i> Adicionar Item
                 </button>
                 <small style="display:block; margin-top:8px; color:#7f8c8d;">
-                    Se não estiver montando um kit, você pode ignorar esta seção e usar apenas o produto de origem principal acima.
+                    Se não estiver montando um kit, ignore esta seção.
                 </small>
             </div>
+
+            <!-- Datalist for Origin Products -->
+            <datalist id="originProductsList">
+                {% for p in origin_products %}
+                <option value="{{ p.name }}">{{ p.unit | abbreviate_unit }}</option>
+                {% endfor %}
+            </datalist>
 
             <!-- Passo 3: Peso Congelado -->
             <div class="step-section">
@@ -104,23 +102,31 @@
                         <input type="number" id="trim_weight" name="trim_weight" step="1" min="0" required placeholder="0" style="flex: 1; padding: 10px; border-radius: 5px; border: 1px solid #ddd;" onchange="updateCalculations()">
                         <span class="unit-display" style="font-weight: bold; color: #7f8c8d;">g</span>
                     </div>
-                    <small id="net_weight_display" style="color: #27ae60; font-weight: bold;"></small>
                 </div>
             </div>
 
-            <!-- Passo 6: Seleção da Porção Gerada -->
+            <!-- Passo 6: Peso Cozido -->
             <div class="step-section">
-                <h3>6. Itens Gerados (Porções)</h3>
+                <h3>6. Peso Cozido (Após Cocção)</h3>
+                <div class="form-group">
+                    <label for="cooked_weight">Peso Final Cozido (g):</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="number" id="cooked_weight" name="cooked_weight" step="1" min="0" placeholder="Opcional (0 se não houver cocção)" style="flex: 1; padding: 10px; border-radius: 5px; border: 1px solid #ddd;" onchange="updateCalculations()">
+                        <span class="unit-display" style="font-weight: bold; color: #7f8c8d;">g</span>
+                    </div>
+                    <small id="cooking_loss_display" style="color: #e74c3c;"></small>
+                    <div id="net_weight_display" style="color: #27ae60; font-weight: bold; margin-top: 5px;"></div>
+                </div>
+            </div>
+
+            <!-- Passo 7: Seleção da Porção Gerada -->
+            <div class="step-section">
+                <h3>7. Itens Gerados (Porções)</h3>
                 <div id="destination-rows">
-                    <div class="destination-row form-row" style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed #ddd;">
+                    <div class="destination-row form-row" style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed #ddd; display: flex; gap: 15px; align-items: flex-start;">
                         <div class="form-group" style="flex: 2;">
                             <label>Tipo de Porção:</label>
-                            <select name="dest_product[]" class="dest-product-select no-search" required style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
-                                <option value="" disabled selected>Selecione a porção gerada...</option>
-                                {% for p in destination_products %}
-                                <option value="{{ p.name }}" data-unit="{{ p.unit }}" data-category="{{ p.category }}" data-usage="{{ usage_ranking.get(p.name, 0) }}" data-status="{{ p.status | default('Ativo') }}">{{ p.name }} ({{ p.unit | abbreviate_unit }})</option>
-                                {% endfor %}
-                            </select>
+                            <input type="text" name="dest_product[]" class="dest-product-input" list="destinationProductsList" placeholder="Digite para buscar..." required style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
                         </div>
                         <div class="form-group" style="flex: 1;">
                             <label>Nº Porções:</label>
@@ -130,46 +136,23 @@
                             <label>Peso Total (g):</label>
                             <div style="display: flex; gap: 10px; align-items: center;">
                                 <input type="number" name="final_qty[]" class="final-qty-input" step="1" min="0" required placeholder="0" style="flex: 1; padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
-                                <span class="dest-unit-display" style="font-weight: bold; color: #7f8c8d;">g</span>
+                                <span class="dest-unit-display unit-display" style="font-weight: bold; color: #7f8c8d;">g</span>
                             </div>
                             <small class="avg-weight-display" style="color: #1e3a8a; font-weight: bold; display: block; margin-top: 5px; font-size: 0.9em;">Média: - g</small>
                         </div>
-                        <button type="button" class="remove-row-btn" style="background: #e74c3c; color: white; border: none; padding: 0 15px; border-radius: 5px; margin-top: 25px; cursor: pointer; display: none;">✖</button>
+                        <div class="form-group" style="flex: 0 0 auto; display: flex; align-items: flex-end;">
+                            <button type="button" class="remove-row-btn" style="background: #e74c3c; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; display: none; height: 42px;">✖</button>
+                        </div>
                     </div>
                 </div>
                 
-                <button type="button" id="add-row-btn" style="background: #1e3a8a; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; margin-top: 10px;">
+                <button type="button" id="add-row-btn" style="background: #1e3a8a; color: white; border: none; padding: 12px 15px; border-radius: 5px; cursor: pointer; margin-top: 10px; width: 100%;">
                     <i class="bi bi-plus-circle-fill"></i> Adicionar Outra Porção
                 </button>
             </div>
 
-            <!-- Template para novas linhas -->
-            <template id="row-template">
-                <div class="destination-row form-row" style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed #ddd;">
-                    <div class="form-group" style="flex: 2;">
-                        <label>Tipo de Porção:</label>
-                        <select name="dest_product[]" class="dest-product-select no-search" required style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
-                            <option value="" disabled selected>Selecione a porção gerada...</option>
-                            {% for p in destination_products %}
-                            <option value="{{ p.name }}" data-unit="{{ p.unit }}" data-category="{{ p.category }}" data-usage="{{ usage_ranking.get(p.name, 0) }}" data-status="{{ p.status | default('Ativo') }}">{{ p.name }} ({{ p.unit | abbreviate_unit }})</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="form-group" style="flex: 1;">
-                        <label>Nº Porções:</label>
-                        <input type="number" name="dest_count[]" class="dest-count-input" step="1" min="1" required placeholder="0" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
-                    </div>
-                    <div class="form-group" style="flex: 1;">
-                        <label>Peso Total (g):</label>
-                        <div style="display: flex; gap: 10px; align-items: center;">
-                            <input type="number" name="final_qty[]" class="final-qty-input" step="1" min="0" required placeholder="0" style="flex: 1; padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
-                            <span class="dest-unit-display" style="font-weight: bold; color: #7f8c8d;">g</span>
-                        </div>
-                        <small class="avg-weight-display" style="color: #1e3a8a; font-weight: bold; display: block; margin-top: 5px; font-size: 0.9em;">Média: - g</small>
-                    </div>
-                    <button type="button" class="remove-row-btn" style="background: #e74c3c; color: white; border: none; padding: 0 15px; border-radius: 5px; margin-top: 25px; cursor: pointer;">✖</button>
-                </div>
-            </template>
+            <!-- Datalist for Destination Products (Populated dynamically via JS) -->
+            <datalist id="destinationProductsList"></datalist>
 
             <div class="form-actions" style="margin-top: 30px; justify-content: flex-end;">
                 <button type="submit" class="action-btn" style="background-color: #d35400;"><i class="bi bi-arrow-repeat"></i> Confirmar Porcionamento</button>
@@ -192,6 +175,54 @@
         font-size: 1.1rem;
         margin-bottom: 15px;
     }
+    
+    /* Mobile Optimization */
+    @media (max-width: 768px) {
+        .service-page {
+            padding: 10px;
+        }
+        .form-row {
+            flex-direction: column;
+            gap: 10px;
+        }
+        .form-group {
+            width: 100%;
+            margin-right: 0 !important;
+        }
+        .form-group label {
+            font-size: 0.95rem;
+            margin-bottom: 5px;
+            display: block;
+        }
+        input, select, .form-control {
+            font-size: 16px !important; /* Prevent zoom on iOS */
+            padding: 12px !important;
+        }
+        .action-btn, button {
+            width: 100%;
+            padding: 12px !important;
+            margin-bottom: 5px;
+        }
+        .unit-display {
+            display: none; /* Save space on mobile */
+        }
+        .destination-row {
+            background: #fff;
+            padding: 15px !important;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .remove-row-btn {
+            margin-top: 10px !important;
+            width: 100% !important;
+            padding: 10px !important;
+        }
+        /* Adjust table for mobile */
+        .table-responsive {
+            border: 0;
+        }
+    }
 </style>
 
 <script type="application/json" id="rules-map-data">
@@ -204,69 +235,82 @@
     {{ usage_ranking | default({}) | tojson }}
 </script>
 
+<script type="application/json" id="all-dest-products-data">
+    [
+    {% for p in destination_products %}
+        {"name": "{{ p.name }}", "unit": "{{ p.unit }}", "category": "{{ p.category }}", "status": "{{ p.status | default('Ativo') }}"}{% if not loop.last %},{% endif %}
+    {% endfor %}
+    ]
+</script>
+
+<script type="application/json" id="all-origin-products-data">
+    [
+    {% for p in origin_products %}
+        {"name": "{{ p.name }}", "unit": "{{ p.unit }}", "category": "{{ p.category }}"}{% if not loop.last %},{% endif %}
+    {% endfor %}
+    ]
+</script>
+
 <script>
-    const originSelect = document.getElementById('origin_product');
+    const originInput = document.getElementById('origin_product');
     const rulesMap = JSON.parse(document.getElementById('rules-map-data').textContent);
     const productRulesMap = JSON.parse(document.getElementById('product-rules-map-data').textContent);
+    const allDestProducts = JSON.parse(document.getElementById('all-dest-products-data').textContent);
+    const allOriginProducts = JSON.parse(document.getElementById('all-origin-products-data').textContent);
     const rowsContainer = document.getElementById('destination-rows');
     const addRowBtn = document.getElementById('add-row-btn');
-    const rowTemplate = document.getElementById('row-template');
     const originRowsContainer = document.getElementById('origin-components-rows');
     const addOriginRowBtn = document.getElementById('add-origin-row-btn');
+    const destDatalist = document.getElementById('destinationProductsList');
 
     // Initialize TomSelect for an element and store instance
     function initTomSelect(el) {
-        if (el.tomselect) return;
-        el.tomselect = new TomSelect(el, {
-            create: false,
-            highlight: true,
-            diacritics: true, // Explicitly enable accent ignorance
-            // Sort by score first, then usage count descending
-            sortField: [
-                {field: '$score'},
-                {field: 'usage', direction: 'desc'}
-            ],
-            plugins: ['dropdown_input'],
-            maxOptions: 10,
-            onInitialize: function() {
-                // Improve touch accessibility
-                this.control.style.padding = "12px"; 
-                this.dropdown.style.fontSize = "1.1em";
-                this.dropdown_content.style.padding = "10px";
-                
-                // Inject usage data from DOM options to TomSelect options
-                var self = this;
-                var domOpts = el.querySelectorAll('option');
-                domOpts.forEach(function(opt){
-                    if(opt.value && self.options[opt.value]){
-                        self.options[opt.value].usage = parseInt(opt.dataset.usage || 0);
-                        self.options[opt.value].status = opt.dataset.status || 'Ativo';
-                        self.options[opt.value].unit = opt.dataset.unit || '';
-                    }
-                });
-            },
-            // Custom score to boost usage and enforce min chars
-            score: function(search) {
-                var score = this.getScoreFunction(search);
-                return function(item) {
-                    // Enforce minimum 3 characters for search filtering
-                    if (search.length > 0 && search.length < 3) {
-                        return 0;
-                    }
-                    var sc = score(item);
-                    if (sc > 0 && item.usage) {
-                        // Boost score by usage (small factor)
-                        return sc + (item.usage * 0.001);
-                    }
-                    return sc;
-                };
-            }
-        });
+        // TomSelect is no longer used for destination products in this version
+        // Kept empty to avoid breaking existing calls if any
     }
 
     // Init existing
-    document.querySelectorAll('.dest-product-select').forEach(initTomSelect);
-    document.querySelectorAll('.origin-component-select').forEach(initTomSelect);
+    // document.querySelectorAll('.dest-product-select').forEach(initTomSelect); // Removed
+    // document.querySelectorAll('.origin-component-select').forEach(initTomSelect); // Removed as we use input list now
+
+    function addOriginRow() {
+        const tr = document.createElement('tr');
+        tr.className = 'origin-component-row';
+        tr.innerHTML = `
+            <td>
+                <input type="text" name="component_product[]" class="form-control origin-component-input" list="originProductsList" placeholder="Digite para buscar..." style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ced4da;">
+            </td>
+            <td>
+                <input type="number" name="component_weight[]" class="form-control origin-component-weight-input" step="1" min="0" placeholder="0" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ced4da;">
+            </td>
+            <td class="text-center">
+                <button type="button" class="remove-origin-row-btn" style="background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </td>
+        `;
+        originRowsContainer.appendChild(tr);
+    }
+    
+    // Add first row by default
+    if (originRowsContainer.children.length === 0) {
+        addOriginRow();
+    }
+
+    addOriginRowBtn.addEventListener('click', addOriginRow);
+
+    // Origin components dynamic rows removal
+    originRowsContainer.addEventListener('click', function(e) {
+        if (e.target.closest('.remove-origin-row-btn')) {
+            const row = e.target.closest('tr');
+            if (originRowsContainer.children.length > 1) {
+                row.remove();
+            } else {
+                // If it's the last row, just clear values
+                row.querySelectorAll('input').forEach(input => input.value = '');
+            }
+        }
+    });
 
     function checkUnitCompatibility(originUnit, destUnit) {
         if (!originUnit || !destUnit) return true;
@@ -285,182 +329,111 @@
         return true;
     }
 
-    function filterDestOptions(selectElement, allowedCategories, allowedProducts) {
+    function updateDestinationDatalist(allowedCategories, allowedProducts) {
+        // Clear existing options
+        destDatalist.innerHTML = '';
+        
         // Decide logic: Product Rules > Category Rules > Show All (if no rules)
         const useProductFilter = allowedProducts && allowedProducts.length > 0;
         const useCategoryFilter = !useProductFilter && allowedCategories && allowedCategories.length > 0;
         
-        // Update DOM options
-        selectElement.value = "";
-        
-        // If we have a Tom Select instance, we need to interact with it properly.
-        // Tom Select sync() method updates based on the underlying select options visibility/disabled state.
-        
-        for (let i = 0; i < selectElement.options.length; i++) {
-             const opt = selectElement.options[i];
-             if (opt.value === "") continue;
-             
-             let visible = true;
-             
-             if (useProductFilter) {
-                 visible = allowedProducts.includes(opt.value);
-             } else if (useCategoryFilter) {
-                 const destCat = opt.dataset.category;
-                 visible = allowedCategories.includes(destCat);
-             }
-             
-             if (!useProductFilter && !useCategoryFilter) {
-                 visible = false; 
-             }
+        // Get unit from current selection
+        const originName = originInput.value;
+        const product = allOriginProducts.find(p => p.name === originName);
+        const originUnit = product ? product.unit : '';
 
-             if (visible) {
-                 opt.hidden = false;
-                 opt.disabled = false;
-             } else {
-                 opt.hidden = true;
-                 opt.disabled = true;
-             }
-        }
-        
-        // Sync with Tom Select if exists
-        if (selectElement.tomselect) {
-            selectElement.tomselect.clear();
-            selectElement.tomselect.clearOptions(); // Clear internal options cache
-            selectElement.tomselect.sync(); // Re-sync from DOM
-            selectElement.tomselect.refreshOptions(false); // Refresh UI
-        }
+        allDestProducts.forEach(prod => {
+            if (prod.status !== 'Ativo') return; // Skip inactive
+
+            let allowed = true;
+            if (useProductFilter) {
+                allowed = allowedProducts.includes(prod.name);
+            } else if (useCategoryFilter) {
+                allowed = allowedCategories.includes(prod.category);
+            }
+            
+            // Unit check
+            if (allowed && !checkUnitCompatibility(originUnit, prod.unit)) {
+                 // allowed = false; // Optional: Enforce or just warn? Let's just filter for better UX
+            }
+
+            if (allowed) {
+                const option = document.createElement('option');
+                option.value = prod.name;
+                option.innerText = prod.unit ? `${prod.unit}` : '';
+                destDatalist.appendChild(option);
+            }
+        });
     }
 
     function getFilters() {
-        const originOption = originSelect.options[originSelect.selectedIndex];
-        if (!originOption || !originOption.value) return { cats: [], prods: [], unit: '' };
-
-        const originName = originOption.value;
-        const originCategory = originOption.dataset.category;
-        const originUnit = originOption.dataset.unit;
+        const originName = originInput.value;
+        const product = allOriginProducts.find(p => p.name === originName);
+        
+        if (!product) return { cats: [], prods: [], unit: '' };
         
         return {
-            cats: rulesMap[originCategory] || [],
-            prods: productRulesMap[originName] || [],
-            unit: originUnit
+            cats: rulesMap[product.category] || [],
+            prods: productRulesMap[product.name] || [],
+            unit: product.unit
         };
     }
 
     function updateAllDestRows() {
         const filters = getFilters();
-        document.querySelectorAll('.dest-product-select').forEach(select => {
-            filterDestOptions(select, filters.cats, filters.prods);
-        });
+        updateDestinationDatalist(filters.cats, filters.prods);
+        
+        // Clear invalid inputs? Maybe not, just let user see they are invalid if they don't match list?
+        // HTML5 validation will complain if we use strict matching, but we use text input so it allows anything.
+        // Backend validation is the safety net.
     }
 
-    originSelect.addEventListener('change', function() {
+    originInput.addEventListener('change', function() {
         updateAllDestRows();
-
-        // Auto-fill logic for the first destination row
-        const firstRow = document.querySelector('.destination-row');
-        if (firstRow) {
-            const select = firstRow.querySelector('.dest-product-select');
-            if (select && select.tomselect) {
-                const ts = select.tomselect;
-                const visibleOptions = [];
-                const originUnit = originSelect.options[originSelect.selectedIndex].dataset.unit;
-                
-                // Iterate through TomSelect options to find valid ones
-                for(let i=0; i<select.options.length; i++) {
-                    const opt = select.options[i];
-                    // Check visibility, status, and unit compatibility
-                    if (opt.value && !opt.disabled && !opt.hidden) {
-                        const status = opt.dataset.status || 'Ativo';
-                        const destUnit = opt.dataset.unit || '';
-                        
-                        if (status === 'Ativo' && checkUnitCompatibility(originUnit, destUnit)) {
-                            visibleOptions.push(opt.value);
-                        }
-                    }
-                }
-                
-                // Clear any previous feedback
-                const prevFeedback = firstRow.querySelector('.portion-feedback');
-                if (prevFeedback) prevFeedback.remove();
-
-                if (visibleOptions.length === 0) {
-                     ts.clear();
-                     // Use a small text feedback
-                     const feedback = document.createElement('small');
-                     feedback.className = 'portion-feedback';
-                     feedback.style.color = '#e74c3c';
-                     feedback.style.display = 'block';
-                     feedback.style.marginTop = '5px';
-                     feedback.textContent = 'Nenhuma porção encontrada para este item – cadastre uma nova porção ou selecione manualmente';
-                     select.parentNode.appendChild(feedback);
-                } else if (visibleOptions.length === 1) {
-                    ts.setValue(visibleOptions[0]);
-                } else {
-                    ts.clear(); // Clear previous selection if any
-                    // Open dropdown to show filtered list
-                    setTimeout(() => {
-                        ts.focus();
-                        ts.open();
-                    }, 100);
-                }
-            }
-        }
+        
+        // Reset destination inputs if they are no longer valid?
+        // Better to clear them to force re-selection
+        document.querySelectorAll('.dest-product-input').forEach(input => {
+            input.value = '';
+        });
     });
 
     // Event delegation for dynamic rows
     rowsContainer.addEventListener('click', function(e) {
-        if (e.target.classList.contains('remove-row-btn')) {
+        if (e.target.closest('.remove-row-btn')) {
             e.target.closest('.destination-row').remove();
             updateRemoveButtons();
             updateCalculations();
         }
     });
 
-    // Origin components dynamic rows
-    originRowsContainer.addEventListener('click', function(e) {
-        if (e.target.classList.contains('remove-origin-row-btn')) {
-            e.target.closest('.origin-component-row').remove();
-            updateOriginRemoveButtons();
-        }
-    });
-
-    addOriginRowBtn.addEventListener('click', function() {
-        const firstRow = originRowsContainer.querySelector('.origin-component-row');
-        const clone = firstRow.cloneNode(true);
-        // Reset values
-        const select = clone.querySelector('.origin-component-select');
-        const weightInput = clone.querySelector('.origin-component-weight-input');
-        if (select) {
-            if (select.tomselect) {
-                select.tomselect.destroy();
-            }
-            select.value = "";
-        }
-        if (weightInput) {
-            weightInput.value = "";
-        }
-        originRowsContainer.appendChild(clone);
-        if (select) {
-            initTomSelect(select);
-        }
-        updateOriginRemoveButtons();
-    });
-
     addRowBtn.addEventListener('click', function() {
-        // Clone from template
-        const clone = rowTemplate.content.cloneNode(true);
-        const newRow = clone.querySelector('.destination-row');
-        rowsContainer.appendChild(newRow);
-        
-        // Initialize Tom Select on the new select
-        const newSelect = newRow.querySelector('select');
-        initTomSelect(newSelect);
-        
+        const div = document.createElement('div');
+        div.className = 'destination-row form-row';
+        div.style.cssText = 'margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed #ddd; display: flex; gap: 15px; align-items: flex-start;';
+        div.innerHTML = `
+            <div class="form-group" style="flex: 2;">
+                <label>Tipo de Porção:</label>
+                <input type="text" name="dest_product[]" class="dest-product-input" list="destinationProductsList" placeholder="Digite para buscar..." required style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label>Nº Porções:</label>
+                <input type="number" name="dest_count[]" class="dest-count-input" step="1" min="1" required placeholder="0" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label>Peso Total (g):</label>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <input type="number" name="final_qty[]" class="final-qty-input" step="1" min="0" required placeholder="0" style="flex: 1; padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
+                    <span class="dest-unit-display unit-display" style="font-weight: bold; color: #7f8c8d;">g</span>
+                </div>
+                <small class="avg-weight-display" style="color: #1e3a8a; font-weight: bold; display: block; margin-top: 5px; font-size: 0.9em;">Média: - g</small>
+            </div>
+            <div class="form-group" style="flex: 0 0 auto; display: flex; align-items: flex-end;">
+                <button type="button" class="remove-row-btn" style="background: #e74c3c; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; height: 42px;">✖</button>
+            </div>
+        `;
+        rowsContainer.appendChild(div);
         updateRemoveButtons();
-        
-        // Apply current filter to new row
-        const filters = getFilters();
-        filterDestOptions(newSelect, filters.cats, filters.prods);
     });
 
     function updateAverageWeight(row) {
@@ -492,7 +465,7 @@
         rows.forEach(row => {
             const btn = row.querySelector('.remove-row-btn');
             if (rows.length > 1) {
-                btn.style.display = 'block';
+                btn.style.display = 'flex'; // Changed to flex for alignment
             } else {
                 btn.style.display = 'none';
             }
@@ -515,6 +488,7 @@
         const frozen = parseFloat(document.getElementById('frozen_weight').value) || 0;
         const thawed = parseFloat(document.getElementById('thawed_weight').value) || 0;
         const trim = parseFloat(document.getElementById('trim_weight').value) || 0;
+        const cooked = parseFloat(document.getElementById('cooked_weight').value) || 0;
 
         // Perda descongelamento
         if (frozen > 0 && thawed > 0) {
@@ -526,9 +500,25 @@
         }
 
         // Peso Líquido Teórico
+        // Fluxo: Congelado -> Descongelado -> Limpo (Sem aparas) -> Cozido
         let usefulWeight = 0;
+        let cleanWeight = 0;
+
         if (thawed > 0) {
-            usefulWeight = thawed - trim;
+            cleanWeight = thawed - trim;
+            
+            // Se houve cocção, o peso útil é o peso cozido
+            // Se não houve (cooked == 0 ou vazio), assumimos que o peso útil é o limpo
+            if (cooked > 0) {
+                usefulWeight = cooked;
+                const cookingLoss = cleanWeight - cooked;
+                const cookingLossPct = cleanWeight > 0 ? (cookingLoss / cleanWeight) * 100 : 0;
+                document.getElementById('cooking_loss_display').innerText = `Perda Cocção: ${cookingLoss.toFixed(3)} (${cookingLossPct.toFixed(1)}%)`;
+            } else {
+                usefulWeight = cleanWeight;
+                document.getElementById('cooking_loss_display').innerText = '';
+            }
+
             const yieldPct = frozen > 0 ? (usefulWeight / frozen) * 100 : 0;
             let displayText = `Peso Útil Estimado: ${usefulWeight.toFixed(3)} (${yieldPct.toFixed(1)}% rendimento global)`;
             
@@ -548,6 +538,7 @@
             document.getElementById('net_weight_display').innerHTML = displayText;
         } else {
             document.getElementById('net_weight_display').innerText = '';
+            document.getElementById('cooking_loss_display').innerText = '';
         }
     }
     
@@ -555,16 +546,26 @@
         const frozen = parseFloat(document.getElementById('frozen_weight').value);
         const thawed = parseFloat(document.getElementById('thawed_weight').value);
         const trim = parseFloat(document.getElementById('trim_weight').value);
+        const cooked = parseFloat(document.getElementById('cooked_weight').value) || 0;
         
         if (thawed > frozen) {
             alert('Erro: Peso descongelado não pode ser maior que o peso congelado.');
             return false;
         }
         
-        const usefulWeight = thawed - trim;
-        if (usefulWeight < 0) {
-            alert('Erro: Peso das aparas é maior que o peso do produto.');
+        const cleanWeight = thawed - trim;
+        if (cleanWeight < 0) {
+            alert('Erro: Peso das aparas é maior que o peso descongelado.');
             return false;
+        }
+
+        let usefulWeight = cleanWeight;
+        if (cooked > 0) {
+            if (cooked > cleanWeight) {
+                alert('Erro: Peso cozido não pode ser maior que o peso limpo (antes da cocção).');
+                return false;
+            }
+            usefulWeight = cooked;
         }
         
         // Validate destination rows
@@ -574,10 +575,10 @@
         let totalPortioned = 0;
 
         for (let row of rows) {
-            const select = row.querySelector('.dest-product-select');
+            const input = row.querySelector('.dest-product-input');
             const qtyInput = row.querySelector('.final-qty-input');
             const qty = parseFloat(qtyInput.value) || 0;
-            const val = select.value;
+            const val = input.value;
 
             // Check for partial fill
             // If one is filled and the other is not

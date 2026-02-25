@@ -95,6 +95,7 @@
                         <th>Qtd (Kg)</th>
                         <th>Kg Degelo</th>
                         <th>Kg Aparas</th>
+                        <th>Kg Cocção</th>
                         <th>Kg Útil</th>
                         <th>Preço/Kg (Bruto)</th>
                         <th>Rendimento %</th>
@@ -112,6 +113,7 @@
                         <td>{{ "%.3f"|format(item.qty_kg) }}</td>
                         <td>{{ "%.3f"|format(item.degelo_kg) }}</td>
                         <td>{{ "%.3f"|format(item.aparas_kg) }}</td>
+                        <td>{{ "%.3f"|format(item.cooking_loss_kg) }}</td>
                         <td>{{ "%.3f"|format(item.useful_kg) }}</td>
                         <td>R$ {{ "%.2f"|format(item.price_gross) }}</td>
                         <td>
@@ -136,6 +138,7 @@
                                     <strong>Peso Bruto:</strong> {{ '%.3f'|format(item.qty_kg) }} kg<br>
                                     <strong>Degelo:</strong> {{ '%.3f'|format(item.degelo_kg) }} kg<br>
                                     <strong>Aparas:</strong> {{ '%.3f'|format(item.aparas_kg) }} kg<br>
+                                    <strong>Cocção:</strong> {{ '%.3f'|format(item.cooking_loss_kg) }} kg<br>
                                     <strong>Peso Útil:</strong> {{ '%.3f'|format(item.useful_kg) }} kg<br>
                                     <strong>Rendimento:</strong> {{ '%.1f'|format(item.yield_pct) }}%<br>
                                     <strong>Perda Total:</strong> {{ '%.1f'|format(item.waste_pct) }}%<br>

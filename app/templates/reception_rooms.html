@@ -438,7 +438,13 @@
                         {% for item in checklist_items %}
                         <label class="list-group-item d-flex gap-2">
                             <input class="form-check-input flex-shrink-0 item-check" type="checkbox">
-                            <span>{{ item }}</span>
+                            <span>
+                                {% if item is mapping %}
+                                    {{ item.name }}
+                                {% else %}
+                                    {{ item }}
+                                {% endif %}
+                            </span>
                         </label>
                         {% else %}
                         <div class="text-center text-muted p-3">Nenhum item no checklist.</div>
@@ -538,10 +544,19 @@
                 <ul class="list-group list-group-flush">
                     {% for item in checklist_items %}
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        {{ item }}
+                        {% if item is mapping %}
+                            {{ item.name }}
+                        {% else %}
+                            {{ item }}
+                        {% endif %}
                         <form method="POST" style="display:inline;">
                             <input type="hidden" name="action" value="delete_checklist_item">
-                            <input type="hidden" name="item_name" value="{{ item }}">
+                            {% if item is mapping %}
+                                <input type="hidden" name="item_id" value="{{ item.id }}">
+                                <input type="hidden" name="item_name" value="{{ item.name }}">
+                            {% else %}
+                                <input type="hidden" name="item_name" value="{{ item }}">
+                            {% endif %}
                             <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Remover este item?')">
                                 <i class="bi bi-trash"></i>
                             </button>
@@ -567,6 +582,7 @@
             <form method="POST">
                 <div class="modal-body">
                     <input type="hidden" name="action" value="checkin">
+                    <input type="hidden" name="reservation_id" id="checkin_reservation_id">
                     
                     <div class="row">
                         <div class="col-md-4 mb-3">
@@ -1528,11 +1544,30 @@
         });
     }
 
+<script>
+    const upcomingCheckinsData = {{ upcoming_checkins | tojson | safe }} || {};
+
     window.openCheckinModal = function(roomNum) {
         if (roomNum) {
             const select = document.getElementById('checkin_room_select');
             if (select) {
                 select.value = roomNum;
+            }
+            
+            // Auto-fill from upcoming checkins
+            const resIdInput = document.getElementById('checkin_reservation_id');
+            const guestInput = document.querySelector('input[name="guest_name"]');
+            
+            if (resIdInput) resIdInput.value = ''; // Reset
+            
+            if (upcomingCheckinsData[roomNum]) {
+                const data = upcomingCheckinsData[roomNum];
+                if (guestInput && !guestInput.value) {
+                    guestInput.value = data.guest || '';
+                }
+                if (resIdInput && data.id) {
+                    resIdInput.value = data.id;
+                }
             }
         } else {
              const select = document.getElementById('checkin_room_select');
@@ -2305,6 +2340,34 @@
             submitBtn.innerHTML = '<i class="bi bi-check-lg"></i> Confirmar e Liberar';
         }
     }
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-open modal if URL params present
+        const urlParams = new URLSearchParams(window.location.search);
+        const openCheckin = urlParams.get('open_checkin');
+        const reservationId = urlParams.get('reservation_id');
+        
+        if (openCheckin === 'true' && reservationId) {
+            // Find room by reservation ID from upcomingCheckinsData
+            let targetRoom = null;
+            for (const [room, data] of Object.entries(upcomingCheckinsData)) {
+                if (String(data.id) === String(reservationId)) {
+                    targetRoom = room;
+                    break;
+                }
+            }
+            
+            if (targetRoom) {
+                // Remove params from URL to prevent reopen on refresh
+                window.history.replaceState({}, document.title, window.location.pathname);
+                
+                // Open modal
+                // Small delay to ensure bootstrap is ready
+                setTimeout(() => {
+                    openCheckinModal(targetRoom);
+                }, 500);
+            }
+        }
+    });
 </script>
 
 <script src="{{ url_for('static', filename='js/guest_view.js') }}"></script>

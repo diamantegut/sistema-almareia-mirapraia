@@ -38,6 +38,7 @@
                 <th>Qtd Bruta (Kg)</th>
                 <th>Kg Degelo</th>
                 <th>Kg Aparas</th>
+                <th>Kg Cocção</th>
                 <th>Kg Útil</th>
                 <th>Funcionário</th>
                 <th>Preço/Kg Bruto</th>
@@ -55,6 +56,7 @@
                 <td>{{ "%.3f"|format(item.qty_kg) }}</td>
                 <td>{{ "%.3f"|format(item.degelo_kg) }}</td>
                 <td>{{ "%.3f"|format(item.aparas_kg) }}</td>
+                <td>{{ "%.3f"|format(item.cooking_loss_kg) }}</td>
                 <td>{{ "%.3f"|format(item.useful_kg) }}</td>
                 <td>{{ item.staff }}</td>
                 <td>R$ {{ "%.2f"|format(item.price_gross) }}</td>

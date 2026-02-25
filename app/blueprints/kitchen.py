@@ -496,6 +496,7 @@ def kitchen_portion():
         frozen_weight = request.form.get('frozen_weight')
         thawed_weight = request.form.get('thawed_weight')
         trim_weight = request.form.get('trim_weight')
+        cooked_weight = request.form.get('cooked_weight')
         component_names = request.form.getlist('component_product[]')
         component_weights = request.form.getlist('component_weight[]')
         
@@ -544,10 +545,12 @@ def kitchen_portion():
             frozen_weight_g = float(frozen_weight)
             thawed_weight_g = float(thawed_weight)
             trim_weight_g = float(trim_weight)
+            cooked_weight_g = float(cooked_weight) if cooked_weight else 0.0
             
             frozen_weight_kg = frozen_weight_g / 1000.0
             thawed_weight_kg = thawed_weight_g / 1000.0
             trim_weight_kg = trim_weight_g / 1000.0
+            cooked_weight_kg = cooked_weight_g / 1000.0
             
             parsed_destinations = []
             total_output_weight_g = 0
@@ -607,11 +610,20 @@ def kitchen_portion():
         # Calculate Losses
         thaw_loss_kg = frozen_weight_kg - thawed_weight_kg
         trim_loss_kg = trim_weight_kg
+        
+        cooking_loss_kg = 0.0
+        if cooked_weight_kg > 0:
+            clean_weight_kg = thawed_weight_kg - trim_weight_kg
+            cooking_loss_kg = max(0.0, clean_weight_kg - cooked_weight_kg)
 
         labels = []
 
         # 1. Register Exit for Origin Product(s)
         total_origin_cost = 0
+        
+        loss_info = f"Degelo: {thaw_loss_kg:.3f}kg | Aparas: {trim_loss_kg:.3f}kg"
+        if cooking_loss_kg > 0:
+            loss_info += f" | Cocção: {cooking_loss_kg:.3f}kg"
 
         if components:
             for comp in components:
@@ -627,7 +639,7 @@ def kitchen_portion():
                     'supplier': "PORCIONAMENTO (SAÍDA)",
                     'qty': -comp_weight_kg,
                     'price': price,
-                    'invoice': f"Transf: {', '.join([d['name'] for d in parsed_destinations])} | Degelo: {thaw_loss_kg:.3f}kg | Aparas: {trim_loss_kg:.3f}kg",
+                    'invoice': f"Transf: {', '.join([d['name'] for d in parsed_destinations])} | {loss_info}",
                     'date': datetime.now().strftime('%d/%m/%Y'),
                     'entry_date': datetime.now().strftime('%d/%m/%Y %H:%M')
                 }
@@ -640,7 +652,7 @@ def kitchen_portion():
                 'supplier': "PORCIONAMENTO (SAÍDA)",
                 'qty': -frozen_weight_kg,
                 'price': origin_prod.get('price', 0) if origin_prod else 0,
-                'invoice': f"Transf: {', '.join([d['name'] for d in parsed_destinations])} | Degelo: {thaw_loss_kg:.3f}kg | Aparas: {trim_loss_kg:.3f}kg",
+                'invoice': f"Transf: {', '.join([d['name'] for d in parsed_destinations])} | {loss_info}",
                 'date': datetime.now().strftime('%d/%m/%Y'),
                 'entry_date': datetime.now().strftime('%d/%m/%Y %H:%M')
             }
@@ -764,6 +776,7 @@ def kitchen_reports():
         invoice_text = entry.get('invoice', '')
         degelo = 0.0
         aparas = 0.0
+        cooking_loss = 0.0
         
         degelo_match = re.search(r'Degelo:\s*([\d\.]+)kg', invoice_text)
         if degelo_match:
@@ -772,12 +785,16 @@ def kitchen_reports():
         aparas_match = re.search(r'Aparas:\s*([\d\.]+)kg', invoice_text)
         if aparas_match:
             aparas = float(aparas_match.group(1))
+            
+        cooking_match = re.search(r'Cocção:\s*([\d\.]+)kg', invoice_text)
+        if cooking_match:
+            cooking_loss = float(cooking_match.group(1))
         
         input_weight_kg = abs(float(entry['qty']))
 
-        useful_weight_kg = input_weight_kg - degelo - aparas
+        useful_weight_kg = input_weight_kg - degelo - aparas - cooking_loss
         degelo_percent = (degelo / input_weight_kg * 100) if input_weight_kg > 0 else 0
-        waste_percent = ((degelo + aparas) / input_weight_kg * 100) if input_weight_kg > 0 else 0
+        waste_percent = ((degelo + aparas + cooking_loss) / input_weight_kg * 100) if input_weight_kg > 0 else 0
         yield_percent = (useful_weight_kg / input_weight_kg * 100) if input_weight_kg > 0 else 0
 
         total_cost = input_weight_kg * float(entry.get('price', 0))
@@ -796,6 +813,7 @@ def kitchen_reports():
             'yield_pct': yield_percent,
             'degelo_kg': degelo,
             'aparas_kg': aparas,
+            'cooking_loss_kg': cooking_loss,
             'useful_kg': useful_weight_kg,
             'total_cost_liquid': total_cost,
             'cost_per_useful_kg': cost_per_useful_kg,
@@ -874,6 +892,7 @@ def kitchen_reports_export():
         invoice_text = entry.get('invoice', '')
         degelo = 0.0
         aparas = 0.0
+        cooking_loss = 0.0
 
         degelo_match = re.search(r'Degelo:\s*([\d\.]+)kg', invoice_text)
         if degelo_match:
@@ -883,11 +902,15 @@ def kitchen_reports_export():
         if aparas_match:
             aparas = float(aparas_match.group(1))
 
+        cooking_match = re.search(r'Cocção:\s*([\d\.]+)kg', invoice_text)
+        if cooking_match:
+            cooking_loss = float(cooking_match.group(1))
+
         input_weight_kg = abs(float(entry['qty']))
-        useful_kg = input_weight_kg - degelo - aparas
+        useful_kg = input_weight_kg - degelo - aparas - cooking_loss
 
         degelo_percent = (degelo / input_weight_kg * 100) if input_weight_kg > 0 else 0
-        waste_percent = ((degelo + aparas) / input_weight_kg * 100) if input_weight_kg > 0 else 0
+        waste_percent = ((degelo + aparas + cooking_loss) / input_weight_kg * 100) if input_weight_kg > 0 else 0
         yield_percent = (useful_kg / input_weight_kg * 100) if input_weight_kg > 0 else 0
 
         total_cost = input_weight_kg * float(entry.get('price', 0))
@@ -904,6 +927,7 @@ def kitchen_reports_export():
             'yield_pct': yield_percent,
             'degelo_kg': degelo,
             'aparas_kg': aparas,
+            'cooking_loss_kg': cooking_loss,
             'useful_kg': useful_kg,
             'total_cost': total_cost,
             'cost_per_useful_kg': cost_per_useful_kg
@@ -918,6 +942,7 @@ def kitchen_reports_export():
             'Qtd Bruta (Kg)',
             'Kg Degelo',
             'Kg Aparas',
+            'Kg Cocção',
             'Kg Útil',
             'Rendimento %',
             'Perda Total %',
@@ -934,6 +959,7 @@ def kitchen_reports_export():
                 f"{row['qty_kg']:.3f}".replace('.', ','),
                 f"{row['degelo_kg']:.3f}".replace('.', ','),
                 f"{row['aparas_kg']:.3f}".replace('.', ','),
+                f"{row['cooking_loss_kg']:.3f}".replace('.', ','),
                 f"{row['useful_kg']:.3f}".replace('.', ','),
                 f"{row['yield_pct']:.1f}".replace('.', ','),
                 f"{row['waste_pct']:.1f}".replace('.', ','),

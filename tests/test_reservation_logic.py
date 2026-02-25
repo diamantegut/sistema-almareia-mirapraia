@@ -30,6 +30,9 @@ class TestReservationLogic(unittest.TestCase):
         
         self.service.get_february_reservations = MagicMock()
         self.service.get_february_reservations.return_value = []
+        
+        self.service.get_guest_details_data = MagicMock()
+        self.service.get_guest_details_data.return_value = {}
 
     def tearDown(self):
         self.patcher_occupancy.stop()
@@ -132,6 +135,67 @@ class TestReservationLogic(unittest.TestCase):
         
         self.assertFalse(result['valid'])
         self.assertIn("Conflito com reserva de Other Guest", result['conflict_message'])
+
+    def test_search_reservations(self):
+        # Setup Mock Data
+        res1 = {'id': '1', 'guest_name': 'João Silva', 'checkin': '01/02/2026', 'checkout': '05/02/2026'}
+        res2 = {'id': '2', 'guest_name': 'Maria Souza', 'checkin': '10/02/2026', 'checkout': '12/02/2026'}
+        res3 = {'id': '3', 'guest_name': 'Ana Pereira', 'checkin': '15/02/2026', 'checkout': '20/02/2026'}
+        
+        self.service.get_february_reservations.return_value = [res1, res2, res3]
+        
+        details = {
+            '1': {
+                'personal_info': {'name': 'João da Silva', 'doc_id': '123456'},
+                'fiscal_info': {'cpf': '111.222.333-44', 'cnpj': ''}
+            },
+            '2': {
+                 'personal_info': {'name': 'Maria de Souza'},
+                 'fiscal_info': {'cpf': '555.666.777-88', 'cnpj': ''}
+            }
+        }
+        self.service.get_guest_details_data.return_value = details
+
+        # 1. Search by Name (Partial)
+        results = self.service.search_reservations('Silva')
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['id'], '1')
+        
+        # 2. Search by Name (Case Insensitive + Accent)
+        results = self.service.search_reservations('joão')
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['id'], '1')
+        
+        # 3. Search by CPF (Clean)
+        results = self.service.search_reservations('11122233344')
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['id'], '1')
+        
+        # 4. Search by CPF (Formatted)
+        results = self.service.search_reservations('555.666.777-88')
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['id'], '2')
+        
+        # 5. Search by Name in Reservation List (not in details)
+        results = self.service.search_reservations('Pereira')
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['id'], '3')
+        
+        # 6. Search No Results
+        results = self.service.search_reservations('NonExistent')
+        self.assertEqual(len(results), 0)
+        
+        # 7. Search Empty Query
+        results = self.service.search_reservations('')
+        self.assertEqual(len(results), 0)
+        
+        # 8. Sort Order (Most Recent Checkin First)
+        # Search "a" matches all (joAo, mAriA, AnA)
+        results = self.service.search_reservations('a')
+        self.assertEqual(len(results), 3)
+        self.assertEqual(results[0]['id'], '3') # 15/02
+        self.assertEqual(results[1]['id'], '2') # 10/02
+        self.assertEqual(results[2]['id'], '1') # 01/02
 
 if __name__ == '__main__':
     unittest.main()

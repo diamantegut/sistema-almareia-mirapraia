@@ -224,6 +224,65 @@ class GuestManager:
                             return guest
         return None
 
+    def search_guests(self, query):
+        """
+        Searches guests by name or document ID.
+        Returns a list of simplified guest objects.
+        """
+        results = []
+        if not query:
+            return results
+        
+        query_norm = str(query).lower().strip()
+        
+        # Limit results for performance
+        MAX_RESULTS = 20
+        count = 0
+        
+        # Iterate all indexed guests
+        for guest_id in self.index:
+            if count >= MAX_RESULTS:
+                break
+                
+            guest = self.get_guest(guest_id)
+            if not guest:
+                continue
+            
+            # Check Document
+            p_info = guest.get('personal_info', {})
+            f_info = guest.get('fiscal_info', {})
+            
+            doc_id = str(p_info.get('doc_id', '')).lower()
+            cpf = str(f_info.get('cpf', '')).lower()
+            passport = str(f_info.get('foreigner_passport', '')).lower()
+            name = str(p_info.get('name', '')).lower() # If name exists in personal_info (it should, but often it's in stay_info or implicit)
+            
+            # Wait, where is the guest name stored?
+            # In create_guest, personal_info usually has 'name' or it's passed separately?
+            # The create_guest signature is create_guest(personal_info, stay_info).
+            # Usually personal_info has 'name'.
+            
+            match = False
+            if query_norm in doc_id or query_norm in cpf or query_norm in passport:
+                match = True
+            elif query_norm in name:
+                match = True
+            
+            if match:
+                results.append({
+                    'id': guest_id,
+                    'name': p_info.get('name', 'Desconhecido'),
+                    'doc_id': p_info.get('doc_id') or f_info.get('cpf') or f_info.get('foreigner_passport'),
+                    'dob': p_info.get('dob'),
+                    'email': p_info.get('email'),
+                    'phone': p_info.get('phone'),
+                    'operational_info': guest.get('operational_info', {}),
+                    'last_stay': guest.get('stay_info', {}).get('checkout_date')
+                })
+                count += 1
+                
+        return results
+
     def get_history_by_doc(self, doc_id):
         """Finds all stays for a given document ID."""
         history = []

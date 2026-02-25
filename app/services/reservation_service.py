@@ -12,6 +12,7 @@ class ReservationService:
     RESERVATIONS_DIR = RESERVATIONS_DIR
     RESERVATIONS_FILE = os.path.join(RESERVATIONS_DIR, "minhas_reservas.xlsx")
     MANUAL_RESERVATIONS_FILE = MANUAL_RESERVATIONS_FILE
+    RESERVATION_STATUS_OVERRIDES_FILE = os.path.join(RESERVATIONS_DIR, "reservation_status_overrides.json")
     
     # Room Capacities (Estimated)
     ROOM_CAPACITIES = {
@@ -23,6 +24,24 @@ class ReservationService:
         "33": 2 # Master Diamante
     }
 
+    def get_reservation_status_overrides(self):
+        import json
+        if not os.path.exists(self.RESERVATION_STATUS_OVERRIDES_FILE):
+            return {}
+        try:
+            with open(self.RESERVATION_STATUS_OVERRIDES_FILE, 'r') as f:
+                return json.load(f)
+        except:
+            return {}
+
+    def update_reservation_status(self, reservation_id, new_status):
+        import json
+        overrides = self.get_reservation_status_overrides()
+        overrides[str(reservation_id)] = new_status
+        
+        with open(self.RESERVATION_STATUS_OVERRIDES_FILE, 'w') as f:
+            json.dump(overrides, f, indent=4)
+            
     def get_manual_reservations_data(self):
         import json
         if not os.path.exists(self.MANUAL_RESERVATIONS_FILE):
@@ -30,8 +49,16 @@ class ReservationService:
         try:
             with open(self.MANUAL_RESERVATIONS_FILE, 'r') as f:
                 data = json.load(f)
-                if isinstance(data, list): return data
-                return []
+                if not isinstance(data, list): return []
+                
+                # Apply Status Overrides
+                overrides = self.get_reservation_status_overrides()
+                for item in data:
+                    rid = str(item.get('id'))
+                    if rid in overrides:
+                        item['status'] = overrides[rid]
+                        
+                return data
         except:
             return []
 
@@ -200,9 +227,280 @@ class ReservationService:
             print(f"Error reading reservations Excel {file_path}: {e}")
         return parsed_items
 
+    UNALLOCATED_RESERVATIONS_FILE = os.path.join(RESERVATIONS_DIR, "unallocated_reservations.json")
+
+    def _get_diff(self, old, new):
+        """
+        Compares two reservation dictionaries and returns a list of changed fields.
+        """
+        changes = []
+        fields = [
+            ('guest_name', 'Nome do Hóspede'),
+            ('checkin', 'Check-in'),
+            ('checkout', 'Check-out'),
+            ('category', 'Categoria'),
+            ('status', 'Status'),
+            ('amount', 'Valor Total'),
+            ('paid_amount', 'Valor Pago'),
+            ('to_receive', 'A Receber')
+        ]
+        
+        for field, label in fields:
+            old_val = str(old.get(field, '')).strip()
+            new_val = str(new.get(field, '')).strip()
+            
+            # Special handling for floats/money to avoid "100.0" vs "100.00" false positives
+            if field in ['amount', 'paid_amount', 'to_receive']:
+                try:
+                    v1 = float(old_val.replace('R$', '').replace('.', '').replace(',', '.')) if old_val else 0.0
+                    v2 = float(new_val.replace('R$', '').replace('.', '').replace(',', '.')) if new_val else 0.0
+                    if abs(v1 - v2) > 0.01:
+                        changes.append(f"{label}: '{old_val}' -> '{new_val}'")
+                except:
+                    if old_val != new_val:
+                        changes.append(f"{label}: '{old_val}' -> '{new_val}'")
+            else:
+                if old_val != new_val:
+                    changes.append(f"{label}: '{old_val}' -> '{new_val}'")
+                    
+        return changes
+
+    def save_unallocated_reservations(self, unallocated_items):
+        """
+        Saves unallocated reservations to a JSON file.
+        """
+        import json
+        if not unallocated_items:
+            return
+            
+        current_data = self.get_unallocated_reservations()
+        
+        # Append new items
+        current_data.extend(unallocated_items)
+        
+        with open(self.UNALLOCATED_RESERVATIONS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(current_data, f, indent=4, ensure_ascii=False)
+
+    def get_unallocated_reservations(self, filters=None):
+        """
+        Retrieves unallocated reservations, optionally filtered.
+        filters: dict with keys 'date', 'start_date', 'end_date', 'category', 'guest_name'
+        """
+        import json
+        if not os.path.exists(self.UNALLOCATED_RESERVATIONS_FILE):
+            return []
+            
+        try:
+            with open(self.UNALLOCATED_RESERVATIONS_FILE, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                
+            # Add index to item for deletion reference
+            for idx, item in enumerate(data):
+                item['original_index'] = idx
+
+            if not filters:
+                return data
+                
+            filtered = []
+            for item in data:
+                match = True
+                
+                # Date Range Overlap Filter
+                if filters.get('start_date') or filters.get('end_date'):
+                    try:
+                        r_cin = datetime.strptime(item.get('checkin'), '%d/%m/%Y')
+                        r_cout = datetime.strptime(item.get('checkout'), '%d/%m/%Y')
+                        
+                        f_start = datetime.min
+                        f_end = datetime.max
+                        
+                        if filters.get('start_date'):
+                            f_start = datetime.strptime(filters['start_date'], '%Y-%m-%d')
+                        if filters.get('end_date'):
+                            f_end = datetime.strptime(filters['end_date'], '%Y-%m-%d')
+                            
+                        # Overlap: (StartA <= EndB) and (EndA >= StartB)
+                        if not (r_cin <= f_end and r_cout >= f_start):
+                            match = False
+                    except: pass
+                
+                # Single Date Point Filter (Legacy)
+                elif filters.get('date'):
+                    # Check if date falls within reservation range
+                    try:
+                        f_date = datetime.strptime(filters['date'], '%Y-%m-%d')
+                        r_cin = datetime.strptime(item.get('checkin'), '%d/%m/%Y')
+                        r_cout = datetime.strptime(item.get('checkout'), '%d/%m/%Y')
+                        if not (r_cin <= f_date <= r_cout):
+                            match = False
+                    except: pass
+                    
+                if filters.get('category') and filters['category'].lower() not in str(item.get('category')).lower():
+                    match = False
+                    
+                if filters.get('guest_name') and filters['guest_name'].lower() not in str(item.get('guest_name')).lower():
+                    match = False
+                    
+                if match:
+                    filtered.append(item)
+            return filtered
+        except:
+            return []
+
+    def delete_unallocated_reservation(self, item_index):
+        """
+        Deletes an unallocated reservation by its index in the list.
+        Returns True if successful.
+        """
+        import json
+        if not os.path.exists(self.UNALLOCATED_RESERVATIONS_FILE):
+            return False
+            
+        try:
+            with open(self.UNALLOCATED_RESERVATIONS_FILE, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            
+            if 0 <= item_index < len(data):
+                data.pop(item_index)
+                with open(self.UNALLOCATED_RESERVATIONS_FILE, 'w', encoding='utf-8') as f:
+                    json.dump(data, f, indent=4, ensure_ascii=False)
+                return True
+            return False
+        except Exception as e:
+            print(f"Error deleting unallocated reservation: {e}")
+            return False
+
+    def get_conflict_details(self, category, checkin_str, checkout_str):
+        """
+        Checks availability and returns detailed conflict information if unavailable.
+        Returns: (is_available, conflict_details_dict)
+        """
+        try:
+            cin = datetime.strptime(checkin_str, '%d/%m/%Y')
+            cout = datetime.strptime(checkout_str, '%d/%m/%Y')
+        except ValueError:
+            return False, {'type': 'invalid_dates', 'message': 'Datas inválidas'}
+
+        from app.services.data_service import load_room_occupancy
+        occupancy = load_room_occupancy()
+        
+        # Expand range slightly to cover edges
+        start_date = datetime(cin.year, cin.month, cin.day)
+        num_days = max(1, (cout - cin).days + 1)
+        range_end = start_date + pd.Timedelta(days=num_days - 1)
+        
+        # Build grid with existing occupancy
+        grid = self.get_occupancy_grid(occupancy, start_date, num_days)
+        
+        # Allocate existing reservations
+        reservations = self.get_february_reservations()
+        self.allocate_reservations(grid, reservations, start_date, num_days)
+        
+        # Determine candidate rooms
+        mapping = self.get_room_mapping()
+        norm_mapping = {k.lower().strip(): v for k, v in mapping.items()}
+        cat_norm = str(category).lower().strip()
+        
+        candidates = []
+        if cat_norm in norm_mapping:
+            candidates = norm_mapping[cat_norm]
+        else:
+            for k, v in norm_mapping.items():
+                if k in cat_norm or cat_norm in k:
+                    candidates = v
+                    break 
+        
+        if not candidates:
+            return False, {'type': 'invalid_category', 'message': f'Categoria desconhecida: {category}'}
+
+        # Calculate required slots for the NEW reservation
+        required_slots = []
+        
+        curr = cin
+        while curr <= cout:
+            if start_date <= curr <= range_end:
+                day_offset = (curr - start_date).days
+                day_idx = day_offset * 2
+                
+                # Logic must match allocate_reservations
+                if curr == cin:
+                    required_slots.append(day_idx + 1) # PM
+                elif curr == cout:
+                    required_slots.append(day_idx) # AM
+                else:
+                    required_slots.append(day_idx)
+                    required_slots.append(day_idx + 1)
+            
+            curr = datetime(curr.year, curr.month, curr.day) + pd.Timedelta(days=1)
+            
+        required_slots = [s for s in required_slots if 0 <= s < (num_days * 2)]
+        
+        if not required_slots:
+             return True, None
+
+        # Check availability and collect conflicts
+        rooms_blocked_reasons = {} 
+        
+        for room in candidates:
+            is_free = True
+            blockers = []
+            
+            # If room not in grid, it's free
+            if room not in grid: 
+                return True, None
+            
+            room_slots = grid[room]
+            
+            for slot in required_slots:
+                if slot in room_slots:
+                    is_free = False
+                    blocker_info = room_slots[slot]
+                    
+                    # Deduplicate blockers for this room
+                    is_known = False
+                    for b in blockers:
+                        if b.get('id') == blocker_info.get('id') and b.get('guest') == blocker_info.get('guest'):
+                            is_known = True
+                            break
+                    if not is_known:
+                        blockers.append(blocker_info)
+            
+            if is_free:
+                return True, None
+            else:
+                rooms_blocked_reasons[room] = blockers
+        
+        # Construct detailed report
+        conflict_summary = []
+        detailed_blockers = []
+        
+        for room, blockers in rooms_blocked_reasons.items():
+            blocker_descs = []
+            for b in blockers:
+                desc = f"{b.get('guest', 'Unknown')} ({b.get('checkin')} - {b.get('checkout')})"
+                blocker_descs.append(desc)
+                
+                detailed_blockers.append({
+                    'room': room,
+                    'guest': b.get('guest'),
+                    'checkin': b.get('checkin'),
+                    'checkout': b.get('checkout'),
+                    'id': b.get('id')
+                })
+                
+            conflict_summary.append(f"Quarto {room}: {', '.join(blocker_descs)}")
+            
+        return False, {
+            'type': 'no_availability',
+            'message': 'Sem disponibilidade na categoria',
+            'details': conflict_summary,
+            'blockers': detailed_blockers
+        }
+
     def preview_import(self, temp_file_path):
         """
         Parses the temp file and compares with existing reservations to generate a preview report.
+        Includes duplicate detection, change tracking, and conflict detection.
         """
         # 1. Parse new items
         new_items = self._parse_excel_file(temp_file_path)
@@ -212,15 +510,16 @@ class ReservationService:
         # 2. Get existing state
         current_reservations = self.get_february_reservations()
         
-        # 3. Compare
+        # 3. Compare & Detect
         report = {
             'total_found': len(new_items),
             'new_entries': [],
             'updates': [],
-            'conflicts': [] # If needed, for now 'updates' covers it
+            'conflicts': [],
+            'unchanged': []
         }
         
-        # Index existing by ID and Composite Key
+        # Index existing
         existing_map_id = {r['id']: r for r in current_reservations if r.get('id')}
         existing_map_key = {}
         for r in current_reservations:
@@ -229,29 +528,165 @@ class ReservationService:
             cout = str(r.get('checkout', '')).strip()
             if name and cin and cout:
                 existing_map_key[f"{name}|{cin}|{cout}"] = r
-                
+
+        # Prepare for conflict check (Load logic once if possible, but for now we rely on has_availability_for_category)
+        # Note: calling has_availability_for_category in a loop is slow. 
+        # But for valid conflict detection involving ALL reservations, we need the grid.
+        
         for item in new_items:
-            # Check match
-            match = None
-            if item.get('id') in existing_map_id:
-                match = existing_map_id[item['id']]
-            else:
-                key = f"{str(item.get('guest_name','')).lower().strip()}|{str(item.get('checkin','')).strip()}|{str(item.get('checkout','')).strip()}"
-                if key in existing_map_key:
-                    match = existing_map_key[key]
-            
-            if match:
-                # Check if data is actually different?
-                # For simplicity, we assume it's an update if it exists
-                # Maybe compare amount or status?
-                report['updates'].append({
-                    'new': item,
-                    'old': match
-                })
-            else:
-                report['new_entries'].append(item)
+            try:
+                match = None
+                is_update = False
+                changes = []
                 
+                # Match Logic
+                if item.get('id') in existing_map_id:
+                    match = existing_map_id[item['id']]
+                else:
+                    key = f"{str(item.get('guest_name','')).lower().strip()}|{str(item.get('checkin','')).strip()}|{str(item.get('checkout','')).strip()}"
+                    if key in existing_map_key:
+                        match = existing_map_key[key]
+                
+                # Update vs New Logic
+                if match:
+                    item['original_id'] = match.get('id')
+                    changes = self._get_diff(match, item)
+                    if changes:
+                        item['changes'] = changes
+                        report['updates'].append(item)
+                        is_update = True
+                    else:
+                        report['unchanged'].append(item)
+                        continue # No need to check conflict for unchanged
+                else:
+                    report['new_entries'].append(item)
+                
+                # Conflict Detection Logic (for New and Changed Updates)
+                # Only check if relevant fields (dates/category) changed or if it's new
+                should_check_conflict = True
+                if is_update:
+                    # Only check if dates or category changed
+                    date_cat_changed = any(c.startswith(('Check-in', 'Check-out', 'Categoria')) for c in changes)
+                    if not date_cat_changed:
+                        should_check_conflict = False
+                
+                if should_check_conflict:
+                    cat = item.get('category', '')
+                    cin = item.get('checkin', '')
+                    cout = item.get('checkout', '')
+                    
+                    is_available, conflict_details = self.get_conflict_details(cat, cin, cout)
+                    
+                    if not is_available:
+                        conflict_info = {
+                            'item': item,
+                            'reason': 'Sem disponibilidade na categoria/período',
+                            'details': conflict_details,
+                            'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                            'status': 'conflict'
+                        }
+                        report['conflicts'].append(conflict_info)
+                        # Mark item as having conflict
+                        item['has_conflict'] = True
+                        item['conflict_reason'] = 'Sem disponibilidade'
+                        item['conflict_details'] = conflict_details
+            except Exception as e:
+                item['has_conflict'] = True
+                item['conflict_reason'] = f"Erro processando item: {str(e)}"
+                report['conflicts'].append({
+                    'item': item,
+                    'reason': str(e),
+                    'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                    'status': 'error'
+                })
+                # Ensure it is tracked in lists for processing
+                if item not in report['new_entries'] and item not in report['updates'] and item not in report['unchanged']:
+                     report['new_entries'].append(item)
+
         return {'success': True, 'report': report}
+
+    def process_import_confirm(self, temp_file_path, token):
+        """
+        Processes the confirmed import:
+        1. Filters out conflicts
+        2. Saves valid reservations (New + Updates + Unchanged) to a new Excel file
+        3. Saves conflicts to unallocated_reservations.json
+        """
+        # Reuse preview logic
+        preview_result = self.preview_import(temp_file_path)
+        if not preview_result['success']:
+            return preview_result
+            
+        report = preview_result['report']
+        
+        valid_items = []
+        conflict_items = []
+        
+        # Helper to process items
+        def process_list(items, is_update=False):
+            for item in items:
+                if item.get('has_conflict'):
+                    # Ensure conflict info is robust
+                    if 'conflict_reason' not in item:
+                        item['conflict_reason'] = 'Conflito detectado na confirmação'
+                    conflict_items.append(item)
+                else:
+                    # If it's an update, ensure we use the ORIGINAL ID to guarantee overwrite
+                    if is_update and item.get('original_id'):
+                        item['id'] = item['original_id']
+                    valid_items.append(item)
+
+        process_list(report['new_entries'])
+        process_list(report['updates'], is_update=True)
+        # Unchanged items are valid and should be kept in the new file source
+        process_list(report['unchanged'])
+        
+        # Save Valid to Excel
+        if valid_items:
+            try:
+                # Prepare DataFrame with standard columns
+                df_data = []
+                for item in valid_items:
+                    df_data.append({
+                        'Id': item.get('id'),
+                        'Responsável': item.get('guest_name'),
+                        'Checkin/out': f"{item.get('checkin')} - {item.get('checkout')}",
+                        'Categoria': item.get('category'),
+                        'Status do pagamento': item.get('status'),
+                        'Canais': item.get('channel'),
+                        'Valor': item.get('amount'),
+                        'Valor pago': item.get('paid_amount'),
+                        'Valor a receber': item.get('to_receive')
+                    })
+                
+                df = pd.DataFrame(df_data)
+                final_name = f"imported_{token}"
+                # Ensure extension
+                if not final_name.endswith('.xlsx'):
+                    final_name += '.xlsx'
+                    
+                final_path = os.path.join(self.RESERVATIONS_DIR, final_name)
+                df.to_excel(final_path, index=False)
+            except Exception as e:
+                return {'success': False, 'error': f"Erro ao salvar arquivo Excel: {str(e)}"}
+            
+        # Save Conflicts
+        if conflict_items:
+            try:
+                self.save_unallocated_reservations(conflict_items)
+            except Exception as e:
+                # If we fail to save conflicts, we should warn? 
+                # Ideally rollback, but file is already written.
+                return {'success': True, 'warning': f"Importado com sucesso, mas erro ao salvar conflitos: {str(e)}"}
+            
+        return {
+            'success': True, 
+            'message': 'Importação processada com sucesso.',
+            'summary': {
+                'imported': len(valid_items),
+                'conflicts': len(conflict_items)
+            }
+        }
 
     def get_february_reservations(self):
         """
@@ -290,6 +725,17 @@ class ReservationService:
                 parsed = self._parse_excel_file(file_path)
                 all_reservations.extend(parsed)
         
+        # Deduplicate by ID (Keep latest version)
+        unique_map = {}
+        for res in all_reservations:
+            if res.get('id'):
+                unique_map[res['id']] = res
+        all_reservations = list(unique_map.values())
+        
+        # 3. Apply Overrides to ALL Reservations
+        overrides = self.get_reservation_status_overrides()
+        manual_allocs = self.get_manual_overrides()
+
         # Deduplicate Logic
         # Priority: Most recent file (already sorted by mtime)
         # Key: ID (if present) OR (Guest Name + Checkin + Checkout)
@@ -297,8 +743,12 @@ class ReservationService:
         unique_reservations = {}
         
         for res in all_reservations:
+            # Apply Status Override (Early)
+            rid = str(res.get('id'))
+            if rid in overrides:
+                res['status'] = overrides[rid]
+
             # 1. Try by ID first
-            rid = res.get('id')
             if rid and rid != 'nan' and rid != 'None':
                 unique_reservations[rid] = res
             else:
@@ -309,12 +759,7 @@ class ReservationService:
                 cout = str(res.get('checkout', '')).strip()
                 
                 if name and cin and cout:
-                    composite_key = f"{name}|{cin}|{cout}"
                     # Check if we already have a reservation with this key (even if it has a different ID or generated ID)
-                    # This is tricky because unique_reservations is keyed by ID.
-                    # We need a secondary index or iterate.
-                    
-                    # Let's check if any existing reservation matches this composite key
                     found_id = None
                     for existing_id, existing_res in unique_reservations.items():
                         e_name = str(existing_res.get('guest_name', '')).lower().strip()
@@ -336,8 +781,96 @@ class ReservationService:
                             rid = str(uuid.uuid4())[:8]
                             res['id'] = rid
                         unique_reservations[rid] = res
+        
+        final_list = list(unique_reservations.values())
+        
+        # Apply Manual Allocations (Financial, Dates, Avg Daily) to FINAL list
+        for res in final_list:
+            rid = str(res.get('id'))
+            self.merge_overrides_into_reservation(rid, res, overrides_cache=manual_allocs)
+            
+        return final_list
 
-        return list(unique_reservations.values())
+    def search_reservations(self, query):
+        """
+        Searches reservations by guest name or CPF/Document.
+        Returns a list of matching reservation objects.
+        """
+        if not query:
+            return []
+            
+        import unicodedata
+        def normalize(s):
+            return ''.join(c for c in unicodedata.normalize('NFD', str(s)) if unicodedata.category(c) != 'Mn').lower()
+
+        query_norm = normalize(query).strip()
+        # Remove common separators for CPF check
+        query_clean = re.sub(r'[.\-]', '', query_norm)
+        is_numeric_search = query_clean.isdigit() and len(query_clean) >= 3
+        
+        all_reservations = self.get_february_reservations()
+        all_details = self.get_guest_details_data()
+        
+        matching_ids = set()
+        
+        # 1. Search in Guest Details (Deep Search: CPF, Doc, Name in details)
+        for res_id, details in all_details.items():
+            match = False
+            
+            # Personal Info
+            p_info = details.get('personal_info', {})
+            # Fiscal Info
+            f_info = details.get('fiscal_info', {})
+            
+            # Name Check (in details)
+            d_name = normalize(p_info.get('name', '') or '')
+            if query_norm in d_name:
+                match = True
+                
+            # Doc/CPF Check
+            if is_numeric_search:
+                doc_id = re.sub(r'\D', '', str(p_info.get('doc_id', '')))
+                cpf = re.sub(r'\D', '', str(f_info.get('cpf', '')))
+                cnpj = re.sub(r'\D', '', str(f_info.get('cnpj', '')))
+                
+                if query_clean in doc_id or query_clean in cpf or query_clean in cnpj:
+                    match = True
+            
+            if match:
+                matching_ids.add(str(res_id))
+                
+        # 2. Filter Reservations
+        results = []
+        seen_ids = set()
+        
+        for res in all_reservations:
+            r_id = str(res.get('id', ''))
+            if r_id in seen_ids:
+                continue
+            
+            # Check if ID matches from details search
+            if r_id in matching_ids:
+                results.append(res)
+                seen_ids.add(r_id)
+                continue
+                
+            # Check basic info (Name in reservation list)
+            r_name = normalize(res.get('guest_name', '') or '')
+            
+            if query_norm in r_name:
+                results.append(res)
+                seen_ids.add(r_id)
+                
+        # 3. Sort by Check-in Date (Most recent first)
+        def parse_date(d_str):
+            try:
+                return datetime.strptime(str(d_str), '%d/%m/%Y')
+            except:
+                return datetime.min
+                
+        results.sort(key=lambda x: parse_date(x.get('checkin')), reverse=True)
+        
+        return results
 
     def get_room_mapping(self):
         return {
@@ -488,6 +1021,10 @@ class ReservationService:
         if isinstance(entry, str): 
             entry = {'room': entry}
             
+        # Capture previous state for financial calc BEFORE updating with new values
+        prev_entry_checkin = entry.get('checkin')
+        prev_entry_checkout = entry.get('checkout')
+            
         if room_number:
             entry['room'] = str(room_number)
         if price_adjustment:
@@ -500,31 +1037,38 @@ class ReservationService:
         # If a price_adjustment is provided or dates changed, compute and persist financial overrides
         try:
             res = self.get_reservation_by_id(reservation_id) or {}
-            # Effective original values
+            
+            # Helper to parse money safely handling BRL and US formats
             def _parse_money(v):
                 try:
                     if v is None: return 0.0
                     if isinstance(v, (int, float)): return float(v)
-                    s = str(v).strip()
-                    s = s.replace('R$', '').replace('.', '').replace(',', '.')
+                    s = str(v).strip().replace('R$', '').replace(' ', '')
+                    if ',' in s:
+                        # 1.200,50 -> 1200.50
+                        s = s.replace('.', '').replace(',', '.')
                     return float(s)
                 except:
                     return 0.0
+
             current_amount = _parse_money(res.get('amount_val', res.get('amount')))
             paid_amount = _parse_money(res.get('paid_amount_val', res.get('paid_amount')))
+            
             # Dates
             from datetime import datetime as _dt
             cin_str = res.get('checkin')
             cout_str = res.get('checkout')
+            
             # Apply previous manual overrides if present for baseline
             try:
-                prev_cin = entry.get('checkin') or cin_str
-                prev_cout = entry.get('checkout') or cout_str
+                prev_cin = prev_entry_checkin or cin_str
+                prev_cout = prev_entry_checkout or cout_str
                 d_in = _dt.strptime(prev_cin, '%d/%m/%Y')
                 d_out = _dt.strptime(prev_cout, '%d/%m/%Y')
                 old_days = max(1, (d_out - d_in).days)
             except:
                 old_days = 1
+                
             # New dates (if provided)
             try:
                 n_in_str = checkin or entry.get('checkin') or cin_str
@@ -534,8 +1078,10 @@ class ReservationService:
                 new_days = max(1, (nd_out - nd_in).days)
             except:
                 new_days = old_days
+                
             # Default avg
             avg_daily = current_amount / old_days if old_days > 0 else 0.0
+            
             # Compute new total by rule
             new_total = None
             if price_adjustment:
@@ -543,31 +1089,59 @@ class ReservationService:
                     ptype = str(price_adjustment.get('type', '')).lower()
                 except:
                     ptype = ''
+                
                 if ptype in ('manual', 'manual_total'):
                     new_total = _parse_money(price_adjustment.get('amount'))
                 elif ptype in ('extra_daily_manual', 'per_day_manual', 'extra_manual'):
                     extra_daily = _parse_money(price_adjustment.get('amount'))
+                    # If reducing days, diff_days is 0, so no refund? 
+                    # User likely wants to ADD this amount per EXTRA day.
+                    # If simply changing price per day, that's different.
+                    # Assuming this is "Add R$ X for each extra day"
                     diff_days = max(0, new_days - old_days)
                     new_total = current_amount + (extra_daily * diff_days)
                 elif ptype in ('auto', 'automatic'):
                     new_total = avg_daily * new_days
-            # Fallback: auto recalculation if dates changed
+            
+            # Fallback: auto recalculation if dates changed and NO explicit manual total set
             if new_total is None and (checkin or checkout):
-                new_total = avg_daily * new_days
+                # If we just moved dates but kept duration, keep price? 
+                # If duration changed, recalc?
+                # "Bug1 ... nao esta ajustando o valor" suggests they expect recalc.
+                if new_days != old_days:
+                    new_total = avg_daily * new_days
+                else:
+                    # If days count is same, keep current amount unless explicit auto requested
+                    # But if we are here, it means NO price_adjustment was passed (or type unknown)
+                    # Let's be conservative: only change if days changed.
+                    new_total = current_amount
+            
             if new_total is not None:
                 fin = entry.get('financial', {})
                 fin['amount'] = f"{new_total:.2f}"
+                
                 # Preserve paid amount if any (prefer override > original)
+                # If paid_amount is already in fin, keep it. Else use original.
                 if 'paid_amount' not in fin or fin.get('paid_amount') is None:
-                    fin['paid_amount'] = f"{paid_amount:.2f}"
+                     fin['paid_amount'] = f"{paid_amount:.2f}"
+                else:
+                    # If it IS in fin, ensure it's formatted
+                    p_val = _parse_money(fin['paid_amount'])
+                    fin['paid_amount'] = f"{p_val:.2f}"
+                    paid_amount = p_val # Update for calculation below
+
+                # Calculate To Receive
                 try:
-                    to_recv = max(0.0, float(fin['amount'].replace(',', '.')) - float(fin['paid_amount'].replace(',', '.')))
+                    total_val = float(fin['amount']) # It's already .2f string
+                    to_recv = max(0.0, total_val - paid_amount)
                 except:
                     to_recv = max(0.0, new_total - paid_amount)
+                    
                 fin['to_receive'] = f"{to_recv:.2f}"
                 entry['financial'] = fin
-        except Exception:
-            # Do not fail allocation due to financial computation issues
+        except Exception as e:
+            # Log error but don't crash
+            print(f"Error calculating financial overrides for {reservation_id}: {str(e)}")
             pass
         
         allocations[str(reservation_id)] = entry
@@ -595,30 +1169,85 @@ class ReservationService:
             json.dump(allocations, f, indent=2)
         return fin
 
-    def merge_overrides_into_reservation(self, res_id, res):
-        entry = self.get_manual_overrides().get(str(res_id))
-        if not entry:
-            return res
-        if isinstance(entry, dict):
+    def merge_overrides_into_reservation(self, res_id, res, overrides_cache=None):
+        if overrides_cache is not None:
+            allocs = overrides_cache
+        else:
+            allocs = self.get_manual_overrides()
+            
+        entry = allocs.get(str(res_id))
+        
+        # Merge overrides if they exist
+        if entry and isinstance(entry, dict):
             # Dates overrides
             cin = entry.get('checkin') or res.get('checkin')
             cout = entry.get('checkout') or res.get('checkout')
             if cin: res['checkin'] = cin
             if cout: res['checkout'] = cout
+            
             # Financial overrides
             fin = entry.get('financial') or {}
             for k in ['amount', 'paid_amount', 'to_receive', 'status', 'channel']:
                 if fin.get(k) is not None:
                     res[k] = fin.get(k)
-            # Avg daily (paid)
-            try:
-                d_in = datetime.strptime(res.get('checkin'), '%d/%m/%Y')
-                d_out = datetime.strptime(res.get('checkout'), '%d/%m/%Y')
-                days = max(1, (d_out - d_in).days)
-                paid = float(str(res.get('paid_amount') or '0').replace(',', '.'))
-                res['avg_daily_paid'] = round(paid / days, 2)
-            except Exception:
-                res['avg_daily_paid'] = 0.0
+                    # Update numeric helpers if they exist
+                    if k == 'amount':
+                        try:
+                            res['amount_val'] = float(str(fin.get(k)).replace(',', '.'))
+                        except:
+                            pass
+                    if k == 'paid_amount':
+                        try:
+                            res['paid_amount_val'] = float(str(fin.get(k)).replace(',', '.'))
+                        except:
+                            pass
+
+        # Calculate Avg Daily Paid (ALWAYS, regardless of overrides)
+        try:
+            d_in = datetime.strptime(res.get('checkin'), '%d/%m/%Y')
+            d_out = datetime.strptime(res.get('checkout'), '%d/%m/%Y')
+            days = max(1, (d_out - d_in).days)
+            
+            paid_val = res.get('paid_amount')
+            if isinstance(paid_val, (int, float)):
+                paid = float(paid_val)
+            else:
+                # Clean currency formatting if string
+                paid_str = str(paid_val or '0').replace('R$', '').replace(' ', '')
+                if ',' in paid_str and '.' in paid_str:
+                     # e.g. 1.200,50 -> 1200.50
+                     paid_str = paid_str.replace('.', '').replace(',', '.')
+                elif ',' in paid_str:
+                     paid_str = paid_str.replace(',', '.')
+                paid = float(paid_str)
+                
+            res['avg_daily_paid'] = round(paid / days, 2)
+        except Exception:
+            res['avg_daily_paid'] = 0.0
+        
+        # Calculate Avg Daily Total (Total Amount / Days)
+        try:
+            d_in = datetime.strptime(res.get('checkin'), '%d/%m/%Y')
+            d_out = datetime.strptime(res.get('checkout'), '%d/%m/%Y')
+            days = max(1, (d_out - d_in).days)
+            
+            total_val = res.get('amount')
+            if isinstance(total_val, (int, float)):
+                total = float(total_val)
+            else:
+                # Clean currency formatting if string
+                total_str = str(total_val or '0').replace('R$', '').replace(' ', '')
+                if ',' in total_str and '.' in total_str:
+                        # e.g. 1.200,50 -> 1200.50
+                        total_str = total_str.replace('.', '').replace(',', '.')
+                elif ',' in total_str:
+                        total_str = total_str.replace(',', '.')
+                total = float(total_str)
+            
+            res['avg_daily_total'] = round(total / days, 2)
+        except Exception:
+            res['avg_daily_total'] = 0.0
+        
         return res
     def check_collision(self, reservation_id, room_number, checkin_str, checkout_str, occupancy_data=None):
         try:
@@ -1094,6 +1723,7 @@ class ReservationService:
                 if (checkin - today).days in [0, 1]: # Today or Tomorrow
                      if res.get('allocated') and res.get('allocated_room'):
                          upcoming.append({
+                             'id': res.get('id'),
                              'room': res['allocated_room'],
                              'guest': res['guest_name'],
                              'checkin': res['checkin'],
