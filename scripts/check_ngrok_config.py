@@ -8,6 +8,8 @@ NGROK_CONFIG_PATH = os.path.join(BASE_DIR, 'data', 'ngrok_config.json')
 SETTINGS_PATH = os.path.join(BASE_DIR, 'data', 'settings.json')
 TARGET_DOMAIN = "syrupy-jaliyah-intracranial.ngrok-free.dev"
 TARGET_TUNNEL_NAME = "staff"
+GUEST_DOMAIN = "hospedes.almareia.mirapraia.ngrok.app"
+GUEST_TUNNEL_NAME = "guest_portal"
 
 def check_and_fix_ngrok_config():
     if not os.path.exists(NGROK_CONFIG_PATH):
@@ -28,6 +30,11 @@ def check_and_fix_ngrok_config():
                         if tunnel.get('domain') != TARGET_DOMAIN:
                             print(f"[FIX] Updating {env} '{TARGET_TUNNEL_NAME}' tunnel domain to {TARGET_DOMAIN}")
                             tunnel['domain'] = TARGET_DOMAIN
+                            modified = True
+                    elif tunnel['name'] == GUEST_TUNNEL_NAME:
+                        if tunnel.get('domain') != GUEST_DOMAIN:
+                            print(f"[FIX] Updating {env} '{GUEST_TUNNEL_NAME}' tunnel domain to {GUEST_DOMAIN}")
+                            tunnel['domain'] = GUEST_DOMAIN
                             modified = True
         
         if modified:

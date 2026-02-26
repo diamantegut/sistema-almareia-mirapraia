@@ -258,8 +258,12 @@
                     <div class="rules-box">
                         <h6 class="fw-bold mb-2"><i class="bi bi-info-circle me-2"></i>Importante:</h6>
                         <ul class="small text-muted ps-3 mb-0">
-                            <li>Todos devem estar presentes para ocupar a mesa.</li>
-                            <li>Tolerância de 5 minutos após chamarmos.</li>
+                            {% for rule in settings.house_rules %}
+                                <li>{{ rule }}</li>
+                            {% else %}
+                                <li>Todos devem estar presentes para ocupar a mesa.</li>
+                                <li>Tolerância de 5 minutos após chamarmos.</li>
+                            {% endfor %}
                         </ul>
                     </div>
                 </div>

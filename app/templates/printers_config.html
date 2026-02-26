@@ -446,30 +446,55 @@ function toggleEditPrinterFields() {
     document.getElementById('edit_networkFields').style.display = type === 'network' ? 'block' : 'none';
 }
 
-// Modal Handling
-var editModal = new bootstrap.Modal(document.getElementById('editPrinterModal'));
+// Global variable for modal
+var editModal;
 
 function openEditModal(btn) {
-    var printer = JSON.parse(btn.getAttribute('data-printer'));
-
-    document.getElementById('edit_printer_id').value = printer.id;
-    document.getElementById('edit_name').value = printer.name;
-    document.getElementById('edit_printerType').value = printer.type || 'network';
-    
-    if (printer.type === 'windows') {
-        document.getElementById('edit_windows_name').value = printer.windows_name || '';
-    } else {
-        document.getElementById('edit_ip').value = printer.ip || '';
-        document.getElementById('edit_port').value = printer.port || 9100;
+    // Ensure modal is initialized
+    if (!editModal) {
+        var modalEl = document.getElementById('editPrinterModal');
+        if (modalEl && typeof bootstrap !== 'undefined') {
+            editModal = new bootstrap.Modal(modalEl);
+        } else {
+            console.error('Bootstrap modal not initialized');
+            alert('Erro ao abrir janela de edição. Tente recarregar a página.');
+            return;
+        }
     }
-    
-    toggleEditPrinterFields();
-    editModal.show();
+
+    try {
+        var printer = JSON.parse(btn.getAttribute('data-printer'));
+
+        document.getElementById('edit_printer_id').value = printer.id;
+        document.getElementById('edit_name').value = printer.name;
+        document.getElementById('edit_printerType').value = printer.type || 'network';
+        
+        if (printer.type === 'windows') {
+            document.getElementById('edit_windows_name').value = printer.windows_name || '';
+        } else {
+            document.getElementById('edit_ip').value = printer.ip || '';
+            document.getElementById('edit_port').value = printer.port || 9100;
+        }
+        
+        toggleEditPrinterFields();
+        editModal.show();
+    } catch (e) {
+        console.error('Error opening edit modal:', e);
+        alert('Erro ao carregar dados da impressora.');
+    }
 }
 
-// Initial state
+// Initialize on DOM Content Loaded
 document.addEventListener('DOMContentLoaded', function() {
     togglePrinterFields();
+    
+    // Initialize modal if bootstrap is available
+    if (typeof bootstrap !== 'undefined') {
+        var modalEl = document.getElementById('editPrinterModal');
+        if (modalEl) {
+            editModal = new bootstrap.Modal(modalEl);
+        }
+    }
 });
 </script>
 {% endblock %}

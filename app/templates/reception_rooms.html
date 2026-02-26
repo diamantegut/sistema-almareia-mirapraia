@@ -583,9 +583,8 @@
                 <h5 class="modal-title"><i class="bi bi-person-plus"></i> Novo Check-in</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <form method="POST">
+            <form method="POST" action="{{ url_for('reception.reception_checkin') }}" class="needs-validation" novalidate>
                 <div class="modal-body">
-                    <input type="hidden" name="action" value="checkin">
                     <input type="hidden" name="reservation_id" id="checkin_reservation_id">
                     
                     <div class="row">
@@ -1548,49 +1547,8 @@
         });
     }
 
-<script>
-    const upcomingCheckinsData = {{ upcoming_checkins | tojson | safe }} || {};
-
-    window.openCheckinModal = function(roomNum) {
-        if (roomNum) {
-            const select = document.getElementById('checkin_room_select');
-            if (select) {
-                select.value = roomNum;
-            }
-            
-            // Auto-fill from upcoming checkins
-            const resIdInput = document.getElementById('checkin_reservation_id');
-            const guestInput = document.querySelector('input[name="guest_name"]');
-            
-            if (resIdInput) resIdInput.value = ''; // Reset
-            
-            if (upcomingCheckinsData[roomNum]) {
-                const data = upcomingCheckinsData[roomNum];
-                if (guestInput && !guestInput.value) {
-                    guestInput.value = data.guest || '';
-                }
-                if (resIdInput && data.id) {
-                    resIdInput.value = data.id;
-                }
-            }
-        } else {
-             const select = document.getElementById('checkin_room_select');
-             if (select) select.value = "";
-        }
-        
-        // Always set check-in date to today (client-side to avoid stale date)
-        const checkinInput = document.querySelector('input[name="checkin_date"]');
-        if (checkinInput) {
-            const today = new Date();
-            const year = today.getFullYear();
-            const month = String(today.getMonth() + 1).padStart(2, '0');
-            const day = String(today.getDate()).padStart(2, '0');
-            checkinInput.value = `${year}-${month}-${day}`;
-        }
-
-        var myModal = new bootstrap.Modal(document.getElementById('checkinModal'));
-        myModal.show();
-    };
+    // Function openCheckinModal moved to the end of the file to ensure stability
+    // upcomingCheckinsData moved to the end of the file
 
     function openTransferModal(roomNum, guestName) {
         document.getElementById('transfer_old_room').value = roomNum;
@@ -2477,4 +2435,124 @@ function submitLaunchExperience() {
 </script>
 
 <script src="{{ url_for('static', filename='js/guest_view.js') }}"></script>
+<script>
+    console.log('Check-in script loading...');
+    
+    // Safely parse upcoming checkins
+    let upcomingCheckinsData = {};
+    try {
+        upcomingCheckinsData = {{ upcoming_checkins | tojson | safe }} || {};
+        console.log('Upcoming checkins loaded:', Object.keys(upcomingCheckinsData).length);
+    } catch (e) {
+        console.error('Error parsing upcoming checkins:', e);
+    }
+
+    // Global function for Check-in Modal
+    window.openCheckinModal = function(roomNum) {
+        console.log('openCheckinModal called with:', roomNum);
+        
+        // Ensure Bootstrap is available
+        if (typeof bootstrap === 'undefined') {
+            console.error('Bootstrap 5 is not loaded!');
+            alert('Erro interno: Bootstrap não carregado. Recarregue a página.');
+            return;
+        }
+
+        try {
+            // Update Room Select
+            const select = document.getElementById('checkin_room_select');
+            if (select) {
+                if (roomNum) {
+                    select.value = roomNum;
+                    // Sync TomSelect if initialized
+                    if (select.tomselect) {
+                        select.tomselect.setValue(roomNum);
+                    } else {
+                        // If TomSelect not yet ready, wait or just set value
+                        console.warn('TomSelect instance not found on checkin_room_select');
+                    }
+                } else {
+                    select.value = "";
+                    if (select.tomselect) select.tomselect.setValue("");
+                }
+            } else {
+                console.error('Select element #checkin_room_select not found');
+            }
+
+            // Auto-fill form data
+            const resIdInput = document.getElementById('checkin_reservation_id');
+            // Use ID for guest name input to be specific, or scoped selector
+            const guestInput = document.querySelector('#checkinModal input[name="guest_name"]');
+            
+            if (resIdInput) resIdInput.value = '';
+            if (guestInput) guestInput.value = '';
+
+            if (roomNum && upcomingCheckinsData && upcomingCheckinsData[roomNum]) {
+                const data = upcomingCheckinsData[roomNum];
+                if (guestInput) {
+                    guestInput.value = data.guest || '';
+                }
+                if (resIdInput && data.id) {
+                    resIdInput.value = data.id;
+                }
+            }
+            
+            // Set Check-in Date to Today
+            const checkinInput = document.querySelector('#checkinModal input[name="checkin_date"]');
+            if (checkinInput) {
+                const today = new Date();
+                const year = today.getFullYear();
+                const month = String(today.getMonth() + 1).padStart(2, '0');
+                const day = String(today.getDate()).padStart(2, '0');
+                checkinInput.value = `${year}-${month}-${day}`;
+            }
+
+            // Show Modal
+            const modalEl = document.getElementById('checkinModal');
+            if (modalEl) {
+                const myModal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                myModal.show();
+            } else {
+                console.error('Modal element #checkinModal not found in DOM');
+                alert('Erro interno: Modal de check-in não encontrado.');
+            }
+        } catch (e) {
+            console.error('Error in openCheckinModal:', e);
+            alert('Erro ao abrir check-in: ' + e.message);
+        }
+    };
+    // Bootstrap 5 Validation
+    (function () {
+      'use strict'
+      var forms = document.querySelectorAll('.needs-validation')
+      Array.prototype.slice.call(forms)
+        .forEach(function (form) {
+          form.addEventListener('submit', function (event) {
+            if (!form.checkValidity()) {
+              event.preventDefault()
+              event.stopPropagation()
+            }
+            form.classList.add('was-validated')
+          }, false)
+        })
+    })()
+
+    // Custom Check-in Validation
+    const checkinForm = document.querySelector('#checkinModal form');
+    if (checkinForm) {
+        checkinForm.addEventListener('submit', function(e) {
+            const checkin = this.querySelector('[name="checkin_date"]').value;
+            const checkout = this.querySelector('[name="checkout_date"]').value;
+            
+            if (checkin && checkout && checkout < checkin) {
+                e.preventDefault();
+                e.stopPropagation();
+                alert('A data de check-out não pode ser anterior ao check-in.');
+                this.querySelector('[name="checkout_date"]').focus();
+            }
+        });
+    }
+
+    console.log('Check-in script loaded successfully');
+</script>
 {% endblock %}

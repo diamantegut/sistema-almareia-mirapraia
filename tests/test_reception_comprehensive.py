@@ -103,7 +103,6 @@ class TestReceptionComprehensive(unittest.TestCase):
     def test_01_checkin_process(self):
         print("\n--- Test 1: Check-in Process ---")
         data = {
-            'action': 'checkin',
             'room_number': '01',
             'guest_name': 'Teste Hóspede',
             'checkin_date': datetime.now().strftime('%Y-%m-%d'),
@@ -113,7 +112,7 @@ class TestReceptionComprehensive(unittest.TestCase):
         }
         
         response = self._measure_performance(
-            self.client.post, '/reception/rooms', data=data, follow_redirects=True
+            self.client.post, '/reception/checkin', data=data, follow_redirects=True
         )
         self.assertEqual(response.status_code, 200)
         

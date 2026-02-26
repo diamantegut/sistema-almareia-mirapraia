@@ -113,6 +113,18 @@
                             <small class="text-muted">Tempo Médio</small>
                         </div>
                     </div>
+                    <hr>
+                    <h6 class="text-center text-muted mb-3">Ocupação do Restaurante</h6>
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h4 class="text-primary">{{ metrics.guests_serving }}</h4>
+                            <small class="text-muted">Hóspedes (Pessoas)</small>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-success">{{ metrics.passants_serving }}</h4>
+                            <small class="text-muted">Passantes (Pessoas)</small>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -130,37 +142,10 @@
                             <label class="form-label">Capacidade Máxima da Fila</label>
                             <input type="number" name="max_size" class="form-control" value="{{ settings.max_queue_size }}">
                         </div>
-                        <h6 class="text-secondary">Integração WhatsApp (API Cloud)</h6>
+                        <h6 class="text-secondary mt-3">Regras da Casa (Público)</h6>
                         <div class="mb-3">
-                            <label class="form-label small">ID do Telefone (Phone ID)</label>
-                            <input type="text" name="whatsapp_phone_id" class="form-control form-control-sm" value="{{ settings.whatsapp_phone_id }}" placeholder="Ex: 100609...">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label small">Token de Acesso (Meta)</label>
-                            <input type="password" name="whatsapp_token" class="form-control form-control-sm" value="{{ settings.whatsapp_api_token }}" placeholder="EAA...">
-                            <div class="alert alert-light border mt-2 py-2 small" style="font-size: 0.75em;">
-                                <strong>Como obter o Token Permanente:</strong>
-                                <ol class="mb-0 ps-3">
-                                    <li>No Meta Business, vá em <em>Contas > Apps</em> e clique em <strong>Adicionar</strong> > <strong>Conectar um ID de App</strong> (se seu App não aparecer na lista).</li>
-                                    <li>Vá em <em>Usuários > Usuários do Sistema</em>.</li>
-                                    <li>Clique em <strong>Adicionar Ativos</strong> > Selecione <strong>Apps</strong> > Escolha seu App > Ative "Gerenciar App".</li>
-                                    <li>Clique em <strong>Gerar novo token</strong>.</li>
-                                    <li>Selecione o App e as permissões: <code>whatsapp_business_messaging</code>.</li>
-                                </ol>
-                                <div class="mt-1 text-muted">
-                                    *Se estiver criando o App e pedir "Casos de uso": Escolha <strong>Outros > Empresa</strong> ou adicione o produto <strong>WhatsApp</strong>.
-                                </div>
-                            </div>
-                        </div>
-                        <h6 class="text-secondary mt-4">Configuração do Webhook (Para Receber Mensagens)</h6>
-                        <div class="alert alert-info border py-2 small" style="font-size: 0.8em;">
-                            <p class="mb-1"><strong>Callback URL:</strong> <code>{{ whatsapp_webhook_url }}</code></p>
-                            <p class="mb-0"><strong>Verify Token:</strong> <code>almareia_webhook_token</code></p>
-                            <hr class="my-1">
-                            <p class="mb-0 text-muted">
-                                *Para receber mensagens (Chat), você precisa configurar o Webhook no painel da Meta.<br>
-                                Use o <strong>ngrok</strong> para expor seu localhost: <code>ngrok http 5001 --domain={{ whatsapp_ngrok_domain }}</code>
-                            </p>
+                            <label class="form-label small">Texto que aparece na seção "Importante" (uma regra por linha)</label>
+                            <textarea name="house_rules" class="form-control" rows="5" placeholder="Ex: Todos devem estar presentes...">{{ settings.house_rules|join('\n') }}</textarea>
                         </div>
                         
                         <button type="submit" class="btn btn-secondary w-100 mt-3">Salvar Configurações</button>

@@ -20,14 +20,4 @@ def guest_experiences_alias():
 
 # As rotas /fila e /cardapio já existem nos blueprints restaurant e menu,
 # e funcionarão normalmente neste domínio se acessadas diretamente (/fila, /cardapio).
-# Mas criamos aliases aqui para garantir que se o usuário acessar
-# hospedes.../fila, ele seja redirecionado corretamente se necessário,
-# ou para documentar que essas rotas são suportadas neste domínio.
-
-@guest_portal_bp.route('/fila', host=GUEST_DOMAIN)
-def guest_queue_alias():
-    return redirect(url_for('restaurant.public_waiting_list'))
-
-@guest_portal_bp.route('/cardapio', host=GUEST_DOMAIN)
-def guest_menu_alias():
-    return redirect(url_for('menu.client_menu'))
+# Removemos os aliases daqui para evitar loops de redirecionamento.

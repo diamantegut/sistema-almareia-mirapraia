@@ -180,9 +180,11 @@ def load_waiting_data():
         "max_queue_size": 50,
         "average_wait_per_party": 15, # minutes
         "critical_wait_threshold": 45, # minutes
-        "whatsapp_api_token": "",
-        "whatsapp_phone_id": "",
-        "cutoff_hour": 20
+        "cutoff_hour": 20,
+        "house_rules": [
+            "Todos devem estar presentes para ocupar a mesa.",
+            "Tolerância de 5 minutos após chamarmos."
+        ]
     }
     
     if not os.path.exists(WAITING_LIST_FILE):

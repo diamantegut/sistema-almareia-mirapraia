@@ -471,145 +471,8 @@ def reception_rooms():
             return redirect(url_for('reception.reception_rooms'))
 
         if action == 'checkin':
-            # 1. Sanitization & Input Extraction
-            room_num_raw = sanitize_input(request.form.get('room_number'))
-            guest_name = sanitize_input(request.form.get('guest_name'))
-            doc_id = sanitize_input(request.form.get('doc_id'))
-            email = sanitize_input(request.form.get('email'))
-            phone = sanitize_input(request.form.get('phone'))
-            checkin_date = sanitize_input(request.form.get('checkin_date'))
-            checkout_date = sanitize_input(request.form.get('checkout_date'))
-            num_adults_raw = request.form.get('num_adults', 1)
-
-            # 2. Validation
-            valid_room, msg_room = validate_room_number(room_num_raw)
-            if not valid_room:
-                log_action('Validation Error', f"Checkin - Invalid Room: {room_num_raw} - {msg_room}", department='Recepção')
-                flash(f'Erro no Check-in: {msg_room}')
-                return redirect(url_for('reception.reception_rooms'))
-            
-            valid_name, msg_name = validate_required(guest_name, "Nome do Hóspede")
-            if not valid_name:
-                log_action('Validation Error', f"Checkin - Invalid Name: {msg_name}", department='Recepção')
-                flash(f'Erro no Check-in: {msg_name}')
-                return redirect(url_for('reception.reception_rooms'))
-
-            # Optional Validations
-            if doc_id:
-                # Simple check: if it looks like CPF (11 digits), validate it. Otherwise assume passport/RG.
-                digits = re.sub(r'\D', '', doc_id)
-                if len(digits) == 11:
-                    valid_cpf, msg_cpf = validate_cpf(doc_id)
-                    if not valid_cpf:
-                        log_action('Validation Error', f"Checkin - Invalid CPF: {doc_id} - {msg_cpf}", department='Recepção')
-                        flash(f'Erro no Check-in: {msg_cpf}')
-                        return redirect(url_for('reception.reception_rooms'))
-
-            if email:
-                valid_email, msg_email = validate_email(email)
-                if not valid_email:
-                    log_action('Validation Error', f"Checkin - Invalid Email: {email} - {msg_email}", department='Recepção')
-                    flash(f'Erro no Check-in: {msg_email}')
-                    return redirect(url_for('reception.reception_rooms'))
-
-            if phone:
-                valid_phone, msg_phone = validate_phone(phone)
-                if not valid_phone:
-                    log_action('Validation Error', f"Checkin - Invalid Phone: {phone} - {msg_phone}", department='Recepção')
-                    flash(f'Erro no Check-in: {msg_phone}')
-                    return redirect(url_for('reception.reception_rooms'))
-
-            valid_in, msg_in = validate_date(checkin_date, '%Y-%m-%d')
-            valid_out, msg_out = validate_date(checkout_date, '%Y-%m-%d')
-            if not (valid_in and valid_out):
-                log_action('Validation Error', f"Checkin - Invalid Dates: {checkin_date}/{checkout_date} - {msg_in or msg_out}", department='Recepção')
-                flash(f'Erro no Check-in: {msg_in or msg_out}')
-                return redirect(url_for('reception.reception_rooms'))
-
-            try:
-                num_adults = int(num_adults_raw)
-                if num_adults < 1: raise ValueError
-            except ValueError:
-                flash('Erro no Check-in: Número de adultos inválido.')
-                return redirect(url_for('reception.reception_rooms'))
-
-            # Format room number
-            room_num = format_room_number(room_num_raw)
-            
-            # Validation: Check if room is already occupied
-            if str(room_num) in occupancy:
-                current_guest = occupancy[str(room_num)].get('guest_name', 'Hóspede Desconhecido')
-                # Allow update ONLY if guest name matches exactly (Edit Check-in scenario)
-                # Otherwise, block to prevent overwrite
-                if current_guest.lower() != guest_name.lower():
-                    log_action('Checkin Blocked', f"Attempt to overwrite occupied room {room_num} ({current_guest}) with {guest_name}", department='Recepção')
-                    flash(f'Erro: Quarto {room_num} já está ocupado por {current_guest}. Realize o check-out ou verifique o número do quarto.')
-                    return redirect(url_for('reception.reception_rooms'))
-                else:
-                    # It's an update for the same guest
-                    log_action('Checkin Update', f"Updating info for {guest_name} in room {room_num}", department='Recepção')
-            
-            # Logic continues
-            if room_num and guest_name:
-                # Convert dates to DD/MM/YYYY for storage/display
-                try:
-                    if checkin_date:
-                        checkin_date = datetime.strptime(checkin_date, '%Y-%m-%d').strftime('%d/%m/%Y')
-                    if checkout_date:
-                        checkout_date = datetime.strptime(checkout_date, '%Y-%m-%d').strftime('%d/%m/%Y')
-                except ValueError:
-                    pass # Already validated above, but safety net
-
-                # 3. Update Reservation Status (if linked)
-                reservation_id = request.form.get('reservation_id')
-                
-                # Heuristic: Try to find reservation if not provided but matches upcoming
-                if not reservation_id and room_num in upcoming_checkins:
-                    upcoming = upcoming_checkins[room_num]
-                    # Fuzzy match name? Or just assume if it's the allocated room for today
-                    if upcoming.get('guest', '').lower() == guest_name.lower():
-                        reservation_id = upcoming.get('id')
-
-                if reservation_id:
-                    try:
-                        res_service = ReservationService()
-                        res_service.update_reservation_status(reservation_id, 'Checked-in')
-                        log_action('Reservation Updated', f"Reservation {reservation_id} status set to Checked-in", department='Recepção')
-                    except Exception as e:
-                        print(f"Error updating reservation status: {e}")
-
-                occupancy[room_num] = {
-                    'guest_name': guest_name,
-                    'checkin': checkin_date,
-                    'checkout': checkout_date,
-                    'num_adults': num_adults,
-                    'checked_in_at': datetime.now().strftime('%d/%m/%Y %H:%M'),
-                    'reservation_id': reservation_id # Link stored
-                }
-                save_room_occupancy(occupancy)
-                
-                # Automatically open restaurant table for the room
-                orders = load_table_orders()
-                if str(room_num) not in orders:
-                    orders[str(room_num)] = {
-                        'items': [], 
-                        'total': 0, 
-                        'status': 'open', 
-                        'opened_at': datetime.now().strftime('%d/%m/%Y %H:%M'),
-                        'num_adults': num_adults,
-                        'customer_type': 'hospede',
-                        'room_number': str(room_num)
-                    }
-                    save_table_orders(orders)
-                    log_action('Check-in', f'Check-in Quarto {room_num} - {guest_name}', department='Recepção')
-                    flash(f'Check-in realizado e Mesa {room_num} aberta automaticamente.')
-                else:
-                    # Update existing order details if needed
-                    orders[str(room_num)]['num_adults'] = num_adults
-                    orders[str(room_num)]['room_number'] = str(room_num) # ensure link
-                    save_table_orders(orders)
-                    log_action('Check-in (Update)', f'Check-in (Atualização) Quarto {room_num} - {guest_name}', department='Recepção')
-                    flash(f'Check-in realizado para Quarto {room_num}.')
+            # Logic moved to /reception/checkin (reception_checkin)
+            return redirect(url_for('reception.reception_rooms'))
         
         elif action == 'checkout':
             room_num_raw = sanitize_input(request.form.get('room_number'))
@@ -4535,3 +4398,177 @@ def guest_experiences_menu():
         grouped[t].append(e)
         
     return render_template('guest_experiences_menu.html', grouped_experiences=grouped)
+
+
+@reception_bp.route('/reception/checkin', methods=['POST'])
+@login_required
+def reception_checkin():
+    """
+    Dedicated route for handling guest check-in.
+    Refactored from reception_rooms to improve maintainability.
+    """
+    # Permission Check (Same as reception_rooms)
+    user_role = session.get('role')
+    role_norm = normalize_text(str(user_role or ''))
+    user_dept = session.get('department')
+    dept_norm = normalize_text(str(user_dept or ''))
+    user_perms = session.get('permissions') or []
+    has_reception_permission = isinstance(user_perms, (list, tuple, set)) and any(normalize_text(str(p)) == 'recepcao' for p in user_perms)
+
+    if role_norm not in ['admin', 'gerente', 'recepcao', 'supervisor'] and dept_norm != 'recepcao' and not has_reception_permission:
+         flash('Acesso restrito.')
+         return redirect(url_for('main.index'))
+
+    occupancy = load_room_occupancy()
+    
+    # Pre-allocation integration (needed for reservation linking logic)
+    upcoming_checkins = {}
+    try:
+        res_service = ReservationService()
+        upcoming_list = res_service.get_upcoming_checkins()
+        for item in upcoming_list:
+            upcoming_checkins[item['room']] = item
+    except Exception as e:
+        print(f"Error loading upcoming checkins: {e}")
+
+    # 1. Sanitization & Input Extraction
+    room_num_raw = sanitize_input(request.form.get('room_number'))
+    guest_name = sanitize_input(request.form.get('guest_name'))
+    doc_id = sanitize_input(request.form.get('doc_id'))
+    email = sanitize_input(request.form.get('email'))
+    phone = sanitize_input(request.form.get('phone'))
+    checkin_date = sanitize_input(request.form.get('checkin_date'))
+    checkout_date = sanitize_input(request.form.get('checkout_date'))
+    num_adults_raw = request.form.get('num_adults', 1)
+
+    # 2. Validation
+    valid_room, msg_room = validate_room_number(room_num_raw)
+    if not valid_room:
+        log_action('Validation Error', f"Checkin - Invalid Room: {room_num_raw} - {msg_room}", department='Recepção')
+        flash(f'Erro no Check-in: {msg_room}')
+        return redirect(url_for('reception.reception_rooms'))
+    
+    valid_name, msg_name = validate_required(guest_name, "Nome do Hóspede")
+    if not valid_name:
+        log_action('Validation Error', f"Checkin - Invalid Name: {msg_name}", department='Recepção')
+        flash(f'Erro no Check-in: {msg_name}')
+        return redirect(url_for('reception.reception_rooms'))
+
+    # Optional Validations
+    if doc_id:
+        # Simple check: if it looks like CPF (11 digits), validate it. Otherwise assume passport/RG.
+        digits = re.sub(r'\D', '', doc_id)
+        if len(digits) == 11:
+            valid_cpf, msg_cpf = validate_cpf(doc_id)
+            if not valid_cpf:
+                log_action('Validation Error', f"Checkin - Invalid CPF: {doc_id} - {msg_cpf}", department='Recepção')
+                flash(f'Erro no Check-in: {msg_cpf}')
+                return redirect(url_for('reception.reception_rooms'))
+
+    if email:
+        valid_email, msg_email = validate_email(email)
+        if not valid_email:
+            log_action('Validation Error', f"Checkin - Invalid Email: {email} - {msg_email}", department='Recepção')
+            flash(f'Erro no Check-in: {msg_email}')
+            return redirect(url_for('reception.reception_rooms'))
+
+    if phone:
+        valid_phone, msg_phone = validate_phone(phone)
+        if not valid_phone:
+            log_action('Validation Error', f"Checkin - Invalid Phone: {phone} - {msg_phone}", department='Recepção')
+            flash(f'Erro no Check-in: {msg_phone}')
+            return redirect(url_for('reception.reception_rooms'))
+
+    valid_in, msg_in = validate_date(checkin_date, '%Y-%m-%d')
+    valid_out, msg_out = validate_date(checkout_date, '%Y-%m-%d')
+    if not (valid_in and valid_out):
+        log_action('Validation Error', f"Checkin - Invalid Dates: {checkin_date}/{checkout_date} - {msg_in or msg_out}", department='Recepção')
+        flash(f'Erro no Check-in: {msg_in or msg_out}')
+        return redirect(url_for('reception.reception_rooms'))
+
+    try:
+        num_adults = int(num_adults_raw)
+        if num_adults < 1: raise ValueError
+    except ValueError:
+        flash('Erro no Check-in: Número de adultos inválido.')
+        return redirect(url_for('reception.reception_rooms'))
+
+    # Format room number
+    room_num = format_room_number(room_num_raw)
+    
+    # Validation: Check if room is already occupied
+    if str(room_num) in occupancy:
+        current_guest = occupancy[str(room_num)].get('guest_name', 'Hóspede Desconhecido')
+        # Allow update ONLY if guest name matches exactly (Edit Check-in scenario)
+        # Otherwise, block to prevent overwrite
+        if current_guest.lower() != guest_name.lower():
+            log_action('Checkin Blocked', f"Attempt to overwrite occupied room {room_num} ({current_guest}) with {guest_name}", department='Recepção')
+            flash(f'Erro: Quarto {room_num} já está ocupado por {current_guest}. Realize o check-out ou verifique o número do quarto.')
+            return redirect(url_for('reception.reception_rooms'))
+        else:
+            # It's an update for the same guest
+            log_action('Checkin Update', f"Updating info for {guest_name} in room {room_num}", department='Recepção')
+    
+    # Logic continues
+    if room_num and guest_name:
+        # Convert dates to DD/MM/YYYY for storage/display
+        try:
+            if checkin_date:
+                checkin_date = datetime.strptime(checkin_date, '%Y-%m-%d').strftime('%d/%m/%Y')
+            if checkout_date:
+                checkout_date = datetime.strptime(checkout_date, '%Y-%m-%d').strftime('%d/%m/%Y')
+        except ValueError:
+            pass # Already validated above, but safety net
+
+        # 3. Update Reservation Status (if linked)
+        reservation_id = request.form.get('reservation_id')
+        
+        # Heuristic: Try to find reservation if not provided but matches upcoming
+        if not reservation_id and room_num in upcoming_checkins:
+            upcoming = upcoming_checkins[room_num]
+            # Fuzzy match name? Or just assume if it's the allocated room for today
+            if upcoming.get('guest', '').lower() == guest_name.lower():
+                reservation_id = upcoming.get('id')
+
+        if reservation_id:
+            try:
+                res_service = ReservationService()
+                res_service.update_reservation_status(reservation_id, 'Checked-in')
+                log_action('Reservation Updated', f"Reservation {reservation_id} status set to Checked-in", department='Recepção')
+            except Exception as e:
+                print(f"Error updating reservation status: {e}")
+
+        occupancy[room_num] = {
+            'guest_name': guest_name,
+            'checkin': checkin_date,
+            'checkout': checkout_date,
+            'num_adults': num_adults,
+            'checked_in_at': datetime.now().strftime('%d/%m/%Y %H:%M'),
+            'reservation_id': reservation_id # Link stored
+        }
+        save_room_occupancy(occupancy)
+        
+        # Automatically open restaurant table for the room
+        orders = load_table_orders()
+        if str(room_num) not in orders:
+            orders[str(room_num)] = {
+                'items': [], 
+                'total': 0, 
+                'status': 'open', 
+                'opened_at': datetime.now().strftime('%d/%m/%Y %H:%M'),
+                'num_adults': num_adults,
+                'customer_type': 'hospede',
+                'room_number': str(room_num)
+            }
+            save_table_orders(orders)
+            log_action('Check-in', f'Check-in Quarto {room_num} - {guest_name}', department='Recepção')
+            flash(f'Check-in realizado e Mesa {room_num} aberta automaticamente.')
+        else:
+            # Update existing order details if needed
+            orders[str(room_num)]['num_adults'] = num_adults
+            orders[str(room_num)]['room_number'] = str(room_num) # ensure link
+            save_table_orders(orders)
+            log_action('Check-in (Update)', f'Check-in (Atualização) Quarto {room_num} - {guest_name}', department='Recepção')
+            flash(f'Check-in realizado para Quarto {room_num}.')
+            
+    return redirect(url_for('reception.reception_rooms'))

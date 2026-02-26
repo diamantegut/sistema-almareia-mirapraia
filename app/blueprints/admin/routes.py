@@ -12,7 +12,7 @@ from . import admin_bp
 from app.utils.decorators import login_required
 from app.services.logger_service import LoggerService
 from app.services.system_config_manager import DEPARTMENTS
-from app.services.data_service import load_users, save_users, load_ex_employees, normalize_text, load_sales_history, load_menu_items, load_cashier_sessions
+from app.services.data_service import load_users, save_users, load_ex_employees, normalize_text, load_sales_history, load_menu_items, save_menu_items, load_cashier_sessions, secure_save_menu_items
 from app.services.rh_service import load_reset_requests
 from app.services.backup_service import backup_service
 from app.services.logging_service import get_logs, export_logs_to_csv

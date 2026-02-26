@@ -1,0 +1,70 @@
+version: "2"
+type: backend
+tech_stack:
+  - Python
+  - Flask
+  - JSON
+  - Bootstrap 5
+  - Jinja2
+features:
+  - name: Reception Rooms Management
+    description: Manage room occupancy, guest check-in/out, transfers, and billing.
+    files:
+      - app/blueprints/reception/routes.py
+      - app/templates/reception_rooms.html
+      - app/services/reservation_service.py
+      - app/services/cashier_service.py
+    endpoints:
+      - method: GET
+        path: /reception/rooms
+        description: View dashboard with room status grid and modals.
+        auth_required: true
+        response_schema:
+          "200": HTML Page
+      - method: POST
+        path: /reception/rooms
+        description: Handle form submissions for check-in, check-out, transfer, etc.
+        auth_required: true
+        request_schema:
+          body:
+            action: string (checkin|checkout|transfer|edit_guest_name|add_charge|pay_charge)
+            room_number: string
+            guest_name: string
+            doc_id: string
+            email: string
+            phone: string
+            checkin_date: string (YYYY-MM-DD)
+            checkout_date: string (YYYY-MM-DD)
+            num_adults: integer
+            reservation_id: string
+        response_schema:
+          "302": Redirect to /reception/rooms
+          "400": Validation Error (Flash Message)
+      - method: POST
+        path: /reception/experiences/launch
+        description: Launch an experience for a guest.
+        auth_required: true
+        request_schema:
+          body:
+            room_number: string
+            guest_name: string
+            experience_id: string
+            collaborator_name: string
+            scheduled_date: string (ISO)
+            notes: string
+        response_schema:
+          "200": JSON Success Response
+          "400": JSON Error Response
+    depends_on:
+      - Authentication (Login Required)
+      - Permission Check (Reception Role)
+      - Room Occupancy Data (JSON)
+      - Reservation Service (Upcoming Checkins)
+      - Cashier Service (Payments)
+known_limitations:
+  - issue: No strict input validation on frontend for some fields (relies on backend).
+    location: app/templates/reception_rooms.html
+    impact: Possible server errors on bad input.
+  - issue: Check-in modal relies on JS global function which was fragile (fixed).
+    location: app/templates/reception_rooms.html
+    impact: User could not open check-in modal.

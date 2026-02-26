@@ -173,17 +173,20 @@ def print_system_notification(ip, title, message, printer_port=9100, is_windows=
         cmd += CUT
         
         if is_windows and windows_name:
-            send_to_windows_printer(windows_name, cmd)
+            success, error = send_to_windows_printer(windows_name, cmd)
+            if not success:
+                logger.error(f"Error printing system notification to Windows printer {windows_name}: {error}")
+                return False
         else:
             # Network print
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                s.settimeout(5)
-                s.connect((ip, int(printer_port)))
-                s.sendall(cmd)
+            success, error = send_to_printer(ip, int(printer_port), cmd)
+            if not success:
+                logger.error(f"Error printing system notification to {ip}:{printer_port}: {error}")
+                return False
                 
         return True
     except Exception as e:
-        print(f"Error printing system notification to {ip if not is_windows else windows_name}: {e}")
+        logger.error(f"Error printing system notification to {ip if not is_windows else windows_name}: {e}")
         return False
 
 def print_cashier_ticket(printer_config, type_str, amount, user, reason):
@@ -448,6 +451,13 @@ def print_order_items(table_id, waiter_name, new_items, printers_config, product
         
         for item in new_items:
             p_name = item['name']
+            
+            # Check for "Não Imprimir" observation to skip printing
+            observations = item.get('observations', [])
+            if 'Não Imprimir' in observations:
+                logger.info(f"Skipping print for item {p_name} due to 'Não Imprimir' observation.")
+                continue
+
             flags = product_flags.get(p_name, {})
             should_print_flag = flags.get('should_print', True)
             printer_id = product_printer_map.get(p_name)

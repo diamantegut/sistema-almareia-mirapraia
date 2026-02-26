@@ -35,6 +35,16 @@ class TestReceptionE2E(unittest.TestCase):
         self.original_charges_file = data_service.ROOM_CHARGES_FILE
         self.original_orders_file = data_service.TABLE_ORDERS_FILE
         
+        # Also patch app module attributes if they exist (since data_service checks app first)
+        import app
+        self.original_app_occupancy = getattr(app, 'ROOM_OCCUPANCY_FILE', None)
+        self.original_app_charges = getattr(app, 'ROOM_CHARGES_FILE', None)
+        
+        if hasattr(app, 'ROOM_OCCUPANCY_FILE'):
+            app.ROOM_OCCUPANCY_FILE = os.path.join(TEST_DATA_DIR, 'room_occupancy.json')
+        if hasattr(app, 'ROOM_CHARGES_FILE'):
+            app.ROOM_CHARGES_FILE = os.path.join(TEST_DATA_DIR, 'room_charges.json')
+            
         data_service.ROOM_OCCUPANCY_FILE = os.path.join(TEST_DATA_DIR, 'room_occupancy.json')
         data_service.CLEANING_STATUS_FILE = os.path.join(TEST_DATA_DIR, 'cleaning_status.json')
         data_service.ROOM_CHARGES_FILE = os.path.join(TEST_DATA_DIR, 'room_charges.json')
@@ -51,6 +61,12 @@ class TestReceptionE2E(unittest.TestCase):
 
     def tearDown(self):
         # Restore original paths
+        import app
+        if self.original_app_occupancy is not None:
+            app.ROOM_OCCUPANCY_FILE = self.original_app_occupancy
+        if self.original_app_charges is not None:
+            app.ROOM_CHARGES_FILE = self.original_app_charges
+            
         data_service.ROOM_OCCUPANCY_FILE = self.original_occupancy_file
         data_service.CLEANING_STATUS_FILE = self.original_cleaning_file
         data_service.ROOM_CHARGES_FILE = self.original_charges_file
@@ -73,7 +89,6 @@ class TestReceptionE2E(unittest.TestCase):
         checkout_date = (datetime.now() + timedelta(days=2)).strftime('%Y-%m-%d')
         
         data = {
-            'action': 'checkin',
             'room_number': '10',
             'guest_name': 'João Silva',
             'checkin_date': checkin_date,
@@ -84,7 +99,7 @@ class TestReceptionE2E(unittest.TestCase):
             'phone': '11999999999'
         }
         
-        response = self.client.post('/reception/rooms', data=data, follow_redirects=True)
+        response = self.client.post('/reception/checkin', data=data, follow_redirects=True)
         self.assertEqual(response.status_code, 200)
         
         # Verify Persistence
@@ -100,37 +115,29 @@ class TestReceptionE2E(unittest.TestCase):
         print("\n--- Testing Invalid Check-in ---")
         
         # Case 1: Missing Required Fields
-        response = self.client.post('/reception/rooms', data={'action': 'checkin'}, follow_redirects=True)
-        self.assertIn(b'Erro', response.data) # Expecting some error message
+        response = self.client.post('/reception/checkin', data={}, follow_redirects=True)
+        # Expecting 'Erro no Check-in' as per routes.py implementation
+        self.assertIn(b'Erro no Check-in', response.data) 
         
         # Case 2: Occupied Room
         # First checkin
         save_room_occupancy({'10': {'guest_name': 'Occupant'}})
         
         data = {
-            'action': 'checkin',
             'room_number': '10',
             'guest_name': 'New Guest',
             'checkin_date': datetime.now().strftime('%Y-%m-%d'),
             'checkout_date': (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
         }
         
-        # Depending on logic, it might overwrite or fail. 
-        # Ideally, it should fail or warn. The current logic usually checks if occupied in UI, 
-        # but backend might overwrite if not strictly blocked. 
-        # Let's check the current implementation behavior via test.
-        # Actually, looking at routes.py, it just writes: occupancy[room_num] = {...}
-        # It DOES NOT check if already occupied in the `checkin` block explicitly in the code I read earlier?
-        # Wait, I see `if room_num and guest_name:` then `occupancy[room_num] = ...`. 
-        # So it might overwrite. Let's verify this behavior.
+        response = self.client.post('/reception/checkin', data=data, follow_redirects=True)
         
-        response = self.client.post('/reception/rooms', data=data, follow_redirects=True)
-        self.assertEqual(response.status_code, 200)
+        # Should contain error message about occupied room
+        self.assertIn(b'Erro: Quarto 10', response.data)
         
         occupancy = load_room_occupancy()
-        # If it overwrites, this confirms the behavior (which might be a bug or feature)
-        # Ideally, we want to know if it blocked it.
-        # If the UI disables the button, backend might not check.
+        # Should still be 'Occupant'
+        self.assertEqual(occupancy['10']['guest_name'], 'Occupant')
         
         print("✓ Invalid check-in handled (Behavior verified)")
 

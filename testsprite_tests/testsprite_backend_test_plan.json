@@ -1,0 +1,52 @@
+[
+  {
+    "id": "TC001",
+    "title": "get reception rooms with valid authentication",
+    "description": "Test GET /reception/rooms endpoint with a valid session cookie and reception role to ensure it returns a 200 HTML page containing the room status grid and modals."
+  },
+  {
+    "id": "TC002",
+    "title": "get reception rooms without authentication or insufficient permissions",
+    "description": "Test GET /reception/rooms endpoint without authentication or with insufficient permissions to verify it returns a 302 redirect to /login or a 403 access denied response."
+  },
+  {
+    "id": "TC003",
+    "title": "post reception rooms checkin with valid data",
+    "description": "Test POST /reception/rooms with action 'checkin' and all required fields provided, ensuring it returns a 302 redirect to /reception/rooms indicating successful check-in."
+  },
+  {
+    "id": "TC004",
+    "title": "post reception rooms checkin with missing required fields",
+    "description": "Test POST /reception/rooms with action 'checkin' but missing required fields such as guest_name or checkin_date, expecting a 400 validation error with a flash message."
+  },
+  {
+    "id": "TC005",
+    "title": "post reception rooms checkout for occupied room",
+    "description": "Test POST /reception/rooms with action 'checkout' for a room that is currently occupied, expecting a 302 redirect to /reception/rooms indicating successful checkout."
+  },
+  {
+    "id": "TC006",
+    "title": "post reception rooms checkout for unoccupied room",
+    "description": "Test POST /reception/rooms with action 'checkout' for a room that is not currently occupied, expecting a 400 validation error with a flash message."
+  },
+  {
+    "id": "TC007",
+    "title": "post reception rooms transfer to available room",
+    "description": "Test POST /reception/rooms with action 'transfer' to a target room that is available, expecting a 302 redirect to /reception/rooms indicating successful transfer."
+  },
+  {
+    "id": "TC008",
+    "title": "post reception rooms transfer to occupied room",
+    "description": "Test POST /reception/rooms with action 'transfer' where the target room is already occupied, expecting a 400 validation error with a flash message."
+  },
+  {
+    "id": "TC009",
+    "title": "post reception rooms add charge with valid details",
+    "description": "Test POST /reception/rooms with action 'add_charge' and valid charge details, expecting a 302 redirect to /reception/rooms indicating the charge was added successfully."
+  },
+  {
+    "id": "TC010",
+    "title": "post reception experiences launch with valid data",
+    "description": "Test POST /reception/experiences/launch with all required fields including a valid experience_id and scheduled_date in the future, expecting a 200 JSON success response."
+  }
+]

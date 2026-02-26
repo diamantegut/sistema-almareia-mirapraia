@@ -30,7 +30,6 @@ if not exist "%BASE_DIR%\scripts\check_ngrok_config.py" (
 )
 
 set "PYTHON=python"
-set "NGROK_ENV=development"
 set "NGROK_DOMAIN=syrupy-jaliyah-intracranial.ngrok-free.dev"
 set "GUEST_DOMAIN=hospedes.almareia.mirapraia.ngrok.app"
 
@@ -44,6 +43,14 @@ echo.
 echo.
 set /p server_port="Digite a porta do servidor (Ex: 5000, 5001): "
 if "%server_port%"=="" goto ASK_PORT
+
+if "%server_port%"=="5000" (
+    set "NGROK_ENV=production"
+    echo [INFO] Modo de Producao detectado - Porta 5000.
+) else (
+    set "NGROK_ENV=development"
+    echo [INFO] Modo de Desenvolvimento detectado.
+)
 
 :ASK_NGROK
 echo.

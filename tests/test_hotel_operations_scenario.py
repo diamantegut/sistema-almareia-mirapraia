@@ -109,7 +109,6 @@ class TestHotelOperationsScenario(unittest.TestCase):
             guests.append({'room': room, 'name': guest_name})
             
             checkin_data = {
-                'action': 'checkin',
                 'room_number': room,
                 'guest_name': guest_name,
                 'checkin_date': datetime.now().strftime('%Y-%m-%d'),
@@ -117,7 +116,7 @@ class TestHotelOperationsScenario(unittest.TestCase):
                 'num_adults': 2
             }
             
-            resp = self.client.post('/reception/rooms', data=checkin_data, follow_redirects=True)
+            resp = self.client.post('/reception/checkin', data=checkin_data, follow_redirects=True)
             self.assertEqual(resp.status_code, 200, f"Check-in failed for room {room}")
             
         # Verify Check-ins
