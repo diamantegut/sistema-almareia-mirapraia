@@ -74,6 +74,10 @@
                                     </button>
                                 </div>
                                 
+                                <button class="btn btn-outline-success btn-sm w-100 mb-2" onclick="openLaunchExperienceModal('{{ room_num }}', '{{ data.guest_name }}')">
+                                    <i class="bi bi-ticket-perforated"></i> Lançar Experiência
+                                </button>
+                                
                                 {% if room_num in pending_rooms %}
                                 <div class="alert alert-warning py-1 px-2 mb-2 small">
                                     <i class="bi bi-exclamation-triangle-fill"></i> Contas Pendentes
@@ -2368,6 +2372,108 @@
             }
         }
     });
+</script>
+
+<!-- Launch Experience Modal -->
+<div class="modal fade" id="launchExperienceModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="bi bi-ticket-perforated"></i> Lançar Experiência</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="launchExperienceForm">
+                    <input type="hidden" id="launchRoomNumber" name="room_number">
+                    <input type="hidden" id="launchGuestName" name="guest_name">
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Quarto / Hóspede</label>
+                        <input type="text" class="form-control" id="launchRoomGuestDisplay" readonly>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Experiência *</label>
+                        <select class="form-select" name="experience_id" required>
+                            <option value="">Selecione...</option>
+                            {% for exp in experiences %}
+                            <option value="{{ exp.id }}">{{ exp.name }} - R$ {{ "%.2f"|format(exp.guest_price|float) }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Colaborador (Venda) *</label>
+                        <input type="text" class="form-control" name="collaborator_name" required placeholder="Nome do colaborador que vendeu" list="collaboratorsList">
+                        <datalist id="collaboratorsList">
+                            {% for c in collaborators %}
+                                <option value="{{ c }}">
+                            {% endfor %}
+                        </datalist>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Data Agendada</label>
+                        <input type="datetime-local" class="form-control" name="scheduled_date">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Observações</label>
+                        <textarea class="form-control" name="notes" rows="2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" onclick="submitLaunchExperience()">Lançar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function openLaunchExperienceModal(room, guest) {
+    const form = document.getElementById('launchExperienceForm');
+    form.reset();
+    document.getElementById('launchRoomNumber').value = room;
+    document.getElementById('launchGuestName').value = guest;
+    document.getElementById('launchRoomGuestDisplay').value = `Quarto ${room} - ${guest}`;
+    
+    // Set default scheduled date to now (ISO format for datetime-local: YYYY-MM-DDTHH:mm)
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    document.getElementsByName('scheduled_date')[0].value = now.toISOString().slice(0, 16);
+    
+    new bootstrap.Modal(document.getElementById('launchExperienceModal')).show();
+}
+
+function submitLaunchExperience() {
+    const form = document.getElementById('launchExperienceForm');
+    const formData = new FormData(form);
+    
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+
+    fetch('/reception/experiences/launch', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Experiência lançada com sucesso!');
+            bootstrap.Modal.getInstance(document.getElementById('launchExperienceModal')).hide();
+        } else {
+            alert('Erro ao lançar: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Erro ao processar solicitação.');
+    });
+}
 </script>
 
 <script src="{{ url_for('static', filename='js/guest_view.js') }}"></script>

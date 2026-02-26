@@ -309,15 +309,28 @@ class SefazService:
             
             status = c_stat.text
             message = x_motivo.text
-            
-            if status not in ['137', '138']: # 137: Nenhum documento, 138: Documentos encontrados
-                return {"success": False, "cStat": status, "message": message}
-            
+
             ult_nsu = ret.find('{http://www.portalfiscal.inf.br/nfe}ultNSU')
-            if ult_nsu is None: ult_nsu = find_all_by_tag(ret, 'ultNSU')[0]
+            if ult_nsu is None: 
+                l = find_all_by_tag(ret, 'ultNSU')
+                ult_nsu = l[0] if l else None
             
             max_nsu = ret.find('{http://www.portalfiscal.inf.br/nfe}maxNSU')
-            if max_nsu is None: max_nsu = find_all_by_tag(ret, 'maxNSU')[0]
+            if max_nsu is None: 
+                l = find_all_by_tag(ret, 'maxNSU')
+                max_nsu = l[0] if l else None
+
+            ult_nsu_val = ult_nsu.text if ult_nsu is not None else None
+            max_nsu_val = max_nsu.text if max_nsu is not None else None
+            
+            if status not in ['137', '138']: # 137: Nenhum documento, 138: Documentos encontrados
+                return {
+                    "success": False, 
+                    "cStat": status, 
+                    "message": message,
+                    "ultNSU": ult_nsu_val,
+                    "maxNSU": max_nsu_val
+                }
             
             lote = ret.find('{http://www.portalfiscal.inf.br/nfe}loteDistDFeInt')
             if lote is None:
@@ -345,8 +358,8 @@ class SefazService:
                 "success": True,
                 "cStat": status,
                 "message": message,
-                "ultNSU": ult_nsu.text,
-                "maxNSU": max_nsu.text,
+                "ultNSU": ult_nsu_val,
+                "maxNSU": max_nsu_val,
                 "documents": docs
             }
             

@@ -11,7 +11,8 @@ from decimal import Decimal, ROUND_HALF_UP
 from datetime import datetime, timedelta
 from app.services.system_config_manager import (
     get_data_path, get_fiscal_path, PENDING_FISCAL_EMISSIONS_FILE, 
-    FISCAL_NSU_FILE, FISCAL_SETTINGS_FILE, FISCAL_SEFAZ_BLOCK_FILE
+    FISCAL_NSU_FILE, FISCAL_SETTINGS_FILE, FISCAL_SEFAZ_BLOCK_FILE,
+    FISCAL_SEFAZ_LAST_CHECK_FILE, FISCAL_SEFAZ_LOCK_FILE
 )
 from app.services.printing_service import print_fiscal_receipt
 from app.services.printer_manager import load_printer_settings, load_printers
@@ -888,6 +889,29 @@ def set_sefaz_block_for_one_hour():
     except Exception as e:
         logger.error(f"Error saving SEFAZ block status: {e}")
 
+def get_sefaz_last_check():
+    path = FISCAL_SEFAZ_LAST_CHECK_FILE
+    if not os.path.exists(path):
+        return None
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception:
+        return None
+
+def save_sefaz_last_check(cstat, message=""):
+    path = FISCAL_SEFAZ_LAST_CHECK_FILE
+    try:
+        data = {
+            'timestamp': datetime.now().isoformat(),
+            'cStat': str(cstat),
+            'message': message
+        }
+        with open(path, 'w', encoding='utf-8') as f:
+            json.dump(data, f)
+    except Exception as e:
+        logger.error(f"Error saving SEFAZ last check: {e}")
+
 def _get_sefaz_service_instance(settings):
     pfx_path = settings.get('certificate_path')
     pfx_password = settings.get('certificate_password')
@@ -908,13 +932,69 @@ def _get_sefaz_service_instance(settings):
         
     return SefazService(pfx_path, pfx_password)
 
+def get_sefaz_lock_status():
+    if not os.path.exists(FISCAL_SEFAZ_LOCK_FILE):
+        return False
+    try:
+        with open(FISCAL_SEFAZ_LOCK_FILE, 'r') as f:
+            data = json.load(f)
+            timestamp = datetime.fromisoformat(data['timestamp'])
+            # 2 minutes timeout
+            if (datetime.now() - timestamp).total_seconds() > 120:
+                return False
+            return True
+    except:
+        return False
+
+def set_sefaz_lock():
+    try:
+        with open(FISCAL_SEFAZ_LOCK_FILE, 'w') as f:
+            json.dump({'timestamp': datetime.now().isoformat()}, f)
+    except Exception as e:
+        logger.error(f"Error setting sefaz lock: {e}")
+
+def release_sefaz_lock():
+    try:
+        if os.path.exists(FISCAL_SEFAZ_LOCK_FILE):
+            os.remove(FISCAL_SEFAZ_LOCK_FILE)
+    except Exception as e:
+        logger.error(f"Error releasing sefaz lock: {e}")
+
 def _list_received_nfes_sefaz(settings):
+    # Check lock to prevent race conditions (Consumo Indevido)
+    if get_sefaz_lock_status():
+        return None, "Sincronização com a SEFAZ já em andamento. Aguarde alguns instantes."
+    
+    set_sefaz_lock()
+    try:
+        return _execute_sefaz_search(settings)
+    finally:
+        release_sefaz_lock()
+
+def _execute_sefaz_search(settings):
     block_until = get_sefaz_block_until()
     if block_until and datetime.now() < block_until:
         remaining = block_until - datetime.now()
         minutes = int(remaining.total_seconds() / 60)
         return None, f"As consultas DF-e foram temporariamente bloqueadas pela SEFAZ por 'Consumo Indevido'. Aguarde {minutes} minutos."
     
+    # Check last check to prevent 656
+    last_check = get_sefaz_last_check()
+    if last_check:
+        try:
+            last_ts = datetime.fromisoformat(last_check['timestamp'])
+            cstat = str(last_check.get('cStat'))
+            
+            # If last result was "No documents" (137), wait 1 hour
+            if cstat == '137':
+                elapsed = (datetime.now() - last_ts).total_seconds()
+                if elapsed < 3600:
+                    wait_min = int((3600 - elapsed) / 60)
+                    # If user wants to force check, they can delete the file manually, but we protect normally
+                    return None, f"Consulta recente sem documentos. Aguarde {wait_min} minutos para nova consulta."
+        except Exception as e:
+            logger.error(f"Error checking last sefaz check: {e}")
+
     service = _get_sefaz_service_instance(settings)
     if not service:
         return None, "Certificado digital não configurado ou inválido (verifique data/certs)."
@@ -937,12 +1017,21 @@ def _list_received_nfes_sefaz(settings):
                 logger.info(f"Consultando SEFAZ Direto (NSU {last_nsu})...")
                 result = service.consultar_distribuicao_dfe(cnpj, ult_nsu=last_nsu, ambiente=ambiente)
                 
+                # Handle 137 (No documents) - Success but stop
+                if str(result.get('cStat')) == '137':
+                    save_sefaz_last_check('137', 'Nenhum documento localizado')
+                    ult_nsu_retorno = result.get('ultNSU')
+                    if ult_nsu_retorno and int(ult_nsu_retorno) > int(last_nsu):
+                        save_last_nsu(ult_nsu_retorno)
+                    break
+
                 if not result['success']:
                     if str(result.get('cStat')) == '656':
                         ult_nsu_retorno = result.get('ultNSU')
                         try:
                             if ult_nsu_retorno and int(ult_nsu_retorno) > int(last_nsu):
                                 save_last_nsu(ult_nsu_retorno)
+                                logger.warning(f"NSU atualizado para {ult_nsu_retorno} via resposta 656 (Consumo Indevido).")
                         except Exception:
                             pass
                         set_sefaz_block_for_one_hour()
@@ -951,14 +1040,6 @@ def _list_received_nfes_sefaz(settings):
                             return all_documents, f"{msg} (Parcialmente sincronizado)"
                         return None, msg
                     
-                    # Se erro for 137 (Nenhum documento), paramos
-                    if str(result.get('cStat')) == '137':
-                        # Mas se tiver ultNSU, salvamos para não consultar o mesmo de novo
-                        ult_nsu_retorno = result.get('ultNSU')
-                        if ult_nsu_retorno and int(ult_nsu_retorno) > int(last_nsu):
-                            save_last_nsu(ult_nsu_retorno)
-                        break
-                        
                     return None, f"Erro SEFAZ: {result.get('message')} (cStat: {result.get('cStat')})"
                     
                 ult_nsu_retorno = result.get('ultNSU')

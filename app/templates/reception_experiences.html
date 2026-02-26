@@ -3,6 +3,68 @@
 {% block title %}Gerenciar Experiências - Almareia Mirapraia{% endblock %}
 
 {% block content %}
+<style>
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        #reportModal, #reportModal .modal-body, #reportModal .modal-body * {
+            visibility: visible;
+        }
+        #reportModal {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: auto;
+            overflow: visible !important;
+            background: white;
+        }
+        .modal-dialog {
+            margin: 0;
+            padding: 0;
+            max-width: none;
+            width: 100%;
+        }
+        .modal-content {
+            border: none;
+            box-shadow: none;
+        }
+        .modal-header, .modal-footer, .d-print-none {
+            display: none !important;
+        }
+        
+        /* 80mm Thermal Printer Optimization */
+        @page {
+            size: 80mm auto;
+            margin: 0;
+        }
+        
+        .table-responsive {
+            overflow: visible !important;
+        }
+        
+        table {
+            width: 100% !important;
+            font-size: 10px; /* Small font for thermal */
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 2px 1px !important;
+            border-bottom: 1px solid #000 !important;
+            white-space: normal; /* Allow wrapping */
+        }
+        
+        /* Hide less critical columns for thermal print if space is tight */
+        /* Keeping basics: Date, Guest, Exp, Supplier, Collab, Comm values */
+        
+        /* Ensure black text */
+        * {
+            color: black !important;
+        }
+    }
+</style>
 <div class="container-fluid px-4 py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
@@ -13,6 +75,9 @@
             <a href="{{ url_for('reception.guest_experiences_menu') }}" target="_blank" class="btn btn-outline-info">
                 <i class="bi bi-box-arrow-up-right"></i> Ver Menu Digital
             </a>
+            <button class="btn btn-info text-white" data-bs-toggle="modal" data-bs-target="#reportModal">
+                <i class="bi bi-file-earmark-text"></i> Relatório
+            </button>
             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createExpModal">
                 <i class="bi bi-plus-lg"></i> Nova Experiência
             </button>
@@ -131,51 +196,116 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="row g-3">
-                        <div class="col-md-8">
-                            <label class="form-label">Nome da Experiência *</label>
-                            <input type="text" class="form-control" name="name" required>
+                    <ul class="nav nav-tabs mb-3" id="createExpTabs" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active" id="create-general-tab" data-bs-toggle="tab" data-bs-target="#create-general" type="button">Geral</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" id="create-internal-tab" data-bs-toggle="tab" data-bs-target="#create-internal" type="button">Interno</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content">
+                        <!-- General Tab -->
+                        <div class="tab-pane fade show active" id="create-general">
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <label class="form-label">Nome da Experiência *</label>
+                                    <input type="text" class="form-control" name="name" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Tipo *</label>
+                                    <select class="form-select" name="type" required>
+                                        <option value="Gastronômica">Gastronômica</option>
+                                        <option value="Passeios">Passeios</option>
+                                        <option value="Bem-estar">Bem-estar</option>
+                                        <option value="Ensaio Fotográfico">Ensaio Fotográfico</option>
+                                        <option value="Romântico">Romântico</option>
+                                        <option value="Outros">Outros</option>
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Descrição Detalhada *</label>
+                                    <textarea class="form-control" name="description" rows="4" required></textarea>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Duração Estimada</label>
+                                    <input type="text" class="form-control" name="duration" placeholder="Ex: 2 horas">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Mín. Pessoas</label>
+                                    <input type="number" class="form-control" name="min_people" value="1" min="1">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Máx. Pessoas</label>
+                                    <input type="number" class="form-control" name="max_people" value="4" min="1">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Preço / Valor (Opcional)</label>
+                                    <input type="text" class="form-control" name="price" placeholder="Ex: R$ 250,00 por pessoa">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Ativo?</label>
+                                    <div class="form-check form-switch mt-2">
+                                        <input class="form-check-input" type="checkbox" name="is_active" checked>
+                                        <label class="form-check-label">Exibir no Menu Digital</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Fotos (Max 6)</label>
+                                    <input type="file" class="form-control" name="images" accept="image/*" multiple>
+                                    <div class="form-text">Formatos: JPG, PNG. Serão redimensionadas automaticamente.</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Vídeo (Opcional)</label>
+                                    <input type="file" class="form-control" name="video" accept="video/mp4,video/quicktime,video/webm">
+                                    <div class="form-text">Formatos: MP4, MOV, WEBM.</div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Tipo *</label>
-                            <select class="form-select" name="type" required>
-                                <option value="Gastronômica">Gastronômica</option>
-                                <option value="Passeios">Passeios</option>
-                                <option value="Bem-estar">Bem-estar</option>
-                                <option value="Ensaio Fotográfico">Ensaio Fotográfico</option>
-                                <option value="Romântico">Romântico</option>
-                                <option value="Outros">Outros</option>
-                            </select>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label">Descrição Detalhada *</label>
-                            <textarea class="form-control" name="description" rows="4" required></textarea>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Duração Estimada</label>
-                            <input type="text" class="form-control" name="duration" placeholder="Ex: 2 horas">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Mín. Pessoas</label>
-                            <input type="number" class="form-control" name="min_people" value="1" min="1">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Máx. Pessoas</label>
-                            <input type="number" class="form-control" name="max_people" value="4" min="1">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Preço / Valor (Opcional)</label>
-                            <input type="text" class="form-control" name="price" placeholder="Ex: R$ 250,00 por pessoa">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Fotos (Max 6)</label>
-                            <input type="file" class="form-control" name="images" accept="image/*" multiple>
-                            <div class="form-text">Formatos: JPG, PNG. Serão redimensionadas automaticamente.</div>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Vídeo (Opcional)</label>
-                            <input type="file" class="form-control" name="video" accept="video/mp4,video/quicktime,video/webm">
-                            <div class="form-text">Formatos: MP4, MOV, WEBM.</div>
+                        <!-- Internal Tab -->
+                        <div class="tab-pane fade" id="create-internal">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Nome do Fornecedor</label>
+                                    <input type="text" class="form-control" name="supplier_name">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Telefone do Fornecedor</label>
+                                    <input type="text" class="form-control" name="supplier_phone">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Preço Fornecedor</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">R$</span>
+                                        <input type="text" class="form-control money" name="supplier_price" id="createSupplierPrice">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Preço Hóspede</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">R$</span>
+                                        <input type="text" class="form-control money" name="guest_price" id="createGuestPrice">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Comissão Esperada (R$)</label>
+                                    <input type="text" class="form-control" name="expected_commission" id="createExpectedCommission" readonly style="background-color: #e9ecef;">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Comissão Venda (R$)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">R$</span>
+                                        <input type="text" class="form-control money" name="sales_commission" id="createSalesCommission">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Comissão Hotel (R$)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">R$</span>
+                                        <input type="text" class="form-control money" name="hotel_commission" id="createHotelCommission">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -198,51 +328,116 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="row g-3">
-                        <div class="col-md-8">
-                            <label class="form-label">Nome da Experiência *</label>
-                            <input type="text" class="form-control" name="name" id="editName" required>
+                    <ul class="nav nav-tabs mb-3" id="editExpTabs" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active" id="edit-general-tab" data-bs-toggle="tab" data-bs-target="#edit-general" type="button">Geral</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" id="edit-internal-tab" data-bs-toggle="tab" data-bs-target="#edit-internal" type="button">Interno</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content">
+                        <!-- General Tab -->
+                        <div class="tab-pane fade show active" id="edit-general">
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <label class="form-label">Nome da Experiência *</label>
+                                    <input type="text" class="form-control" name="name" id="editName" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Tipo *</label>
+                                    <select class="form-select" name="type" id="editType" required>
+                                        <option value="Gastronômica">Gastronômica</option>
+                                        <option value="Passeios">Passeios</option>
+                                        <option value="Bem-estar">Bem-estar</option>
+                                        <option value="Ensaio Fotográfico">Ensaio Fotográfico</option>
+                                        <option value="Romântico">Romântico</option>
+                                        <option value="Outros">Outros</option>
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Descrição Detalhada *</label>
+                                    <textarea class="form-control" name="description" id="editDescription" rows="4" required></textarea>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Duração Estimada</label>
+                                    <input type="text" class="form-control" name="duration" id="editDuration">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Mín. Pessoas</label>
+                                    <input type="number" class="form-control" name="min_people" id="editMinPeople" min="1">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Máx. Pessoas</label>
+                                    <input type="number" class="form-control" name="max_people" id="editMaxPeople" min="1">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Preço / Valor (Opcional)</label>
+                                    <input type="text" class="form-control" name="price" id="editPrice">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Ativo?</label>
+                                    <div class="form-check form-switch mt-2">
+                                        <input class="form-check-input" type="checkbox" name="is_active" id="editIsActive">
+                                        <label class="form-check-label">Exibir no Menu Digital</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Adicionar Fotos</label>
+                                    <input type="file" class="form-control" name="images" accept="image/*" multiple>
+                                    <div class="form-text">Novas fotos serão adicionadas à galeria existente.</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Substituir Vídeo</label>
+                                    <input type="file" class="form-control" name="video" accept="video/mp4,video/quicktime,video/webm">
+                                    <div class="form-text">O vídeo atual será substituído.</div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Tipo *</label>
-                            <select class="form-select" name="type" id="editType" required>
-                                <option value="Gastronômica">Gastronômica</option>
-                                <option value="Passeios">Passeios</option>
-                                <option value="Bem-estar">Bem-estar</option>
-                                <option value="Ensaio Fotográfico">Ensaio Fotográfico</option>
-                                <option value="Romântico">Romântico</option>
-                                <option value="Outros">Outros</option>
-                            </select>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label">Descrição Detalhada *</label>
-                            <textarea class="form-control" name="description" id="editDescription" rows="4" required></textarea>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Duração Estimada</label>
-                            <input type="text" class="form-control" name="duration" id="editDuration">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Mín. Pessoas</label>
-                            <input type="number" class="form-control" name="min_people" id="editMinPeople" min="1">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Máx. Pessoas</label>
-                            <input type="number" class="form-control" name="max_people" id="editMaxPeople" min="1">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Preço / Valor (Opcional)</label>
-                            <input type="text" class="form-control" name="price" id="editPrice">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Adicionar Fotos</label>
-                            <input type="file" class="form-control" name="images" accept="image/*" multiple>
-                            <div class="form-text">Novas fotos serão adicionadas à galeria existente.</div>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Substituir Vídeo</label>
-                            <input type="file" class="form-control" name="video" accept="video/mp4,video/quicktime,video/webm">
-                            <div class="form-text">O vídeo atual será substituído.</div>
+                        <!-- Internal Tab -->
+                        <div class="tab-pane fade" id="edit-internal">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Nome do Fornecedor</label>
+                                    <input type="text" class="form-control" name="supplier_name" id="editSupplierName">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Telefone do Fornecedor</label>
+                                    <input type="text" class="form-control" name="supplier_phone" id="editSupplierPhone">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Preço Fornecedor</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">R$</span>
+                                        <input type="text" class="form-control money" name="supplier_price" id="editSupplierPrice">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Preço Hóspede</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">R$</span>
+                                        <input type="text" class="form-control money" name="guest_price" id="editGuestPrice">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Comissão Esperada (R$)</label>
+                                    <input type="text" class="form-control" name="expected_commission" id="editExpectedCommission" readonly style="background-color: #e9ecef;">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Comissão Venda (R$)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">R$</span>
+                                        <input type="text" class="form-control money" name="sales_commission" id="editSalesCommission">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Comissão Hotel (R$)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">R$</span>
+                                        <input type="text" class="form-control money" name="hotel_commission" id="editHotelCommission">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -256,6 +451,139 @@
 </div>
 
 <script>
+    // Commission Calculation Logic
+    function calculateCommission(prefix) {
+        // Parse helper
+        const parseMoney = (id) => {
+            let el = document.getElementById(id);
+            if (!el) return 0;
+            let val = el.value;
+            if (!val) return 0;
+            
+            // Aggressive cleanup: keep only digits, comma, dot, minus
+            // This handles "R$ 1.200,50", "R$1200.50", "1 200,50", etc.
+            val = val.replace(/[^\d,.-]/g, '');
+            
+            // Handle PT-BR format
+            if (val.includes(',')) {
+                // If there is a comma, it is the decimal separator (PT-BR)
+                // Remove all dots (thousands separators) and replace comma with dot
+                val = val.replace(/\./g, '').replace(',', '.');
+            } else {
+                // No comma. Check for dots.
+                // If the value looks like 1.200 (thousands), remove dot.
+                // If it looks like 1.50 (decimal), keep dot.
+                // Heuristic: If it has dots, and the last chunk is 3 digits, assume thousands.
+                if (val.includes('.')) {
+                    const parts = val.split('.');
+                    const lastPart = parts[parts.length - 1];
+                    if (lastPart.length === 3 && parts.length > 1) {
+                        // Assume thousands separator (e.g. 1.200 or 1.000.000)
+                        val = val.replace(/\./g, '');
+                    }
+                    // Else assume decimal (e.g. 1.50 or 500.50)
+                }
+            }
+            
+            return parseFloat(val) || 0;
+        };
+
+        const formatMoney = (val) => {
+            return val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        };
+
+        // Inputs
+        const supplierVal = parseMoney(prefix + 'SupplierPrice');
+        const guestVal = parseMoney(prefix + 'GuestPrice');
+        const salesComm = parseMoney(prefix + 'SalesCommission');
+        const hotelComm = parseMoney(prefix + 'HotelCommission');
+
+        // Calculate Expected Commission (Margin)
+        // Rule: Expected = Guest - Supplier
+        let expectedComm = 0;
+        if (guestVal > supplierVal) {
+            expectedComm = guestVal - supplierVal;
+        }
+        
+        // Update Expected Commission Field
+        const expectedEl = document.getElementById(prefix + 'ExpectedCommission');
+        if (expectedEl) {
+            expectedEl.value = formatMoney(expectedComm);
+        }
+
+        // Validation
+        // Rule: Sales + Hotel <= Expected
+        const totalDistrib = salesComm + hotelComm;
+        
+        // Visual Feedback
+        const salesEl = document.getElementById(prefix + 'SalesCommission');
+        const hotelEl = document.getElementById(prefix + 'HotelCommission');
+        
+        if (salesEl && hotelEl) {
+            // Remove error classes first
+            salesEl.classList.remove('is-invalid');
+            hotelEl.classList.remove('is-invalid');
+            
+            // Check limits
+            // Use a small tolerance for float comparison
+            if (totalDistrib > expectedComm + 0.01) {
+                salesEl.classList.add('is-invalid');
+                hotelEl.classList.add('is-invalid');
+                
+                // Disable submit button
+                let submitBtn;
+                if (prefix === 'create') {
+                    submitBtn = document.querySelector('#createExpModal button[type="submit"]');
+                } else {
+                    submitBtn = document.querySelector('#editExpModal button[type="submit"]');
+                }
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerText = "Comissão Excede Limite";
+                }
+            } else {
+                // Restore submit button
+                let submitBtn;
+                if (prefix === 'create') {
+                    submitBtn = document.querySelector('#createExpModal button[type="submit"]');
+                } else {
+                    submitBtn = document.querySelector('#editExpModal button[type="submit"]');
+                }
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    if (prefix === 'create') submitBtn.innerText = "Salvar Experiência";
+                    else submitBtn.innerText = "Salvar Alterações";
+                }
+            }
+        }
+    }
+
+    // Attach listeners when DOM loads
+    document.addEventListener('DOMContentLoaded', function() {
+        const prefixes = ['create', 'edit']; 
+        
+        prefixes.forEach(prefix => {
+            const inputs = [
+                prefix + 'SupplierPrice',
+                prefix + 'GuestPrice',
+                prefix + 'SalesCommission',
+                prefix + 'HotelCommission'
+            ];
+            
+            inputs.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    // Listen to multiple events for robustness
+                    el.addEventListener('input', () => calculateCommission(prefix));
+                    el.addEventListener('keyup', () => calculateCommission(prefix));
+                    el.addEventListener('change', () => calculateCommission(prefix));
+                    el.addEventListener('blur', () => calculateCommission(prefix));
+                }
+            });
+        });
+    });
+
+
     function toggleActive(id) {
         fetch(`/reception/experiences/${id}/toggle`, {method: 'POST'})
             .then(r => r.json())
@@ -296,8 +624,217 @@
         document.getElementById('editMinPeople').value = exp.min_people || 1;
         document.getElementById('editMaxPeople').value = exp.max_people || 1;
         document.getElementById('editPrice').value = exp.price || '';
+        document.getElementById('editIsActive').checked = exp.active !== false;
+
+        // Internal fields
+        document.getElementById('editSupplierName').value = exp.supplier_name || '';
+        document.getElementById('editSupplierPhone').value = exp.supplier_phone || '';
+        document.getElementById('editSupplierPrice').value = exp.supplier_price || '';
+        document.getElementById('editGuestPrice').value = exp.guest_price || '';
+        document.getElementById('editExpectedCommission').value = exp.expected_commission || '';
+        document.getElementById('editSalesCommission').value = exp.sales_commission || '';
+        document.getElementById('editHotelCommission').value = exp.hotel_commission || '';
         
+        // Recalculate to ensure consistency and set Expected Commission (R$) correctly
+        // (Since expected_commission stored might be old percentage or just empty)
+        calculateCommission('edit');
+
         modal.show();
+    }
+</script>
+
+<!-- Report Modal -->
+<div class="modal fade" id="reportModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Relatório de Comissões de Experiências</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3 mb-4 d-print-none">
+                    <div class="col-md-3">
+                        <label class="form-label">Data Início</label>
+                        <input type="date" class="form-control" id="filterStartDate">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Data Fim</label>
+                        <input type="date" class="form-control" id="filterEndDate">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Colaborador</label>
+                        <input type="text" class="form-control" id="filterCollaborator" placeholder="Nome">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Fornecedor</label>
+                        <input type="text" class="form-control" id="filterSupplier" placeholder="Nome">
+                    </div>
+                    <div class="col-12 d-flex justify-content-end">
+                        <button class="btn btn-primary" onclick="loadReport()">
+                            <i class="bi bi-search"></i> Filtrar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Hóspede / Quarto</th>
+                                <th>Experiência</th>
+                                <th>Fornecedor</th>
+                                <th>Colaborador</th>
+                                <th>Comissão Venda</th>
+                                <th>Valor Fornecedor</th>
+                                <th>Valor Hóspede</th>
+                                <th>Comissão Hotel</th>
+                                <th class="d-print-none">Status Pagto</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reportTableBody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="5" class="text-end fw-bold">Totais:</td>
+                                <td id="totalSales" class="fw-bold">R$ 0,00</td>
+                                <td id="totalSupplier" class="fw-bold">R$ 0,00</td>
+                                <td id="totalGuest" class="fw-bold">R$ 0,00</td>
+                                <td id="totalCommission" class="fw-bold">R$ 0,00</td>
+                                <td class="d-print-none"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer d-print-none">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-success" onclick="window.print()">
+                    <i class="bi bi-printer"></i> Imprimir
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('reportModal').addEventListener('shown.bs.modal', function () {
+        loadReport();
+    });
+
+    function loadReport() {
+        const params = new URLSearchParams({
+            start_date: document.getElementById('filterStartDate').value,
+            end_date: document.getElementById('filterEndDate').value,
+            collaborator: document.getElementById('filterCollaborator').value,
+            supplier: document.getElementById('filterSupplier').value
+        });
+
+        fetch(`/reception/experiences/report?${params}`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    renderReport(data.data);
+                } else {
+                    console.error('Erro ao carregar relatório: ' + data.message);
+                }
+            })
+            .catch(e => console.error('Erro de conexão'));
+    }
+
+    function renderReport(items) {
+        const tbody = document.getElementById('reportTableBody');
+        tbody.innerHTML = '';
+        
+        let totalSupplier = 0;
+        let totalGuest = 0;
+        let totalCommission = 0;
+        let totalSales = 0;
+
+        if (items.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted">Nenhum registro encontrado</td></tr>';
+        } else {
+            items.forEach(item => {
+                const supplierPrice = parseCurrency(item.supplier_price);
+                const guestPrice = parseCurrency(item.guest_price);
+                const hotelCommission = parseCurrency(item.hotel_commission);
+                const salesCommission = parseCurrency(item.sales_commission);
+
+                totalSupplier += supplierPrice;
+                totalGuest += guestPrice;
+                totalCommission += hotelCommission;
+                totalSales += salesCommission;
+
+                const statusHtml = item.commission_paid
+                    ? `<span class="badge bg-success" onclick="togglePaid('${item.id}')" style="cursor:pointer" title="Clique para desmarcar">Pago <i class="bi bi-check"></i></span>`
+                    : `<button class="btn btn-sm btn-outline-warning py-0 px-2" onclick="togglePaid('${item.id}')" title="Marcar como pago">Pendente</button>`;
+
+                const row = `
+                    <tr>
+                        <td>${formatDate(item.launched_at || item.date)}</td>
+                        <td>${item.guest_name} (Qto ${item.room_number})</td>
+                        <td>${item.experience_name}</td>
+                        <td>${item.supplier_name || '-'}</td>
+                        <td>${item.collaborator_name || '-'}</td>
+                        <td>${formatCurrency(salesCommission)}</td>
+                        <td>${formatCurrency(supplierPrice)}</td>
+                        <td>${formatCurrency(guestPrice)}</td>
+                        <td>${formatCurrency(hotelCommission)}</td>
+                        <td class="d-print-none text-center">${statusHtml}</td>
+                    </tr>
+                `;
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+        }
+
+        document.getElementById('totalSales').textContent = formatCurrency(totalSales);
+        document.getElementById('totalSupplier').textContent = formatCurrency(totalSupplier);
+        document.getElementById('totalGuest').textContent = formatCurrency(totalGuest);
+        document.getElementById('totalCommission').textContent = formatCurrency(totalCommission);
+    }
+
+    function parseCurrency(val) {
+        if (!val) return 0;
+        if (typeof val === 'number') return val;
+        let v = val.replace(/[^\d,.-]/g, '');
+        v = v.replace(/\./g, '');
+        v = v.replace(',', '.');
+        return parseFloat(v) || 0;
+    }
+
+    function formatCurrency(val) {
+        return val.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
+    }
+
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+        try {
+            const date = new Date(dateStr);
+            if(isNaN(date.getTime())) return dateStr;
+            return date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+        } catch(e) { return dateStr; }
+    }
+    
+    function togglePaid(id) {
+        // Prevent event propagation if inside a clickable row
+        event.stopPropagation();
+        
+        if(!confirm('Deseja alterar o status de pagamento desta comissão?')) return;
+        
+        fetch(`/reception/experiences/launch/${id}/toggle_paid`, {method: 'POST'})
+            .then(r => r.json())
+            .then(data => {
+                if(data.success) {
+                    loadReport();
+                } else {
+                    alert('Erro: ' + (data.message || 'Desconhecido'));
+                }
+            })
+            .catch(e => {
+                console.error(e);
+                alert('Erro de conexão');
+            });
     }
 </script>
 

@@ -729,6 +729,10 @@ def reception_rooms():
     printers = load_printers()
     printer_settings = load_printer_settings()
 
+    # Load Active Experiences for Launch Modal
+    experiences = ExperienceService.get_all_experiences(only_active=True)
+    collaborators = ExperienceService.get_unique_collaborators()
+
     return render_template('reception_rooms.html', 
                            occupancy=occupancy, 
                            cleaning_status=cleaning_status,
@@ -740,7 +744,9 @@ def reception_rooms():
                            upcoming_checkins=upcoming_checkins,
                            today=datetime.now().strftime('%Y-%m-%d'),
                            printers=printers,
-                           printer_settings=printer_settings)
+                           printer_settings=printer_settings,
+                           experiences=experiences,
+                           collaborators=collaborators)
 
 @reception_bp.route('/reception/cashier', methods=['GET', 'POST'])
 @login_required
@@ -1306,6 +1312,52 @@ def api_calculate_reservation_update():
         return jsonify({'success': False, 'error': str(e)}), 400
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
+
+@reception_bp.route('/reception/experiences/launch', methods=['POST'])
+@login_required
+def launch_experience():
+    try:
+        data = {
+            'experience_id': request.form.get('experience_id'),
+            'room_number': request.form.get('room_number'),
+            'guest_name': request.form.get('guest_name'),
+            'collaborator_name': request.form.get('collaborator_name'),
+            'scheduled_date': request.form.get('scheduled_date'),
+            'notes': request.form.get('notes')
+        }
+        
+        if ExperienceService.launch_experience(data):
+            return jsonify({'success': True, 'message': 'Experiência lançada com sucesso!'})
+        return jsonify({'success': False, 'message': 'Erro ao lançar experiência.'}), 400
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@reception_bp.route('/reception/experiences/report', methods=['GET'])
+@login_required
+def get_launched_experiences_report():
+    try:
+        filters = {
+            'start_date': request.args.get('start_date'),
+            'end_date': request.args.get('end_date'),
+            'collaborator': request.args.get('collaborator'),
+            'supplier': request.args.get('supplier')
+        }
+        
+        report = ExperienceService.get_launched_experiences(filters)
+        return jsonify({'success': True, 'data': report})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@reception_bp.route('/reception/experiences/launch/<launch_id>/toggle_paid', methods=['POST'])
+@login_required
+def toggle_experience_commission_paid(launch_id):
+    try:
+        new_status = ExperienceService.toggle_commission_paid(launch_id)
+        if new_status is None:
+             return jsonify({'success': False, 'message': 'Lançamento não encontrado'}), 404
+        return jsonify({'success': True, 'paid': new_status})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 @reception_bp.route('/api/reception/move_reservation', methods=['POST'])
 @login_required
@@ -4368,7 +4420,16 @@ def create_experience():
             'max_people': request.form.get('max_people', 1),
             'price': request.form.get('price'),
             'images': saved_images,
-            'video': saved_video
+            'video': saved_video,
+            # Internal Info
+            'active': request.form.get('is_active') == 'on',
+            'supplier_name': request.form.get('supplier_name'),
+            'supplier_phone': request.form.get('supplier_phone'),
+            'supplier_price': request.form.get('supplier_price'),
+            'guest_price': request.form.get('guest_price'),
+            'expected_commission': request.form.get('expected_commission'),
+            'sales_commission': request.form.get('sales_commission'),
+            'hotel_commission': request.form.get('hotel_commission')
         }
         
         if ExperienceService.create_experience(data):
@@ -4416,7 +4477,16 @@ def update_experience(exp_id):
             'max_people': request.form.get('max_people'),
             'price': request.form.get('price'),
             'images': final_images,
-            'video': final_video
+            'video': final_video,
+            # Internal Info
+            'active': request.form.get('is_active') == 'on',
+            'supplier_name': request.form.get('supplier_name'),
+            'supplier_phone': request.form.get('supplier_phone'),
+            'supplier_price': request.form.get('supplier_price'),
+            'guest_price': request.form.get('guest_price'),
+            'expected_commission': request.form.get('expected_commission'),
+            'sales_commission': request.form.get('sales_commission'),
+            'hotel_commission': request.form.get('hotel_commission')
         }
         
         if ExperienceService.update_experience(exp_id, data):
