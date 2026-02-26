@@ -1,0 +1,212 @@
+[
+    {
+        "timestamp": "2026-02-20T18:40:43.301182",
+        "action": "CREATE",
+        "user": "Admin",
+        "item_id": "290",
+        "details": {
+            "id": "290",
+            "name": "Vinho Tinto L'Alchimiste Saint Jean D'aumieres",
+            "category": "Vinhos",
+            "price": 390.0,
+            "cost_price": 171.96,
+            "printer_id": "97e342f3-2ba7-4dc3-9afd-b299b4c7b777",
+            "should_print": true,
+            "description": "",
+            "image": "",
+            "image_url": "",
+            "service_fee_exempt": false,
+            "visible_virtual_menu": true,
+            "highlight": false,
+            "active": true,
+            "recipe": [
+                {
+                    "ingredient_id": "814",
+                    "qty": 1.0
+                }
+            ],
+            "mandatory_questions": [],
+            "flavor_group_id": "",
+            "flavor_multiplier": 1.0,
+            "product_type": "standard",
+            "has_accompaniments": false,
+            "allowed_accompaniments": [],
+            "ncm": "22041010",
+            "cest": "",
+            "transparency_tax": 0.0,
+            "fiscal_benefit_code": "",
+            "cfop": "5102",
+            "origin": "1",
+            "tax_situation": "102",
+            "icms_rate": 0.0,
+            "icms_base_reduction": 0.0,
+            "fcp_rate": 0.0,
+            "pis_cst": "",
+            "pis_rate": 0.0,
+            "cofins_cst": "",
+            "cofins_rate": 0.0,
+            "paused": false,
+            "pause_reason": "",
+            "version": 1,
+            "last_updated": "2026-02-20T18:40:43.301130",
+            "hash": "7add083b6d81c9da334bb0116e70ac285c95a5f1629a1b7373e028c7d41bbbd0"
+        },
+        "changes": [],
+        "hash": "f2cd0c7c9a09335492ecc5ebfe645aa6dcf9c5592b2de3f9c51963c990c7437e"
+    },
+    {
+        "timestamp": "2026-02-20T18:40:43.302071",
+        "action": "BULK_CHANGE_ALERT",
+        "user": "Admin",
+        "item_id": "ALL",
+        "details": {
+            "message": "SECURITY ALERT (MENU): Alterações detectadas: 275 (100.0% > 20%)"
+        },
+        "changes": [],
+        "hash": "c247781b853e889ebfae31fcf20d81d548ba5715b1aca0ef21f9d4a412ae7ba1"
+    },
+    {
+        "timestamp": "2026-02-20T18:42:19.275613",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "190",
+        "details": {
+            "name": "Vinho Branco Petit Chablis Thomas Labille"
+        },
+        "changes": [
+            {
+                "field": "image",
+                "old": "190_1014.jpg",
+                "new": "/Produtos/Fotos/190_1014.jpg"
+            },
+            {
+                "field": "price",
+                "old": 290.0,
+                "new": 590.0
+            },
+            {
+                "field": "cost_price",
+                "old": 132.35,
+                "new": 261.8
+            }
+        ],
+        "hash": "dde33cd25a58adeec14e26904d389d43856610c2c2662b6c047cd714e2180508"
+    },
+    {
+        "timestamp": "2026-02-20T18:49:08.230731",
+        "action": "CREATE",
+        "user": "Admin",
+        "item_id": "291",
+        "details": {
+            "id": "291",
+            "name": "Espumante Barnaut Blanc De Noirs",
+            "category": "Vinhos",
+            "price": 720.0,
+            "cost_price": 432.38,
+            "printer_id": "97e342f3-2ba7-4dc3-9afd-b299b4c7b777",
+            "should_print": true,
+            "description": "",
+            "image": "",
+            "image_url": "",
+            "service_fee_exempt": false,
+            "visible_virtual_menu": true,
+            "highlight": false,
+            "active": true,
+            "recipe": [],
+            "mandatory_questions": [],
+            "flavor_group_id": "",
+            "flavor_multiplier": 1.0,
+            "product_type": "standard",
+            "has_accompaniments": false,
+            "allowed_accompaniments": [],
+            "ncm": "22041010",
+            "cest": "",
+            "transparency_tax": 0.0,
+            "fiscal_benefit_code": "",
+            "cfop": "5102",
+            "origin": "1",
+            "tax_situation": "102",
+            "icms_rate": 0.0,
+            "icms_base_reduction": 0.0,
+            "fcp_rate": 0.0,
+            "pis_cst": "",
+            "pis_rate": 0.0,
+            "cofins_cst": "",
+            "cofins_rate": 0.0,
+            "paused": false,
+            "pause_reason": "",
+            "version": 1,
+            "last_updated": "2026-02-20T18:49:08.230669",
+            "hash": "bd5486fe73acd989e3e7d349e460553bd1c7ddfe238fcf2bffe76b77caa201ca"
+        },
+        "changes": [],
+        "hash": "a260c39965a7255832df67cff505c29ec8176b2286294b8da2467bcdae3feac0"
+    },
+    {
+        "timestamp": "2026-02-20T18:50:11.711762",
+        "action": "CREATE",
+        "user": "Admin",
+        "item_id": "292",
+        "details": {
+            "id": "292",
+            "name": "Vinho Tinto Chateau La Vieille Forge ",
+            "category": "Vinhos",
+            "price": 390.0,
+            "cost_price": 184.97,
+            "printer_id": "97e342f3-2ba7-4dc3-9afd-b299b4c7b777",
+            "should_print": true,
+            "description": "",
+            "image": "",
+            "image_url": "",
+            "service_fee_exempt": false,
+            "visible_virtual_menu": true,
+            "highlight": false,
+            "active": true,
+            "recipe": [],
+            "mandatory_questions": [],
+            "flavor_group_id": "",
+            "flavor_multiplier": 1.0,
+            "product_type": "standard",
+            "has_accompaniments": false,
+            "allowed_accompaniments": [],
+            "ncm": "22041010",
+            "cest": "",
+            "transparency_tax": 0.0,
+            "fiscal_benefit_code": "",
+            "cfop": "5102",
+            "origin": "1",
+            "tax_situation": "102",
+            "icms_rate": 0.0,
+            "icms_base_reduction": 0.0,
+            "fcp_rate": 0.0,
+            "pis_cst": "",
+            "pis_rate": 0.0,
+            "cofins_cst": "",
+            "cofins_rate": 0.0,
+            "paused": false,
+            "pause_reason": "",
+            "version": 1,
+            "last_updated": "2026-02-20T18:50:11.711715",
+            "hash": "3c075c2958443940d2d970c03330cd58dbb3f2371be8799b8c6e3c5c1926ec27"
+        },
+        "changes": [],
+        "hash": "1bbcb8328eb0ee85a02f74db980122c4c351909561a74ede32b3ee55ead37a0b"
+    },
+    {
+        "timestamp": "2026-02-20T20:07:32.751156",
+        "action": "UPDATE",
+        "user": "priscila",
+        "item_id": "44",
+        "details": {
+            "name": "Vieiras"
+        },
+        "changes": [
+            {
+                "field": "active",
+                "old": false,
+                "new": true
+            }
+        ],
+        "hash": "89651008ecb61c2c0bc1e620c6092fa7e9cce92c34d6af5d99d7174fae3ba092"
+    }
+]

@@ -1,0 +1,121 @@
+[
+    {
+        "timestamp": "2026-02-22T14:15:11.895242",
+        "action": "UPDATE",
+        "user": "eduardo",
+        "item_id": "25",
+        "details": {
+            "name": "Brasília Amarela (Sem Alcool)"
+        },
+        "changes": [
+            {
+                "field": "active",
+                "old": false,
+                "new": true
+            }
+        ],
+        "hash": "4f16a4c7289945b0aead92306f4d899efed029e891229df69aa9a2cf677b5b19"
+    },
+    {
+        "timestamp": "2026-02-22T14:15:21.559499",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "88",
+        "details": {
+            "name": "Carré de Cordeiro da Chefe (Individual)"
+        },
+        "changes": [
+            {
+                "field": "price",
+                "old": 109.9,
+                "new": 129.9
+            }
+        ],
+        "hash": "10bf13992dc08ec9bf38446227d239cda30fbea39ec43a99f5f8057e905df3d9"
+    },
+    {
+        "timestamp": "2026-02-22T14:44:14.527448",
+        "action": "UPDATE",
+        "user": "eduardo",
+        "item_id": "128",
+        "details": {
+            "name": "Sorvete Artesenal de Castanha"
+        },
+        "changes": [
+            {
+                "field": "active",
+                "old": true,
+                "new": false
+            }
+        ],
+        "hash": "5f4f996b5f4cfdbd497f743115347b79b1ab9b9d3b9e2904ba7ac3b4e32f65ec"
+    },
+    {
+        "timestamp": "2026-02-22T17:07:58.203202",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "267",
+        "details": {
+            "name": "Toast (Consultar Sabor do Dia)"
+        },
+        "changes": [
+            {
+                "field": "flavor_group_id",
+                "old": "Sabores",
+                "new": "Toast"
+            }
+        ],
+        "hash": "bbfb4675ad655f126138656566aef331d2e449aca596c6e5d97ed419f01c34e4"
+    },
+    {
+        "timestamp": "2026-02-22T17:09:46.955655",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "267",
+        "details": {
+            "name": "Toast (Consultar Sabor do Dia)"
+        },
+        "changes": [
+            {
+                "field": "flavor_group_id",
+                "old": "Toast",
+                "new": "Sabores"
+            }
+        ],
+        "hash": "bbfb4675ad655f126138656566aef331d2e449aca596c6e5d97ed419f01c34e4"
+    },
+    {
+        "timestamp": "2026-02-22T17:10:18.095273",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "267",
+        "details": {
+            "name": "Toast (Consultar Sabor do Dia)"
+        },
+        "changes": [
+            {
+                "field": "flavor_group_id",
+                "old": "Sabores",
+                "new": "Toast"
+            }
+        ],
+        "hash": "bbfb4675ad655f126138656566aef331d2e449aca596c6e5d97ed419f01c34e4"
+    },
+    {
+        "timestamp": "2026-02-22T19:03:50.116713",
+        "action": "UPDATE",
+        "user": "filipe",
+        "item_id": "173",
+        "details": {
+            "name": "Espumante Chandon Reserve Brut"
+        },
+        "changes": [
+            {
+                "field": "active",
+                "old": true,
+                "new": false
+            }
+        ],
+        "hash": "7e918911d0836e0852283ae0a5a866d8d3b4257a674995fa86d5a7bc3d124cdc"
+    }
+]

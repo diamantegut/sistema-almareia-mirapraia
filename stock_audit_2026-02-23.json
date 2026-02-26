@@ -1,0 +1,133 @@
+[
+    {
+        "timestamp": "2026-02-23T16:34:52.897804",
+        "action": "CREATE",
+        "user": "eduardo",
+        "product_id": "827",
+        "details": {
+            "id": "827",
+            "name": "Whisky The Glenlivet Founders Reserve ",
+            "department": "Serviço",
+            "unit": "Litros",
+            "price": 220.94,
+            "category": "Bebidas Quentes",
+            "min_stock": 0.2,
+            "package_size": 1.0,
+            "purchase_unit": "",
+            "frequency": "Semanal",
+            "suppliers": [
+                "dlp"
+            ],
+            "is_internal": false,
+            "ncm": "",
+            "cest": "",
+            "icms_rate": 0.0,
+            "anp_code": "",
+            "cfop_default": "",
+            "version": 1,
+            "last_updated": "2026-02-23T16:34:52.897758",
+            "hash": "d7ddc1fefa1e8e74c9f9823527d85e83f9d313e592d0092f1eb78535daa19ab7"
+        },
+        "changes": [],
+        "hash": "c58a0360817fa17a4a8953f11f0253dd4cffbcc30286d8c90521a401e4dd67aa"
+    },
+    {
+        "timestamp": "2026-02-23T16:36:28.951498",
+        "action": "CREATE",
+        "user": "eduardo",
+        "product_id": "828",
+        "details": {
+            "id": "828",
+            "name": "Espumante Casa Perini Black Edition",
+            "department": "Serviço",
+            "unit": "Litros",
+            "price": 51.6,
+            "category": "Vinhos",
+            "min_stock": 0.0,
+            "package_size": 1.0,
+            "purchase_unit": "",
+            "frequency": "Semanal",
+            "suppliers": [
+                "dlp"
+            ],
+            "is_internal": false,
+            "ncm": "",
+            "cest": "",
+            "icms_rate": 0.0,
+            "anp_code": "",
+            "cfop_default": "",
+            "version": 1,
+            "last_updated": "2026-02-23T16:36:28.951452",
+            "hash": "2971ac515a76a43218e7520fc85f919e05f8484749080f037fa8db3e2c76b0cb"
+        },
+        "changes": [],
+        "hash": "4cfc9ab39ca27cb860e25d08df0d39dd772cc63ef8338619088b991206cd2fd0"
+    },
+    {
+        "timestamp": "2026-02-23T16:47:40.869397",
+        "action": "UPDATE",
+        "user": "eduardo",
+        "product_id": "299",
+        "details": {
+            "name": "Whisky Jack Daniels Old"
+        },
+        "changes": [
+            {
+                "field": "purchase_unit",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "package_size",
+                "old": null,
+                "new": 1.0
+            },
+            {
+                "field": "cfop_default",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "ncm",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "icms_rate",
+                "old": null,
+                "new": 0.0
+            },
+            {
+                "field": "price",
+                "old": 0.0,
+                "new": 148.58
+            },
+            {
+                "field": "frequency",
+                "old": null,
+                "new": "Sem Frequência"
+            },
+            {
+                "field": "is_internal",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "anp_code",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "department",
+                "old": "Estoques",
+                "new": "Serviço"
+            },
+            {
+                "field": "cest",
+                "old": null,
+                "new": ""
+            }
+        ],
+        "hash": "bc834e8f8f79a14bf00beeed6dc12fe78d8c5128f054e1fcc0f128619d14bc2c"
+    }
+]

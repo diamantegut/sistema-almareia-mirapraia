@@ -1,0 +1,481 @@
+[
+    {
+        "timestamp": "2026-02-20T18:38:45.161833",
+        "action": "UPDATE",
+        "user": "eduardo",
+        "product_id": "789",
+        "details": {
+            "name": "Camarão (Caldo)"
+        },
+        "changes": [
+            {
+                "field": "name",
+                "old": "Camarão (caldo)",
+                "new": "Camarão (Caldo)"
+            }
+        ],
+        "hash": "fa1803604bc30d88cd117cdec53e570ccbe33084e755aa2be0d7c1f1338ea5a9"
+    },
+    {
+        "timestamp": "2026-02-20T18:38:45.162535",
+        "action": "UPDATE",
+        "user": "eduardo",
+        "product_id": "792",
+        "details": {
+            "name": "Espumante Miolo Cuvee Brut Nature"
+        },
+        "changes": [
+            {
+                "field": "department",
+                "old": "ServiÃ§o",
+                "new": "Serviço"
+            },
+            {
+                "field": "category",
+                "old": "vinhos",
+                "new": "Espumantes"
+            }
+        ],
+        "hash": "faebb3f48331f1fcac9c5a259dca03cc2d0175a9c3d658faaf96557c11874c41"
+    },
+    {
+        "timestamp": "2026-02-20T18:38:45.171372",
+        "action": "UPDATE",
+        "user": "eduardo",
+        "product_id": "793",
+        "details": {
+            "name": "Sururu (Caldos)"
+        },
+        "changes": [
+            {
+                "field": "min_stock",
+                "old": 4.0,
+                "new": 5.0
+            },
+            {
+                "field": "suppliers",
+                "old": [
+                    "Polpas Açai"
+                ],
+                "new": [
+                    "Preparo Cazeiro"
+                ]
+            },
+            {
+                "field": "unit",
+                "old": "Kilogramas",
+                "new": "Litros"
+            },
+            {
+                "field": "department",
+                "old": "ServiÃ§o",
+                "new": "Cozinha"
+            },
+            {
+                "field": "name",
+                "old": "Mangaba",
+                "new": "Sururu (Caldos)"
+            },
+            {
+                "field": "package_size",
+                "old": 1.0,
+                "new": 4.0
+            },
+            {
+                "field": "frequency",
+                "old": "Quinzenal",
+                "new": "Semanal"
+            },
+            {
+                "field": "category",
+                "old": "Frutas",
+                "new": "Entradas"
+            },
+            {
+                "field": "price",
+                "old": 3.0,
+                "new": 15.9
+            },
+            {
+                "field": "purchase_unit",
+                "old": "",
+                "new": "Balde"
+            }
+        ],
+        "hash": "91e2fd2002b61ca926112e010e80a44c46e750d7b6225906d801cbd055a9a6cb"
+    },
+    {
+        "timestamp": "2026-02-20T18:38:45.179062",
+        "action": "UPDATE",
+        "user": "eduardo",
+        "product_id": "792",
+        "details": {
+            "name": "Portillo Merlot"
+        },
+        "changes": [
+            {
+                "field": "min_stock",
+                "old": 2.0,
+                "new": 1.0
+            },
+            {
+                "field": "suppliers",
+                "old": [
+                    "GERAL"
+                ],
+                "new": [
+                    "inga"
+                ]
+            },
+            {
+                "field": "department",
+                "old": "ServiÃ§o",
+                "new": "Serviço"
+            },
+            {
+                "field": "name",
+                "old": "Espumante Miolo Cuvee Brut Nature",
+                "new": "Portillo Merlot"
+            },
+            {
+                "field": "package_size",
+                "old": 1.0,
+                "new": 6.0
+            },
+            {
+                "field": "price",
+                "old": 60.0,
+                "new": 78.0
+            },
+            {
+                "field": "purchase_unit",
+                "old": "",
+                "new": "Caixa"
+            }
+        ],
+        "hash": "ea48f4753e6728bd0f555857f4b47c3adfd2ec27851578d90fcb127079757340"
+    },
+    {
+        "timestamp": "2026-02-20T18:38:45.185903",
+        "action": "UPDATE",
+        "user": "eduardo",
+        "product_id": "793",
+        "details": {
+            "name": "Porta 6"
+        },
+        "changes": [
+            {
+                "field": "min_stock",
+                "old": 4.0,
+                "new": 1.0
+            },
+            {
+                "field": "suppliers",
+                "old": [
+                    "Polpas Açai"
+                ],
+                "new": [
+                    "inga"
+                ]
+            },
+            {
+                "field": "unit",
+                "old": "Kilogramas",
+                "new": "Litros"
+            },
+            {
+                "field": "department",
+                "old": "ServiÃ§o",
+                "new": "Serviço"
+            },
+            {
+                "field": "name",
+                "old": "Mangaba",
+                "new": "Porta 6"
+            },
+            {
+                "field": "package_size",
+                "old": 1.0,
+                "new": 6.0
+            },
+            {
+                "field": "frequency",
+                "old": "Quinzenal",
+                "new": "Semanal"
+            },
+            {
+                "field": "category",
+                "old": "Frutas",
+                "new": "vinhos"
+            },
+            {
+                "field": "price",
+                "old": 3.0,
+                "new": 69.95
+            },
+            {
+                "field": "purchase_unit",
+                "old": "",
+                "new": "Caixa"
+            }
+        ],
+        "hash": "1e4426cd5038557587bb3aea92cadc7f1d8105d3fce0ce228930067e7f558e87"
+    },
+    {
+        "timestamp": "2026-02-20T18:38:45.192655",
+        "action": "UPDATE",
+        "user": "eduardo",
+        "product_id": "815",
+        "details": {
+            "name": "Papel Higiênico BigRool"
+        },
+        "changes": [
+            {
+                "field": "min_stock",
+                "old": 10.0,
+                "new": 32.0
+            },
+            {
+                "field": "suppliers",
+                "old": [
+                    "3 corações"
+                ],
+                "new": [
+                    "P&R",
+                    "ceasa ( grazi )"
+                ]
+            },
+            {
+                "field": "unit",
+                "old": "Kilogramas",
+                "new": "Litros"
+            },
+            {
+                "field": "name",
+                "old": "Cafe funcionarios",
+                "new": "Papel Higiênico BigRool"
+            },
+            {
+                "field": "category",
+                "old": "Estoque Principal - cozinha",
+                "new": "Estoque Principal - Limpeza"
+            },
+            {
+                "field": "price",
+                "old": 51.6,
+                "new": 7.63
+            },
+            {
+                "field": "purchase_unit",
+                "old": "kilograma",
+                "new": "fardo"
+            }
+        ],
+        "hash": "b244023b5c2b87817728a4773aec9a09b7868316d38f913424019f37310634a9"
+    },
+    {
+        "timestamp": "2026-02-20T18:38:45.199289",
+        "action": "UPDATE",
+        "user": "eduardo",
+        "product_id": "815",
+        "details": {
+            "name": "Farinha de Trigo ( principal )"
+        },
+        "changes": [
+            {
+                "field": "min_stock",
+                "old": 10.0,
+                "new": 40.0
+            },
+            {
+                "field": "suppliers",
+                "old": [
+                    "3 corações"
+                ],
+                "new": [
+                    "atacamax",
+                    "KarneKeijo"
+                ]
+            },
+            {
+                "field": "name",
+                "old": "Cafe funcionarios",
+                "new": "Farinha de Trigo ( principal )"
+            },
+            {
+                "field": "price",
+                "old": 51.6,
+                "new": 4.29
+            },
+            {
+                "field": "purchase_unit",
+                "old": "kilograma",
+                "new": "fardo"
+            }
+        ],
+        "hash": "7b9f696898cc624ec9502a677c87eef2dd9c225dd24f42d71217571791d07705"
+    },
+    {
+        "timestamp": "2026-02-20T18:38:45.206358",
+        "action": "UPDATE",
+        "user": "eduardo",
+        "product_id": "815",
+        "details": {
+            "name": "Fubá funicionarios"
+        },
+        "changes": [
+            {
+                "field": "min_stock",
+                "old": 10.0,
+                "new": 30.0
+            },
+            {
+                "field": "suppliers",
+                "old": [
+                    "3 corações"
+                ],
+                "new": [
+                    "atacamax",
+                    "KarneKeijo",
+                    "3 corações"
+                ]
+            },
+            {
+                "field": "name",
+                "old": "Cafe funcionarios",
+                "new": "Fubá funicionarios"
+            },
+            {
+                "field": "price",
+                "old": 51.6,
+                "new": 2.99
+            },
+            {
+                "field": "purchase_unit",
+                "old": "kilograma",
+                "new": "fardo"
+            }
+        ],
+        "hash": "377de46d432b4b2e472e9623c915bbd0d9afd2fe380941ac08c5bc8ff9fcfc9e"
+    },
+    {
+        "timestamp": "2026-02-20T18:38:45.212982",
+        "action": "CREATE",
+        "user": "eduardo",
+        "product_id": "814",
+        "details": {
+            "id": "814",
+            "name": "Vinho Tinto L'Alchimiste Saint Jean D'aumieres",
+            "department": "Serviço",
+            "unit": "Litros",
+            "price": 171.96,
+            "category": "Vinhos",
+            "min_stock": 1.0,
+            "package_size": 1.0,
+            "purchase_unit": "",
+            "frequency": "Semanal",
+            "suppliers": [
+                "dlp"
+            ],
+            "is_internal": false,
+            "ncm": "",
+            "cest": "",
+            "icms_rate": 0.0,
+            "anp_code": "",
+            "cfop_default": "",
+            "version": 1,
+            "last_updated": "2026-02-20T18:38:45.212945",
+            "hash": "b90c1a99d35b3ab19d57d6e22b711e49c3270cc561801ecb5f482d233791ea76"
+        },
+        "changes": [],
+        "hash": "7cc45b212a5bacd9572ceb6140fa2d0895b460b5e703c0a3567040219ce4ca3a"
+    },
+    {
+        "timestamp": "2026-02-20T18:38:45.220397",
+        "action": "BULK_CHANGE_ALERT",
+        "user": "eduardo",
+        "product_id": "ALL",
+        "details": {
+            "message": "SECURITY ALERT: Alterações detectadas: 805 (98.9% > 20%)"
+        },
+        "changes": [],
+        "hash": "1de7fe209cfe5a36a33a000d2139bb1c413ee795707012f6a622b35d7cc762fe"
+    },
+    {
+        "timestamp": "2026-02-20T18:46:47.701666",
+        "action": "UPDATE",
+        "user": "eduardo",
+        "product_id": "345",
+        "details": {
+            "name": "Espumante Barnaut Blanc De Noirs"
+        },
+        "changes": [
+            {
+                "field": "min_stock",
+                "old": 0.17355371900826447,
+                "new": 1.0
+            },
+            {
+                "field": "anp_code",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "icms_rate",
+                "old": null,
+                "new": 0.0
+            },
+            {
+                "field": "department",
+                "old": "Estoques",
+                "new": "Serviço"
+            },
+            {
+                "field": "name",
+                "old": "Espumante Cordelier Brut",
+                "new": "Espumante Barnaut Blanc De Noirs"
+            },
+            {
+                "field": "package_size",
+                "old": null,
+                "new": 1.0
+            },
+            {
+                "field": "cfop_default",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "frequency",
+                "old": null,
+                "new": "Sem Frequência"
+            },
+            {
+                "field": "ncm",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "is_internal",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "price",
+                "old": 53.35,
+                "new": 432.38
+            },
+            {
+                "field": "purchase_unit",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "cest",
+                "old": null,
+                "new": ""
+            }
+        ],
+        "hash": "47f20163a4c0074e5fafd59ccb164d0676855931b2793dc460efc2c84fcc4b7a"
+    }
+]
