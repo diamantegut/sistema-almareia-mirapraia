@@ -209,7 +209,7 @@
     },
     "daniel": {
         "password": "1234",
-        "department": "Governança",
+        "department": "Manutenção",
         "role": "colaborador",
         "score": 2,
         "permissions": [],
@@ -262,21 +262,6 @@
         "birthday": "1983-09-08",
         "daily_target_hours": 8,
         "weekly_day_off": 0
-    },
-    "erique": {
-        "password": "1234",
-        "department": "Serviço",
-        "role": "colaborador",
-        "score": 3,
-        "permissions": [
-            "restaurante_mirapraia",
-            "restaurante_full_access"
-        ],
-        "full_name": "Erique Neves Cavalcanti",
-        "admission_date": "2025-10-01",
-        "birthday": "1981-02-28",
-        "daily_target_hours": 8,
-        "weekly_day_off": 2
     },
     "filipe": {
         "password": "1406",
@@ -388,21 +373,6 @@
         "full_name": "Jose Roberto Da Silva",
         "admission_date": "2026-01-16",
         "birthday": "2000-08-27",
-        "daily_target_hours": 8,
-        "weekly_day_off": 1
-    },
-    "josenice": {
-        "password": "1234",
-        "department": "Cozinha",
-        "role": "colaborador",
-        "score": 3,
-        "permissions": [
-            "cozinha",
-            "principal"
-        ],
-        "full_name": "Josenice Maria De Oliveira",
-        "admission_date": "2021-08-01",
-        "birthday": "1976-10-09",
         "daily_target_hours": 8,
         "weekly_day_off": 1
     },
@@ -590,21 +560,6 @@
         "daily_target_hours": 8,
         "weekly_day_off": 3
     },
-    "antonio": {
-        "password": "1234",
-        "department": "Recepção",
-        "role": "colaborador",
-        "score": 2,
-        "permissions": [
-            "recepcao",
-            "governanca"
-        ],
-        "full_name": "Antonio Carlos Da Silva",
-        "admission_date": "2026-01-11",
-        "birthday": "1993-06-13",
-        "daily_target_hours": 8,
-        "weekly_day_off": 3
-    },
     "josegomes": {
         "password": "1234",
         "department": "Serviço",
@@ -631,21 +586,6 @@
         "birthday": "1991-12-18",
         "daily_target_hours": 8,
         "weekly_day_off": 2
-    },
-    "orlando": {
-        "password": "1234",
-        "department": "Serviço",
-        "role": "colaborador",
-        "score": 2,
-        "permissions": [
-            "restaurante_mirapraia",
-            "restaurante_full_access"
-        ],
-        "full_name": "Orlando Severino de Gouveia",
-        "admission_date": "2024-12-09",
-        "birthday": "1979-08-02",
-        "daily_target_hours": 8,
-        "weekly_day_off": 1
     },
     "josiane": {
         "password": "1234",
@@ -728,5 +668,37 @@
         "birthday": "1998-09-21",
         "daily_target_hours": 8,
         "weekly_day_off": 6
+    },
+    "kelly": {
+        "password": "1234",
+        "department": "Cozinha",
+        "role": "colaborador",
+        "score": 2,
+        "permissions": [
+            "",
+            "",
+            ""
+        ],
+        "full_name": "Kelly Cristina Soares Da Silva",
+        "admission_date": "2026-02-13",
+        "birthday": "1981-10-01",
+        "daily_target_hours": 8,
+        "weekly_day_off": 0
+    },
+    "luana": {
+        "password": "1234",
+        "department": "Governança",
+        "role": "colaborador",
+        "score": 2,
+        "permissions": [
+            "",
+            "",
+            ""
+        ],
+        "full_name": "Luana Cris De Lira",
+        "admission_date": "2026-02-06",
+        "birthday": "1987-01-22",
+        "daily_target_hours": 8,
+        "weekly_day_off": 2
     }
 }

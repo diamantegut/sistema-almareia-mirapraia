@@ -1,0 +1,71 @@
+[
+    {
+        "timestamp": "2026-02-24T11:13:08.764117",
+        "action": "CREATE",
+        "user": "pedro",
+        "product_id": "829",
+        "details": {
+            "id": "829",
+            "name": "Ombrelone 2,40 crochê",
+            "department": "Serviço",
+            "unit": "Litros",
+            "price": 2.0,
+            "category": "Inventario",
+            "min_stock": 3.0,
+            "package_size": 1.0,
+            "purchase_unit": "unidadde",
+            "frequency": "Semanal",
+            "suppliers": [
+                "PZ4 Fabrica de Guarda sol LTDA"
+            ],
+            "is_internal": false,
+            "ncm": "",
+            "cest": "",
+            "icms_rate": 0.0,
+            "anp_code": "",
+            "cfop_default": "",
+            "version": 1,
+            "last_updated": "2026-02-24T11:13:08.764070",
+            "hash": "e90034d44bb871acdb3910142912458136a045f77751112902643a5292ca3ef8"
+        },
+        "changes": [],
+        "hash": "4a226ff9ae32d9caf89bbe986b60a4b51e72993fedbd159851a76e30042ba0e2"
+    },
+    {
+        "timestamp": "2026-02-24T16:08:35.090651",
+        "action": "UPDATE",
+        "user": "pedro",
+        "product_id": "805",
+        "details": {
+            "name": "Casa Perini Aquarela Rosé combo"
+        },
+        "changes": [
+            {
+                "field": "anp_code",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "cest",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "cfop_default",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "ncm",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "icms_rate",
+                "old": null,
+                "new": 0.0
+            }
+        ],
+        "hash": "391e480c58802c1e506c696293c4f16758673f63d556b432de92f5e2f75a2500"
+    }
+]

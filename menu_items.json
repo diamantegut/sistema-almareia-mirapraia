@@ -1138,7 +1138,7 @@
         "description": "Mocktail cítrico e refrescante, inspirado na Brasília Amarela, preparado sem álcool.",
         "service_fee_exempt": false,
         "visible_virtual_menu": true,
-        "active": false,
+        "active": true,
         "recipe": [
             {
                 "ingredient_id": "330",
@@ -1172,9 +1172,9 @@
         "pause_reason": "",
         "pause_start": "",
         "pause_end": "",
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
+        "version": 2,
+        "hash": "4ec07600f70703225512d12fdebee933c909152638535cf82be6e2ad99838fa6",
+        "last_updated": "2026-02-22T14:15:11.895186"
     },
     {
         "id": "26",
@@ -1866,7 +1866,7 @@
         "description": "Deliciosa casquinha de ouriço do mar, uma iguaria exótica e saborosa.",
         "service_fee_exempt": false,
         "visible_virtual_menu": true,
-        "active": true,
+        "active": false,
         "recipe": [
             {
                 "ingredient_id": "26",
@@ -1900,9 +1900,9 @@
         "pause_reason": "",
         "pause_start": "",
         "pause_end": "",
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
+        "version": 2,
+        "hash": "1c2d3ec612210c26c9935aa244bf6a489e0b8dcd4ecab87e3b991c282db8467e",
+        "last_updated": "2026-02-21T14:59:52.559120"
     },
     {
         "id": "39",
@@ -2218,7 +2218,7 @@
         "description": "Água com gás 500ml, disponível no frigobar.",
         "service_fee_exempt": false,
         "visible_virtual_menu": true,
-        "active": false,
+        "active": true,
         "recipe": [
             {
                 "ingredient_id": "748",
@@ -2252,9 +2252,9 @@
         "pause_reason": "",
         "pause_start": "",
         "pause_end": "",
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
+        "version": 2,
+        "hash": "9205981ceed5a2c5f08a5d3746eb8e30ddead855d606c92facd030852beb0b2b",
+        "last_updated": "2026-02-23T15:25:06.940812"
     },
     {
         "id": "47",
@@ -2267,7 +2267,7 @@
         "description": "Água mineral sem gás 330ml.",
         "service_fee_exempt": false,
         "visible_virtual_menu": true,
-        "active": false,
+        "active": true,
         "recipe": [
             {
                 "ingredient_id": "490",
@@ -2301,9 +2301,9 @@
         "pause_reason": "",
         "pause_start": "",
         "pause_end": "",
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
+        "version": 2,
+        "hash": "e528ff740ec60924b5505dfd02b192f8be265a3b9d4ea8d149385f6c4f54526d",
+        "last_updated": "2026-02-23T15:24:55.866666"
     },
     {
         "id": "48",
@@ -2778,18 +2778,18 @@
         "has_accompaniments": false,
         "allowed_accompaniments": [],
         "paused": false,
-        "version": 2,
-        "hash": "34a9052d15d42f86192c623696076a11e3680dbb8c9058d7be06ba2a49575bc8",
-        "last_updated": "2026-02-21T12:37:19.213406",
+        "version": 3,
+        "hash": "755ff860ea580b96454a7fc27f54fbba1de4a022ebbe9bfa27890b13432d8674",
+        "last_updated": "2026-02-21T19:03:12.071233",
         "image_url": "",
         "highlight": false,
         "mandatory_questions": [
             {
-                "question": " otnoP",
+                "question": "Ponto",
                 "type": "choice",
                 "options": [
-                    "lamron",
-                    "zcante norc meB"
+                    "Bem Crocante",
+                    "Normal"
                 ],
                 "required": true
             }
@@ -3051,7 +3051,7 @@
         "description": "Suculentas tiras de carne de sol do sertão, aceboladas e servidas com macaxeira frita dourada e crocante.",
         "service_fee_exempt": false,
         "visible_virtual_menu": true,
-        "active": true,
+        "active": false,
         "recipe": [],
         "ncm": "21069090",
         "cest": "",
@@ -3068,9 +3068,9 @@
         "cofins_cst": "01",
         "cofins_rate": 0.0,
         "paused": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
+        "version": 2,
+        "hash": "44454aa2eb31862c1a80279374f6205068d20bc4ce21ebdcfb1ac662df150092",
+        "last_updated": "2026-02-26T13:21:52.289157"
     },
     {
         "id": "63",
@@ -3298,7 +3298,7 @@
         "description": "Mexilhões frescos cozidos lentamente em um aromático molho de vinho branco, alho e ervas finas. Acompanha torradas.",
         "service_fee_exempt": false,
         "visible_virtual_menu": true,
-        "active": true,
+        "active": false,
         "recipe": [
             {
                 "ingredient_id": "197",
@@ -3324,9 +3324,9 @@
         "has_accompaniments": false,
         "allowed_accompaniments": [],
         "paused": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
+        "version": 2,
+        "hash": "174a60b7bec7c56c5fa7ead2ca82631f655337e0d3e9d7f4331d168ddc327389",
+        "last_updated": "2026-02-25T19:28:21.324839"
     },
     {
         "id": "69",
@@ -3406,9 +3406,9 @@
         "has_accompaniments": false,
         "allowed_accompaniments": [],
         "paused": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
+        "version": 3,
+        "hash": "9ddd7b0d5cf992f56dd05d7d23799ed39be0b8282e4476e4930a964e970f06f9",
+        "last_updated": "2026-02-26T17:03:34.679348"
     },
     {
         "id": "71",
@@ -3421,7 +3421,7 @@
         "description": "Uma deliciosa porção de Pastel de Camarão, ideal para abrir o apetite e compartilhar.",
         "service_fee_exempt": false,
         "visible_virtual_menu": true,
-        "active": false,
+        "active": true,
         "recipe": [
             {
                 "ingredient_id": "198",
@@ -3447,9 +3447,9 @@
         "has_accompaniments": false,
         "allowed_accompaniments": [],
         "paused": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
+        "version": 2,
+        "hash": "a1d188277a29276b6741f2be0783cd20e60f4d41854508cc0c48173b553d6c26",
+        "last_updated": "2026-02-21T15:02:43.359090"
     },
     {
         "id": "72",
@@ -3770,9 +3770,9 @@
         "has_accompaniments": false,
         "allowed_accompaniments": [],
         "paused": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
+        "version": 3,
+        "hash": "7109ea77ba81f826542fd0220366c9d3487378073065aa580db3ec71a2082710",
+        "last_updated": "2026-02-24T14:48:19.233710"
     },
     {
         "id": "80",
@@ -3904,9 +3904,9 @@
             }
         ],
         "paused": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
+        "version": 3,
+        "hash": "2c23b91f6fc86515d5fc8ee2fd417376500f9a9d75bbe262741de2be6892b871",
+        "last_updated": "2026-02-27T15:41:06.715610"
     },
     {
         "id": "83",
@@ -4117,7 +4117,7 @@
         "id": "88",
         "name": "Carré de Cordeiro da Chefe (Individual)",
         "category": "Pratos",
-        "price": 109.9,
+        "price": 129.9,
         "cost_price": 30.78,
         "printer_id": "2",
         "should_print": true,
@@ -4171,9 +4171,9 @@
         "pause_reason": "",
         "pause_start": "",
         "pause_end": "",
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
+        "version": 2,
+        "hash": "4522c4b55a41114b0902caf74babea7df38ce8b141987fe81f9bd5c88cf5bb79",
+        "last_updated": "2026-02-22T14:15:21.559438"
     },
     {
         "id": "89",
@@ -4762,7 +4762,7 @@
         "description": "Prato especial de Parmegiana de Camarão, preparado com ingredientes frescos e sabor caseiro.",
         "service_fee_exempt": false,
         "visible_virtual_menu": true,
-        "active": true,
+        "active": false,
         "recipe": [
             {
                 "ingredient_id": "209",
@@ -4796,9 +4796,9 @@
         "flavor_group_id": "",
         "flavor_multiplier": 1.0,
         "paused": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
+        "version": 2,
+        "hash": "0e95bec248fc133d36209d785bd125e54de70445d26fdd84be43476745cd8fb8",
+        "last_updated": "2026-02-26T13:21:19.570943"
     },
     {
         "id": "105",
@@ -5053,7 +5053,7 @@
         "cost_price": 71.0,
         "printer_id": "2",
         "should_print": true,
-        "description": "Prato especial de Peixe na Telha, preparado com ingredientes frescos e sabor caseiro.",
+        "description": "Cioba inteira frita ou grelhada (aprox. 1.200 kg) a moda dos pescadores, guarnecido por arroz, farofa, pirão e macaxeira frita. (Esse prato demora aprox. 1Hr (Frito) e 1:30Hrs (Grelhada)",
         "service_fee_exempt": false,
         "visible_virtual_menu": true,
         "active": true,
@@ -5105,9 +5105,9 @@
         "pause_end": "",
         "video": "",
         "video_url": "",
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
+        "version": 3,
+        "hash": "cdd1a269e91435f401d38f2d264aea94655359a59c89266674b2422c4907379f",
+        "last_updated": "2026-02-27T15:48:54.987577"
     },
     {
         "id": "111",
@@ -5499,7 +5499,7 @@
         "cost_price": 75.0,
         "printer_id": "2",
         "should_print": true,
-        "description": "Prato especial de Peixe na Telha, preparado com ingredientes frescos e sabor caseiro.",
+        "description": "Cioba inteira frita ou grelhada (aprox. 950 g) a moda dos pescadores, guarnecido por arroz, farofa, pirão e macaxeira frita. (Esse prato demora aprox. 1Hr (Frito) e 1:30Hrs (Grelhada)",
         "service_fee_exempt": false,
         "visible_virtual_menu": true,
         "active": true,
@@ -5551,9 +5551,9 @@
         "pause_end": "",
         "video": "",
         "video_url": "",
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
+        "version": 2,
+        "hash": "5845c09ff08477d51e76cce145fb6b89675074d21b009f624dd9fa88a8db4d2b",
+        "last_updated": "2026-02-27T15:38:19.393745"
     },
     {
         "id": "120",
@@ -5742,7 +5742,7 @@
         "description": "Irresistível Banoffe, a doçura perfeita para finalizar sua refeição.",
         "service_fee_exempt": false,
         "visible_virtual_menu": true,
-        "active": false,
+        "active": true,
         "recipe": [],
         "ncm": "21069090",
         "cest": "",
@@ -5766,9 +5766,9 @@
         "has_accompaniments": false,
         "allowed_accompaniments": [],
         "paused": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
+        "version": 2,
+        "hash": "6cf19ca1d2dd579dc7a6bde81f100de99575937307033694a89e6829e93fdf21",
+        "last_updated": "2026-02-24T14:06:53.690203"
     },
     {
         "id": "126",
@@ -5883,9 +5883,9 @@
         "has_accompaniments": false,
         "allowed_accompaniments": [],
         "paused": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
+        "version": 3,
+        "hash": "86e7adc0f47f324b9b07fad4823174121fa65364abc9af45bad898fb49015732",
+        "last_updated": "2026-02-25T17:04:12.650627"
     },
     {
         "id": "129",
@@ -6217,7 +6217,7 @@
                 "required": true
             }
         ],
-        "image": "135_1089.jpg",
+        "image": "/Produtos/Fotos/135_1089.jpg",
         "flavor_group_id": "",
         "flavor_multiplier": 1.0,
         "product_type": "standard",
@@ -6229,9 +6229,9 @@
         "pause_reason": "",
         "pause_start": "",
         "pause_end": "",
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
+        "version": 2,
+        "hash": "56386f49ff84925704347334c49070b20793279dd022639b2c8be3c4a80edb36",
+        "last_updated": "2026-02-25T14:36:46.953435"
     },
     {
         "id": "136",
@@ -7721,7 +7721,7 @@
         "description": "Vinho Espumante Chandon Reserve Brut, selecionado para harmonizar com nossos pratos.",
         "service_fee_exempt": false,
         "visible_virtual_menu": true,
-        "active": true,
+        "active": false,
         "recipe": [
             {
                 "ingredient_id": "342",
@@ -7755,9 +7755,9 @@
         "pause_reason": "",
         "pause_start": "",
         "pause_end": "",
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
+        "version": 2,
+        "hash": "06cb64fd2f48895198f098b35faf413aeb36ea0bbecdff1db6bdf8bd35733549",
+        "last_updated": "2026-02-22T19:03:50.116666"
     },
     {
         "id": "174",
@@ -8162,7 +8162,7 @@
         "description": "Vinho Branco Lupo Nero, selecionado para harmonizar com nossos pratos.",
         "service_fee_exempt": false,
         "visible_virtual_menu": true,
-        "active": true,
+        "active": false,
         "recipe": [
             {
                 "ingredient_id": "362",
@@ -8196,9 +8196,9 @@
         "pause_reason": "",
         "pause_start": "",
         "pause_end": "",
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
+        "version": 2,
+        "hash": "08a833be48f01bd4d563073791493e899b185f9078f58be03360765d22d8ca93",
+        "last_updated": "2026-02-21T13:24:08.883197"
     },
     {
         "id": "188",
@@ -8358,7 +8358,7 @@
         "description": "Vinho Branco Torre Oria Viura/Sauvignon Blanc, selecionado para harmonizar com nossos pratos.",
         "service_fee_exempt": false,
         "visible_virtual_menu": true,
-        "active": true,
+        "active": false,
         "recipe": [
             {
                 "ingredient_id": "369",
@@ -8392,9 +8392,9 @@
         "pause_reason": "",
         "pause_start": "",
         "pause_end": "",
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
+        "version": 2,
+        "hash": "b03ce2adce2e1208842f22f1653fdca55f06e9f3c7c0bae1885e51dc21781191",
+        "last_updated": "2026-02-26T20:40:27.437237"
     },
     {
         "id": "192",
@@ -8490,9 +8490,9 @@
         "pause_reason": "",
         "pause_start": "",
         "pause_end": "",
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
+        "version": 3,
+        "hash": "064b3ba4927c48d0dc0f8473b7713c6abe45f9159a20f2205463053e880e3496",
+        "last_updated": "2026-02-27T14:42:32.301137"
     },
     {
         "id": "194",
@@ -9844,7 +9844,7 @@
         "pis_rate": 0.0,
         "cofins_cst": "01",
         "cofins_rate": 0.0,
-        "image": "",
+        "image": "228_569_Absolut.jpg",
         "mandatory_questions": [],
         "flavor_group_id": "",
         "flavor_multiplier": 1.0,
@@ -9852,9 +9852,14 @@
         "has_accompaniments": false,
         "allowed_accompaniments": [],
         "paused": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
+        "version": 2,
+        "hash": "a2fe10f675228846fa7aff2214126b46316c386908bb19dce7e1cce802fd2369",
+        "last_updated": "2026-02-27T15:27:43.601385",
+        "image_url": "/Produtos/Fotos/228_569_Absolut.jpg",
+        "highlight": false,
+        "pause_reason": "",
+        "pause_start": "",
+        "pause_end": ""
     },
     {
         "id": "229",
@@ -9888,8 +9893,8 @@
         "pis_rate": 0.0,
         "cofins_cst": "01",
         "cofins_rate": 0.0,
-        "image_url": "/Produtos/Fotos/229.jpg",
-        "image": "/Produtos/Fotos/229.jpg",
+        "image_url": "/Produtos/Fotos/229_250.jpg",
+        "image": "229_250.jpg",
         "mandatory_questions": [],
         "flavor_group_id": "",
         "flavor_multiplier": 1.0,
@@ -9897,9 +9902,13 @@
         "has_accompaniments": false,
         "allowed_accompaniments": [],
         "paused": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
+        "version": 2,
+        "hash": "cf21f6ef2beb4c8fe9c3891c0ca1ea19661d0d8eff18bdd51ffce83dc7594adb",
+        "last_updated": "2026-02-27T15:29:44.311728",
+        "highlight": false,
+        "pause_reason": "",
+        "pause_start": "",
+        "pause_end": ""
     },
     {
         "id": "230",
@@ -10022,8 +10031,8 @@
         "pis_rate": 0.0,
         "cofins_cst": "01",
         "cofins_rate": 0.0,
-        "image_url": "/Produtos/Fotos/232_265.jpg",
-        "image": "232_265.jpg",
+        "image_url": "/Produtos/Fotos/232_573.jpg",
+        "image": "232_573.jpg",
         "paused": false,
         "highlight": false,
         "mandatory_questions": [],
@@ -10035,9 +10044,9 @@
         "pause_reason": "",
         "pause_start": "",
         "pause_end": "",
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
+        "version": 2,
+        "hash": "89856fad02e7fc81cd2f1b338a97ba05922622f460772fa4cfb9af7dd4cb0f4b",
+        "last_updated": "2026-02-27T15:36:54.939970"
     },
     {
         "id": "233",
@@ -10197,38 +10206,6 @@
         "last_updated": ""
     },
     {
-        "id": "238",
-        "name": "Black & White Garrafa",
-        "category": "Bebidas Quentes Garrafas",
-        "price": 150.0,
-        "cost_price": 0.0,
-        "printer_id": "97e342f3-2ba7-4dc3-9afd-b299b4c7b777",
-        "should_print": true,
-        "description": "Garrafa de Black & White Garrafa.",
-        "service_fee_exempt": false,
-        "visible_virtual_menu": true,
-        "active": false,
-        "recipe": [],
-        "ncm": "22085000",
-        "cest": "200800",
-        "transparency_tax": 0.0,
-        "fiscal_benefit_code": "",
-        "cfop": "5405",
-        "origin": "0",
-        "tax_situation": "500",
-        "icms_rate": 0.0,
-        "icms_base_reduction": 0.0,
-        "fcp_rate": 0.0,
-        "pis_cst": "01",
-        "pis_rate": 0.0,
-        "cofins_cst": "01",
-        "cofins_rate": 0.0,
-        "paused": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
         "id": "239",
         "name": "Cachaça Seleta Garrafa",
         "category": "Bebidas Quentes Garrafas",
@@ -10256,9 +10233,21 @@
         "cofins_cst": "01",
         "cofins_rate": 0.0,
         "paused": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
+        "version": 2,
+        "hash": "fe1eb732106f034beaaa17eb328fa5b7ebf9c780d6b698af83c9be4105939232",
+        "last_updated": "2026-02-27T15:29:17.595208",
+        "image": "239_250.jpg",
+        "image_url": "/Produtos/Fotos/239_250.jpg",
+        "highlight": false,
+        "mandatory_questions": [],
+        "flavor_group_id": "",
+        "flavor_multiplier": 1.0,
+        "product_type": "standard",
+        "has_accompaniments": false,
+        "allowed_accompaniments": [],
+        "pause_reason": "",
+        "pause_start": "",
+        "pause_end": ""
     },
     {
         "id": "240",
@@ -11126,7 +11115,7 @@
         "active": true,
         "recipe": [],
         "mandatory_questions": [],
-        "flavor_group_id": "Sabores",
+        "flavor_group_id": "Toast",
         "flavor_multiplier": 1.0,
         "product_type": "standard",
         "has_accompaniments": false,
@@ -11151,9 +11140,9 @@
         "pause_end": "",
         "image_url": "",
         "highlight": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
+        "version": 4,
+        "hash": "46b120937778abc2ddc0cca5f72db37f154538c674f4d1d3d9d0cc7ca15c8ad0",
+        "last_updated": "2026-02-22T17:10:18.095223"
     },
     {
         "id": "268",
@@ -12039,12 +12028,12 @@
         "id": "260",
         "name": "Whisky Chivas ",
         "category": "Doses",
-        "price": 21.9,
+        "price": 24.9,
         "cost_price": 12.0,
         "printer_id": "97e342f3-2ba7-4dc3-9afd-b299b4c7b777",
         "should_print": true,
         "description": "",
-        "image": "260_265.jpg",
+        "image": "/Produtos/Fotos/260_265.jpg",
         "service_fee_exempt": false,
         "visible_virtual_menu": true,
         "active": true,
@@ -12080,20 +12069,20 @@
         "pause_reason": "",
         "pause_start": "",
         "pause_end": "",
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
+        "version": 2,
+        "hash": "a180fc724b3d144552dec1def0f46e879749cd5ec6569d072296014e0772f7e5",
+        "last_updated": "2026-02-23T16:37:01.691158"
     },
     {
         "id": "261",
         "name": "Whisky Black Label",
         "category": "Doses",
-        "price": 17.9,
+        "price": 19.9,
         "cost_price": 8.0,
         "printer_id": "97e342f3-2ba7-4dc3-9afd-b299b4c7b777",
         "should_print": true,
         "description": "",
-        "image": "261_265.jpg",
+        "image": "/Produtos/Fotos/261_265.jpg",
         "service_fee_exempt": false,
         "visible_virtual_menu": false,
         "active": true,
@@ -12129,15 +12118,15 @@
         "pause_reason": "",
         "pause_start": "",
         "pause_end": "",
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
+        "version": 2,
+        "hash": "3fb58f22f6fa4e5597e31c444cca01e19475dc5cdc6e46476d04567af861eeb2",
+        "last_updated": "2026-02-23T16:42:55.670185"
     },
     {
         "id": "264",
         "name": "Whisky Old Par",
         "category": "Doses",
-        "price": 18.9,
+        "price": 21.9,
         "cost_price": 5.0,
         "printer_id": "97e342f3-2ba7-4dc3-9afd-b299b4c7b777",
         "should_print": true,
@@ -12178,9 +12167,9 @@
         "pause_reason": "",
         "pause_start": "",
         "pause_end": "",
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
+        "version": 2,
+        "hash": "1fa96c7fd65766f32e6cb7b892c86f5175ef382b00b064ff10c644559378cfbf",
+        "last_updated": "2026-02-23T16:41:31.225134"
     },
     {
         "id": "272",
@@ -13083,8 +13072,8 @@
         "printer_id": "71e0b2b7-668d-45b3-b69a-d69ff63dc77a",
         "should_print": true,
         "description": "",
-        "image": "",
-        "image_url": "",
+        "image": "289_ceviche_vegano.jpg",
+        "image_url": "/Produtos/Fotos/289_ceviche_vegano.jpg",
         "service_fee_exempt": false,
         "visible_virtual_menu": true,
         "highlight": false,
@@ -13112,9 +13101,11 @@
         "cofins_rate": 0.0,
         "paused": false,
         "pause_reason": "",
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
+        "version": 2,
+        "hash": "5cbeb736482eb5ec05ef4aeb6440447059815132b2500dbc216323c93026fd56",
+        "last_updated": "2026-02-27T15:36:01.011830",
+        "pause_start": "",
+        "pause_end": ""
     },
     {
         "id": "290",
@@ -13165,7 +13156,7 @@
     },
     {
         "id": "291",
-        "name": "Espumante Barnaut Blanc De Noirs",
+        "name": "Espumante Champagne Barnaut Blanc De Noirs",
         "category": "Vinhos",
         "price": 720.0,
         "cost_price": 432.38,
@@ -13178,7 +13169,12 @@
         "visible_virtual_menu": true,
         "highlight": false,
         "active": true,
-        "recipe": [],
+        "recipe": [
+            {
+                "ingredient_id": "816",
+                "qty": 1.0
+            }
+        ],
         "mandatory_questions": [],
         "flavor_group_id": "",
         "flavor_multiplier": 1.0,
@@ -13201,9 +13197,11 @@
         "cofins_rate": 0.0,
         "paused": false,
         "pause_reason": "",
-        "version": 1,
-        "last_updated": "2026-02-20T18:49:08.230669",
-        "hash": "bd5486fe73acd989e3e7d349e460553bd1c7ddfe238fcf2bffe76b77caa201ca"
+        "version": 3,
+        "last_updated": "2026-02-21T19:07:13.023672",
+        "hash": "73e4a0c655bb242427a4c6806e706ca484d14828c2c4484e1381daefaa3cd6ab",
+        "pause_start": "",
+        "pause_end": ""
     },
     {
         "id": "292",
@@ -13220,7 +13218,155 @@
         "visible_virtual_menu": true,
         "highlight": false,
         "active": true,
-        "recipe": [],
+        "recipe": [
+            {
+                "ingredient_id": "819",
+                "qty": 1.0
+            }
+        ],
+        "mandatory_questions": [],
+        "flavor_group_id": "",
+        "flavor_multiplier": 1.0,
+        "product_type": "standard",
+        "has_accompaniments": false,
+        "allowed_accompaniments": [],
+        "ncm": "22041010",
+        "cest": "",
+        "transparency_tax": 0.0,
+        "fiscal_benefit_code": "",
+        "cfop": "5102",
+        "origin": "1",
+        "tax_situation": "102",
+        "icms_rate": 0.0,
+        "icms_base_reduction": 0.0,
+        "fcp_rate": 0.0,
+        "pis_cst": "",
+        "pis_rate": 0.0,
+        "cofins_cst": "",
+        "cofins_rate": 0.0,
+        "paused": false,
+        "pause_reason": "",
+        "version": 2,
+        "last_updated": "2026-02-21T19:07:37.331029",
+        "hash": "52bba73a00e81e8273476a54c56d05749758fac0b164149a1ceb10765b6ee2b9",
+        "pause_start": "",
+        "pause_end": ""
+    },
+    {
+        "id": "293",
+        "name": "Whisky Jack Daniels Old ",
+        "category": "Doses",
+        "price": 24.9,
+        "cost_price": 0.0,
+        "printer_id": "97e342f3-2ba7-4dc3-9afd-b299b4c7b777",
+        "should_print": true,
+        "description": "",
+        "image": "",
+        "image_url": "",
+        "service_fee_exempt": false,
+        "visible_virtual_menu": true,
+        "highlight": false,
+        "active": true,
+        "recipe": [
+            {
+                "ingredient_id": "299",
+                "qty": 0.07
+            }
+        ],
+        "mandatory_questions": [],
+        "flavor_group_id": "",
+        "flavor_multiplier": 1.0,
+        "product_type": "standard",
+        "has_accompaniments": false,
+        "allowed_accompaniments": [],
+        "ncm": "22085000",
+        "cest": "",
+        "transparency_tax": 0.0,
+        "fiscal_benefit_code": "",
+        "cfop": "5102",
+        "origin": "1",
+        "tax_situation": "102",
+        "icms_rate": 0.0,
+        "icms_base_reduction": 0.0,
+        "fcp_rate": 0.0,
+        "pis_cst": "",
+        "pis_rate": 0.0,
+        "cofins_cst": "",
+        "cofins_rate": 0.0,
+        "paused": false,
+        "pause_reason": "",
+        "version": 1,
+        "last_updated": "2026-02-23T16:39:03.356607",
+        "hash": "5deb11e295b51251f32c96602d336023e0523bc59587a3eae9d72abc807c6524"
+    },
+    {
+        "id": "294",
+        "name": "Whisky The Glenlivet Founders Reserve ",
+        "category": "Doses",
+        "price": 39.9,
+        "cost_price": 0.0,
+        "printer_id": "97e342f3-2ba7-4dc3-9afd-b299b4c7b777",
+        "should_print": true,
+        "description": "",
+        "image": "",
+        "image_url": "",
+        "service_fee_exempt": false,
+        "visible_virtual_menu": true,
+        "highlight": false,
+        "active": true,
+        "recipe": [
+            {
+                "ingredient_id": "827",
+                "qty": 0.07
+            }
+        ],
+        "mandatory_questions": [],
+        "flavor_group_id": "",
+        "flavor_multiplier": 1.0,
+        "product_type": "standard",
+        "has_accompaniments": false,
+        "allowed_accompaniments": [],
+        "ncm": "22085000",
+        "cest": "",
+        "transparency_tax": 0.0,
+        "fiscal_benefit_code": "",
+        "cfop": "5102",
+        "origin": "1",
+        "tax_situation": "102",
+        "icms_rate": 0.0,
+        "icms_base_reduction": 0.0,
+        "fcp_rate": 0.0,
+        "pis_cst": "",
+        "pis_rate": 0.0,
+        "cofins_cst": "",
+        "cofins_rate": 0.0,
+        "paused": false,
+        "pause_reason": "",
+        "version": 1,
+        "last_updated": "2026-02-23T16:40:03.853335",
+        "hash": "87a7cae2c35f9df06a2ac0bef122091471e7f6cfd4662586bc41edfb2883965f"
+    },
+    {
+        "id": "295",
+        "name": "Espumante Casa Perini Black Edition",
+        "category": "Vinhos",
+        "price": 129.9,
+        "cost_price": 51.6,
+        "printer_id": "97e342f3-2ba7-4dc3-9afd-b299b4c7b777",
+        "should_print": true,
+        "description": "",
+        "image": "",
+        "image_url": "",
+        "service_fee_exempt": false,
+        "visible_virtual_menu": true,
+        "highlight": false,
+        "active": true,
+        "recipe": [
+            {
+                "ingredient_id": "828",
+                "qty": 1.0
+            }
+        ],
         "mandatory_questions": [],
         "flavor_group_id": "",
         "flavor_multiplier": 1.0,
@@ -13244,7 +13390,7 @@
         "paused": false,
         "pause_reason": "",
         "version": 1,
-        "last_updated": "2026-02-20T18:50:11.711715",
-        "hash": "3c075c2958443940d2d970c03330cd58dbb3f2371be8799b8c6e3c5c1926ec27"
+        "last_updated": "2026-02-23T16:45:07.230384",
+        "hash": "4b6fd025251b327fd6457e267a7c605ccc299012d44be552472bb3f9ee66474d"
     }
 ]

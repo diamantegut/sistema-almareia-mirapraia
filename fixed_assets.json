@@ -6,20 +6,23 @@
         "category": "Teste",
         "acquisition_value": 10.0,
         "purchase_date": "2026-02-19",
-        "quantity": 0.0,
+        "quantity": 10.0,
         "supplier": "Transferido do Estoque",
         "condition": "Bom",
         "location": "A Definir",
-        "responsible": "Angelo",
-        "useful_life_years": 5,
-        "annual_depreciation_rate": 10,
+        "responsible": "",
+        "useful_life_years": 5.0,
+        "annual_depreciation_rate": 20.0,
         "created_at": "19/02/2026 12:29",
         "created_by": "Angelo",
         "transfer_history": {
             "from": "Estoque",
             "date": "19/02/2026 12:29",
             "justification": "ativo teste"
-        }
+        },
+        "min_stock": 0.0,
+        "updated_at": "27/02/2026 14:15",
+        "updated_by": "Angelo"
     },
     {
         "id": "4fc367b5-d7bb-49f6-8c5a-3e1c8c334132",
@@ -217,6 +220,226 @@
             "from": "Estoque",
             "date": "19/02/2026 12:39",
             "justification": "Ativo Imobilizado"
+        }
+    },
+    {
+        "id": "81eb1b80-5423-4f34-8fd8-71394594b95c",
+        "patrimony_number": "PAT-00011",
+        "description": "Taça Caipirinha",
+        "category": "Inventario",
+        "acquisition_value": 17.0,
+        "purchase_date": "2026-02-27",
+        "quantity": 16.0,
+        "supplier": "Transferido do Estoque",
+        "condition": "Bom",
+        "location": "A Definir",
+        "responsible": "Angelo",
+        "useful_life_years": 5,
+        "annual_depreciation_rate": 10,
+        "created_at": "27/02/2026 14:13",
+        "created_by": "Angelo",
+        "transfer_history": {
+            "from": "Estoque",
+            "date": "27/02/2026 14:13",
+            "justification": "taças de uso do restaurante"
+        }
+    },
+    {
+        "id": "4b287319-4be6-4e4a-8e3b-1c9aba36bbfa",
+        "patrimony_number": "PAT-00012",
+        "description": "Taça de acrílico grande",
+        "category": "Inventario",
+        "acquisition_value": 13.0,
+        "purchase_date": "2026-02-27",
+        "quantity": 71.0,
+        "supplier": "Transferido do Estoque",
+        "condition": "Bom",
+        "location": "A Definir",
+        "responsible": "Angelo",
+        "useful_life_years": 5,
+        "annual_depreciation_rate": 10,
+        "created_at": "27/02/2026 14:13",
+        "created_by": "Angelo",
+        "transfer_history": {
+            "from": "Estoque",
+            "date": "27/02/2026 14:13",
+            "justification": "taças de uso do restaurante"
+        }
+    },
+    {
+        "id": "2a921e50-1124-47d2-8bc7-ec0c20919597",
+        "patrimony_number": "PAT-00013",
+        "description": "Taça de acrilico pequena",
+        "category": "Inventario",
+        "acquisition_value": 24.0,
+        "purchase_date": "2026-02-27",
+        "quantity": 12.0,
+        "supplier": "Transferido do Estoque",
+        "condition": "Bom",
+        "location": "A Definir",
+        "responsible": "Angelo",
+        "useful_life_years": 5,
+        "annual_depreciation_rate": 10,
+        "created_at": "27/02/2026 14:13",
+        "created_by": "Angelo",
+        "transfer_history": {
+            "from": "Estoque",
+            "date": "27/02/2026 14:13",
+            "justification": "taças de uso do restaurante"
+        }
+    },
+    {
+        "id": "c24442df-5d07-4623-9636-ce571c1e14a6",
+        "patrimony_number": "PAT-00014",
+        "description": "Taça de Drinks Coloridos",
+        "category": "Inventario",
+        "acquisition_value": 16.82,
+        "purchase_date": "2026-02-27",
+        "quantity": 45.0,
+        "supplier": "Transferido do Estoque",
+        "condition": "Bom",
+        "location": "A Definir",
+        "responsible": "Angelo",
+        "useful_life_years": 5,
+        "annual_depreciation_rate": 10,
+        "created_at": "27/02/2026 14:13",
+        "created_by": "Angelo",
+        "transfer_history": {
+            "from": "Estoque",
+            "date": "27/02/2026 14:13",
+            "justification": "taças de uso do restaurante"
+        }
+    },
+    {
+        "id": "628d33f8-e05f-484e-8cbb-612008840f09",
+        "patrimony_number": "PAT-00015",
+        "description": "Taça de machiato",
+        "category": "Inventario",
+        "acquisition_value": 11.0,
+        "purchase_date": "2026-02-27",
+        "quantity": 25.0,
+        "supplier": "Transferido do Estoque",
+        "condition": "Bom",
+        "location": "A Definir",
+        "responsible": "Angelo",
+        "useful_life_years": 5,
+        "annual_depreciation_rate": 10,
+        "created_at": "27/02/2026 14:13",
+        "created_by": "Angelo",
+        "transfer_history": {
+            "from": "Estoque",
+            "date": "27/02/2026 14:13",
+            "justification": "taças de uso do restaurante"
+        }
+    },
+    {
+        "id": "de6a75fd-8035-4dc5-b8d9-f4f24488ae41",
+        "patrimony_number": "PAT-00016",
+        "description": "Taça de vidro grande ( sobremesa )",
+        "category": "Inventario",
+        "acquisition_value": 15.0,
+        "purchase_date": "2026-02-27",
+        "quantity": 8.0,
+        "supplier": "Transferido do Estoque",
+        "condition": "Bom",
+        "location": "A Definir",
+        "responsible": "Angelo",
+        "useful_life_years": 5,
+        "annual_depreciation_rate": 10,
+        "created_at": "27/02/2026 14:13",
+        "created_by": "Angelo",
+        "transfer_history": {
+            "from": "Estoque",
+            "date": "27/02/2026 14:13",
+            "justification": "taças de uso do restaurante"
+        }
+    },
+    {
+        "id": "fdda18b0-971b-4f9c-882a-db9e3e37b2c1",
+        "patrimony_number": "PAT-00017",
+        "description": "Taça Espumante",
+        "category": "Inventario",
+        "acquisition_value": 14.82,
+        "purchase_date": "2026-02-27",
+        "quantity": 45.0,
+        "supplier": "Transferido do Estoque",
+        "condition": "Bom",
+        "location": "A Definir",
+        "responsible": "Angelo",
+        "useful_life_years": 5,
+        "annual_depreciation_rate": 10,
+        "created_at": "27/02/2026 14:13",
+        "created_by": "Angelo",
+        "transfer_history": {
+            "from": "Estoque",
+            "date": "27/02/2026 14:13",
+            "justification": "taças de uso do restaurante"
+        }
+    },
+    {
+        "id": "d702bb4e-0896-4e76-bdfa-a3b16b13dfcc",
+        "patrimony_number": "PAT-00018",
+        "description": "Taça Gin",
+        "category": "Inventario",
+        "acquisition_value": 22.0,
+        "purchase_date": "2026-02-27",
+        "quantity": 15.0,
+        "supplier": "Transferido do Estoque",
+        "condition": "Bom",
+        "location": "A Definir",
+        "responsible": "Angelo",
+        "useful_life_years": 5,
+        "annual_depreciation_rate": 10,
+        "created_at": "27/02/2026 14:13",
+        "created_by": "Angelo",
+        "transfer_history": {
+            "from": "Estoque",
+            "date": "27/02/2026 14:13",
+            "justification": "taças de uso do restaurante"
+        }
+    },
+    {
+        "id": "cd3af514-c6fe-44b4-963e-ce65dee95259",
+        "patrimony_number": "PAT-00019",
+        "description": "Taça Vinho Branco",
+        "category": "Inventario",
+        "acquisition_value": 16.0,
+        "purchase_date": "2026-02-27",
+        "quantity": 93.0,
+        "supplier": "Transferido do Estoque",
+        "condition": "Bom",
+        "location": "A Definir",
+        "responsible": "Angelo",
+        "useful_life_years": 5,
+        "annual_depreciation_rate": 10,
+        "created_at": "27/02/2026 14:13",
+        "created_by": "Angelo",
+        "transfer_history": {
+            "from": "Estoque",
+            "date": "27/02/2026 14:13",
+            "justification": "taças de uso do restaurante"
+        }
+    },
+    {
+        "id": "2140f7b2-2dc5-4113-94c7-56fa2d2621cc",
+        "patrimony_number": "PAT-00020",
+        "description": "Taça Vinho Tinto",
+        "category": "Inventario",
+        "acquisition_value": 14.83,
+        "purchase_date": "2026-02-27",
+        "quantity": 64.0,
+        "supplier": "Transferido do Estoque",
+        "condition": "Bom",
+        "location": "A Definir",
+        "responsible": "Angelo",
+        "useful_life_years": 5,
+        "annual_depreciation_rate": 10,
+        "created_at": "27/02/2026 14:13",
+        "created_by": "Angelo",
+        "transfer_history": {
+            "from": "Estoque",
+            "date": "27/02/2026 14:13",
+            "justification": "taças de uso do restaurante"
         }
     }
 ]

@@ -1,0 +1,371 @@
+[
+    {
+        "timestamp": "2026-02-27T13:46:43.781794",
+        "action": "UPDATE",
+        "user": "luiz",
+        "item_id": "82",
+        "details": {
+            "name": "Isca de peixe empanado (Gurjões de peixe)"
+        },
+        "changes": [
+            {
+                "field": "active",
+                "old": true,
+                "new": false
+            }
+        ],
+        "hash": "b00e0933a2ec167320c26abde0c07e086df72081d05c3b00a781e10d09dd8f24"
+    },
+    {
+        "timestamp": "2026-02-27T14:31:59.228753",
+        "action": "UPDATE",
+        "user": "eduardo",
+        "item_id": "193",
+        "details": {
+            "name": "Vinho Branco Vinha do Conde"
+        },
+        "changes": [
+            {
+                "field": "active",
+                "old": true,
+                "new": false
+            }
+        ],
+        "hash": "71a3c545b4ba94a1bb9bbab4cc2fa27dc5e3fa5f660c29de1a3654f557704fb8"
+    },
+    {
+        "timestamp": "2026-02-27T14:42:32.301232",
+        "action": "UPDATE",
+        "user": "filipe",
+        "item_id": "193",
+        "details": {
+            "name": "Vinho Branco Vinha do Conde"
+        },
+        "changes": [
+            {
+                "field": "active",
+                "old": false,
+                "new": true
+            }
+        ],
+        "hash": "71a3c545b4ba94a1bb9bbab4cc2fa27dc5e3fa5f660c29de1a3654f557704fb8"
+    },
+    {
+        "timestamp": "2026-02-27T15:27:43.601495",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "228",
+        "details": {
+            "name": "Absolut Garrafa"
+        },
+        "changes": [
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "228_569_Absolut.jpg"
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/228_569_Absolut.jpg"
+            }
+        ],
+        "hash": "e4e7f4f8e0887ecc07942b73e0515a456a00be6aaf983e68980b6c315a3a1436"
+    },
+    {
+        "timestamp": "2026-02-27T15:27:51.346593",
+        "action": "DELETE",
+        "user": "eduardo",
+        "item_id": "238",
+        "details": {
+            "id": "238",
+            "name": "Black & White Garrafa",
+            "category": "Bebidas Quentes Garrafas",
+            "price": 150.0,
+            "cost_price": 0.0,
+            "printer_id": "97e342f3-2ba7-4dc3-9afd-b299b4c7b777",
+            "should_print": true,
+            "description": "Garrafa de Black & White Garrafa.",
+            "service_fee_exempt": false,
+            "visible_virtual_menu": true,
+            "active": false,
+            "recipe": [],
+            "ncm": "22085000",
+            "cest": "200800",
+            "transparency_tax": 0.0,
+            "fiscal_benefit_code": "",
+            "cfop": "5405",
+            "origin": "0",
+            "tax_situation": "500",
+            "icms_rate": 0.0,
+            "icms_base_reduction": 0.0,
+            "fcp_rate": 0.0,
+            "pis_cst": "01",
+            "pis_rate": 0.0,
+            "cofins_cst": "01",
+            "cofins_rate": 0.0,
+            "paused": false,
+            "version": 1,
+            "hash": "",
+            "last_updated": ""
+        },
+        "changes": [],
+        "hash": "1f49af64cedb0539accb5c79f7c83ba69495939f7345336ad485c3438c412da4"
+    },
+    {
+        "timestamp": "2026-02-27T15:29:17.595298",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "239",
+        "details": {
+            "name": "Cachaça Seleta Garrafa"
+        },
+        "changes": [
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": null,
+                "new": "239_250.jpg"
+            },
+            {
+                "field": "product_type",
+                "old": null,
+                "new": "standard"
+            },
+            {
+                "field": "flavor_group_id",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "allowed_accompaniments",
+                "old": null,
+                "new": []
+            },
+            {
+                "field": "flavor_multiplier",
+                "old": null,
+                "new": 1.0
+            },
+            {
+                "field": "mandatory_questions",
+                "old": null,
+                "new": []
+            },
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "has_accompaniments",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/239_250.jpg"
+            }
+        ],
+        "hash": "e310308d8775dfad92b099b3ea599fe0eca9e2fcaf41eb0e0a7eb6bb0d9745c7"
+    },
+    {
+        "timestamp": "2026-02-27T15:29:44.311808",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "229",
+        "details": {
+            "name": "Cobiçada Garrafa"
+        },
+        "changes": [
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "/Produtos/Fotos/229.jpg",
+                "new": "229_250.jpg"
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image_url",
+                "old": "/Produtos/Fotos/229.jpg",
+                "new": "/Produtos/Fotos/229_250.jpg"
+            }
+        ],
+        "hash": "d0f05e07d623df116da0374d7444c2f6c1b933af9a72413a8ebc2e3d648d9671"
+    },
+    {
+        "timestamp": "2026-02-27T15:36:01.011933",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "289",
+        "details": {
+            "name": "Ceviche de Banana da Terra "
+        },
+        "changes": [
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "289_ceviche_vegano.jpg"
+            },
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image_url",
+                "old": "",
+                "new": "/Produtos/Fotos/289_ceviche_vegano.jpg"
+            }
+        ],
+        "hash": "b38aae93814c8bdcea73365bad7b40388a53fe5440e726c37e1bbd772f4278b0"
+    },
+    {
+        "timestamp": "2026-02-27T15:36:54.940092",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "232",
+        "details": {
+            "name": "Rolha Bebida Quente"
+        },
+        "changes": [
+            {
+                "field": "image",
+                "old": "232_265.jpg",
+                "new": "232_573.jpg"
+            },
+            {
+                "field": "image_url",
+                "old": "/Produtos/Fotos/232_265.jpg",
+                "new": "/Produtos/Fotos/232_573.jpg"
+            }
+        ],
+        "hash": "dea43d8b7b6a996854e02343fb548634b09d8dc7ddb979512afd9b1d83848098"
+    },
+    {
+        "timestamp": "2026-02-27T15:38:19.393848",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "119",
+        "details": {
+            "name": "Peixe na Telha (2 pessoas)"
+        },
+        "changes": [
+            {
+                "field": "description",
+                "old": "Prato especial de Peixe na Telha, preparado com ingredientes frescos e sabor caseiro.",
+                "new": "Cioba inteira frita ou grelhada (aprox. 950 g) a moda dos pescadores, guarnecido por arroz, farofa, pirão e macaxeira frita. (Esse prato demora aprox. 1Hr (Frito) e 1:30Hrs (Grelhada)"
+            }
+        ],
+        "hash": "b2631f140bcdb617e29f67027d8dfe4e5a5393a7acfff1013e57a12e668d57f4"
+    },
+    {
+        "timestamp": "2026-02-27T15:38:30.847256",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "110",
+        "details": {
+            "name": "Peixe na Telha (3 Pessoas)"
+        },
+        "changes": [
+            {
+                "field": "description",
+                "old": "Prato especial de Peixe na Telha, preparado com ingredientes frescos e sabor caseiro.",
+                "new": "Cioba inteira frita ou grelhada (aprox. 950 g) a moda dos pescadores, guarnecido por arroz, farofa, pirão e macaxeira frita. (Esse prato demora aprox. 1Hr (Frito) e 1:30Hrs (Grelhada)"
+            }
+        ],
+        "hash": "24e99c0004cc231b28959683cd7bdef04919f053021cb6b3a1d125fca95d09ab"
+    },
+    {
+        "timestamp": "2026-02-27T15:41:06.715718",
+        "action": "UPDATE",
+        "user": "filipe",
+        "item_id": "82",
+        "details": {
+            "name": "Isca de peixe empanado (Gurjões de peixe)"
+        },
+        "changes": [
+            {
+                "field": "active",
+                "old": false,
+                "new": true
+            }
+        ],
+        "hash": "b00e0933a2ec167320c26abde0c07e086df72081d05c3b00a781e10d09dd8f24"
+    },
+    {
+        "timestamp": "2026-02-27T15:48:54.987731",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "110",
+        "details": {
+            "name": "Peixe na Telha (3 Pessoas)"
+        },
+        "changes": [
+            {
+                "field": "description",
+                "old": "Cioba inteira frita ou grelhada (aprox. 950 g) a moda dos pescadores, guarnecido por arroz, farofa, pirão e macaxeira frita. (Esse prato demora aprox. 1Hr (Frito) e 1:30Hrs (Grelhada)",
+                "new": "Cioba inteira frita ou grelhada (aprox. 1.200 kg) a moda dos pescadores, guarnecido por arroz, farofa, pirão e macaxeira frita. (Esse prato demora aprox. 1Hr (Frito) e 1:30Hrs (Grelhada)"
+            }
+        ],
+        "hash": "24e99c0004cc231b28959683cd7bdef04919f053021cb6b3a1d125fca95d09ab"
+    }
+]

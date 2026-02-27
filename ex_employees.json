@@ -125,5 +125,93 @@
             "observations": "Falecimento de colaborador.",
             "dismissed_by": "iraquitan"
         }
+    },
+    {
+        "password": "1234",
+        "department": "Cozinha",
+        "role": "colaborador",
+        "score": 3,
+        "permissions": [
+            "cozinha",
+            "principal"
+        ],
+        "full_name": "Josenice Maria De Oliveira",
+        "admission_date": "2021-08-01",
+        "birthday": "1976-10-09",
+        "daily_target_hours": 8,
+        "weekly_day_off": 1,
+        "username": "josenice",
+        "dismissal_info": {
+            "reason": "Sem justa causa",
+            "date": "2026-02-23",
+            "observations": "",
+            "dismissed_by": "iraquitan"
+        }
+    },
+    {
+        "password": "1234",
+        "department": "Recepção",
+        "role": "colaborador",
+        "score": 2,
+        "permissions": [
+            "recepcao",
+            "governanca"
+        ],
+        "full_name": "Antonio Carlos Da Silva",
+        "admission_date": "2026-01-11",
+        "birthday": "1993-06-13",
+        "daily_target_hours": 8,
+        "weekly_day_off": 3,
+        "username": "antonio",
+        "dismissal_info": {
+            "reason": "Pedido de demissão",
+            "date": "2026-02-10",
+            "observations": "",
+            "dismissed_by": "iraquitan"
+        }
+    },
+    {
+        "password": "1234",
+        "department": "Serviço",
+        "role": "colaborador",
+        "score": 3,
+        "permissions": [
+            "restaurante_mirapraia",
+            "restaurante_full_access"
+        ],
+        "full_name": "Erique Neves Cavalcanti",
+        "admission_date": "2025-10-01",
+        "birthday": "1981-02-28",
+        "daily_target_hours": 8,
+        "weekly_day_off": 2,
+        "username": "erique",
+        "dismissal_info": {
+            "reason": "Sem justa causa",
+            "date": "2026-02-24",
+            "observations": "",
+            "dismissed_by": "iraquitan"
+        }
+    },
+    {
+        "password": "1234",
+        "department": "Serviço",
+        "role": "colaborador",
+        "score": 2,
+        "permissions": [
+            "restaurante_mirapraia",
+            "restaurante_full_access"
+        ],
+        "full_name": "Orlando Severino de Gouveia",
+        "admission_date": "2024-12-09",
+        "birthday": "1979-08-02",
+        "daily_target_hours": 8,
+        "weekly_day_off": 1,
+        "username": "orlando",
+        "dismissal_info": {
+            "reason": "Sem justa causa",
+            "date": "2026-02-19",
+            "observations": "",
+            "dismissed_by": "iraquitan"
+        }
     }
 ]

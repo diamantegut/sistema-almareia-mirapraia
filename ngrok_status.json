@@ -1,7 +1,7 @@
 {
     "environment": "production",
     "port": 5000,
-    "last_update": "2026-02-15 12:45:47",
+    "last_update": "2026-02-27 12:44:47",
     "tunnels": [
         {
             "name": "pre-checkin",
@@ -10,7 +10,7 @@
             "port": 5000,
             "description": "Pr\u00e9-Checkin Digital",
             "status": "active",
-            "timestamp": "2026-02-15 12:45:46"
+            "timestamp": "2026-02-27 12:44:46"
         },
         {
             "name": "staff",
@@ -19,16 +19,25 @@
             "port": 5000,
             "description": "Acesso Colaboradores",
             "status": "active",
-            "timestamp": "2026-02-15 12:45:47"
+            "timestamp": "2026-02-27 12:44:46"
+        },
+        {
+            "name": "guest_portal",
+            "url": "https://hospedes.almareia.mirapraia.ngrok.app",
+            "domain": "hospedes.almareia.mirapraia.ngrok.app",
+            "port": 5000,
+            "description": "Portal do H\u00f3spede",
+            "status": "active",
+            "timestamp": "2026-02-27 12:44:46"
         },
         {
             "name": "menu",
-            "url": "https://menu.mirapraia.ngrok.app",
+            "error": "ngrok client exception, API returned 502: {\"error_code\":103,\"status_code\":502,\"msg\":\"failed to start tunnel\",\"details\":{\"err\":\"failed to start tunnel: Failed to create an endpoint with the domain 'menu.mirapraia.ngrok.app'. Nested subdomains of an ngrok base domain 'ngrok.app' must be reserved first. Alternatively, try 'menu-mirapraia.ngrok.app' instead.\\r\\n\\r\\nERR_NGROK_354\\r\\n\"}}\n",
             "domain": "menu.mirapraia.ngrok.app",
             "port": 5000,
             "description": "Card\u00e1pio Digital",
-            "status": "active",
-            "timestamp": "2026-02-15 12:45:47"
+            "status": "failed",
+            "timestamp": "2026-02-27 12:44:47"
         }
     ]
 }
