@@ -408,6 +408,11 @@
             const receivedIn = item.received_in || 0;
             const transferredIn = item.transferred_in || 0;
 
+            let iconClass = 'bi-wallet2';
+            if (item.type_key === 'restaurant_service' || item.type_key === 'restaurant') iconClass = 'bi-cup-straw';
+            else if (item.type_key === 'reception_room_billing' || item.type_key === 'guest_consumption') iconClass = 'bi-building';
+            else if (item.type_key === 'reservation_cashier' || item.type_key === 'reception_reservations') iconClass = 'bi-calendar-check';
+
             const cardCol = document.createElement('div');
             const hasContinuity = !!item.has_continuity_issue;
             const cardBorderClass = (item.has_anomaly || hasContinuity) ? 'border-warning border-2' : 'border-0';

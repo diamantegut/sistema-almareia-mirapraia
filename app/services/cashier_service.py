@@ -74,7 +74,8 @@ class CashierService:
     TYPES = {
         'restaurant': 'Caixa Restaurante',
         'guest_consumption': 'Caixa Consumo de Hóspedes',
-        'daily_rates': 'Caixa Diárias'
+        'daily_rates': 'Caixa Diárias',
+        'reservation_cashier': 'Caixa de Reservas'
     }
 
     @staticmethod
@@ -304,6 +305,41 @@ class CashierService:
                 current_balance += abs(amount)
                 
         return current_balance
+
+    @staticmethod
+    def get_session_summary(session):
+        """Returns a summary of the session including balance by payment method."""
+        if not session:
+            return None
+            
+        summary = {
+            'opening_balance': float(session.get('opening_balance', 0.0)),
+            'current_balance': CashierService._calculate_balance(session),
+            'total_in': 0.0,
+            'total_out': 0.0,
+            'balance_by_method': {}
+        }
+        
+        for t in session.get('transactions', []) or []:
+            try:
+                amount = float(t.get('amount', 0.0) or 0.0)
+            except:
+                amount = 0.0
+            
+            t_type = str(t.get('type', '')).strip().lower()
+            method = t.get('payment_method', 'Outros')
+            
+            if t_type in ['in', 'sale', 'deposit']:
+                summary['total_in'] += amount
+                summary['balance_by_method'][method] = summary['balance_by_method'].get(method, 0.0) + amount
+            elif t_type in ['out', 'withdrawal']:
+                summary['total_out'] += amount
+                # Optional: Deduct from method balance if tracking cash drawer specifically?
+                # Usually withdrawals are cash, so we deduct from 'Dinheiro' if method is not specified or matches
+                if method == 'Dinheiro' or method == 'Outros': # Simplified assumption
+                     summary['balance_by_method'][method] = summary['balance_by_method'].get(method, 0.0) - amount
+
+        return summary
 
     @staticmethod
     def _calculate_cash_balance(session):
@@ -709,6 +745,11 @@ class CashierService:
         
         for t in transactions:
             details = t.get('details', {}) or {}
+            if isinstance(details, str):
+                try:
+                    details = json.loads(details)
+                except:
+                    details = {}
             gid = details.get('payment_group_id')
             
             # Priority 1: New Payment Group ID
@@ -735,6 +776,11 @@ class CashierService:
         
         for t in transactions:
             details = t.get('details', {}) or {}
+            if isinstance(details, str):
+                try:
+                    details = json.loads(details)
+                except:
+                    details = {}
             gid = details.get('payment_group_id')
             
             # Handle Payment Group ID

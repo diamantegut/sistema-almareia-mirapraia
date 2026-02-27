@@ -1734,21 +1734,25 @@ def restaurant_table_order(table_id):
                     try:
                         secure_save_sales_history(sales_history, session.get('user', 'Sistema'))
                     except Exception as e:
-                        flash(f'Erro ao salvar histórico de vendas (Segurança): {e}')
-                        return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
-                
+                        current_app.logger.error(f'Erro ao salvar histórico de vendas (Mesa {table_id}): {e}')
+                        # Do NOT return, proceed to close table to avoid inconsistency (Bug Fix Table 42)
+                        flash(f'Aviso: Erro ao salvar histórico de vendas. Mesa fechada, mas verifique logs.')
+
                 # Shadow Log (Security Audit) - Backup for Closure
-                log_security_audit(
-                    event_type='TABLE_CLOSE',
-                    details={
-                        'table_id': table_id,
-                        'full_order_dump': orders[str_table_id],
-                        'reason': 'Regular Close',
-                        'final_total': grand_total
-                    },
-                    user=session.get('user'),
-                    ip_address=request.remote_addr
-                )
+                try:
+                    log_security_audit(
+                        event_type='TABLE_CLOSE',
+                        details={
+                            'table_id': table_id,
+                            'full_order_dump': orders[str_table_id],
+                            'reason': 'Regular Close',
+                            'final_total': grand_total
+                        },
+                        user=session.get('user'),
+                        ip_address=request.remote_addr
+                    )
+                except Exception as e:
+                    current_app.logger.error(f"Erro ao registrar auditoria de segurança (Mesa {table_id}): {e}")
                 
                 del orders[str_table_id]
                 if not save_table_orders(orders):

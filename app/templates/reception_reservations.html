@@ -2523,14 +2523,29 @@
         if (!modalEl) return;
         
         var form = document.getElementById('newResForm');
-        // If form not found (e.g. if we matched the wrong modal), try to find inputs directly or use the other modal structure
-        // But based on analysis, we are using the first modal with id="newResForm"
-        
         var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
         
         if (form) {
             form.reset();
             
+            // Fetch Payment Methods
+            fetch('/api/payment-methods')
+            .then(r => r.json())
+            .then(methods => {
+                const select = document.getElementById('nrPaymentMethod');
+                if (select) {
+                    select.innerHTML = '<option value="">Selecione...</option>';
+                    methods.forEach(m => {
+                        const option = document.createElement('option');
+                        option.value = m.id;
+                        option.textContent = m.name;
+                        option.dataset.name = m.name;
+                        select.appendChild(option);
+                    });
+                }
+            })
+            .catch(err => console.error('Erro ao carregar métodos de pagamento', err));
+
             // Set defaults
             var channel = form.querySelector('[name="channel"]');
             if (channel) channel.value = 'Direto';
@@ -2540,8 +2555,6 @@
             
             // Set dates
             if (checkin && checkout) {
-                // Input expects YYYY-MM-DD
-                // checkin/checkout are DD/MM/YYYY
                 var pIn = checkin.split('/');
                 var pOut = checkout.split('/');
                 if (pIn.length === 3) form.querySelector('[name="checkin"]').value = `${pIn[2]}-${pIn[1]}-${pIn[0]}`;
@@ -2570,6 +2583,24 @@
         
         modal.show();
     };
+
+    // Auto-calculate To Receive
+    document.addEventListener('DOMContentLoaded', function() {
+        const amountInput = document.querySelector('#newResForm [name="amount"]');
+        const paidInput = document.querySelector('#newResForm [name="paid_amount"]');
+        const toReceiveInput = document.querySelector('#newResForm [name="to_receive"]');
+
+        function updateToReceive() {
+            if (!amountInput || !paidInput || !toReceiveInput) return;
+            const amount = parseFloat(amountInput.value) || 0;
+            const paid = parseFloat(paidInput.value) || 0;
+            const remaining = Math.max(0, amount - paid);
+            toReceiveInput.value = remaining.toFixed(2);
+        }
+
+        if (amountInput) amountInput.addEventListener('input', updateToReceive);
+        if (paidInput) paidInput.addEventListener('input', updateToReceive);
+    });
 
     // Attach event listeners to empty cells
     document.addEventListener('DOMContentLoaded', function() {
@@ -2635,16 +2666,22 @@
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Pago (R$)</label>
-                            <input type="number" step="0.01" class="form-control" name="paid_amount" value="0.00">
+                            <input type="number" step="0.01" class="form-control" name="paid_amount" value="0.00" id="nrPaid">
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">A Receber (R$)</label>
-                            <input type="number" step="0.01" class="form-control" name="to_receive" value="0.00">
+                            <input type="number" step="0.01" class="form-control" name="to_receive" value="0.00" readonly id="nrToReceive">
                         </div>
                     </div>
                     <div class="row mb-3">
-                         <div class="col-md-6">
-                             <label class="form-label">Canal</label>
+                        <div class="col-md-6">
+                            <label class="form-label">Forma de Pagamento</label>
+                            <select class="form-select" name="payment_method_id" id="nrPaymentMethod">
+                                <option value="">Selecione...</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Canal</label>
                              <select class="form-select" name="channel">
                                  <option value="Direto">Direto (Balcão/Telefone)</option>
                                  <option value="WhatsApp">WhatsApp</option>
@@ -2721,6 +2758,27 @@
         var formData = new FormData(form);
         var data = Object.fromEntries(formData.entries());
         
+        // Validation
+        var amount = parseFloat(data.amount) || 0;
+        var paid = parseFloat(data.paid_amount) || 0;
+        
+        if (paid > amount) {
+            alert('O valor pago não pode ser maior que o valor total da reserva.');
+            return;
+        }
+        
+        if (paid > 0 && !data.payment_method_id) {
+            alert('Selecione a forma de pagamento para o valor pago.');
+            return;
+        }
+        
+        // Add Payment Method Name
+        if (data.payment_method_id) {
+            var select = form.querySelector('[name="payment_method_id"]');
+            var option = select.options[select.selectedIndex];
+            data.payment_method_name = option.dataset.name || option.text;
+        }
+
         // Format dates to DD/MM/YYYY
         if (data.checkin) {
             var d = new Date(data.checkin);

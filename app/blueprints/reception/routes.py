@@ -1429,18 +1429,55 @@ def api_create_manual_reservation():
         if not data.get('guest_name') or not data.get('checkin') or not data.get('checkout'):
              return jsonify({'success': False, 'error': 'Dados obrigatórios faltando.'}), 400
              
-        # Block past check-in dates for manual creations
-        try:
-            cin = datetime.strptime(data.get('checkin'), '%d/%m/%Y').date()
-            today = datetime.now().date()
-            if cin < today:
-                return jsonify({'success': False, 'error': 'Check-in não pode ser anterior a hoje.'}), 400
-        except Exception:
-            return jsonify({'success': False, 'error': 'Formato de data inválido. Use DD/MM/AAAA.'}), 400
+        # Parse Dates (handle both formats)
+        checkin_str = data.get('checkin')
+        checkout_str = data.get('checkout')
         
+        try:
+            cin = datetime.strptime(checkin_str, '%d/%m/%Y').date()
+            cout = datetime.strptime(checkout_str, '%d/%m/%Y').date()
+        except ValueError:
+            try:
+                cin = datetime.strptime(checkin_str, '%Y-%m-%d').date()
+                cout = datetime.strptime(checkout_str, '%Y-%m-%d').date()
+                # Normalize data to DD/MM/YYYY for consistency
+                data['checkin'] = cin.strftime('%d/%m/%Y')
+                data['checkout'] = cout.strftime('%d/%m/%Y')
+            except ValueError:
+                return jsonify({'success': False, 'error': 'Formato de data inválido. Use DD/MM/AAAA.'}), 400
+
+        # Block past check-in dates for manual creations
+        today = datetime.now().date()
+        if cin < today:
+            return jsonify({'success': False, 'error': 'Check-in não pode ser anterior a hoje.'}), 400
+        
+        # Payment Validation
+        try:
+            paid_amount = float(data.get('paid_amount', 0))
+        except (ValueError, TypeError):
+            paid_amount = 0.0
+            
+        print(f"DEBUG: api_create_manual_reservation paid_amount={paid_amount}")
+            
+        total_value = float(data.get('total_value', 0))
+        payment_method_id = data.get('payment_method')
+        
+        if paid_amount > 0:
+            if paid_amount > total_value + 0.01: # Small tolerance
+                return jsonify({'success': False, 'error': 'Valor pago não pode ser maior que o total.'}), 400
+            
+            if not payment_method_id:
+                return jsonify({'success': False, 'error': 'Forma de pagamento obrigatória para valores pagos.'}), 400
+                
+            # Check Cashier Session
+            current_session = CashierService.get_active_session('reservation_cashier')
+            if not current_session:
+                 return jsonify({'success': False, 'error': 'Caixa de Reservas fechado. Abra o caixa para registrar o pagamento.'}), 400
+
         room_number = str(data.get('room_number') or '').strip()
         service = ReservationService()
         occupancy = load_room_occupancy()
+        
         if room_number:
             try:
                 service.check_collision('new', room_number, data.get('checkin'), data.get('checkout'), occupancy_data=occupancy)
@@ -1457,7 +1494,47 @@ def api_create_manual_reservation():
                         return jsonify({'success': False, 'error': msg, 'available_categories': alts}), 200
                     return jsonify({'success': False, 'error': f'Não há disponibilidade para o período {data.get("checkin")}–{data.get("checkout")} em nenhuma categoria.'}), 200
         
-        new_res = service.create_manual_reservation(data)
+        # Create Reservation
+        creation_data = data.copy()
+        # Ensure paid_amount is 0 for initial creation to avoid double counting by add_payment later
+        creation_data['paid_amount'] = '0.00'
+        new_res = service.create_manual_reservation(creation_data)
+        
+        # Process Payment if applicable
+        print(f"DEBUG: Processing Payment? paid_amount={paid_amount}")
+        if paid_amount > 0:
+            try:
+                # Get Payment Method Name
+                payment_methods = load_payment_methods()
+                method_name = next((m['name'] for m in payment_methods if str(m['id']) == str(payment_method_id)), 'Desconhecido')
+                
+                # Add to Cashier
+                CashierService.add_transaction(
+                    cashier_type='reservation_cashier',
+                    amount=paid_amount,
+                    description=f"Pagamento Inicial Reserva #{new_res['id']} - {data.get('guest_name')}",
+                    payment_method=method_name,
+                    user=session.get('user'),
+                    transaction_type='sale',
+                    is_withdrawal=False
+                )
+                
+                # Add to Reservation Payments
+                service.add_payment(new_res['id'], paid_amount, {
+                    'method': method_name,
+                    'method_id': payment_method_id,
+                    'user': session.get('user'),
+                    'notes': 'Pagamento no ato da reserva'
+                })
+                
+                log_action('Pagamento Reserva', f"Recebido R$ {paid_amount:.2f} ({method_name}) para Reserva #{new_res['id']}", department='Recepção')
+                
+            except Exception as e:
+                # Log error but don't fail reservation creation (critical data already saved)
+                current_app.logger.error(f"Erro ao processar pagamento reserva {new_res['id']}: {str(e)}")
+                print(f"DEBUG: Payment Error: {str(e)}")
+                import traceback
+                traceback.print_exc()
         
         # Trigger pre-allocation immediately?
         service.auto_pre_allocate(window_hours=48)
@@ -1473,7 +1550,7 @@ def api_create_manual_reservation():
                     occupancy_data=occupancy
                 )
             except ValueError as e:
-                return jsonify({'success': False, 'error': str(e)}), 400
+                 return jsonify({'success': False, 'error': f"Reserva criada, mas falha na alocação: {str(e)}"}), 400
         
         return jsonify({'success': True, 'reservation': new_res})
     except Exception as e:
@@ -2812,7 +2889,7 @@ def reception_reservations_cashier():
     current_user = session.get('user')
     
     # Use Service to get session
-    current_session = CashierService.get_active_session('reception_reservations')
+    current_session = CashierService.get_active_session('reservation_cashier')
             
     payment_methods = load_payment_methods()
     payment_methods = [m for m in payment_methods if 'caixa_reservas' in m.get('available_in', []) or 'reservas' in m.get('available_in', []) or 'reservations' in m.get('available_in', [])]
@@ -2828,7 +2905,7 @@ def reception_reservations_cashier():
                 initial_balance = 0.0
             
             try:
-                CashierService.open_session('reception_reservations', current_user, initial_balance)
+                CashierService.open_session('reservation_cashier', current_user, initial_balance)
                 log_action('Caixa Aberto', f'Caixa Reservas aberto por {current_user} com R$ {initial_balance:.2f}', department='Recepção')
                 flash('Caixa de Reservas aberto com sucesso.')
             except ValueError as e:
@@ -2888,7 +2965,7 @@ def reception_reservations_cashier():
                     if trans_type == 'transfer':
                         target_cashier = request.form.get('target_cashier')
                         CashierService.transfer_funds(
-                            source_type='reception_reservations',
+                            source_type='reservation_cashier',
                             target_type=target_cashier,
                             amount=amount,
                             description=description,
@@ -2941,7 +3018,7 @@ def reception_reservations_cashier():
                                             logging.warning(f"DEBUG: Payment method ID {p_method_id} not found in {payment_methods}")
 
                                     CashierService.add_transaction(
-                                        cashier_type='reception_reservations',
+                                        cashier_type='reservation_cashier',
                                         amount=p_amount,
                                         description=description,
                                         payment_method=p_method_name,
@@ -2973,7 +3050,7 @@ def reception_reservations_cashier():
                             method_name = next((m['name'] for m in payment_methods if m['id'] == method_id), method_id)
                             
                             CashierService.add_transaction(
-                                cashier_type='reception_reservations',
+                                cashier_type='reservation_cashier',
                                 amount=amount,
                                 description=description,
                                 payment_method=method_name,
@@ -3002,7 +3079,7 @@ def reception_reservations_cashier():
                                     return redirect(url_for('reception.reception_reservations_cashier'))
 
                         CashierService.add_transaction(
-                            cashier_type='reception_reservations',
+                            cashier_type='reservation_cashier',
                             amount=amount,
                             description=description,
                             payment_method='Dinheiro',
@@ -3020,7 +3097,7 @@ def reception_reservations_cashier():
                         
                     elif trans_type == 'withdrawal':
                         CashierService.add_transaction(
-                            cashier_type='reception_reservations',
+                            cashier_type='reservation_cashier',
                             amount=amount,
                             description=description,
                             payment_method='Dinheiro',
@@ -4398,6 +4475,83 @@ def guest_experiences_menu():
         grouped[t].append(e)
         
     return render_template('guest_experiences_menu.html', grouped_experiences=grouped)
+
+
+@reception_bp.route('/reception/reservation/<reservation_id>/debt')
+@login_required
+def reception_reservation_debt(reservation_id):
+    try:
+        service = ReservationService()
+        res = service.get_reservation_by_id(reservation_id)
+        if not res:
+            return jsonify({'success': False, 'error': 'Reserva não encontrada'}), 404
+            
+        total = float(res.get('total_value', 0) or res.get('amount', 0))
+        
+        # Calculate Paid
+        payments_data = service.get_reservation_payments()
+        payments = payments_data.get(reservation_id, [])
+        paid = sum(float(p.get('amount', 0)) for p in payments)
+        
+        remaining = max(0.0, total - paid)
+        
+        return jsonify({
+            'success': True,
+            'total': total,
+            'paid': paid,
+            'remaining': remaining
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@reception_bp.route('/reception/reservation/pay', methods=['POST'])
+@login_required
+def reception_reservation_pay():
+    try:
+        data = request.json
+        res_id = data.get('reservation_id')
+        amount = float(data.get('amount', 0))
+        payment_method_id = data.get('payment_method_id')
+        payment_method_name = data.get('payment_method_name')
+        
+        if not res_id or amount <= 0 or not payment_method_id:
+             return jsonify({'success': False, 'error': 'Dados inválidos.'}), 400
+             
+        # Check Cashier Session
+        current_session = CashierService.get_active_session('reservation_cashier')
+        if not current_session:
+             return jsonify({'success': False, 'error': 'Caixa de Reservas fechado. Abra o caixa para registrar o pagamento.'}), 400
+
+        service = ReservationService()
+        res = service.get_reservation_by_id(res_id)
+        if not res:
+             return jsonify({'success': False, 'error': 'Reserva não encontrada.'}), 404
+             
+        # Add to Cashier
+        CashierService.add_transaction(
+            cashier_type='reservation_cashier',
+            amount=amount,
+            description=f"Pagamento Reserva #{res_id} - {res.get('guest_name')}",
+            payment_method=payment_method_name,
+            user=session.get('user'),
+            transaction_type='sale',
+            is_withdrawal=False
+        )
+        
+        # Add to Reservation Payments
+        service.add_payment(res_id, amount, {
+            'method': payment_method_name,
+            'method_id': payment_method_id,
+            'user': session.get('user'),
+            'notes': 'Pagamento via Recepção'
+        })
+        
+        log_action('Pagamento Reserva', f"Recebido R$ {amount:.2f} ({payment_method_name}) para Reserva #{res_id}", department='Recepção')
+        
+        return jsonify({'success': True})
+    except Exception as e:
+        current_app.logger.error(f"Erro pagamento reserva: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 
 @reception_bp.route('/reception/checkin', methods=['POST'])

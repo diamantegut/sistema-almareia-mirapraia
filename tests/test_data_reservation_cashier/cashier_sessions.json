@@ -1,0 +1,36 @@
+[
+    {
+        "id": "SESSION_RESERVATION_CASHIER_20260227165554_test_admin",
+        "user": "test_admin",
+        "type": "reservation_cashier",
+        "entity": "Hotel Almareia",
+        "opened_at": "27/02/2026 16:55",
+        "opening_balance": 50.0,
+        "transactions": [
+            {
+                "id": "TX_20260227165554_b5a023",
+                "type": "sale",
+                "amount": 100.0,
+                "description": "T1",
+                "payment_method": "Dinheiro",
+                "timestamp": "27/02/2026 16:55",
+                "user": "test",
+                "details": {}
+            },
+            {
+                "id": "TX_20260227165554_4488a4",
+                "type": "sale",
+                "amount": 200.0,
+                "description": "T2",
+                "payment_method": "PIX",
+                "timestamp": "27/02/2026 16:55",
+                "user": "test",
+                "details": {}
+            }
+        ],
+        "status": "open",
+        "closed_at": null,
+        "closing_balance": null,
+        "difference": null
+    }
+]

@@ -368,6 +368,7 @@ def get_balance_data(period_type, year, specific_value=None):
         'restaurant_service': 'Restaurante',
         'reception_room_billing': 'Recepção (Quartos)',
         'reception_reservations': 'Recepção (Reservas)',
+        'reservation_cashier': 'Recepção (Reservas)',
         'guest_consumption': 'Consumo de Hóspedes Restaurante'
     }
     

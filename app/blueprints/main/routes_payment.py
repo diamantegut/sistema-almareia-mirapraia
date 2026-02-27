@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for, session, flash
+from flask import render_template, request, redirect, url_for, session, flash, jsonify
 from app.utils.decorators import login_required
 from app.services.data_service import load_payment_methods, save_payment_methods
 from app.services.fiscal_service import load_fiscal_settings
@@ -87,3 +87,9 @@ def payment_methods():
     fiscal_integrations = fiscal_settings.get('integrations', [])
         
     return render_template('payment_methods.html', methods=methods, fiscal_integrations=fiscal_integrations)
+
+@main_bp.route('/api/payment-methods', methods=['GET'])
+@login_required
+def api_payment_methods():
+    methods = load_payment_methods()
+    return jsonify(methods)
