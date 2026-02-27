@@ -93,6 +93,7 @@
                 "cfop": "5405",
                 "origin": "0",
                 "tax_info": null
+<<<<<<<< HEAD:backups/table_orders/table_orders_20260227_155246_leo.json
             },
             {
                 "id": "fbf1f4c9-f60d-4dd2-9737-e835e4e71cb2",
@@ -171,6 +172,11 @@
             }
         ],
         "total": 70.3,
+========
+            }
+        ],
+        "total": 40.6,
+>>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0:archive/table_orders/table_orders_20260226_084026_eduardo.json
         "status": "open",
         "opened_at": "18/02/2026 10:40",
         "num_adults": 1,
@@ -587,6 +593,7 @@
                 "cfop": "5405",
                 "origin": "0",
                 "tax_info": null
+<<<<<<<< HEAD:backups/table_orders/table_orders_20260227_155246_leo.json
             },
             {
                 "id": "ce4aeda8-d154-4d6c-aef0-a7b29d7923f2",
@@ -612,6 +619,11 @@
             }
         ],
         "total": 102.30000000000001,
+========
+            }
+        ],
+        "total": 73.4,
+>>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0:archive/table_orders/table_orders_20260226_084026_eduardo.json
         "created_via": "open_staff_table_v2",
         "partial_payments": [],
         "total_paid": 0.0,
@@ -1162,6 +1174,27 @@
         "customer_type": "hospede",
         "room_number": "11"
     },
+<<<<<<<< HEAD:backups/table_orders/table_orders_20260227_155246_leo.json
+========
+    "31": {
+        "items": [],
+        "total": 0,
+        "status": "open",
+        "opened_at": "22/02/2026 14:09",
+        "num_adults": 2,
+        "customer_type": "hospede",
+        "room_number": "31"
+    },
+    "33": {
+        "items": [],
+        "total": 0,
+        "status": "open",
+        "opened_at": "22/02/2026 14:13",
+        "num_adults": 2,
+        "customer_type": "hospede",
+        "room_number": "33"
+    },
+>>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0:archive/table_orders/table_orders_20260226_084026_eduardo.json
     "12": {
         "items": [],
         "total": 0,
@@ -1298,6 +1331,27 @@
         "customer_type": "hospede",
         "room_number": "03"
     },
+<<<<<<<< HEAD:backups/table_orders/table_orders_20260227_155246_leo.json
+========
+    "02": {
+        "items": [],
+        "total": 0,
+        "status": "open",
+        "opened_at": "23/02/2026 16:51",
+        "num_adults": 2,
+        "customer_type": "hospede",
+        "room_number": "02"
+    },
+    "26": {
+        "items": [],
+        "total": 0,
+        "status": "open",
+        "opened_at": "24/02/2026 13:49",
+        "num_adults": 2,
+        "customer_type": "hospede",
+        "room_number": "26"
+    },
+>>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0:archive/table_orders/table_orders_20260226_084026_eduardo.json
     "21": {
         "items": [],
         "total": 0,
@@ -1350,6 +1404,277 @@
         "partial_payments": [],
         "total_paid": 0.0
     },
+<<<<<<<< HEAD:backups/table_orders/table_orders_20260227_155246_leo.json
+========
+    "37": {
+        "items": [
+            {
+                "id": "6624e653-f079-4a89-b957-c29bb720fb12",
+                "product_id": "267",
+                "name": "Toast (Consultar Sabor do Dia)",
+                "price": 24.9,
+                "qty": 2.0,
+                "category": "Café da manhã",
+                "created_at": "25/02/2026 10:48",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 40"
+                ],
+                "accompaniments": [],
+                "flavor": "Carne seca com requeijão",
+                "questions_answers": [],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "af18e697-c9af-4aaf-b787-cdcb559dcc90",
+                "product_id": "17",
+                "name": "Waffles da chef",
+                "price": 5.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "25/02/2026 10:51",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Com nutela",
+                    "Transf de Mesa 40"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            }
+        ],
+        "total": 54.8,
+        "status": "open",
+        "opened_at": "25/02/2026 11:02",
+        "num_adults": 1,
+        "customer_type": "passante",
+        "customer_name": "Cafe da manha ",
+        "room_number": null,
+        "waiter": "",
+        "staff_name": null,
+        "is_breakfast": false,
+        "partial_payments": [],
+        "total_paid": 0.0,
+        "last_transfer": {
+            "source_table": "40",
+            "timestamp": "25/02/2026 11:02",
+            "user": "luiz"
+        }
+    },
+    "56": {
+        "items": [
+            {
+                "id": "d01f84be-dfa9-4b60-981e-67f9196221d0",
+                "product_id": "142",
+                "name": "Água de Coco",
+                "price": 10.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "25/02/2026 11:14",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "20098922",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "879e936f-71a0-4e65-8b8e-e248611675a6",
+                "product_id": "142",
+                "name": "Água de Coco",
+                "price": 10.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "25/02/2026 11:17",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "20098922",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "2b408adc-4c82-4362-9e66-69fc55b02e96",
+                "product_id": "133",
+                "name": "Agua com Gás 275ml",
+                "price": 9.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "25/02/2026 11:46",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "Gelo e limão 1 copo"
+                    }
+                ],
+                "ncm": "22011000",
+                "cest": "300504",
+                "cfop": "5405",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "a6349be8-1a11-4f3a-8b15-6ccbb58dd660",
+                "product_id": "108",
+                "name": "Peixe ao Molho de Camarão (Individual)",
+                "price": 98.9,
+                "qty": 1.0,
+                "category": "Pratos",
+                "created_at": "25/02/2026 12:42",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "ea02ba30-bec7-4af7-8827-4c5a3dd647aa",
+                "product_id": "78",
+                "name": "Macaxeira Frita",
+                "price": 24.9,
+                "qty": 1.0,
+                "category": "Entradas",
+                "created_at": "25/02/2026 12:42",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "a5ce3f11-301f-4591-8c11-a9b29d9de032",
+                "product_id": "518",
+                "name": "Arroz",
+                "price": 14.9,
+                "qty": 1.0,
+                "category": "Porções",
+                "created_at": "25/02/2026 13:17",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "8ec108a3-2988-4a0b-9119-f035fe975edd",
+                "product_id": "132",
+                "name": "Cocada de forno da casa",
+                "price": 32.9,
+                "qty": 1.0,
+                "category": "Sobremesas",
+                "created_at": "25/02/2026 13:26",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "f5a31695-4ea4-453f-833a-ddebca73acfe",
+                "product_id": "2",
+                "name": "Acai",
+                "price": 19.9,
+                "qty": 1.0,
+                "category": "Sobremesas",
+                "created_at": "25/02/2026 15:50",
+                "waiter": "henrique",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5102",
+                "origin": "1",
+                "tax_info": null
+            }
+        ],
+        "total": 223.20000000000005,
+        "status": "open",
+        "opened_at": "25/02/2026 11:14",
+        "num_adults": 3,
+        "customer_type": "hospede",
+        "customer_name": "",
+        "room_number": "33",
+        "waiter": "",
+        "staff_name": null,
+        "is_breakfast": false,
+        "partial_payments": [],
+        "total_paid": 0.0,
+        "locked": true
+    },
+>>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0:archive/table_orders/table_orders_20260226_084026_eduardo.json
     "34": {
         "items": [],
         "total": 0,
@@ -1377,6 +1702,27 @@
         "customer_type": "hospede",
         "room_number": "24"
     },
+<<<<<<<< HEAD:backups/table_orders/table_orders_20260227_155246_leo.json
+========
+    "17": {
+        "items": [],
+        "total": 0,
+        "status": "open",
+        "opened_at": "25/02/2026 13:55",
+        "num_adults": 2,
+        "customer_type": "hospede",
+        "room_number": "17"
+    },
+    "22": {
+        "items": [],
+        "total": 0,
+        "status": "open",
+        "opened_at": "25/02/2026 13:57",
+        "num_adults": 2,
+        "customer_type": "hospede",
+        "room_number": "22"
+    },
+>>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0:archive/table_orders/table_orders_20260226_084026_eduardo.json
     "23": {
         "items": [],
         "total": 0,
@@ -1465,6 +1811,7 @@
         "partial_payments": [],
         "total_paid": 0.0
     },
+<<<<<<<< HEAD:backups/table_orders/table_orders_20260227_155246_leo.json
     "14": {
         "items": [],
         "total": 0,
@@ -1940,6 +2287,14 @@
         "status": "open",
         "opened_at": "27/02/2026 11:36",
         "num_adults": 2,
+========
+    "40": {
+        "items": [],
+        "total": 0,
+        "status": "open",
+        "opened_at": "26/02/2026 06:39",
+        "num_adults": 1,
+>>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0:archive/table_orders/table_orders_20260226_084026_eduardo.json
         "customer_type": "hospede",
         "customer_name": "",
         "room_number": "25",
@@ -1947,6 +2302,7 @@
         "staff_name": null,
         "is_breakfast": false,
         "partial_payments": [],
+<<<<<<<< HEAD:backups/table_orders/table_orders_20260227_155246_leo.json
         "total_paid": 0.0
     },
     "43": {
@@ -1960,22 +2316,48 @@
                 "category": "Sucos e Águas",
                 "created_at": "27/02/2026 11:58",
                 "waiter": "leo",
+========
+        "total_paid": 0.0,
+        "locked": false
+    },
+    "93": {
+        "items": [
+            {
+                "id": "c65fcf43-8d72-4d4f-87b6-2d8503cf5a3f",
+                "product_id": "2002",
+                "name": "Tapioca",
+                "price": 10.0,
+                "qty": 2.0,
+                "category": "Café da manhã",
+                "created_at": "26/02/2026 08:17",
+                "waiter": "adailton",
+>>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0:archive/table_orders/table_orders_20260226_084026_eduardo.json
                 "printed": true,
                 "print_status": "printed",
                 "complements": [],
                 "observations": [
+<<<<<<<< HEAD:backups/table_orders/table_orders_20260227_155246_leo.json
                     "Batido com gelo e adoçante"
                 ],
                 "accompaniments": [],
                 "flavor": "Limão",
                 "questions_answers": [],
                 "ncm": "20098990",
+========
+                    "Manteiga"
+                ],
+                "accompaniments": [],
+                "flavor": "Tradicional",
+                "questions_answers": [],
+                "ncm": "19030000",
+>>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0:archive/table_orders/table_orders_20260226_084026_eduardo.json
                 "cest": "",
                 "cfop": "5101",
                 "origin": "0",
                 "tax_info": null
             },
             {
+<<<<<<<< HEAD:backups/table_orders/table_orders_20260227_155246_leo.json
                 "id": "f4d0c043-6c3b-4650-823c-052d1ef60a0b",
                 "product_id": "2006",
                 "name": "Caipiroska Absolut (Escolha o sabor)",
@@ -2005,6 +2387,15 @@
                 "qty": 1.0,
                 "category": "Entradas",
                 "created_at": "27/02/2026 13:01",
+========
+                "id": "57bb8c60-231d-42a8-8cf9-fb389beb0515",
+                "product_id": "14",
+                "name": "Queijo assado",
+                "price": 15.0,
+                "qty": 2.0,
+                "category": "Café da manhã",
+                "created_at": "26/02/2026 08:17",
+>>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0:archive/table_orders/table_orders_20260226_084026_eduardo.json
                 "waiter": "adailton",
                 "printed": true,
                 "print_status": "printed",
@@ -2020,6 +2411,7 @@
                 "tax_info": null
             },
             {
+<<<<<<<< HEAD:backups/table_orders/table_orders_20260227_155246_leo.json
                 "id": "aed1a9fe-4e9a-433f-8bb9-9662ed8039f1",
                 "product_id": "2006",
                 "name": "Caipiroska Absolut (Escolha o sabor)",
@@ -2118,11 +2510,21 @@
                 "qty": 1.0,
                 "category": "Refrigerante",
                 "created_at": "27/02/2026 14:08",
+========
+                "id": "9eb322fb-0a7c-45e0-8133-ddbb7329f825",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "26/02/2026 08:17",
+>>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0:archive/table_orders/table_orders_20260226_084026_eduardo.json
                 "waiter": "adailton",
                 "printed": true,
                 "print_status": "printed",
                 "complements": [],
                 "observations": [
+<<<<<<<< HEAD:backups/table_orders/table_orders_20260227_155246_leo.json
                     "Transf de Mesa 40"
                 ],
                 "accompaniments": [],
@@ -2153,52 +2555,58 @@
         "waiter": "",
         "staff_name": null,
         "is_breakfast": false,
-        "partial_payments": [],
-        "total_paid": 0.0
-    },
-    "60": {
-        "items": [
-            {
-                "id": "e3f70dbc-4b72-4c78-9627-14e5591ff0be",
-                "product_id": "142",
-                "name": "Água de Coco",
-                "price": 10.9,
-                "qty": 2.0,
-                "category": "Sucos e Águas",
-                "created_at": "27/02/2026 12:33",
-                "waiter": "leo",
-                "printed": true,
-                "print_status": "printed",
-                "complements": [],
-                "observations": [],
+========
+                    "Gema mole"
+                ],
                 "accompaniments": [],
-                "flavor": "",
-                "questions_answers": [],
-                "ncm": "20098922",
+                "flavor": "Ovos",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "cozido ou frito"
+                    }
+                ],
+                "ncm": "21069090",
                 "cest": "",
                 "cfop": "5101",
                 "origin": "0",
                 "tax_info": null
-            },
+            }
+        ],
+        "total": 58.9,
+        "status": "open",
+        "opened_at": "26/02/2026 08:16",
+        "num_adults": 1,
+        "customer_type": "hospede",
+        "customer_name": "",
+        "room_number": "32",
+        "waiter": "",
+        "staff_name": null,
+        "is_breakfast": true,
+        "partial_payments": [],
+        "total_paid": 0.0
+    },
+    "89": {
+        "items": [
             {
-                "id": "0a5aaaec-cf39-4c81-b675-0bcb9d7988bb",
-                "product_id": "82",
-                "name": "Isca de peixe empanado (Gurjões de peixe)",
-                "price": 89.9,
-                "qty": 1.0,
-                "category": "Entradas",
-                "created_at": "27/02/2026 13:43",
-                "waiter": "leo",
+                "id": "7327bbd5-a895-4249-b6c7-5df51d7c4fe4",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 2.0,
+                "category": "Café da manhã",
+                "created_at": "26/02/2026 08:20",
+                "waiter": "adailton",
                 "printed": true,
                 "print_status": "printed",
                 "complements": [],
                 "observations": [],
                 "accompaniments": [],
-                "flavor": "",
+                "flavor": "Tradicional",
                 "questions_answers": [
                     {
-                        "question": "Crocância",
-                        "answer": "Bem Crocante"
+                        "question": "Tipo do Ovo",
+                        "answer": "Mexido"
                     }
                 ],
                 "ncm": "21069090",
@@ -2208,13 +2616,356 @@
                 "tax_info": null
             },
             {
-                "id": "18aed109-df01-4823-9227-31baec725a2c",
-                "product_id": "76",
-                "name": "Batata Frita",
+                "id": "0ecb751a-b11b-4b74-9134-46ebac9eb687",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "26/02/2026 08:20",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Gema mole"
+                ],
+                "accompaniments": [],
+                "flavor": "Tradicional",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "cozido ou frito"
+                    }
+                ],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "a6f46ef3-69e9-4a0b-9aa6-939ca1d01880",
+                "product_id": "267",
+                "name": "Toast (Consultar Sabor do Dia)",
                 "price": 24.9,
                 "qty": 1.0,
-                "category": "Entradas",
-                "created_at": "27/02/2026 13:43",
+                "category": "Café da manhã",
+                "created_at": "26/02/2026 08:20",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "Salmão com requeijão",
+                "questions_answers": [],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "52280cff-0041-4aed-856c-85c44e1f0646",
+                "product_id": "6",
+                "name": "Cuscuz Recheado",
+                "price": 11.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "26/02/2026 08:21",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "Charque Desfiada + Tomate + Queijo Coalho",
+                "questions_answers": [],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "3b17603d-dc68-416e-a032-30695896bd37",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "26/02/2026 08:21",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Gema dura"
+                ],
+                "accompaniments": [],
+                "flavor": "Tradicional",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "cozido ou frito"
+                    }
+                ],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "76a087be-02fe-45f3-8be7-0dea8e1bf76f",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "26/02/2026 08:21",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "Tradicional",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Mexido"
+                    }
+                ],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "bbbd87bf-f8e9-4886-9a7b-3b72a38284b3",
+                "product_id": "267",
+                "name": "Toast (Consultar Sabor do Dia)",
+                "price": 24.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "26/02/2026 08:32",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "Salmão com requeijão",
+                "questions_answers": [],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            }
+        ],
+        "total": 106.20000000000002,
+        "status": "open",
+        "opened_at": "26/02/2026 08:17",
+        "num_adults": 1,
+        "customer_type": "hospede",
+        "customer_name": "",
+        "room_number": "26",
+        "waiter": "",
+        "staff_name": null,
+        "is_breakfast": true,
+>>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0:archive/table_orders/table_orders_20260226_084026_eduardo.json
+        "partial_payments": [],
+        "total_paid": 0.0
+    },
+    "60": {
+        "items": [
+            {
+<<<<<<<< HEAD:backups/table_orders/table_orders_20260227_155246_leo.json
+                "id": "e3f70dbc-4b72-4c78-9627-14e5591ff0be",
+                "product_id": "142",
+                "name": "Água de Coco",
+                "price": 10.9,
+                "qty": 2.0,
+                "category": "Sucos e Águas",
+                "created_at": "27/02/2026 12:33",
+========
+                "id": "d79250dc-652f-4174-ae96-d5c26e28251a",
+                "product_id": "141",
+                "name": "Chocolate quente",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "26/02/2026 08:19",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "18069000",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "61cc6b7b-7673-4b8d-890b-f3e7ad140492",
+                "product_id": "13",
+                "name": "Pao Na Chapa",
+                "price": 2.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "26/02/2026 08:36",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Com queijo"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "628cf2c5-180c-40c2-b825-990e12126a59",
+                "product_id": "141",
+                "name": "Chocolate quente",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "26/02/2026 08:36",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "18069000",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "f5029520-1b2f-4090-a692-1bc7e2d4d2d8",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "26/02/2026 08:36",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Pouca cebola"
+                ],
+                "accompaniments": [],
+                "flavor": "Cebola Branca",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Omelete"
+                    }
+                ],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "79280455-23f6-466f-9641-6a88458b9178",
+                "product_id": "10",
+                "name": "Misto Quente",
+                "price": 14.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "26/02/2026 08:36",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Pouco recheio"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            }
+        ],
+        "total": 43.6,
+        "status": "open",
+        "opened_at": "26/02/2026 08:18",
+        "num_adults": 1,
+        "customer_type": "hospede",
+        "customer_name": "",
+        "room_number": "21",
+        "waiter": "",
+        "staff_name": null,
+        "is_breakfast": true,
+        "partial_payments": [],
+        "total_paid": 0.0
+    },
+    "61": {
+        "items": [
+            {
+                "id": "202781a7-ad78-417c-8b31-19a01d48c157",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "26/02/2026 08:27",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Frito com a gema mole"
+                ],
+                "accompaniments": [],
+                "flavor": "Ovos",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "cozido ou frito"
+                    }
+                ],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "2ac3f112-e1e7-4ae4-9483-ddb2fbc08818",
+                "product_id": "14",
+                "name": "Queijo assado",
+                "price": 15.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "26/02/2026 08:27",
                 "waiter": "leo",
                 "printed": true,
                 "print_status": "printed",
@@ -2228,6 +2979,235 @@
                 "cfop": "5101",
                 "origin": "0",
                 "tax_info": null
+            },
+            {
+                "id": "a36e4c51-4fe2-4762-a196-518a391a8ecd",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "26/02/2026 08:27",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "Ovos",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Pochê"
+                    }
+                ],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "c8d254dd-b895-4318-ab89-dd237d7319cb",
+                "product_id": "10",
+                "name": "Misto Quente",
+                "price": 14.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "26/02/2026 08:27",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "0517be6c-5a2d-4090-92d2-fee8cdc9b5f1",
+                "product_id": "144",
+                "name": "Café Capuccino",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "26/02/2026 08:27",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Tipo",
+                        "answer": "Classic"
+                    }
+                ],
+                "ncm": "9012100",
+                "cest": "",
+                "cfop": "5405",
+                "origin": "0",
+                "tax_info": null
+            }
+        ],
+        "total": 56.599999999999994,
+        "status": "open",
+        "opened_at": "26/02/2026 08:25",
+        "num_adults": 2,
+        "customer_type": "hospede",
+        "customer_name": "",
+        "room_number": "03",
+        "waiter": "",
+        "staff_name": null,
+        "is_breakfast": true,
+        "partial_payments": [],
+        "total_paid": 0.0
+    },
+    "59": {
+        "items": [
+            {
+                "id": "ea880bc0-e749-41ec-9968-c05f6fe3eaf4",
+                "product_id": "267",
+                "name": "Toast (Consultar Sabor do Dia)",
+                "price": 24.9,
+                "qty": 2.0,
+                "category": "Café da manhã",
+                "created_at": "26/02/2026 08:30",
+>>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0:archive/table_orders/table_orders_20260226_084026_eduardo.json
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+<<<<<<<< HEAD:backups/table_orders/table_orders_20260227_155246_leo.json
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "20098922",
+========
+                "observations": [
+                    "Salmao"
+                ],
+                "accompaniments": [],
+                "flavor": "Sem Recheio ",
+                "questions_answers": [],
+                "ncm": "21069090",
+>>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0:archive/table_orders/table_orders_20260226_084026_eduardo.json
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+<<<<<<<< HEAD:backups/table_orders/table_orders_20260227_155246_leo.json
+                "id": "0a5aaaec-cf39-4c81-b675-0bcb9d7988bb",
+                "product_id": "82",
+                "name": "Isca de peixe empanado (Gurjões de peixe)",
+                "price": 89.9,
+                "qty": 1.0,
+                "category": "Entradas",
+                "created_at": "27/02/2026 13:43",
+========
+                "id": "4e0bba35-ea24-4264-9d4f-197d67a4ece0",
+                "product_id": "2002",
+                "name": "Tapioca",
+                "price": 10.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "26/02/2026 08:30",
+>>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0:archive/table_orders/table_orders_20260226_084026_eduardo.json
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+<<<<<<<< HEAD:backups/table_orders/table_orders_20260227_155246_leo.json
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Crocância",
+                        "answer": "Bem Crocante"
+========
+                "flavor": "Queijo Mussarela + Presunto",
+                "questions_answers": [],
+                "ncm": "19030000",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "ec20aa8f-029f-4689-9a38-d5bcf0de4d90",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "26/02/2026 08:30",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "Tomate",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Mexido"
+>>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0:archive/table_orders/table_orders_20260226_084026_eduardo.json
+                    }
+                ],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+<<<<<<<< HEAD:backups/table_orders/table_orders_20260227_155246_leo.json
+                "id": "18aed109-df01-4823-9227-31baec725a2c",
+                "product_id": "76",
+                "name": "Batata Frita",
+                "price": 24.9,
+                "qty": 1.0,
+                "category": "Entradas",
+                "created_at": "27/02/2026 13:43",
+========
+                "id": "36b30228-db59-4872-b397-961072199f4b",
+                "product_id": "6",
+                "name": "Cuscuz Recheado",
+                "price": 11.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "26/02/2026 08:30",
+>>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0:archive/table_orders/table_orders_20260226_084026_eduardo.json
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+<<<<<<<< HEAD:backups/table_orders/table_orders_20260227_155246_leo.json
+                "flavor": "",
+========
+                "flavor": "Charque Desfiada + Queijo Coalho",
+>>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0:archive/table_orders/table_orders_20260226_084026_eduardo.json
+                "questions_answers": [],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+<<<<<<<< HEAD:backups/table_orders/table_orders_20260227_155246_leo.json
             },
             {
                 "id": "3078662a-2e49-468a-9e56-070c2d9073ad",
@@ -2278,11 +3258,39 @@
                 "qty": 1.0,
                 "category": "Vinhos",
                 "created_at": "27/02/2026 12:48",
+========
+            }
+        ],
+        "total": 80.60000000000001,
+        "status": "open",
+        "opened_at": "26/02/2026 08:28",
+        "num_adults": 2,
+        "customer_type": "hospede",
+        "customer_name": "",
+        "room_number": "17",
+        "waiter": "",
+        "staff_name": null,
+        "is_breakfast": true,
+        "partial_payments": [],
+        "total_paid": 0.0
+    },
+    "97": {
+        "items": [
+            {
+                "id": "adf27538-16d1-4c85-83ad-e8fead0f4432",
+                "product_id": "2002",
+                "name": "Tapioca",
+                "price": 10.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "26/02/2026 08:29",
+>>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0:archive/table_orders/table_orders_20260226_084026_eduardo.json
                 "waiter": "adailton",
                 "printed": true,
                 "print_status": "printed",
                 "complements": [],
                 "observations": [
+<<<<<<<< HEAD:backups/table_orders/table_orders_20260227_155246_leo.json
                     "2 taça"
                 ],
                 "accompaniments": [],
@@ -2291,10 +3299,21 @@
                 "ncm": "22042910",
                 "cest": "",
                 "cfop": "5405",
+========
+                    "Sem receheio"
+                ],
+                "accompaniments": [],
+                "flavor": "Tradicional",
+                "questions_answers": [],
+                "ncm": "19030000",
+                "cest": "",
+                "cfop": "5101",
+>>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0:archive/table_orders/table_orders_20260226_084026_eduardo.json
                 "origin": "0",
                 "tax_info": null
             },
             {
+<<<<<<<< HEAD:backups/table_orders/table_orders_20260227_155246_leo.json
                 "id": "c42ef0f4-89ca-4ee3-b25e-b5a342a0f4d0",
                 "product_id": "135",
                 "name": "Agua sem Gás 275ml",
@@ -2303,11 +3322,22 @@
                 "category": "Sucos e Águas",
                 "created_at": "27/02/2026 14:44",
                 "waiter": "edson",
+========
+                "id": "067f32cd-9977-4ca9-a02f-896c7b5ddc63",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 2.0,
+                "category": "Café da manhã",
+                "created_at": "26/02/2026 08:29",
+                "waiter": "adailton",
+>>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0:archive/table_orders/table_orders_20260226_084026_eduardo.json
                 "printed": true,
                 "print_status": "printed",
                 "complements": [],
                 "observations": [],
                 "accompaniments": [],
+<<<<<<<< HEAD:backups/table_orders/table_orders_20260227_155246_leo.json
                 "flavor": "",
                 "questions_answers": [
                     {
@@ -2397,6 +3427,15 @@
                 "accompaniments": [],
                 "flavor": "",
                 "questions_answers": [],
+========
+                "flavor": "Ovos",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Mexido"
+                    }
+                ],
+>>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0:archive/table_orders/table_orders_20260226_084026_eduardo.json
                 "ncm": "21069090",
                 "cest": "",
                 "cfop": "5101",
@@ -2404,6 +3443,7 @@
                 "tax_info": null
             },
             {
+<<<<<<<< HEAD:backups/table_orders/table_orders_20260227_155246_leo.json
                 "id": "8964b39a-31df-4cee-8ca9-3c80a2b8d4f4",
                 "product_id": "79",
                 "name": "Pasteis de Queijo coalho  (6 unidades)",
@@ -2449,19 +3489,35 @@
                 "qty": 1.0,
                 "category": "Sucos e Águas",
                 "created_at": "27/02/2026 13:06",
+========
+                "id": "eff9d462-8e8a-4765-859e-85a49924bf19",
+                "product_id": "267",
+                "name": "Toast (Consultar Sabor do Dia)",
+                "price": 24.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "26/02/2026 08:29",
+>>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0:archive/table_orders/table_orders_20260226_084026_eduardo.json
                 "waiter": "adailton",
                 "printed": true,
                 "print_status": "printed",
                 "complements": [],
                 "observations": [],
                 "accompaniments": [],
+<<<<<<<< HEAD:backups/table_orders/table_orders_20260227_155246_leo.json
                 "flavor": "",
                 "questions_answers": [],
                 "ncm": "20098922",
+========
+                "flavor": "Salmão com requeijão",
+                "questions_answers": [],
+                "ncm": "21069090",
+>>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0:archive/table_orders/table_orders_20260226_084026_eduardo.json
                 "cest": "",
                 "cfop": "5101",
                 "origin": "0",
                 "tax_info": null
+<<<<<<<< HEAD:backups/table_orders/table_orders_20260227_155246_leo.json
             },
             {
                 "id": "7267ba6b-c526-4a9d-b220-5dec9599a88b",
@@ -2509,14 +3565,51 @@
                 "qty": 1.0,
                 "category": "Entradas",
                 "created_at": "27/02/2026 13:15",
+========
+            }
+        ],
+        "total": 52.7,
+        "status": "open",
+        "opened_at": "26/02/2026 08:29",
+        "num_adults": 1,
+        "customer_type": "hospede",
+        "customer_name": "",
+        "room_number": "12",
+        "waiter": "",
+        "staff_name": null,
+        "is_breakfast": true,
+        "partial_payments": [],
+        "total_paid": 0.0
+    },
+    "94": {
+        "items": [
+            {
+                "id": "a5dfa1a2-c81e-4df2-bdcb-b973fb8c94d4",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "26/02/2026 08:36",
+>>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0:archive/table_orders/table_orders_20260226_084026_eduardo.json
                 "waiter": "adailton",
                 "printed": true,
                 "print_status": "printed",
                 "complements": [],
                 "observations": [],
                 "accompaniments": [],
+<<<<<<<< HEAD:backups/table_orders/table_orders_20260227_155246_leo.json
                 "flavor": "",
                 "questions_answers": [],
+========
+                "flavor": "Queijo Mussarela + Charque Desfiada + Tomate",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Omelete"
+                    }
+                ],
+>>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0:archive/table_orders/table_orders_20260226_084026_eduardo.json
                 "ncm": "21069090",
                 "cest": "",
                 "cfop": "5101",
@@ -2524,6 +3617,7 @@
                 "tax_info": null
             },
             {
+<<<<<<<< HEAD:backups/table_orders/table_orders_20260227_155246_leo.json
                 "id": "39d538c9-bbfe-414e-a48b-e7a57635ce25",
                 "product_id": "84",
                 "name": "Camarão na manteiga de alho",
@@ -2531,6 +3625,91 @@
                 "qty": 1.0,
                 "category": "Entradas",
                 "created_at": "27/02/2026 13:15",
+========
+                "id": "7a00da5a-43b2-495a-8fcf-5dbeed0ea8a3",
+                "product_id": "2002",
+                "name": "Tapioca",
+                "price": 10.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "26/02/2026 08:36",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "Queijo Coalho",
+                "questions_answers": [],
+                "ncm": "19030000",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "0dd4b79f-adc1-4580-bd30-253a42456999",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "26/02/2026 08:36",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "Queijo Coalho",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Omelete"
+                    }
+                ],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "1953ea9f-f7d3-43ae-9308-80f637aa5d3b",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 4.0,
+                "category": "Café da manhã",
+                "created_at": "26/02/2026 08:36",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "Ovos",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Mexido"
+                    }
+                ],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "ffd36c3b-6b40-45b8-b389-3eabebaea71b",
+                "product_id": "14",
+                "name": "Queijo assado",
+                "price": 15.0,
+                "qty": 2.0,
+                "category": "Café da manhã",
+                "created_at": "26/02/2026 08:36",
+>>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0:archive/table_orders/table_orders_20260226_084026_eduardo.json
                 "waiter": "adailton",
                 "printed": true,
                 "print_status": "printed",
@@ -2546,6 +3725,7 @@
                 "tax_info": null
             }
         ],
+<<<<<<<< HEAD:backups/table_orders/table_orders_20260227_155246_leo.json
         "total": 129.8,
         "status": "open",
         "opened_at": "27/02/2026 13:14",
@@ -2606,6 +3786,54 @@
                 "category": "Entradas",
                 "created_at": "27/02/2026 15:32",
                 "waiter": "leo",
+========
+        "total": 93.4,
+        "status": "open",
+        "opened_at": "26/02/2026 08:33",
+        "num_adults": 1,
+        "customer_type": "hospede",
+        "customer_name": "",
+        "room_number": "23",
+        "waiter": "",
+        "staff_name": null,
+        "is_breakfast": true,
+        "partial_payments": [],
+        "total_paid": 0.0
+    },
+    "47": {
+        "items": [
+            {
+                "id": "8ecfcbb7-fd09-4458-bb0c-cecdfd9e328b",
+                "product_id": "267",
+                "name": "Toast (Consultar Sabor do Dia)",
+                "price": 24.9,
+                "qty": 2.0,
+                "category": "Café da manhã",
+                "created_at": "26/02/2026 08:35",
+                "waiter": "eduardo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "Salmão com requeijão",
+                "questions_answers": [],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "8a9f57a3-ab95-442c-9ae1-19b9b511c29a",
+                "product_id": "17",
+                "name": "Waffles da chef",
+                "price": 5.0,
+                "qty": 1.0,
+                "category": "Café da manhã",
+                "created_at": "26/02/2026 08:35",
+                "waiter": "eduardo",
+>>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0:archive/table_orders/table_orders_20260226_084026_eduardo.json
                 "printed": true,
                 "print_status": "printed",
                 "complements": [],
@@ -2620,6 +3848,7 @@
                 "tax_info": null
             },
             {
+<<<<<<<< HEAD:backups/table_orders/table_orders_20260227_155246_leo.json
                 "id": "d82decff-7b09-4e29-ac25-6a62cd3f9390",
                 "product_id": "25",
                 "name": "Brasília Amarela (Sem Alcool)",
@@ -2659,11 +3888,38 @@
                 "questions_answers": [],
                 "ncm": "22089000",
                 "cest": "299900",
+========
+                "id": "17930d74-4e98-4576-b8bb-8542ea8374d6",
+                "product_id": "12",
+                "name": "Ovos ",
+                "price": 8.9,
+                "qty": 2.0,
+                "category": "Café da manhã",
+                "created_at": "26/02/2026 08:35",
+                "waiter": "eduardo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Sem sal"
+                ],
+                "accompaniments": [],
+                "flavor": "Ovos",
+                "questions_answers": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "answer": "Pochê"
+                    }
+                ],
+                "ncm": "21069090",
+                "cest": "",
+>>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0:archive/table_orders/table_orders_20260226_084026_eduardo.json
                 "cfop": "5101",
                 "origin": "0",
                 "tax_info": null
             }
         ],
+<<<<<<<< HEAD:backups/table_orders/table_orders_20260227_155246_leo.json
         "total": 84.69999999999999,
         "status": "open",
         "opened_at": "27/02/2026 15:31",
@@ -2674,6 +3930,18 @@
         "waiter": "",
         "staff_name": null,
         "is_breakfast": false,
+========
+        "total": 72.6,
+        "status": "open",
+        "opened_at": "26/02/2026 08:34",
+        "num_adults": 2,
+        "customer_type": "hospede",
+        "customer_name": "",
+        "room_number": "31",
+        "waiter": "",
+        "staff_name": null,
+        "is_breakfast": true,
+>>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0:archive/table_orders/table_orders_20260226_084026_eduardo.json
         "partial_payments": [],
         "total_paid": 0.0
     }

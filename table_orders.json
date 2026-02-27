@@ -122,6 +122,7 @@
                 "cfop": "5101",
                 "origin": "0",
                 "tax_info": null
+<<<<<<< HEAD
             },
             {
                 "id": "1f7cbbac-2523-441d-a9d1-30b913de90db",
@@ -171,6 +172,11 @@
             }
         ],
         "total": 70.3,
+=======
+            }
+        ],
+        "total": 50.5,
+>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0
         "status": "open",
         "opened_at": "18/02/2026 10:40",
         "num_adults": 1,
@@ -587,6 +593,7 @@
                 "cfop": "5405",
                 "origin": "0",
                 "tax_info": null
+<<<<<<< HEAD
             },
             {
                 "id": "ce4aeda8-d154-4d6c-aef0-a7b29d7923f2",
@@ -612,6 +619,11 @@
             }
         ],
         "total": 102.30000000000001,
+=======
+            }
+        ],
+        "total": 73.4,
+>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0
         "created_via": "open_staff_table_v2",
         "partial_payments": [],
         "total_paid": 0.0,
@@ -1162,6 +1174,7 @@
         "customer_type": "hospede",
         "room_number": "11"
     },
+<<<<<<< HEAD
     "12": {
         "items": [],
         "total": 0,
@@ -1171,6 +1184,35 @@
         "customer_type": "hospede",
         "room_number": "12"
     },
+=======
+    "31": {
+        "items": [],
+        "total": 0,
+        "status": "open",
+        "opened_at": "22/02/2026 14:09",
+        "num_adults": 2,
+        "customer_type": "hospede",
+        "room_number": "31"
+    },
+    "33": {
+        "items": [],
+        "total": 0,
+        "status": "open",
+        "opened_at": "22/02/2026 14:13",
+        "num_adults": 2,
+        "customer_type": "hospede",
+        "room_number": "33"
+    },
+    "12": {
+        "items": [],
+        "total": 0,
+        "status": "open",
+        "opened_at": "22/02/2026 14:17",
+        "num_adults": 2,
+        "customer_type": "hospede",
+        "room_number": "12"
+    },
+>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0
     "38": {
         "items": [
             {
@@ -1298,6 +1340,18 @@
         "customer_type": "hospede",
         "room_number": "03"
     },
+<<<<<<< HEAD
+=======
+    "02": {
+        "items": [],
+        "total": 0,
+        "status": "open",
+        "opened_at": "23/02/2026 16:51",
+        "num_adults": 2,
+        "customer_type": "hospede",
+        "room_number": "02"
+    },
+>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0
     "21": {
         "items": [],
         "total": 0,
@@ -1377,6 +1431,18 @@
         "customer_type": "hospede",
         "room_number": "24"
     },
+<<<<<<< HEAD
+=======
+    "17": {
+        "items": [],
+        "total": 0,
+        "status": "open",
+        "opened_at": "25/02/2026 13:55",
+        "num_adults": 2,
+        "customer_type": "hospede",
+        "room_number": "17"
+    },
+>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0
     "23": {
         "items": [],
         "total": 0,
@@ -1524,6 +1590,7 @@
         "partial_payments": [],
         "total_paid": 0.0
     },
+<<<<<<< HEAD
     "01": {
         "items": [],
         "total": 0,
@@ -1568,17 +1635,57 @@
         "items": [
             {
                 "id": "b6d23a70-cb52-4392-b142-b497cf85b4f7",
+=======
+    "60": {
+        "items": [
+            {
+                "id": "1d18d6c2-e42b-4c78-aaad-1c68c6bfe14f",
+                "product_id": "133",
+                "name": "Agua com Gás 275ml",
+                "price": 9.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "26/02/2026 12:09",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "1 cp"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "."
+                    }
+                ],
+                "ncm": "22011000",
+                "cest": "300504",
+                "cfop": "5405",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "3caff3d6-b02b-429b-b222-6188969b8110",
+>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0
                 "product_id": "142",
                 "name": "Água de Coco",
                 "price": 10.9,
                 "qty": 2.0,
                 "category": "Sucos e Águas",
+<<<<<<< HEAD
                 "created_at": "27/02/2026 11:05",
-                "waiter": "adailton",
+=======
+                "created_at": "26/02/2026 12:46",
+                "waiter": "eduardo",
                 "printed": true,
                 "print_status": "printed",
                 "complements": [],
-                "observations": [],
+                "observations": [
+                    "Já foi"
+                ],
                 "accompaniments": [],
                 "flavor": "",
                 "questions_answers": [],
@@ -1587,6 +1694,52 @@
                 "cfop": "5101",
                 "origin": "0",
                 "tax_info": null
+            },
+            {
+                "id": "66e1a58f-f4d6-4a24-9519-61333d2cbea9",
+                "product_id": "23",
+                "name": "Aperol Spritz",
+                "price": 38.9,
+                "qty": 1.0,
+                "category": "Drinks",
+                "created_at": "26/02/2026 12:46",
+                "waiter": "eduardo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "22089000",
+                "cest": "299900",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "83036f98-1567-4931-98d1-ba2d417aaefa",
+                "product_id": "71",
+                "name": "Pastel de Camarão",
+                "price": 42.9,
+                "qty": 1.0,
+                "category": "Entradas",
+                "created_at": "26/02/2026 13:42",
+>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+<<<<<<< HEAD
             }
         ],
         "total": 21.8,
@@ -1661,6 +1814,17 @@
                 "qty": 1.0,
                 "category": "Entradas",
                 "created_at": "27/02/2026 13:41",
+=======
+            },
+            {
+                "id": "45d01b32-3e11-4777-8454-6441f54b3cb9",
+                "product_id": "79",
+                "name": "Pasteis de Queijo coalho  (6 unidades)",
+                "price": 28.9,
+                "qty": 1.0,
+                "category": "Entradas",
+                "created_at": "26/02/2026 13:42",
+>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0
                 "waiter": "adailton",
                 "printed": true,
                 "print_status": "printed",
@@ -1676,6 +1840,7 @@
                 "tax_info": null
             },
             {
+<<<<<<< HEAD
                 "id": "b6a27099-03de-407a-b274-c312369146fe",
                 "product_id": "2004",
                 "name": "Suco Copo",
@@ -1684,6 +1849,67 @@
                 "category": "Sucos e Águas",
                 "created_at": "27/02/2026 13:43",
                 "waiter": "adailton",
+=======
+                "id": "476ad314-fd66-4788-8775-b09bb1b3e261",
+                "product_id": "194",
+                "name": "Vinho Branco Vista Calma Torrontés",
+                "price": 139.0,
+                "qty": 1.0,
+                "category": "Vinhos",
+                "created_at": "26/02/2026 13:42",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "3 Taças"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "22042910",
+                "cest": "",
+                "cfop": "5405",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "58001e02-7ed6-4643-8882-22f0c192a609",
+                "product_id": "133",
+                "name": "Agua com Gás 275ml",
+                "price": 9.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "26/02/2026 13:50",
+                "waiter": "eduardo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "1 Cp com gelo"
+                    }
+                ],
+                "ncm": "22011000",
+                "cest": "300504",
+                "cfop": "5405",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "7c951dc4-da26-4f86-af07-9d649cec429f",
+                "product_id": "266",
+                "name": "Cerveja Sem Gluten (Consultar Disponibilidade)",
+                "price": 16.9,
+                "qty": 1.0,
+                "category": "Cervejas",
+                "created_at": "26/02/2026 13:50",
+                "waiter": "eduardo",
+>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0
                 "printed": true,
                 "print_status": "printed",
                 "complements": [],
@@ -2165,8 +2391,25 @@
                 "cfop": "5405",
                 "origin": "0",
                 "tax_info": null
-            },
+            }
+        ],
+        "total": 308.19999999999993,
+        "status": "open",
+        "opened_at": "26/02/2026 12:08",
+        "num_adults": 2,
+        "customer_type": "hospede",
+        "customer_name": "ELIETE NEVES e Odair Pires",
+        "room_number": "23",
+        "waiter": "",
+        "staff_name": null,
+        "is_breakfast": false,
+        "partial_payments": [],
+        "total_paid": 0.0
+    },
+    "73": {
+        "items": [
             {
+<<<<<<< HEAD
                 "id": "c77efac8-aa22-4375-98dc-e91e1e87040e",
                 "product_id": "225",
                 "name": "Vinho Verde Casal Miranda",
@@ -2175,6 +2418,15 @@
                 "category": "Vinhos",
                 "created_at": "27/02/2026 13:55",
                 "waiter": "leo",
+=======
+                "id": "250c6293-2249-4ae3-9b0b-ca79bc52a46c",
+                "product_id": "142",
+                "name": "Água de Coco",
+                "price": 10.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "26/02/2026 12:20",
+                "waiter": "leo",
                 "printed": true,
                 "print_status": "printed",
                 "complements": [],
@@ -2182,6 +2434,468 @@
                 "accompaniments": [],
                 "flavor": "",
                 "questions_answers": [],
+                "ncm": "20098922",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "5e782651-b0ab-4640-bab7-0143b0cde656",
+                "product_id": "160",
+                "name": "Corona Long Neck",
+                "price": 16.9,
+                "qty": 1.0,
+                "category": "Cervejas",
+                "created_at": "26/02/2026 12:31",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Já foi"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "22030000",
+                "cest": "302101",
+                "cfop": "5405",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "521352a2-f8ec-4aca-af8f-6cdd38fee991",
+                "product_id": "81",
+                "name": "Casquinha de Aratu",
+                "price": 49.9,
+                "qty": 1.0,
+                "category": "Entradas",
+                "created_at": "26/02/2026 12:38",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "f4364284-16f1-4858-ba5c-74bd760de84c",
+                "product_id": "79",
+                "name": "Pasteis de Queijo coalho  (6 unidades)",
+                "price": 28.9,
+                "qty": 1.0,
+                "category": "Entradas",
+                "created_at": "26/02/2026 13:01",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "a0e5841f-aa03-4bdb-9c77-c657b00158c8",
+                "product_id": "132",
+                "name": "Cocada de forno da casa",
+                "price": 32.9,
+                "qty": 1.0,
+                "category": "Sobremesas",
+                "created_at": "26/02/2026 14:44",
+                "waiter": "edson",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "2 colheres"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "e343d147-c9a1-4234-a39a-35ca85ee0e27",
+                "product_id": "142",
+                "name": "Água de Coco",
+                "price": 10.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "26/02/2026 14:44",
+                "waiter": "edson",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "20098922",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            }
+        ],
+        "total": 150.4,
+        "status": "open",
+        "opened_at": "26/02/2026 12:20",
+        "num_adults": 1,
+        "customer_type": "hospede",
+        "customer_name": "",
+        "room_number": "32",
+        "waiter": "",
+        "staff_name": null,
+        "is_breakfast": false,
+        "partial_payments": [],
+        "total_paid": 0.0
+    },
+    "47": {
+        "items": [
+            {
+                "id": "4711f5b6-90c6-4441-ab82-1d9ab3590b87",
+                "product_id": "142",
+                "name": "Água de Coco",
+                "price": 10.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "26/02/2026 12:21",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "20098922",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "16f7d486-a45a-4805-91d6-9b210d70dc2a",
+                "product_id": "142",
+                "name": "Água de Coco",
+                "price": 10.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "26/02/2026 12:38",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "20098922",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "43052592-5557-43b2-8386-1c4fdca1c359",
+                "product_id": "81",
+                "name": "Casquinha de Aratu",
+                "price": 49.9,
+                "qty": 1.0,
+                "category": "Entradas",
+                "created_at": "26/02/2026 13:36",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "5dc35a2d-cf75-4a93-be6b-75901eb80282",
+                "product_id": "164",
+                "name": "Heineken Long Neck",
+                "price": 16.9,
+                "qty": 1.0,
+                "category": "Cervejas",
+                "created_at": "26/02/2026 13:36",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "2 cp"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "22030000",
+                "cest": "302101",
+                "cfop": "5405",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "0246c254-c170-4dd4-b696-8175e116a416",
+                "product_id": "283",
+                "name": "Cachaca Seleta",
+                "price": 18.9,
+                "qty": 1.0,
+                "category": "Doses",
+                "created_at": "26/02/2026 13:51",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "22084000",
+                "cest": "0200400",
+                "cfop": "5102",
+                "origin": "1",
+                "tax_info": null
+            },
+            {
+                "id": "c104431d-6cad-4561-9c32-0b4b1c2c526c",
+                "product_id": "84",
+                "name": "Camarão na manteiga de alho",
+                "price": 89.9,
+                "qty": 1.0,
+                "category": "Entradas",
+                "created_at": "26/02/2026 14:04",
+                "waiter": "eduardo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "33a84168-b18e-4f9f-89ed-220babd65835",
+                "product_id": "81",
+                "name": "Casquinha de Aratu",
+                "price": 49.9,
+                "qty": 1.0,
+                "category": "Entradas",
+                "created_at": "26/02/2026 14:04",
+                "waiter": "eduardo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "02c390e1-a6e8-4e84-a7fb-f6f4159c058d",
+                "product_id": "164",
+                "name": "Heineken Long Neck",
+                "price": 16.9,
+                "qty": 1.0,
+                "category": "Cervejas",
+                "created_at": "26/02/2026 14:24",
+                "waiter": "eduardo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "2 cp"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "22030000",
+                "cest": "302101",
+                "cfop": "5405",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "c533f548-c0b4-4413-8d28-ed12cb508fe1",
+                "product_id": "283",
+                "name": "Cachaca Seleta",
+                "price": 18.9,
+                "qty": 1.0,
+                "category": "Doses",
+                "created_at": "26/02/2026 14:24",
+                "waiter": "eduardo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "22084000",
+                "cest": "0200400",
+                "cfop": "5102",
+                "origin": "1",
+                "tax_info": null
+            }
+        ],
+        "total": 283.09999999999997,
+        "status": "open",
+        "opened_at": "26/02/2026 12:21",
+        "num_adults": 1,
+        "customer_type": "hospede",
+        "customer_name": "",
+        "room_number": "31",
+        "waiter": "",
+        "staff_name": null,
+        "is_breakfast": false,
+        "partial_payments": [],
+        "total_paid": 0.0
+    },
+    "54": {
+        "items": [
+            {
+                "id": "fd9801ae-d675-40c2-bd9e-cd1496bcd968",
+                "product_id": "142",
+                "name": "Água de Coco",
+                "price": 10.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "26/02/2026 12:45",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "20098922",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "ed3ab128-00db-495c-914b-8ff9e3e72b87",
+                "product_id": "142",
+                "name": "Água de Coco",
+                "price": 10.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "26/02/2026 13:08",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "20098922",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "cbc004ff-0391-4456-9d03-88266307565c",
+                "product_id": "37",
+                "name": "Arroz Havaiano (Individual)",
+                "price": 139.9,
+                "qty": 1.0,
+                "category": "Especiais da Casa",
+                "created_at": "26/02/2026 13:25",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Sem leite e glúten"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "8ed39139-6935-4899-9bb5-e67b54d14c27",
+                "product_id": "79",
+                "name": "Pasteis de Queijo coalho  (6 unidades)",
+                "price": 28.9,
+                "qty": 1.0,
+                "category": "Entradas",
+                "created_at": "26/02/2026 13:35",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "d79c3c5c-95b5-450b-9880-68be5fdfd7ae",
+                "product_id": "2000",
+                "name": "Suco Jarra",
+                "price": 21.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "26/02/2026 13:35",
+                "waiter": "adailton",
+>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+<<<<<<< HEAD
                 "ncm": "22042910",
                 "cest": "",
                 "cfop": "5405",
@@ -2237,10 +2951,16 @@
                 "ncm": "21069090",
                 "cest": "",
                 "cfop": "5101",
+=======
+                "ncm": "22021000",
+                "cest": "301002",
+                "cfop": "5405",
+>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0
                 "origin": "0",
                 "tax_info": null
             }
         ],
+<<<<<<< HEAD
         "total": 660.8,
         "status": "open",
         "opened_at": "27/02/2026 12:23",
@@ -2383,7 +3103,261 @@
         "total": 198.60000000000002,
         "status": "open",
         "opened_at": "27/02/2026 12:46",
+=======
+        "total": 212.50000000000003,
+        "status": "open",
+        "opened_at": "26/02/2026 12:44",
+>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0
         "num_adults": 2,
+        "customer_type": "hospede",
+        "customer_name": "CASSIANO E RITIANE",
+        "room_number": "02",
+        "waiter": "",
+        "staff_name": null,
+        "is_breakfast": false,
+        "partial_payments": [],
+        "total_paid": 0.0
+    },
+    "59": {
+        "items": [
+            {
+                "id": "16924794-237f-49db-93bd-c005edde4e39",
+                "product_id": "82",
+                "name": "Isca de peixe empanado (Gurjões de peixe)",
+                "price": 89.9,
+                "qty": 1.0,
+                "category": "Entradas",
+                "created_at": "26/02/2026 13:10",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Crocância",
+                        "answer": "Bem Crocante"
+                    }
+                ],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "42ef4fa5-c764-4076-a85d-aab97a221eae",
+                "product_id": "104",
+                "name": "Parmegiana de Camarão (Individual)",
+                "price": 98.99,
+                "qty": 1.0,
+                "category": "Pratos",
+                "created_at": "26/02/2026 13:10",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [
+                    "Batata Frita",
+                    "Arroz"
+                ],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "ae11ad7a-3414-4110-b5d9-346c2aea33ca",
+                "product_id": "2000",
+                "name": "Suco Jarra",
+                "price": 21.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "26/02/2026 13:43",
+                "waiter": "eduardo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Sem açúcar"
+                ],
+                "accompaniments": [],
+                "flavor": "Caju",
+                "questions_answers": [],
+                "ncm": "22021000",
+                "cest": "301002",
+                "cfop": "5405",
+                "origin": "0",
+                "tax_info": null
+            }
+        ],
+        "total": 210.79,
+        "status": "open",
+        "opened_at": "26/02/2026 13:09",
+        "num_adults": 3,
+        "customer_type": "hospede",
+        "customer_name": "Maria Clara e Arnaldo Prata",
+        "room_number": "35",
+        "waiter": "",
+        "staff_name": null,
+        "is_breakfast": false,
+        "partial_payments": [],
+        "total_paid": 0.0
+    },
+    "40": {
+        "items": [
+            {
+                "id": "41bcd9d0-abce-448b-b0e7-6cec6713c575",
+                "product_id": "111",
+                "name": "Filé de peixe branco na folha de bananeira (individual)",
+                "price": 99.9,
+                "qty": 1.0,
+                "category": "Pratos",
+                "created_at": "26/02/2026 13:51",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "e4c95367-5965-4851-a494-b7ea3e1cfb3f",
+                "product_id": "103",
+                "name": "Moqueca de Camarão (Individual)",
+                "price": 89.9,
+                "qty": 1.0,
+                "category": "Pratos",
+                "created_at": "26/02/2026 13:51",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "7cb8f054-ea0d-4481-9acd-cae085bfebda",
+                "product_id": "114",
+                "name": "Risotto de Camarão (Individual)",
+                "price": 79.9,
+                "qty": 1.0,
+                "category": "Pratos",
+                "created_at": "26/02/2026 13:51",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Ponto do Arroz",
+                        "answer": "Al Dente"
+                    }
+                ],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "89b414b1-e857-40da-9ca3-f46a1277a21c",
+                "product_id": "142",
+                "name": "Água de Coco",
+                "price": 10.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "26/02/2026 13:51",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "20098922",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "1a249f08-119a-4d79-9aff-a27e66d036c7",
+                "product_id": "2000",
+                "name": "Suco Jarra",
+                "price": 21.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "26/02/2026 13:51",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "3 cp"
+                ],
+                "accompaniments": [],
+                "flavor": "Laranja",
+                "questions_answers": [],
+                "ncm": "22021000",
+                "cest": "301002",
+                "cfop": "5405",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "e2d35e54-4115-4619-9aa0-d41a45cfc0cb",
+                "product_id": "2000",
+                "name": "Suco Jarra",
+                "price": 21.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "26/02/2026 14:44",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "3 cp"
+                ],
+                "accompaniments": [],
+                "flavor": "Laranja",
+                "questions_answers": [],
+                "ncm": "22021000",
+                "cest": "301002",
+                "cfop": "5405",
+                "origin": "0",
+                "tax_info": null
+            }
+        ],
+        "total": 324.4,
+        "status": "open",
+        "opened_at": "26/02/2026 13:47",
+        "num_adults": 3,
         "customer_type": "passante",
         "customer_name": "",
         "room_number": null,
@@ -2391,8 +3365,10 @@
         "staff_name": null,
         "is_breakfast": false,
         "partial_payments": [],
-        "total_paid": 0.0
+        "total_paid": 0.0,
+        "locked": true
     },
+<<<<<<< HEAD
     "78": {
         "items": [
             {
@@ -2403,6 +3379,18 @@
                 "qty": 1.0,
                 "category": "Entradas",
                 "created_at": "27/02/2026 12:52",
+=======
+    "89": {
+        "items": [
+            {
+                "id": "ac7c6eec-b706-4031-b9a6-fcc861f163bc",
+                "product_id": "118",
+                "name": "Arroz de Polvo (Individual)",
+                "price": 89.9,
+                "qty": 1.0,
+                "category": "Pratos",
+                "created_at": "26/02/2026 14:01",
+>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0
                 "waiter": "leo",
                 "printed": true,
                 "print_status": "printed",
@@ -2418,6 +3406,7 @@
                 "tax_info": null
             },
             {
+<<<<<<< HEAD
                 "id": "8964b39a-31df-4cee-8ca9-3c80a2b8d4f4",
                 "product_id": "79",
                 "name": "Pasteis de Queijo coalho  (6 unidades)",
@@ -2425,6 +3414,15 @@
                 "qty": 1.0,
                 "category": "Entradas",
                 "created_at": "27/02/2026 12:52",
+=======
+                "id": "be7eaf67-711b-499b-89a7-88568e1b1c6b",
+                "product_id": "88",
+                "name": "Carré de Cordeiro da Chefe (Individual)",
+                "price": 129.9,
+                "qty": 1.0,
+                "category": "Pratos",
+                "created_at": "26/02/2026 14:01",
+>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0
                 "waiter": "leo",
                 "printed": true,
                 "print_status": "printed",
@@ -2432,7 +3430,16 @@
                 "observations": [],
                 "accompaniments": [],
                 "flavor": "",
+<<<<<<< HEAD
                 "questions_answers": [],
+=======
+                "questions_answers": [
+                    {
+                        "question": "Ponto da Carne",
+                        "answer": "Ao ponto"
+                    }
+                ],
+>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0
                 "ncm": "21069090",
                 "cest": "",
                 "cfop": "5101",
@@ -2440,6 +3447,7 @@
                 "tax_info": null
             },
             {
+<<<<<<< HEAD
                 "id": "893c364f-9b99-4b88-bab9-32d83f498cc1",
                 "product_id": "76",
                 "name": "Batata Frita",
@@ -2448,20 +3456,39 @@
                 "category": "Entradas",
                 "created_at": "27/02/2026 16:36",
                 "waiter": "filipe",
+=======
+                "id": "7a0b1a2f-77c8-4ec8-8183-2bcf3ecc47be",
+                "product_id": "2000",
+                "name": "Suco Jarra",
+                "price": 21.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "26/02/2026 14:01",
+                "waiter": "leo",
+>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0
                 "printed": true,
                 "print_status": "printed",
                 "complements": [],
                 "observations": [],
                 "accompaniments": [],
+<<<<<<< HEAD
                 "flavor": "",
                 "questions_answers": [],
                 "ncm": "21069090",
                 "cest": "",
                 "cfop": "5101",
+=======
+                "flavor": "Cajá",
+                "questions_answers": [],
+                "ncm": "22021000",
+                "cest": "301002",
+                "cfop": "5405",
+>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0
                 "origin": "0",
                 "tax_info": null
             }
         ],
+<<<<<<< HEAD
         "total": 113.6,
         "status": "open",
         "opened_at": "27/02/2026 12:50",
@@ -2643,6 +3670,11 @@
         "total": 84.69999999999999,
         "status": "open",
         "opened_at": "27/02/2026 15:31",
+=======
+        "total": 241.70000000000002,
+        "status": "open",
+        "opened_at": "26/02/2026 13:59",
+>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0
         "num_adults": 2,
         "customer_type": "hospede",
         "customer_name": "",
@@ -2653,6 +3685,7 @@
         "partial_payments": [],
         "total_paid": 0.0
     },
+<<<<<<< HEAD
     "61": {
         "items": [
             {
@@ -2664,6 +3697,448 @@
                 "category": "Especiais da Casa",
                 "created_at": "27/02/2026 15:59",
                 "waiter": "filipe",
+=======
+    "92": {
+        "items": [
+            {
+                "id": "f592bfcc-d50d-4378-aa29-23252a5a460c",
+                "product_id": "160",
+                "name": "Corona Long Neck",
+                "price": 16.9,
+                "qty": 1.0,
+                "category": "Cervejas",
+                "created_at": "26/02/2026 13:48",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "1 cp",
+                    "Com limao",
+                    "Transf de Mesa 99"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "22030000",
+                "cest": "302101",
+                "cfop": "5405",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "03e77b47-fc5b-4d58-a7f0-735390ee98f5",
+                "product_id": "87",
+                "name": "Caldeirada de frutos do Mar (Individual)",
+                "price": 109.9,
+                "qty": 1.0,
+                "category": "Pratos",
+                "created_at": "26/02/2026 13:48",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Sem pimentão",
+                    "Transf de Mesa 99"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "c73ccccd-8623-4538-8a24-f4da860f5741",
+                "product_id": "85",
+                "name": "Arrumadinho da chef (Individual)",
+                "price": 99.9,
+                "qty": 1.0,
+                "category": "Pratos",
+                "created_at": "26/02/2026 13:48",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 99"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "c4253a85-5fd9-456d-9149-c92c00e12656",
+                "product_id": "160",
+                "name": "Corona Long Neck",
+                "price": 16.9,
+                "qty": 2.0,
+                "category": "Cervejas",
+                "created_at": "26/02/2026 14:13",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Com limao"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "22030000",
+                "cest": "302101",
+                "cfop": "5405",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "94afad20-b5a8-4ada-aa09-3709a2965923",
+                "product_id": "155",
+                "name": "Guaraná Zero 350ml",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Refrigerante",
+                "created_at": "26/02/2026 14:42",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "1 cp",
+                    "Com gelo e laranja"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "22021000",
+                "cest": "301002",
+                "cfop": "5405",
+                "origin": "0",
+                "tax_info": null
+            }
+        ],
+        "total": 269.4,
+        "status": "open",
+        "opened_at": "26/02/2026 14:04",
+        "num_adults": 1,
+        "customer_type": "passante",
+        "customer_name": "Leandro",
+        "room_number": null,
+        "waiter": "",
+        "staff_name": null,
+        "is_breakfast": false,
+        "partial_payments": [],
+        "total_paid": 0.0,
+        "last_transfer": {
+            "source_table": "99",
+            "timestamp": "26/02/2026 14:04",
+            "user": "filipe"
+        }
+    },
+    "91": {
+        "items": [
+            {
+                "id": "f4b736da-c84a-4efa-8043-50e738663413",
+                "product_id": "102",
+                "name": "Medalhão de carne de sol (Individual)",
+                "price": 94.9,
+                "qty": 1.0,
+                "category": "Pratos",
+                "created_at": "26/02/2026 13:38",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 97"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Ponto da Carne",
+                        "answer": "Bem Passada"
+                    }
+                ],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "abc4e1d8-6475-4a6f-a300-eb006bf6beb6",
+                "product_id": "86",
+                "name": "Bacalhau a Natas (Individual)",
+                "price": 99.9,
+                "qty": 1.0,
+                "category": "Pratos",
+                "created_at": "26/02/2026 13:38",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 97"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "8f8b0558-13ed-4bed-9760-2a555dca1f4e",
+                "product_id": "160",
+                "name": "Corona Long Neck",
+                "price": 16.9,
+                "qty": 1.0,
+                "category": "Cervejas",
+                "created_at": "26/02/2026 13:49",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "1 cp",
+                    "Com limao",
+                    "Transf de Mesa 97"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "22030000",
+                "cest": "302101",
+                "cfop": "5405",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "4ebb3bd7-4dd1-40b9-b62f-a24c679c9730",
+                "product_id": "149",
+                "name": "Coca-Cola 350ml",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Refrigerante",
+                "created_at": "26/02/2026 14:16",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "Com gelo"
+                    }
+                ],
+                "ncm": "22021000",
+                "cest": "301002",
+                "cfop": "5405",
+                "origin": "0",
+                "tax_info": null
+            }
+        ],
+        "total": 220.60000000000002,
+        "status": "open",
+        "opened_at": "26/02/2026 14:04",
+        "num_adults": 2,
+        "customer_type": "passante",
+        "customer_name": "Gerlânia ",
+        "room_number": null,
+        "waiter": "",
+        "staff_name": null,
+        "is_breakfast": false,
+        "partial_payments": [],
+        "total_paid": 0.0,
+        "last_transfer": {
+            "source_table": "97",
+            "timestamp": "26/02/2026 14:04",
+            "user": "filipe"
+        }
+    },
+    "93": {
+        "items": [
+            {
+                "id": "8f0e6b51-08cd-4705-9fe5-7df47ce7e769",
+                "product_id": "265",
+                "name": "Caldo (Consultar sabor do dia)",
+                "price": 15.9,
+                "qty": 1.0,
+                "category": "Entradas",
+                "created_at": "26/02/2026 13:43",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Entrada",
+                    "Transf de Mesa 98"
+                ],
+                "accompaniments": [],
+                "flavor": "Marisco (Caldo)",
+                "questions_answers": [],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "08de5c17-758e-48bf-95bf-5e1ea1cc8fc4",
+                "product_id": "119",
+                "name": "Peixe na Telha (2 pessoas)",
+                "price": 198.9,
+                "qty": 1.0,
+                "category": "Pratos",
+                "created_at": "26/02/2026 13:43",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 98"
+                ],
+                "accompaniments": [
+                    "Macaxeira Frita"
+                ],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Preparo",
+                        "answer": "Grelhado"
+                    }
+                ],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "1e65b73f-cc66-421e-9953-a68bde176fa1",
+                "product_id": "146",
+                "name": "Água Tônica",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Refrigerante",
+                "created_at": "26/02/2026 13:43",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "1 cp",
+                    "Com gelo e sumo de limao",
+                    "Transf de Mesa 98"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "22030000",
+                "cest": "300700",
+                "cfop": "5405",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "d8094d51-8048-4b19-8611-ec21fddb6e8d",
+                "product_id": "160",
+                "name": "Corona Long Neck",
+                "price": 16.9,
+                "qty": 1.0,
+                "category": "Cervejas",
+                "created_at": "26/02/2026 13:49",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Com limao",
+                    "Transf de Mesa 98"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "22030000",
+                "cest": "302101",
+                "cfop": "5405",
+                "origin": "0",
+                "tax_info": null
+            }
+        ],
+        "total": 240.60000000000002,
+        "status": "open",
+        "opened_at": "26/02/2026 14:07",
+        "num_adults": 1,
+        "customer_type": "passante",
+        "customer_name": "Fabiana ",
+        "room_number": null,
+        "waiter": "",
+        "staff_name": null,
+        "is_breakfast": false,
+        "partial_payments": [],
+        "total_paid": 0.0,
+        "last_transfer": {
+            "source_table": "98",
+            "timestamp": "26/02/2026 14:07",
+            "user": "eduardo"
+        }
+    },
+    "98": {
+        "items": [
+            {
+                "id": "384c0488-40f1-4094-b56e-3bc22ff8e917",
+                "product_id": "148",
+                "name": "Coca Cola Zero 350ml",
+                "price": 8.9,
+                "qty": 2.0,
+                "category": "Refrigerante",
+                "created_at": "26/02/2026 14:17",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "2 cp"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "Com gelo"
+                    }
+                ],
+                "ncm": "22021000",
+                "cest": "301002",
+                "cfop": "5405",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "c4b8207e-092d-4b28-ba1e-3babea97d812",
+                "product_id": "108",
+                "name": "Peixe ao Molho de Camarão (Individual)",
+                "price": 98.9,
+                "qty": 1.0,
+                "category": "Pratos",
+                "created_at": "26/02/2026 14:24",
+                "waiter": "leo",
+>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0
                 "printed": true,
                 "print_status": "printed",
                 "complements": [],
@@ -2678,6 +4153,7 @@
                 "tax_info": null
             },
             {
+<<<<<<< HEAD
                 "id": "caa4b1f9-abe4-4f5c-8748-2e31279d453a",
                 "product_id": "196",
                 "name": "Vinho Branco William Cole Vin Sel Chardonnay",
@@ -2707,10 +4183,232 @@
         "customer_type": "hospede",
         "customer_name": "",
         "room_number": "35",
+=======
+                "id": "3689af80-1fa8-4c9a-a641-b9dd1707c7ef",
+                "product_id": "289",
+                "name": "Ceviche de Banana da Terra ",
+                "price": 39.9,
+                "qty": 1.0,
+                "category": "Entradas",
+                "created_at": "26/02/2026 14:24",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Entrada"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "1",
+                "tax_info": null
+            }
+        ],
+        "total": 156.6,
+        "status": "open",
+        "opened_at": "26/02/2026 14:17",
+        "num_adults": 2,
+        "customer_type": "passante",
+        "customer_name": "Passante",
+        "room_number": null,
+>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0
         "waiter": "",
         "staff_name": null,
         "is_breakfast": false,
         "partial_payments": [],
         "total_paid": 0.0
+<<<<<<< HEAD
+=======
+    },
+    "58": {
+        "items": [
+            {
+                "id": "9e41c562-7aa9-4cdf-ace3-c1bb56c773af",
+                "product_id": "135",
+                "name": "Agua sem Gás 275ml",
+                "price": 9.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "26/02/2026 11:59",
+                "waiter": "leo",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 86"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "Com gelo e sumo de limao"
+                    }
+                ],
+                "ncm": "22011000",
+                "cest": "300504",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "3d8d985f-8e69-4312-874f-b553abada946",
+                "product_id": "79",
+                "name": "Pasteis de Queijo coalho  (6 unidades)",
+                "price": 28.9,
+                "qty": 1.0,
+                "category": "Entradas",
+                "created_at": "26/02/2026 12:40",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 86"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "7489aae2-6f81-4334-83ed-c203cf5c2e5a",
+                "product_id": "148",
+                "name": "Coca Cola Zero 350ml",
+                "price": 8.9,
+                "qty": 1.0,
+                "category": "Refrigerante",
+                "created_at": "26/02/2026 12:40",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "1 cp",
+                    "Transf de Mesa 86"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Copo",
+                        "answer": "Gelo"
+                    }
+                ],
+                "ncm": "22021000",
+                "cest": "301002",
+                "cfop": "5405",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "2daab60c-4fa9-4cd1-a003-ccd378b417a0",
+                "product_id": "142",
+                "name": "Água de Coco",
+                "price": 10.9,
+                "qty": 1.0,
+                "category": "Sucos e Águas",
+                "created_at": "26/02/2026 12:40",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 86"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "20098922",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "7e70b9b8-b485-4369-a2fe-36b850df7ced",
+                "product_id": "94",
+                "name": "Fettuccine de camarão (Individual)",
+                "price": 85.9,
+                "qty": 1.0,
+                "category": "Pratos",
+                "created_at": "26/02/2026 13:57",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Transf de Mesa 86"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "0",
+                "tax_info": null
+            },
+            {
+                "id": "192035bf-82f7-413b-a247-e2d490914021",
+                "product_id": "101",
+                "name": "Medalhão com risotto de champignon e molho especial (Individual)",
+                "price": 94.99,
+                "qty": 1.0,
+                "category": "Pratos",
+                "created_at": "26/02/2026 13:57",
+                "waiter": "adailton",
+                "printed": true,
+                "print_status": "printed",
+                "complements": [],
+                "observations": [
+                    "Sem cogumelo",
+                    "Transf de Mesa 86"
+                ],
+                "accompaniments": [],
+                "flavor": "",
+                "questions_answers": [
+                    {
+                        "question": "Ponto da Carne",
+                        "answer": "Ao ponto"
+                    },
+                    {
+                        "question": "Ponto do Arroz",
+                        "answer": "Al Dente"
+                    }
+                ],
+                "ncm": "21069090",
+                "cest": "",
+                "cfop": "5101",
+                "origin": "1",
+                "tax_info": null
+            }
+        ],
+        "total": 239.49,
+        "status": "open",
+        "opened_at": "26/02/2026 14:46",
+        "num_adults": 2,
+        "customer_type": "hospede",
+        "customer_name": "",
+        "room_number": "21",
+        "waiter": "",
+        "staff_name": null,
+        "is_breakfast": false,
+        "partial_payments": [],
+        "total_paid": 0.0,
+        "last_transfer": {
+            "source_table": "86",
+            "timestamp": "26/02/2026 14:46",
+            "user": "filipe"
+        }
+>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0
     }
 }

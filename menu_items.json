@@ -3380,7 +3380,7 @@
         "description": "Uma deliciosa porção de Pasteis de Cupim, ideal para abrir o apetite e compartilhar.",
         "service_fee_exempt": false,
         "visible_virtual_menu": true,
-        "active": true,
+        "active": false,
         "recipe": [
             {
                 "ingredient_id": "199",
@@ -3406,9 +3406,15 @@
         "has_accompaniments": false,
         "allowed_accompaniments": [],
         "paused": false,
+<<<<<<< HEAD
         "version": 3,
         "hash": "9ddd7b0d5cf992f56dd05d7d23799ed39be0b8282e4476e4930a964e970f06f9",
         "last_updated": "2026-02-26T17:03:34.679348"
+=======
+        "version": 2,
+        "hash": "ed1cef1912884fa3f6bc5d550e278115a547f31f659e5311782fdd3b7eda5632",
+        "last_updated": "2026-02-21T14:58:49.716153"
+>>>>>>> 21aa9f0fdeac95549485acc597c6788d776a6ce0
     },
     {
         "id": "71",
