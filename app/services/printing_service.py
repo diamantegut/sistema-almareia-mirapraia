@@ -2,6 +2,8 @@ import socket
 import threading
 import time
 import logging
+import os
+import uuid
 from datetime import datetime
 from app.services.printer_manager import load_printer_settings, load_printers
 
@@ -1045,19 +1047,41 @@ def format_fiscal_receipt(invoice_data, printer_width=40):
     cmd += b'\n\n\n\n' + GS + b'V' + b'\x41' + b'\x03'
     return cmd
 
-def print_fiscal_receipt(printer_config, invoice_data):
+def print_fiscal_receipt(printer_config, invoice_data, force_print=False):
     try:
         # Use configuration
         target_printer = get_default_printer('fiscal')
         
+        # Override behavior: Save to file instead of physical printing
+        # User requested: "ao inves de imprimir salvar um arquivo de impressao"
+        
+        data = format_fiscal_receipt(invoice_data, printer_width=40)
+        
+        # Ensure directory exists
+        base_dir = os.path.join(os.getcwd(), 'data', 'fiscal_receipts')
+        if not os.path.exists(base_dir):
+            os.makedirs(base_dir)
+            
+        # Generate filename
+        timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+        unique_id = uuid.uuid4().hex[:6]
+        fname = f"receipt_{timestamp}_{unique_id}.bin"
+        fpath = os.path.join(base_dir, fname)
+        
+        with open(fpath, 'wb') as f:
+            f.write(data)
+            
+        if not force_print:
+            logger.info(f"Fiscal receipt saved to file (printing disabled): {fpath}")
+            return True, f"Recibo salvo em arquivo: {fname}"
+        
+        # Force Print logic
         if not target_printer:
             if printer_config and (printer_config.get('ip') or printer_config.get('type') == 'windows'):
                 target_printer = printer_config
             else:
                 return False, "Impressora Fiscal não configurada"
 
-        data = format_fiscal_receipt(invoice_data, printer_width=40)
-        
         if target_printer.get('type') == 'windows':
             return send_to_windows_printer(target_printer.get('windows_name'), data)
         return send_to_printer(target_printer.get('ip'), target_printer.get('port', 9100), data)

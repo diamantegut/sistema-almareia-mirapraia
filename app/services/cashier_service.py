@@ -213,8 +213,28 @@ class CashierService:
                 f.flush()
                 os.fsync(f.fileno())
                 
-            # Atomic replacement
-            os.replace(temp_path, CASHIER_SESSIONS_FILE)
+            # Atomic replacement with retry logic for Windows
+            import time
+            max_retries = 10
+            for i in range(max_retries):
+                try:
+                    if os.path.exists(CASHIER_SESSIONS_FILE):
+                        os.replace(temp_path, CASHIER_SESSIONS_FILE)
+                    else:
+                        os.rename(temp_path, CASHIER_SESSIONS_FILE)
+                    break
+                except PermissionError: # WinError 5 or 32
+                    if i == max_retries - 1:
+                        raise
+                    time.sleep(0.1)
+                except OSError as e: # Handle other OS errors that might be related to locking
+                    if e.errno == 13: # Permission denied (Windows)
+                         if i == max_retries - 1:
+                            raise
+                         time.sleep(0.1)
+                    else:
+                        raise
+                        
             return True
         except Exception as e:
             print(f"Error saving cashier sessions: {e}")

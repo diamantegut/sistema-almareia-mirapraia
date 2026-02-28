@@ -12,12 +12,35 @@ from app.services.data_service import load_menu_items, _backup_before_write, _sa
 class FiscalPoolService:
     @staticmethod
     def _load_pool():
+        import time
         if not os.path.exists(FISCAL_POOL_FILE):
             return []
+        
+        pool = []
+        loaded = False
+        max_retries = 30
+        
+        for i in range(max_retries):
+            try:
+                with open(FISCAL_POOL_FILE, 'r', encoding='utf-8') as f:
+                    pool = json.load(f)
+                loaded = True
+                break
+            except (PermissionError, OSError):
+                if i == max_retries - 1:
+                    # CRITICAL: Do NOT return empty list on lock failure.
+                    # Raising exception prevents overwriting data with empty list.
+                    raise OSError(f"Could not acquire lock for {FISCAL_POOL_FILE} after {max_retries} attempts.")
+                time.sleep(0.1)
+            except Exception as e:
+                # If file exists but is corrupted, we might want to backup and return empty?
+                # Or raise? Raising is safer.
+                raise e
+        
+        if not loaded:
+             raise OSError(f"Failed to load {FISCAL_POOL_FILE}")
+            
         try:
-            with open(FISCAL_POOL_FILE, 'r', encoding='utf-8') as f:
-                pool = json.load(f)
-                
             # Migration / Backfill
             modified = False
             for entry in pool:
@@ -183,6 +206,14 @@ class FiscalPoolService:
         if fiscal_amount > float(total_amount):
             fiscal_amount = float(total_amount)
             
+        status = 'pending'
+        notes_str = notes
+        
+        # Auto-ignore zero-value invoices
+        if float(total_amount) <= 0.001 or fiscal_amount <= 0.001:
+            status = 'ignored'
+            notes_str = (notes_str or "") + " | Auto-ignored: Valor Zero"
+            
         entry = {
             'id': str(uuid.uuid4()),
             'origin': origin,
@@ -196,8 +227,8 @@ class FiscalPoolService:
             'items': enriched_items,
             'payment_methods': payment_methods,
             'customer': customer_info or {},
-            'status': 'pending', # pending, emitted, ignored
-            'notes': notes,
+            'status': status, # pending, emitted, ignored
+            'notes': notes_str,
             'fiscal_doc_uuid': None,
             'history': []
         }

@@ -56,14 +56,28 @@ def normalize_room_simple(r):
 
 # --- Generic Load/Save Helper ---
 def _load_json(filepath, default=None):
+    import time
     if default is None: default = []
     if not os.path.exists(filepath):
         return default
-    try:
-        with open(filepath, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except (json.JSONDecodeError, OSError):
-        return default
+    
+    max_retries = 20
+    for i in range(max_retries):
+        try:
+            with open(filepath, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except (PermissionError, OSError):
+            if i == max_retries - 1:
+                # If we can't read due to lock, returning default is risky for read-modify-write cycles.
+                # But _load_json is generic.
+                # We will log warning.
+                print(f"Warning: Could not acquire lock for {filepath} after {max_retries} attempts.")
+                return default
+            time.sleep(0.1)
+        except json.JSONDecodeError:
+            return default
+            
+    return default
 
 def _save_json(filepath, data):
     try:
@@ -75,14 +89,28 @@ def _save_json(filepath, data):
         return False
 
 def _save_json_atomic(filepath, data):
+    import time
     temp_file = filepath + ".tmp"
     try:
         with open(temp_file, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=4, ensure_ascii=False)
-        if os.path.exists(filepath):
-            os.replace(temp_file, filepath)
-        else:
-            os.rename(temp_file, filepath)
+            f.flush()
+            os.fsync(f.fileno())
+        
+        # Retry logic for Windows file locking
+        max_retries = 30
+        for i in range(max_retries):
+            try:
+                if os.path.exists(filepath):
+                    os.replace(temp_file, filepath)
+                else:
+                    os.rename(temp_file, filepath)
+                return True
+            except (PermissionError, OSError): # WinError 32 or 5
+                if i == max_retries - 1:
+                    raise
+                time.sleep(0.1)
+                
         return True
     except Exception as e:
         print(f"Error saving {filepath} (atomic): {e}")

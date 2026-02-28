@@ -1602,32 +1602,25 @@ def fiscal_pool_view():
     if session.get('role') != 'admin':
         return redirect(url_for('main.index'))
     pool = FiscalPoolService._load_pool()
+    
+    # Parameters
     selected_month = request.args.get('month')
-    if not selected_month:
+    selected_date = request.args.get('date')
+    sort_order = request.args.get('sort', 'date_desc')
+    
+    if not selected_month and not selected_date:
         selected_month = datetime.now().strftime('%Y-%m')
+        
     filtered_pool = []
-    for entry in pool:
-        try:
-            dt_str = entry.get('closed_at')
-            if not dt_str:
-                continue
-            try:
-                dt = datetime.strptime(dt_str, '%Y-%m-%d %H:%M:%S')
-            except ValueError:
-                try:
-                    dt = datetime.strptime(dt_str, '%Y-%m-%d')
-                except ValueError:
-                    continue
-            if dt.strftime('%Y-%m') == selected_month:
-                filtered_pool.append(entry)
-        except Exception:
-            continue
     months = set()
+    
+    # 1. Collect all available months for the dropdown
     for entry in pool:
         try:
             dt_str = entry.get('closed_at')
-            if not dt_str:
-                continue
+            if not dt_str: continue
+            
+            # Normalize date
             try:
                 dt = datetime.strptime(dt_str, '%Y-%m-%d %H:%M:%S')
             except ValueError:
@@ -1635,10 +1628,36 @@ def fiscal_pool_view():
                     dt = datetime.strptime(dt_str, '%Y-%m-%d')
                 except ValueError:
                     continue
+            
             months.add(dt.strftime('%Y-%m'))
+            
+            # 2. Filter Logic
+            match = True
+            
+            # Date/Month Filter
+            if selected_date:
+                # specific date overrides month
+                if dt.strftime('%Y-%m-%d') != selected_date:
+                    match = False
+            elif selected_month:
+                if dt.strftime('%Y-%m') != selected_month:
+                    match = False
+            
+            if match:
+                filtered_pool.append(entry)
+                
         except Exception:
             continue
+            
     months = sorted(months, reverse=True)
+    
+    # 3. Sort Logic
+    if sort_order == 'value_desc':
+        filtered_pool.sort(key=lambda x: float(x.get('fiscal_amount', 0) or 0), reverse=True)
+    else:
+        # Default: Date Descending
+        filtered_pool.sort(key=lambda x: x.get('closed_at', ''), reverse=True)
+    
     total_fiscal = 0.0
     emitted_fiscal = 0.0
     for e in filtered_pool:
@@ -1650,8 +1669,20 @@ def fiscal_pool_view():
         total_fiscal += val
         if e.get('status') == 'emitted':
             emitted_fiscal += val
+            
     pending_fiscal = total_fiscal - emitted_fiscal
-    return render_template('fiscal_pool.html', pool=filtered_pool, months=months, selected_month=selected_month, total_fiscal=round(total_fiscal, 2), emitted_fiscal=round(emitted_fiscal, 2), pending_fiscal=round(pending_fiscal, 2))
+    
+    return render_template(
+        'fiscal_pool.html', 
+        pool=filtered_pool, 
+        months=months, 
+        selected_month=selected_month,
+        selected_date=selected_date,
+        sort_order=sort_order,
+        total_fiscal=round(total_fiscal, 2), 
+        emitted_fiscal=round(emitted_fiscal, 2), 
+        pending_fiscal=round(pending_fiscal, 2)
+    )
 
 @admin_bp.route('/admin/fiscal/pool/emit_until', methods=['POST'])
 @login_required

@@ -1501,7 +1501,7 @@ def api_create_manual_reservation():
         new_res = service.create_manual_reservation(creation_data)
         
         # Process Payment if applicable
-        print(f"DEBUG: Processing Payment? paid_amount={paid_amount}")
+        # print(f"DEBUG: Processing Payment? paid_amount={paid_amount}")
         if paid_amount > 0:
             try:
                 # Get Payment Method Name
@@ -1532,7 +1532,7 @@ def api_create_manual_reservation():
             except Exception as e:
                 # Log error but don't fail reservation creation (critical data already saved)
                 current_app.logger.error(f"Erro ao processar pagamento reserva {new_res['id']}: {str(e)}")
-                print(f"DEBUG: Payment Error: {str(e)}")
+                # print(f"DEBUG: Payment Error: {str(e)}")
                 import traceback
                 traceback.print_exc()
         
@@ -2871,6 +2871,28 @@ def reception_edit_charge():
         return redirect(url_for('reception.reception_rooms'))
         
     return redirect(url_for('reception.reception_cashier'))
+
+@reception_bp.route('/api/reception/cashier/summary')
+@login_required
+def api_cashier_summary():
+    try:
+        cashier_type = request.args.get('type', 'reservation_cashier')
+        
+        # Security check: Ensure user has access to this cashier type
+        # For now, rely on @login_required, but could add role checks
+        
+        active_session = CashierService.get_active_session(cashier_type)
+        if not active_session:
+             return jsonify({'success': False, 'error': 'Caixa fechado'}), 404
+             
+        summary = CashierService.get_session_summary(active_session)
+        
+        # Add total_balance alias for frontend compatibility
+        summary['total_balance'] = summary.get('current_balance', 0.0)
+        
+        return jsonify(summary)
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 import logging
 
@@ -4486,13 +4508,21 @@ def reception_reservation_debt(reservation_id):
         if not res:
             return jsonify({'success': False, 'error': 'Reserva não encontrada'}), 404
             
-        total = float(res.get('total_value', 0) or res.get('amount', 0))
-        
-        # Calculate Paid
-        payments_data = service.get_reservation_payments()
-        payments = payments_data.get(reservation_id, [])
-        paid = sum(float(p.get('amount', 0)) for p in payments)
-        
+        def parse_val(val):
+            if isinstance(val, (int, float)):
+                return float(val)
+            try:
+                # Handle R$ 1.000,00 -> 1000.00
+                if ',' in str(val):
+                    clean = str(val).replace('R$', '').replace('.', '').replace(',', '.').strip()
+                else:
+                    clean = str(val).replace('R$', '').strip()
+                return float(clean)
+            except:
+                return 0.0
+
+        total = parse_val(res.get('amount', 0))
+        paid = parse_val(res.get('paid_amount', 0))
         remaining = max(0.0, total - paid)
         
         return jsonify({

@@ -2831,7 +2831,7 @@ def fiscal_print(entry_id):
             if items:
                 invoice_data['items'] = items
 
-        ok, err = print_fiscal_receipt({}, invoice_data)
+        ok, err = print_fiscal_receipt({}, invoice_data, force_print=True)
         if not ok:
             return jsonify({'success': False, 'error': err or 'Falha ao imprimir'}), 500
 

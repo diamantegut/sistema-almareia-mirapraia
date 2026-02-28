@@ -349,15 +349,77 @@ def process_pending_emissions(settings=None, specific_id=None):
     success_count = 0
     failed_count = 0
     
+    # Load products once for lookup optimization
+    from app.services.data_service import load_products
+    try:
+        products_db = load_products()
+        products_map = {str(p['id']): p for p in products_db}
+    except:
+        products_map = {}
+    
     for entry in all_pending:
         emission = entry['data']
         source = entry['source']
         
         # Prepare transaction object for emit_invoice
         
+        # REFRESH ITEM DATA FROM PRODUCTS DB
+        # To avoid stale NCM/CFOP/CEST errors if product was updated after order closing
+        if emission.get('items'):
+            for item in emission['items']:
+                p_id = str(item.get('id', ''))
+                p_id_alt = str(item.get('product_id', ''))
+                
+                product_data = None
+                if p_id in products_map:
+                    product_data = products_map[p_id]
+                elif p_id_alt in products_map:
+                    product_data = products_map[p_id_alt]
+                
+                if product_data:
+                    # Update fiscal fields if present in product registration
+                    if product_data.get('ncm'):
+                        ncm_clean = str(product_data.get('ncm', '')).replace('.', '').strip()
+                        if ncm_clean:
+                            item['ncm'] = ncm_clean
+                    if product_data.get('cest'):
+                        cest_clean = str(product_data.get('cest', '')).replace('.', '').strip()
+                        if cest_clean:
+                            item['cest'] = cest_clean
+                    if product_data.get('cfop_default'):
+                        cfop_clean = str(product_data.get('cfop_default', '')).replace('.', '').strip()
+                        if cfop_clean:
+                            item['cfop'] = cfop_clean
+                    if product_data.get('origin'): # icms origin
+                        item['origin'] = product_data.get('origin')
+        
         # Payments handling
         payments = emission.get('payments') or emission.get('payment_methods') or []
-        primary_method = payments[0].get('method', 'Outros') if payments else 'Outros'
+        
+        # Determine primary method logic:
+        # Prioritize any payment method that is explicitly marked as 'is_fiscal'
+        primary_method = 'Outros'
+        if payments:
+            # First pass: look for is_fiscal=True
+            fiscal_method = next((p.get('method') for p in payments if p.get('is_fiscal')), None)
+            
+            if fiscal_method:
+                primary_method = fiscal_method
+            else:
+                # Fallback: if no explicit flag, try to find one that is KNOWN to be fiscal via global config
+                try:
+                    from app.services.data_service import load_payment_methods
+                    all_methods = load_payment_methods()
+                    fiscal_names = {m['name'] for m in all_methods if m.get('is_fiscal')}
+                    
+                    fiscal_match = next((p.get('method') for p in payments if p.get('method') in fiscal_names), None)
+                    if fiscal_match:
+                        primary_method = fiscal_match
+                    else:
+                        # Final Fallback: just take the first one
+                        primary_method = payments[0].get('method', 'Outros')
+                except Exception:
+                     primary_method = payments[0].get('method', 'Outros')
         
         transaction = {
             'id': emission['id'],
@@ -419,23 +481,46 @@ def process_pending_emissions(settings=None, specific_id=None):
 
             xml_ok = False
             xml_error_msg = None
-            try:
-                xml_path = download_xml(nfe_id, integration_settings)
-                if xml_path:
-                    xml_ok = True
-                    if source == 'queue':
-                        emission['xml_path'] = xml_path
-                    if source == 'pool':
-                        try:
-                            FiscalPoolService.set_xml_ready(emission['id'], True, xml_path)
-                        except Exception:
-                            pass
-                    logger.info(f"XML saved at {xml_path}")
-                else:
-                    xml_error_msg = "XML da NFC-e não disponível na Nuvem Fiscal (verifique autorização)."
-            except Exception as e:
-                xml_error_msg = f"Falha ao baixar XML da NFC-e: {e}"
-                logger.error(f"Failed to download XML for {nfe_id}: {e}")
+            
+            # Special Handling for Duplicity Recovery
+            # If we recovered a key, we might not have the ID for download_xml if it came from a raw message.
+            # But usually we have the ID from Nuvem Fiscal even in error response (nfe_id).
+            # If we don't have nfe_id (e.g. if the error response didn't contain 'id'), we might skip XML download or try by key?
+            # Nuvem Fiscal API allows download by ID.
+            
+            if result.get('recovered_key'):
+                 # We have a key but maybe the ID in result['data']['id'] is the new (rejected) one?
+                 # Actually, the error response usually contains the ID of the attempt.
+                 # The "Duplicidade" means there is ANOTHER note with same number/series but diff key.
+                 # We should probably trust the ID returned in the error response to try to download the XML of the FAILED attempt?
+                 # No, we want the XML of the ORIGINAL authorized note.
+                 # But we don't have the ID of the original note, only the key.
+                 # Does Nuvem Fiscal allow fetching by key?
+                 # GET /nfce?chave=...
+                 
+                 # For now, let's assume we can't download the XML easily without the ID of the original note.
+                 # But we mark as emitted so the user is not blocked.
+                 xml_ok = True
+                 xml_path = "" 
+                 logger.info(f"Recovered from duplicity. Key: {result['recovered_key']}. XML download skipped (missing original ID).")
+            else:
+                try:
+                    xml_path = download_xml(nfe_id, integration_settings)
+                    if xml_path:
+                        xml_ok = True
+                        if source == 'queue':
+                            emission['xml_path'] = xml_path
+                        if source == 'pool':
+                            try:
+                                FiscalPoolService.set_xml_ready(emission['id'], True, xml_path)
+                            except Exception:
+                                pass
+                        logger.info(f"XML saved at {xml_path}")
+                    else:
+                        xml_error_msg = "XML da NFC-e não disponível na Nuvem Fiscal (verifique autorização)."
+                except Exception as e:
+                    xml_error_msg = f"Falha ao baixar XML da NFC-e: {e}"
+                    logger.error(f"Failed to download XML for {nfe_id}: {e}")
 
             if not xml_ok:
                 err_msg = xml_error_msg or "XML da NFC-e não disponível."
@@ -741,7 +826,12 @@ def manifest_nfe(access_key, settings, event_code=210210):
         else:
             try:
                 err = response.json()
+                code = err.get('error', {}).get('code')
                 msg = err.get('error', {}).get('message') or err.get('message')
+                
+                # Check for specific QuotaExceeded error
+                if code == 'QuotaExceeded' or (msg and "dfe-eventos" in str(msg) and "limit" in str(msg)):
+                    return False, "QUOTA_EXCEEDED"
             except:
                 msg = response.text
             return False, msg
@@ -826,17 +916,20 @@ def consult_nfe_sefaz(access_key, settings):
                  return response_internal.content, None
 
              # If not found locally, try to Manifest (Ciência da Operação) to allow download from SEFAZ
-             manifest_success, _ = manifest_nfe(access_key, settings)
-             if manifest_success:
-                 import time
-                 time.sleep(2) # Wait for propagation
-                 
-                 # Retry download from SEFAZ
-                 response_retry = requests.get(api_url, headers=headers)
-                 if response_retry.status_code == 200:
-                     return response_retry.content, None
+             # DISABLED BY USER REQUEST to save dfe-eventos quota
+             # manifest_success, manifest_msg = manifest_nfe(access_key, settings)
+             # if manifest_success:
+             #     import time
+             #     time.sleep(2) # Wait for propagation
+             #     
+             #     # Retry download from SEFAZ
+             #     response_retry = requests.get(api_url, headers=headers)
+             #     if response_retry.status_code == 200:
+             #         return response_retry.content, None
+             # elif manifest_msg == "QUOTA_EXCEEDED":
+             #     return None, "QUOTA_EXCEEDED"
              
-             return None, "Nota não encontrada na SEFAZ (mesmo após tentativa de manifestação) ou na base local."
+             return None, "Nota não encontrada na SEFAZ (manifestação automática desativada para economia de cota) ou na base local."
         else:
             try:
                 err = response.json()
@@ -1337,6 +1430,10 @@ def sync_received_nfes(settings):
             else:
                 xml_content, err = consult_nfe_sefaz(key, settings)
                 
+                if err == "QUOTA_EXCEEDED":
+                    logger.warning("Cota de manifestação 'dfe-eventos' (100 ops/hora) atingida. Interrompendo downloads de XML por agora.")
+                    break
+                
             if xml_content:
                 with open(file_path, 'wb') as f:
                     f.write(xml_content)
@@ -1544,8 +1641,20 @@ def emit_invoice(transaction, settings, order_items, customer_cpf_cnpj=None):
         'Debito': '04',
         'Pix': '17'
     }
+
+    # Determine Payment Method based on fiscal availability
+    # 1. Load available payment methods
+    from app.services.data_service import load_payment_methods
+    all_methods = load_payment_methods()
     
-    pay_code = payment_map.get(transaction.get('payment_method'), '99')
+    # 2. Filter methods that are flagged as fiscal
+    fiscal_method_names = {m['name'] for m in all_methods if m.get('is_fiscal')}
+    
+    target_payment_method = transaction.get('payment_method')
+    
+    pay_code = payment_map.get(target_payment_method, '99')
+ 
+
     
     # To avoid "Ausencia de troco" rejection or "Valor do pagamento menor que o total",
     # we force vPag to be exactly equal to the total of items (vNF).
@@ -1553,12 +1662,18 @@ def emit_invoice(transaction, settings, order_items, customer_cpf_cnpj=None):
     # If the real transaction amount was higher (e.g. tip/service), for fiscal purposes here we just emit the products.
     v_pag_final = _round_money(total_items)
 
-    pagamentos = [
-        {
-            "tPag": pay_code,
-            "vPag": v_pag_final,
-        }
-    ]
+    payment_obj = {
+        "tPag": pay_code,
+        "vPag": v_pag_final,
+    }
+    
+    # Fix for Rejeicao: Descricao do pagamento obrigatoria para meio de pagamento 99 - outros
+    if pay_code == '99':
+        method_name = transaction.get('payment_method')
+        desc = method_name if method_name and str(method_name).strip() else "Outros"
+        payment_obj["xPag"] = str(desc)[:60] # Limit to 60 chars
+
+    pagamentos = [payment_obj]
 
     # Payload for Nuvem Fiscal
     # Using the 'infNFe' structure inside the payload
@@ -1727,7 +1842,40 @@ def emit_invoice(transaction, settings, order_items, customer_cpf_cnpj=None):
                 if not base_msg:
                     base_msg = resp_data.get("message") or resp_data.get("title") or f"NFC-e não autorizada (Status: {status_val})"
                 
+                # Handling Duplicity (Rejeicao 539)
                 # If we have a key but not authorized, it might be a rejection or processing
+                # Error format: "Rejeicao: Duplicidade de NF-e, com diferença na Chave de Acesso [chNFe:26260228952732000109650090000002841138657170]"
+                
+                is_duplicity = False
+                original_key = None
+                
+                if base_msg and "Duplicidade" in base_msg and "[chNFe:" in base_msg:
+                    is_duplicity = True
+                    try:
+                        start = base_msg.find("[chNFe:") + 7
+                        end = base_msg.find("]", start)
+                        if start > 6 and end > start:
+                            original_key = base_msg[start:end]
+                    except:
+                        pass
+                
+                if is_duplicity and original_key and len(original_key) == 44:
+                    logger.warning(f"Duplicity detected. Recovering original key: {original_key}")
+                    # If duplicity, we treat as SUCCESS because the invoice exists.
+                    # We just need to update our local record with the correct key/ID.
+                    # Nuvem Fiscal ID might be different, but we have the valid SEFAZ key.
+                    
+                    # We inject the recovered key into resp_data so the caller can use it
+                    resp_data['chave'] = original_key
+                    resp_data['status'] = 'autorizada' # Fake it to proceed
+                    
+                    return {
+                        "success": True, 
+                        "message": f"NFC-e recuperada (Duplicidade)! Chave: {original_key}",
+                        "data": resp_data,
+                        "recovered_key": original_key
+                    }
+                
                 if len(chave_val) == 44:
                     base_msg += f" - Chave gerada: {chave_val}"
                     

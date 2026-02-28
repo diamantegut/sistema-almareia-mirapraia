@@ -50,14 +50,26 @@
     <div class="card mb-4 shadow-sm">
         <div class="card-body">
             <form method="GET" class="row g-3 align-items-end">
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <label class="form-label">Mês de Referência</label>
-                    <select name="month" class="form-select">
+                    <select name="month" class="form-select" onchange="this.form.date.value=''; this.form.submit()">
+                        <option value="">-- Selecione --</option>
                         {% for m in months %}
-                            <option value="{{ m }}" {% if m == selected_month %}selected{% endif %}>
+                            <option value="{{ m }}" {% if m == selected_month and not selected_date %}selected{% endif %}>
                                 {{ m.split('-')[1] }}/{{ m.split('-')[0] }}
                             </option>
                         {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Filtrar por Dia</label>
+                    <input type="date" name="date" class="form-select" value="{{ selected_date or '' }}" onchange="this.form.month.value=''; this.form.submit()">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Ordenação</label>
+                    <select name="sort" class="form-select" onchange="this.form.submit()">
+                        <option value="date_desc" {% if sort_order == 'date_desc' %}selected{% endif %}>Data (Mais recente)</option>
+                        <option value="value_desc" {% if sort_order == 'value_desc' %}selected{% endif %}>Valor (Maior -> Menor)</option>
                     </select>
                 </div>
                 <div class="col-md-2">
@@ -85,6 +97,100 @@
         </div>
     </div>
     <script>
+        // Checkbox Logic
+        function toggleSelectAll() {
+            const isChecked = document.getElementById('selectAll').checked;
+            document.querySelectorAll('.row-checkbox').forEach(cb => {
+                cb.checked = isChecked;
+            });
+            updateSelectedCount();
+        }
+
+        function updateSelectedCount() {
+            const count = document.querySelectorAll('.row-checkbox:checked').length;
+            const btn = document.getElementById('btnEmitSelected');
+            const counter = document.getElementById('selectedCount');
+            
+            if(counter) counter.innerText = count;
+            if(btn) btn.disabled = count === 0;
+        }
+
+        async function emitSelected() {
+            // Collect IDs in visual order (table order)
+            // querySelectorAll returns nodes in document order, so this respects the table sort
+            const checkboxes = Array.from(document.querySelectorAll('.row-checkbox:checked'));
+            const selectedIds = checkboxes.map(cb => cb.value);
+            
+            if (selectedIds.length === 0) return;
+
+            if (!confirm(`Confirma a emissão de ${selectedIds.length} notas selecionadas?`)) return;
+
+            const btn = document.getElementById('btnEmitSelected');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processando...';
+
+            let successCount = 0;
+            let errorCount = 0;
+
+            // Process sequentially one by one
+            for (const id of selectedIds) {
+                const row = document.getElementById(`row-${id}`);
+                try {
+                    if(row) row.classList.add('table-warning');
+
+                    const resp = await fetch('{{ url_for("admin.fiscal_pool_action") }}', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ action: 'emit', id: id })
+                    });
+                    
+                    const data = await resp.json();
+                    
+                    if (data.success) {
+                        successCount++;
+                        if(row) {
+                            row.classList.remove('table-warning');
+                            row.classList.add('table-success');
+                            // Update status badge locally
+                            // Assuming status is in the 10th column (index 9) because we added a checkbox column at index 0
+                            const badgeCell = row.cells[9]; 
+                            if(badgeCell) badgeCell.innerHTML = '<span class="badge bg-success">Emitida</span>';
+                            
+                            // Remove checkbox and disable it
+                            const cb = row.querySelector('.row-checkbox');
+                            if(cb) {
+                                cb.checked = false;
+                                cb.disabled = true;
+                            }
+                        }
+                    } else {
+                        errorCount++;
+                        if(row) {
+                            row.classList.remove('table-warning');
+                            row.classList.add('table-danger');
+                        }
+                        console.error(`Erro na nota ${id}: ${data.error}`);
+                    }
+                } catch (e) {
+                    errorCount++;
+                    if(row) {
+                        row.classList.remove('table-warning');
+                        row.classList.add('table-danger');
+                    }
+                    console.error(`Erro de rede na nota ${id}: ${e.message}`);
+                }
+                
+                // Update counter as we go
+                const remaining = selectedIds.length - (successCount + errorCount);
+                document.getElementById('selectedCount').innerText = `${remaining} restan.`;
+            }
+
+            alert(`Processamento concluído.\nSucessos: ${successCount}\nErros: ${errorCount}`);
+            location.reload();
+        }
+
+
         async function emitUntilMatch() {
             const btn = event.currentTarget;
             btn.disabled = true;
@@ -115,18 +221,26 @@
     <!-- Accounts Table -->
     <div class="card shadow-sm">
         <div class="card-body p-0">
+            <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="selectAll" onclick="toggleSelectAll()">
+                    <label class="form-check-label fw-bold" for="selectAll">Selecionar Todos</label>
+                </div>
+                <button id="btnEmitSelected" class="btn btn-success btn-sm" onclick="emitSelected()" disabled>
+                    <i class="bi bi-cloud-upload"></i> Emitir Selecionados (<span id="selectedCount">0</span>)
+                </button>
+            </div>
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                     <thead class="bg-light">
                         <tr>
-                            <th>Data/Hora</th>
+                            <th style="width: 40px;"></th>
+                            <th>Data</th>
                             <th>Origem</th>
-                            <th>ID Original</th>
-                            <th>Série</th>
-                            <th>Número</th>
+                            <th>ID</th>
+                            <th>Série/Nº</th>
                             <th>Total</th>
                             <th>Pagamento</th>
-                            <th>Cliente</th>
                             <th>Status</th>
                             <th class="text-end">Ações</th>
                         </tr>
@@ -134,62 +248,63 @@
                     <tbody>
                         {% for entry in pool %}
                         <tr id="row-{{ entry.id }}">
-                            <td>{{ entry.closed_at }}</td>
+                            <td>
+                                {% if entry.status in ['pending', 'error', 'failed'] %}
+                                    <input class="form-check-input row-checkbox" type="checkbox" value="{{ entry.id }}" onclick="updateSelectedCount()">
+                                {% endif %}
+                            </td>
+                            <td><small>{{ entry.closed_at }}</small></td>
                             <td>
                                 {% if entry.origin == 'restaurant' %}
-                                    <span class="badge bg-warning text-dark"><i class="bi bi-cup-straw"></i> Restaurante</span>
+                                    <span class="badge bg-warning text-dark"><i class="bi bi-cup-straw"></i> Rest.</span>
                                 {% elif entry.origin == 'reception' %}
-                                    <span class="badge bg-info text-dark"><i class="bi bi-door-open"></i> Recepção</span>
+                                    <span class="badge bg-info text-dark"><i class="bi bi-door-open"></i> Rec.</span>
                                 {% elif entry.origin == 'daily_rates' %}
                                     <span class="badge bg-primary"><i class="bi bi-building"></i> Diárias</span>
                                 {% else %}
-                                    <span class="badge bg-secondary">{{ entry.origin }}</span>
+                                    <span class="badge bg-secondary">{{ entry.origin|truncate(4, True, '') }}</span>
                                 {% endif %}
                             </td>
-                            <td>{{ entry.original_id }}</td>
-                            <td>{{ entry.serie|default('-') }}</td>
-                            <td>{{ entry.number|default('-') }}</td>
-                            <td>R$ {{ "%.2f"|format(entry.get('total_amount', 0)) }}</td>
+                            <td><small class="text-muted">{{ entry.original_id|truncate(15, True, '...') }}</small></td>
+                            <td><small>{{ entry.serie|default('-') }}/{{ entry.number|default('-') }}</small></td>
+                            <td class="fw-bold"><small>R$ {{ "%.2f"|format(entry.get('total_amount', 0)) }}</small></td>
                             <td>
                                 {% for pm in entry.payment_methods %}
-                                    <div>
-                                        <small>{{ pm.method }}</small>
+                                    <div class="d-flex align-items-center">
+                                        <small class="text-truncate" style="max-width: 80px;" title="{{ pm.method }}">{{ pm.method }}</small>
                                         {% if pm.is_fiscal %}
-                                            <i class="bi bi-check-circle-fill text-success" title="Fiscal"></i>
+                                            <i class="bi bi-check-circle-fill text-success ms-1" style="font-size: 0.75rem;" title="Fiscal"></i>
                                         {% endif %}
                                     </div>
                                 {% endfor %}
                             </td>
                             <td>
-                                {% if entry.get('customer') and entry.customer.get('name') %}
-                                    <div>{{ entry.customer.name }}</div>
-                                {% endif %}
-                                {% if entry.get('customer') and entry.customer.get('cpf_cnpj') %}
-                                    <small class="text-muted">{{ entry.customer.cpf_cnpj }}</small>
-                                {% endif %}
-                            </td>
-                            <td>
                                 {% if entry.get('status') == 'pending' %}
-                                    <span class="badge bg-warning text-dark">Pendente</span>
+                                    <span class="badge bg-warning text-dark">Pend.</span>
                                 {% elif entry.get('status') == 'emitted' %}
-                                    <span class="badge bg-success">Emitida</span>
+                                    <span class="badge bg-success">Emit.</span>
                                 {% elif entry.get('status') == 'error' %}
                                     <span class="badge bg-danger">Erro</span>
                                 {% elif entry.get('status') == 'failed' %}
                                     <span class="badge bg-danger">Falha</span>
                                 {% elif entry.get('status') == 'ignored' %}
-                                    <span class="badge bg-secondary">Ignorada</span>
+                                    <span class="badge bg-secondary">Ign.</span>
                                 {% endif %}
                             </td>
-                            <td class="text-end">
-                                <button class="btn btn-sm btn-info" onclick="viewDetails('{{ entry.id }}')">
+                            <td class="text-end text-nowrap">
+                                <button class="btn btn-sm btn-info p-1 px-2" onclick="viewDetails('{{ entry.id }}')" title="Ver Detalhes">
                                     <i class="bi bi-eye"></i>
                                 </button>
-                                {% if entry.status in ['pending','error','failed'] %}
-                                    <button class="btn btn-sm btn-success" onclick="emitInvoice('{{ entry.id }}')">
-                                        <i class="bi bi-cloud-upload"></i> Emitir
+                                {% if entry.status == 'emitted' %}
+                                    <button class="btn btn-sm btn-primary p-1 px-2" onclick="printInvoice('{{ entry.id }}')" title="Imprimir">
+                                        <i class="bi bi-printer"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-outline-secondary" onclick="ignoreEntry('{{ entry.id }}')">
+                                {% endif %}
+                                {% if entry.status in ['pending','error','failed'] %}
+                                    <button class="btn btn-sm btn-success p-1 px-2" onclick="emitInvoice('{{ entry.id }}')" title="Emitir">
+                                        <i class="bi bi-cloud-upload"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-secondary p-1 px-2" onclick="ignoreEntry('{{ entry.id }}')" title="Ignorar">
                                         <i class="bi bi-x-circle"></i>
                                     </button>
                                 {% endif %}
@@ -209,13 +324,16 @@
 
 <!-- Details Modal -->
 <div class="modal fade" id="detailsModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Detalhes da Conta</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body" id="detailsContent">
+                <!-- Loaded via JS -->
+            </div>
+            <div class="modal-footer d-none" id="detailsFooter">
                 <!-- Loaded via JS -->
             </div>
         </div>
@@ -230,7 +348,7 @@ function viewDetails(id) {
     const entry = poolData.find(e => e.id === id);
     if (!entry) return;
     
-    let itemsHtml = '<table class="table table-sm table-striped"><thead><tr><th>Item</th><th>Qtd</th><th>Preço</th><th>Total</th></tr></thead><tbody>';
+    let itemsHtml = '<div class="table-responsive" style="max-height: 200px; overflow-y: auto;"><table class="table table-sm table-striped"><thead><tr><th>Item</th><th>Qtd</th><th>Preço</th><th>Total</th></tr></thead><tbody>';
     entry.items.forEach(item => {
         // Handle different item structures if necessary
         const qty = item.qty || item.quantity || 1;
@@ -243,9 +361,11 @@ function viewDetails(id) {
             <td>R$ ${total}</td>
         </tr>`;
     });
-    itemsHtml += '</tbody></table>';
+    itemsHtml += '</tbody></table></div>';
 
     const content = document.getElementById('detailsContent');
+    const footer = document.getElementById('detailsFooter');
+    
     const errorHtml = entry.last_error ? `
         <div class="alert alert-danger mt-3">
             <i class="bi bi-exclamation-triangle-fill"></i>
@@ -257,95 +377,172 @@ function viewDetails(id) {
     content.innerHTML = `
         <div class="row mb-3">
             <div class="col-md-6">
-                <p><strong>Origem:</strong> ${entry.origin}</p>
-                <p><strong>ID Original:</strong> ${entry.original_id}</p>
-                <p><strong>Fechado em:</strong> ${entry.closed_at}</p>
-                <p><strong>Fechado por:</strong> ${entry.closed_by}</p>
+                <p class="mb-1"><strong>Origem:</strong> ${entry.origin}</p>
+                <p class="mb-1"><strong>ID Original:</strong> ${entry.original_id}</p>
+                <p class="mb-1"><strong>Fechado em:</strong> ${entry.closed_at}</p>
+                <p class="mb-1"><strong>Fechado por:</strong> ${entry.closed_by}</p>
             </div>
             <div class="col-md-6 text-end">
                 <h3 class="text-primary">R$ ${entry.total_amount.toFixed(2)}</h3>
                 <span class="badge bg-${entry.status === 'emitted' ? 'success' : (entry.status === 'pending' ? 'warning' : 'secondary')} fs-6">${entry.status.toUpperCase()}</span>
                 ${entry.status === 'emitted' ? `
-                  <div class="mt-3 d-flex gap-2 justify-content-end">
-                    <button class="btn btn-outline-secondary btn-sm" onclick="downloadXml('${entry.id}')">
-                      <i class="bi bi-download"></i> Baixar XML
-                    </button>
-                    <button class="btn btn-danger btn-sm" onclick="downloadPdf('${entry.id}')">
-                      <i class="bi bi-file-earmark-pdf"></i> Baixar PDF da Nota
-                    </button>
-                    <button class="btn btn-primary btn-sm" onclick="printInvoice('${entry.id}')">
-                      <i class="bi bi-printer"></i> Imprimir Nota
-                    </button>
-                  </div>
                   <div id="xml-status-${entry.id}" class="form-text mt-1 text-muted">
                     ${entry.xml_ready ? 'XML disponível.' : 'Aguardando disponibilidade do XML...'}
                   </div>
                 ` : ''}
             </div>
         </div>
-        <hr>
-        <h5>Itens do Pedido</h5>
+        ${errorHtml}
+        <hr class="my-2">
+        <h6 class="fw-bold">Itens do Pedido</h6>
         ${itemsHtml}
-        <hr>
+        <hr class="my-2">
         <div class="row">
             <div class="col-md-6">
-                <h5>Cliente</h5>
+                <h6 class="fw-bold">Cliente</h6>
                 <p class="mb-1"><strong>Nome:</strong> ${entry.customer.name || 'Consumidor Final'}</p>
                 <p class="mb-1"><strong>CPF/CNPJ:</strong> ${entry.customer.cpf_cnpj || 'Não informado'}</p>
             </div>
             <div class="col-md-6">
-                 <h5>Pagamento</h5>
-                 <ul class="list-unstyled">
+                 <h6 class="fw-bold">Pagamento</h6>
+                 <ul class="list-unstyled mb-0">
                     ${entry.payment_methods.map(pm => `<li>${pm.method}: R$ ${pm.amount.toFixed(2)}</li>`).join('')}
                  </ul>
             </div>
         </div>
-        ${entry.notes ? `<div class="alert alert-info mt-3"><i class="bi bi-info-circle"></i> ${entry.notes}</div>` : ''}
-        ${errorHtml}
     `;
-    
-    new bootstrap.Modal(document.getElementById('detailsModal')).show();
+
+    // Move buttons to footer
+    if (entry.status === 'emitted') {
+        footer.classList.remove('d-none');
+        footer.innerHTML = `
+            <button class="btn btn-outline-secondary btn-sm" onclick="downloadXml('${entry.id}')">
+                <i class="bi bi-download"></i> Baixar XML
+            </button>
+            <button class="btn btn-danger btn-sm" onclick="downloadPdf('${entry.id}')">
+                <i class="bi bi-file-earmark-pdf"></i> Baixar PDF
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="printInvoice('${entry.id}')">
+                <i class="bi bi-printer"></i> Imprimir
+            </button>
+        `;
+    } else {
+        footer.classList.add('d-none');
+        footer.innerHTML = '';
+    }
+
+    const modal = new bootstrap.Modal(document.getElementById('detailsModal'));
+    modal.show();
 }
 
-async function emitInvoice(id) {
+// Global Emission Queue
+const emissionQueue = [];
+let isQueueRunning = false;
+
+function emitInvoice(id) {
     if (!confirm('Deseja iniciar a emissão fiscal para esta conta?')) return;
     
-    // Show loading state (optional)
     const btn = document.querySelector(`#row-${id} .btn-success`);
     if (btn) {
         btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Emitindo...';
+        btn.innerHTML = '<i class="bi bi-hourglass-split"></i>'; // Queued
+        btn.classList.remove('btn-success');
+        btn.classList.add('btn-warning');
+        btn.title = 'Aguardando na fila...';
     }
 
-    try {
-        const response = await fetch('/admin/fiscal/pool/action', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ action: 'emit', id: id })
-        });
+    emissionQueue.push(id);
+    processQueue();
+}
+
+async function processQueue() {
+    if (isQueueRunning) return;
+    if (emissionQueue.length === 0) return;
+
+    isQueueRunning = true;
+
+    while (emissionQueue.length > 0) {
+        const id = emissionQueue.shift();
+        const row = document.getElementById(`row-${id}`);
+        const btn = row ? row.querySelector('.btn-warning') : null;
+
+        if (btn) {
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+            btn.classList.remove('btn-warning');
+            btn.classList.add('btn-info'); // Processing color
+            btn.title = 'Emitindo...';
+        }
         
-        const result = await response.json();
-        
-        if (result.success) {
-            alert('Emissão iniciada com sucesso!');
-            location.reload();
-        } else {
-            console.error('Erro emissão:', result);
-            alert('Erro ao iniciar emissão: ' + (result.error || 'Erro desconhecido'));
+        try {
+            const response = await fetch('/admin/fiscal/pool/action', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ action: 'emit', id: id })
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                // Success: Update UI without reload
+                if (row) {
+                    row.classList.remove('table-warning', 'table-danger');
+                    row.classList.add('table-success');
+                    
+                    // Update Status Badge (Index 7)
+                    const badgeCell = row.cells[7];
+                    if (badgeCell) badgeCell.innerHTML = '<span class="badge bg-success">Emit.</span>';
+                    
+                    // Update Actions (Index 8)
+                    const actionsCell = row.cells[8];
+                    if (actionsCell) {
+                        actionsCell.innerHTML = `
+                            <button class="btn btn-sm btn-info p-1 px-2" onclick="viewDetails('${id}')" title="Ver Detalhes">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        `;
+                    }
+                    
+                    // Remove checkbox if present
+                    const cb = row.querySelector('.row-checkbox');
+                    if (cb) {
+                        cb.checked = false;
+                        cb.disabled = true;
+                        cb.remove();
+                    }
+                    updateSelectedCount();
+                }
+            } else {
+                // Error: Show state and allow retry
+                if (row) {
+                    row.classList.add('table-danger');
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="bi bi-exclamation-triangle"></i>';
+                        btn.classList.remove('btn-info');
+                        btn.classList.add('btn-danger');
+                        btn.title = result.error || 'Erro na emissão';
+                        // Reset class to allow retry logic if clicked again (it calls emitInvoice -> adds to queue)
+                        // But we need to change onclick or reset classes? 
+                        // emitInvoice adds .btn-warning. So if we leave it as btn-danger, it's fine.
+                    }
+                }
+                console.error(`Erro na nota ${id}: ${result.error}`);
+            }
+        } catch (e) {
+            console.error(`Exceção na nota ${id}:`, e);
             if (btn) {
                 btn.disabled = false;
-                btn.innerHTML = '<i class="bi bi-cloud-upload"></i> Emitir';
+                btn.innerHTML = '<i class="bi bi-wifi-off"></i>';
+                btn.classList.remove('btn-info');
+                btn.classList.add('btn-danger');
+                btn.title = 'Erro de conexão';
             }
         }
-    } catch (e) {
-        console.error('Exceção emissão:', e);
-        alert('Erro de conexão ou servidor: ' + e.message);
-        if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-cloud-upload"></i> Emitir';
-        }
     }
+
+    isQueueRunning = false;
 }
+
+
 
 async function openXmlFolder(id) {
     downloadXml(id);
@@ -420,6 +617,13 @@ function downloadPdf(id) {
 async function ignoreEntry(id) {
     if (!confirm('Deseja marcar esta conta como "Ignorada/Não Fiscal"?')) return;
 
+    // Show loading state
+    const btn = document.querySelector(`#row-${id} .btn-outline-secondary`);
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+    }
+
     try {
         const response = await fetch('/admin/fiscal/pool/action', {
             method: 'POST',
@@ -429,12 +633,41 @@ async function ignoreEntry(id) {
         
         const result = await response.json();
         if (result.success) {
-            location.reload();
+            // Update UI without reload
+            const row = document.getElementById(`row-${id}`);
+            if (row) {
+                // Option 1: Remove row completely (if filtering pending only)
+                // row.remove();
+                
+                // Option 2: Mark as Ignored visually
+                row.classList.add('table-secondary');
+                const badgeCell = row.cells[7]; // Status column index
+                if(badgeCell) badgeCell.innerHTML = '<span class="badge bg-secondary">Ign.</span>';
+                
+                // Remove buttons
+                const actionsCell = row.cells[8]; // Actions column index
+                if(actionsCell) actionsCell.innerHTML = '';
+                
+                // Remove checkbox
+                const cb = row.querySelector('.row-checkbox');
+                if(cb) cb.remove();
+                
+                // Update select count if it was selected
+                updateSelectedCount();
+            }
         } else {
             alert('Erro: ' + result.error);
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-x-circle"></i>';
+            }
         }
     } catch (e) {
         alert('Erro de comunicação com o servidor.');
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-x-circle"></i>';
+        }
     }
 }
 </script>

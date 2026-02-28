@@ -55,7 +55,7 @@
                             {% if data %}
                                 <h5 class="card-title">
                                     <a href="#" class="text-decoration-none text-dark" 
-                                       onclick="openViewGuestModal('{{ data.guest_id }}', '{{ data.guest_name }}', '{{ room_num }}'); return false;"
+                                       onclick="openViewGuestModal('{{ data.reservation_id or data.guest_id }}', '{{ data.guest_name }}', '{{ room_num }}'); return false;"
                                        title="Ver Ficha do Hóspede">
                                         {{ data.guest_name }} <i class="bi bi-person-badge text-primary small ms-1"></i>
                                     </a>
@@ -78,9 +78,11 @@
                                     <i class="bi bi-ticket-perforated"></i> Lançar Experiência
                                 </button>
 
-                                <button class="btn btn-primary btn-sm w-100 mb-2" onclick="openReservationPaymentModal('{{ data.guest_id }}', '{{ data.guest_name }}', '{{ room_num }}')">
+                                {% if data.reservation_id or data.guest_id %}
+                                <button class="btn btn-primary btn-sm w-100 mb-2" onclick="openReservationPaymentModal('{{ data.reservation_id or data.guest_id }}', '{{ data.guest_name }}', '{{ room_num }}')">
                                     <i class="bi bi-credit-card"></i> Receber Reserva
                                 </button>
+                                {% endif %}
                                 
                                 {% if room_num in pending_rooms %}
                                 <div class="alert alert-warning py-1 px-2 mb-2 small">

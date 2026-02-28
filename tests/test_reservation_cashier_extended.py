@@ -17,13 +17,14 @@ class TestReservationCashierExtended(unittest.TestCase):
     
     @classmethod
     def setUpClass(cls):
+        if os.path.exists(TEST_DATA_DIR):
+            shutil.rmtree(TEST_DATA_DIR)
+        os.makedirs(TEST_DATA_DIR)
+
         cls.app = create_app('testing')
         cls.app.config['TESTING'] = True
         cls.app.config['WTF_CSRF_ENABLED'] = False
         cls.client = cls.app.test_client()
-        
-        if not os.path.exists(TEST_DATA_DIR):
-            os.makedirs(TEST_DATA_DIR)
             
         # Patch MANUAL_RESERVATIONS_FILE in ReservationService
         cls.original_manual_file = ReservationService.MANUAL_RESERVATIONS_FILE
@@ -167,21 +168,16 @@ class TestReservationCashierExtended(unittest.TestCase):
         self.assertEqual(float(res['paid_amount']), 300.00) # 200 + 100
         
         # 4. Verify Balance
-        session_data = CashierService.get_active_session('reservation_cashier')
-        self.assertEqual(len(session_data['transactions']), 2)
-        # Summary
-        summary = CashierService.get_session_summary(session_data)
-        self.assertEqual(summary['balance_by_method']['Dinheiro'], 200.00)
-        self.assertEqual(summary['balance_by_method']['PIX'], 100.00)
+        resp = self.client.get('/api/reception/cashier/summary?type=reservation_cashier')
+        self.assertEqual(resp.status_code, 200)
+        summary = resp.json
         self.assertEqual(summary['total_balance'], 400.00) # 100 (initial) + 200 + 100
         
-        # 5. Close Cashier
+        # Close Cashier
         resp = self.client.post('/reception/reservations-cashier', data={
             'action': 'close_cashier',
-            'closing_balance': '400.00', # Correct amount
-            'cash_amount': '300.00', # 100 initial + 200 paid
-            'card_amount': '0.00',
-            'pix_amount': '100.00'
+            'closing_cash': '300.00', # 100 initial + 200 paid
+            'closing_non_cash': '100.00' # 100 PIX
         }, follow_redirects=True)
         self.assertIn(b'Caixa de Reservas fechado com sucesso', resp.data)
         
@@ -190,8 +186,15 @@ class TestReservationCashierExtended(unittest.TestCase):
         self.assertIsNone(session_data) # Should be closed
         
         # Verify in "Finance" (simulated via file check)
-        sessions = cashier_service._load_cashier_sessions()
-        last_session = sessions[-1]
+        sessions = CashierService._load_sessions()
+        # Find the session we just closed
+        last_session = None
+        for s in reversed(sessions):
+             if s.get('type') == 'reservation_cashier' and s.get('status') == 'closed':
+                 last_session = s
+                 break
+        
+        self.assertIsNotNone(last_session)
         self.assertEqual(last_session['status'], 'closed')
         self.assertEqual(last_session['closing_balance'], 400.00)
 

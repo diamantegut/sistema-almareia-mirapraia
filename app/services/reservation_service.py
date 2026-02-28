@@ -67,7 +67,7 @@ class ReservationService:
         return None
 
     def add_payment(self, reservation_id, amount, payment_details):
-        print(f"DEBUG: add_payment id={reservation_id} amount={amount}")
+        # print(f"DEBUG: add_payment id={reservation_id} amount={amount}")
         res = self.get_reservation_by_id(reservation_id)
         if not res:
             raise ValueError("Reserva não encontrada")
@@ -79,7 +79,7 @@ class ReservationService:
             'details': payment_details
         })
         
-        print(f"DEBUG: add_payment source_type={res.get('source_type')}")
+        # print(f"DEBUG: add_payment source_type={res.get('source_type')}")
         
         # If manual, update the file directly too for consistency
         if res.get('source_type') == 'manual':
@@ -87,9 +87,9 @@ class ReservationService:
 
     def update_manual_reservation_payment(self, reservation_id, amount):
         import json
-        print(f"DEBUG: update_manual_reservation_payment id={reservation_id} amount={amount}")
+        # print(f"DEBUG: update_manual_reservation_payment id={reservation_id} amount={amount}")
         if not os.path.exists(self.MANUAL_RESERVATIONS_FILE):
-            print("DEBUG: MANUAL_RESERVATIONS_FILE not found")
+            # print("DEBUG: MANUAL_RESERVATIONS_FILE not found")
             return
             
         with open(self.MANUAL_RESERVATIONS_FILE, 'r') as f:
@@ -101,17 +101,27 @@ class ReservationService:
             if str(item.get('id')) == str(reservation_id):
                 found = True
                 try:
-                    current_paid = float(str(item.get('paid_amount', '0')).replace('R$', '').replace('.', '').replace(',', '.'))
+                    val_str = str(item.get('paid_amount', '0')).strip()
+                    if ',' in val_str:
+                        # Assume BR format: 1.000,00
+                        current_paid = float(val_str.replace('R$', '').replace('.', '').replace(',', '.'))
+                    else:
+                        # Assume standard format: 1000.00
+                        current_paid = float(val_str.replace('R$', ''))
                 except:
                     current_paid = 0.0
                     
                 new_paid = current_paid + float(amount)
                 item['paid_amount'] = f"{new_paid:.2f}"
-                print(f"DEBUG: Updating paid_amount from {current_paid} to {new_paid}")
+                # print(f"DEBUG: Updating paid_amount from {current_paid} to {new_paid}")
                 
                 # Update remaining if needed
                 try:
-                    total = float(str(item.get('amount', '0')).replace('R$', '').replace('.', '').replace(',', '.'))
+                    total_str = str(item.get('amount', '0')).strip()
+                    if ',' in total_str:
+                        total = float(total_str.replace('R$', '').replace('.', '').replace(',', '.'))
+                    else:
+                        total = float(total_str.replace('R$', ''))
                 except:
                     total = 0.0
                     
@@ -120,12 +130,42 @@ class ReservationService:
                 break
         
         if not found:
-            print(f"DEBUG: Reservation ID {reservation_id} not found in file")
+            pass
+            # print(f"DEBUG: Reservation ID {reservation_id} not found in file")
         
         if changed:
             with open(self.MANUAL_RESERVATIONS_FILE, 'w') as f:
                 json.dump(data, f, indent=2)
-            print("DEBUG: File updated")
+            # print("DEBUG: File updated")
+
+    def auto_pre_allocate(self, window_hours=48):
+        """
+        Placeholder for auto pre-allocation logic.
+        Returns a list of actions taken.
+        """
+        # print(f"DEBUG: auto_pre_allocate window_hours={window_hours}")
+        return []
+
+    def save_manual_allocation(self, reservation_id, room_number, checkin, checkout, occupancy_data=None):
+        import json
+        # print(f"DEBUG: save_manual_allocation id={reservation_id} room={room_number}")
+        
+        manual_alloc_file = os.path.join(self.RESERVATIONS_DIR, "manual_allocations.json")
+        
+        allocations = {}
+        if os.path.exists(manual_alloc_file):
+            try:
+                with open(manual_alloc_file, 'r') as f:
+                    allocations = json.load(f)
+            except:
+                allocations = {}
+        
+        allocations[str(reservation_id)] = {"room": str(room_number)}
+        
+        with open(manual_alloc_file, 'w') as f:
+            json.dump(allocations, f, indent=2)
+            
+        # print(f"DEBUG: Manual allocation saved for {reservation_id} -> {room_number}")
 
     # Room Capacities (Estimated)
     ROOM_CAPACITIES = {
@@ -214,6 +254,310 @@ class ReservationService:
             json.dump(reservations, f, indent=2)
             
         return new_res
+
+    def get_february_reservations(self):
+        """
+        Retrieves all active reservations from Manual and Excel sources.
+        Originally named for a specific month, now returns all relevant reservations.
+        """
+        # Load Manual
+        manual = self.get_manual_reservations_data()
+        
+        # Load Excel
+        excel_items = []
+        if os.path.exists(self.RESERVATIONS_FILE):
+             excel_items.extend(self._parse_excel_file(self.RESERVATIONS_FILE))
+        
+        if os.path.exists(self.RESERVATIONS_DIR):
+             for f in os.listdir(self.RESERVATIONS_DIR):
+                 if (f.endswith('.xlsx') or f.endswith('.xls')) and f != os.path.basename(self.RESERVATIONS_FILE):
+                     try:
+                        excel_items.extend(self._parse_excel_file(os.path.join(self.RESERVATIONS_DIR, f)))
+                     except: pass
+        
+        # Apply overrides to excel items (manual already has them)
+        overrides = self.get_reservation_status_overrides()
+        for item in excel_items:
+            rid = str(item.get('id'))
+            if rid in overrides:
+                item['status'] = overrides[rid]
+        
+        # Merge - prefer manual if duplicate IDs? 
+        # Usually manual and excel are distinct sets or manual overrides excel?
+        # For now, just concatenate.
+        return manual + excel_items
+
+    def get_room_mapping(self):
+        """
+        Returns a dictionary mapping categories to lists of room numbers.
+        """
+        # Hardcoded based on ROOM_CAPACITIES knowledge or derived
+        return {
+            "Suíte Areia": ["01", "02", "03"],
+            "Suíte Mar Família": ["11"],
+            "Suíte Mar": ["12", "14", "15", "16", "17", "21", "22", "23", "24", "25", "26"],
+            "Suíte Alma c/ Banheira": ["31", "35"],
+            "Suíte Alma": ["32", "34"],
+            "Suíte Master Diamante": ["33"]
+        }
+
+    def get_occupancy_grid(self, occupancy_data, start_date, num_days):
+        """
+        Initializes an empty grid for the given date range.
+        grid[room] = [slot0, slot1, ...]
+        Each day has 2 slots (AM/PM).
+        """
+        grid = {}
+        total_slots = num_days * 2
+        
+        # All known rooms
+        all_rooms = []
+        mapping = self.get_room_mapping()
+        for rooms in mapping.values():
+            all_rooms.extend(rooms)
+            
+        for room in all_rooms:
+            grid[room] = [None] * total_slots
+            
+        return grid
+
+    def allocate_reservations(self, grid, reservations, start_date, num_days):
+        """
+        Places reservations into the grid.
+        Resolves room allocation based on manual allocations or category matching.
+        """
+        import json
+        from datetime import timedelta
+        
+        # Load Manual Allocations
+        manual_allocs = {}
+        manual_alloc_file = os.path.join(self.RESERVATIONS_DIR, "manual_allocations.json")
+        if os.path.exists(manual_alloc_file):
+            try:
+                with open(manual_alloc_file, 'r') as f:
+                    manual_allocs = json.load(f)
+            except: pass
+
+        # Sort reservations to prioritize fixed allocations?
+        # Or just process all.
+        
+        mapping = self.get_room_mapping()
+        # Invert mapping for easy lookup
+        room_to_cat = {}
+        for cat, rooms in mapping.items():
+            for r in rooms:
+                room_to_cat[r] = cat
+
+        for res in reservations:
+            try:
+                # Parse dates
+                # Checkin format: DD/MM/YYYY or YYYY-MM-DD
+                cin_str = res.get('checkin')
+                cout_str = res.get('checkout')
+                
+                if not cin_str or not cout_str: continue
+                
+                try:
+                    if '-' in cin_str:
+                        cin = datetime.strptime(cin_str, '%Y-%m-%d')
+                    else:
+                        cin = datetime.strptime(cin_str, '%d/%m/%Y')
+                        
+                    if '-' in cout_str:
+                        cout = datetime.strptime(cout_str, '%Y-%m-%d')
+                    else:
+                        cout = datetime.strptime(cout_str, '%d/%m/%Y')
+                except: continue
+                
+                # Calculate slots relative to start_date
+                # Start Date 00:00 is Slot 0 (Day 1 AM)
+                # Checkin usually 14:00 -> Slot 1 (Day 1 PM)
+                # Checkout usually 12:00 -> Slot 0 (Day 2 AM) - wait, next day AM.
+                
+                # Logic:
+                # Day Delta = (Date - StartDate).days
+                # Checkin Slot = DayDelta * 2 + 1 (PM)
+                # Checkout Slot = DayDelta * 2 (AM) (Exclusive? No, inclusive of that morning?)
+                # A stay from Day 1 to Day 2:
+                # Day 1 PM (Slot 1)
+                # Day 2 AM (Slot 2)
+                # Checkout is at Day 2 AM. So it occupies Slot 2.
+                # Next guest checks in Day 2 PM (Slot 3).
+                
+                start_delta = (cin - start_date).days
+                end_delta = (cout - start_date).days
+                
+                # Range of slots
+                # Start: start_delta * 2 + 1
+                # End: end_delta * 2
+                # Example: 1st to 2nd.
+                # Start 1st (delta 0) -> Slot 1.
+                # End 2nd (delta 1) -> Slot 2.
+                # Range: [1, 2] (inclusive)
+                
+                start_slot = start_delta * 2 + 1
+                end_slot = end_delta * 2
+                
+                # Clip to grid range
+                total_slots = num_days * 2
+                if end_slot < 0 or start_slot >= total_slots:
+                    continue
+                    
+                # Effective range
+                eff_start = max(0, start_slot)
+                eff_end = min(total_slots - 1, end_slot)
+                
+                if eff_start > eff_end: continue
+                
+                # Determine Room
+                res_id = str(res.get('id'))
+                allocated_room = None
+                
+                # 1. Check Manual Allocation
+                if res_id in manual_allocs:
+                    allocated_room = manual_allocs[res_id].get('room')
+                
+                # 2. Check if reservation has room field (some manual ones might)
+                if not allocated_room and res.get('room'):
+                    allocated_room = res.get('room')
+                    
+                # 3. If not allocated, try to find empty room in category
+                if not allocated_room:
+                    cat = res.get('category', 'Unknown')
+                    # Normalize category string?
+                    # Try exact match first
+                    candidates = mapping.get(cat, [])
+                    if not candidates:
+                         # Try partial match
+                         for k, v in mapping.items():
+                             if cat.lower() in k.lower() or k.lower() in cat.lower():
+                                 candidates = v
+                                 break
+                    
+                    # Find first free room
+                    for room in candidates:
+                        is_free = True
+                        if room not in grid: continue
+                        for s in range(eff_start, eff_end + 1):
+                            if grid[room][s] is not None:
+                                is_free = False
+                                break
+                        if is_free:
+                            allocated_room = room
+                            break
+                            
+                # Place in grid if room found/assigned
+                if allocated_room and allocated_room in grid:
+                    # Check conflicts if forced
+                    # We just overwrite for now or mark conflict?
+                    # The grid stores the reservation object
+                    
+                    # Store simple dict or full res?
+                    # Store dict with needed info
+                    cell_data = {
+                        'id': res_id,
+                        'guest': res.get('guest_name'),
+                        'checkin': cin.strftime('%d/%m/%Y'),
+                        'checkout': cout.strftime('%d/%m/%Y'),
+                        'category': res.get('category'),
+                        'payment_status': res.get('status'),
+                        'channel': res.get('channel'),
+                        'amount': res.get('amount'),
+                        'paid_amount': res.get('paid_amount'),
+                        'to_receive': res.get('to_receive')
+                    }
+                    
+                    for s in range(eff_start, eff_end + 1):
+                        if grid[allocated_room][s] is None:
+                            grid[allocated_room][s] = cell_data
+                        else:
+                            # Conflict!
+                            # Could store list of collisions?
+                            # For visualization, maybe just overwrite or mark conflict
+                            # Let's keep the existing one or overwrite?
+                            # If we overwrite, we lose the previous one.
+                            # Maybe we shouldn't have placed it if occupied.
+                            # But if it was manually allocated, we force it.
+                            pass
+                            
+            except Exception as e:
+                print(f"Error allocating reservation {res.get('id')}: {e}")
+                continue
+                
+        return grid
+
+    def get_gantt_segments(self, grid, start_date, num_days):
+        """
+        Converts the grid into segments for the UI.
+        Returns: { 'room': [ {type, length, data}, ... ] }
+        """
+        segments = {}
+        total_slots = num_days * 2
+        
+        for room, slots in grid.items():
+            room_segments = []
+            current_res_id = None
+            current_start = 0
+            current_data = None
+            
+            for i in range(total_slots):
+                cell = slots[i]
+                cell_id = cell['id'] if cell else None
+                
+                if cell_id != current_res_id:
+                    # End previous segment
+                    if current_start < i:
+                        length = i - current_start
+                        
+                        seg_type = 'empty'
+                        if current_res_id:
+                            status = str(current_data.get('payment_status', '')).lower()
+                            if 'checked-in' in status or 'hospedado' in status or 'ocupado' in status:
+                                seg_type = 'occupied'
+                            else:
+                                seg_type = 'reserved'
+                        
+                        seg_data = current_data if current_res_id else {'start_day': current_start}
+                        if current_res_id:
+                            # Add start_day to data for UI
+                            seg_data['start_day'] = current_start
+                        
+                        room_segments.append({
+                            'type': seg_type,
+                            'length': length,
+                            'data': seg_data
+                        })
+                    
+                    # Start new segment
+                    current_res_id = cell_id
+                    current_start = i
+                    current_data = cell
+            
+            # End last segment
+            if current_start < total_slots:
+                length = total_slots - current_start
+                
+                seg_type = 'empty'
+                if current_res_id:
+                    status = str(current_data.get('payment_status', '')).lower()
+                    if 'checked-in' in status or 'hospedado' in status or 'ocupado' in status:
+                        seg_type = 'occupied'
+                    else:
+                        seg_type = 'reserved'
+                        
+                seg_data = current_data if current_res_id else {'start_day': current_start}
+                if current_res_id:
+                    seg_data['start_day'] = current_start
+                    
+                room_segments.append({
+                    'type': seg_type,
+                    'length': length,
+                    'data': seg_data
+                })
+                
+            segments[room] = room_segments
+            
+        return segments
 
     def _parse_excel_file(self, file_path):
         parsed_items = []
