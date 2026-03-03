@@ -446,13 +446,51 @@
         "score": 2,
         "permissions": [
             "principal",
-            "conferencias"
+            "conferencia"
         ],
         "full_name": "Pedro Lucas Silva Dos Santos",
         "admission_date": "2025-08-15",
         "birthday": "2004-03-01",
         "daily_target_hours": 8,
-        "weekly_day_off": 5
+        "weekly_day_off": 5,
+        "permissions_v2": {
+            "version": 2,
+            "areas": {
+                "estoque_principal": {
+                    "all": true,
+                    "pages": {}
+                },
+                "recepcao": {
+                    "all": true,
+                    "pages": {}
+                },
+                "restaurante_mirapraia": {
+                    "all": true,
+                    "pages": {}
+                },
+                "cozinha": {
+                    "all": true,
+                    "pages": {}
+                },
+                "governanca": {
+                    "all": false,
+                    "pages": {}
+                },
+                "conferencia": {
+                    "all": true,
+                    "pages": {}
+                },
+                "financeiro": {
+                    "all": false,
+                    "pages": {}
+                },
+                "recursos_humanos": {
+                    "all": false,
+                    "pages": {}
+                }
+            },
+            "level_pages": []
+        }
     },
     "priscila": {
         "password": "2509",
@@ -700,5 +738,10 @@
         "birthday": "1987-01-22",
         "daily_target_hours": 8,
         "weekly_day_off": 2
+    },
+    "admin": {
+        "password": "123",
+        "role": "admin",
+        "department": "Diretoria"
     }
 }
