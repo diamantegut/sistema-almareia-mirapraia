@@ -1,0 +1,26 @@
+[
+    {
+        "id": "SESSION_RESERVATION_CASHIER_20260301142215_tester",
+        "user": "tester",
+        "type": "reservation_cashier",
+        "entity": "Hotel Almareia",
+        "opened_at": "01/03/2026 14:22",
+        "opening_balance": 100.0,
+        "transactions": [
+            {
+                "id": "TX_20260301142215_e42e06",
+                "type": "sale",
+                "amount": 200.0,
+                "description": "Pagamento Reserva #d4c2afbd-c5f6-425a-9866-f27e72056b57 - Teste Flow",
+                "payment_method": "PIX",
+                "timestamp": "01/03/2026 14:22",
+                "user": "tester",
+                "details": {}
+            }
+        ],
+        "status": "open",
+        "closed_at": null,
+        "closing_balance": null,
+        "difference": null
+    }
+]

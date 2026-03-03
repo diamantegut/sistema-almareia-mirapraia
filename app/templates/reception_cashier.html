@@ -737,8 +737,9 @@
                         <label class="form-label">Impressora</label>
                         <select class="form-select" id="indivPrinterSelect">
                             <option value="">Selecione...</option>
+                            {% set default_printer = printer_settings.get('reception_printer_id') or printer_settings.get('default_reception_report_printer_id') %}
                             {% for p in printers %}
-                            <option value="{{ p.id }}" {% if printer_settings.get('default_reception_printer_id') == p.id %}selected{% endif %}>
+                            <option value="{{ p.id }}" {% if default_printer == p.id %}selected{% endif %}>
                                 {{ p.name }} ({{ p.ip }})
                             </option>
                             {% endfor %}

@@ -268,6 +268,52 @@
     </div>
     {% endif %}
 
+    <div class="row mt-5" id="permissions">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-shield-lock"></i> Permissões (Áreas e Páginas)</h5>
+                    <button class="btn btn-sm btn-outline-light" type="button" onclick="permissionsReloadDefinitions()"><i class="bi bi-arrow-repeat"></i> Atualizar</button>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Buscar</label>
+                            <input id="permSearch" class="form-control" placeholder="Usuário, nome ou departamento">
+                            <div class="btn-group w-100 mt-2" role="group" aria-label="Tipo de alvo">
+                                <input type="radio" class="btn-check" name="permTargetType" id="permTypeUser" autocomplete="off" checked>
+                                <label class="btn btn-outline-primary" for="permTypeUser">Usuários</label>
+                                <input type="radio" class="btn-check" name="permTargetType" id="permTypeDept" autocomplete="off">
+                                <label class="btn btn-outline-primary" for="permTypeDept">Departamentos</label>
+                            </div>
+                            <div id="permTargets" class="list-group mt-3" style="max-height: 420px; overflow:auto;"></div>
+                        </div>
+                        <div class="col-md-8">
+                            <div id="permEditorEmpty" class="text-muted text-center py-5">
+                                Selecione um usuário ou um departamento para editar as permissões.
+                            </div>
+                            <div id="permEditor" style="display:none;">
+                                <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
+                                    <div>
+                                        <div class="fw-bold" id="permTargetTitle"></div>
+                                        <div class="text-muted small" id="permTargetMeta"></div>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <button id="permReloadBtn" type="button" class="btn btn-outline-secondary btn-sm">Recarregar</button>
+                                        <button id="permSaveBtn" type="button" class="btn btn-primary btn-sm"><i class="bi bi-save"></i> Salvar</button>
+                                    </div>
+                                </div>
+                                <div id="permToast" class="alert alert-success py-2 small d-none"></div>
+                                <div id="permError" class="alert alert-danger py-2 small d-none"></div>
+                                <div id="permAreasAccordion" class="accordion"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Ngrok External Tunnels Status -->
     <div class="row mt-5">
         <div class="col-12">
@@ -373,6 +419,308 @@ function refreshNgrokStatus() {
 
 // Initial load
 document.addEventListener('DOMContentLoaded', refreshNgrokStatus);
+</script>
+
+<script>
+let permDefinitions = null;
+let permTargetsDebounce = null;
+let permCurrentTarget = null;
+let permCurrentProfile = null;
+let permCurrentTargetRole = null;
+
+function permShow(el) { el.style.display = ''; }
+function permHide(el) { el.style.display = 'none'; }
+
+function permSetAlert(id, msg, kind) {
+    const el = document.getElementById(id);
+    if (!msg) {
+        el.classList.add('d-none');
+        el.textContent = '';
+        return;
+    }
+    el.classList.remove('d-none');
+    el.classList.toggle('alert-success', kind === 'success');
+    el.classList.toggle('alert-danger', kind === 'danger');
+    el.textContent = msg;
+}
+
+async function permFetchJson(url, options) {
+    const res = await fetch(url, options || {});
+    let data = null;
+    try { data = await res.json(); } catch { data = null; }
+    if (!res.ok) {
+        const msg = (data && (data.error || data.message)) ? (data.error || data.message) : `Erro HTTP ${res.status}`;
+        throw new Error(msg);
+    }
+    return data;
+}
+
+function permNormalizeProfile(p) {
+    if (!p || typeof p !== 'object') return { version: 2, areas: {}, level_pages: [] };
+    const areas = (p.areas && typeof p.areas === 'object') ? p.areas : {};
+    const outAreas = {};
+    Object.keys(areas).forEach(k => {
+        const v = areas[k];
+        if (!v || typeof v !== 'object') return;
+        outAreas[k] = { all: !!v.all, pages: (v.pages && typeof v.pages === 'object') ? v.pages : {} };
+    });
+    const level_pages = Array.isArray(p.level_pages) ? p.level_pages.map(x => String(x)) : [];
+    return { version: 2, areas: outAreas, level_pages: level_pages };
+}
+
+function permRoleLevel(role) {
+    const r = String(role || '').toLowerCase();
+    if (r.includes('admin')) return 40;
+    if (r === 'super') return 50;
+    if (r.includes('gerente')) return 30;
+    if (r.includes('supervisor')) return 20;
+    return 10;
+}
+
+async function permissionsReloadDefinitions() {
+    permSetAlert('permError', null);
+    try {
+        permDefinitions = await permFetchJson('/admin/api/permissions/definitions');
+        if (permCurrentTarget) {
+            await permLoadTarget(permCurrentTarget.type, permCurrentTarget.id);
+        }
+    } catch (e) {
+        permSetAlert('permError', e.message || String(e), 'danger');
+    }
+}
+
+function permGetTargetType() {
+    return document.getElementById('permTypeDept').checked ? 'department' : 'user';
+}
+
+async function permLoadTargets() {
+    const q = document.getElementById('permSearch').value || '';
+    const type = permGetTargetType();
+    const box = document.getElementById('permTargets');
+    box.innerHTML = `<div class="text-muted small px-2 py-2"><span class="spinner-border spinner-border-sm"></span> Buscando...</div>`;
+    try {
+        const data = await permFetchJson(`/admin/api/permissions/targets?type=${encodeURIComponent(type)}&q=${encodeURIComponent(q)}`);
+        const items = (data && data.items) ? data.items : [];
+        if (!items.length) {
+            box.innerHTML = `<div class="text-muted small px-2 py-2">Nenhum resultado.</div>`;
+            return;
+        }
+        box.innerHTML = '';
+        items.forEach(item => {
+            const a = document.createElement('button');
+            a.type = 'button';
+            a.className = 'list-group-item list-group-item-action';
+            const label = item.label || item.id;
+            const meta = item.type === 'user'
+                ? `${item.department || '-'} · ${String(item.role || '').toUpperCase()}`
+                : '';
+            a.innerHTML = `<div class="fw-semibold">${label}</div>${meta ? `<div class="text-muted small">${meta}</div>` : ''}`;
+            a.addEventListener('click', () => permLoadTarget(item.type, item.id));
+            box.appendChild(a);
+        });
+    } catch (e) {
+        box.innerHTML = `<div class="text-danger small px-2 py-2">${e.message || String(e)}</div>`;
+    }
+}
+
+async function permLoadTarget(type, id) {
+    permSetAlert('permToast', null);
+    permSetAlert('permError', null);
+    permCurrentTarget = { type, id };
+    const empty = document.getElementById('permEditorEmpty');
+    const editor = document.getElementById('permEditor');
+    permHide(empty);
+    permShow(editor);
+
+    if (!permDefinitions) {
+        await permissionsReloadDefinitions();
+    }
+
+    document.getElementById('permAreasAccordion').innerHTML = `<div class="text-muted small py-2"><span class="spinner-border spinner-border-sm"></span> Carregando...</div>`;
+    try {
+        const data = await permFetchJson(`/admin/api/permissions/get?type=${encodeURIComponent(type)}&id=${encodeURIComponent(id)}`);
+        permCurrentProfile = permNormalizeProfile(data.profile);
+        permCurrentTargetRole = data.role || null;
+
+        const title = type === 'user' ? (data.full_name ? `${data.full_name} (${id})` : id) : id;
+        document.getElementById('permTargetTitle').textContent = title;
+        document.getElementById('permTargetMeta').textContent = type === 'user'
+            ? `${data.department || '-'} · ${String(data.role || '').toUpperCase()}`
+            : 'Permissões aplicadas a todos os usuários do departamento';
+
+        permRenderEditor();
+    } catch (e) {
+        permSetAlert('permError', e.message || String(e), 'danger');
+        document.getElementById('permAreasAccordion').innerHTML = '';
+    }
+}
+
+function permEnsureArea(areaKey) {
+    if (!permCurrentProfile.areas[areaKey]) {
+        permCurrentProfile.areas[areaKey] = { all: false, pages: {} };
+    }
+    if (!permCurrentProfile.areas[areaKey].pages) {
+        permCurrentProfile.areas[areaKey].pages = {};
+    }
+}
+
+function permSetPage(areaKey, endpoint, checked, isLevelRestricted) {
+    permEnsureArea(areaKey);
+    permCurrentProfile.areas[areaKey].pages[String(endpoint)] = !!checked;
+    if (isLevelRestricted) {
+        const set = new Set(permCurrentProfile.level_pages || []);
+        if (checked) set.add(String(endpoint));
+        else set.delete(String(endpoint));
+        permCurrentProfile.level_pages = Array.from(set).sort();
+    }
+}
+
+function permToggleAreaAll(areaKey, checked) {
+    permEnsureArea(areaKey);
+    permCurrentProfile.areas[areaKey].all = !!checked;
+}
+
+function permRenderEditor() {
+    const acc = document.getElementById('permAreasAccordion');
+    const defs = permDefinitions || {};
+    const areas = (defs.areas || []);
+    const pagesByArea = defs.pages_by_area || {};
+    const levelMin = defs.level_restricted_pages || {};
+    const targetLevel = permCurrentTarget && permCurrentTarget.type === 'user' ? permRoleLevel(permCurrentTargetRole) : null;
+
+    acc.innerHTML = '';
+
+    areas.forEach((area, idx) => {
+        const areaKey = area.key;
+        const areaLabel = area.label;
+        permEnsureArea(areaKey);
+        const areaVal = permCurrentProfile.areas[areaKey];
+        const isAll = !!areaVal.all;
+
+        const itemId = `permArea_${idx}`;
+        const pages = pagesByArea[areaKey] || [];
+
+        const accordionItem = document.createElement('div');
+        accordionItem.className = 'accordion-item';
+        accordionItem.innerHTML = `
+            <h2 class="accordion-header" id="${itemId}_h">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#${itemId}_c" aria-expanded="false" aria-controls="${itemId}_c">
+                    ${areaLabel}
+                </button>
+            </h2>
+            <div id="${itemId}_c" class="accordion-collapse collapse" aria-labelledby="${itemId}_h" data-bs-parent="#permAreasAccordion">
+                <div class="accordion-body">
+                    <div class="form-check mb-2">
+                        <input class="form-check-input perm-area-all" type="checkbox" data-area="${areaKey}" id="${itemId}_all" ${isAll ? 'checked' : ''}>
+                        <label class="form-check-label fw-semibold" for="${itemId}_all">Acesso total nesta área</label>
+                    </div>
+                    <div class="text-muted small mb-2">Páginas</div>
+                    <div class="perm-pages" style="max-height: 260px; overflow:auto;"></div>
+                </div>
+            </div>
+        `;
+
+        const pagesBox = accordionItem.querySelector('.perm-pages');
+        if (!pages.length) {
+            pagesBox.innerHTML = `<div class="text-muted small">Nenhuma página mapeada para esta área.</div>`;
+        } else {
+            pages.forEach(p => {
+                const ep = p.endpoint;
+                const checked = isAll || !!(areaVal.pages && areaVal.pages[ep]);
+                const restrictedMin = p.level_min_role || levelMin[ep] || null;
+                const isRestricted = !!restrictedMin;
+                const idSafe = ep.replaceAll('.', '_').replaceAll(':', '_');
+                const disabledByRole = isRestricted && targetLevel !== null && targetLevel < permRoleLevel(restrictedMin);
+                const disabled = isAll || disabledByRole;
+                const badge = isRestricted ? `<span class="badge bg-warning text-dark ms-2">${String(restrictedMin).toUpperCase()}+</span>` : '';
+                const sub = `<div class="text-muted small">${p.path} · ${p.methods.join(', ')}</div>`;
+                const row = document.createElement('div');
+                row.className = 'form-check mb-2';
+                row.innerHTML = `
+                    <input class="form-check-input perm-page" type="checkbox" data-area="${areaKey}" data-endpoint="${ep}" data-restricted="${isRestricted ? '1' : '0'}" id="perm_${idSafe}" ${checked ? 'checked' : ''} ${disabled ? 'disabled' : ''}>
+                    <label class="form-check-label" for="perm_${idSafe}">
+                        <span class="fw-semibold">${p.label || ep}</span>${badge}
+                        ${sub}
+                    </label>
+                `;
+                if (disabledByRole) {
+                    row.querySelector('label').insertAdjacentHTML('beforeend', `<div class="text-muted small">Nível insuficiente para liberar esta página.</div>`);
+                }
+                pagesBox.appendChild(row);
+            });
+        }
+
+        acc.appendChild(accordionItem);
+    });
+
+    acc.querySelectorAll('.perm-area-all').forEach(cb => {
+        cb.addEventListener('change', e => {
+            const areaKey = e.target.getAttribute('data-area');
+            permToggleAreaAll(areaKey, e.target.checked);
+            permRenderEditor();
+        });
+    });
+
+    acc.querySelectorAll('.perm-page').forEach(cb => {
+        cb.addEventListener('change', e => {
+            const areaKey = e.target.getAttribute('data-area');
+            const endpoint = e.target.getAttribute('data-endpoint');
+            const restricted = e.target.getAttribute('data-restricted') === '1';
+            const checked = e.target.checked;
+            const targetLevel = permCurrentTarget && permCurrentTarget.type === 'user' ? permRoleLevel(permCurrentTargetRole) : null;
+            const minRole = (permDefinitions.level_restricted_pages || {})[endpoint] || null;
+            if (restricted && targetLevel !== null && minRole && targetLevel < permRoleLevel(minRole)) {
+                e.target.checked = false;
+                permSetAlert('permError', 'Conflito: o nível hierárquico do usuário não permite este acesso.', 'danger');
+                return;
+            }
+            permSetAlert('permError', null);
+            permSetPage(areaKey, endpoint, checked, restricted);
+        });
+    });
+}
+
+async function permSaveCurrent() {
+    permSetAlert('permToast', null);
+    permSetAlert('permError', null);
+    if (!permCurrentTarget) return;
+    const payload = {
+        type: permCurrentTarget.type,
+        id: permCurrentTarget.id,
+        profile: permCurrentProfile
+    };
+    try {
+        const res = await permFetchJson('/admin/api/permissions/set', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        if (res && res.success) {
+            permSetAlert('permToast', 'Permissões salvas com sucesso.', 'success');
+            await permLoadTarget(permCurrentTarget.type, permCurrentTarget.id);
+        } else {
+            permSetAlert('permError', (res && res.error) ? res.error : 'Falha ao salvar', 'danger');
+        }
+    } catch (e) {
+        permSetAlert('permError', e.message || String(e), 'danger');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const search = document.getElementById('permSearch');
+    search.addEventListener('input', () => {
+        clearTimeout(permTargetsDebounce);
+        permTargetsDebounce = setTimeout(permLoadTargets, 250);
+    });
+    document.getElementById('permTypeUser').addEventListener('change', permLoadTargets);
+    document.getElementById('permTypeDept').addEventListener('change', permLoadTargets);
+    document.getElementById('permSaveBtn').addEventListener('click', permSaveCurrent);
+    document.getElementById('permReloadBtn').addEventListener('click', () => {
+        if (permCurrentTarget) permLoadTarget(permCurrentTarget.type, permCurrentTarget.id);
+    });
+    permLoadTargets();
+    permissionsReloadDefinitions();
+});
 </script>
 
 <style>

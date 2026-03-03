@@ -1,4 +1,6 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
+
+{% block title %}Recepção - Gestão de Quartos{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
@@ -10,11 +12,16 @@
             justify-content: center;
         }
     </style>
+    
+    <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2><i class="bi bi-bell-fill"></i> Recepção - Gestão de Quartos</h2>
         <div>
-            <a href="{{ url_for('reception.reception_waiting_list') }}" class="btn btn-outline-warning text-dark me-2" title="Gerenciar Fila de Espera">
+            <a href="{{ url_for('reception.waiting_list') }}" class="btn btn-outline-warning text-dark me-2" title="Gerenciar Fila de Espera">
                 <i class="bi bi-people-fill"></i> <span class="d-none d-sm-inline">Chamar Próximo</span>
+            </a>
+            <a href="{{ url_for('reception.reception_chat') }}" class="btn btn-outline-success me-2" title="Chat WhatsApp">
+                <i class="bi bi-whatsapp"></i> <span class="d-none d-sm-inline">Chat</span>
             </a>
             <a href="{{ url_for('reception.reception_dashboard') }}" class="btn btn-secondary me-2">
                 <i class="bi bi-arrow-left"></i> Voltar
@@ -25,200 +32,101 @@
             <button class="btn btn-outline-info me-2" data-bs-toggle="modal" data-bs-target="#checklistConfigModal">
                 <i class="bi bi-list-check"></i> Gerenciar Checklist
             </button>
-            <button class="btn btn-primary" onclick="openCheckinModal()">
+            <button class="btn btn-primary" onclick="openCheckinModal('')">
                 <i class="bi bi-person-plus"></i> Novo Check-in
             </button>
         </div>
     </div>
 
+    <!-- Room Grid -->
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
         {% set excluded_rooms = [4, 5, 6, 7, 8, 9, 10, 13, 18, 19, 20, 27, 28, 29, 30] %}
         {% for i in range(1, 36) %}
             {% if i not in excluded_rooms %}
                 {% set room_num = i|format_room %}
-                {% set data = occupancy.get(room_num) %}
+                {% set occ_data = occupancy.get(room_num) %}
+                {% set clean_data = cleaning_status.get(room_num, {}) %}
+                {% set status = clean_data.get('status', 'dirty') %}
+                
                 <div class="col">
-                    <div class="card h-100 {{ 'border-primary' if data else 'border-secondary' }}">
-                        <div class="card-header d-flex justify-content-between align-items-center {{ 'bg-primary text-white' if data else 'bg-light' }}">
+                    <div class="card h-100 {{ 'border-primary' if occ_data else 'border-secondary' }}">
+                        <!-- Card Header -->
+                        <div class="card-header d-flex justify-content-between align-items-center {{ 'bg-primary text-white' if occ_data else 'bg-light' }}">
                             <h5 class="mb-0">Quarto {{ room_num }}</h5>
-                            {% if data %}
+                            {% if occ_data %}
                                 <span class="badge bg-white text-primary">Ocupado</span>
                             {% else %}
-                                {% if upcoming_checkins and room_num in upcoming_checkins %}
-                                    <span class="badge bg-warning text-dark">Pré-alocado</span>
-                                {% else %}
-                                    <span class="badge bg-secondary">Livre</span>
-                                {% endif %}
+                                <span class="badge bg-secondary">Livre</span>
                             {% endif %}
                         </div>
+                        
+                        <!-- Card Body -->
                         <div class="card-body">
-                            {% if data %}
+                            {% if occ_data %}
                                 <h5 class="card-title">
+                                    {% if occ_data.reservation_id %}
                                     <a href="#" class="text-decoration-none text-dark" 
-                                       onclick="openViewGuestModal('{{ data.reservation_id or data.guest_id }}', '{{ data.guest_name }}', '{{ room_num }}'); return false;"
+                                       onclick="openViewGuestModal('{{ occ_data.reservation_id }}', '{{ occ_data.guest_name }}', '{{ room_num }}'); return false;"
                                        title="Ver Ficha do Hóspede">
-                                        {{ data.guest_name }} <i class="bi bi-person-badge text-primary small ms-1"></i>
+                                        {{ occ_data.guest_name }} <i class="bi bi-person-badge text-primary small ms-1"></i>
                                     </a>
+                                    {% else %}
+                                    <span class="text-dark" title="Hóspede sem reserva vinculada">
+                                        {{ occ_data.guest_name }} <i class="bi bi-person text-secondary small ms-1"></i>
+                                    </span>
+                                    {% endif %}
                                 </h5>
                                 <p class="card-text small text-muted">
-                                    <i class="bi bi-calendar-check"></i> Check-in: {{ data.checkin }}<br>
-                                    <i class="bi bi-calendar-x"></i> Check-out: {{ data.checkout }}
+                                    <i class="bi bi-calendar-check"></i> Check-in: {{ occ_data.checkin }}<br>
+                                    <i class="bi bi-calendar-x"></i> Check-out: {{ occ_data.checkout }}
                                 </p>
 
                                 <div class="d-flex gap-2 mb-2">
-                                    <button class="btn btn-outline-primary btn-sm w-50" onclick="openTransferModal('{{ room_num }}', '{{ data.guest_name }}')">
+                                    <button class="btn btn-outline-primary btn-sm w-50" onclick="openTransferModal('{{ room_num }}', '{{ occ_data.guest_name }}')">
                                         <i class="bi bi-arrow-left-right"></i> Trocar
                                     </button>
-                                    <button class="btn btn-outline-secondary btn-sm w-50" onclick="openEditGuestModal('{{ room_num }}', '{{ data.guest_name }}')">
+                                    <button class="btn btn-outline-secondary btn-sm w-50" onclick="openEditGuestModal('{{ room_num }}', '{{ occ_data.guest_name }}')">
                                         <i class="bi bi-pencil-square"></i> Editar
                                     </button>
                                 </div>
                                 
-                                <button class="btn btn-outline-success btn-sm w-100 mb-2" onclick="openLaunchExperienceModal('{{ room_num }}', '{{ data.guest_name }}')">
-                                    <i class="bi bi-ticket-perforated"></i> Lançar Experiência
-                                </button>
+                                <form method="POST" action="{{ url_for('reception.reception_checkout') }}" onsubmit="return confirm('Confirmar check-out do quarto {{ room_num }}?');">
+                                    <input type="hidden" name="action" value="checkout">
+                                    <input type="hidden" name="room_number" value="{{ room_num }}">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                                        <i class="bi bi-box-arrow-right"></i> Realizar Check-out
+                                    </button>
+                                </form>
 
-                                {% if data.reservation_id or data.guest_id %}
-                                <button class="btn btn-primary btn-sm w-100 mb-2" onclick="openReservationPaymentModal('{{ data.reservation_id or data.guest_id }}', '{{ data.guest_name }}', '{{ room_num }}')">
-                                    <i class="bi bi-credit-card"></i> Receber Reserva
-                                </button>
-                                {% endif %}
-                                
-                                {% if room_num in pending_rooms %}
-                                <div class="alert alert-warning py-1 px-2 mb-2 small">
-                                    <i class="bi bi-exclamation-triangle-fill"></i> Contas Pendentes
-                                </div>
-                                <button type="button" class="btn btn-warning btn-sm w-100 mb-2" data-bs-toggle="modal" data-bs-target="#roomChargesModal{{ room_num }}">
-                                    <i class="bi bi-receipt"></i> Ver Consumo
-                                </button>
-                                <button type="button" class="btn btn-outline-danger btn-sm w-100" disabled title="Regularize as contas pendentes antes do check-out">
-                                    <i class="bi bi-box-arrow-right"></i> Check-out Bloqueado
-                                </button>
-
-                                <!-- Modal Consumo -->
-                                <div class="modal fade" id="roomChargesModal{{ room_num }}" tabindex="-1" aria-hidden="true">
-                                    <div class="modal-dialog modal-lg">
-                                        <div class="modal-content">
-                                            <div class="modal-header bg-warning text-dark">
-                                                <h5 class="modal-title">Quarto {{ room_num }} - Contas Pendentes</h5>
-                                                <div class="ms-auto">
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                                </div>
-                                            </div>
-                                            <div class="modal-body p-0">
-                                                <div class="table-responsive">
-                                                    <table class="table table-hover mb-0">
-                                                        <thead class="table-light">
-                                                            <tr>
-                                                                <th>Data</th>
-                                                                <th>Origem</th>
-                                                                <th>Itens</th>
-                                                                <th class="text-end">Valor</th>
-                                                                <th class="text-center">Ação</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            {% if grouped_charges and room_num in grouped_charges %}
-                                                                {% for charge in grouped_charges[room_num] %}
-                                                                <tr>
-                                                                <td class="align-middle">{{ charge.date }}</td>
-                                                                <td class="align-middle">
-                                                                    {% if charge.source == 'minibar' %}
-                                                                        <span class="badge bg-info text-dark"><i class="bi bi-snow"></i> Frigobar</span>
-                                                                    {% else %}
-                                                                        <span class="badge bg-secondary"><i class="bi bi-shop"></i> Restaurante</span>
-                                                                    {% endif %}
-                                                                </td>
-                                                                <td class="align-middle">
-                                                                    <small class="text-muted" style="line-height: 1.2; display: block;">
-                                                                        {% for item in charge.get('items', []) %}
-                                                                            <div>{{ item.qty }}x {{ item.name }}</div>
-                                                                        {% endfor %}
-                                                                    </small>
-                                                                </td>
-                                                                <td class="text-end align-middle fw-bold">R$ {{ "%.2f"|format(charge.get('total', 0)) }}</td>
-                                                                <td class="text-center align-middle">
-                                                                    {% set charge_total = charge.get('total', 0) %}
-                                                                    <button class="btn btn-sm btn-success" 
-                                                                            onclick="openPaymentModal('{{ charge.id }}', '{{ room_num }}', '{{ charge_total }}')">
-                                                                        <i class="bi bi-cash"></i>
-                                                                    </button>
-                                                                    <button class="btn btn-sm btn-primary ms-1" 
-                                                                            data-id="{{ charge.id }}"
-                                                                            data-total="{{ charge.get('total', 0) }}"
-                                                                            data-date="{{ charge.date }}"
-                                                                            data-status="{{ charge.status }}"
-                                            data-notes="{{ charge.notes }}"
-                                            data-service-fee-removed="{{ charge.get('service_fee_removed', False)|tojson }}"
-                                            data-items="{{ charge.get('items', [])|tojson|forceescape }}"
-                                            onclick="openEditModal(this)">
-                                                                        <i class="bi bi-pencil"></i> Editar
-                                                                    </button>
-                                                                    {% if session.get('role') == 'admin' %}
-                                                                    <button class="btn btn-sm btn-outline-danger ms-1" 
-                                                                            title="Cancelar Consumo"
-                                                                            data-id="{{ charge.id }}"
-                                                                            data-date="{{ charge.date }}"
-                                                                            data-total="{{ charge.get('total', 0) }}"
-                                                                            data-guest="{{ data.guest_name if data else 'Hóspede' }}"
-                                                                            onclick="openCancelModal(this)">
-                                                                        <i class="bi bi-trash"></i>
-                                                                    </button>
-                                                                    {% endif %}
-
-                                                                    {% if session.get('role') in ['admin', 'gerente'] and charge.get('table_id') %}
-                                                                    <button class="btn btn-sm btn-outline-info ms-1" 
-                                                                            title="Devolver para Restaurante"
-                                                                            data-id="{{ charge.id }}"
-                                                                            onclick="returnToRestaurant('{{ charge.id }}')">
-                                                                        <i class="bi bi-arrow-left"></i>
-                                                                    </button>
-                                                                    {% endif %}
-                                                                </td>
-                                                            </tr>
-                                                            {% endfor %}
-                                                        {% endif %}
-                                                    </tbody>
-                                                </table>
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer justify-content-between">
-                                                {% set room_total = grouped_charges[room_num]|sum(attribute='total') if grouped_charges and room_num in grouped_charges else 0 %}
-                                                <div class="d-flex align-items-center gap-2">
-                                                    <div class="fw-bold fs-5 me-3">
-                                                        {% if grouped_charges and room_num in grouped_charges %}
-                                                            Total: R$ {{ "%.2f"|format(room_total) }}
-                                                        {% endif %}
-                                                    </div>
-                                                    {% if session.get('role') in ['admin', 'gerente'] or 'recepcao' in session.get('permissions', []) %}
-                                                    <button type="button" class="btn btn-outline-dark" onclick="openPrintConsumptionModal('{{ room_num }}')">
-                                                        <i class="bi bi-printer"></i> Imprimir Relatório
-                                                    </button>
-                                                    <button type="button" class="btn btn-outline-primary ms-2"
-                                                            data-room="{{ room_num }}"
-                                                            data-guest="{{ data.guest_name if data else 'Hóspede' }}"
-                                                            data-charges="{{ grouped_charges[room_num]|tojson|forceescape }}"
-                                                            onclick="openIndividualBillsModal(this)">
-                                                        <i class="bi bi-receipt-cutoff"></i> Imprimir 80mm
-                                                    </button>
-                                                    <button type="button" class="btn btn-success ms-2" onclick="openCloseAccountModal('{{ room_num }}', '{{ room_total }}')">
-                                                        <i class="bi bi-check-circle"></i> Dar Baixa na Conta
-                                                    </button>
-                                                    {% endif %}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                {% endif %}
                             {% else %}
-                                <p class="card-text text-muted text-center py-4">
-                                    <i class="bi bi-door-open display-4"></i><br>
-                                    Disponível
-                                </p>
-                                <button class="btn btn-primary w-100" onclick="openCheckinModal('{{ room_num }}')">
-                                    Fazer Check-in
-                                </button>
+                                <!-- Free Room Logic -->
+                                {% if status == 'inspected' %}
+                                    <div class="alert alert-success py-2 small mb-2 text-center">
+                                        <i class="bi bi-check-circle-fill"></i> Pronto para Hóspede
+                                    </div>
+                                    <button class="btn btn-primary btn-sm w-100" 
+                                            onclick="openCheckinModal('{{ room_num }}')">
+                                        <i class="bi bi-person-plus"></i> Fazer Check-in
+                                    </button>
+                                {% elif status == 'clean' %}
+                                    <div class="alert alert-info py-2 small mb-2 text-center">
+                                        <i class="bi bi-stars"></i> Limpo - Aguardando Inspeção
+                                    </div>
+                                    <button class="btn btn-info text-white btn-sm w-100 mb-2" 
+                                            onclick="openInspectModal('{{ room_num }}')">
+                                        <i class="bi bi-clipboard-check"></i> Realizar Inspeção
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm w-100" disabled>
+                                        <i class="bi bi-person-plus"></i> Check-in Bloqueado
+                                    </button>
+                                {% else %}
+                                    <div class="alert alert-warning py-2 small mb-2 text-center">
+                                        <i class="bi bi-clock-history"></i> Aguardando Limpeza
+                                    </div>
+                                    <button class="btn btn-outline-secondary btn-sm w-100" disabled>
+                                        <i class="bi bi-person-plus"></i> Check-in Bloqueado
+                                    </button>
+                                {% endif %}
                             {% endif %}
                         </div>
                     </div>
@@ -228,181 +136,1403 @@
     </div>
 </div>
 
-<!-- Reservation Payment Modal -->
-<div class="modal fade" id="reservationPaymentModal" tabindex="-1">
+<!-- Modals -->
+
+<!-- Check-in Modal -->
+<div class="modal fade" id="checkinModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title">Receber Reserva</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="bi bi-person-plus"></i> Novo Check-in</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('reception.reception_checkin') }}">
+                <div class="modal-body">
+                    <input type="hidden" name="action" value="checkin">
+                    
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Quarto *</label>
+                            <select class="form-select" name="room_number" id="checkin_room_select" required>
+                                <option value="">Selecione...</option>
+                                {% for i in range(1, 36) %}
+                                    {% if i not in excluded_rooms %}
+                                        <option value="{{ i|format_room }}">{{ i|format_room }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-8 mb-3">
+                            <label class="form-label">Nome do Hóspede *</label>
+                            <input type="text" class="form-control" name="guest_name" required>
+                        </div>
+                    </div>
+
+                    <h6 class="text-primary border-bottom pb-1 mb-2">Dados Pessoais</h6>
+                    <div class="row">
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label small">CPF/Passaporte</label>
+                            <input type="text" class="form-control form-control-sm" name="doc_id">
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label small">Nascimento</label>
+                            <input type="date" class="form-control form-control-sm" name="birth_date">
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label small">Gênero</label>
+                            <select class="form-select form-select-sm" name="gender">
+                                <option value="">Selecione...</option>
+                                <option value="M">Masculino</option>
+                                <option value="F">Feminino</option>
+                                <option value="O">Outro</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label small">Nacionalidade</label>
+                            <input type="text" class="form-control form-control-sm" name="nationality" value="Brasileira">
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label small">Profissão</label>
+                            <input type="text" class="form-control form-control-sm" name="profession">
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label small">Email</label>
+                            <input type="email" class="form-control form-control-sm" name="email">
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label small">Telefone</label>
+                            <input type="text" class="form-control form-control-sm" name="phone">
+                        </div>
+                    </div>
+
+                    <h6 class="text-primary border-bottom pb-1 mb-2 mt-2">Endereço</h6>
+                    <div class="row">
+                         <div class="col-md-4 mb-2">
+                            <label class="form-label small">CEP</label>
+                            <input type="text" class="form-control form-control-sm" name="zipcode">
+                        </div>
+                        <div class="col-md-8 mb-2">
+                            <label class="form-label small">Endereço</label>
+                            <input type="text" class="form-control form-control-sm" name="address">
+                        </div>
+                        <div class="col-md-8 mb-2">
+                            <label class="form-label small">Cidade</label>
+                            <input type="text" class="form-control form-control-sm" name="city">
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label small">UF</label>
+                            <input type="text" class="form-control form-control-sm" name="state" maxlength="2">
+                        </div>
+                    </div>
+
+                    <h6 class="text-primary border-bottom pb-1 mb-2 mt-2">Dados da Estadia</h6>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Check-in</label>
+                            <input type="text" class="form-control" name="checkin_date" value="{{ today }}" readonly>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Check-out Previsto</label>
+                            <input type="date" class="form-control" name="checkout_date">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Adultos</label>
+                        <input type="number" class="form-control" name="num_adults" value="2" min="1">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Realizar Check-in</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Transfer Room Modal -->
+<div class="modal fade" id="transferModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="bi bi-arrow-left-right"></i> Trocar Quarto</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('reception.transfer_guest') }}">
+                <div class="modal-body">
+                    <input type="hidden" name="action" value="transfer_guest">
+                    <input type="hidden" name="old_room" id="transfer_old_room">
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Hóspede</label>
+                        <input type="text" class="form-control" id="transfer_guest_name" readonly>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Quarto Atual</label>
+                        <input type="text" class="form-control" id="transfer_old_room_display" readonly>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Novo Quarto *</label>
+                        <select class="form-select" name="new_room" required>
+                            <option value="">Selecione...</option>
+                            {% for i in range(1, 36) %}
+                                {% if i not in excluded_rooms %}
+                                    {% set r = i|format_room %}
+                                    {% if not occupancy.get(r) %}
+                                        <option value="{{ r }}">{{ r }}</option>
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">Apenas quartos livres e não excluídos.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Motivo da Troca</label>
+                        <textarea class="form-control" name="reason" rows="2" placeholder="Ex: Ar condicionado com defeito..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Confirmar Troca</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Guest Modal -->
+<div class="modal fade" id="editGuestModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-secondary text-white">
+                <h5 class="modal-title"><i class="bi bi-pencil-square"></i> Editar Hóspede</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('reception.edit_guest_name') }}">
+                <div class="modal-body">
+                    <input type="hidden" name="action" value="edit_guest_name">
+                    <input type="hidden" name="room_number" id="edit_guest_room">
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Quarto</label>
+                        <input type="text" class="form-control" id="edit_guest_room_display" readonly>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Nome Atual</label>
+                        <input type="text" class="form-control" id="edit_guest_old_name" readonly>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Novo Nome *</label>
+                        <input type="text" class="form-control" name="new_name" id="edit_guest_new_name" required minlength="3">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- View Guest Modal -->
+<div class="modal fade" id="viewGuestModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="bi bi-person-vcard"></i> Ficha do Hóspede</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <div id="resPaymentLoading" class="text-center py-3">
+                <!-- Loading Spinner -->
+                <div id="viewGuestLoading" class="text-center py-4">
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">Carregando...</span>
                     </div>
+                    <p class="mt-2 text-muted">Carregando dados do hóspede...</p>
+                </div>
+
+                <!-- Content -->
+                <div id="viewGuestContent" class="d-none">
+                    <ul class="nav nav-tabs mb-3" id="guestTabs" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-personal" type="button">Dados Pessoais</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-stay" type="button">Estadia Atual</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-history" type="button">Histórico</button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content">
+                        <!-- Personal Info -->
+                        <div class="tab-pane fade show active" id="tab-personal">
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <h6 class="fw-bold">Nome Completo</h6>
+                                    <p id="vg_name" class="border-bottom pb-1">-</p>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6 class="fw-bold">Ficha Nº</h6>
+                                    <p id="vg_ficha" class="border-bottom pb-1">-</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold">Documento (CPF/Passaporte)</h6>
+                                    <p id="vg_doc" class="border-bottom pb-1">-</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold">Data de Nascimento</h6>
+                                    <p id="vg_birth" class="border-bottom pb-1">-</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold">Email</h6>
+                                    <p id="vg_email" class="border-bottom pb-1">-</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold">Telefone</h6>
+                                    <p id="vg_phone" class="border-bottom pb-1">-</p>
+                                </div>
+                                <div class="col-12">
+                                    <h6 class="fw-bold">Endereço</h6>
+                                    <p id="vg_address" class="border-bottom pb-1">-</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Stay Info -->
+                        <div class="tab-pane fade" id="tab-stay">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold">Quarto Atual</h6>
+                                    <p id="vg_room" class="fs-4 text-primary">-</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold">Status</h6>
+                                    <p id="vg_status" class="badge bg-success">-</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold">Check-in</h6>
+                                    <p id="vg_checkin" class="border-bottom pb-1">-</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold">Check-out (Previsto)</h6>
+                                    <p id="vg_checkout" class="border-bottom pb-1">-</p>
+                                </div>
+                                <div class="col-12 mt-4">
+                                    <h6 class="fw-bold mb-3">Consumo Atual (Resumo)</h6>
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <span>Total Consumido:</span>
+                                                <span class="fw-bold" id="vg_total_consumed">R$ 0,00</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <span>Total Pago:</span>
+                                                <span class="text-success fw-bold" id="vg_total_paid">R$ 0,00</span>
+                                            </div>
+                                            <hr>
+                                            <div class="d-flex justify-content-between">
+                                                <span class="fs-5">Saldo Devedor:</span>
+                                                <span class="fs-5 fw-bold text-danger" id="vg_balance">R$ 0,00</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2 text-end">
+                                        <button class="btn btn-sm btn-outline-primary" onclick="viewDetailedCharges()">
+                                            <i class="bi bi-receipt"></i> Ver Detalhes da Conta
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- History -->
+                        <div class="tab-pane fade" id="tab-history">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Data</th>
+                                            <th>Quarto</th>
+                                            <th>Valor</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="vg_history_table">
+                                        <!-- Populated via JS -->
+                                    </tbody>
+                                </table>
+                                <p class="text-center text-muted small mt-2">Mostrando as últimas 5 estadias.</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
-                <div id="resPaymentContent" style="display:none;">
-                    <div class="alert alert-info mb-3">
-                        <strong>Hóspede:</strong> <span id="resPayGuestName"></span><br>
-                        <strong>Quarto:</strong> <span id="resPayRoom"></span>
-                    </div>
-
-                    <div class="card bg-light mb-3">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between mb-2">
-                                <span>Valor Total da Reserva:</span>
-                                <span class="fw-bold" id="resPayTotal">R$ 0,00</span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-2">
-                                <span>Já Pago:</span>
-                                <span class="text-success fw-bold" id="resPayPaid">R$ 0,00</span>
-                            </div>
-                            <div class="d-flex justify-content-between border-top pt-2">
-                                <span>Saldo Pendente:</span>
-                                <span class="text-danger fw-bold fs-5" id="resPayRemaining">R$ 0,00</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <form id="reservationPaymentForm">
-                        <input type="hidden" id="resPayId" name="reservation_id">
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Valor a Receber (R$)</label>
-                            <input type="number" step="0.01" class="form-control form-control-lg" id="resPayAmount" name="amount" required>
-                            <div class="form-text text-danger" id="resPayError" style="display:none;"></div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Forma de Pagamento</label>
-                            <select class="form-select" id="resPayMethod" name="payment_method" required>
-                                <option value="">Selecione...</option>
-                                <!-- Populated via JS -->
-                            </select>
-                        </div>
-                    </form>
+                <!-- Error State -->
+                <div id="viewGuestError" class="d-none text-center py-4">
+                    <i class="bi bi-exclamation-circle text-danger fs-1"></i>
+                    <p class="mt-2 text-danger">Erro ao carregar dados do hóspede.</p>
+                    <p class="small text-muted" id="viewGuestErrorMsg"></p>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-success" id="btnConfirmResPayment" onclick="submitReservationPayment()">
-                    <i class="bi bi-check-circle"></i> Confirmar Pagamento
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" id="vg_edit_btn" onclick="switchToEdit()">
+                    <i class="bi bi-pencil"></i> Editar Dados
                 </button>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Inspect Modal -->
+<div class="modal fade" id="inspectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title"><i class="bi bi-clipboard-check"></i> Checklist de Inspeção de Quarto</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" id="inspectionForm" action="{{ url_for('reception.inspect_room') }}">
+                <div class="modal-body">
+                    <input type="hidden" name="action" value="inspect_room">
+                    <input type="hidden" name="room_number" id="inspect_room_number">
+                    
+                    <div class="alert alert-secondary text-center mb-3">
+                        Inspecionando <strong>Quarto <span id="inspect_room_display"></span></strong>
+                    </div>
+                    
+                    <p class="small text-muted mb-2">Verifique os itens abaixo:</p>
+                    
+                    <div class="list-group mb-3">
+                        {% for item in checklist_items %}
+                        <label class="list-group-item d-flex gap-2">
+                            <input class="form-check-input flex-shrink-0 item-check" type="checkbox">
+                            <span>{{ item }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+
+                    <hr>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Resultado da Inspeção:</label>
+                        <div class="d-flex gap-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="inspection_result" id="result_passed" value="passed" checked onchange="toggleObservation()">
+                                <label class="form-check-label text-success fw-bold" for="result_passed">
+                                    <i class="bi bi-check-circle-fill"></i> APROVADO
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="inspection_result" id="result_failed" value="failed" onchange="toggleObservation()">
+                                <label class="form-check-label text-danger fw-bold" for="result_failed">
+                                    <i class="bi bi-x-circle-fill"></i> REPROVADO
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3" id="obs_container" style="display:none;">
+                        <label class="form-label">Motivo da Reprovação / Observações:</label>
+                        <textarea class="form-control" name="observation" id="inspection_obs" rows="3" placeholder="Descreva o problema encontrado..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-info text-white" id="submit_inspection_btn">
+                        <i class="bi bi-save"></i> Salvar Inspeção
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Checklist Configuration Modal -->
+<div class="modal fade" id="checklistConfigModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title"><i class="bi bi-gear-fill"></i> Gerenciar Itens do Checklist</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{{ url_for('reception.manage_checklist') }}" class="d-flex gap-2 mb-4">
+                    <input type="hidden" name="action" value="add_checklist_item">
+                    <input type="text" class="form-control" name="item_name" placeholder="Novo item..." required>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-plus-lg"></i>
+                    </button>
+                </form>
+
+                <h6 class="mb-3">Itens Atuais:</h6>
+                <ul class="list-group list-group-flush">
+                    {% for item in checklist_items %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ item }}
+                        <form method="POST" action="{{ url_for('reception.manage_checklist') }}" style="display:inline;">
+                            <input type="hidden" name="action" value="delete_checklist_item">
+                            <input type="hidden" name="item_name" value="{{ item }}">
+                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Remover este item?')">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Room Charges Modals (Generated Loop) -->
+{% for room_num, charges in grouped_charges.items() %}
+<div class="modal fade" id="roomChargesModal{{ room_num }}" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Detalhes da Conta - Quarto {{ room_num }}</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Item</th>
+                                <th>Qtd</th>
+                                <th>Valor Unit.</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for charge in charges %}
+                            <tr>
+                                <td>{{ charge.date }}</td>
+                                <td>{{ charge.description }}</td>
+                                <td>{{ charge.qty }}</td>
+                                <td>R$ {{ charge.value|float|round(2) }}</td>
+                                <td>R$ {{ charge.total|float|round(2) }}</td>
+                                <td>
+                                    <span class="badge bg-{{ 'success' if charge.status == 'paid' else 'warning' }}">
+                                        {{ charge.status }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if charge.status == 'pending' %}
+                                    <button class="btn btn-sm btn-outline-success me-1" 
+                                            onclick="openPaymentModal('{{ charge.id }}', '{{ room_num }}', '{{ charge.total }}')"
+                                            title="Pagar Item">
+                                        <i class="bi bi-currency-dollar"></i>
+                                    </button>
+                                    {% endif %}
+                                    <button class="btn btn-sm btn-outline-primary" onclick="openEditModal(this)" 
+                                            data-id="{{ charge.id }}" 
+                                            data-total="{{ charge.total }}"
+                                            data-date="{{ charge.date }}"
+                                            data-status="{{ charge.status }}"
+                                            data-notes="{{ charge.notes }}"
+                                            data-items='{{ charge.items|tojson|safe }}'
+                                            data-audit='{{ charge.audit_log|tojson|safe }}'>
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+             <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-success" onclick="openCloseAccountModal('{{ room_num }}', '{{ charges|sum(attribute='total') }}')">
+                    <i class="bi bi-cash-coin"></i> Fechar Conta
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Edit Charge Modal -->
+<div class="modal fade" id="editChargeModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Editar Conta</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="/reception/charge/edit" onsubmit="prepareEditSubmit()">
+                <input type="hidden" name="source_page" value="reception_rooms">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-5 border-end">
+                            <ul class="nav nav-tabs mb-3" id="editTabs" role="tablist">
+                                <li class="nav-item">
+                                    <button class="nav-link active" id="details-tab" data-bs-toggle="tab" data-bs-target="#details" type="button">Detalhes</button>
+                                </li>
+                            </ul>
+                            <div class="tab-content" id="editTabContent">
+                                <div class="tab-pane fade show active" id="details" role="tabpanel">
+                                    <div class="mb-2">
+                                        <label class="form-label text-muted small">ID da Conta</label>
+                                        <input type="text" class="form-control-plaintext fw-bold py-0" name="charge_id" id="editChargeId" readonly>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label small">Data</label>
+                                        <input type="text" class="form-control form-control-sm" name="new_date" id="editChargeDate" required placeholder="DD/MM/YYYY HH:MM">
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label small">Status</label>
+                                        <select class="form-select form-select-sm" name="new_status" id="editChargeStatus">
+                                            <option value="pending">Pendente</option>
+                                            <option value="cancelled">Cancelado</option>
+                                            <option value="paid">Pago (Manual)</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label small fw-bold text-danger">Motivo da Edição *</label>
+                                        <textarea class="form-control form-control-sm" name="justification" id="editJustification" rows="2" required placeholder="Obrigatório para auditoria..."></textarea>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label small">Observações (Internas)</label>
+                                        <textarea class="form-control form-control-sm" name="new_notes" id="editChargeNotes" rows="2"></textarea>
+                                    </div>
+                                    <div class="alert alert-warning small py-1 mt-2">
+                                        <i class="bi bi-exclamation-triangle"></i> Estoque ajustado auto.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            <h6 class="text-primary mb-3">Itens do Pedido</h6>
+                            <div class="card bg-light mb-3">
+                                <div class="card-body p-2">
+                                    <label class="form-label small fw-bold">Adicionar Item</label>
+                                    <div class="input-group input-group-sm mb-2">
+                                        <select class="form-select" id="newItemSelect">
+                                            <option value="">Selecione um produto...</option>
+                                            {% for product in products %}
+                                            <option value="{{ product.id }}" data-name="{{ product.name }}" data-price="{{ product.price }}">{{ product.name }} - R$ {{ product.price }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <input type="number" class="form-control" id="newItemQty" value="1" min="0.1" step="0.1" style="max-width: 70px;">
+                                        <button type="button" class="btn btn-success" onclick="addNewEditItem()">
+                                            <i class="bi bi-plus-lg"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="table-responsive" style="max-height: 300px; overflow-y: auto">
+                                <table class="table table-sm table-hover" id="editItemsTable">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Item</th>
+                                            <th class="text-end">Qtd</th>
+                                            <th class="text-end">Total</th>
+                                            <th class="text-center">Ação</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="editItemsList"></tbody>
+                                </table>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="removeServiceFee" name="remove_service_fee" onchange="renderEditItems()">
+                                    <label class="form-check-label small" for="removeServiceFee">Retirar 10% (Serviço)</label>
+                                </div>
+                                <div class="text-end">
+                                    <span class="text-muted small d-block">Total Estimado:</span>
+                                    <span class="fw-bold fs-5 text-primary" id="editGrandTotal">R$ 0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" name="items_to_add" id="itemsToAddInput">
+                    <input type="hidden" name="items_to_remove" id="itemsToRemoveInput">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Print Preview Modal -->
+<div class="modal fade" id="printPreviewModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Pré-visualização do Relatório</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="printPreviewContent">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" onclick="printReport()">
+                    <i class="bi bi-printer"></i> Imprimir
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cancel Confirmation Modal -->
+<div class="modal fade" id="cancelConsumptionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="bi bi-exclamation-triangle-fill"></i> Cancelar Consumo</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja cancelar este consumo?</p>
+                <div class="alert alert-light border">
+                    <p class="mb-1"><strong>Hóspede:</strong> <span id="cancelGuestName"></span></p>
+                    <p class="mb-1"><strong>Data:</strong> <span id="cancelDate"></span></p>
+                    <p class="mb-0"><strong>Valor:</strong> R$ <span id="cancelTotal"></span></p>
+                </div>
+                <form id="cancelConsumptionForm">
+                    <input type="hidden" id="cancelChargeId" name="charge_id">
+                    <div class="mb-3">
+                        <label for="cancelJustification" class="form-label fw-bold">Justificativa (Obrigatório)</label>
+                        <textarea class="form-control" id="cancelJustification" rows="3" required placeholder="Motivo do cancelamento..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-danger" onclick="submitCancelConsumption()">Confirmar Cancelamento</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Close Account Confirmation Modal -->
+<div class="modal fade" id="closeAccountModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="bi bi-check-circle"></i> Dar Baixa na Conta</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Confirma a baixa total da conta do quarto <strong id="closeAccountRoomNum"></strong>?</p>
+                <div class="alert alert-info">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Total a Pagar:</span>
+                        <strong class="fs-5" id="closeAccountTotal">R$ 0,00</strong>
+                    </div>
+                    <small class="text-muted">Incluindo taxas de serviço e consumo.</small>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Pagamentos</label>
+                    <div class="bg-light p-2 rounded mb-2 border">
+                        <div id="paymentList" class="mb-2">
+                            <div class="text-muted small text-center fst-italic py-1" id="noPaymentMsg">Nenhum pagamento adicionado</div>
+                        </div>
+                        <div class="d-flex justify-content-between border-top pt-2">
+                            <span class="small fw-bold">Total Pago:</span>
+                            <span class="small fw-bold text-success" id="totalPaidDisplay">R$ 0,00</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="small fw-bold">Restante:</span>
+                            <span class="small fw-bold text-danger" id="remainingDisplay">R$ 0,00</span>
+                        </div>
+                    </div>
+                    <div class="input-group input-group-sm">
+                        <select class="form-select" id="newPaymentMethod">
+                             <option value="">Selecione...</option>
+                             {% for method in payment_methods %}
+                             <option value="{{ method.id }}">{{ method.name }}</option>
+                             {% endfor %}
+                        </select>
+                        <input type="text" class="form-control" id="newPaymentAmount" placeholder="Valor" onkeyup="formatCurrency(this)">
+                        <button class="btn btn-primary" type="button" onclick="addPayment()">
+                            <i class="bi bi-plus-lg"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="closeAccountPrintReceipt" checked>
+                    <label class="form-check-label" for="closeAccountPrintReceipt">
+                        Imprimir comprovante automaticamente
+                    </label>
+                </div>
+                <p class="text-muted small mb-0">Esta ação irá marcar todos os itens pendentes como "Pagos" e registrar o fechamento da conta.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" onclick="submitCloseAccount()">Confirmar Baixa</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Single Charge Payment Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">Pagar Item Individual</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Confirma o pagamento do item?</p>
+                <div class="alert alert-info">
+                    <strong>Total do Item: R$ <span id="paymentModalTotal"></span></strong>
+                </div>
+                <input type="hidden" id="paymentChargeId">
+                <input type="hidden" id="paymentRoomNum">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Pagamentos</label>
+                    <div class="bg-light p-2 rounded mb-2 border">
+                        <div id="paymentListSingle" class="mb-2">
+                            <div class="text-muted small text-center fst-italic py-1" id="noPaymentMsgSingle">Nenhum pagamento adicionado</div>
+                        </div>
+                        <div class="d-flex justify-content-between border-top pt-2">
+                            <span class="small fw-bold">Total Pago:</span>
+                            <span class="small fw-bold text-success" id="totalPaidDisplaySingle">R$ 0,00</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="small fw-bold">Restante:</span>
+                            <span class="small fw-bold text-danger" id="remainingDisplaySingle">R$ 0,00</span>
+                        </div>
+                    </div>
+                    <div class="input-group input-group-sm">
+                        <select class="form-select" id="newPaymentMethodSingle">
+                             <option value="">Selecione...</option>
+                             {% for method in payment_methods %}
+                             <option value="{{ method.id }}">{{ method.name }}</option>
+                             {% endfor %}
+                        </select>
+                        <input type="text" class="form-control" id="newPaymentAmountSingle" placeholder="Valor" onkeyup="formatCurrency(this)">
+                        <button class="btn btn-primary" type="button" onclick="addPaymentSingle()">
+                            <i class="bi bi-plus-lg"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" onclick="submitSinglePayment()">Confirmar Pagamento</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Modal -->
+<div class="modal fade" id="loadingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered text-center">
+        <div class="modal-content bg-transparent border-0 shadow-none">
+            <div class="spinner-border text-light" style="width: 3rem; height: 3rem;" role="status">
+                <span class="visually-hidden">Carregando...</span>
+            </div>
+            <h5 class="text-light mt-3">Processando...</h5>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="/static/js/guest_view.js"></script>
 <script>
-async function openReservationPaymentModal(guestId, guestName, roomNum) {
-    const modal = new bootstrap.Modal(document.getElementById('reservationPaymentModal'));
-    modal.show();
-    
-    document.getElementById('resPaymentLoading').style.display = 'block';
-    document.getElementById('resPaymentContent').style.display = 'none';
-    document.getElementById('resPayError').style.display = 'none';
-    document.getElementById('btnConfirmResPayment').disabled = true;
-    
-    document.getElementById('resPayGuestName').textContent = guestName;
-    document.getElementById('resPayRoom').textContent = roomNum;
-    document.getElementById('resPayId').value = guestId;
-
-    try {
-        // 1. Fetch Debt Info
-        const debtResp = await fetch(`/reception/reservation/${guestId}/debt`);
-        if (!debtResp.ok) throw new Error('Erro ao buscar dados da reserva');
-        const debtData = await debtResp.json();
+    // Functions for Modals
+    window.openCheckinModal = function(roomNum) {
+        if (roomNum) {
+            const select = document.getElementById('checkin_room_select');
+            if (select) {
+                select.value = roomNum;
+            }
+        } else {
+             const select = document.getElementById('checkin_room_select');
+             if (select) select.value = "";
+        }
         
-        document.getElementById('resPayTotal').textContent = `R$ ${debtData.total.toFixed(2)}`;
-        document.getElementById('resPayPaid').textContent = `R$ ${debtData.paid.toFixed(2)}`;
-        document.getElementById('resPayRemaining').textContent = `R$ ${debtData.remaining.toFixed(2)}`;
+        var myModal = new bootstrap.Modal(document.getElementById('checkinModal'));
+        myModal.show();
+    };
+
+    function openTransferModal(roomNum, guestName) {
+        document.getElementById('transfer_old_room').value = roomNum;
+        document.getElementById('transfer_old_room_display').value = roomNum;
+        document.getElementById('transfer_guest_name').value = guestName;
         
-        // Default amount to remaining
-        document.getElementById('resPayAmount').value = debtData.remaining.toFixed(2);
-        document.getElementById('resPayAmount').max = debtData.remaining + 0.01; // tolerance
-
-        // 2. Fetch Payment Methods
-        const methodsResp = await fetch('/api/payment-methods');
-        if (!methodsResp.ok) throw new Error('Erro ao buscar formas de pagamento');
-        const methods = await methodsResp.json();
-        
-        const select = document.getElementById('resPayMethod');
-        select.innerHTML = '<option value="">Selecione...</option>';
-        methods.forEach(m => {
-            const option = document.createElement('option');
-            option.value = m.id;
-            option.textContent = m.name;
-            option.dataset.name = m.name; // Store name for submission
-            select.appendChild(option);
-        });
-
-        document.getElementById('resPaymentLoading').style.display = 'none';
-        document.getElementById('resPaymentContent').style.display = 'block';
-        document.getElementById('btnConfirmResPayment').disabled = false;
-
-    } catch (error) {
-        alert(error.message);
-        modal.hide();
+        var myModalEl = document.getElementById('transferModal');
+        var modal = new bootstrap.Modal(myModalEl);
+        modal.show();
     }
-}
 
-async function submitReservationPayment() {
-    const btn = document.getElementById('btnConfirmResPayment');
-    const amountInput = document.getElementById('resPayAmount');
-    const methodSelect = document.getElementById('resPayMethod');
-    const errorDiv = document.getElementById('resPayError');
-    
-    const amount = parseFloat(amountInput.value);
-    const maxAmount = parseFloat(amountInput.max);
-    
-    if (!amount || amount <= 0) {
-        errorDiv.textContent = 'Digite um valor válido.';
-        errorDiv.style.display = 'block';
-        return;
+    function openCheckinModal(roomNum) {
+        var modal = new bootstrap.Modal(document.getElementById('checkinModal'));
+        if (roomNum) {
+            var select = document.getElementById('checkin_room_select');
+            if (select) {
+                select.value = roomNum;
+            }
+        }
+        modal.show();
     }
-    
-    if (amount > maxAmount) {
-        if (!confirm(`O valor R$ ${amount.toFixed(2)} é maior que o saldo pendente (R$ ${maxAmount.toFixed(2)}). Deseja continuar?`)) {
+
+    function openEditGuestModal(roomNum, guestName) {
+        document.getElementById('edit_guest_room').value = roomNum;
+        document.getElementById('edit_guest_room_display').value = roomNum;
+        document.getElementById('edit_guest_old_name').value = guestName;
+        document.getElementById('edit_guest_new_name').value = guestName;
+        
+        var myModalEl = document.getElementById('editGuestModal');
+        var modal = new bootstrap.Modal(myModalEl);
+        modal.show();
+    }
+
+    function openInspectModal(roomNum) {
+        document.getElementById('inspect_room_number').value = roomNum;
+        document.getElementById('inspect_room_display').innerText = roomNum;
+        
+        // Reset form state
+        document.getElementById('result_passed').checked = true;
+        document.querySelectorAll('.item-check').forEach(c => c.checked = false);
+        toggleObservation();
+        
+        var modal = new bootstrap.Modal(document.getElementById('inspectModal'));
+        modal.show();
+    }
+
+    function toggleObservation() {
+        const isFailed = document.getElementById('result_failed').checked;
+        const obsContainer = document.getElementById('obs_container');
+        const obsInput = document.getElementById('inspection_obs');
+        const submitBtn = document.getElementById('submit_inspection_btn');
+        
+        if (isFailed) {
+            obsContainer.style.display = 'block';
+            obsInput.required = true;
+            submitBtn.classList.remove('btn-info');
+            submitBtn.classList.add('btn-danger');
+            submitBtn.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Reprovar Quarto';
+        } else {
+            obsContainer.style.display = 'none';
+            obsInput.required = false;
+            submitBtn.classList.remove('btn-danger');
+            submitBtn.classList.add('btn-info');
+            submitBtn.innerHTML = '<i class="bi bi-check-lg"></i> Confirmar e Liberar';
+        }
+    }
+
+    // --- Charge Edit Logic ---
+    let editOriginalItems = [];
+    let editAddedItems = [];
+    let editRemovedIndices = []; // Track indices for UI hiding
+    let editRemovedIds = [];     // Track IDs for backend
+
+    function openEditModal(btn) {
+        const id = btn.getAttribute('data-id');
+        const total = btn.getAttribute('data-total');
+        const date = btn.getAttribute('data-date');
+        const status = btn.getAttribute('data-status');
+        const notes = btn.getAttribute('data-notes');
+        const items = JSON.parse(btn.getAttribute('data-items') || '[]');
+        
+        document.getElementById('editChargeId').value = id;
+        document.getElementById('editChargeDate').value = date;
+        document.getElementById('editChargeStatus').value = status;
+        document.getElementById('editChargeNotes').value = notes || '';
+        document.getElementById('editJustification').value = ''; // Reset justification
+        
+        // Initialize Items
+        editOriginalItems = items;
+        editAddedItems = [];
+        editRemovedIndices = [];
+        editRemovedIds = [];
+        
+        renderEditItems();
+        
+        var modal = new bootstrap.Modal(document.getElementById('editChargeModal'));
+        modal.show();
+    }
+
+    function addNewEditItem() {
+        const select = document.getElementById('newItemSelect');
+        const qtyInput = document.getElementById('newItemQty');
+        
+        const productId = select.value;
+        if (!productId) return;
+        
+        const option = select.options[select.selectedIndex];
+        const name = option.getAttribute('data-name');
+        const price = parseFloat(option.getAttribute('data-price'));
+        const qty = parseFloat(qtyInput.value);
+        
+        if (qty <= 0) {
+            alert("Quantidade inválida");
             return;
+        }
+        
+        editAddedItems.push({
+            id: productId, // Using product ID for new items (backend expects 'id' to find product def)
+            name: name,
+            qty: qty,
+            unit_price: price,
+            total: price * qty
+        });
+        
+        // Reset inputs
+        select.value = "";
+        qtyInput.value = "1";
+        
+        renderEditItems();
+    }
+
+    function removeEditItem(index, isOriginal) {
+        if (isOriginal) {
+            if (!editRemovedIndices.includes(index)) {
+                editRemovedIndices.push(index);
+                const item = editOriginalItems[index];
+                if (item && item.id) {
+                    editRemovedIds.push(item.id);
+                }
+            }
+        } else {
+            // Remove from added items array
+            editAddedItems.splice(index, 1);
+        }
+        renderEditItems();
+    }
+
+    function renderEditItems() {
+        const tbody = document.getElementById('editItemsList');
+        tbody.innerHTML = '';
+        
+        let grandTotal = 0;
+        
+        // Render Original Items
+        editOriginalItems.forEach((item, index) => {
+            if (editRemovedIndices.includes(index)) return; // Skip removed
+            
+            // Calculate total safely
+            let total = 0;
+            if (item.total) {
+                total = parseFloat(item.total);
+            } else if (item.unit_price && item.qty) {
+                total = parseFloat(item.unit_price) * parseFloat(item.qty);
+            }
+            
+            grandTotal += total;
+            
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><span class="badge bg-secondary me-1">Orig</span> ${item.name || item.description || 'Item'}</td>
+                <td class="text-end">${item.qty}</td>
+                <td class="text-end">R$ ${total.toFixed(2)}</td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-xs btn-outline-danger" onclick="removeEditItem(${index}, true)">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+        
+        // Render Added Items
+        editAddedItems.forEach((item, index) => {
+            const total = item.total;
+            grandTotal += total;
+            
+            const tr = document.createElement('tr');
+            tr.classList.add('table-success'); // Highlight new items
+            tr.innerHTML = `
+                <td><span class="badge bg-success me-1">Novo</span> ${item.name}</td>
+                <td class="text-end">${item.qty}</td>
+                <td class="text-end">R$ ${total.toFixed(2)}</td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-xs btn-outline-danger" onclick="removeEditItem(${index}, false)">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+        
+        // Update Total
+        const removeService = document.getElementById('removeServiceFee').checked;
+        if (removeService) {
+            // grandTotal = grandTotal / 1.1; // Don't adjust display, just total
+        }
+        
+        document.getElementById('editGrandTotal').textContent = 'R$ ' + grandTotal.toFixed(2);
+        
+        // Update Hidden Inputs
+        document.getElementById('itemsToAddInput').value = JSON.stringify(editAddedItems);
+        document.getElementById('itemsToRemoveInput').value = JSON.stringify(editRemovedIds);
+    }
+    
+    function prepareEditSubmit() {
+        // Ensure hidden inputs are ready (already updated in render)
+        return true;
+    }
+
+    // --- Close Account Logic ---
+    let closeAccountPayments = [];
+    let closeAccountTotalVal = 0;
+    
+    function openCloseAccountModal(roomNum, total) {
+        document.getElementById('closeAccountRoomNum').textContent = roomNum;
+        closeAccountTotalVal = parseFloat(total);
+        document.getElementById('closeAccountTotal').textContent = 'R$ ' + closeAccountTotalVal.toFixed(2);
+        
+        // Reset
+        closeAccountPayments = [];
+        renderPayments();
+        
+        var modal = new bootstrap.Modal(document.getElementById('closeAccountModal'));
+        modal.show();
+    }
+    
+    function addPayment() {
+        const select = document.getElementById('newPaymentMethod');
+        const amountInput = document.getElementById('newPaymentAmount');
+        
+        const methodId = select.value;
+        const methodName = select.options[select.selectedIndex].text;
+        
+        // Parse currency input (pt-BR format or simple float)
+        let amountStr = amountInput.value.replace('R$', '').trim();
+        if (amountStr.includes(',') && !amountStr.includes('.')) {
+             amountStr = amountStr.replace('.', '').replace(',', '.'); // 1.000,00 -> 1000.00
+        } else if (amountStr.includes(',') && amountStr.includes('.')) {
+             amountStr = amountStr.replace('.', '').replace(',', '.');
+        }
+        
+        const amount = parseFloat(amountStr);
+        
+        if (!methodId || isNaN(amount) || amount <= 0) {
+            alert("Selecione um método e informe um valor válido.");
+            return;
+        }
+        
+        closeAccountPayments.push({
+            method_id: methodId,
+            method_name: methodName,
+            amount: amount
+        });
+        
+        amountInput.value = "";
+        renderPayments();
+    }
+    
+    function renderPayments() {
+        const list = document.getElementById('paymentList');
+        const totalPaidEl = document.getElementById('totalPaidDisplay');
+        const remainingEl = document.getElementById('remainingDisplay');
+        const msg = document.getElementById('noPaymentMsg');
+        
+        list.innerHTML = '';
+        let totalPaid = 0;
+        
+        closeAccountPayments.forEach((p, index) => {
+            totalPaid += p.amount;
+            const div = document.createElement('div');
+            div.className = 'd-flex justify-content-between align-items-center mb-1 small';
+            div.innerHTML = `
+                <span>${p.method_name}</span>
+                <span>R$ ${p.amount.toFixed(2)} <i class="bi bi-x text-danger cursor-pointer ms-2" onclick="removePayment(${index})"></i></span>
+            `;
+            list.appendChild(div);
+        });
+        
+        if (closeAccountPayments.length === 0) {
+            list.appendChild(msg);
+            msg.style.display = 'block';
+        } else {
+            msg.style.display = 'none'; // Clone doesn't work well with display toggle if we append.
+            // Actually, recreating the list removes the msg element if not re-added.
+            // So just adding msg if empty is enough.
+        }
+        
+        totalPaidEl.textContent = 'R$ ' + totalPaid.toFixed(2);
+        const remaining = closeAccountTotalVal - totalPaid;
+        remainingEl.textContent = 'R$ ' + Math.max(0, remaining).toFixed(2);
+        
+        if (remaining <= 0.01) {
+            remainingEl.classList.remove('text-danger');
+            remainingEl.classList.add('text-success');
+        } else {
+            remainingEl.classList.remove('text-success');
+            remainingEl.classList.add('text-danger');
         }
     }
     
-    if (!methodSelect.value) {
-        alert('Selecione uma forma de pagamento.');
-        return;
+    function removePayment(index) {
+        closeAccountPayments.splice(index, 1);
+        renderPayments();
     }
-
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Processando...';
     
-    try {
-        const option = methodSelect.options[methodSelect.selectedIndex];
+    function submitCloseAccount() {
+        const roomNum = document.getElementById('closeAccountRoomNum').textContent;
+        const printReceipt = document.getElementById('closeAccountPrintReceipt').checked;
         
-        const resp = await fetch('/reception/reservation/pay', {
+        // Validate total
+        let totalPaid = closeAccountPayments.reduce((acc, p) => acc + p.amount, 0);
+        if (Math.abs(totalPaid - closeAccountTotalVal) > 0.05) { // 5 cent tolerance
+            if (!confirm("O valor pago (R$ " + totalPaid.toFixed(2) + ") é diferente do total (R$ " + closeAccountTotalVal.toFixed(2) + "). Deseja continuar mesmo assim?")) {
+                return;
+            }
+        }
+        
+        if (closeAccountPayments.length === 0 && closeAccountTotalVal > 0) {
+             alert("Adicione pelo menos um pagamento.");
+             return;
+        }
+
+        // Show Loading
+        var modalEl = document.getElementById('closeAccountModal');
+        var modal = bootstrap.Modal.getInstance(modalEl);
+        modal.hide();
+        
+        var loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+        loadingModal.show();
+        
+        // Construct Payload
+        const payload = {
+            room_number: roomNum,
+            payments: closeAccountPayments,
+            print_receipt: printReceipt
+        };
+        
+        fetch('/reception/close_account/' + roomNum, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                reservation_id: document.getElementById('resPayId').value,
-                amount: amount,
-                payment_method_id: methodSelect.value,
-                payment_method_name: option.dataset.name
-            })
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(data => {
+            loadingModal.hide();
+            if (data.success) {
+                alert("Conta fechada com sucesso!");
+                location.reload();
+            } else {
+                alert("Erro ao fechar conta: " + (data.error || "Desconhecido"));
+                modal.show(); // Reopen on error
+            }
+        })
+        .catch(err => {
+            loadingModal.hide();
+            console.error(err);
+            alert("Erro de comunicação.");
+            modal.show();
+        });
+    }
+
+    function formatCurrency(input) {
+        let value = input.value.replace(/\D/g, '');
+        value = (value / 100).toFixed(2) + '';
+        value = value.replace(".", ",");
+        value = value.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
+        input.value = "R$ " + value;
+    }
+
+    // --- Single Payment Logic ---
+    let singlePaymentPayments = [];
+    let singlePaymentTotalVal = 0;
+    
+    function openPaymentModal(chargeId, roomNum, total) {
+        document.getElementById('paymentChargeId').value = chargeId;
+        document.getElementById('paymentRoomNum').value = roomNum;
+        singlePaymentTotalVal = parseFloat(total);
+        document.getElementById('paymentModalTotal').textContent = singlePaymentTotalVal.toFixed(2);
+        
+        // Reset
+        singlePaymentPayments = [];
+        renderPaymentsSingle();
+        
+        var modal = new bootstrap.Modal(document.getElementById('paymentModal'));
+        modal.show();
+    }
+
+    function addPaymentSingle() {
+        const select = document.getElementById('newPaymentMethodSingle');
+        const amountInput = document.getElementById('newPaymentAmountSingle');
+        
+        const methodId = select.value;
+        const methodName = select.options[select.selectedIndex].text;
+        
+        let amountStr = amountInput.value.replace('R$', '').trim();
+        if (amountStr.includes(',') && !amountStr.includes('.')) {
+             amountStr = amountStr.replace('.', '').replace(',', '.');
+        } else if (amountStr.includes(',') && amountStr.includes('.')) {
+             amountStr = amountStr.replace('.', '').replace(',', '.');
+        }
+        
+        const amount = parseFloat(amountStr);
+        
+        if (!methodId || isNaN(amount) || amount <= 0) {
+            alert("Selecione um método e informe um valor válido.");
+            return;
+        }
+        
+        singlePaymentPayments.push({
+            id: methodId, // Backend expects 'id' in payment_data
+            name: methodName,
+            amount: amount
         });
         
-        const result = await resp.json();
-        
-        if (!resp.ok) throw new Error(result.error || 'Erro ao processar pagamento');
-        
-        alert('Pagamento registrado com sucesso!');
-        location.reload();
-        
-    } catch (error) {
-        alert(error.message);
-        btn.disabled = false;
-        btn.innerHTML = '<i class="bi bi-check-circle"></i> Confirmar Pagamento';
+        amountInput.value = "";
+        renderPaymentsSingle();
     }
-}
+    
+    function renderPaymentsSingle() {
+        const list = document.getElementById('paymentListSingle');
+        const totalPaidEl = document.getElementById('totalPaidDisplaySingle');
+        const remainingEl = document.getElementById('remainingDisplaySingle');
+        const msg = document.getElementById('noPaymentMsgSingle');
+        
+        list.innerHTML = '';
+        let totalPaid = 0;
+        
+        singlePaymentPayments.forEach((p, index) => {
+            totalPaid += p.amount;
+            const div = document.createElement('div');
+            div.className = 'd-flex justify-content-between align-items-center mb-1 small';
+            div.innerHTML = `
+                <span>${p.name}</span>
+                <span>R$ ${p.amount.toFixed(2)} <i class="bi bi-x text-danger cursor-pointer ms-2" onclick="removePaymentSingle(${index})"></i></span>
+            `;
+            list.appendChild(div);
+        });
+        
+        if (singlePaymentPayments.length === 0) {
+            list.appendChild(msg);
+            msg.style.display = 'block';
+        } else {
+            msg.style.display = 'none';
+        }
+        
+        totalPaidEl.textContent = 'R$ ' + totalPaid.toFixed(2);
+        const remaining = singlePaymentTotalVal - totalPaid;
+        remainingEl.textContent = 'R$ ' + Math.max(0, remaining).toFixed(2);
+        
+        if (remaining <= 0.01) {
+            remainingEl.classList.remove('text-danger');
+            remainingEl.classList.add('text-success');
+        } else {
+            remainingEl.classList.remove('text-success');
+            remainingEl.classList.add('text-danger');
+        }
+    }
+    
+    function removePaymentSingle(index) {
+        singlePaymentPayments.splice(index, 1);
+        renderPaymentsSingle();
+    }
+    
+    function submitSinglePayment() {
+        const chargeId = document.getElementById('paymentChargeId').value;
+        const roomNum = document.getElementById('paymentRoomNum').value;
+        
+        // Validate total
+        let totalPaid = singlePaymentPayments.reduce((acc, p) => acc + p.amount, 0);
+        if (Math.abs(totalPaid - singlePaymentTotalVal) > 0.05) {
+             alert("O valor pago deve ser igual ao total do item.");
+             return;
+        }
+        
+        // Construct Payload for /reception/pay_charge/<charge_id>
+        const payload = {
+            room_num: roomNum,
+            payments: singlePaymentPayments
+        };
+        
+        fetch('/reception/pay_charge/' + chargeId, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success !== false) { // backend might return redirect or success:true
+                 // If redirect, it might not be JSON, but here we expect JSON or success
+                 alert("Pagamento realizado com sucesso!");
+                 location.reload();
+            } else {
+                alert("Erro ao pagar: " + (data.message || "Desconhecido"));
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Erro de comunicação.");
+        });
+    }
+
+    // --- Cancellation Logic ---
+    function openCancelModal(chargeId, guestName, date, total) {
+        document.getElementById('cancelChargeId').value = chargeId;
+        document.getElementById('cancelGuestName').textContent = guestName;
+        document.getElementById('cancelDate').textContent = date;
+        document.getElementById('cancelTotal').textContent = total;
+        document.getElementById('cancelJustification').value = '';
+        
+        var modal = new bootstrap.Modal(document.getElementById('cancelConsumptionModal'));
+        modal.show();
+    }
+
+    function submitCancelConsumption() {
+        const chargeId = document.getElementById('cancelChargeId').value;
+        const justification = document.getElementById('cancelJustification').value;
+        
+        if (!justification) {
+            alert("Justificativa é obrigatória.");
+            return;
+        }
+        
+        // Use edit endpoint with cancelled status
+        const formData = new FormData();
+        formData.append('charge_id', chargeId);
+        formData.append('new_status', 'cancelled');
+        formData.append('justification', justification);
+        formData.append('source_page', 'reception_rooms');
+        
+        fetch('/reception/charge/edit', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (response.ok) {
+                alert("Consumo cancelado com sucesso.");
+                location.reload();
+            } else {
+                alert("Erro ao cancelar consumo.");
+            }
+        })
+        .catch(err => console.error(err));
+    }
+
+    // --- Print Logic ---
+    function printReport() {
+        window.print();
+    }
+
+
 </script>
 {% endblock %}

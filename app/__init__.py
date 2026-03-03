@@ -73,6 +73,14 @@ def create_app(config_name=None):
     def start_timer():
         g.start = time.time()
 
+    @app.before_request
+    def enforce_permissions():
+        try:
+            from app.services.permission_service import enforce_request_access
+            return enforce_request_access()
+        except Exception:
+            return None
+
     @app.after_request
     def log_request(response):
         if request.path.startswith('/static'):
@@ -114,29 +122,59 @@ from app.services.system_config_manager import (
     CASHIER_SESSIONS_FILE,
     ROOM_CHARGES_FILE,
     ROOM_OCCUPANCY_FILE,
+    TABLE_ORDERS_FILE,
     USERS_FILE,
+    AUDIT_LOGS_FILE,
+    ACTION_LOGS_DIR,
 )
 from app.services.data_service import (
+    format_room_number,
     load_payables,
     save_payables,
     load_cashier_sessions,
     save_cashier_sessions,
+    load_table_orders,
+    save_table_orders,
+    load_menu_items,
+    save_menu_items,
+    load_payment_methods,
+    save_payment_methods,
+    load_users,
+    save_users,
     load_room_charges,
     save_room_charges,
     load_room_occupancy,
     save_room_occupancy,
+    load_audit_logs,
+    save_audit_logs,
     normalize_room_simple,
 )
 from app.services.commission_service import (
     load_commission_cycles,
     save_commission_cycles,
 )
+from app.services.cashier_service import CashierService
+from app.services.printer_manager import load_printers, load_printer_settings, save_printer_settings
 import app.services.commission_service as _commission_module
 import app.services.cashier_service as _cashier_module
+import app.services.printing_service as _printing_module
+import app.services.guest_notification_service as _guest_notification_module
+import app.services.security_service as _security_service_module
+import app.services.waiting_list_service as _waiting_list_module
+import app.models.database as _database_module
+import app.models.models as _models_module
+import app.services.logger_service as _logger_service_module
 from app.utils.logger import log_action as _legacy_log_action
 import types
 
 sys.modules.setdefault('commission_service', _commission_module)
+sys.modules.setdefault('printing_service', _printing_module)
+sys.modules.setdefault('guest_notification_service', _guest_notification_module)
+sys.modules.setdefault('security_service', _security_service_module)
+sys.modules.setdefault('waiting_list_service', _waiting_list_module)
+sys.modules.setdefault('database', _database_module)
+sys.modules.setdefault('models', _models_module)
+sys.modules.setdefault('logger_service', _logger_service_module)
 
 services_pkg = sys.modules.get('services')
 if services_pkg is None:
@@ -146,5 +184,16 @@ if services_pkg is None:
 sys.modules.setdefault('services.cashier_service', _cashier_module)
 setattr(services_pkg, 'cashier_service', _cashier_module)
 setattr(services_pkg, 'transfer_service', __import__('app.services.transfer_service', fromlist=['*']))
+setattr(services_pkg, 'closed_account_service', __import__('app.services.closed_account_service', fromlist=['*']))
+sys.modules.setdefault('services.closed_account_service', sys.modules['app.services.closed_account_service'])
+
+for _mod_name in (
+    'fiscal_pool_service',
+    'fiscal_service',
+    'logging_service',
+):
+    _mod = __import__(f'app.services.{_mod_name}', fromlist=['*'])
+    setattr(services_pkg, _mod_name, _mod)
+    sys.modules.setdefault(f'services.{_mod_name}', _mod)
 
 log_action = _legacy_log_action

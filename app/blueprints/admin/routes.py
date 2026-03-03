@@ -8,11 +8,24 @@ import threading
 import subprocess
 import pandas as pd
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Set
 from . import admin_bp
 from app.utils.decorators import login_required
 from app.services.logger_service import LoggerService
 from app.services.system_config_manager import DEPARTMENTS
-from app.services.data_service import load_users, save_users, load_ex_employees, normalize_text, load_sales_history, load_menu_items, save_menu_items, load_cashier_sessions, secure_save_menu_items
+from app.services.data_service import (
+    load_users,
+    save_users,
+    load_ex_employees,
+    normalize_text,
+    load_sales_history,
+    load_menu_items,
+    save_menu_items,
+    load_cashier_sessions,
+    secure_save_menu_items,
+    load_department_permissions,
+    save_department_permissions,
+)
 from app.services.rh_service import load_reset_requests
 from app.services.backup_service import backup_service
 from app.services.logging_service import get_logs, export_logs_to_csv
@@ -162,9 +175,9 @@ def admin_users():
                     request.form.get('weekly_day_off', users[username].get('weekly_day_off', 6))
                 )
                 
-                # Handle Permissions
-                permissions = request.form.getlist('permissions')
-                users[username]['permissions'] = permissions
+                if 'permissions' in request.form:
+                    permissions = request.form.getlist('permissions')
+                    users[username]['permissions'] = permissions
                 
                 save_users(users)
                 
@@ -395,6 +408,231 @@ def admin_export_users():
         current_app.logger.error(f"Erro ao exportar usuários: {e}")
         flash(f'Erro ao gerar arquivo de exportação: {str(e)}')
         return redirect(url_for('admin.admin_users'))
+
+
+@admin_bp.route('/admin/api/permissions/definitions')
+@login_required
+def api_permissions_definitions():
+    if session.get('role') != 'admin':
+        return jsonify({'error': 'Unauthorized'}), 403
+    from app.services.permission_service import list_permission_definitions
+    return jsonify(list_permission_definitions(current_app))
+
+
+@admin_bp.route('/admin/api/permissions/targets')
+@login_required
+def api_permissions_targets():
+    if session.get('role') != 'admin':
+        return jsonify({'error': 'Unauthorized'}), 403
+
+    target_type = (request.args.get('type') or '').strip().lower()
+    query = normalize_text(request.args.get('q') or '')
+
+    results: List[Dict[str, Any]] = []
+    users = load_users()
+
+    if target_type in ('', 'user', 'users'):
+        if isinstance(users, dict):
+            for username, data in users.items():
+                if not isinstance(data, dict):
+                    continue
+                full_name = str(data.get('full_name') or '')
+                dept = str(data.get('department') or '')
+                role = str(data.get('role') or '')
+                haystack = normalize_text(f"{username} {full_name} {dept} {role}")
+                if query and query not in haystack:
+                    continue
+                results.append(
+                    {
+                        'type': 'user',
+                        'id': username,
+                        'label': f"{full_name} ({username})",
+                        'department': dept,
+                        'role': role,
+                    }
+                )
+
+    if target_type in ('', 'department', 'departments'):
+        for dept in DEPARTMENTS:
+            dept_s = str(dept)
+            if query and query not in normalize_text(dept_s):
+                continue
+            results.append({'type': 'department', 'id': dept_s, 'label': dept_s})
+
+    results.sort(key=lambda x: (x.get('type') or '', x.get('label') or ''))
+    return jsonify({'items': results[:200]})
+
+
+@admin_bp.route('/admin/api/permissions/get')
+@login_required
+def api_permissions_get():
+    if session.get('role') != 'admin':
+        return jsonify({'error': 'Unauthorized'}), 403
+
+    target_type = (request.args.get('type') or '').strip().lower()
+    target_id = (request.args.get('id') or '').strip()
+
+    from app.services.permission_service import effective_profile_for_user, merge_profiles, _normalize_profile, _empty_profile
+
+    users = load_users()
+    dept_perms = load_department_permissions()
+
+    if target_type == 'user':
+        if not target_id or not isinstance(users, dict) or target_id not in users or not isinstance(users.get(target_id), dict):
+            return jsonify({'error': 'User not found'}), 404
+        profile = effective_profile_for_user(target_id, users, dept_perms)
+        data = users[target_id]
+        return jsonify(
+            {
+                'type': 'user',
+                'id': target_id,
+                'full_name': data.get('full_name'),
+                'department': data.get('department'),
+                'role': data.get('role'),
+                'profile': profile,
+            }
+        )
+
+    if target_type == 'department':
+        if not target_id:
+            return jsonify({'error': 'Department not provided'}), 400
+        profile = _normalize_profile((dept_perms or {}).get(target_id)) if isinstance(dept_perms, dict) else _empty_profile()
+        return jsonify({'type': 'department', 'id': target_id, 'profile': profile})
+
+    return jsonify({'error': 'Invalid type'}), 400
+
+
+def _diff_profiles(old: Dict[str, Any], new: Dict[str, Any]) -> Dict[str, Any]:
+    from app.services.permission_service import _normalize_profile
+
+    o = _normalize_profile(old)
+    n = _normalize_profile(new)
+
+    def pages_set(p: Dict[str, Any]) -> Set[str]:
+        out: Set[str] = set()
+        for area_key, area_val in (p.get('areas') or {}).items():
+            if bool(area_val.get('all')):
+                out.add(f"area:{area_key}:all")
+            pages = area_val.get('pages') if isinstance(area_val.get('pages'), dict) else {}
+            for ep, v in pages.items():
+                if v:
+                    out.add(f"page:{ep}")
+        for ep in p.get('level_pages') or []:
+            out.add(f"level:{ep}")
+        return out
+
+    o_set = pages_set(o)
+    n_set = pages_set(n)
+    added = sorted(list(n_set - o_set))
+    removed = sorted(list(o_set - n_set))
+    return {'added': added, 'removed': removed}
+
+
+@admin_bp.route('/admin/api/permissions/set', methods=['POST'])
+@login_required
+def api_permissions_set():
+    if session.get('role') != 'admin':
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 403
+
+    data = request.get_json(silent=True) or {}
+    changes = data.get('changes')
+    if not isinstance(changes, list):
+        changes = [
+            {
+                'type': data.get('type'),
+                'id': data.get('id'),
+                'profile': data.get('profile'),
+            }
+        ]
+
+    from app.services.permission_service import LEVEL_RESTRICTED_PAGES, ROLE_LEVELS, _empty_profile, _normalize_profile, role_level
+
+    old_users = load_users()
+    old_dept_perms = load_department_permissions()
+    users = json.loads(json.dumps(old_users)) if isinstance(old_users, dict) else {}
+    dept_perms = json.loads(json.dumps(old_dept_perms)) if isinstance(old_dept_perms, dict) else {}
+
+    actor = session.get('user', 'Sistema')
+    actor_role = session.get('role')
+
+    audit_entries: List[Dict[str, Any]] = []
+
+    try:
+        for ch in changes:
+            target_type = (ch.get('type') or '').strip().lower()
+            target_id = (ch.get('id') or '').strip()
+            profile_raw = ch.get('profile')
+
+            if target_type not in ('user', 'department'):
+                return jsonify({'success': False, 'error': 'Tipo inválido'}), 400
+            if not target_id:
+                return jsonify({'success': False, 'error': 'ID inválido'}), 400
+
+            if target_type == 'user' and target_id == actor:
+                return jsonify({'success': False, 'error': 'Usuário não pode alterar suas próprias permissões'}), 400
+
+            new_profile = _normalize_profile(profile_raw)
+
+            if target_type == 'user':
+                if not isinstance(users, dict) or target_id not in users or not isinstance(users.get(target_id), dict):
+                    return jsonify({'success': False, 'error': 'Usuário não encontrado'}), 404
+
+                user_role = users[target_id].get('role')
+                for ep in new_profile.get('level_pages') or []:
+                    min_role = LEVEL_RESTRICTED_PAGES.get(str(ep))
+                    if min_role and role_level(user_role) < ROLE_LEVELS.get(min_role, ROLE_LEVELS['supervisor']):
+                        return jsonify({'success': False, 'error': f'Conflito: {target_id} não tem nível para {ep}'}), 400
+
+                old_profile = users[target_id].get('permissions_v2') if isinstance(users[target_id], dict) else _empty_profile()
+                users[target_id]['permissions_v2'] = new_profile
+                audit_entries.append(
+                    {
+                        'type': 'user',
+                        'id': target_id,
+                        'diff': _diff_profiles(old_profile, new_profile),
+                    }
+                )
+
+            if target_type == 'department':
+                old_profile = dept_perms.get(target_id, _empty_profile())
+                dept_perms[target_id] = new_profile
+                audit_entries.append(
+                    {
+                        'type': 'department',
+                        'id': target_id,
+                        'diff': _diff_profiles(old_profile, new_profile),
+                    }
+                )
+
+        ok_users = save_users(users)
+        ok_dept = save_department_permissions(dept_perms)
+        if not ok_users or not ok_dept:
+            save_users(old_users if isinstance(old_users, dict) else {})
+            save_department_permissions(old_dept_perms if isinstance(old_dept_perms, dict) else {})
+            return jsonify({'success': False, 'error': 'Rollback aplicado após erro de gravação'}), 500
+
+        for entry in audit_entries:
+            LoggerService.log_acao(
+                acao="Alteração de Permissões",
+                entidade="Permissões",
+                detalhes={
+                    'actor': actor,
+                    'actor_role': actor_role,
+                    'target_type': entry.get('type'),
+                    'target_id': entry.get('id'),
+                    'diff': entry.get('diff'),
+                    'ip': request.remote_addr,
+                },
+                nivel_severidade='WARNING',
+                departamento_id="Sistema",
+                colaborador_id=actor,
+            )
+
+        return jsonify({'success': True, 'applied': audit_entries})
+    except Exception as e:
+        save_users(old_users if isinstance(old_users, dict) else {})
+        save_department_permissions(old_dept_perms if isinstance(old_dept_perms, dict) else {})
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @admin_bp.route('/admin/restart', methods=['POST'])
 @login_required
@@ -805,17 +1043,22 @@ def api_sales_analysis():
                 if is_room_transfer_order and not skip_room_transfer_for_order:
                     room_number = order.get('room_charge') or order.get('room_number')
                     guest_name = order.get('customer_name') or 'Hóspede'
-                    room_transfer_items.append({
-                        'order_id': order_id,
-                        'product_id': p_id,
-                        'product_name': name,
-                        'qty': qty,
-                        'unit_price': price,
-                        'total': revenue,
-                        'room_number': room_number,
-                        'guest_name': guest_name,
-                        'closed_at': closed_at_str
-                    })
+                    qty_int = int(qty)
+                    qty_is_int = qty_int >= 1 and float(qty_int) == float(qty)
+                    per_units = qty_int if qty_is_int else 1
+
+                    for _ in range(per_units):
+                        room_transfer_items.append({
+                            'order_id': order_id,
+                            'product_id': p_id,
+                            'product_name': name,
+                            'qty': 1.0 if qty_is_int else qty,
+                            'unit_price': price,
+                            'total': price if qty_is_int else revenue,
+                            'room_number': room_number,
+                            'guest_name': guest_name,
+                            'closed_at': closed_at_str
+                        })
                     room_transfer_items_count += qty
                     if p_id not in room_transfer_products:
                         room_transfer_products[p_id] = {
@@ -837,7 +1080,8 @@ def api_sales_analysis():
                     guest_stats['items'] += order_items_count
                     
                     if is_transferred:
-                        transferred_to_rooms_revenue += order_revenue
+                        if not (is_room_transfer_order and skip_room_transfer_for_order):
+                            transferred_to_rooms_revenue += order_revenue
                     else:
                         guest_paid_at_cashier_revenue += order_revenue
                 else:
@@ -1290,6 +1534,7 @@ def api_restore_backup():
 @login_required
 def admin_dashboard():
     if session.get('role') != 'admin':
+        flash('Acesso negado.')
         return redirect(url_for('main.index'))
     
     # System Stats (Mock or Real)

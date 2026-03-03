@@ -1258,3 +1258,70 @@ def print_individual_bills_thermal(printer_id, room_num, guest_name, charges, to
     except Exception as e:
         logger.error(f"Error printing individual bills: {e}")
         return False, str(e)
+
+def preview_individual_bill_text(room_num, guest_name, charges, total_amount):
+    """
+    Returns a text representation of the thermal bill for preview purposes.
+    Stripped of ESC/POS commands.
+    """
+    lines = []
+    lines.append("HOTEL ALMAREIA")
+    lines.append("EXTRATO DE CONSUMO")
+    lines.append("--------------------------------")
+    lines.append(f"Quarto: {room_num}")
+    lines.append(f"Hospede: {guest_name}")
+    lines.append(f"Emissao: {datetime.now().strftime('%d/%m/%Y %H:%M')}")
+    lines.append("================================")
+    lines.append("DATA   DESCRICAO           VALOR")
+    lines.append("--------------------------------")
+    
+    for charge in charges:
+        date = charge.get('date', '')
+        date_short = date[:5]
+        
+        line_items = charge.get('items', [])
+        if not line_items:
+            line_items = charge.get('line_items', [])
+            
+        if not line_items:
+            desc = "Consumo Diverso"
+            val = float(charge.get('total', 0))
+            lines.append(f"{date_short} {desc:<18} {val:>8.2f}")
+        else:
+            charge_subtotal = 0.0
+            for item in line_items:
+                name = item['name'][:18]
+                qty = float(item.get('qty', 1))
+                val = float(item.get('total', 0))
+                if val == 0:
+                    val = float(item.get('price', 0)) * qty
+                
+                charge_subtotal += val
+                
+                if qty > 1:
+                    desc = f"{int(qty)}x {name}"
+                else:
+                    desc = name
+                    
+                lines.append(f"{date_short} {desc:<18} {val:>8.2f}")
+                
+            sf = float(charge.get('service_fee', 0))
+            if sf > 0:
+                 lines.append(f"      Taxa Servico       {sf:>8.2f}")
+                 charge_subtotal += sf
+            
+            final_charge_total = float(charge.get('total', 0))
+            if final_charge_total == 0:
+                final_charge_total = charge_subtotal
+                
+            lines.append(f"                  Subtotal: {final_charge_total:.2f}")
+             
+        lines.append("- - - - - - - - - - - - - - - -")
+
+    lines.append("--------------------------------")
+    lines.append(f"TOTAL: R$ {total_amount:.2f}")
+    lines.append("")
+    lines.append("Obrigado pela preferencia!")
+    lines.append("www.hotelalmareia.com.br")
+    
+    return "\n".join(lines)

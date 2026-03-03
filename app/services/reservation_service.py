@@ -7,6 +7,7 @@ from app.services.system_config_manager import (
     MANUAL_ALLOCATIONS_FILE, GUEST_DETAILS_FILE, 
     MANUAL_RESERVATIONS_FILE, RESERVATIONS_DIR
 )
+from app.services.cashier_service import file_lock
 
 class ReservationService:
     RESERVATIONS_DIR = RESERVATIONS_DIR
@@ -21,21 +22,31 @@ class ReservationService:
         if not os.path.exists(self.RESERVATION_PAYMENTS_FILE):
             return {}
         try:
-            with open(self.RESERVATION_PAYMENTS_FILE, 'r') as f:
-                return json.load(f)
+            with file_lock(self.RESERVATION_PAYMENTS_FILE):
+                with open(self.RESERVATION_PAYMENTS_FILE, 'r') as f:
+                    return json.load(f)
         except:
             return {}
 
     def save_reservation_payment(self, reservation_id, payment_data):
         import json
-        payments = self.get_reservation_payments()
-        if reservation_id not in payments:
-            payments[reservation_id] = []
-        
-        payments[reservation_id].append(payment_data)
-        
-        with open(self.RESERVATION_PAYMENTS_FILE, 'w') as f:
-            json.dump(payments, f, indent=4)
+        with file_lock(self.RESERVATION_PAYMENTS_FILE):
+            if os.path.exists(self.RESERVATION_PAYMENTS_FILE):
+                try:
+                    with open(self.RESERVATION_PAYMENTS_FILE, 'r') as f:
+                        payments = json.load(f)
+                except:
+                    payments = {}
+            else:
+                payments = {}
+                
+            if reservation_id not in payments:
+                payments[reservation_id] = []
+            
+            payments[reservation_id].append(payment_data)
+            
+            with open(self.RESERVATION_PAYMENTS_FILE, 'w') as f:
+                json.dump(payments, f, indent=4)
 
     def get_reservation_by_id(self, reservation_id):
         # Check Manual
@@ -92,51 +103,179 @@ class ReservationService:
             # print("DEBUG: MANUAL_RESERVATIONS_FILE not found")
             return
             
-        with open(self.MANUAL_RESERVATIONS_FILE, 'r') as f:
-            data = json.load(f)
-            
-        changed = False
-        found = False
-        for item in data:
-            if str(item.get('id')) == str(reservation_id):
-                found = True
-                try:
-                    val_str = str(item.get('paid_amount', '0')).strip()
-                    if ',' in val_str:
-                        # Assume BR format: 1.000,00
-                        current_paid = float(val_str.replace('R$', '').replace('.', '').replace(',', '.'))
-                    else:
-                        # Assume standard format: 1000.00
-                        current_paid = float(val_str.replace('R$', ''))
-                except:
-                    current_paid = 0.0
-                    
-                new_paid = current_paid + float(amount)
-                item['paid_amount'] = f"{new_paid:.2f}"
-                # print(f"DEBUG: Updating paid_amount from {current_paid} to {new_paid}")
+        with file_lock(self.MANUAL_RESERVATIONS_FILE):
+            with open(self.MANUAL_RESERVATIONS_FILE, 'r') as f:
+                data = json.load(f)
                 
-                # Update remaining if needed
-                try:
-                    total_str = str(item.get('amount', '0')).strip()
-                    if ',' in total_str:
-                        total = float(total_str.replace('R$', '').replace('.', '').replace(',', '.'))
-                    else:
-                        total = float(total_str.replace('R$', ''))
-                except:
-                    total = 0.0
+            changed = False
+            found = False
+            for item in data:
+                if str(item.get('id')) == str(reservation_id):
+                    found = True
+                    try:
+                        val_str = str(item.get('paid_amount', '0')).strip()
+                        if ',' in val_str:
+                            # Assume BR format: 1.000,00
+                            current_paid = float(val_str.replace('R$', '').replace('.', '').replace(',', '.'))
+                        else:
+                            # Assume standard format: 1000.00
+                            current_paid = float(val_str.replace('R$', ''))
+                    except:
+                        current_paid = 0.0
+                        
+                    new_paid = current_paid + float(amount)
+                    item['paid_amount'] = f"{new_paid:.2f}"
+                    # print(f"DEBUG: Updating paid_amount from {current_paid} to {new_paid}")
                     
-                item['to_receive'] = f"{max(0, total - new_paid):.2f}"
-                changed = True
-                break
+                    # Update remaining if needed
+                    try:
+                        total_str = str(item.get('amount', '0')).strip()
+                        if ',' in total_str:
+                            total = float(total_str.replace('R$', '').replace('.', '').replace(',', '.'))
+                        else:
+                            total = float(total_str.replace('R$', ''))
+                    except:
+                        total = 0.0
+                        
+                    item['to_receive'] = f"{max(0, total - new_paid):.2f}"
+                    changed = True
+                    break
+            
+            if not found:
+                pass
+                # print(f"DEBUG: Reservation ID {reservation_id} not found in file")
+            
+            if changed:
+                with open(self.MANUAL_RESERVATIONS_FILE, 'w') as f:
+                    json.dump(data, f, indent=2)
+                # print("DEBUG: File updated")
+
+    def get_guest_details(self, reservation_id):
+        import json
         
-        if not found:
-            pass
-            # print(f"DEBUG: Reservation ID {reservation_id} not found in file")
+        # 1. Try to load from Guest Details File
+        details = {}
+        if os.path.exists(GUEST_DETAILS_FILE):
+            try:
+                with file_lock(GUEST_DETAILS_FILE):
+                    with open(GUEST_DETAILS_FILE, 'r', encoding='utf-8') as f:
+                        all_details = json.load(f)
+                        details = all_details.get(str(reservation_id), {})
+            except Exception as e:
+                print(f"Error loading guest details: {e}")
         
-        if changed:
-            with open(self.MANUAL_RESERVATIONS_FILE, 'w') as f:
-                json.dump(data, f, indent=2)
-            # print("DEBUG: File updated")
+        # 2. If empty, try to populate from Reservation
+        if not details:
+            res = self.get_reservation_by_id(reservation_id)
+            if res:
+                details = {
+                    'personal_info': {
+                        'name': res.get('guest_name', ''),
+                        'email': '',
+                        'phone': '',
+                        'cpf': '',
+                        'address': '',
+                        'city': '',
+                        'state': '',
+                        'zip': '',
+                        'country': ''
+                    },
+                    'history': [],
+                    'companions': []
+                }
+        
+        # Ensure structure
+        if 'personal_info' not in details:
+            details['personal_info'] = {}
+        
+        # If we have reservation but name is missing in details, sync it
+        if 'name' not in details['personal_info'] or not details['personal_info']['name']:
+             res = self.get_reservation_by_id(reservation_id)
+             if res:
+                 details['personal_info']['name'] = res.get('guest_name', '')
+                 
+        return details
+
+    def update_guest_details(self, reservation_id, updates):
+        """
+        Updates guest details for a reservation.
+        Updates 'guest_name' in MANUAL_RESERVATIONS_FILE.
+        Updates other fields in GUEST_DETAILS_FILE.
+        """
+        import json
+        
+        success = False
+        
+        # 1. Update Manual Reservation (if name changed)
+        if 'guest_name' in updates:
+            if os.path.exists(self.MANUAL_RESERVATIONS_FILE):
+                with file_lock(self.MANUAL_RESERVATIONS_FILE):
+                    try:
+                        with open(self.MANUAL_RESERVATIONS_FILE, 'r', encoding='utf-8') as f:
+                            data = json.load(f)
+                        
+                        changed = False
+                        for item in data:
+                            if str(item.get('id')) == str(reservation_id):
+                                item['guest_name'] = updates['guest_name']
+                                changed = True
+                        
+                        if changed:
+                            with open(self.MANUAL_RESERVATIONS_FILE, 'w', encoding='utf-8') as f:
+                                json.dump(data, f, indent=4, ensure_ascii=False)
+                            success = True
+                    except Exception as e:
+                        print(f"Error updating manual reservation: {e}")
+        
+        # 2. Update Extended Details in GUEST_DETAILS_FILE
+        try:
+            with file_lock(GUEST_DETAILS_FILE):
+                all_details = {}
+                if os.path.exists(GUEST_DETAILS_FILE):
+                    try:
+                        with open(GUEST_DETAILS_FILE, 'r', encoding='utf-8') as f:
+                            all_details = json.load(f)
+                    except:
+                        all_details = {}
+                
+                # Get existing or create new
+                current_details = all_details.get(str(reservation_id), {})
+                
+                # Ensure structure
+                if 'personal_info' not in current_details:
+                    current_details['personal_info'] = {}
+                if 'companions' not in current_details:
+                    current_details['companions'] = []
+                
+                # Map specific fields if present at top level
+                if 'guest_name' in updates:
+                    current_details['personal_info']['name'] = updates['guest_name']
+                if 'email' in updates:
+                    current_details['personal_info']['email'] = updates['email']
+                if 'phone' in updates:
+                    current_details['personal_info']['phone'] = updates['phone']
+                if 'cpf' in updates:
+                    current_details['personal_info']['cpf'] = updates['cpf']
+                if 'notes' in updates:
+                    current_details['notes'] = updates['notes']
+                    
+                # Also support direct structured updates
+                if 'personal_info' in updates:
+                    current_details['personal_info'].update(updates['personal_info'])
+                
+                if 'companions' in updates:
+                    current_details['companions'] = updates['companions']
+                    
+                all_details[str(reservation_id)] = current_details
+                
+                with open(GUEST_DETAILS_FILE, 'w', encoding='utf-8') as f:
+                    json.dump(all_details, f, indent=4, ensure_ascii=False)
+                
+                success = True
+        except Exception as e:
+            print(f"Error updating guest details file: {e}")
+            
+        return success
 
     def auto_pre_allocate(self, window_hours=48):
         """
@@ -152,18 +291,19 @@ class ReservationService:
         
         manual_alloc_file = os.path.join(self.RESERVATIONS_DIR, "manual_allocations.json")
         
-        allocations = {}
-        if os.path.exists(manual_alloc_file):
-            try:
-                with open(manual_alloc_file, 'r') as f:
-                    allocations = json.load(f)
-            except:
-                allocations = {}
-        
-        allocations[str(reservation_id)] = {"room": str(room_number)}
-        
-        with open(manual_alloc_file, 'w') as f:
-            json.dump(allocations, f, indent=2)
+        with file_lock(manual_alloc_file):
+            allocations = {}
+            if os.path.exists(manual_alloc_file):
+                try:
+                    with open(manual_alloc_file, 'r') as f:
+                        allocations = json.load(f)
+                except:
+                    allocations = {}
+            
+            allocations[str(reservation_id)] = {"room": str(room_number)}
+            
+            with open(manual_alloc_file, 'w') as f:
+                json.dump(allocations, f, indent=2)
             
         # print(f"DEBUG: Manual allocation saved for {reservation_id} -> {room_number}")
 
@@ -189,11 +329,19 @@ class ReservationService:
 
     def update_reservation_status(self, reservation_id, new_status):
         import json
-        overrides = self.get_reservation_status_overrides()
-        overrides[str(reservation_id)] = new_status
-        
-        with open(self.RESERVATION_STATUS_OVERRIDES_FILE, 'w') as f:
-            json.dump(overrides, f, indent=4)
+        with file_lock(self.RESERVATION_STATUS_OVERRIDES_FILE):
+            overrides = {}
+            if os.path.exists(self.RESERVATION_STATUS_OVERRIDES_FILE):
+                try:
+                    with open(self.RESERVATION_STATUS_OVERRIDES_FILE, 'r') as f:
+                        overrides = json.load(f)
+                except:
+                    overrides = {}
+
+            overrides[str(reservation_id)] = new_status
+            
+            with open(self.RESERVATION_STATUS_OVERRIDES_FILE, 'w') as f:
+                json.dump(overrides, f, indent=4)
             
     def get_manual_reservations_data(self):
         import json
@@ -221,7 +369,6 @@ class ReservationService:
         import uuid
         
         print(f"DEBUG: create_manual_reservation data={data}")
-        reservations = self.get_manual_reservations_data()
         
         amount_val = data.get('amount')
         if not amount_val:
@@ -244,14 +391,25 @@ class ReservationService:
         }
         
         print(f"DEBUG: create_manual_reservation new_res={new_res}")
-        reservations.append(new_res)
         
         dir_name = os.path.dirname(self.MANUAL_RESERVATIONS_FILE)
         if dir_name:
             os.makedirs(dir_name, exist_ok=True)
-        
-        with open(self.MANUAL_RESERVATIONS_FILE, 'w') as f:
-            json.dump(reservations, f, indent=2)
+            
+        with file_lock(self.MANUAL_RESERVATIONS_FILE):
+            reservations = []
+            if os.path.exists(self.MANUAL_RESERVATIONS_FILE):
+                try:
+                    with open(self.MANUAL_RESERVATIONS_FILE, 'r') as f:
+                        reservations = json.load(f)
+                        if not isinstance(reservations, list): reservations = []
+                except:
+                    reservations = []
+            
+            reservations.append(new_res)
+            
+            with open(self.MANUAL_RESERVATIONS_FILE, 'w') as f:
+                json.dump(reservations, f, indent=2)
             
         return new_res
 
@@ -275,8 +433,12 @@ class ReservationService:
                         excel_items.extend(self._parse_excel_file(os.path.join(self.RESERVATIONS_DIR, f)))
                      except: pass
         
-        # Apply overrides to excel items (manual already has them)
+        # Apply overrides to all items (manual + excel)
         overrides = self.get_reservation_status_overrides()
+        for item in manual:
+            rid = str(item.get('id'))
+            if rid in overrides:
+                item['status'] = overrides[rid]
         for item in excel_items:
             rid = str(item.get('id'))
             if rid in overrides:

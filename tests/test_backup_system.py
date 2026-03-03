@@ -9,8 +9,8 @@ import sys
 # Add project root to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from services.backup_service import BackupService, BACKUP_CONFIGS, DATA_DIR, BACKUPS_DIR
-import services.backup_service
+from app.services.backup_service import BackupService
+import app.services.backup_service as backup_service
 
 class TestBackupSystem(unittest.TestCase):
     def setUp(self):
@@ -22,14 +22,14 @@ class TestBackupSystem(unittest.TestCase):
         os.makedirs(self.test_backups_dir, exist_ok=True)
         
         # Override global configs for testing
-        self.original_data_dir = services.backup_service.DATA_DIR
-        self.original_configs = services.backup_service.BACKUP_CONFIGS.copy()
+        self.original_data_dir = backup_service.DATA_DIR
+        self.original_configs = backup_service.BACKUP_CONFIGS.copy()
         
         # Patch DATA_DIR
-        services.backup_service.DATA_DIR = self.test_data_dir
+        backup_service.DATA_DIR = self.test_data_dir
         
         # Create a test config
-        services.backup_service.BACKUP_CONFIGS = {
+        backup_service.BACKUP_CONFIGS = {
             'test_type': {
                 'source_files': ['test_file.json'],
                 'dest_dir': os.path.join(self.test_backups_dir, 'TestType'),
@@ -40,7 +40,7 @@ class TestBackupSystem(unittest.TestCase):
         }
         
         # Ensure dest dir exists
-        os.makedirs(services.backup_service.BACKUP_CONFIGS['test_type']['dest_dir'], exist_ok=True)
+        os.makedirs(backup_service.BACKUP_CONFIGS['test_type']['dest_dir'], exist_ok=True)
         
         self.service = BackupService()
         
@@ -55,15 +55,14 @@ class TestBackupSystem(unittest.TestCase):
         shutil.rmtree(self.test_backups_dir)
         
         # Restore configs
-        import services.backup_service
-        services.backup_service.DATA_DIR = self.original_data_dir
-        services.backup_service.BACKUP_CONFIGS = self.original_configs
+        backup_service.DATA_DIR = self.original_data_dir
+        backup_service.BACKUP_CONFIGS = self.original_configs
 
     def test_backup_and_restore(self):
         print("\nTesting Backup and Restore...")
         
         # 1. Perform Backup
-        config = services.backup_service.BACKUP_CONFIGS['test_type']
+        config = backup_service.BACKUP_CONFIGS['test_type']
         self.service._perform_backup('test_type', config)
         
         # Verify backup created
@@ -93,7 +92,7 @@ class TestBackupSystem(unittest.TestCase):
 
     def test_retention_policy(self):
         print("\nTesting Retention Policy...")
-        config = services.backup_service.BACKUP_CONFIGS['test_type']
+        config = backup_service.BACKUP_CONFIGS['test_type']
         dest_dir = config['dest_dir']
         
         # Create a dummy old backup manually

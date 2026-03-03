@@ -6,8 +6,8 @@ import unittest
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from services.backup_service import BackupService
-import services.backup_service
+from app.services.backup_service import BackupService
+import app.services.backup_service as backup_service
 
 
 class TestReceptionBackup(unittest.TestCase):
@@ -18,11 +18,11 @@ class TestReceptionBackup(unittest.TestCase):
         os.makedirs(self.test_data_dir, exist_ok=True)
         os.makedirs(self.test_backups_dir, exist_ok=True)
 
-        self.original_data_dir = services.backup_service.DATA_DIR
-        self.original_configs = services.backup_service.BACKUP_CONFIGS.copy()
+        self.original_data_dir = backup_service.DATA_DIR
+        self.original_configs = backup_service.BACKUP_CONFIGS.copy()
 
-        services.backup_service.DATA_DIR = self.test_data_dir
-        services.backup_service.BACKUP_CONFIGS = {
+        backup_service.DATA_DIR = self.test_data_dir
+        backup_service.BACKUP_CONFIGS = {
             'reception': {
                 'source_files': [
                     'room_occupancy.json',
@@ -37,10 +37,10 @@ class TestReceptionBackup(unittest.TestCase):
             }
         }
 
-        os.makedirs(services.backup_service.BACKUP_CONFIGS['reception']['dest_dir'], exist_ok=True)
+        os.makedirs(backup_service.BACKUP_CONFIGS['reception']['dest_dir'], exist_ok=True)
         self.service = BackupService()
 
-        for fname in services.backup_service.BACKUP_CONFIGS['reception']['source_files']:
+        for fname in backup_service.BACKUP_CONFIGS['reception']['source_files']:
             with open(os.path.join(self.test_data_dir, fname), 'w', encoding='utf-8') as f:
                 json.dump({'file': fname}, f, ensure_ascii=False)
 
@@ -48,11 +48,11 @@ class TestReceptionBackup(unittest.TestCase):
         shutil.rmtree(self.test_data_dir)
         shutil.rmtree(self.test_backups_dir)
 
-        services.backup_service.DATA_DIR = self.original_data_dir
-        services.backup_service.BACKUP_CONFIGS = self.original_configs
+        backup_service.DATA_DIR = self.original_data_dir
+        backup_service.BACKUP_CONFIGS = self.original_configs
 
     def test_reception_backup_creates_files(self):
-        config = services.backup_service.BACKUP_CONFIGS['reception']
+        config = backup_service.BACKUP_CONFIGS['reception']
         self.service._perform_backup('reception', config)
 
         backups = os.listdir(config['dest_dir'])

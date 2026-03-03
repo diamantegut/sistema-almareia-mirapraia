@@ -126,24 +126,11 @@
             </div>
             
             <div class="form-group">
-                <label>Permissões Adicionais (Acesso de Gerente):</label>
-                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-                    {% for service in services %}
-                    <label style="display: flex; align-items: center; gap: 5px; background: #eee; padding: 5px 10px; border-radius: 4px;">
-                        <input type="checkbox" name="permissions" value="{{ service.id }}">
-                        {{ service.name }}
-                    </label>
-                    {% endfor %}
+                <label>Permissões:</label>
+                <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                    <span class="text-muted">Gerenciamento por área/página no Dashboard do Sistema.</span>
+                    <a href="{{ url_for('admin.admin_dashboard') }}#permissions" class="action-btn" style="background-color:#1e3a8a; text-decoration:none;">Abrir Gerenciador</a>
                 </div>
-                <small class="text-muted">Marque os serviços que este usuário pode gerenciar além do seu departamento.</small>
-            </div>
-
-            <div class="form-group">
-                <label>Permissões Especiais:</label>
-                <label style="display: inline-flex; align-items: center; gap: 5px; background: #fdf2e9; padding: 5px 10px; border-radius: 4px;">
-                    <input type="checkbox" name="permissions" value="comissao">
-                    Acesso ao Cálculo de Comissões
-                </label>
             </div>
 
             <button type="submit" class="action-btn" style="background-color: #27ae60;">Criar Usuário</button>
@@ -251,28 +238,9 @@
                                         {% endif %}
                                         <input form="{{ form_id }}" type="text" name="password" value="{{ data.password }}" class="form-control" placeholder="Senha" title="Senha" style="width: 50%;">
                                     </div>
-                                    <details>
-                                        <summary style="cursor: pointer; color: #1e3a8a; font-size: 0.7em; list-style: none; text-align: right;">
-                                            + Permissões ({{ data.get('permissions', [])|length }})
-                                        </summary>
-                                        <div style="margin-top: 4px; background: white; border: 1px solid #ccc; padding: 10px; border-radius: 4px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); min-width: 200px; max-height: 220px; overflow-y: auto;">
-                                            <p style="margin: 0 0 5px 0; font-weight: bold; border-bottom: 1px solid #eee; padding-bottom: 2px; font-size: 0.8em;">Extras:</p>
-                                            <div style="display: flex; flex-direction: column; gap: 4px;">
-                                                <label style="display: flex; align-items: center; gap: 5px; font-size: 0.8em; cursor: pointer; background: #fdf2e9; padding: 4px 6px; border-radius: 3px;">
-                                                    <input form="{{ form_id }}" type="checkbox" name="permissions" value="comissao" 
-                                                        {% if 'comissao' in data.get('permissions', []) %}checked{% endif %}>
-                                                    Acesso ao Cálculo de Comissões
-                                                </label>
-                                                {% for service in services %}
-                                                <label style="display: flex; align-items: center; gap: 5px; font-size: 0.8em; cursor: pointer;">
-                                                    <input form="{{ form_id }}" type="checkbox" name="permissions" value="{{ service.id }}" 
-                                                        {% if service.id in data.get('permissions', []) %}checked{% endif %}>
-                                                    {{ service.name }}
-                                                </label>
-                                                {% endfor %}
-                                            </div>
-                                        </div>
-                                    </details>
+                                    <div style="display:flex; justify-content:flex-end;">
+                                        <a href="{{ url_for('admin.admin_dashboard') }}#permissions" style="font-size:0.75em; color:#1e3a8a; text-decoration:none;">Gerenciar permissões</a>
+                                    </div>
                                 </div>
                             </td>
 

@@ -20,6 +20,7 @@ from app.services.system_config_manager import (
     CHECKLIST_ITEMS_FILE, INSPECTION_LOGS_FILE, CLEANING_STATUS_FILE,
     ARCHIVED_ORDERS_FILE, AUDIT_LOGS_FILE, USERS_FILE, EX_EMPLOYEES_FILE,
     BAR_DATA_FILE,
+    DEPARTMENT_PERMISSIONS_FILE,
     DEPARTMENTS, # for load/save helpers
     get_backup_path
 )
@@ -147,8 +148,17 @@ def load_settings(): return _load_json(SETTINGS_FILE, {})
 def save_settings(settings): return _save_json(SETTINGS_FILE, settings)
 
 # --- Users ---
-def load_users(): return _load_json(USERS_FILE, [])
-def save_users(users): return _save_json(USERS_FILE, users)
+def load_users(): return _load_json(USERS_FILE, {})
+def save_users(users):
+    _backup_before_write(USERS_FILE)
+    return _save_json_atomic(USERS_FILE, users)
+
+def load_department_permissions():
+    return _load_json(DEPARTMENT_PERMISSIONS_FILE, {})
+
+def save_department_permissions(data):
+    _backup_before_write(DEPARTMENT_PERMISSIONS_FILE)
+    return _save_json_atomic(DEPARTMENT_PERMISSIONS_FILE, data)
 
 def load_bar_data():
     default = {
@@ -357,7 +367,7 @@ def load_payment_methods():
                 
             # 2. Category Validation
             available_in = method.get('available_in')
-            if not isinstance(available_in, list) or not available_in:
+            if not isinstance(available_in, list):
                 logging.error(f"Payment Method Validation Failed: Invalid 'available_in'. ID: {method.get('id')}, Value: {available_in}")
                 continue
 

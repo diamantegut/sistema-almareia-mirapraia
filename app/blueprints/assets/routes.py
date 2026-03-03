@@ -22,10 +22,6 @@ ASSETS_UPLOAD_DIR = 'app/static/uploads/assets'
 @assets_bp.route('/service/principal/assets')
 @login_required
 def index():
-    if session.get('role') not in ['admin', 'gerente', 'estoque'] and session.get('department') != 'Principal':
-        flash('Acesso restrito.')
-        return redirect(url_for('main.index'))
-    
     assets = load_fixed_assets()
     
     # --- Filters ---
@@ -761,4 +757,3 @@ def conference_details(conf_id):
              item['patrimony'] = '?'
              
     return render_template('assets/conference_details.html', conference=conference)
-

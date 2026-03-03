@@ -38,32 +38,38 @@
     }
 
     function populateGuestModal(responseData, roomNum) {
-        var guest = responseData.guest;
-        var history = responseData.history;
+        var guest = responseData.guest || {};
+        var reservation = responseData.reservation || {};
+        var personal = guest.personal_info || {};
+        var history = guest.history || [];
         
         // Personal Info
-        setText('vg_name', guest.personal_info.name);
-        setText('vg_ficha', guest.ficha_number || 'N/A');
-        setText('vg_doc', guest.personal_info.doc_id || 'Não informado');
-        setText('vg_birth', guest.personal_info.birth_date || '-');
-        setText('vg_email', guest.personal_info.contact?.email || '-');
-        setText('vg_phone', guest.personal_info.contact?.phone || '-');
+        setText('vg_name', personal.name || reservation.guest_name || 'Hóspede');
+        setText('vg_ficha', personal.ficha_number || 'N/A');
+        setText('vg_doc', personal.cpf || personal.doc_id || 'Não informado');
+        setText('vg_birth', personal.birth_date || '-');
+        setText('vg_email', personal.email || '-');
+        setText('vg_phone', personal.phone || reservation.phone || '-');
         
-        var addr = guest.personal_info.address || {};
-        var addrStr = [addr.street, addr.city, addr.state].filter(Boolean).join(', ');
+        var addrStr = personal.address || '';
+        if (personal.city) addrStr += (addrStr ? ', ' : '') + personal.city;
+        if (personal.state) addrStr += (addrStr ? ' - ' : '') + personal.state;
         setText('vg_address', addrStr || 'Endereço não cadastrado');
 
         // Stay Info
         setText('vg_room', roomNum);
         setText('vg_status', 'Hospedado'); 
-        setText('vg_checkin', guest.stay_info?.checkin_date || '-');
-        setText('vg_checkout', guest.stay_info?.checkout_date || '-');
+        setText('vg_checkin', reservation.checkin || '-');
+        setText('vg_checkout', reservation.checkout || '-');
         
         // Financials 
-        var financials = guest.financials || {};
-        setText('vg_total_consumed', formatCurrency(financials.amount_due || 0));
-        setText('vg_total_paid', formatCurrency(financials.paid_amount || 0));
-        setText('vg_balance', formatCurrency(financials.balance || 0));
+        var total = parseFloat(reservation.amount || 0);
+        var paid = parseFloat(reservation.paid_amount || 0);
+        var balance = parseFloat(reservation.to_receive || 0);
+
+        setText('vg_total_consumed', formatCurrency(total));
+        setText('vg_total_paid', formatCurrency(paid));
+        setText('vg_balance', formatCurrency(balance));
 
         // History
         var tbody = document.getElementById('vg_history_table');

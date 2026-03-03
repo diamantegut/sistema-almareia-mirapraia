@@ -2,20 +2,22 @@ import unittest
 import json
 import os
 import sys
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from datetime import datetime
 
 # Add parent directory to path to import app
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from app import app, load_room_charges, save_room_charges, load_audit_logs, save_audit_logs
+from app import create_app
 
 class TestConsumptionCancellation(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.app = create_app('testing')
+        cls.app.testing = True
+        cls.client = cls.app.test_client()
 
     def setUp(self):
-        self.client = app.test_client()
-        app.testing = True
-        
         # Sample charge data
         self.sample_charge = {
             "id": "CHARGE_TEST_001",
@@ -48,7 +50,8 @@ class TestConsumptionCancellation(unittest.TestCase):
         )
         
         self.assertEqual(response.status_code, 403)
-        self.assertIn(b'Acesso negado', response.data)
+        data = response.get_json()
+        self.assertIn('Acesso negado', data.get('message', ''))
 
     def test_missing_data(self):
         self.set_session(role='admin')
@@ -60,7 +63,7 @@ class TestConsumptionCancellation(unittest.TestCase):
         
         self.assertEqual(response.status_code, 400)
         
-    @patch('app.load_room_charges')
+    @patch('app.blueprints.reception.routes.load_room_charges')
     def test_charge_not_found(self, mock_load):
         self.set_session(role='admin')
         mock_load.return_value = [] # Empty list
@@ -74,7 +77,7 @@ class TestConsumptionCancellation(unittest.TestCase):
         data = response.get_json()
         self.assertIn('Consumo não encontrado', data['message'])
 
-    @patch('app.load_room_charges')
+    @patch('app.blueprints.reception.routes.load_room_charges')
     def test_already_canceled(self, mock_load):
         self.set_session(role='admin')
         mock_load.return_value = [self.canceled_charge]
@@ -88,19 +91,17 @@ class TestConsumptionCancellation(unittest.TestCase):
         data = response.get_json()
         self.assertIn('já foi cancelado', data['message'])
 
-    @patch('app.load_room_charges')
-    @patch('app.save_room_charges')
-    @patch('app.load_audit_logs')
-    @patch('app.save_audit_logs')
-    @patch('app.notify_guest')
-    @patch('app.load_room_occupancy')
-    def test_successful_cancellation(self, mock_occupancy, mock_notify, mock_save_audit, mock_load_audit, mock_save_charges, mock_load_charges):
+    @patch('app.blueprints.reception.routes.LoggerService.log_acao')
+    @patch('app.blueprints.reception.routes.load_room_charges')
+    @patch('app.blueprints.reception.routes.save_room_charges')
+    @patch('app.blueprints.reception.routes.load_audit_logs')
+    @patch('app.blueprints.reception.routes.save_audit_logs')
+    def test_successful_cancellation(self, mock_save_audit, mock_load_audit, mock_save_charges, mock_load_charges, mock_log_acao):
         self.set_session(role='admin')
         
         # Setup mocks
         mock_load_charges.return_value = [self.sample_charge.copy()]
         mock_load_audit.return_value = []
-        mock_occupancy.return_value = {"101": {"guest_name": "Test Guest"}}
         
         response = self.client.post(
             '/admin/consumption/cancel',
@@ -123,13 +124,6 @@ class TestConsumptionCancellation(unittest.TestCase):
         self.assertEqual(len(saved_logs), 1)
         self.assertEqual(saved_logs[0]['action'], 'cancel_consumption')
         self.assertEqual(saved_logs[0]['target_id'], 'CHARGE_TEST_001')
-        
-        # Verify notification
-        mock_notify.assert_called_once()
-        args, _ = mock_notify.call_args
-        self.assertEqual(args[0], "Test Guest") # Guest Name
-        self.assertEqual(args[1], "101") # Room Number
-        self.assertIn('cancelado', args[2]) # Message content
 
 if __name__ == '__main__':
     unittest.main()

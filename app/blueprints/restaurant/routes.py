@@ -1116,6 +1116,13 @@ def restaurant_table_order(table_id):
                     items.remove(target_item)
                     removed_count += 1
                     last_removed_name = target_item['name']
+
+                if removed_count == 0:
+                    msg = 'Item não encontrado.'
+                    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                        return jsonify({'success': False, 'error': msg}), 404
+                    flash(msg)
+                    return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
                 
                 # Recalculate Total
                 total = 0
@@ -1588,10 +1595,17 @@ def restaurant_table_order(table_id):
                 
                 # Deduct Stock (Batch Processing with Deduplication)
                 products_db = load_products()
+                menu_items_db = load_menu_items()
                 low_stock_items = []
                 stock_entries_to_add = []
                 
                 for item in order['items']:
+                    # Fix for ID Collision (e.g. Mocktail ID 31 vs Polvo ID 31)
+                    # If item is a menu item with recipe, it was already deducted at add_item.
+                    menu_item_match = next((m for m in menu_items_db if str(m['id']) == str(item.get('product_id'))), None)
+                    if menu_item_match and menu_item_match.get('recipe'):
+                        continue
+
                     # Find product by ID first, then name
                     product_obj = None
                     if item.get('product_id'):

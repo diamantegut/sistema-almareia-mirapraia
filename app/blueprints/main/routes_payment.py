@@ -57,6 +57,9 @@ def payment_methods():
             av_rec = request.form.get('available_reception') == 'on'
             av_res = request.form.get('available_reservas') == 'on'
             
+            # Debug Log
+            print(f"[DEBUG Payment Edit] ID: {method_id}, Rest: {av_rest}, Rec: {av_rec}, Res: {av_res}")
+            
             is_fiscal = request.form.get('is_fiscal') == 'on'
             fiscal_cnpj = request.form.get('fiscal_cnpj', '').strip()
             
@@ -65,15 +68,23 @@ def payment_methods():
             if av_rec: available_in.append('reception')
             if av_res: available_in.append('reservations')
 
+            found = False
             for m in methods:
-                if m['id'] == method_id:
+                if str(m.get('id')) == str(method_id):
                     m['name'] = new_name
                     m['available_in'] = available_in
                     m['is_fiscal'] = is_fiscal
                     m['fiscal_cnpj'] = fiscal_cnpj
+                    found = True
                     break
-            save_payment_methods(methods)
-            flash('Forma de pagamento atualizada.')
+            
+            if found:
+                save_payment_methods(methods)
+                flash('Forma de pagamento atualizada.')
+                print(f"[DEBUG Payment Edit] Saved: {available_in}")
+            else:
+                flash('Erro: Método não encontrado.')
+                print(f"[DEBUG Payment Edit] Method {method_id} not found.")
 
         elif action == 'delete':
             method_id = request.form.get('id')

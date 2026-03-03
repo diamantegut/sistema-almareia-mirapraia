@@ -1,0 +1,30 @@
+- Toda ação executada por qualquer usuário deve gerar log.
+- Nenhuma função pode ser criada sem implementação de log.
+- Toda ação financeira obrigatoriamente deve gerar registro em:
+  /finance/balances
+- Cancelamentos devem gerar estorno rastreável.
+- Toda nova função criada deve:
+  - Ser documentada automaticamente.
+  - Ser adicionada ao manual do sistema.
+  - Incluir explicação passo a passo.
+  - Informar qual departamento utiliza a função.
+- Nenhuma feature pode ser considerada completa sem documentação.
+- Toda validação deve existir:
+  - no frontend (UX)
+  - no backend (segurança)
+- Toda rota deve validar permissões por perfil de usuário.
+- Funções sensíveis devem exigir permissões explícitas.
+- Sempre que uma nova funcionalidade for criada, sugerir:
+  - Possíveis melhorias
+  - Funções relacionadas que possam estar faltando
+  - Pontos de auditoria
+  - Riscos operacionais
+  - Relatórios úteis derivados daquela função
+- Sempre indicar o próximo passo ao usuário.
+- Código deve ser modular.
+- Separar claramente:
+  - regras de negócio
+  - camada de persistência
+  - interface
+- Implementar testes para regras financeiras.
+- Nenhuma alteração estrutural pode quebrar histórico.

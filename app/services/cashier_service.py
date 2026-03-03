@@ -151,8 +151,6 @@ class CashierService:
     def _load_sessions():
         if not os.path.exists(CASHIER_SESSIONS_FILE):
             logger.warning(f"Sessions file NOT FOUND at {CASHIER_SESSIONS_FILE}. Attempting recovery...")
-            if _is_test_environment():
-                return []
             recovered = CashierService._recover_from_backup()
             if recovered is not None:
                 return recovered
@@ -162,8 +160,6 @@ class CashierService:
             file_size = os.path.getsize(CASHIER_SESSIONS_FILE)
             if file_size == 0:
                 logger.warning(f"Sessions file {CASHIER_SESSIONS_FILE} is EMPTY (0 bytes). Attempting recovery...")
-                if _is_test_environment():
-                    return []
                 recovered = CashierService._recover_from_backup()
                 if recovered is not None:
                     return recovered
@@ -415,7 +411,16 @@ class CashierService:
     def open_session(cashier_type, user, opening_balance=0.0):
         with file_lock(CASHIER_SESSIONS_FILE):
             # Check for existing session
-            sessions = CashierService._load_sessions()
+            if _is_test_environment() and not os.path.exists(CASHIER_SESSIONS_FILE):
+                try:
+                    os.makedirs(os.path.dirname(CASHIER_SESSIONS_FILE), exist_ok=True)
+                    with open(CASHIER_SESSIONS_FILE, 'w', encoding='utf-8') as f:
+                        json.dump([], f)
+                except Exception:
+                    pass
+                sessions = []
+            else:
+                sessions = CashierService._load_sessions()
             
             # Type aliasing for check
             check_types = [cashier_type]

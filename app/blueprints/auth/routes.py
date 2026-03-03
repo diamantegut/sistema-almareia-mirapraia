@@ -34,6 +34,19 @@ def login():
                     session['role'] = user_data.get('role', 'colaborador')
                     session['permissions'] = user_data.get('permissions', [])
                     session['full_name'] = user_data.get('full_name')
+                    session['permissions_v2'] = user_data.get('permissions_v2')
+                    try:
+                        from app.services.data_service import load_department_permissions
+                        from app.services.permission_service import effective_profile_for_user, legacy_tokens_from_profile
+                        dept_perms = load_department_permissions()
+                        profile = effective_profile_for_user(real_username, users, dept_perms)
+                        legacy_tokens = legacy_tokens_from_profile(profile)
+                        current = session.get('permissions') or []
+                        if not isinstance(current, list):
+                            current = []
+                        session['permissions'] = sorted(list({*(str(x) for x in current), *legacy_tokens}))
+                    except Exception:
+                        pass
                 
                 try:
                     log_system_action('Login', f"Usuário {real_username} entrou no sistema", user=real_username, category="Autenticação")

@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 
-{% block title %}Mapa de Reservas - Recepção<!-- Companion Modal -->
+{% block title %}Mapa de Reservas - Recepção{% endblock %}
+
+{% block content %}
+<!-- Companion Modal -->
 <div class="modal fade" id="companionModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -314,9 +317,7 @@
         .catch(err => alert('Erro ao remover.'));
     }
 </script>
-{% endblock %}
 
-{% block content %}
 <div class="container-fluid px-4 py-4 bg-light min-vh-100">
     <!-- Header Section -->
     <div class="row align-items-center mb-4 g-3">
@@ -1410,13 +1411,13 @@
             return num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         };
         try {
-            var guestTabEl = document.querySelector('#resTab button[data-bs-target="#guest"]');
-            if (guestTabEl && window.bootstrap && typeof bootstrap.Tab === 'function') {
-                var guestTab = new bootstrap.Tab(guestTabEl);
-                guestTab.show();
+            var infoTabEl = document.querySelector('#resTab button[data-bs-target="#info"]');
+            if (infoTabEl && window.bootstrap && typeof bootstrap.Tab === 'function') {
+                var infoTab = new bootstrap.Tab(infoTabEl);
+                infoTab.show();
             }
         } catch (e) {
-            console.warn('Falha ao ativar aba de convidado:', e);
+            console.warn('Falha ao ativar aba de reserva:', e);
         }
         var el;
         el = document.getElementById('modalGuestName'); if (el) el.textContent = guest || 'Hóspede';
@@ -2961,7 +2962,8 @@
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <div class="fw-bold">Dados da Reserva</div>
                 <div>
-                    <button type="button" id="modalCheckinActionBtn" class="btn btn-sm btn-success me-2" style="display:none;"><i class="bi bi-box-arrow-in-right"></i> Fazer Check-in</button>
+                    <button type="button" id="modalPayBtn" class="btn btn-sm btn-success me-2" onclick="openReservationPaymentModal(document.getElementById('guestResId').value, document.getElementById('modalGuestName').textContent, document.getElementById('modalCategory').textContent)"><i class="bi bi-currency-dollar"></i> Receber</button>
+                    <button type="button" id="modalCheckinActionBtn" class="btn btn-sm btn-primary me-2" style="display:none;"><i class="bi bi-box-arrow-in-right"></i> Fazer Check-in</button>
                     <button type="button" id="resEditToggle" class="btn btn-sm btn-outline-secondary">Editar</button>
                     <button type="button" id="resSaveBtn" class="btn btn-sm btn-primary d-none">Salvar</button>
                 </div>
@@ -3182,8 +3184,11 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+        <button type="button" class="btn btn-success" onclick="openReservationPaymentModal(document.getElementById('guestResId').value, document.getElementById('modalGuestName').textContent, document.getElementById('modalCategory').textContent)">
+            <i class="bi bi-currency-dollar"></i> Receber
+        </button>
         <button type="button" class="btn btn-primary" onclick="saveGuestData()">Salvar Alterações</button>
-        <button type="button" class="btn btn-success" onclick="generatePreCheckinLink()">Gerar Pré-Check-in</button>
+        <button type="button" class="btn btn-outline-success" onclick="generatePreCheckinLink()">Gerar Pré-Check-in</button>
       </div>
     </div>
   </div>
@@ -4007,5 +4012,190 @@ Use o botão "Remover" para limpar este item da lista se não for mais necessár
             alert('Erro de comunicação ao tentar remover o item.');
         });
     }
+</script>
+
+<!-- Reservation Payment Modal (Copied from reception_rooms.html) -->
+<div class="modal fade" id="reservationPaymentModal" tabindex="-1" style="z-index: 1060;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">Receber Reserva</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="resPaymentLoading" class="text-center py-3">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                </div>
+                
+                <div id="resPaymentContent" style="display:none;">
+                    <div class="alert alert-info mb-3">
+                        <strong>Hóspede:</strong> <span id="resPayGuestName"></span><br>
+                        <strong>Categoria/Quarto:</strong> <span id="resPayRoom"></span>
+                    </div>
+
+                    <div class="card bg-light mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Valor Total da Reserva:</span>
+                                <span class="fw-bold" id="resPayTotal">R$ 0,00</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Já Pago:</span>
+                                <span class="text-success fw-bold" id="resPayPaid">R$ 0,00</span>
+                            </div>
+                            <div class="d-flex justify-content-between border-top pt-2">
+                                <span>Saldo Pendente:</span>
+                                <span class="text-danger fw-bold fs-5" id="resPayRemaining">R$ 0,00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form id="reservationPaymentForm">
+                        <input type="hidden" id="resPayId" name="reservation_id">
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Valor a Receber (R$)</label>
+                            <input type="number" step="0.01" class="form-control form-control-lg" id="resPayAmount" name="amount" required>
+                            <div class="form-text text-danger" id="resPayError" style="display:none;"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Forma de Pagamento</label>
+                            <select class="form-select" id="resPayMethod" name="payment_method" required>
+                                <option value="">Selecione...</option>
+                                <!-- Populated via JS -->
+                            </select>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" id="btnConfirmResPayment" onclick="submitReservationPayment()">
+                    <i class="bi bi-check-circle"></i> Confirmar Pagamento
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function openReservationPaymentModal(guestId, guestName, roomInfo) {
+    // Close the details modal if open (optional, or keep both open stacked)
+    // bootstrap handles stacked modals if configured, but let's just show this one on top
+    
+    const modal = new bootstrap.Modal(document.getElementById('reservationPaymentModal'));
+    modal.show();
+    
+    document.getElementById('resPaymentLoading').style.display = 'block';
+    document.getElementById('resPaymentContent').style.display = 'none';
+    document.getElementById('resPayError').style.display = 'none';
+    document.getElementById('btnConfirmResPayment').disabled = true;
+    
+    document.getElementById('resPayGuestName').textContent = guestName;
+    document.getElementById('resPayRoom').textContent = roomInfo || '-';
+    document.getElementById('resPayId').value = guestId;
+
+    try {
+        // 1. Fetch Debt Info
+        const debtResp = await fetch(`/reception/reservation/${guestId}/debt`);
+        if (!debtResp.ok) throw new Error('Erro ao buscar dados da reserva');
+        const debtData = await debtResp.json();
+        
+        document.getElementById('resPayTotal').textContent = `R$ ${debtData.total.toFixed(2)}`;
+        document.getElementById('resPayPaid').textContent = `R$ ${debtData.paid.toFixed(2)}`;
+        document.getElementById('resPayRemaining').textContent = `R$ ${debtData.remaining.toFixed(2)}`;
+        
+        // Default amount to remaining
+        document.getElementById('resPayAmount').value = debtData.remaining.toFixed(2);
+        document.getElementById('resPayAmount').max = debtData.remaining + 0.01; // tolerance
+
+        // 2. Fetch Payment Methods
+        const methodsResp = await fetch('/api/payment-methods');
+        if (!methodsResp.ok) throw new Error('Erro ao buscar formas de pagamento');
+        let methods = await methodsResp.json();
+        
+        // Filter for Reservations
+        methods = methods.filter(m => (m.available_in || []).includes('reservations'));
+        
+        const select = document.getElementById('resPayMethod');
+        select.innerHTML = '<option value="">Selecione...</option>';
+        methods.forEach(m => {
+            const option = document.createElement('option');
+            option.value = m.id;
+            option.textContent = m.name;
+            option.dataset.name = m.name; // Store name for submission
+            select.appendChild(option);
+        });
+
+        document.getElementById('resPaymentLoading').style.display = 'none';
+        document.getElementById('resPaymentContent').style.display = 'block';
+        document.getElementById('btnConfirmResPayment').disabled = false;
+
+    } catch (error) {
+        alert(error.message);
+        // modal.hide();
+    }
+}
+
+async function submitReservationPayment() {
+    const btn = document.getElementById('btnConfirmResPayment');
+    const amountInput = document.getElementById('resPayAmount');
+    const methodSelect = document.getElementById('resPayMethod');
+    const errorDiv = document.getElementById('resPayError');
+    
+    const amount = parseFloat(amountInput.value);
+    const maxAmount = parseFloat(amountInput.max);
+    
+    if (!amount || amount <= 0) {
+        errorDiv.textContent = 'Digite um valor válido.';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    if (amount > maxAmount) {
+        if (!confirm(`O valor R$ ${amount.toFixed(2)} é maior que o saldo pendente (R$ ${maxAmount.toFixed(2)}). Deseja continuar?`)) {
+            return;
+        }
+    }
+    
+    if (!methodSelect.value) {
+        alert('Selecione uma forma de pagamento.');
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Processando...';
+    
+    try {
+        const option = methodSelect.options[methodSelect.selectedIndex];
+        
+        const resp = await fetch('/reception/reservation/pay', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                reservation_id: document.getElementById('resPayId').value,
+                amount: amount,
+                payment_method_id: methodSelect.value,
+                payment_method_name: option.dataset.name,
+                origin: 'reservations'
+            })
+        });
+        
+        const result = await resp.json();
+        
+        if (!resp.ok) throw new Error(result.error || 'Erro ao processar pagamento');
+        
+        alert('Pagamento registrado com sucesso!');
+        location.reload();
+        
+    } catch (error) {
+        alert(error.message);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-check-circle"></i> Confirmar Pagamento';
+    }
+}
 </script>
 {% endblock %}

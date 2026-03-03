@@ -200,6 +200,7 @@ WHATSAPP_TEMPLATES_FILE = get_data_path('whatsapp_templates.json')
 DELETED_MESSAGES_LOG = get_data_path('deleted_messages_log.json')
 AUDIT_LOGS_FILE = get_data_path('audit_logs.json')
 PASSWORD_RESET_REQUESTS_FILE = get_data_path('password_reset_requests.json')
+DEPARTMENT_PERMISSIONS_FILE = get_data_path('department_permissions.json')
 
 SYSTEM_STATUS_FILE = get_data_path('system_status.json')
 FISCAL_POOL_FILE = get_data_path('fiscal_pool.json')

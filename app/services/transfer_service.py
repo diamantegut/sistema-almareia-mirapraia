@@ -206,13 +206,6 @@ def transfer_table_to_room(table_id, raw_room_number, user_name, mode='restauran
                         noncover_items_total += item_val_sf
                 
                 rest_taxable = sum(i['qty'] * i['price'] for i in restaurant_items if not i.get('service_fee_exempt', False))
-                
-                if restaurant_items_total > 0:
-                    noncover_share_for_service = noncover_items_total / restaurant_items_total
-                else:
-                    noncover_share_for_service = 1.0
-                
-                rest_taxable *= noncover_share_for_service
                 rest_service = 0 if service_fee_removed else rest_taxable * 0.10
                 
                 rest_total_base = restaurant_items_total
@@ -355,7 +348,7 @@ def transfer_table_to_room(table_id, raw_room_number, user_name, mode='restauran
             # If table save fails, we might have duplicate charges (risk).
             # Ideally we'd rollback charges, but let's just try to be safe.
             
-            room_charges.extend(new_charges)
+            room_charges = new_charges + room_charges
             if not save_json('room_charges.json', room_charges):
                 raise TransferError("Falha ao salvar cobranças no quarto. Tente novamente.")
             

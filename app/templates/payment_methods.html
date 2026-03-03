@@ -89,8 +89,8 @@
                                         {% set av = method.available_in or [] %}
                                         {% set is_rest = 'restaurant' in av or 'caixa_restaurante' in av %}
                                         {% set is_rec = 'reception' in av or 'caixa_recepcao' in av %}
-                                        {% set is_res = 'reservas' in av or 'caixa_reservas' in av %}
-                                        {% set is_fiscal = method.is_fiscal if method.is_fiscal is defined else false %}
+                                        {% set is_res = 'reservations' in av or 'reservas' in av or 'caixa_reservas' in av %}
+                                        {% set is_fiscal = method.is_fiscal|default(false) %}
                                         <tr>
                                             <td>
                                                 <i class="bi bi-credit-card me-2 text-muted"></i>
