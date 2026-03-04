@@ -1,0 +1,5415 @@
+[
+    {
+        "timestamp": "2026-02-27T13:46:43.781794",
+        "action": "UPDATE",
+        "user": "luiz",
+        "item_id": "82",
+        "details": {
+            "name": "Isca de peixe empanado (Gurjões de peixe)"
+        },
+        "changes": [
+            {
+                "field": "active",
+                "old": true,
+                "new": false
+            }
+        ],
+        "hash": "b00e0933a2ec167320c26abde0c07e086df72081d05c3b00a781e10d09dd8f24"
+    },
+    {
+        "timestamp": "2026-02-27T14:31:59.228753",
+        "action": "UPDATE",
+        "user": "eduardo",
+        "item_id": "193",
+        "details": {
+            "name": "Vinho Branco Vinha do Conde"
+        },
+        "changes": [
+            {
+                "field": "active",
+                "old": true,
+                "new": false
+            }
+        ],
+        "hash": "71a3c545b4ba94a1bb9bbab4cc2fa27dc5e3fa5f660c29de1a3654f557704fb8"
+    },
+    {
+        "timestamp": "2026-02-27T14:42:32.301232",
+        "action": "UPDATE",
+        "user": "filipe",
+        "item_id": "193",
+        "details": {
+            "name": "Vinho Branco Vinha do Conde"
+        },
+        "changes": [
+            {
+                "field": "active",
+                "old": false,
+                "new": true
+            }
+        ],
+        "hash": "71a3c545b4ba94a1bb9bbab4cc2fa27dc5e3fa5f660c29de1a3654f557704fb8"
+    },
+    {
+        "timestamp": "2026-02-27T15:27:43.601495",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "228",
+        "details": {
+            "name": "Absolut Garrafa"
+        },
+        "changes": [
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "228_569_Absolut.jpg"
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/228_569_Absolut.jpg"
+            }
+        ],
+        "hash": "e4e7f4f8e0887ecc07942b73e0515a456a00be6aaf983e68980b6c315a3a1436"
+    },
+    {
+        "timestamp": "2026-02-27T15:27:51.346593",
+        "action": "DELETE",
+        "user": "eduardo",
+        "item_id": "238",
+        "details": {
+            "id": "238",
+            "name": "Black & White Garrafa",
+            "category": "Bebidas Quentes Garrafas",
+            "price": 150.0,
+            "cost_price": 0.0,
+            "printer_id": "97e342f3-2ba7-4dc3-9afd-b299b4c7b777",
+            "should_print": true,
+            "description": "Garrafa de Black & White Garrafa.",
+            "service_fee_exempt": false,
+            "visible_virtual_menu": true,
+            "active": false,
+            "recipe": [],
+            "ncm": "22085000",
+            "cest": "200800",
+            "transparency_tax": 0.0,
+            "fiscal_benefit_code": "",
+            "cfop": "5405",
+            "origin": "0",
+            "tax_situation": "500",
+            "icms_rate": 0.0,
+            "icms_base_reduction": 0.0,
+            "fcp_rate": 0.0,
+            "pis_cst": "01",
+            "pis_rate": 0.0,
+            "cofins_cst": "01",
+            "cofins_rate": 0.0,
+            "paused": false,
+            "version": 1,
+            "hash": "",
+            "last_updated": ""
+        },
+        "changes": [],
+        "hash": "1f49af64cedb0539accb5c79f7c83ba69495939f7345336ad485c3438c412da4"
+    },
+    {
+        "timestamp": "2026-02-27T15:29:17.595298",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "239",
+        "details": {
+            "name": "Cachaça Seleta Garrafa"
+        },
+        "changes": [
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": null,
+                "new": "239_250.jpg"
+            },
+            {
+                "field": "product_type",
+                "old": null,
+                "new": "standard"
+            },
+            {
+                "field": "flavor_group_id",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "allowed_accompaniments",
+                "old": null,
+                "new": []
+            },
+            {
+                "field": "flavor_multiplier",
+                "old": null,
+                "new": 1.0
+            },
+            {
+                "field": "mandatory_questions",
+                "old": null,
+                "new": []
+            },
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "has_accompaniments",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/239_250.jpg"
+            }
+        ],
+        "hash": "e310308d8775dfad92b099b3ea599fe0eca9e2fcaf41eb0e0a7eb6bb0d9745c7"
+    },
+    {
+        "timestamp": "2026-02-27T15:29:44.311808",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "229",
+        "details": {
+            "name": "Cobiçada Garrafa"
+        },
+        "changes": [
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "/Produtos/Fotos/229.jpg",
+                "new": "229_250.jpg"
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image_url",
+                "old": "/Produtos/Fotos/229.jpg",
+                "new": "/Produtos/Fotos/229_250.jpg"
+            }
+        ],
+        "hash": "d0f05e07d623df116da0374d7444c2f6c1b933af9a72413a8ebc2e3d648d9671"
+    },
+    {
+        "timestamp": "2026-02-27T15:36:01.011933",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "289",
+        "details": {
+            "name": "Ceviche de Banana da Terra "
+        },
+        "changes": [
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "289_ceviche_vegano.jpg"
+            },
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image_url",
+                "old": "",
+                "new": "/Produtos/Fotos/289_ceviche_vegano.jpg"
+            }
+        ],
+        "hash": "b38aae93814c8bdcea73365bad7b40388a53fe5440e726c37e1bbd772f4278b0"
+    },
+    {
+        "timestamp": "2026-02-27T15:36:54.940092",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "232",
+        "details": {
+            "name": "Rolha Bebida Quente"
+        },
+        "changes": [
+            {
+                "field": "image",
+                "old": "232_265.jpg",
+                "new": "232_573.jpg"
+            },
+            {
+                "field": "image_url",
+                "old": "/Produtos/Fotos/232_265.jpg",
+                "new": "/Produtos/Fotos/232_573.jpg"
+            }
+        ],
+        "hash": "dea43d8b7b6a996854e02343fb548634b09d8dc7ddb979512afd9b1d83848098"
+    },
+    {
+        "timestamp": "2026-02-27T15:38:19.393848",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "119",
+        "details": {
+            "name": "Peixe na Telha (2 pessoas)"
+        },
+        "changes": [
+            {
+                "field": "description",
+                "old": "Prato especial de Peixe na Telha, preparado com ingredientes frescos e sabor caseiro.",
+                "new": "Cioba inteira frita ou grelhada (aprox. 950 g) a moda dos pescadores, guarnecido por arroz, farofa, pirão e macaxeira frita. (Esse prato demora aprox. 1Hr (Frito) e 1:30Hrs (Grelhada)"
+            }
+        ],
+        "hash": "b2631f140bcdb617e29f67027d8dfe4e5a5393a7acfff1013e57a12e668d57f4"
+    },
+    {
+        "timestamp": "2026-02-27T15:38:30.847256",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "110",
+        "details": {
+            "name": "Peixe na Telha (3 Pessoas)"
+        },
+        "changes": [
+            {
+                "field": "description",
+                "old": "Prato especial de Peixe na Telha, preparado com ingredientes frescos e sabor caseiro.",
+                "new": "Cioba inteira frita ou grelhada (aprox. 950 g) a moda dos pescadores, guarnecido por arroz, farofa, pirão e macaxeira frita. (Esse prato demora aprox. 1Hr (Frito) e 1:30Hrs (Grelhada)"
+            }
+        ],
+        "hash": "24e99c0004cc231b28959683cd7bdef04919f053021cb6b3a1d125fca95d09ab"
+    },
+    {
+        "timestamp": "2026-02-27T15:41:06.715718",
+        "action": "UPDATE",
+        "user": "filipe",
+        "item_id": "82",
+        "details": {
+            "name": "Isca de peixe empanado (Gurjões de peixe)"
+        },
+        "changes": [
+            {
+                "field": "active",
+                "old": false,
+                "new": true
+            }
+        ],
+        "hash": "b00e0933a2ec167320c26abde0c07e086df72081d05c3b00a781e10d09dd8f24"
+    },
+    {
+        "timestamp": "2026-02-27T15:48:54.987731",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "110",
+        "details": {
+            "name": "Peixe na Telha (3 Pessoas)"
+        },
+        "changes": [
+            {
+                "field": "description",
+                "old": "Cioba inteira frita ou grelhada (aprox. 950 g) a moda dos pescadores, guarnecido por arroz, farofa, pirão e macaxeira frita. (Esse prato demora aprox. 1Hr (Frito) e 1:30Hrs (Grelhada)",
+                "new": "Cioba inteira frita ou grelhada (aprox. 1.200 kg) a moda dos pescadores, guarnecido por arroz, farofa, pirão e macaxeira frita. (Esse prato demora aprox. 1Hr (Frito) e 1:30Hrs (Grelhada)"
+            }
+        ],
+        "hash": "24e99c0004cc231b28959683cd7bdef04919f053021cb6b3a1d125fca95d09ab"
+    },
+    {
+        "timestamp": "2026-02-27T17:28:19.328690",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "289",
+        "details": {
+            "name": "Ceviche de Banana da Terra "
+        },
+        "changes": [
+            {
+                "field": "image",
+                "old": "289_ceviche_vegano.jpg",
+                "new": "/Produtos/Fotos/289_ceviche_vegano.jpg"
+            }
+        ],
+        "hash": "b38aae93814c8bdcea73365bad7b40388a53fe5440e726c37e1bbd772f4278b0"
+    },
+    {
+        "timestamp": "2026-02-27T17:29:21.515602",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "231",
+        "details": {
+            "name": "Pitú Garrafa 965ml"
+        },
+        "changes": [
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image_url",
+                "old": "/Produtos/Fotos/231.jpg",
+                "new": "/Produtos/Fotos/231_aguardente-de-cana-adocada-pitu-garrafa-965ml_40.jpg"
+            },
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "image",
+                "old": "/Produtos/Fotos/231.jpg",
+                "new": "231_aguardente-de-cana-adocada-pitu-garrafa-965ml_40.jpg"
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            }
+        ],
+        "hash": "70904c14b05ef639c63bcccda7ce90ad695a214ce7049b717015dfcf7001f90e"
+    },
+    {
+        "timestamp": "2026-02-27T17:31:17.845687",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "240",
+        "details": {
+            "name": "Red Label Garrafa"
+        },
+        "changes": [
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/240_red_label_garrafa.jpg"
+            },
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "has_accompaniments",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "mandatory_questions",
+                "old": null,
+                "new": []
+            },
+            {
+                "field": "allowed_accompaniments",
+                "old": null,
+                "new": []
+            },
+            {
+                "field": "flavor_multiplier",
+                "old": null,
+                "new": 1.0
+            },
+            {
+                "field": "image",
+                "old": null,
+                "new": "240_red_label_garrafa.jpg"
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "product_type",
+                "old": null,
+                "new": "standard"
+            },
+            {
+                "field": "flavor_group_id",
+                "old": null,
+                "new": ""
+            }
+        ],
+        "hash": "472a979ec751c1c4fea2325940bca527796df80b288d935fdfb3765148d2ec06"
+    },
+    {
+        "timestamp": "2026-02-27T17:31:41.555362",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "233",
+        "details": {
+            "name": "Salinas Garrafa"
+        },
+        "changes": [
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/233_250.jpg"
+            },
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "has_accompaniments",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "mandatory_questions",
+                "old": null,
+                "new": []
+            },
+            {
+                "field": "allowed_accompaniments",
+                "old": null,
+                "new": []
+            },
+            {
+                "field": "flavor_multiplier",
+                "old": null,
+                "new": 1.0
+            },
+            {
+                "field": "image",
+                "old": null,
+                "new": "233_250.jpg"
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "product_type",
+                "old": null,
+                "new": "standard"
+            },
+            {
+                "field": "flavor_group_id",
+                "old": null,
+                "new": ""
+            }
+        ],
+        "hash": "68803dce60fe61645a7da549dcf9574e88c905d7466acdc1467a6b0c52a36900"
+    },
+    {
+        "timestamp": "2026-02-27T17:31:58.461283",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "235",
+        "details": {
+            "name": "Tequila Jose Cuervo Garrafa"
+        },
+        "changes": [
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/235_265.jpg"
+            },
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "has_accompaniments",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "mandatory_questions",
+                "old": null,
+                "new": []
+            },
+            {
+                "field": "allowed_accompaniments",
+                "old": null,
+                "new": []
+            },
+            {
+                "field": "flavor_multiplier",
+                "old": null,
+                "new": 1.0
+            },
+            {
+                "field": "image",
+                "old": null,
+                "new": "235_265.jpg"
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "product_type",
+                "old": null,
+                "new": "standard"
+            },
+            {
+                "field": "flavor_group_id",
+                "old": null,
+                "new": ""
+            }
+        ],
+        "hash": "98d81bbf52161935520949bb7051ed7b834f2921005c60994b371b3f4f8d8650"
+    },
+    {
+        "timestamp": "2026-02-27T17:32:55.678929",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "237",
+        "details": {
+            "name": "Whisky Old Par 1L"
+        },
+        "changes": [
+            {
+                "field": "image_url",
+                "old": "/Produtos/Fotos/237_old_parr.jpg",
+                "new": "/Produtos/Fotos/237_old_par.jpg"
+            },
+            {
+                "field": "image",
+                "old": "/Produtos/Fotos/237_old_parr.jpg",
+                "new": "237_old_par.jpg"
+            }
+        ],
+        "hash": "59cc352df18b91fdc74ee4cb2e339bbbaf425cf1822546c2ba65d5345eb53b7e"
+    },
+    {
+        "timestamp": "2026-02-27T17:34:27.699863",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "3",
+        "details": {
+            "name": "Banana da Terra"
+        },
+        "changes": [
+            {
+                "field": "image_url",
+                "old": "/Produtos/Fotos/3_banana-da-terra-grelhada-rotated.jpg",
+                "new": "/Produtos/Fotos/3_banana_da_terra_assada.jpg"
+            },
+            {
+                "field": "image",
+                "old": "3_banana-da-terra-grelhada-rotated.jpg",
+                "new": "3_banana_da_terra_assada.jpg"
+            }
+        ],
+        "hash": "27080fdaf0b5399473b7a6a301547b9843c50f07f9a0d27291bee628cfee596a"
+    },
+    {
+        "timestamp": "2026-02-27T17:36:20.292189",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "266",
+        "details": {
+            "name": "Cerveja Sem Gluten (Consultar Disponibilidade)"
+        },
+        "changes": [
+            {
+                "field": "image_url",
+                "old": "/Produtos/Fotos/266_cerveja_sem_gluten.jpg",
+                "new": "/Produtos/Fotos/266_stella_sem_gluten.jpg"
+            },
+            {
+                "field": "image",
+                "old": "266_cerveja_sem_gluten.jpg",
+                "new": "266_stella_sem_gluten.jpg"
+            }
+        ],
+        "hash": "23dde867f312024bc187070d70d606dd3250af3968ecfdc1e0b4b67637dd6405"
+    },
+    {
+        "timestamp": "2026-02-27T17:36:44.879088",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "160",
+        "details": {
+            "name": "Corona Long Neck"
+        },
+        "changes": [
+            {
+                "field": "image_url",
+                "old": "/Produtos/Fotos/160_194.jpg",
+                "new": "/Produtos/Fotos/160_353.jpg"
+            },
+            {
+                "field": "image",
+                "old": "160_194.jpg",
+                "new": "160_353.jpg"
+            }
+        ],
+        "hash": "8eaf5eea81192e431e886babd6057a2b99ca67b3666a2f47d142daf23e29f727"
+    },
+    {
+        "timestamp": "2026-02-27T17:37:45.291536",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "164",
+        "details": {
+            "name": "Heineken Long Neck"
+        },
+        "changes": [
+            {
+                "field": "image_url",
+                "old": "/Produtos/Fotos/164_354.jpg",
+                "new": "/Produtos/Fotos/164_726.jpg"
+            },
+            {
+                "field": "image",
+                "old": "164_354.jpg",
+                "new": "164_726.jpg"
+            }
+        ],
+        "hash": "3d421a8ceb9af4f8445158e115ddbef45b16c44d4aee513ecefd364b18b955e7"
+    },
+    {
+        "timestamp": "2026-02-27T17:38:35.618767",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "165",
+        "details": {
+            "name": "Original Litrinho"
+        },
+        "changes": [
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/165_original_litrinho.jpg"
+            },
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "165_original_litrinho.jpg"
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            }
+        ],
+        "hash": "3e5c5a2b8f9ef44b61083cf9957ce01daac0298b0818c7e85442fe1518b294c1"
+    },
+    {
+        "timestamp": "2026-02-27T17:44:48.108836",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "284",
+        "details": {
+            "name": "Preparo Cozumel"
+        },
+        "changes": [
+            {
+                "field": "image_url",
+                "old": "/Produtos/Fotos/284_cuzumel.jpg",
+                "new": "/Produtos/Fotos/284_preparo_cozumel.jpg"
+            },
+            {
+                "field": "image",
+                "old": "284_cuzumel.jpg",
+                "new": "284_preparo_cozumel.jpg"
+            }
+        ],
+        "hash": "358fc9864a4916caf81c583f1dc565e15ee2adcc1d349b1343700445acff6251"
+    },
+    {
+        "timestamp": "2026-02-27T17:49:14.178576",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "249",
+        "details": {
+            "name": "Aperol"
+        },
+        "changes": [
+            {
+                "field": "image_url",
+                "old": "/Produtos/Fotos/249_265.jpg",
+                "new": "/Produtos/Fotos/249_Aperol_dose.jpg"
+            },
+            {
+                "field": "image",
+                "old": "249_265.jpg",
+                "new": "249_Aperol_dose.jpg"
+            }
+        ],
+        "hash": "5c0e32ce0cc7a41e7949ce6ebfbe47232af15edb04fc5f0a1b407e6a613e5784"
+    },
+    {
+        "timestamp": "2026-02-27T17:49:30.799570",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "235",
+        "details": {
+            "name": "Tequila Garrafa"
+        },
+        "changes": [
+            {
+                "field": "image",
+                "old": "235_265.jpg",
+                "new": "/Produtos/Fotos/235_265.jpg"
+            },
+            {
+                "field": "name",
+                "old": "Tequila Jose Cuervo Garrafa",
+                "new": "Tequila Garrafa"
+            }
+        ],
+        "hash": "794875e0bf7794586f61cb017fd19843199feefd808c27445334714e4428a2b4"
+    },
+    {
+        "timestamp": "2026-02-27T17:50:04.357662",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "239",
+        "details": {
+            "name": "Cachaça Seleta Garrafa"
+        },
+        "changes": [
+            {
+                "field": "image",
+                "old": "239_250.jpg",
+                "new": "/Produtos/Fotos/239_250.jpg"
+            },
+            {
+                "field": "recipe",
+                "old": [],
+                "new": [
+                    {
+                        "ingredient_id": "277",
+                        "qty": 1000.0
+                    }
+                ]
+            }
+        ],
+        "hash": "e310308d8775dfad92b099b3ea599fe0eca9e2fcaf41eb0e0a7eb6bb0d9745c7"
+    },
+    {
+        "timestamp": "2026-02-27T17:50:27.105707",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "240",
+        "details": {
+            "name": "Red Label Garrafa"
+        },
+        "changes": [
+            {
+                "field": "image",
+                "old": "240_red_label_garrafa.jpg",
+                "new": "/Produtos/Fotos/240_red_label_garrafa.jpg"
+            },
+            {
+                "field": "recipe",
+                "old": [],
+                "new": [
+                    {
+                        "ingredient_id": "304",
+                        "qty": 1000.0
+                    }
+                ]
+            }
+        ],
+        "hash": "472a979ec751c1c4fea2325940bca527796df80b288d935fdfb3765148d2ec06"
+    },
+    {
+        "timestamp": "2026-02-27T17:50:45.059703",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "233",
+        "details": {
+            "name": "Salinas Garrafa"
+        },
+        "changes": [
+            {
+                "field": "image",
+                "old": "233_250.jpg",
+                "new": "/Produtos/Fotos/233_250.jpg"
+            },
+            {
+                "field": "recipe",
+                "old": [],
+                "new": [
+                    {
+                        "ingredient_id": "277",
+                        "qty": 1000.0
+                    }
+                ]
+            }
+        ],
+        "hash": "68803dce60fe61645a7da549dcf9574e88c905d7466acdc1467a6b0c52a36900"
+    },
+    {
+        "timestamp": "2026-02-27T17:51:15.257119",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "235",
+        "details": {
+            "name": "Tequila Garrafa"
+        },
+        "changes": [
+            {
+                "field": "recipe",
+                "old": [],
+                "new": [
+                    {
+                        "ingredient_id": "295",
+                        "qty": 750.0
+                    }
+                ]
+            }
+        ],
+        "hash": "794875e0bf7794586f61cb017fd19843199feefd808c27445334714e4428a2b4"
+    },
+    {
+        "timestamp": "2026-02-27T17:51:44.879858",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "236",
+        "details": {
+            "name": "Vodka Grey Goose (Garrafa 750ml)"
+        },
+        "changes": [
+            {
+                "field": "image",
+                "old": "236_1120.jpg",
+                "new": "/Produtos/Fotos/236_1120.jpg"
+            },
+            {
+                "field": "recipe",
+                "old": [],
+                "new": [
+                    {
+                        "ingredient_id": "297",
+                        "qty": 750.0
+                    }
+                ]
+            }
+        ],
+        "hash": "217f7c782bf47ad56d08b43c88dc1bbd9768cdd76266830b9f16ef23dd08ce4f"
+    },
+    {
+        "timestamp": "2026-02-27T17:52:56.242322",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "9",
+        "details": {
+            "name": "Mimosa Espumante"
+        },
+        "changes": [
+            {
+                "field": "image",
+                "old": "9_938.jpg",
+                "new": "/Produtos/Fotos/9_938.jpg"
+            }
+        ],
+        "hash": "a9b593d4fb4fe6ac53e012ea9ade9be76c1bba9db9bd4a751546e1d68dc9cf98"
+    },
+    {
+        "timestamp": "2026-02-27T17:57:20.772893",
+        "action": "UPDATE",
+        "user": "eduardo",
+        "item_id": "283",
+        "details": {
+            "name": "Cachaca Seleta"
+        },
+        "changes": [
+            {
+                "field": "active",
+                "old": true,
+                "new": false
+            }
+        ],
+        "hash": "64f6c850fc47c91786220058165fd4f9a31d4abacf57d3575f3e2fdddb4a0448"
+    },
+    {
+        "timestamp": "2026-02-27T17:59:13.436739",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "2008",
+        "details": {
+            "name": "Campari"
+        },
+        "changes": [
+            {
+                "field": "image_url",
+                "old": "/Produtos/Fotos/2008_265.jpg",
+                "new": "/Produtos/Fotos/2008_camparidose.jpg"
+            },
+            {
+                "field": "image",
+                "old": "2008_265.jpg",
+                "new": "2008_camparidose.jpg"
+            }
+        ],
+        "hash": "151ebb3c19e12ed8071ae863c5270308159536e247a9e520d93d945159b39abb"
+    },
+    {
+        "timestamp": "2026-02-27T18:00:00.239392",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "252",
+        "details": {
+            "name": "Licor 43"
+        },
+        "changes": [
+            {
+                "field": "image_url",
+                "old": "/Produtos/Fotos/252_265.jpg",
+                "new": "/Produtos/Fotos/252_licor43dose.jpg"
+            },
+            {
+                "field": "image",
+                "old": "252_265.jpg",
+                "new": "252_licor43dose.jpg"
+            }
+        ],
+        "hash": "e5f0913772ab489b326919c22abff787a0c554a8cb0d42342d4217465953b2ba"
+    },
+    {
+        "timestamp": "2026-02-27T18:01:20.226605",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "253",
+        "details": {
+            "name": "Licor Amarula"
+        },
+        "changes": [
+            {
+                "field": "image_url",
+                "old": "/Produtos/Fotos/253_265.jpg",
+                "new": "/Produtos/Fotos/253_licor_amarula.jpg"
+            },
+            {
+                "field": "image",
+                "old": "253_265.jpg",
+                "new": "253_licor_amarula.jpg"
+            }
+        ],
+        "hash": "38d06a3f6b8f02d814bc9d87b5e491c964ce2ac891d2e535d79446413a19c87f"
+    },
+    {
+        "timestamp": "2026-02-27T18:02:24.441341",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "254",
+        "details": {
+            "name": "Licor de cassis"
+        },
+        "changes": [
+            {
+                "field": "image_url",
+                "old": "/Produtos/Fotos/254_265.jpg",
+                "new": "/Produtos/Fotos/254_licor_cassis.jpg"
+            },
+            {
+                "field": "image",
+                "old": "254_265.jpg",
+                "new": "254_licor_cassis.jpg"
+            }
+        ],
+        "hash": "c43eaaa9007e8a50769d85b3c080f4a9798d3aa737f29d9955270a29482794c0"
+    },
+    {
+        "timestamp": "2026-02-27T18:03:56.141274",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "6",
+        "details": {
+            "name": "Cuscuz Recheado"
+        },
+        "changes": [
+            {
+                "field": "image_url",
+                "old": "",
+                "new": "/Produtos/Fotos/6_cuscuz-recheado-com-carne-seca-em-fundo-branco.jpg"
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "6_cuscuz-recheado-com-carne-seca-em-fundo-branco.jpg"
+            }
+        ],
+        "hash": "6ffa47c83bd5123139b43f9a9fbdadf2d20cd04872a8ad0bc2b49a58b316e84b"
+    },
+    {
+        "timestamp": "2026-02-27T18:05:19.345461",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "10",
+        "details": {
+            "name": "Misto Quente"
+        },
+        "changes": [
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/10_misto_quente.jpg"
+            },
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "10_misto_quente.jpg"
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            }
+        ],
+        "hash": "797fc675d107e95b284a6a1ac4a599d2c32a5c18bfd27bafee8cf752139ed1bd"
+    },
+    {
+        "timestamp": "2026-02-27T18:06:54.199568",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "12",
+        "details": {
+            "name": "Ovos "
+        },
+        "changes": [
+            {
+                "field": "image_url",
+                "old": "",
+                "new": "/Produtos/Fotos/12_omelete.jpg"
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "12_omelete.jpg"
+            }
+        ],
+        "hash": "924143be93c4e9c63455af65857f4be47b854ad78da919eb679da1611cf2faf0"
+    },
+    {
+        "timestamp": "2026-02-27T18:07:21.253061",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "12",
+        "details": {
+            "name": "Ovos "
+        },
+        "changes": [
+            {
+                "field": "mandatory_questions",
+                "old": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "type": "choice",
+                        "options": [
+                            "Omelete",
+                            "Mexido",
+                            "Pochê",
+                            "cozido ou frito"
+                        ],
+                        "required": true
+                    }
+                ],
+                "new": [
+                    {
+                        "question": "Tipo do Ovo",
+                        "type": "choice",
+                        "options": [
+                            "Omelete",
+                            "Mexido",
+                            "Pochê",
+                            "cozido",
+                            "frito"
+                        ],
+                        "required": true
+                    }
+                ]
+            },
+            {
+                "field": "image",
+                "old": "12_omelete.jpg",
+                "new": "/Produtos/Fotos/12_omelete.jpg"
+            }
+        ],
+        "hash": "924143be93c4e9c63455af65857f4be47b854ad78da919eb679da1611cf2faf0"
+    },
+    {
+        "timestamp": "2026-02-27T18:11:04.035494",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "13",
+        "details": {
+            "name": "Pao Na Chapa"
+        },
+        "changes": [
+            {
+                "field": "image_url",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            }
+        ],
+        "hash": "0a8a8a088101b5266df6b2fb1ef43c6e0012277168278447b4550c0811bdcbf7"
+    },
+    {
+        "timestamp": "2026-02-27T18:11:33.244207",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "13",
+        "details": {
+            "name": "Pao Na Chapa"
+        },
+        "changes": [
+            {
+                "field": "image_url",
+                "old": "",
+                "new": "/Produtos/Fotos/13_pao_na_chapa.jpg"
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "13_pao_na_chapa.jpg"
+            }
+        ],
+        "hash": "0a8a8a088101b5266df6b2fb1ef43c6e0012277168278447b4550c0811bdcbf7"
+    },
+    {
+        "timestamp": "2026-02-27T18:12:50.681824",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "14",
+        "details": {
+            "name": "Queijo assado"
+        },
+        "changes": [
+            {
+                "field": "image_url",
+                "old": "",
+                "new": "/Produtos/Fotos/14_queijo_assado.jpg"
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "14_queijo_assado.jpg"
+            }
+        ],
+        "hash": "a0c08f0717da86609df222f027093255ddb91611c7235e040354a87b5c9f54ce"
+    },
+    {
+        "timestamp": "2026-02-27T18:15:03.885093",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "17",
+        "details": {
+            "name": "Waffles da chef"
+        },
+        "changes": [
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/17_waffles_com_nutella.jpg"
+            },
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "17_waffles_com_nutella.jpg"
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            }
+        ],
+        "hash": "1ba8028c52cc20e8c90a236e6caa2cc2d92afc0f3717f4e77b90ab591c13a1d9"
+    },
+    {
+        "timestamp": "2026-02-27T18:19:18.520807",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "2002",
+        "details": {
+            "name": "Tapioca"
+        },
+        "changes": [
+            {
+                "field": "image_url",
+                "old": "",
+                "new": "/Produtos/Fotos/2002_tapioca.jpg"
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "2002_tapioca.jpg"
+            }
+        ],
+        "hash": "2dddeb7aa1efcaa02b92f5fe157844a4d893998f1618da26c13e85670414b219"
+    },
+    {
+        "timestamp": "2026-02-27T18:19:40.059654",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "255",
+        "details": {
+            "name": "Martini "
+        },
+        "changes": [
+            {
+                "field": "image_url",
+                "old": "/Produtos/Fotos/255_265.jpg",
+                "new": "/Produtos/Fotos/255_martini_rosso_dose.jpg"
+            },
+            {
+                "field": "image",
+                "old": "255_265.jpg",
+                "new": "255_martini_rosso_dose.jpg"
+            }
+        ],
+        "hash": "98de47649121d13f99a7fe3e12216d24be440e37a8d5b7145c871446c7eef6ce"
+    },
+    {
+        "timestamp": "2026-02-27T18:22:47.164789",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "256",
+        "details": {
+            "name": "Rum Bacardi"
+        },
+        "changes": [
+            {
+                "field": "image_url",
+                "old": "/Produtos/Fotos/256_265.jpg",
+                "new": "/Produtos/Fotos/256_rum_bacardi_dose.jpg"
+            },
+            {
+                "field": "image",
+                "old": "256_265.jpg",
+                "new": "256_rum_bacardi_dose.jpg"
+            }
+        ],
+        "hash": "54b2b69eea9c2172ecd25887e3e49b607cb352bbfd22e7754242021ba3823f34"
+    },
+    {
+        "timestamp": "2026-02-27T18:23:11.245821",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "258",
+        "details": {
+            "name": "Rum Malibu"
+        },
+        "changes": [
+            {
+                "field": "image_url",
+                "old": "/Produtos/Fotos/258_265.jpg",
+                "new": "/Produtos/Fotos/258_rum_malibu_dose.jpg"
+            },
+            {
+                "field": "image",
+                "old": "258_265.jpg",
+                "new": "258_rum_malibu_dose.jpg"
+            }
+        ],
+        "hash": "bfbd579eea98cf475c01a52753d02871ad4f763c91c49fe317415a480e77436f"
+    },
+    {
+        "timestamp": "2026-02-27T18:23:49.975844",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "259",
+        "details": {
+            "name": "Vodka Absolut "
+        },
+        "changes": [
+            {
+                "field": "image_url",
+                "old": "/Produtos/Fotos/259_265.jpg",
+                "new": "/Produtos/Fotos/259_569_Absolut.jpg"
+            },
+            {
+                "field": "image",
+                "old": "259_265.jpg",
+                "new": "259_569_Absolut.jpg"
+            }
+        ],
+        "hash": "ffe579992e82c94bbb8f67457a7f09da2898cf13c09a86399c496ba3b4ad88a5"
+    },
+    {
+        "timestamp": "2026-02-27T18:24:12.483330",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "293",
+        "details": {
+            "name": "Whisky Jack Daniels Old "
+        },
+        "changes": [
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image_url",
+                "old": "",
+                "new": "/Produtos/Fotos/293_jackdanielsdose.jpg"
+            },
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "293_jackdanielsdose.jpg"
+            }
+        ],
+        "hash": "2049d0f615242d2706896c3c5b867d54f18d2ae961b7c4b6200646f002e73c51"
+    },
+    {
+        "timestamp": "2026-02-27T18:24:37.295293",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "294",
+        "details": {
+            "name": "Whisky The Glenlivet Founders Reserve "
+        },
+        "changes": [
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            }
+        ],
+        "hash": "2a057ac513114e8824de3507ffa8159ebb488c092f98cb182c732cb102c3af58"
+    },
+    {
+        "timestamp": "2026-02-27T18:26:04.107507",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "294",
+        "details": {
+            "name": "Whisky The Glenlivet Founders Reserve "
+        },
+        "changes": [
+            {
+                "field": "image_url",
+                "old": "",
+                "new": "/Produtos/Fotos/294_Whisky-The-Glenlivet-Founders.jpg"
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "294_Whisky-The-Glenlivet-Founders.jpg"
+            }
+        ],
+        "hash": "2a057ac513114e8824de3507ffa8159ebb488c092f98cb182c732cb102c3af58"
+    },
+    {
+        "timestamp": "2026-02-27T18:28:06.580974",
+        "action": "UPDATE",
+        "user": "eduardo",
+        "item_id": "113",
+        "details": {
+            "name": "Polvo a Provençal (Individual)"
+        },
+        "changes": [
+            {
+                "field": "active",
+                "old": true,
+                "new": false
+            }
+        ],
+        "hash": "2646f685f3d185bbfff2ea7b7ef2db3ecd990fb14d9c8fd951b15363185d2367"
+    },
+    {
+        "timestamp": "2026-02-27T18:32:26.282499",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "261",
+        "details": {
+            "name": "Whisky Black Label"
+        },
+        "changes": [
+            {
+                "field": "image_url",
+                "old": "/Produtos/Fotos/261_265.jpg",
+                "new": "/Produtos/Fotos/261_Whisky-Johny-Walker-Black-Label-750Ml-616x1024.jpg"
+            },
+            {
+                "field": "image",
+                "old": "/Produtos/Fotos/261_265.jpg",
+                "new": "261_Whisky-Johny-Walker-Black-Label-750Ml-616x1024.jpg"
+            }
+        ],
+        "hash": "ae81dd2b52069b6c2145283b2a8b0762e37c59bfd9f93aba0683e4b4db945889"
+    },
+    {
+        "timestamp": "2026-02-27T18:35:41.683651",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "260",
+        "details": {
+            "name": "Whisky Chivas "
+        },
+        "changes": [
+            {
+                "field": "image_url",
+                "old": "/Produtos/Fotos/260_265.jpg",
+                "new": "/Produtos/Fotos/260_chivas.jpg"
+            },
+            {
+                "field": "image",
+                "old": "/Produtos/Fotos/260_265.jpg",
+                "new": "260_chivas.jpg"
+            }
+        ],
+        "hash": "0ad2be4b725e20e6d26f69c5f353fb7e1b73552ddc63eed86993d3bf7534c310"
+    },
+    {
+        "timestamp": "2026-02-27T18:36:59.322026",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "264",
+        "details": {
+            "name": "Whisky Old Par"
+        },
+        "changes": [
+            {
+                "field": "image_url",
+                "old": "/Produtos/Fotos/264_old_parr.jpg",
+                "new": "/Produtos/Fotos/264_old_par.jpg"
+            },
+            {
+                "field": "image",
+                "old": "/Produtos/Fotos/264_old_parr.jpg",
+                "new": "264_old_par.jpg"
+            }
+        ],
+        "hash": "48358e3a4fdc1acf1b2e30c1410babf025e277bcca43c85afde09278048e9010"
+    },
+    {
+        "timestamp": "2026-02-27T18:41:23.070094",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "2007",
+        "details": {
+            "name": "Caipifruta Absolut (Escolha o sabor)"
+        },
+        "changes": [
+            {
+                "field": "image_url",
+                "old": "/Produtos/Fotos/2007_287.jpg",
+                "new": "/Produtos/Fotos/2007_289.jpg"
+            },
+            {
+                "field": "image",
+                "old": "2007_287.jpg",
+                "new": "2007_289.jpg"
+            },
+            {
+                "field": "description",
+                "old": "Caipifruta sem álcool com sabor a escolher",
+                "new": "Caipifruta com sabor a escolher"
+            }
+        ],
+        "hash": "c8d08a8cf6ab511a868432a90627f5c12a32ac339905b52ab5eddefa844bc67d"
+    },
+    {
+        "timestamp": "2026-02-27T19:02:36.073739",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "34",
+        "details": {
+            "name": "Piña Colada"
+        },
+        "changes": [
+            {
+                "field": "image",
+                "old": "/Produtos/Fotos/34_262.jpg",
+                "new": "34_262.jpg"
+            }
+        ],
+        "hash": "fa5f0fccad7ff7aaa91e5ad22db259525445d8318bb22f6ea3797ef0aa6c462a"
+    },
+    {
+        "timestamp": "2026-02-27T19:05:42.359397",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "76",
+        "details": {
+            "name": "Batata Frita"
+        },
+        "changes": [
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/76_313.jpg"
+            },
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "mandatory_questions",
+                "old": null,
+                "new": []
+            },
+            {
+                "field": "flavor_multiplier",
+                "old": null,
+                "new": 1.0
+            },
+            {
+                "field": "flavor_group_id",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "76_313.jpg"
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            }
+        ],
+        "hash": "138a5689f08bd49c7d4e9b8840987516202b5d6aebc38a765f1f1f5a2d36ee15"
+    },
+    {
+        "timestamp": "2026-02-27T19:06:01.160549",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "59",
+        "details": {
+            "name": "Bolinho de Bacalhau ( Unid.)"
+        },
+        "changes": [
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/59_1418.jpg"
+            },
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "mandatory_questions",
+                "old": null,
+                "new": []
+            },
+            {
+                "field": "flavor_multiplier",
+                "old": null,
+                "new": 1.0
+            },
+            {
+                "field": "flavor_group_id",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "59_1418.jpg"
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            }
+        ],
+        "hash": "e0ab53e47bcd39f4d6e1ecb37c0a4d3472fe34431e415ece4d361754f52ade5b"
+    },
+    {
+        "timestamp": "2026-02-27T19:06:20.180104",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "60",
+        "details": {
+            "name": "Brusqueta de Salmão com pão artesanal da  casa (3un.)"
+        },
+        "changes": [
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/60_1676.jpg"
+            },
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "mandatory_questions",
+                "old": [
+                    {
+                        "question": "Crocância",
+                        "type": "single_choice",
+                        "options": [
+                            "Normal",
+                            "Bem Crocante"
+                        ],
+                        "required": true
+                    }
+                ],
+                "new": [
+                    {
+                        "question": "Crocância",
+                        "type": "text",
+                        "options": [
+                            "Normal",
+                            "Bem Crocante"
+                        ],
+                        "required": true
+                    }
+                ]
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "60_1676.jpg"
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            }
+        ],
+        "hash": "dd7bbfccd6f55d4ee5a1532faf244b6f5362d4451a947fcb860644c96881e0fe"
+    },
+    {
+        "timestamp": "2026-02-27T19:06:40.208476",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "61",
+        "details": {
+            "name": "Burrata"
+        },
+        "changes": [
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/61_1111.jpg"
+            },
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "mandatory_questions",
+                "old": null,
+                "new": []
+            },
+            {
+                "field": "flavor_multiplier",
+                "old": null,
+                "new": 1.0
+            },
+            {
+                "field": "flavor_group_id",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "61_1111.jpg"
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            }
+        ],
+        "hash": "42f06933468ca2a4475f25f480cc529f0394babd3f8644a5ecb54026d381f7f2"
+    },
+    {
+        "timestamp": "2026-02-27T19:07:02.446208",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "265",
+        "details": {
+            "name": "Caldo (Consultar sabor do dia)"
+        },
+        "changes": [
+            {
+                "field": "image_url",
+                "old": "",
+                "new": "/Produtos/Fotos/265_356.jpg"
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "265_356.jpg"
+            }
+        ],
+        "hash": "567a501b46b9faf9e6ace3d168ec8ace1d7c85c4732ae835f74a1df39eb88258"
+    },
+    {
+        "timestamp": "2026-02-27T19:07:32.094276",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "84",
+        "details": {
+            "name": "Camarão na manteiga de alho"
+        },
+        "changes": [
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/84_317.jpg"
+            },
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "mandatory_questions",
+                "old": null,
+                "new": []
+            },
+            {
+                "field": "flavor_multiplier",
+                "old": null,
+                "new": 1.0
+            },
+            {
+                "field": "flavor_group_id",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "84_317.jpg"
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            }
+        ],
+        "hash": "827bd387431377990f2e2da17dc26e5fdcd7ad314b1bc4987d1775cb9d313d9c"
+    },
+    {
+        "timestamp": "2026-02-27T19:08:01.385599",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "81",
+        "details": {
+            "name": "Casquinha de Aratu"
+        },
+        "changes": [
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/81_321.jpg"
+            },
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "mandatory_questions",
+                "old": null,
+                "new": []
+            },
+            {
+                "field": "flavor_multiplier",
+                "old": null,
+                "new": 1.0
+            },
+            {
+                "field": "flavor_group_id",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "81_321.jpg"
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            }
+        ],
+        "hash": "9f6549d0c885e6d40fe516d5e82ba6e85fd6311a531f993c8ade2588e70efabc"
+    },
+    {
+        "timestamp": "2026-02-27T19:15:25.926187",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "63",
+        "details": {
+            "name": "Ciobinha Petisco"
+        },
+        "changes": [
+            {
+                "field": "image_url",
+                "old": "",
+                "new": "/Produtos/Fotos/63_677.jpg"
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "63_677.jpg"
+            }
+        ],
+        "hash": "d6cbba27ed4afbc0cce286397f287061238db3bb1c2d9d0e38cb3437cc7b1cd2"
+    },
+    {
+        "timestamp": "2026-02-27T19:17:01.938630",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "80",
+        "details": {
+            "name": "Dadinho de Queijo Coalho ( 4 Uni. )"
+        },
+        "changes": [
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/80_323.jpg"
+            },
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "mandatory_questions",
+                "old": null,
+                "new": []
+            },
+            {
+                "field": "flavor_multiplier",
+                "old": null,
+                "new": 1.0
+            },
+            {
+                "field": "flavor_group_id",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "80_323.jpg"
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            }
+        ],
+        "hash": "624690942f246f4020bb422514eaba3b19a33bde9a8139b164bf314eecb47181"
+    },
+    {
+        "timestamp": "2026-02-27T19:19:03.008645",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "65",
+        "details": {
+            "name": "Esferas de Queijo do Reino ( 04 Uni.)"
+        },
+        "changes": [
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/65_724.jpg"
+            },
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "mandatory_questions",
+                "old": null,
+                "new": []
+            },
+            {
+                "field": "flavor_multiplier",
+                "old": null,
+                "new": 1.0
+            },
+            {
+                "field": "flavor_group_id",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "65_724.jpg"
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            }
+        ],
+        "hash": "bf9eac79c8d88abc87ba4b6ffe2282e27df316778390fc468bc054b523063248"
+    },
+    {
+        "timestamp": "2026-02-27T19:22:30.776373",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "82",
+        "details": {
+            "name": "Isca de peixe empanado (Gurjões de peixe)"
+        },
+        "changes": [
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "flavor_group_id",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "flavor_multiplier",
+                "old": null,
+                "new": 1.0
+            },
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "82_315.jpg"
+            },
+            {
+                "field": "mandatory_questions",
+                "old": [
+                    {
+                        "question": "Crocância",
+                        "type": "single_choice",
+                        "options": [
+                            "Normal",
+                            "Bem Crocante"
+                        ],
+                        "required": true
+                    }
+                ],
+                "new": [
+                    {
+                        "question": "Crocância",
+                        "type": "text",
+                        "options": [
+                            "Normal",
+                            "Bem Crocante"
+                        ],
+                        "required": true
+                    }
+                ]
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/82_315.jpg"
+            }
+        ],
+        "hash": "b00e0933a2ec167320c26abde0c07e086df72081d05c3b00a781e10d09dd8f24"
+    },
+    {
+        "timestamp": "2026-02-27T19:22:57.911390",
+        "action": "UPDATE",
+        "user": "eduardo",
+        "item_id": "82",
+        "details": {
+            "name": "Isca de peixe empanado (Gurjões de peixe)"
+        },
+        "changes": [
+            {
+                "field": "active",
+                "old": true,
+                "new": false
+            }
+        ],
+        "hash": "b00e0933a2ec167320c26abde0c07e086df72081d05c3b00a781e10d09dd8f24"
+    },
+    {
+        "timestamp": "2026-02-27T19:23:29.389717",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "78",
+        "details": {
+            "name": "Macaxeira Frita"
+        },
+        "changes": [
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "78_314.jpg"
+            },
+            {
+                "field": "flavor_group_id",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "mandatory_questions",
+                "old": null,
+                "new": []
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/78_314.jpg"
+            },
+            {
+                "field": "flavor_multiplier",
+                "old": null,
+                "new": 1.0
+            }
+        ],
+        "hash": "9274c764941bd5240d191f9a41ac56f10ec850903ca6d802c4772eca0611bf69"
+    },
+    {
+        "timestamp": "2026-02-27T19:24:16.658660",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "68",
+        "details": {
+            "name": "Mexilhões ao Molho de Vinho Branco"
+        },
+        "changes": [
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "68_1651.jpg"
+            },
+            {
+                "field": "flavor_group_id",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "mandatory_questions",
+                "old": null,
+                "new": []
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/68_1651.jpg"
+            },
+            {
+                "field": "flavor_multiplier",
+                "old": null,
+                "new": 1.0
+            }
+        ],
+        "hash": "3b932fd4574b918c063b4eee0416a9f42be4f7f6572e83945173c83d18609ac7"
+    },
+    {
+        "timestamp": "2026-02-27T19:28:53.115168",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "271",
+        "details": {
+            "name": "Ostras Frescas - 2 unidades"
+        },
+        "changes": [
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "271_958.jpg"
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/271_958.jpg"
+            }
+        ],
+        "hash": "28a82b66646765af3b9702743a219e114475187b4b5cac0a8a36b5bd0576a882"
+    },
+    {
+        "timestamp": "2026-02-27T19:31:27.673144",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "77",
+        "details": {
+            "name": "Ostras Gratinadas (molho de queijo) - 2 unidades"
+        },
+        "changes": [
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "77_489.jpg"
+            },
+            {
+                "field": "flavor_group_id",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "mandatory_questions",
+                "old": null,
+                "new": []
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/77_489.jpg"
+            },
+            {
+                "field": "flavor_multiplier",
+                "old": null,
+                "new": 1.0
+            }
+        ],
+        "hash": "88fe635e475d28b0638d6f67363d7077591a6f16a554bb97a9f5df8edba37319"
+    },
+    {
+        "timestamp": "2026-02-27T19:31:55.602091",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "69",
+        "details": {
+            "name": "Panelinha Nordestina"
+        },
+        "changes": [
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "69_1670.jpg"
+            },
+            {
+                "field": "flavor_group_id",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "mandatory_questions",
+                "old": null,
+                "new": []
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/69_1670.jpg"
+            },
+            {
+                "field": "flavor_multiplier",
+                "old": null,
+                "new": 1.0
+            }
+        ],
+        "hash": "58efebb94d3f1f08ab2dc6d6c8da7b3911fa6c08b8ab5b0b225e2a62644c4ab6"
+    },
+    {
+        "timestamp": "2026-02-27T19:33:59.880752",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "70",
+        "details": {
+            "name": "Pasteis de Cupim (6un.)"
+        },
+        "changes": [
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "70_1500.jpg"
+            },
+            {
+                "field": "flavor_group_id",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "mandatory_questions",
+                "old": null,
+                "new": []
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/70_1500.jpg"
+            },
+            {
+                "field": "flavor_multiplier",
+                "old": null,
+                "new": 1.0
+            }
+        ],
+        "hash": "4a3fa36532129b3251572dd85734bd5553b71697e7d94dca8e8ab083d9b4f78c"
+    },
+    {
+        "timestamp": "2026-02-27T19:34:31.183347",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "79",
+        "details": {
+            "name": "Pasteis de Queijo coalho  (6 unidades)"
+        },
+        "changes": [
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "79_307.jpg"
+            },
+            {
+                "field": "flavor_group_id",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "mandatory_questions",
+                "old": null,
+                "new": []
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/79_307.jpg"
+            },
+            {
+                "field": "flavor_multiplier",
+                "old": null,
+                "new": 1.0
+            }
+        ],
+        "hash": "c6d7f14d444c64024de4c3aacdab02b85ba2490eb86fb1ea3067310e3b5d7c14"
+    },
+    {
+        "timestamp": "2026-02-27T19:36:19.092297",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "71",
+        "details": {
+            "name": "Pastel de Camarão"
+        },
+        "changes": [
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "71_1500.jpg"
+            },
+            {
+                "field": "flavor_group_id",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "mandatory_questions",
+                "old": null,
+                "new": []
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/71_1500.jpg"
+            },
+            {
+                "field": "flavor_multiplier",
+                "old": null,
+                "new": 1.0
+            }
+        ],
+        "hash": "9e7d3571ce91e5935c0cd41f54d54396d45f9b322f79fa02ccaae3f3835a089a"
+    },
+    {
+        "timestamp": "2026-02-27T19:36:34.548949",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "83",
+        "details": {
+            "name": "Polvo a Pescador"
+        },
+        "changes": [
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "83_324.jpg"
+            },
+            {
+                "field": "flavor_group_id",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "mandatory_questions",
+                "old": null,
+                "new": []
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/83_324.jpg"
+            },
+            {
+                "field": "flavor_multiplier",
+                "old": null,
+                "new": 1.0
+            }
+        ],
+        "hash": "c6f567db6632d71910bcebfb8c08b7e000b4e6d0e20e92bba10e5b4dd0eb6e1a"
+    },
+    {
+        "timestamp": "2026-02-27T19:42:47.308420",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "73",
+        "details": {
+            "name": "Salada da Chef de Camarão"
+        },
+        "changes": [
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "73_1101.jpg"
+            },
+            {
+                "field": "flavor_group_id",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "mandatory_questions",
+                "old": null,
+                "new": []
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/73_1101.jpg"
+            },
+            {
+                "field": "flavor_multiplier",
+                "old": null,
+                "new": 1.0
+            }
+        ],
+        "hash": "d744fcf65c2d55ea084f64fcf175553760b3a3c54fb38a09f1b6f903e25f2d3d"
+    },
+    {
+        "timestamp": "2026-02-27T19:43:31.536437",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "74",
+        "details": {
+            "name": "Salada da Chef de Salmão"
+        },
+        "changes": [
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "74_899.jpg"
+            },
+            {
+                "field": "flavor_group_id",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "mandatory_questions",
+                "old": null,
+                "new": []
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/74_899.jpg"
+            },
+            {
+                "field": "flavor_multiplier",
+                "old": null,
+                "new": 1.0
+            }
+        ],
+        "hash": "02b57a166602a4d8bd611b6337e7fffbafea670da27018b22e891cba4f1b2c68"
+    },
+    {
+        "timestamp": "2026-02-27T19:46:24.196430",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "43",
+        "details": {
+            "name": "Realeza Marinha"
+        },
+        "changes": [
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "43_397.jpg"
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/43_397.jpg"
+            }
+        ],
+        "hash": "ed1800b89a69cf089c498376183c6f469f89b59fb5b6b0216a97f315169d133a"
+    },
+    {
+        "timestamp": "2026-02-27T19:46:56.411046",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "44",
+        "details": {
+            "name": "Vieiras"
+        },
+        "changes": [
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "44_728.jpg"
+            },
+            {
+                "field": "flavor_group_id",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "mandatory_questions",
+                "old": null,
+                "new": []
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/44_728.jpg"
+            },
+            {
+                "field": "flavor_multiplier",
+                "old": null,
+                "new": 1.0
+            }
+        ],
+        "hash": "89651008ecb61c2c0bc1e620c6092fa7e9cce92c34d6af5d99d7174fae3ba092"
+    },
+    {
+        "timestamp": "2026-02-27T19:49:43.097324",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "48",
+        "details": {
+            "name": "Agua Sem Gás Pet FRIGOBAR"
+        },
+        "changes": [
+            {
+                "field": "image",
+                "old": "48_1710.jpg",
+                "new": "48_199.jpg"
+            },
+            {
+                "field": "image_url",
+                "old": "/Produtos/Fotos/48_1710.jpg",
+                "new": "/Produtos/Fotos/48_199.jpg"
+            }
+        ],
+        "hash": "b45e7a42051b35136e1209877d355c4e5958764d30d263434fd273c93a648a82"
+    },
+    {
+        "timestamp": "2026-02-27T19:51:47.305048",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "50",
+        "details": {
+            "name": "Capsulas (Hospedes)"
+        },
+        "changes": [
+            {
+                "field": "image",
+                "old": "",
+                "new": "50_capsulas.jpg"
+            },
+            {
+                "field": "image_url",
+                "old": "",
+                "new": "/Produtos/Fotos/50_capsulas.jpg"
+            }
+        ],
+        "hash": "457dc9ab584bf8416cb1d1cf99e0decb5b59957555b6357c512357b816d38e58"
+    },
+    {
+        "timestamp": "2026-02-27T19:53:05.881149",
+        "action": "UPDATE",
+        "user": "eduardo",
+        "item_id": "55",
+        "details": {
+            "name": "Espumante Garibaldi Primicias Brut (CORTESIA)"
+        },
+        "changes": [
+            {
+                "field": "active",
+                "old": true,
+                "new": false
+            }
+        ],
+        "hash": "7836e4e6d45d91cbc91e807ff34067968d4dee384b463772842ee0ec4a757931"
+    },
+    {
+        "timestamp": "2026-02-27T19:55:05.068157",
+        "action": "DELETE",
+        "user": "eduardo",
+        "item_id": "55",
+        "details": {
+            "id": "55",
+            "name": "Espumante Garibaldi Primicias Brut (CORTESIA)",
+            "category": "Frigobar",
+            "price": 0.1,
+            "cost_price": 0.0,
+            "printer_id": "97e342f3-2ba7-4dc3-9afd-b299b4c7b777",
+            "should_print": false,
+            "description": "Espumante Garibaldi Primicias Brut cortesia.",
+            "service_fee_exempt": true,
+            "visible_virtual_menu": false,
+            "active": false,
+            "recipe": [
+                {
+                    "ingredient_id": "346",
+                    "qty": 1.0
+                }
+            ],
+            "ncm": "22041010",
+            "cest": "",
+            "transparency_tax": 27.0,
+            "fiscal_benefit_code": "",
+            "cfop": "5405",
+            "origin": "0",
+            "tax_situation": "500",
+            "icms_rate": 0.0,
+            "icms_base_reduction": 0.0,
+            "fcp_rate": 0.0,
+            "pis_cst": "01",
+            "pis_rate": 0.0,
+            "cofins_cst": "01",
+            "cofins_rate": 0.0,
+            "image": "55_1277.jpg",
+            "product_type": "standard",
+            "has_accompaniments": false,
+            "allowed_accompaniments": [],
+            "paused": false,
+            "image_url": "/Produtos/Fotos/55_1277.jpg",
+            "highlight": false,
+            "mandatory_questions": [],
+            "flavor_group_id": "",
+            "flavor_multiplier": 1.0,
+            "pause_reason": "",
+            "pause_start": "",
+            "pause_end": "",
+            "version": 2,
+            "hash": "6272d138ddcb080d9d7697320f8c153e232790a54643ce678f130adda8cd5988",
+            "last_updated": "2026-02-27T19:53:05.881039"
+        },
+        "changes": [],
+        "hash": "2bb2f93541028f4d5c2250e034938205e159668f6ab8270584af4d1ce8650e0e"
+    },
+    {
+        "timestamp": "2026-02-27T19:56:46.054029",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "56",
+        "details": {
+            "name": "Heineken FRIGOBAR"
+        },
+        "changes": [
+            {
+                "field": "image",
+                "old": "56_354.jpg",
+                "new": "56_726.jpg"
+            },
+            {
+                "field": "image_url",
+                "old": "/Produtos/Fotos/56_354.jpg",
+                "new": "/Produtos/Fotos/56_726.jpg"
+            }
+        ],
+        "hash": "bf63de1e63360c011e71098db1ae03c5d4d3172b6e5b04ee25553b956c246d06"
+    },
+    {
+        "timestamp": "2026-02-27T19:57:01.390995",
+        "action": "UPDATE",
+        "user": "eduardo",
+        "item_id": "57",
+        "details": {
+            "name": "Mini espumante Terra nova (Cortesia Hospedes)"
+        },
+        "changes": [
+            {
+                "field": "active",
+                "old": true,
+                "new": false
+            }
+        ],
+        "hash": "333f01ea98465185668cc7fbc44a218295b631fff3dcef99f731327c0bb49b68"
+    },
+    {
+        "timestamp": "2026-02-27T19:59:05.880549",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "45",
+        "details": {
+            "name": "Água com gás LATA FRIGOBAR"
+        },
+        "changes": [
+            {
+                "field": "image",
+                "old": "45_agua_com_gas_lata.jpg",
+                "new": "45_agua_minalba_com_gas_lata.jpg"
+            },
+            {
+                "field": "image_url",
+                "old": "/Produtos/Fotos/45_agua_com_gas_lata.jpg",
+                "new": "/Produtos/Fotos/45_agua_minalba_com_gas_lata.jpg"
+            }
+        ],
+        "hash": "e0699a06a1df169bee132783fac0ce266c40b2c9c435ab247300536886aaf329"
+    },
+    {
+        "timestamp": "2026-02-27T20:00:05.398602",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "279",
+        "details": {
+            "name": "Jantar Gold"
+        },
+        "changes": [
+            {
+                "field": "image",
+                "old": "",
+                "new": "279_1129.jpg"
+            },
+            {
+                "field": "image_url",
+                "old": "",
+                "new": "/Produtos/Fotos/279_1129.jpg"
+            }
+        ],
+        "hash": "5e984234a71606253dbb540e8a99b976938c1c1e01ef5ce40a4de59cd55e511c"
+    },
+    {
+        "timestamp": "2026-02-27T20:00:35.808137",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "280",
+        "details": {
+            "name": "Jantar Silver"
+        },
+        "changes": [
+            {
+                "field": "image",
+                "old": "",
+                "new": "280_1129.jpg"
+            },
+            {
+                "field": "image_url",
+                "old": "",
+                "new": "/Produtos/Fotos/280_1129.jpg"
+            }
+        ],
+        "hash": "fa8e5997a1972561c3b25a8a4f2935c20a414ee9b9f0ea298de97f7cbc2a3ff2"
+    },
+    {
+        "timestamp": "2026-02-27T20:01:25.492328",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "118",
+        "details": {
+            "name": "Arroz de Polvo (Individual)"
+        },
+        "changes": [
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "118_344.jpg"
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/118_344.jpg"
+            }
+        ],
+        "hash": "a476b46fa7ac6ca104b20157520cdf3370d29964c079287c3a95d20d0378c89c"
+    },
+    {
+        "timestamp": "2026-02-27T20:02:05.739838",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "85",
+        "details": {
+            "name": "Arrumadinho da chef (Individual)"
+        },
+        "changes": [
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "85_971.jpg"
+            },
+            {
+                "field": "flavor_group_id",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "mandatory_questions",
+                "old": null,
+                "new": []
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/85_971.jpg"
+            },
+            {
+                "field": "flavor_multiplier",
+                "old": null,
+                "new": 1.0
+            }
+        ],
+        "hash": "1c1a02877cae1917c54056c4e181722f9066804fc32a4753f57f8f7953e34be4"
+    },
+    {
+        "timestamp": "2026-02-27T20:02:32.153900",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "86",
+        "details": {
+            "name": "Bacalhau a Natas (Individual)"
+        },
+        "changes": [
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "86_1417.jpg"
+            },
+            {
+                "field": "flavor_group_id",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "mandatory_questions",
+                "old": null,
+                "new": []
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/86_1417.jpg"
+            },
+            {
+                "field": "flavor_multiplier",
+                "old": null,
+                "new": 1.0
+            }
+        ],
+        "hash": "36afa1686309c0145a09c521956d4bbbcaac0faaec3e1f7d263b9e667d35e548"
+    },
+    {
+        "timestamp": "2026-02-27T20:03:18.469600",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "87",
+        "details": {
+            "name": "Caldeirada de frutos do Mar (Individual)"
+        },
+        "changes": [
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "87_956.jpg"
+            },
+            {
+                "field": "flavor_group_id",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "mandatory_questions",
+                "old": null,
+                "new": []
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/87_956.jpg"
+            },
+            {
+                "field": "flavor_multiplier",
+                "old": null,
+                "new": 1.0
+            }
+        ],
+        "hash": "5f5e88ac9b752955ec2c9642867c47ec3a548b25f8d569b431d30aca662b7cd6"
+    },
+    {
+        "timestamp": "2026-02-27T20:04:02.287578",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "88",
+        "details": {
+            "name": "Carré de Cordeiro da Chefe (Individual)"
+        },
+        "changes": [
+            {
+                "field": "image",
+                "old": "",
+                "new": "88_768.jpg"
+            },
+            {
+                "field": "image_url",
+                "old": "",
+                "new": "/Produtos/Fotos/88_768.jpg"
+            }
+        ],
+        "hash": "10bf13992dc08ec9bf38446227d239cda30fbea39ec43a99f5f8057e905df3d9"
+    },
+    {
+        "timestamp": "2026-02-27T20:14:12.849692",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "89",
+        "details": {
+            "name": "Ciobinha Recheada com farofa de camarão (2 Pessoas)"
+        },
+        "changes": [
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "89_836.jpg"
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/89_836.jpg"
+            }
+        ],
+        "hash": "5ef2c95e675e028d4d1037244ed118d35960e2e4175b4fa1c82acb03e72a2b9d"
+    },
+    {
+        "timestamp": "2026-02-27T20:16:04.545805",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "91",
+        "details": {
+            "name": "Cupim na telha (2 Pessoas)"
+        },
+        "changes": [
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "91_1711.jpg"
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/91_1711.jpg"
+            }
+        ],
+        "hash": "be67c4989afb6b11ce0b9882e2ab72ee0a3bf378521e2736f40a3dec91a39fe6"
+    },
+    {
+        "timestamp": "2026-02-27T20:16:43.375962",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "93",
+        "details": {
+            "name": "Curry Mirathai (Individual Vegano)"
+        },
+        "changes": [
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "product_type",
+                "old": null,
+                "new": "standard"
+            },
+            {
+                "field": "flavor_group_id",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "cost_price",
+                "old": 1.5377,
+                "new": 1.538
+            },
+            {
+                "field": "flavor_multiplier",
+                "old": null,
+                "new": 1.0
+            },
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "has_accompaniments",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "image",
+                "old": null,
+                "new": "93_664.jpg"
+            },
+            {
+                "field": "mandatory_questions",
+                "old": null,
+                "new": []
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "allowed_accompaniments",
+                "old": null,
+                "new": []
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/93_664.jpg"
+            }
+        ],
+        "hash": "1993981ebb15aa4c1afcda29d4393b59ce719f08fab0fec5c408cbcf9646e8a0"
+    },
+    {
+        "timestamp": "2026-02-27T20:17:45.311772",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "92",
+        "details": {
+            "name": "Curry de Camarão (Individual)"
+        },
+        "changes": [
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "92_725.jpg"
+            },
+            {
+                "field": "flavor_group_id",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "mandatory_questions",
+                "old": null,
+                "new": []
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/92_725.jpg"
+            },
+            {
+                "field": "flavor_multiplier",
+                "old": null,
+                "new": 1.0
+            }
+        ],
+        "hash": "b11e8e95a005dec74de6f3f889992dd541292b0fa2e6402e53164ad4554376cb"
+    },
+    {
+        "timestamp": "2026-02-27T20:19:09.331346",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "123",
+        "details": {
+            "name": "Embalagem"
+        },
+        "changes": [
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "123_embalagem.jpg"
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/123_embalagem.jpg"
+            }
+        ],
+        "hash": "2f21bef31c668da835d8ae86721fcb81cc75d89488904d2b27db0a128b3b6aed"
+    },
+    {
+        "timestamp": "2026-02-27T20:19:53.496386",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "90",
+        "details": {
+            "name": "Cupim Individual"
+        },
+        "changes": [
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "90_340.jpg"
+            },
+            {
+                "field": "flavor_group_id",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "mandatory_questions",
+                "old": null,
+                "new": []
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/90_340.jpg"
+            },
+            {
+                "field": "flavor_multiplier",
+                "old": null,
+                "new": 1.0
+            }
+        ],
+        "hash": "d83187bcb28382b98a096b3021356f5babdd58e758967bf3a647340d85bc5a97"
+    },
+    {
+        "timestamp": "2026-02-27T20:20:20.681971",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "94",
+        "details": {
+            "name": "Fettuccine de camarão (Individual)"
+        },
+        "changes": [
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "94_578.jpg"
+            },
+            {
+                "field": "flavor_group_id",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "mandatory_questions",
+                "old": null,
+                "new": []
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/94_578.jpg"
+            },
+            {
+                "field": "flavor_multiplier",
+                "old": null,
+                "new": 1.0
+            }
+        ],
+        "hash": "2d2fdf510099a191aa684a7b6756b7db9d5cf3154e4a505d3e9eb47d56cd1144"
+    },
+    {
+        "timestamp": "2026-02-27T20:21:08.394830",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "111",
+        "details": {
+            "name": "Filé de peixe branco na folha de bananeira (individual)"
+        },
+        "changes": [
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "111_557.jpg"
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/111_557.jpg"
+            }
+        ],
+        "hash": "730848df26cd351d345300d8eda6fef0dee1a995f4ce40c581ecd2b704d2e771"
+    },
+    {
+        "timestamp": "2026-02-27T20:21:37.424938",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "112",
+        "details": {
+            "name": "Filé de peixe branco no molho velouté (Individual)"
+        },
+        "changes": [
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "112_689.jpg"
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/112_689.jpg"
+            }
+        ],
+        "hash": "7109bb7127a7429195c7857f6cdc4f36cfc4c5ecf4f6e0210778a1d80b9aa44d"
+    },
+    {
+        "timestamp": "2026-02-27T20:22:06.623905",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "122",
+        "details": {
+            "name": "Khao Mirapraia (Individual)"
+        },
+        "changes": [
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "122_325.jpg"
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/122_325.jpg"
+            }
+        ],
+        "hash": "7919651400bd128aa764804387b1fbdfdf45377337ff2b0df8ffa7352c049781"
+    },
+    {
+        "timestamp": "2026-02-27T20:23:45.054585",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "97",
+        "details": {
+            "name": "Lagosta Inteira Grelhada (2 Pessoas)"
+        },
+        "changes": [
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "97_796.jpg"
+            },
+            {
+                "field": "flavor_group_id",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "mandatory_questions",
+                "old": null,
+                "new": []
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/97_796.jpg"
+            },
+            {
+                "field": "flavor_multiplier",
+                "old": null,
+                "new": 1.0
+            }
+        ],
+        "hash": "a1347c858b8b3f882538128c9d6a9454995f123e8c341a28aada10ae22b29bf6"
+    },
+    {
+        "timestamp": "2026-02-27T20:32:18.296134",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "262",
+        "details": {
+            "name": "Mar de corais"
+        },
+        "changes": [
+            {
+                "field": "image",
+                "old": "",
+                "new": "262_556.jpg"
+            },
+            {
+                "field": "image_url",
+                "old": "",
+                "new": "/Produtos/Fotos/262_556.jpg"
+            }
+        ],
+        "hash": "2f75284bb092d27155de11c48e6b213d656283a7f563b4557891c09b30eab2e6"
+    },
+    {
+        "timestamp": "2026-02-27T20:32:34.828205",
+        "action": "UPDATE",
+        "user": "eduardo",
+        "item_id": "271",
+        "details": {
+            "name": "Ostras Frescas - 2 unidades"
+        },
+        "changes": [
+            {
+                "field": "active",
+                "old": true,
+                "new": false
+            }
+        ],
+        "hash": "28a82b66646765af3b9702743a219e114475187b4b5cac0a8a36b5bd0576a882"
+    },
+    {
+        "timestamp": "2026-02-27T20:34:02.705659",
+        "action": "DELETE",
+        "user": "eduardo",
+        "item_id": "62",
+        "details": {
+            "id": "62",
+            "name": "carne de sol tiras",
+            "category": "Entradas",
+            "price": 68.9,
+            "cost_price": 9.56,
+            "printer_id": "71e0b2b7-668d-45b3-b69a-d69ff63dc77a",
+            "should_print": true,
+            "description": "Suculentas tiras de carne de sol do sertão, aceboladas e servidas com macaxeira frita dourada e crocante.",
+            "service_fee_exempt": false,
+            "visible_virtual_menu": true,
+            "active": false,
+            "recipe": [],
+            "ncm": "21069090",
+            "cest": "",
+            "transparency_tax": 18.0,
+            "fiscal_benefit_code": "SEM CBENEF",
+            "cfop": "5101",
+            "origin": "0",
+            "tax_situation": "102",
+            "icms_rate": 0.0,
+            "icms_base_reduction": 0.0,
+            "fcp_rate": 0.0,
+            "pis_cst": "01",
+            "pis_rate": 0.0,
+            "cofins_cst": "01",
+            "cofins_rate": 0.0,
+            "paused": false,
+            "version": 2,
+            "hash": "44454aa2eb31862c1a80279374f6205068d20bc4ce21ebdcfb1ac662df150092",
+            "last_updated": "2026-02-26T13:21:52.289157"
+        },
+        "changes": [],
+        "hash": "243e772254f56c0fd52c0725b991164845af1ba963ebf3af0c7c356360c19350"
+    },
+    {
+        "timestamp": "2026-02-27T20:34:12.902581",
+        "action": "DELETE",
+        "user": "eduardo",
+        "item_id": "67",
+        "details": {
+            "id": "67",
+            "name": "Iscas de cupim",
+            "category": "Entradas",
+            "price": 89.9,
+            "cost_price": 0.0,
+            "printer_id": "71e0b2b7-668d-45b3-b69a-d69ff63dc77a",
+            "should_print": true,
+            "description": "Uma deliciosa porção de Iscas de cupim, ideal para abrir o apetite e compartilhar.",
+            "service_fee_exempt": false,
+            "visible_virtual_menu": true,
+            "active": false,
+            "recipe": [],
+            "ncm": "21069090",
+            "cest": "",
+            "transparency_tax": 18.0,
+            "fiscal_benefit_code": "SEM CBENEF",
+            "cfop": "5101",
+            "origin": "0",
+            "tax_situation": "102",
+            "icms_rate": 0.0,
+            "icms_base_reduction": 0.0,
+            "fcp_rate": 0.0,
+            "pis_cst": "01",
+            "pis_rate": 0.0,
+            "cofins_cst": "01",
+            "cofins_rate": 0.0,
+            "paused": false,
+            "version": 1,
+            "hash": "",
+            "last_updated": ""
+        },
+        "changes": [],
+        "hash": "92c2d5c4deb081ad2d2311c2ca39d10703dda6acd1df22c0f59a5f83b80c0b5e"
+    },
+    {
+        "timestamp": "2026-02-27T20:35:20.575595",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "99",
+        "details": {
+            "name": "Mar á Vista (Individual)"
+        },
+        "changes": [
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "99_957.jpg"
+            },
+            {
+                "field": "flavor_group_id",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "mandatory_questions",
+                "old": null,
+                "new": []
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/99_957.jpg"
+            },
+            {
+                "field": "flavor_multiplier",
+                "old": null,
+                "new": 1.0
+            }
+        ],
+        "hash": "c25214d77f7984ed1f46d69dafb8449d15cc4bd73edb33fc461b583267f0cdd0"
+    },
+    {
+        "timestamp": "2026-02-27T20:35:43.412218",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "101",
+        "details": {
+            "name": "Medalhão com risotto de champignon e molho especial (Individual)"
+        },
+        "changes": [
+            {
+                "field": "image",
+                "old": "",
+                "new": "101_893.jpg"
+            },
+            {
+                "field": "image_url",
+                "old": "",
+                "new": "/Produtos/Fotos/101_893.jpg"
+            }
+        ],
+        "hash": "7ffdcef2bf7a2c1d1103f035208c05ed88cf6a3e3622e4057cfd0a01bb9c571c"
+    },
+    {
+        "timestamp": "2026-02-27T20:36:07.777811",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "102",
+        "details": {
+            "name": "Medalhão de carne de sol (Individual)"
+        },
+        "changes": [
+            {
+                "field": "image",
+                "old": "",
+                "new": "102_925.jpg"
+            },
+            {
+                "field": "image_url",
+                "old": "",
+                "new": "/Produtos/Fotos/102_925.jpg"
+            }
+        ],
+        "hash": "fea28e2ad1dd2e705d46978d8611bc58d566fe01964e0f6f4df4f821f08a3e9a"
+    },
+    {
+        "timestamp": "2026-02-27T20:39:34.869406",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "103",
+        "details": {
+            "name": "Moqueca de Camarão (Individual)"
+        },
+        "changes": [
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/103_887.jpg"
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "flavor_multiplier",
+                "old": null,
+                "new": 1.0
+            },
+            {
+                "field": "mandatory_questions",
+                "old": null,
+                "new": []
+            },
+            {
+                "field": "flavor_group_id",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "103_887.jpg"
+            }
+        ],
+        "hash": "2e629df2e29c82ae35196584f46d0032236d9230fee73a39bc57785ca8e625f4"
+    },
+    {
+        "timestamp": "2026-02-27T20:40:14.572372",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "120",
+        "details": {
+            "name": "Moqueca de banana da terra (Individual Vegana)"
+        },
+        "changes": [
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "120_491.jpg"
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/120_491.jpg"
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            }
+        ],
+        "hash": "316e86a1536a03b0935b01b61ef4abf0b32a651b677cb72766b52345bb596fb1"
+    },
+    {
+        "timestamp": "2026-02-27T20:41:04.898289",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "121",
+        "details": {
+            "name": "Paella Tropical (Individual Vegana)"
+        },
+        "changes": [
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "121_490.jpg"
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/121_490.jpg"
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            }
+        ],
+        "hash": "4a182b85d05a0380d264a5ae93743596718a9b40bf28fee607fc5ade8152e4b1"
+    },
+    {
+        "timestamp": "2026-02-27T20:43:38.984783",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "148",
+        "details": {
+            "name": "Coca Cola Zero 350ml"
+        },
+        "changes": [
+            {
+                "field": "image",
+                "old": "148_221.jpg",
+                "new": "148_220.jpg"
+            },
+            {
+                "field": "image_url",
+                "old": "/Produtos/Fotos/148_221.jpg",
+                "new": "/Produtos/Fotos/148_220.jpg"
+            }
+        ],
+        "hash": "c3d4697e53e467180456b30e9180eeaf648e3196071273800e1deb543db91f12"
+    },
+    {
+        "timestamp": "2026-02-27T20:43:53.648141",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "149",
+        "details": {
+            "name": "Coca-Cola 350ml"
+        },
+        "changes": [
+            {
+                "field": "image",
+                "old": "149_220.jpg",
+                "new": "149_221.jpg"
+            },
+            {
+                "field": "image_url",
+                "old": "/Produtos/Fotos/149_220.jpg",
+                "new": "/Produtos/Fotos/149_221.jpg"
+            }
+        ],
+        "hash": "f410bd5140b7340689e46d884db2271c1e9f041758b324536e53624e15a09160"
+    },
+    {
+        "timestamp": "2026-02-27T20:46:42.462335",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "104",
+        "details": {
+            "name": "Parmegiana de Camarão (Individual)"
+        },
+        "changes": [
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "104_885.jpg"
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/104_885.jpg"
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            }
+        ],
+        "hash": "60258e084842606d310fd1568f00c9ae68ad600d1d6f6dbb82adf7f1700825ac"
+    },
+    {
+        "timestamp": "2026-02-27T20:47:04.695341",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "105",
+        "details": {
+            "name": "Parmegiana de Filé Mignon (Individual)"
+        },
+        "changes": [
+            {
+                "field": "image",
+                "old": "",
+                "new": "105_886.jpg"
+            },
+            {
+                "field": "image_url",
+                "old": "",
+                "new": "/Produtos/Fotos/105_886.jpg"
+            }
+        ],
+        "hash": "9f155e8e4c5af899ed58ad4696879f4a4be6d87396fd71037c9e9faa7740867d"
+    },
+    {
+        "timestamp": "2026-02-27T20:47:41.795647",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "106",
+        "details": {
+            "name": "Parmegiana de Peixe (Individual)"
+        },
+        "changes": [
+            {
+                "field": "image",
+                "old": "",
+                "new": "106_886.jpg"
+            },
+            {
+                "field": "image_url",
+                "old": "",
+                "new": "/Produtos/Fotos/106_886.jpg"
+            }
+        ],
+        "hash": "49b0dfbd1d97d2b7c617e11f03b13feae82a4b882fa17aad63c3e9f6e9bcc2fa"
+    },
+    {
+        "timestamp": "2026-02-27T20:48:04.964105",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "108",
+        "details": {
+            "name": "Peixe ao Molho de Camarão (Individual)"
+        },
+        "changes": [
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "108_889.jpg"
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/108_889.jpg"
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            }
+        ],
+        "hash": "7713dc949fe9a1b34e08c1ab6503c1927a0110a76f73b34d944e11a22c55f6bd"
+    },
+    {
+        "timestamp": "2026-02-27T20:48:36.113239",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "107",
+        "details": {
+            "name": "Peixada Pernambucana  (Individual)"
+        },
+        "changes": [
+            {
+                "field": "image",
+                "old": "",
+                "new": "107_888.jpg"
+            },
+            {
+                "field": "image_url",
+                "old": "",
+                "new": "/Produtos/Fotos/107_888.jpg"
+            }
+        ],
+        "hash": "09ba28f84df856bf5dc1eb8c2cc5ac7a05de1fc532c98a0fe8b97f6b9a27ef39"
+    },
+    {
+        "timestamp": "2026-02-27T20:49:47.030475",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "109",
+        "details": {
+            "name": "Peixe na Crosta de Banana (Individual)"
+        },
+        "changes": [
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "109_1436.jpg"
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/109_1436.jpg"
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            }
+        ],
+        "hash": "7068ca373307c53b5ce8131367f266f9f8b8a4a23e7b4f417f4d60f233c1393a"
+    },
+    {
+        "timestamp": "2026-02-27T20:50:25.122736",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "117",
+        "details": {
+            "name": "Peixe na farofa de Castanha (Individual)"
+        },
+        "changes": [
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "117_345.jpg"
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/117_345.jpg"
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            }
+        ],
+        "hash": "a764219112262dc9c344adc372568530dd8cd2a20a7805a98c8bf80f63088628"
+    },
+    {
+        "timestamp": "2026-02-27T20:52:16.472106",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "113",
+        "details": {
+            "name": "Polvo a Provençal (Individual)"
+        },
+        "changes": [
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "113_906.jpg"
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/113_906.jpg"
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            }
+        ],
+        "hash": "2646f685f3d185bbfff2ea7b7ef2db3ecd990fb14d9c8fd951b15363185d2367"
+    },
+    {
+        "timestamp": "2026-02-27T20:52:41.654032",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "114",
+        "details": {
+            "name": "Risotto de Camarão (Individual)"
+        },
+        "changes": [
+            {
+                "field": "image",
+                "old": "",
+                "new": "114_603.jpg"
+            },
+            {
+                "field": "image_url",
+                "old": "",
+                "new": "/Produtos/Fotos/114_603.jpg"
+            }
+        ],
+        "hash": "fda5a22a7d3b17f1f40d96cbdadfd72e62b1471ca81ad949c37606d795f9e631"
+    },
+    {
+        "timestamp": "2026-02-27T20:53:29.084655",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "115",
+        "details": {
+            "name": "Salmão com Spaghetti ao molho pesto (Individual)"
+        },
+        "changes": [
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "115_894.jpg"
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/115_894.jpg"
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            }
+        ],
+        "hash": "c7f25c476c7e8c14f8d354ef6d8b828e6c99cdf0e6ec47b87429b073b45a5500"
+    },
+    {
+        "timestamp": "2026-02-27T20:54:10.456987",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "116",
+        "details": {
+            "name": "Terra e Mar: Do Mar ao Sertão(Individual)"
+        },
+        "changes": [
+            {
+                "field": "image",
+                "old": "",
+                "new": "116_527.jpg"
+            },
+            {
+                "field": "image_url",
+                "old": "",
+                "new": "/Produtos/Fotos/116_527.jpg"
+            }
+        ],
+        "hash": "712863f7994047ba231ef55e133fac8e842a4d479cf4881c9ca65c6eb40e57d6"
+    },
+    {
+        "timestamp": "2026-02-27T20:56:16.979520",
+        "action": "DELETE",
+        "user": "eduardo",
+        "item_id": "157",
+        "details": {
+            "id": "157",
+            "name": "Schweppes Tonica",
+            "category": "Refrigerante",
+            "price": 8.9,
+            "cost_price": 0.0,
+            "printer_id": "97e342f3-2ba7-4dc3-9afd-b299b4c7b777",
+            "should_print": true,
+            "description": "Refrigerante Schweppes Tonica refrescante.",
+            "service_fee_exempt": false,
+            "visible_virtual_menu": true,
+            "active": false,
+            "recipe": [
+                {
+                    "ingredient_id": "329",
+                    "qty": 1.0
+                }
+            ],
+            "ncm": "22030000",
+            "cest": "300700",
+            "transparency_tax": 27.0,
+            "fiscal_benefit_code": "",
+            "cfop": "5405",
+            "origin": "0",
+            "tax_situation": "500",
+            "icms_rate": 0.0,
+            "icms_base_reduction": 0.0,
+            "fcp_rate": 0.0,
+            "pis_cst": "06",
+            "pis_rate": 0.0,
+            "cofins_cst": "06",
+            "cofins_rate": 0.0,
+            "image": "157_227.jpg",
+            "mandatory_questions": [],
+            "flavor_group_id": "",
+            "flavor_multiplier": 1.0,
+            "product_type": "standard",
+            "has_accompaniments": false,
+            "allowed_accompaniments": [],
+            "paused": false,
+            "image_url": "/Produtos/Fotos/157_227.jpg",
+            "highlight": false,
+            "pause_reason": "",
+            "pause_start": "",
+            "pause_end": "",
+            "version": 1,
+            "hash": "",
+            "last_updated": ""
+        },
+        "changes": [],
+        "hash": "4e826278bdc9adf220ee466b6e8d41a1d1cd8b93470fc918f775f31a456ec888"
+    },
+    {
+        "timestamp": "2026-02-27T20:56:37.065119",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "158",
+        "details": {
+            "name": "Sprite 350ml"
+        },
+        "changes": [
+            {
+                "field": "image",
+                "old": "158_sprite.jpg",
+                "new": "158_223.jpg"
+            },
+            {
+                "field": "image_url",
+                "old": "/Produtos/Fotos/158_sprite.jpg",
+                "new": "/Produtos/Fotos/158_223.jpg"
+            }
+        ],
+        "hash": "23129223641e6424ee6627225053e3bfdca69ba52643db84d4d2aebc2e3248ac"
+    },
+    {
+        "timestamp": "2026-02-27T20:58:35.681555",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "125",
+        "details": {
+            "name": "Banoffe"
+        },
+        "changes": [
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "125_607.jpg"
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/125_607.jpg"
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            }
+        ],
+        "hash": "a28c3f104636e2f15b8964b9bf930a8ac4dc60939fae8813243f22e2eb1d8f51"
+    },
+    {
+        "timestamp": "2026-02-27T20:59:47.218080",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "132",
+        "details": {
+            "name": "Cocada de forno da casa"
+        },
+        "changes": [
+            {
+                "field": "image",
+                "old": "",
+                "new": "132_351.jpg"
+            },
+            {
+                "field": "image_url",
+                "old": "",
+                "new": "/Produtos/Fotos/132_351.jpg"
+            }
+        ],
+        "hash": "e09bd13f49635d37aa52ba13a60a9a1b4138f00b0110e1c65bfd4db59b79a315"
+    },
+    {
+        "timestamp": "2026-02-27T21:00:34.780027",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "127",
+        "details": {
+            "name": "Sorvete Artesanal de Doce de Leite"
+        },
+        "changes": [
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "127_631.jpg"
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/127_631.jpg"
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            }
+        ],
+        "hash": "a31451c44ea536e2346611f41579dc795ae65bff4e31f8c947b8e943ce1bef20"
+    },
+    {
+        "timestamp": "2026-02-27T21:02:14.019999",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "128",
+        "details": {
+            "name": "Sorvete Artesenal de Castanha"
+        },
+        "changes": [
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "128_880.jpg"
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/128_880.jpg"
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            }
+        ],
+        "hash": "5f4f996b5f4cfdbd497f743115347b79b1ab9b9d3b9e2904ba7ac3b4e32f65ec"
+    },
+    {
+        "timestamp": "2026-02-27T21:03:18.816693",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "129",
+        "details": {
+            "name": "Sorvete De Queijo Do Reino"
+        },
+        "changes": [
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": "",
+                "new": "129_1650.jpg"
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": "/Produtos/Fotos/129_1650.jpg"
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            }
+        ],
+        "hash": "97eb7709ecc539492dc892b69ba9e163e5f8ceea586771cadcd1fab200f1eb55"
+    },
+    {
+        "timestamp": "2026-02-27T21:03:59.679524",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "47",
+        "details": {
+            "name": "Agua Sem Gás Pet"
+        },
+        "changes": [
+            {
+                "field": "image",
+                "old": "/Produtos/Fotos/47_199.jpg",
+                "new": "47_199.jpg"
+            }
+        ],
+        "hash": "7f461bdfae75bbcfd078b3776f2e91dea8645ff5c75f33bb62ab58064d0127c3"
+    },
+    {
+        "timestamp": "2026-02-27T21:04:23.956270",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "136",
+        "details": {
+            "name": "Agua Sem Gás Pet 500ml"
+        },
+        "changes": [
+            {
+                "field": "image",
+                "old": "136_1710.jpg",
+                "new": "136_199.jpg"
+            },
+            {
+                "field": "image_url",
+                "old": "/Produtos/Fotos/136_1710.jpg",
+                "new": "/Produtos/Fotos/136_199.jpg"
+            }
+        ],
+        "hash": "5444dc444700ad329dc8cbc016cc4ac5269e7c6ac936f139dfa54e4cf669f61e"
+    },
+    {
+        "timestamp": "2026-02-27T21:05:44.777011",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "46",
+        "details": {
+            "name": "Agua com gás Pet"
+        },
+        "changes": [
+            {
+                "field": "image",
+                "old": "",
+                "new": "46_202.jpg"
+            },
+            {
+                "field": "image_url",
+                "old": "",
+                "new": "/Produtos/Fotos/46_202.jpg"
+            }
+        ],
+        "hash": "5ce1337a9b98fcd180c4d340eb5454c104a927af4804a3b44baa0d467c5e9ffb"
+    },
+    {
+        "timestamp": "2026-02-27T21:06:44.106133",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "135",
+        "details": {
+            "name": "Agua sem Gás 275ml"
+        },
+        "changes": [
+            {
+                "field": "image",
+                "old": "/Produtos/Fotos/135_1089.jpg",
+                "new": "135_1089.jpg"
+            }
+        ],
+        "hash": "7bc1f45208f9d5f06ac9b6885dc54a923e92296ab47e9a2161954966c965108d"
+    },
+    {
+        "timestamp": "2026-02-27T21:07:59.823408",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "2000",
+        "details": {
+            "name": "Suco Jarra"
+        },
+        "changes": [
+            {
+                "field": "image",
+                "old": "2000_266.jpg",
+                "new": "2000_267.jpg"
+            },
+            {
+                "field": "image_url",
+                "old": "/Produtos/Fotos/2000_266.jpg",
+                "new": "/Produtos/Fotos/2000_267.jpg"
+            }
+        ],
+        "hash": "239dc080a98071907a329f64fbecbe573d61962d55cf5861bb092d9a112c8c91"
+    },
+    {
+        "timestamp": "2026-02-27T21:08:20.006063",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "142",
+        "details": {
+            "name": "Água de Coco"
+        },
+        "changes": [
+            {
+                "field": "image",
+                "old": "142_2_2_203.jpg",
+                "new": "142_203.jpg"
+            },
+            {
+                "field": "image_url",
+                "old": "/Produtos/Fotos/142_2_2_203.jpg",
+                "new": "/Produtos/Fotos/142_203.jpg"
+            }
+        ],
+        "hash": "0c609710d670083c8997a1c4ad9586e2e456448486ae2d53a27a8d6d6e0d1db2"
+    },
+    {
+        "timestamp": "2026-02-27T21:08:56.821594",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "170",
+        "details": {
+            "name": "Espumante Casa Perini Aquarela"
+        },
+        "changes": [
+            {
+                "field": "image",
+                "old": "170_aquarela.png",
+                "new": "170_699.jpg"
+            },
+            {
+                "field": "image_url",
+                "old": "/Produtos/Fotos/170_aquarela.png",
+                "new": "/Produtos/Fotos/170_699.jpg"
+            }
+        ],
+        "hash": "d7f138adeafb57ba64b331e9755934e3b1372300b6030905c99aef8f03a213e8"
+    },
+    {
+        "timestamp": "2026-02-27T21:10:19.388996",
+        "action": "UPDATE",
+        "user": "eduardo",
+        "item_id": "38",
+        "details": {
+            "name": "Casquinha de ouriço do mar (comida exótica - ver disponibilidade)"
+        },
+        "changes": [
+            {
+                "field": "active",
+                "old": false,
+                "new": true
+            }
+        ],
+        "hash": "e23ba7c20cc397d46007262456baf98d4d224b4237481d1af70c8dfe24954078"
+    },
+    {
+        "timestamp": "2026-02-27T21:10:45.788797",
+        "action": "UPDATE",
+        "user": "eduardo",
+        "item_id": "104",
+        "details": {
+            "name": "Parmegiana de Camarão (Individual)"
+        },
+        "changes": [
+            {
+                "field": "active",
+                "old": false,
+                "new": true
+            }
+        ],
+        "hash": "60258e084842606d310fd1568f00c9ae68ad600d1d6f6dbb82adf7f1700825ac"
+    },
+    {
+        "timestamp": "2026-02-27T21:13:06.318320",
+        "action": "UPDATE",
+        "user": "eduardo",
+        "item_id": "109",
+        "details": {
+            "name": "Peixe na Crosta de Banana (Individual)"
+        },
+        "changes": [
+            {
+                "field": "active",
+                "old": false,
+                "new": true
+            }
+        ],
+        "hash": "7068ca373307c53b5ce8131367f266f9f8b8a4a23e7b4f417f4d60f233c1393a"
+    },
+    {
+        "timestamp": "2026-02-27T21:13:22.558384",
+        "action": "UPDATE",
+        "user": "eduardo",
+        "item_id": "109",
+        "details": {
+            "name": "Peixe na Crosta de Banana (Individual)"
+        },
+        "changes": [
+            {
+                "field": "active",
+                "old": true,
+                "new": false
+            }
+        ],
+        "hash": "7068ca373307c53b5ce8131367f266f9f8b8a4a23e7b4f417f4d60f233c1393a"
+    },
+    {
+        "timestamp": "2026-02-27T21:17:28.765577",
+        "action": "UPDATE",
+        "user": "eduardo",
+        "item_id": "2005",
+        "details": {
+            "name": "Vitamina"
+        },
+        "changes": [
+            {
+                "field": "active",
+                "old": true,
+                "new": false
+            }
+        ],
+        "hash": "9f796bdd7fc28a4708ad467a5bf28bdfd2badd3dccface6da083679f100c8ea8"
+    },
+    {
+        "timestamp": "2026-02-27T21:17:36.159447",
+        "action": "UPDATE",
+        "user": "eduardo",
+        "item_id": "276",
+        "details": {
+            "name": "Bolo Especial"
+        },
+        "changes": [
+            {
+                "field": "active",
+                "old": true,
+                "new": false
+            }
+        ],
+        "hash": "6993e018b1b2ec6682b79d9ea659031dc5da3ad57a4eb90fcdb3f1159552506f"
+    },
+    {
+        "timestamp": "2026-02-27T21:17:46.008715",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "41",
+        "details": {
+            "name": "Cinzeiro (Lançar pra chegar na Mesa)"
+        },
+        "changes": [
+            {
+                "field": "allowed_accompaniments",
+                "old": null,
+                "new": []
+            },
+            {
+                "field": "pause_start",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "mandatory_questions",
+                "old": null,
+                "new": []
+            },
+            {
+                "field": "pause_end",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "image",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "has_accompaniments",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "visible_virtual_menu",
+                "old": true,
+                "new": false
+            },
+            {
+                "field": "image_url",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "pause_reason",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "highlight",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "product_type",
+                "old": null,
+                "new": "standard"
+            },
+            {
+                "field": "flavor_multiplier",
+                "old": null,
+                "new": 1.0
+            },
+            {
+                "field": "flavor_group_id",
+                "old": null,
+                "new": ""
+            }
+        ],
+        "hash": "95baa07a18743653d11974f9120ad353f18f23ca370f5fc882b6e5eeb1026230"
+    },
+    {
+        "timestamp": "2026-02-27T21:17:54.667922",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "41",
+        "details": {
+            "name": "Cinzeiro (Lançar pra chegar na Mesa)"
+        },
+        "changes": [
+            {
+                "field": "service_fee_exempt",
+                "old": false,
+                "new": true
+            }
+        ],
+        "hash": "95baa07a18743653d11974f9120ad353f18f23ca370f5fc882b6e5eeb1026230"
+    },
+    {
+        "timestamp": "2026-02-27T21:18:09.069000",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "32",
+        "details": {
+            "name": "Couvert Artistico (som ao vivo ou dj)"
+        },
+        "changes": [
+            {
+                "field": "image",
+                "old": "32_440.jpg",
+                "new": "/Produtos/Fotos/32_440.jpg"
+            }
+        ],
+        "hash": "96f241ab5f96c3917985eb7c62023e610b4c9c799e81c97a81260f34b54bf6c2"
+    },
+    {
+        "timestamp": "2026-02-27T21:23:43.930341",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "37",
+        "details": {
+            "name": "Arroz Havaiano (Individual)"
+        },
+        "changes": [
+            {
+                "field": "image",
+                "old": "37_332.jpg",
+                "new": "/Produtos/Fotos/37_332.jpg"
+            },
+            {
+                "field": "highlight",
+                "old": false,
+                "new": true
+            }
+        ],
+        "hash": "0737a3b7a4f96f639b5448101f0c545ab0ab946c6d8435c0847b42c2b5d8a0ed"
+    }
+]

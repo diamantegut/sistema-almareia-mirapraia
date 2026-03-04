@@ -4835,21 +4835,6 @@
         "last_updated": ""
     },
     {
-        "id": "293",
-        "name": "Rum Montilla",
-        "department": "Estoques",
-        "unit": "Litros",
-        "price": 0.0,
-        "suppliers": [
-            "Estoque Inicial"
-        ],
-        "category": "Bebidas Quentes",
-        "min_stock": 0.0,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
         "id": "294",
         "name": "Smirnoff Vodka",
         "department": "Estoques",
@@ -4937,17 +4922,26 @@
     {
         "id": "299",
         "name": "Whisky Jack Daniels Old",
-        "department": "Estoques",
+        "department": "Serviço",
         "unit": "Litros",
-        "price": 0.0,
+        "price": 148.58,
         "suppliers": [
             "Estoque Inicial"
         ],
         "category": "Bebidas Quentes",
         "min_stock": 0.0,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
+        "version": 2,
+        "hash": "bb087b0e040051b1bac5b4c0d1665a85428859ddff7f916cc3f5222083941b34",
+        "last_updated": "2026-02-23T16:47:40.869342",
+        "package_size": 1.0,
+        "purchase_unit": "",
+        "frequency": "Sem Frequência",
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": ""
     },
     {
         "id": "300",
@@ -4972,7 +4966,7 @@
     },
     {
         "id": "303",
-        "name": "Whysky Old Parr 12 Anos",
+        "name": "Whisky Old Parr 12 Anos",
         "department": "Recepção",
         "unit": "Litros",
         "price": 159.64,
@@ -4986,13 +4980,18 @@
         "purchase_unit": "unidade",
         "frequency": "Quinzenal",
         "is_internal": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
+        "version": 2,
+        "hash": "1e02a7341b90fc7fe823e21efab2c5b071abb87f8006bd4c6bc917286ed2e781",
+        "last_updated": "2026-03-02T12:13:53.150861",
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": ""
     },
     {
         "id": "304",
-        "name": "Whysky Red Label",
+        "name": "Whisky Red Label",
         "department": "Serviço",
         "unit": "Litros",
         "price": 98.9,
@@ -5006,9 +5005,14 @@
         "purchase_unit": "unidade",
         "frequency": "Sem Frequência",
         "is_internal": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
+        "version": 2,
+        "hash": "8c83c30b562fa91182e695e3cc74a84bbf8a8c884819fe9eb3f940f0f71ec95c",
+        "last_updated": "2026-03-02T12:14:57.399092",
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": ""
     },
     {
         "id": "306",
@@ -5469,17 +5473,26 @@
     {
         "id": "332",
         "name": "Corona Long Neck (BAR)",
-        "department": "Estoques",
+        "department": "Serviço",
         "unit": "Unidades",
         "price": 7.5,
         "suppliers": [
             "Estoque Inicial"
         ],
         "category": "Cervejas.",
-        "min_stock": 0.0,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
+        "min_stock": 60.0,
+        "version": 2,
+        "hash": "8a63014b6bc1d722abd032a8b413b0074df48e7bf050681ce291653ae8a6695b",
+        "last_updated": "2026-03-01T12:00:42.609731",
+        "package_size": 1.0,
+        "purchase_unit": "",
+        "frequency": "Sem Frequência",
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": ""
     },
     {
         "id": "333",
@@ -6790,9 +6803,9 @@
         "icms_rate": 0.0,
         "anp_code": "",
         "cfop_default": "",
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
+        "version": 3,
+        "hash": "3319633ee4c5b50bdfa1e3bbe72e9e1c43f006e7069bed3b5acaeb5a0851dcfa",
+        "last_updated": "2026-02-21T14:27:08.768004"
     },
     {
         "id": "415",
@@ -8014,8 +8027,8 @@
     },
     {
         "id": "490",
-        "name": "Água sem gás Pet 500ml",
-        "department": "Estoques",
+        "name": "Água sem gás Pet 500ml (Governança)",
+        "department": "Governança",
         "unit": "Unidades",
         "price": 1.78,
         "suppliers": [
@@ -8023,9 +8036,18 @@
         ],
         "category": "Governança",
         "min_stock": 0.0,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
+        "version": 2,
+        "hash": "5ac5d6230c279fd985ca8e04420be89677e50451b77c80ab97780f92429680ad",
+        "last_updated": "2026-03-02T10:50:11.246887",
+        "package_size": 1.0,
+        "purchase_unit": "",
+        "frequency": "Sem Frequência",
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": ""
     },
     {
         "id": "491",
@@ -8909,623 +8931,6 @@
             "Estoque Inicial"
         ],
         "category": "Governança",
-        "min_stock": 0.0,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "548",
-        "name": "Abridores",
-        "department": "Serviço",
-        "unit": "Unidades",
-        "price": 80.0,
-        "suppliers": [
-            "MERCADO LIVRE"
-        ],
-        "category": "Inventario",
-        "min_stock": 20.0,
-        "package_size": 1.0,
-        "purchase_unit": "unidadde",
-        "frequency": "Mensal",
-        "is_internal": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "549",
-        "name": "Amolador de faca",
-        "department": "Cozinha",
-        "unit": "Unidades",
-        "price": 30.0,
-        "suppliers": [
-            "MERCADO LIVRE"
-        ],
-        "category": "Inventario",
-        "min_stock": 1.0,
-        "package_size": 1.0,
-        "purchase_unit": "unidadde",
-        "frequency": "Sem Frequência",
-        "is_internal": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "550",
-        "name": "Armadilha de Mosca",
-        "department": "Cozinha",
-        "unit": "Unidades",
-        "price": 532.62,
-        "suppliers": [
-            "MERCADO LIVRE"
-        ],
-        "category": "Inventario",
-        "min_stock": 2.0,
-        "package_size": 1.0,
-        "purchase_unit": "unidadde",
-        "frequency": "Sem Frequência",
-        "is_internal": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "551",
-        "name": "Bailarina",
-        "department": "Serviço",
-        "unit": "Unidades",
-        "price": 15.0,
-        "suppliers": [
-            "MERCADO LIVRE"
-        ],
-        "category": "Inventario",
-        "min_stock": 2.0,
-        "package_size": 1.0,
-        "purchase_unit": "unidadde",
-        "frequency": "Sem Frequência",
-        "is_internal": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "552",
-        "name": "Balança de ate 30kg",
-        "department": "Estoque",
-        "unit": "Unidades",
-        "price": 150.0,
-        "suppliers": [
-            "MERCADO LIVRE"
-        ],
-        "category": "Inventario",
-        "min_stock": 3.0,
-        "package_size": 1.0,
-        "purchase_unit": "unidadde",
-        "frequency": "Sem Frequência",
-        "is_internal": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "553",
-        "name": "Balde de gelo médio",
-        "department": "Serviço",
-        "unit": "Unidades",
-        "price": 28.29,
-        "suppliers": [
-            "MERCADO LIVRE"
-        ],
-        "category": "Inventario",
-        "min_stock": 24.0,
-        "package_size": 1.0,
-        "purchase_unit": "unidadde",
-        "frequency": "Sem Frequência",
-        "is_internal": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "554",
-        "name": "Balde de gelo pequeno",
-        "department": "Serviço",
-        "unit": "Unidades",
-        "price": 15.0,
-        "suppliers": [
-            "MERCADO LIVRE"
-        ],
-        "category": "Inventario",
-        "min_stock": 24.0,
-        "package_size": 1.0,
-        "purchase_unit": "unidadde",
-        "frequency": "Sem Frequência",
-        "is_internal": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "555",
-        "name": "Balde de plático grande 5L",
-        "department": "Cozinha",
-        "unit": "Unidades",
-        "price": 30.0,
-        "suppliers": [
-            "MERCADO LIVRE"
-        ],
-        "category": "Inventario",
-        "min_stock": 2.0,
-        "package_size": 1.0,
-        "purchase_unit": "unidadde",
-        "frequency": "Sem Frequência",
-        "is_internal": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "556",
-        "name": "Bandeja de madeira",
-        "department": "Cozinha",
-        "unit": "Unidades",
-        "price": 15.0,
-        "suppliers": [
-            "MERCADO LIVRE"
-        ],
-        "category": "Inventario",
-        "min_stock": 20.0,
-        "package_size": 1.0,
-        "purchase_unit": "unidadde",
-        "frequency": "Sem Frequência",
-        "is_internal": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "557",
-        "name": "Bandeja de metal pequena",
-        "department": "Serviço",
-        "unit": "Unidades",
-        "price": 30.0,
-        "suppliers": [
-            "MERCADO LIVRE"
-        ],
-        "category": "Inventario",
-        "min_stock": 8.0,
-        "package_size": 1.0,
-        "purchase_unit": "unidadde",
-        "frequency": "Sem Frequência",
-        "is_internal": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "558",
-        "name": "Bandeja de Tres Camadas",
-        "department": "Cozinha",
-        "unit": "Unidades",
-        "price": 60.0,
-        "suppliers": [
-            "MERCADO LIVRE"
-        ],
-        "category": "Inventario",
-        "min_stock": 0.0,
-        "package_size": 1.0,
-        "purchase_unit": "unidadde",
-        "frequency": "Sem Frequência",
-        "is_internal": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "559",
-        "name": "Bandeja Flutuante",
-        "department": "Serviço",
-        "unit": "Unidades",
-        "price": 440.0,
-        "suppliers": [
-            "MERCADO LIVRE"
-        ],
-        "category": "Inventario",
-        "min_stock": 1.0,
-        "package_size": 1.0,
-        "purchase_unit": "unidadde",
-        "frequency": "Sem Frequência",
-        "is_internal": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "560",
-        "name": "Bandeja grande de metal",
-        "department": "Serviço",
-        "unit": "Unidades",
-        "price": 40.0,
-        "suppliers": [
-            "MERCADO LIVRE"
-        ],
-        "category": "Inventario",
-        "min_stock": 3.0,
-        "package_size": 1.0,
-        "purchase_unit": "unidadde",
-        "frequency": "Sem Frequência",
-        "is_internal": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "561",
-        "name": "Batedor manual",
-        "department": "Cozinha",
-        "unit": "Unidades",
-        "price": 8.0,
-        "suppliers": [
-            "MERCADO LIVRE"
-        ],
-        "category": "Inventario",
-        "min_stock": 4.0,
-        "package_size": 1.0,
-        "purchase_unit": "unidadde",
-        "frequency": "Sem Frequência",
-        "is_internal": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "562",
-        "name": "Bico de Maçarico",
-        "department": "Estoque",
-        "unit": "Unidades",
-        "price": 39.0,
-        "suppliers": [
-            "MERCADO LIVRE"
-        ],
-        "category": "Inventario",
-        "min_stock": 3.0,
-        "package_size": 1.0,
-        "purchase_unit": "unidadde",
-        "frequency": "Sem Frequência",
-        "is_internal": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "563",
-        "name": "Bisnaga para Molho P",
-        "department": "Cozinha",
-        "unit": "Unidades",
-        "price": 2.0,
-        "suppliers": [
-            "MERCADO LIVRE"
-        ],
-        "category": "Inventario",
-        "min_stock": 10.0,
-        "package_size": 1.0,
-        "purchase_unit": "unidadde",
-        "frequency": "Sem Frequência",
-        "is_internal": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "564",
-        "name": "Bisnagas Para Molhos G",
-        "department": "Cozinha",
-        "unit": "Unidades",
-        "price": 10.0,
-        "suppliers": [
-            "MERCADO LIVRE"
-        ],
-        "category": "Inventario",
-        "min_stock": 10.0,
-        "package_size": 1.0,
-        "purchase_unit": "unidadde",
-        "frequency": "Sem Frequência",
-        "is_internal": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "565",
-        "name": "Boleador",
-        "department": "Cozinha",
-        "unit": "Unidades",
-        "price": 12.0,
-        "suppliers": [
-            "MERCADO LIVRE"
-        ],
-        "category": "Inventario",
-        "min_stock": 2.0,
-        "package_size": 1.0,
-        "purchase_unit": "unidadde",
-        "frequency": "Sem Frequência",
-        "is_internal": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "566",
-        "name": "Bule de aço inox",
-        "department": "Cozinha",
-        "unit": "Unidades",
-        "price": 13.0,
-        "suppliers": [
-            "MERCADO LIVRE"
-        ],
-        "category": "Inventario",
-        "min_stock": 19.0,
-        "package_size": 1.0,
-        "purchase_unit": "unidadde",
-        "frequency": "Sem Frequência",
-        "is_internal": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "567",
-        "name": "Caldeirão de inox",
-        "department": "Cozinha",
-        "unit": "Unidades",
-        "price": 110.0,
-        "suppliers": [
-            "MERCADO LIVRE"
-        ],
-        "category": "Inventario",
-        "min_stock": 0.0,
-        "package_size": 1.0,
-        "purchase_unit": "unidadde",
-        "frequency": "Sem Frequência",
-        "is_internal": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "568",
-        "name": "Camisinha para cerveja",
-        "department": "Estoque",
-        "unit": "Unidades",
-        "price": 15.0,
-        "suppliers": [
-            "MERCADO LIVRE"
-        ],
-        "category": "Inventario",
-        "min_stock": 24.0,
-        "package_size": 1.0,
-        "purchase_unit": "caixa",
-        "frequency": "Sem Frequência",
-        "is_internal": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "569",
-        "name": "Centrifuga de saladas manual",
-        "department": "Cozinha",
-        "unit": "Unidades",
-        "price": 34.0,
-        "suppliers": [
-            "MERCADO LIVRE"
-        ],
-        "category": "Inventario",
-        "min_stock": 2.0,
-        "package_size": 1.0,
-        "purchase_unit": "unidadde",
-        "frequency": "Sem Frequência",
-        "is_internal": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "570",
-        "name": "Coador de coquetéis (chinoi ou chinoy )",
-        "department": "Serviço",
-        "unit": "Unidades",
-        "price": 7.0,
-        "suppliers": [
-            "MERCADO LIVRE"
-        ],
-        "category": "Inventario",
-        "min_stock": 2.0,
-        "package_size": 1.0,
-        "purchase_unit": "unidadde",
-        "frequency": "Sem Frequência",
-        "is_internal": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "571",
-        "name": "Colher de chá",
-        "department": "Estoques",
-        "unit": "Unidades",
-        "price": 26.0,
-        "suppliers": [
-            "Estoque Inicial"
-        ],
-        "category": "Inventario",
-        "min_stock": 0.0,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "572",
-        "name": "Colher de cilicone media",
-        "department": "Estoques",
-        "unit": "Unidades",
-        "price": 6.0,
-        "suppliers": [
-            "Estoque Inicial"
-        ],
-        "category": "Inventario",
-        "min_stock": 0.0,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "573",
-        "name": "Colher de madeira média",
-        "department": "Estoques",
-        "unit": "Unidades",
-        "price": 5.0,
-        "suppliers": [
-            "Estoque Inicial"
-        ],
-        "category": "Inventario",
-        "min_stock": 0.0,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "574",
-        "name": "Colher de madeira pequena",
-        "department": "Estoques",
-        "unit": "Unidades",
-        "price": 2.0,
-        "suppliers": [
-            "Estoque Inicial"
-        ],
-        "category": "Inventario",
-        "min_stock": 0.0,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "575",
-        "name": "Colher de porcelana curva",
-        "department": "Estoques",
-        "unit": "Unidades",
-        "price": 8.0,
-        "suppliers": [
-            "Estoque Inicial"
-        ],
-        "category": "Inventario",
-        "min_stock": 0.0,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "576",
-        "name": "Colher de Sobremesa",
-        "department": "Estoques",
-        "unit": "Unidades",
-        "price": 28.0,
-        "suppliers": [
-            "Estoque Inicial"
-        ],
-        "category": "Inventario",
-        "min_stock": 0.0,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "577",
-        "name": "Colher de Sopa",
-        "department": "Estoques",
-        "unit": "Unidades",
-        "price": 27.02,
-        "suppliers": [
-            "Estoque Inicial"
-        ],
-        "category": "Inventario",
-        "min_stock": 0.0,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "578",
-        "name": "Colher grande de inox",
-        "department": "Estoques",
-        "unit": "Unidades",
-        "price": 4.0,
-        "suppliers": [
-            "Estoque Inicial"
-        ],
-        "category": "Inventario",
-        "min_stock": 0.0,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "579",
-        "name": "Colher media de inox",
-        "department": "Estoques",
-        "unit": "Unidades",
-        "price": 3.0,
-        "suppliers": [
-            "Estoque Inicial"
-        ],
-        "category": "Inventario",
-        "min_stock": 0.0,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "580",
-        "name": "Concha de inox grande",
-        "department": "Estoques",
-        "unit": "Unidades",
-        "price": 5.0,
-        "suppliers": [
-            "Estoque Inicial"
-        ],
-        "category": "Inventario",
-        "min_stock": 0.0,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "581",
-        "name": "Concha de inox pequena",
-        "department": "Estoques",
-        "unit": "Unidades",
-        "price": 3.0,
-        "suppliers": [
-            "Estoque Inicial"
-        ],
-        "category": "Inventario",
-        "min_stock": 0.0,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "582",
-        "name": "Concha de madeira grande",
-        "department": "Estoques",
-        "unit": "Unidades",
-        "price": 9.0,
-        "suppliers": [
-            "Estoque Inicial"
-        ],
-        "category": "Inventario",
         "min_stock": 0.0,
         "version": 1,
         "hash": "",
@@ -11351,156 +10756,6 @@
         "last_updated": ""
     },
     {
-        "id": "704",
-        "name": "Taça Caipirinha",
-        "department": "Estoques",
-        "unit": "Unidades",
-        "price": 17.0,
-        "suppliers": [
-            "Estoque Inicial"
-        ],
-        "category": "Inventario",
-        "min_stock": 0.0,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "705",
-        "name": "Taça de acrílico grande",
-        "department": "Estoques",
-        "unit": "Unidades",
-        "price": 13.0,
-        "suppliers": [
-            "Estoque Inicial"
-        ],
-        "category": "Inventario",
-        "min_stock": 0.0,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "706",
-        "name": "Taça de acrilico pequena",
-        "department": "Estoques",
-        "unit": "Unidades",
-        "price": 24.0,
-        "suppliers": [
-            "Estoque Inicial"
-        ],
-        "category": "Inventario",
-        "min_stock": 0.0,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "707",
-        "name": "Taça de Drinks Coloridos",
-        "department": "Estoques",
-        "unit": "Unidades",
-        "price": 16.82,
-        "suppliers": [
-            "Estoque Inicial"
-        ],
-        "category": "Inventario",
-        "min_stock": 0.0,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "708",
-        "name": "Taça de machiato",
-        "department": "Estoques",
-        "unit": "Unidades",
-        "price": 11.0,
-        "suppliers": [
-            "Estoque Inicial"
-        ],
-        "category": "Inventario",
-        "min_stock": 0.0,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "709",
-        "name": "Taça de vidro grande ( sobremesa )",
-        "department": "Estoques",
-        "unit": "Unidades",
-        "price": 15.0,
-        "suppliers": [
-            "Estoque Inicial"
-        ],
-        "category": "Inventario",
-        "min_stock": 0.0,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "710",
-        "name": "Taça Espumante",
-        "department": "Estoques",
-        "unit": "Unidades",
-        "price": 14.82,
-        "suppliers": [
-            "Estoque Inicial"
-        ],
-        "category": "Inventario",
-        "min_stock": 0.0,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "711",
-        "name": "Taça Gin",
-        "department": "Estoques",
-        "unit": "Unidades",
-        "price": 22.0,
-        "suppliers": [
-            "Estoque Inicial"
-        ],
-        "category": "Inventario",
-        "min_stock": 0.0,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "712",
-        "name": "Taça Vinho Branco",
-        "department": "Estoques",
-        "unit": "Unidades",
-        "price": 16.0,
-        "suppliers": [
-            "Estoque Inicial"
-        ],
-        "category": "Inventario",
-        "min_stock": 0.0,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "713",
-        "name": "Taça Vinho Tinto",
-        "department": "Estoques",
-        "unit": "Unidades",
-        "price": 14.83,
-        "suppliers": [
-            "Estoque Inicial"
-        ],
-        "category": "Inventario",
-        "min_stock": 0.0,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
         "id": "714",
         "name": "Tampa para alimentos inox",
         "department": "Estoques",
@@ -11668,156 +10923,6 @@
     {
         "id": "725",
         "name": "Travessa de madeira quadrada pequena",
-        "department": "Estoques",
-        "unit": "Unidades",
-        "price": 12.0,
-        "suppliers": [
-            "Estoque Inicial"
-        ],
-        "category": "Inventario",
-        "min_stock": 0.0,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "726",
-        "name": "Travessa de melamina grande",
-        "department": "Estoques",
-        "unit": "Unidades",
-        "price": 32.0,
-        "suppliers": [
-            "Estoque Inicial"
-        ],
-        "category": "Inventario",
-        "min_stock": 0.0,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "727",
-        "name": "Travessa quadrada de ardosia",
-        "department": "Estoques",
-        "unit": "Kilogramas",
-        "price": 30.0,
-        "suppliers": [
-            "Estoque Inicial"
-        ],
-        "category": "Inventario",
-        "min_stock": 0.0,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "728",
-        "name": "Travessa redonda grande night sky",
-        "department": "Estoques",
-        "unit": "Unidades",
-        "price": 37.0,
-        "suppliers": [
-            "Estoque Inicial"
-        ],
-        "category": "Inventario",
-        "min_stock": 0.0,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "729",
-        "name": "Travessa retangular media de cerâmica",
-        "department": "Estoques",
-        "unit": "Unidades",
-        "price": 11.0,
-        "suppliers": [
-            "Estoque Inicial"
-        ],
-        "category": "Inventario",
-        "min_stock": 0.0,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "730",
-        "name": "Travessa retangular orgânica grande",
-        "department": "Estoques",
-        "unit": "Unidades",
-        "price": 64.29,
-        "suppliers": [
-            "Estoque Inicial"
-        ],
-        "category": "Inventario",
-        "min_stock": 0.0,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "731",
-        "name": "Travessa retangular orgânica media",
-        "department": "Estoques",
-        "unit": "Unidades",
-        "price": 56.0,
-        "suppliers": [
-            "Estoque Inicial"
-        ],
-        "category": "Inventario",
-        "min_stock": 0.0,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "732",
-        "name": "Tulipa de heineken",
-        "department": "Estoques",
-        "unit": "Unidades",
-        "price": 32.0,
-        "suppliers": [
-            "Estoque Inicial"
-        ],
-        "category": "Inventario",
-        "min_stock": 0.0,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "733",
-        "name": "Vaporizador de bambu medio",
-        "department": "Estoques",
-        "unit": "Unidades",
-        "price": 12.0,
-        "suppliers": [
-            "Estoque Inicial"
-        ],
-        "category": "Inventario",
-        "min_stock": 0.0,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "734",
-        "name": "Xícaras  (Pequena)",
-        "department": "Estoques",
-        "unit": "Unidades",
-        "price": 14.49,
-        "suppliers": [
-            "Estoque Inicial"
-        ],
-        "category": "Inventario",
-        "min_stock": 0.0,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "735",
-        "name": "Xícaras Capuccino (Grande)",
         "department": "Estoques",
         "unit": "Unidades",
         "price": 12.0,
@@ -12491,21 +11596,6 @@
         "last_updated": ""
     },
     {
-        "id": "775",
-        "name": "Vinho Petit Chablis",
-        "department": "Estoques",
-        "unit": "Unidades",
-        "price": 0.0,
-        "suppliers": [
-            "Estoque Inicial"
-        ],
-        "category": "Estoque Principal - Bar",
-        "min_stock": 0.0,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
         "id": "776",
         "name": "Macarrão funcionarios",
         "department": "Estoque",
@@ -12723,25 +11813,6 @@
         "hash": "b6c9fea82c35910423e1d10f788c7738393cd56ef0f102a44eba14be27175f91"
     },
     {
-        "id": "789",
-        "name": "Camarão (caldo)",
-        "department": "Cozinha",
-        "unit": "Litros",
-        "price": 15.9,
-        "category": "Entradas",
-        "min_stock": 5.0,
-        "package_size": 4.0,
-        "purchase_unit": "Balde",
-        "frequency": "Semanal",
-        "suppliers": [
-            "Preparo Cazeiro"
-        ],
-        "is_internal": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
         "id": "790",
         "name": "Feijão (Caldo)",
         "department": "Cozinha",
@@ -12794,9 +11865,33 @@
             "GERAL"
         ],
         "is_internal": false,
+        "version": 3,
+        "last_updated": "2026-03-02T11:44:14.824218",
+        "hash": "1b21bbb86b21fd48e61e55fdbe54a698c7bf48fc395f0462e8f5f81b2e2e958c",
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": ""
+    },
+    {
+        "id": "100000",
+        "name": "Portillo Merlot",
+        "department": "Serviço",
+        "unit": "Litros",
+        "price": 78.0,
+        "category": "vinhos",
+        "min_stock": 1.0,
+        "package_size": 6.0,
+        "purchase_unit": "Caixa",
+        "frequency": "Semanal",
+        "suppliers": [
+            "inga"
+        ],
+        "is_internal": false,
         "version": 2,
-        "last_updated": "2026-02-20T18:38:45.162504",
-        "hash": "8715fc9876fb546f45872281e57c30787f16787d7f372dd91791509a4085863c"
+        "last_updated": "2026-02-20T18:38:45.179028",
+        "hash": "110d892e241e0ae5eeb8996451176435a2221eb6583a950f02491194c18961c1"
     },
     {
         "id": "793",
@@ -12818,45 +11913,7 @@
         "hash": "45cdc6019438396e497a78ae61f7ffb8d8d4df34f5a5866390083dfbf6c81280"
     },
     {
-        "id": "791",
-        "name": "Les chermilles du roy",
-        "department": "Serviço",
-        "unit": "Litros",
-        "price": 39.0,
-        "category": "vinhos",
-        "min_stock": 1.0,
-        "package_size": 6.0,
-        "purchase_unit": "Caixa",
-        "frequency": "Semanal",
-        "suppliers": [
-            "inga"
-        ],
-        "is_internal": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "792",
-        "name": "Portillo Merlot",
-        "department": "Serviço",
-        "unit": "Litros",
-        "price": 78.0,
-        "category": "vinhos",
-        "min_stock": 1.0,
-        "package_size": 6.0,
-        "purchase_unit": "Caixa",
-        "frequency": "Semanal",
-        "suppliers": [
-            "inga"
-        ],
-        "is_internal": false,
-        "version": 2,
-        "last_updated": "2026-02-20T18:38:45.179028",
-        "hash": "110d892e241e0ae5eeb8996451176435a2221eb6583a950f02491194c18961c1"
-    },
-    {
-        "id": "793",
+        "id": "100001",
         "name": "Porta 6",
         "department": "Serviço",
         "unit": "Litros",
@@ -12875,26 +11932,7 @@
         "hash": "dd1b60472f8f999769273afafd3a472ced2d048263941f56dc89c6d32a4f63bb"
     },
     {
-        "id": "792",
-        "name": "Espumante Miolo Cuvee Brut Nature",
-        "department": "ServiÃ§o",
-        "unit": "Litros",
-        "price": 60.0,
-        "category": "vinhos",
-        "min_stock": 2.0,
-        "package_size": 1.0,
-        "purchase_unit": "",
-        "frequency": "Semanal",
-        "suppliers": [
-            "GERAL"
-        ],
-        "is_internal": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "793",
+        "id": "100002",
         "name": "Mangaba",
         "department": "ServiÃ§o",
         "unit": "Kilogramas",
@@ -13105,9 +12143,14 @@
             "dlp"
         ],
         "is_internal": false,
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
+        "version": 2,
+        "hash": "862275c44be32497cfdb3806e58d367be0c55db0f389475c51b59671726d8b8a",
+        "last_updated": "2026-02-24T16:08:35.090605",
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": ""
     },
     {
         "id": "806",
@@ -13197,31 +12240,6 @@
         "last_updated": ""
     },
     {
-        "id": "810",
-        "name": "Stella artois longue neck",
-        "department": "Estoque",
-        "unit": "Litros",
-        "price": 5.46,
-        "category": "Estoque Principal - Bar",
-        "min_stock": 240.0,
-        "package_size": 1.0,
-        "purchase_unit": "fardo",
-        "frequency": "Semanal",
-        "suppliers": [
-            "ambev",
-            "pit stop"
-        ],
-        "is_internal": false,
-        "ncm": "",
-        "cest": "",
-        "icms_rate": 0.0,
-        "anp_code": "",
-        "cfop_default": "",
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
         "id": "811",
         "name": "Farinha Panko",
         "department": "Estoque",
@@ -13271,6 +12289,81 @@
         "hash": "6093d82173cddb8f44df8a22cb7dbf940095cd8139c5c8783efbc5887ef78161"
     },
     {
+        "id": "100003",
+        "name": "Farinha de Trigo ( principal )",
+        "department": "Estoque",
+        "unit": "Kilogramas",
+        "price": 4.29,
+        "category": "Estoque Principal - cozinha",
+        "min_stock": 40.0,
+        "package_size": 1.0,
+        "purchase_unit": "fardo",
+        "frequency": "Semanal",
+        "suppliers": [
+            "atacamax",
+            "KarneKeijo"
+        ],
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": "",
+        "version": 2,
+        "last_updated": "2026-02-20T18:38:45.199253",
+        "hash": "f537cd49dc828b7d54e3538ad0754d94bed38f795e8d5242ca868a525abe996b"
+    },
+    {
+        "id": "100004",
+        "name": "Fubá funicionarios",
+        "department": "Estoque",
+        "unit": "Kilogramas",
+        "price": 2.99,
+        "category": "Estoque Principal - cozinha",
+        "min_stock": 30.0,
+        "package_size": 1.0,
+        "purchase_unit": "fardo",
+        "frequency": "Semanal",
+        "suppliers": [
+            "atacamax",
+            "KarneKeijo",
+            "3 corações"
+        ],
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": "",
+        "version": 2,
+        "last_updated": "2026-02-20T18:38:45.206321",
+        "hash": "c1ecc479292ccca9341b2dda0bdcb3a3e4cecbdba9305cc0462fa6996b904abf"
+    },
+    {
+        "id": "100005",
+        "name": "Cafe funcionarios",
+        "department": "Estoque",
+        "unit": "Kilogramas",
+        "price": 51.6,
+        "category": "Estoque Principal - cozinha",
+        "min_stock": 10.0,
+        "package_size": 1.0,
+        "purchase_unit": "kilograma",
+        "frequency": "Semanal",
+        "suppliers": [
+            "3 corações"
+        ],
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": "",
+        "version": 1,
+        "hash": "",
+        "last_updated": ""
+    },
+    {
         "id": "817",
         "name": "Papel toalha",
         "department": "Estoque",
@@ -13309,81 +12402,6 @@
         "suppliers": [
             "Harus",
             "Kalyda"
-        ],
-        "is_internal": false,
-        "ncm": "",
-        "cest": "",
-        "icms_rate": 0.0,
-        "anp_code": "",
-        "cfop_default": "",
-        "version": 1,
-        "hash": "",
-        "last_updated": ""
-    },
-    {
-        "id": "815",
-        "name": "Farinha de Trigo ( principal )",
-        "department": "Estoque",
-        "unit": "Kilogramas",
-        "price": 4.29,
-        "category": "Estoque Principal - cozinha",
-        "min_stock": 40.0,
-        "package_size": 1.0,
-        "purchase_unit": "fardo",
-        "frequency": "Semanal",
-        "suppliers": [
-            "atacamax",
-            "KarneKeijo"
-        ],
-        "is_internal": false,
-        "ncm": "",
-        "cest": "",
-        "icms_rate": 0.0,
-        "anp_code": "",
-        "cfop_default": "",
-        "version": 2,
-        "last_updated": "2026-02-20T18:38:45.199253",
-        "hash": "f537cd49dc828b7d54e3538ad0754d94bed38f795e8d5242ca868a525abe996b"
-    },
-    {
-        "id": "815",
-        "name": "Fubá funicionarios",
-        "department": "Estoque",
-        "unit": "Kilogramas",
-        "price": 2.99,
-        "category": "Estoque Principal - cozinha",
-        "min_stock": 30.0,
-        "package_size": 1.0,
-        "purchase_unit": "fardo",
-        "frequency": "Semanal",
-        "suppliers": [
-            "atacamax",
-            "KarneKeijo",
-            "3 corações"
-        ],
-        "is_internal": false,
-        "ncm": "",
-        "cest": "",
-        "icms_rate": 0.0,
-        "anp_code": "",
-        "cfop_default": "",
-        "version": 2,
-        "last_updated": "2026-02-20T18:38:45.206321",
-        "hash": "c1ecc479292ccca9341b2dda0bdcb3a3e4cecbdba9305cc0462fa6996b904abf"
-    },
-    {
-        "id": "815",
-        "name": "Cafe funcionarios",
-        "department": "Estoque",
-        "unit": "Kilogramas",
-        "price": 51.6,
-        "category": "Estoque Principal - cozinha",
-        "min_stock": 10.0,
-        "package_size": 1.0,
-        "purchase_unit": "kilograma",
-        "frequency": "Semanal",
-        "suppliers": [
-            "3 corações"
         ],
         "is_internal": false,
         "ncm": "",
@@ -13468,5 +12486,269 @@
         "version": 1,
         "last_updated": "2026-02-20T18:38:45.212945",
         "hash": "b90c1a99d35b3ab19d57d6e22b711e49c3270cc561801ecb5f482d233791ea76"
+    },
+    {
+        "id": "816",
+        "name": "Espumante Champagne Barnaut Blanc de Noirs",
+        "department": "Serviço",
+        "unit": "Unidades",
+        "price": 432.38,
+        "category": "Vinhos",
+        "min_stock": 1.0,
+        "package_size": 1.0,
+        "purchase_unit": "",
+        "frequency": "Semanal",
+        "suppliers": [
+            "dlp"
+        ],
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": "",
+        "version": 2,
+        "last_updated": "2026-02-21T19:08:19.295681",
+        "hash": "3eed5ccc69f33e1cd5f70b0d80cf950630f51dc179baf0a8826795dffab9cc65"
+    },
+    {
+        "id": "819",
+        "name": "Vinho Tinto Chateau La Vieille Forge ",
+        "department": "Serviço",
+        "unit": "Unidades",
+        "price": 184.97,
+        "category": "Vinhos",
+        "min_stock": 1.0,
+        "package_size": 1.0,
+        "purchase_unit": "",
+        "frequency": "Semanal",
+        "suppliers": [
+            "dlp"
+        ],
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": "",
+        "version": 1,
+        "last_updated": "2026-02-21T19:06:36.792677",
+        "hash": "849de23b5518a85808964320ee214087ee8f5c399a07c2ed7cf64997a29551e5"
+    },
+    {
+        "id": "820",
+        "name": "Camarão com requeijão",
+        "department": "Cozinha",
+        "unit": "Kilogramas",
+        "price": 10.0,
+        "category": "Confeitaria",
+        "min_stock": 1.0,
+        "package_size": 1.0,
+        "purchase_unit": "",
+        "frequency": "Semanal",
+        "suppliers": [
+            "GERAL"
+        ],
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": "",
+        "version": 1,
+        "last_updated": "2026-02-22T16:56:16.092288",
+        "hash": "5cc8510826d5a0300859b00f6f2ca893e4efd01506373496df151d094a921b09"
+    },
+    {
+        "id": "821",
+        "name": "Cupim com requeijão",
+        "department": "Cozinha",
+        "unit": "Kilogramas",
+        "price": 10.0,
+        "category": "Confeitaria",
+        "min_stock": 1.0,
+        "package_size": 1.0,
+        "purchase_unit": "",
+        "frequency": "Semanal",
+        "suppliers": [
+            "GERAL"
+        ],
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": "",
+        "version": 1,
+        "last_updated": "2026-02-22T16:59:06.115251",
+        "hash": "1a073ba9bfd94043d531f41935d75f2fc8a9d948096f3d4260218064b42fb8fb"
+    },
+    {
+        "id": "822",
+        "name": "Carne seca com requeijão",
+        "department": "Cozinha",
+        "unit": "Kilogramas",
+        "price": 10.0,
+        "category": "Confeitaria",
+        "min_stock": 1.0,
+        "package_size": 1.0,
+        "purchase_unit": "",
+        "frequency": "Semanal",
+        "suppliers": [
+            "GERAL"
+        ],
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": "",
+        "version": 1,
+        "last_updated": "2026-02-22T17:00:11.113753",
+        "hash": "1c917bd02f7f8eea053c2b1e790f83656c36e051026e91a9c46cf5a75c03ddd7"
+    },
+    {
+        "id": "823",
+        "name": "Parma com requeijão",
+        "department": "Cozinha",
+        "unit": "Kilogramas",
+        "price": 10.0,
+        "category": "Confeitaria",
+        "min_stock": 1.0,
+        "package_size": 1.0,
+        "purchase_unit": "",
+        "frequency": "Semanal",
+        "suppliers": [
+            "GERAL"
+        ],
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": "",
+        "version": 1,
+        "last_updated": "2026-02-22T17:00:40.840923",
+        "hash": "58e80e6e1edc56cb0fce499b4a19c0744ed080a05f3256d160128f88241eb1e0"
+    },
+    {
+        "id": "824",
+        "name": "Pastrame com requeijão",
+        "department": "Cozinha",
+        "unit": "Kilogramas",
+        "price": 10.0,
+        "category": "Confeitaria",
+        "min_stock": 1.0,
+        "package_size": 1.0,
+        "purchase_unit": "",
+        "frequency": "Semanal",
+        "suppliers": [
+            "GERAL"
+        ],
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": "",
+        "version": 1,
+        "last_updated": "2026-02-22T17:01:28.626330",
+        "hash": "529cc47e5c5830ca96e1206203ceabb6451a5cc771e3386123674dc37f943f03"
+    },
+    {
+        "id": "825",
+        "name": "Salmão com requeijão",
+        "department": "Cozinha",
+        "unit": "Kilogramas",
+        "price": 10.0,
+        "category": "Confeitaria",
+        "min_stock": 1.0,
+        "package_size": 1.0,
+        "purchase_unit": "",
+        "frequency": "Semanal",
+        "suppliers": [
+            "GERAL"
+        ],
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": "",
+        "version": 1,
+        "last_updated": "2026-02-22T17:02:00.592624",
+        "hash": "beb443a30bb568598fb03dbc46d6cdacf2f9399661a111ff97879279d9a4adcc"
+    },
+    {
+        "id": "826",
+        "name": "Sem Recheio ",
+        "department": "Cozinha",
+        "unit": "Kilogramas",
+        "price": 2.0,
+        "category": "Confeitaria",
+        "min_stock": 1.0,
+        "package_size": 1.0,
+        "purchase_unit": "",
+        "frequency": "Semanal",
+        "suppliers": [
+            "GERAL"
+        ],
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": "",
+        "version": 1,
+        "last_updated": "2026-02-22T17:02:49.971468",
+        "hash": "9f1d5e8e910e8cc29f8eee081afe3c66cb3d7cd534a021cafa65a25113d66aee"
+    },
+    {
+        "id": "827",
+        "name": "Whisky The Glenlivet Founders Reserve ",
+        "department": "Serviço",
+        "unit": "Litros",
+        "price": 220.94,
+        "category": "Bebidas Quentes",
+        "min_stock": 0.2,
+        "package_size": 1.0,
+        "purchase_unit": "",
+        "frequency": "Semanal",
+        "suppliers": [
+            "dlp"
+        ],
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": "",
+        "version": 1,
+        "last_updated": "2026-02-23T16:34:52.897758",
+        "hash": "d7ddc1fefa1e8e74c9f9823527d85e83f9d313e592d0092f1eb78535daa19ab7"
+    },
+    {
+        "id": "828",
+        "name": "Espumante Casa Perini Black Edition",
+        "department": "Serviço",
+        "unit": "Litros",
+        "price": 51.6,
+        "category": "Vinhos",
+        "min_stock": 0.0,
+        "package_size": 1.0,
+        "purchase_unit": "",
+        "frequency": "Semanal",
+        "suppliers": [
+            "dlp"
+        ],
+        "is_internal": false,
+        "ncm": "",
+        "cest": "",
+        "icms_rate": 0.0,
+        "anp_code": "",
+        "cfop_default": "",
+        "version": 1,
+        "last_updated": "2026-02-23T16:36:28.951452",
+        "hash": "2971ac515a76a43218e7520fc85f919e05f8484749080f037fa8db3e2c76b0cb"
     }
 ]

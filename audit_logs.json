@@ -1174,5 +1174,33 @@
         "user": "Angelo",
         "timestamp": "05/02/2026 11:06",
         "justification": "teste"
+    },
+    {
+        "id": "AUDIT_20260304112546_4644",
+        "action": "cancel_consumption",
+        "target_id": "charge_log",
+        "target_details": {
+            "room": "24",
+            "total": 22.0,
+            "date": "04/03/2026 11:25",
+            "old_status": "pending"
+        },
+        "user": "admin_tester",
+        "timestamp": "04/03/2026 11:25",
+        "justification": "Teste de auditoria"
+    },
+    {
+        "id": "AUDIT_20260304112943_8137",
+        "action": "cancel_consumption",
+        "target_id": "charge_log",
+        "target_details": {
+            "room": "24",
+            "total": 22.0,
+            "date": "04/03/2026 11:29",
+            "old_status": "pending"
+        },
+        "user": "admin_tester",
+        "timestamp": "04/03/2026 11:29",
+        "justification": "Teste de auditoria"
     }
 ]

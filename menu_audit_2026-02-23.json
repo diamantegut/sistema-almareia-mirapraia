@@ -1,0 +1,279 @@
+[
+    {
+        "timestamp": "2026-02-23T15:24:55.866736",
+        "action": "UPDATE",
+        "user": "filipe",
+        "item_id": "47",
+        "details": {
+            "name": "Agua Sem Gás Pet"
+        },
+        "changes": [
+            {
+                "field": "active",
+                "old": false,
+                "new": true
+            }
+        ],
+        "hash": "7f461bdfae75bbcfd078b3776f2e91dea8645ff5c75f33bb62ab58064d0127c3"
+    },
+    {
+        "timestamp": "2026-02-23T15:25:06.940879",
+        "action": "UPDATE",
+        "user": "filipe",
+        "item_id": "46",
+        "details": {
+            "name": "Agua com gás Pet"
+        },
+        "changes": [
+            {
+                "field": "active",
+                "old": false,
+                "new": true
+            }
+        ],
+        "hash": "5ce1337a9b98fcd180c4d340eb5454c104a927af4804a3b44baa0d467c5e9ffb"
+    },
+    {
+        "timestamp": "2026-02-23T16:37:01.691209",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "260",
+        "details": {
+            "name": "Whisky Chivas "
+        },
+        "changes": [
+            {
+                "field": "image",
+                "old": "260_265.jpg",
+                "new": "/Produtos/Fotos/260_265.jpg"
+            },
+            {
+                "field": "price",
+                "old": 21.9,
+                "new": 24.9
+            }
+        ],
+        "hash": "0ad2be4b725e20e6d26f69c5f353fb7e1b73552ddc63eed86993d3bf7534c310"
+    },
+    {
+        "timestamp": "2026-02-23T16:39:03.356661",
+        "action": "CREATE",
+        "user": "Admin",
+        "item_id": "293",
+        "details": {
+            "id": "293",
+            "name": "Whisky Jack Daniels Old ",
+            "category": "Doses",
+            "price": 24.9,
+            "cost_price": 0.0,
+            "printer_id": "97e342f3-2ba7-4dc3-9afd-b299b4c7b777",
+            "should_print": true,
+            "description": "",
+            "image": "",
+            "image_url": "",
+            "service_fee_exempt": false,
+            "visible_virtual_menu": true,
+            "highlight": false,
+            "active": true,
+            "recipe": [
+                {
+                    "ingredient_id": "299",
+                    "qty": 0.07
+                }
+            ],
+            "mandatory_questions": [],
+            "flavor_group_id": "",
+            "flavor_multiplier": 1.0,
+            "product_type": "standard",
+            "has_accompaniments": false,
+            "allowed_accompaniments": [],
+            "ncm": "22085000",
+            "cest": "",
+            "transparency_tax": 0.0,
+            "fiscal_benefit_code": "",
+            "cfop": "5102",
+            "origin": "1",
+            "tax_situation": "102",
+            "icms_rate": 0.0,
+            "icms_base_reduction": 0.0,
+            "fcp_rate": 0.0,
+            "pis_cst": "",
+            "pis_rate": 0.0,
+            "cofins_cst": "",
+            "cofins_rate": 0.0,
+            "paused": false,
+            "pause_reason": "",
+            "version": 1,
+            "last_updated": "2026-02-23T16:39:03.356607",
+            "hash": "5deb11e295b51251f32c96602d336023e0523bc59587a3eae9d72abc807c6524"
+        },
+        "changes": [],
+        "hash": "0c5f62b21b8f4555f7e6b5c0de5b934982ed8c14eeed0c143ddcbd0ce04b95b3"
+    },
+    {
+        "timestamp": "2026-02-23T16:40:03.853387",
+        "action": "CREATE",
+        "user": "Admin",
+        "item_id": "294",
+        "details": {
+            "id": "294",
+            "name": "Whisky The Glenlivet Founders Reserve ",
+            "category": "Doses",
+            "price": 39.9,
+            "cost_price": 0.0,
+            "printer_id": "97e342f3-2ba7-4dc3-9afd-b299b4c7b777",
+            "should_print": true,
+            "description": "",
+            "image": "",
+            "image_url": "",
+            "service_fee_exempt": false,
+            "visible_virtual_menu": true,
+            "highlight": false,
+            "active": true,
+            "recipe": [
+                {
+                    "ingredient_id": "827",
+                    "qty": 0.07
+                }
+            ],
+            "mandatory_questions": [],
+            "flavor_group_id": "",
+            "flavor_multiplier": 1.0,
+            "product_type": "standard",
+            "has_accompaniments": false,
+            "allowed_accompaniments": [],
+            "ncm": "22085000",
+            "cest": "",
+            "transparency_tax": 0.0,
+            "fiscal_benefit_code": "",
+            "cfop": "5102",
+            "origin": "1",
+            "tax_situation": "102",
+            "icms_rate": 0.0,
+            "icms_base_reduction": 0.0,
+            "fcp_rate": 0.0,
+            "pis_cst": "",
+            "pis_rate": 0.0,
+            "cofins_cst": "",
+            "cofins_rate": 0.0,
+            "paused": false,
+            "pause_reason": "",
+            "version": 1,
+            "last_updated": "2026-02-23T16:40:03.853335",
+            "hash": "87a7cae2c35f9df06a2ac0bef122091471e7f6cfd4662586bc41edfb2883965f"
+        },
+        "changes": [],
+        "hash": "c39b9a83eb2f862111f35469e75583ea8a21a49225e19f1fdc9960bd4d8170e5"
+    },
+    {
+        "timestamp": "2026-02-23T16:41:31.225188",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "264",
+        "details": {
+            "name": "Whisky Old Par"
+        },
+        "changes": [
+            {
+                "field": "price",
+                "old": 18.9,
+                "new": 21.9
+            }
+        ],
+        "hash": "48358e3a4fdc1acf1b2e30c1410babf025e277bcca43c85afde09278048e9010"
+    },
+    {
+        "timestamp": "2026-02-23T16:42:55.670238",
+        "action": "UPDATE",
+        "user": "Admin",
+        "item_id": "261",
+        "details": {
+            "name": "Whisky Black Label"
+        },
+        "changes": [
+            {
+                "field": "image",
+                "old": "261_265.jpg",
+                "new": "/Produtos/Fotos/261_265.jpg"
+            },
+            {
+                "field": "price",
+                "old": 17.9,
+                "new": 19.9
+            }
+        ],
+        "hash": "ae81dd2b52069b6c2145283b2a8b0762e37c59bfd9f93aba0683e4b4db945889"
+    },
+    {
+        "timestamp": "2026-02-23T16:45:07.230450",
+        "action": "CREATE",
+        "user": "Admin",
+        "item_id": "295",
+        "details": {
+            "id": "295",
+            "name": "Espumante Casa Perini Black Edition",
+            "category": "Vinhos",
+            "price": 129.9,
+            "cost_price": 51.6,
+            "printer_id": "97e342f3-2ba7-4dc3-9afd-b299b4c7b777",
+            "should_print": true,
+            "description": "",
+            "image": "",
+            "image_url": "",
+            "service_fee_exempt": false,
+            "visible_virtual_menu": true,
+            "highlight": false,
+            "active": true,
+            "recipe": [
+                {
+                    "ingredient_id": "828",
+                    "qty": 1.0
+                }
+            ],
+            "mandatory_questions": [],
+            "flavor_group_id": "",
+            "flavor_multiplier": 1.0,
+            "product_type": "standard",
+            "has_accompaniments": false,
+            "allowed_accompaniments": [],
+            "ncm": "22041010",
+            "cest": "",
+            "transparency_tax": 0.0,
+            "fiscal_benefit_code": "",
+            "cfop": "5102",
+            "origin": "1",
+            "tax_situation": "102",
+            "icms_rate": 0.0,
+            "icms_base_reduction": 0.0,
+            "fcp_rate": 0.0,
+            "pis_cst": "",
+            "pis_rate": 0.0,
+            "cofins_cst": "",
+            "cofins_rate": 0.0,
+            "paused": false,
+            "pause_reason": "",
+            "version": 1,
+            "last_updated": "2026-02-23T16:45:07.230384",
+            "hash": "4b6fd025251b327fd6457e267a7c605ccc299012d44be552472bb3f9ee66474d"
+        },
+        "changes": [],
+        "hash": "23c87e122f5fbd0adae4a8e51fd40a0bd6cd72de8b21378116cca8e9f17f0c53"
+    },
+    {
+        "timestamp": "2026-02-23T19:43:05.676478",
+        "action": "UPDATE",
+        "user": "priscila",
+        "item_id": "79",
+        "details": {
+            "name": "Pasteis de Queijo coalho  (6 unidades)"
+        },
+        "changes": [
+            {
+                "field": "active",
+                "old": true,
+                "new": false
+            }
+        ],
+        "hash": "c6d7f14d444c64024de4c3aacdab02b85ba2490eb86fb1ea3067310e3b5d7c14"
+    }
+]

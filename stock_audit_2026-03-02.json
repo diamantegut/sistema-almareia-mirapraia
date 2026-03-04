@@ -1,0 +1,246 @@
+[
+    {
+        "timestamp": "2026-03-02T10:50:11.246929",
+        "action": "UPDATE",
+        "user": "eduardo",
+        "product_id": "490",
+        "details": {
+            "name": "Água sem gás Pet 500ml (Governança)"
+        },
+        "changes": [
+            {
+                "field": "anp_code",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "package_size",
+                "old": null,
+                "new": 1.0
+            },
+            {
+                "field": "name",
+                "old": "Água sem gás Pet 500ml",
+                "new": "Água sem gás Pet 500ml (Governança)"
+            },
+            {
+                "field": "icms_rate",
+                "old": null,
+                "new": 0.0
+            },
+            {
+                "field": "is_internal",
+                "old": null,
+                "new": false
+            },
+            {
+                "field": "department",
+                "old": "Estoques",
+                "new": "Governança"
+            },
+            {
+                "field": "frequency",
+                "old": null,
+                "new": "Sem Frequência"
+            },
+            {
+                "field": "cfop_default",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "ncm",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "purchase_unit",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "cest",
+                "old": null,
+                "new": ""
+            }
+        ],
+        "hash": "2e14e4a49dc41903d628b3752831d3788a833c5f57f539e515f8ff25129ade76"
+    },
+    {
+        "timestamp": "2026-03-02T11:32:17.009396",
+        "action": "DELETE",
+        "user": "eduardo",
+        "product_id": "810",
+        "details": {
+            "id": "810",
+            "name": "Stella artois longue neck",
+            "department": "Estoque",
+            "unit": "Litros",
+            "price": 5.46,
+            "category": "Estoque Principal - Bar",
+            "min_stock": 240.0,
+            "package_size": 1.0,
+            "purchase_unit": "fardo",
+            "frequency": "Semanal",
+            "suppliers": [
+                "ambev",
+                "pit stop"
+            ],
+            "is_internal": false,
+            "ncm": "",
+            "cest": "",
+            "icms_rate": 0.0,
+            "anp_code": "",
+            "cfop_default": "",
+            "version": 1,
+            "hash": "",
+            "last_updated": ""
+        },
+        "changes": [],
+        "hash": "15c4337a64bcd38eb666e3b735444e31bfff97cf5f4fa92c303da192b47949a5"
+    },
+    {
+        "timestamp": "2026-03-02T11:44:14.824265",
+        "action": "UPDATE",
+        "user": "eduardo",
+        "product_id": "792",
+        "details": {
+            "name": "Espumante Miolo Cuvee Brut Nature"
+        },
+        "changes": [
+            {
+                "field": "anp_code",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "icms_rate",
+                "old": null,
+                "new": 0.0
+            },
+            {
+                "field": "cfop_default",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "cest",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "ncm",
+                "old": null,
+                "new": ""
+            }
+        ],
+        "hash": "faebb3f48331f1fcac9c5a259dca03cc2d0175a9c3d658faaf96557c11874c41"
+    },
+    {
+        "timestamp": "2026-03-02T12:10:56.945252",
+        "action": "DELETE",
+        "user": "eduardo",
+        "product_id": "293",
+        "details": {
+            "id": "293",
+            "name": "Rum Montilla",
+            "department": "Estoques",
+            "unit": "Litros",
+            "price": 0.0,
+            "suppliers": [
+                "Estoque Inicial"
+            ],
+            "category": "Bebidas Quentes",
+            "min_stock": 0.0,
+            "version": 1,
+            "hash": "",
+            "last_updated": ""
+        },
+        "changes": [],
+        "hash": "a117e91e0a2864639f0e1490c3a00db4300b137cfdcee72c4aa765d34c693426"
+    },
+    {
+        "timestamp": "2026-03-02T12:13:53.150900",
+        "action": "UPDATE",
+        "user": "eduardo",
+        "product_id": "303",
+        "details": {
+            "name": "Whisky Old Parr 12 Anos"
+        },
+        "changes": [
+            {
+                "field": "anp_code",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "icms_rate",
+                "old": null,
+                "new": 0.0
+            },
+            {
+                "field": "cfop_default",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "cest",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "name",
+                "old": "Whysky Old Parr 12 Anos",
+                "new": "Whisky Old Parr 12 Anos"
+            },
+            {
+                "field": "ncm",
+                "old": null,
+                "new": ""
+            }
+        ],
+        "hash": "33bea29b14e6af8edbde82f1a776800f38c75909ea57c07449b2dcdec624050e"
+    },
+    {
+        "timestamp": "2026-03-02T12:14:57.399129",
+        "action": "UPDATE",
+        "user": "eduardo",
+        "product_id": "304",
+        "details": {
+            "name": "Whisky Red Label"
+        },
+        "changes": [
+            {
+                "field": "anp_code",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "icms_rate",
+                "old": null,
+                "new": 0.0
+            },
+            {
+                "field": "cfop_default",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "cest",
+                "old": null,
+                "new": ""
+            },
+            {
+                "field": "name",
+                "old": "Whysky Red Label",
+                "new": "Whisky Red Label"
+            },
+            {
+                "field": "ncm",
+                "old": null,
+                "new": ""
+            }
+        ],
+        "hash": "4e712a37378f78b6d35fd52e6b060812f2e92352e7d19b13893b4df10bb3e855"
+    }
+]
