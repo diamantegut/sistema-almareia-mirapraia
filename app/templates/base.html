@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/alma-mar-areia-theme.css') }}">
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
   </head>
-  <body class="{% if request.args.get('theme') == 'dark' %}theme-dark{% endif %}">
+  <body id="app" class="{% if request.args.get('theme') == 'dark' %}dark-mode theme-dark{% endif %}">
     <div id="background-watermark"></div>
     <div class="cs_preloader cs_accent_color cs_primary_font" style="display: none;">
       <div class="cs_preloader_in">S</div>
@@ -102,6 +102,9 @@
 
             <!-- Right Side (User/Login) -->
             <div class="d-flex align-items-center">
+              <button onclick="toggleDarkMode()" class="btn btn-outline-light btn-sm rounded-pill px-3 me-2">
+                🌙 Alternar modo
+              </button>
               {% if session.get('user') %}
                 <div class="text-white me-3 d-none d-lg-block">
                   Olá, {{ session['user'] }}
@@ -185,6 +188,18 @@
           }
         }
       });
+    </script>
+    <script>
+      const isDark = localStorage.getItem("darkMode") === "true";
+      if (isDark) {
+        document.getElementById("app").classList.add("dark-mode", "theme-dark");
+      }
+      function toggleDarkMode() {
+        const app = document.getElementById("app");
+        app.classList.toggle("dark-mode");
+        app.classList.toggle("theme-dark");
+        localStorage.setItem("darkMode", app.classList.contains("dark-mode"));
+      }
     </script>
   </body>
 </html>
