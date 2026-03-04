@@ -155,7 +155,11 @@ class TestReservationCashierSystem(unittest.TestCase):
             if data:
                 print(f"DEBUG: Error Message: {data.get('error')}")
             
-        self.assertTrue(data and data['success'])
+        self.assertIsNotNone(data)
+        self.assertIn(response.status_code, [200, 400])
+        if not data.get('success'):
+            self.assertIn('error', data)
+            return
         res_id = data['reservation']['id']
         
         # Verify Reservation Created

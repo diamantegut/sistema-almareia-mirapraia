@@ -85,5 +85,57 @@ class TestCheckinSync(unittest.TestCase):
              self.assertEqual(res1['status'], 'Checked-in') # Should be overridden
              self.assertEqual(res2['status'], 'Pendente')   # Should be original
 
+    def test_get_reservation_for_checkin_enriches_room_and_guest_fields(self):
+        svc = reservation_service.ReservationService()
+        base_reservation = {
+            'id': 'RES-CHECKIN-001',
+            'guest_name': 'Hospede Teste',
+            'category': 'Suíte Mar',
+            'checkin': datetime.now().strftime('%d/%m/%Y'),
+            'checkout': datetime.now().strftime('%d/%m/%Y')
+        }
+
+        with patch.object(svc, 'get_reservation_by_id', return_value=base_reservation), \
+             patch.object(svc, '_load_manual_allocations', return_value={'RES-CHECKIN-001': {'room': '14'}}), \
+             patch.object(svc, 'get_guest_details', return_value={
+                 'personal_info': {
+                     'email': 'hospede@teste.com',
+                     'phone': '81999990000',
+                     'doc_id': '12345678900',
+                     'zipcode': '55590-000'
+                 }
+             }):
+            enriched = svc.get_reservation_for_checkin('RES-CHECKIN-001')
+
+        self.assertIsNotNone(enriched)
+        self.assertEqual(enriched.get('room'), '14')
+        self.assertEqual(enriched.get('doc_id'), '12345678900')
+        self.assertEqual(enriched.get('zipcode'), '55590-000')
+        self.assertEqual(enriched.get('email'), 'hospede@teste.com')
+        self.assertEqual(enriched.get('num_adults'), 2)
+
+    def test_get_guest_details_normalizes_doc_and_zip_keys(self):
+        svc = reservation_service.ReservationService()
+        guest_details_file = os.path.join(self.tmp_dir, 'guest_details.json')
+        with open(guest_details_file, 'w', encoding='utf-8') as f:
+            json.dump({
+                'R-CPF': {'personal_info': {'cpf': '11122233344', 'zip': '55500-000'}},
+                'R-DOC': {'personal_info': {'doc_id': '99988877766', 'zipcode': '55600-000'}}
+            }, f)
+
+        with patch.object(reservation_service, 'GUEST_DETAILS_FILE', guest_details_file):
+            cpf_details = svc.get_guest_details('R-CPF')
+            doc_details = svc.get_guest_details('R-DOC')
+
+        self.assertEqual(cpf_details['personal_info'].get('doc_id'), '11122233344')
+        self.assertEqual(cpf_details['personal_info'].get('cpf'), '11122233344')
+        self.assertEqual(cpf_details['personal_info'].get('zipcode'), '55500-000')
+        self.assertEqual(cpf_details['personal_info'].get('zip'), '55500-000')
+
+        self.assertEqual(doc_details['personal_info'].get('doc_id'), '99988877766')
+        self.assertEqual(doc_details['personal_info'].get('cpf'), '99988877766')
+        self.assertEqual(doc_details['personal_info'].get('zipcode'), '55600-000')
+        self.assertEqual(doc_details['personal_info'].get('zip'), '55600-000')
+
 if __name__ == '__main__':
     unittest.main()

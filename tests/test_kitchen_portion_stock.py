@@ -163,10 +163,11 @@ class TestKitchenPortionStock(unittest.TestCase):
         self.assertAlmostEqual(dest_entry["price"], 40.0 / 10.0, places=3)
 
     @patch('app.blueprints.kitchen.print_portion_labels')
+    @patch('app.blueprints.kitchen.secure_save_products')
     @patch('app.blueprints.kitchen.save_stock_entry')
     @patch('app.blueprints.kitchen.load_settings')
     @patch('app.blueprints.kitchen.load_products')
-    def test_kitchen_portion_multi_origin_kit_paella(self, mock_load_products, mock_load_settings, mock_save_stock, mock_print_labels):
+    def test_kitchen_portion_multi_origin_kit_paella(self, mock_load_products, mock_load_settings, mock_save_stock, mock_secure_save_products, mock_print_labels):
         products = [
             {
                 "name": "Kit Paella Base",
@@ -258,6 +259,118 @@ class TestKitchenPortionStock(unittest.TestCase):
         for label in labels_arg:
             self.assertEqual(label["name"], "Kit Paella Porcionado")
             self.assertIn("g", label["avg_weight"])
+
+        self.assertTrue(mock_secure_save_products.called)
+        saved_products = mock_secure_save_products.call_args[0][0]
+        updated_dest = next((p for p in saved_products if p["name"] == "Kit Paella Porcionado"), None)
+        self.assertIsNotNone(updated_dest)
+        self.assertAlmostEqual(float(updated_dest["price"]), 4.0, places=3)
+
+    @patch('app.blueprints.kitchen.load_products')
+    @patch('app.blueprints.kitchen.load_stock_entries')
+    def test_kitchen_reports_shows_portioned_final_unit_prices(self, mock_load_stock_entries, mock_load_products):
+        mock_load_products.return_value = [
+            {"name": "Frango Congelado", "category": "Carnes"},
+            {"name": "Frango Porcionado 170g", "category": "Porcionados"},
+            {"name": "Frango Porcionado 200g", "category": "Porcionados"},
+        ]
+        mock_load_stock_entries.return_value = [
+            {
+                "id": "20260304123000_PORT_OUT",
+                "entry_date": "04/03/2026 12:30",
+                "date": "04/03/2026",
+                "product": "Frango Congelado",
+                "supplier": "PORCIONAMENTO (SAÍDA)",
+                "qty": -2.0,
+                "price": 30.0,
+                "user": "admin",
+                "invoice": "Transf: Frango Porcionado 170g, Frango Porcionado 200g | Degelo: 0.100kg | Aparas: 0.050kg | Cocção: 0.000kg"
+            },
+            {
+                "id": "20260304123000_PORT_IN_Frango Porcionado 170g",
+                "entry_date": "04/03/2026 12:30",
+                "date": "04/03/2026",
+                "product": "Frango Porcionado 170g",
+                "supplier": "PORCIONAMENTO (ENTRADA)",
+                "qty": 10,
+                "price": 4.20,
+                "user": "admin"
+            },
+            {
+                "id": "20260304123000_PORT_IN_Frango Porcionado 200g",
+                "entry_date": "04/03/2026 12:30",
+                "date": "04/03/2026",
+                "product": "Frango Porcionado 200g",
+                "supplier": "PORCIONAMENTO (ENTRADA)",
+                "qty": 5,
+                "price": 5.00,
+                "user": "admin"
+            }
+        ]
+
+        response = self.client.get("/kitchen/reports")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Preço Final Unitário (Porcionados)".encode("utf-8"), response.data)
+        self.assertIn("Frango Porcionado 170g: R$ 4.20".encode("utf-8"), response.data)
+        self.assertIn("Frango Porcionado 200g: R$ 5.00".encode("utf-8"), response.data)
+
+    @patch('app.blueprints.kitchen.LoggerService.log_acao')
+    @patch('app.blueprints.kitchen.save_settings')
+    @patch('app.blueprints.kitchen.load_settings')
+    def test_kitchen_portion_settings_updates_category_rule(self, mock_load_settings, mock_save_settings, mock_log_acao):
+        mock_load_settings.return_value = {
+            "portioning_rules": [
+                {"origin": "Carnes", "destinations": ["Porcionados"]}
+            ],
+            "product_portioning_rules": []
+        }
+
+        response = self.client.post(
+            "/kitchen/portion/settings",
+            data={
+                "action": "update",
+                "rule_index": "0",
+                "origin_category": "Aves",
+                "destination_categories": ["Porcionados", "Kits"]
+            },
+            follow_redirects=True
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(mock_save_settings.called)
+        saved_settings = mock_save_settings.call_args[0][0]
+        self.assertEqual(saved_settings["portioning_rules"][0]["origin"], "Aves")
+        self.assertEqual(saved_settings["portioning_rules"][0]["destinations"], ["Porcionados", "Kits"])
+        self.assertTrue(mock_log_acao.called)
+
+    @patch('app.blueprints.kitchen.LoggerService.log_acao')
+    @patch('app.blueprints.kitchen.save_settings')
+    @patch('app.blueprints.kitchen.load_settings')
+    def test_kitchen_portion_settings_updates_product_rule(self, mock_load_settings, mock_save_settings, mock_log_acao):
+        mock_load_settings.return_value = {
+            "portioning_rules": [],
+            "product_portioning_rules": [
+                {"origin": "Filé de Peixe", "destinations": ["Filé 200g"]}
+            ]
+        }
+
+        response = self.client.post(
+            "/kitchen/portion/settings",
+            data={
+                "action": "update_product_rule",
+                "rule_index": "0",
+                "origin_product": "Filé de Peixe Premium",
+                "destination_products": ["Filé 150g", "Filé 200g"]
+            },
+            follow_redirects=True
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(mock_save_settings.called)
+        saved_settings = mock_save_settings.call_args[0][0]
+        self.assertEqual(saved_settings["product_portioning_rules"][0]["origin"], "Filé de Peixe Premium")
+        self.assertEqual(saved_settings["product_portioning_rules"][0]["destinations"], ["Filé 150g", "Filé 200g"])
+        self.assertTrue(mock_log_acao.called)
 
 
 if __name__ == "__main__":

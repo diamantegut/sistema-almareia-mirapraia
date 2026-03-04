@@ -174,6 +174,9 @@ class FiscalPoolService:
         if origin == 'daily_rates':
             fiscal_type = 'nfse' # Service
             cnpj_emitente = '46500590000112' # Almareia
+        elif origin in ['reservations', 'reservation_checkin']:
+            fiscal_type = 'nfse'
+            cnpj_emitente = str((customer_info or {}).get('nfse_emit_cnpj') or '46500590000112').replace('.', '').replace('/', '').replace('-', '').strip()
         elif origin == 'reception':
             # Check items for services
             if any(item.get('is_service') for item in enriched_items):
@@ -198,9 +201,12 @@ class FiscalPoolService:
         
         # Calculate Fiscal Amount
         fiscal_amount = 0.0
-        for pm in payment_methods:
-            if pm.get('is_fiscal'):
-                fiscal_amount += float(pm.get('amount', 0.0))
+        if origin in ['reservations', 'reservation_checkin']:
+            fiscal_amount = float(total_amount)
+        else:
+            for pm in payment_methods:
+                if pm.get('is_fiscal'):
+                    fiscal_amount += float(pm.get('amount', 0.0))
         
         # Ensure we don't exceed total_amount due to rounding
         if fiscal_amount > float(total_amount):

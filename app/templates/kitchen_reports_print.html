@@ -46,6 +46,7 @@
                 <th>Perda Total %</th>
                 <th>Custo/Kg Útil</th>
                 <th>Custo Total Líquido</th>
+                <th>Preço Final Unitário (Porcionados)</th>
             </tr>
         </thead>
         <tbody>
@@ -64,6 +65,7 @@
                 <td>{{ "%.1f"|format(item.waste_pct) }}%</td>
                 <td>R$ {{ "%.2f"|format(item.cost_per_useful_kg) }}</td>
                 <td>R$ {{ "%.2f"|format(item.total_cost) }}</td>
+                <td>{{ item.portioned_items_unit_prices }}</td>
             </tr>
             {% endfor %}
         </tbody>

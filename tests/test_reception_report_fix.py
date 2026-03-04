@@ -15,15 +15,13 @@ class TestReceptionReportFix(unittest.TestCase):
         self.client = app.test_client()
         self.client.testing = True
         
-    @patch('app.load_room_charges')
-    @patch('app.load_printer_settings')
-    @patch('app.load_printers')
-    @patch('app.load_room_occupancy')
-    @patch('app.process_and_print_pending_bills')
-    @patch('app.load_users')
-    def test_service_fee_inclusion(self, mock_load_users, mock_process, mock_occupancy, mock_printers, mock_settings, mock_charges):
+    @patch('app.blueprints.reception.routes.load_room_charges')
+    @patch('app.blueprints.reception.routes.load_printer_settings')
+    @patch('app.blueprints.reception.routes.load_printers')
+    @patch('app.blueprints.reception.routes.load_room_occupancy')
+    @patch('app.blueprints.reception.routes.process_and_print_pending_bills')
+    def test_service_fee_inclusion(self, mock_process, mock_occupancy, mock_printers, mock_settings, mock_charges):
         # Setup Mocks
-        mock_load_users.return_value = {'test_user': {'password': '123', 'role': 'admin'}}
         mock_charges.return_value = [
             {
                 "id": "CHARGE_1",

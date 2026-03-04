@@ -107,6 +107,16 @@
                                     <i class="bi bi-cart-plus"></i> Lançar Consumo
                                 </a>
 
+                                {% if occ_data.reservation_id %}
+                                <button class="btn btn-outline-warning btn-sm w-100 mb-2"
+                                        data-res-id="{{ occ_data.reservation_id }}"
+                                        data-guest-name="{{ occ_data.guest_name }}"
+                                        data-room-label="Quarto {{ room_num }}"
+                                        onclick="openReservationPaymentModalFromElement(this)">
+                                    <i class="bi bi-cash-stack"></i> Receber Reserva
+                                </button>
+                                {% endif %}
+
                                 <form method="POST" action="{{ url_for('reception.reception_rooms') }}" onsubmit="return confirm('Confirmar check-out do quarto {{ room_num }}?');">
                                     <input type="hidden" name="action" value="checkout">
                                     <input type="hidden" name="room_number" value="{{ room_num }}">
@@ -154,6 +164,71 @@
 </div>
 
 <!-- Modals -->
+
+<div class="modal fade" id="reservationPaymentModal" tabindex="-1" style="z-index: 1060;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">Receber Reserva</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="resPaymentLoading" class="text-center py-3">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                </div>
+
+                <div id="resPaymentContent" style="display:none;">
+                    <div class="alert alert-info mb-3">
+                        <strong>Hóspede:</strong> <span id="resPayGuestName"></span><br>
+                        <strong>Categoria/Quarto:</strong> <span id="resPayRoom"></span>
+                    </div>
+
+                    <div class="card bg-light mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Valor Total da Reserva:</span>
+                                <span class="fw-bold" id="resPayTotal">R$ 0,00</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Já Pago:</span>
+                                <span class="text-success fw-bold" id="resPayPaid">R$ 0,00</span>
+                            </div>
+                            <div class="d-flex justify-content-between border-top pt-2">
+                                <span>Saldo Pendente:</span>
+                                <span class="text-danger fw-bold fs-5" id="resPayRemaining">R$ 0,00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form id="reservationPaymentForm">
+                        <input type="hidden" id="resPayId" name="reservation_id">
+
+                        <div class="mb-3">
+                            <label class="form-label">Valor a Receber (R$)</label>
+                            <input type="number" step="0.01" class="form-control form-control-lg" id="resPayAmount" name="amount" required>
+                            <div class="form-text text-danger" id="resPayError" style="display:none;"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Forma de Pagamento</label>
+                            <select class="form-select" id="resPayMethod" name="payment_method" required>
+                                <option value="">Selecione...</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" id="btnConfirmResPayment" onclick="submitReservationPayment()">
+                    <i class="bi bi-check-circle"></i> Confirmar Pagamento
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Check-in Modal -->
 <div class="modal fade" id="checkinModal" tabindex="-1">
@@ -628,11 +703,14 @@
     </div>
 </div>
 
-<script id="checkinConfigData" type="application/json">{{ {'upcoming_reservations': upcoming_reservations, 'room_capacities': room_capacities} | tojson | safe }}</script>
+<script id="checkinConfigData" type="application/json">{{ {'upcoming_reservations': upcoming_reservations, 'room_capacities': room_capacities, 'reservation_payment_methods': reservation_payment_methods, 'open_checkin': open_checkin, 'requested_reservation_id': requested_reservation_id} | tojson | safe }}</script>
 <script>
     const checkinConfigData = JSON.parse(document.getElementById('checkinConfigData').textContent || '{}');
     const upcomingReservations = checkinConfigData.upcoming_reservations || [];
     const roomCapacities = checkinConfigData.room_capacities || {};
+    const reservationPaymentMethods = checkinConfigData.reservation_payment_methods || [];
+    const openCheckinFromUrl = Boolean(checkinConfigData.open_checkin);
+    const requestedReservationId = String(checkinConfigData.requested_reservation_id || '');
 
     function validateCapacity() {
         const roomSelect = document.getElementById('checkin_room_select');
@@ -669,6 +747,18 @@
         const adultsInput = document.querySelector('#checkinModal input[name="num_adults"]');
         if (roomSelect) roomSelect.addEventListener('change', validateCapacity);
         if (adultsInput) adultsInput.addEventListener('change', validateCapacity);
+
+        if (openCheckinFromUrl && requestedReservationId) {
+            const loader = document.getElementById('reservation_loader');
+            if (loader) {
+                const hasOption = Array.from(loader.options).some(opt => String(opt.value) === requestedReservationId);
+                if (hasOption) {
+                    loader.value = requestedReservationId;
+                }
+            }
+            openCheckinModal('');
+            loadReservationData(requestedReservationId);
+        }
     });
     
     function loadReservationData(id) {
@@ -776,6 +866,113 @@
         
         var modal = new bootstrap.Modal(document.getElementById('transferModal'));
         modal.show();
+    }
+
+    function openReservationPaymentModalFromElement(element) {
+        const reservationId = element.getAttribute('data-res-id') || '';
+        const guestName = element.getAttribute('data-guest-name') || '';
+        const roomLabel = element.getAttribute('data-room-label') || '';
+        openReservationPaymentModal(reservationId, guestName, roomLabel);
+    }
+
+    async function openReservationPaymentModal(reservationId, guestName, roomInfo) {
+        const modal = new bootstrap.Modal(document.getElementById('reservationPaymentModal'));
+        modal.show();
+
+        document.getElementById('resPaymentLoading').style.display = 'block';
+        document.getElementById('resPaymentContent').style.display = 'none';
+        document.getElementById('resPayError').style.display = 'none';
+        document.getElementById('btnConfirmResPayment').disabled = true;
+
+        document.getElementById('resPayGuestName').textContent = guestName;
+        document.getElementById('resPayRoom').textContent = roomInfo || '-';
+        document.getElementById('resPayId').value = reservationId;
+
+        try {
+            const debtResp = await fetch(`/reception/reservation/${reservationId}/debt`);
+            if (!debtResp.ok) throw new Error('Erro ao buscar dados da reserva');
+            const debtData = await debtResp.json();
+
+            document.getElementById('resPayTotal').textContent = `R$ ${Number(debtData.total || 0).toFixed(2)}`;
+            document.getElementById('resPayPaid').textContent = `R$ ${Number(debtData.paid || 0).toFixed(2)}`;
+            document.getElementById('resPayRemaining').textContent = `R$ ${Number(debtData.remaining || 0).toFixed(2)}`;
+            document.getElementById('resPayAmount').value = Number(debtData.remaining || 0).toFixed(2);
+            document.getElementById('resPayAmount').max = Number(debtData.remaining || 0) + 0.01;
+
+            const select = document.getElementById('resPayMethod');
+            select.innerHTML = '<option value="">Selecione...</option>';
+            reservationPaymentMethods.forEach(m => {
+                const option = document.createElement('option');
+                option.value = m.id;
+                option.textContent = m.name;
+                option.dataset.name = m.name;
+                select.appendChild(option);
+            });
+
+            if (!reservationPaymentMethods.length) {
+                throw new Error('Nenhuma forma de pagamento habilitada para Reservas em /payment-methods.');
+            }
+
+            document.getElementById('resPaymentLoading').style.display = 'none';
+            document.getElementById('resPaymentContent').style.display = 'block';
+            document.getElementById('btnConfirmResPayment').disabled = false;
+        } catch (error) {
+            alert(error.message);
+        }
+    }
+
+    async function submitReservationPayment() {
+        const btn = document.getElementById('btnConfirmResPayment');
+        const amountInput = document.getElementById('resPayAmount');
+        const methodSelect = document.getElementById('resPayMethod');
+        const errorDiv = document.getElementById('resPayError');
+
+        const amount = parseFloat(amountInput.value);
+        const maxAmount = parseFloat(amountInput.max);
+
+        if (!amount || amount <= 0) {
+            errorDiv.textContent = 'Digite um valor válido.';
+            errorDiv.style.display = 'block';
+            return;
+        }
+
+        if (amount > maxAmount) {
+            errorDiv.textContent = `O valor informado excede o saldo pendente de R$ ${maxAmount.toFixed(2)}.`;
+            errorDiv.style.display = 'block';
+            return;
+        }
+
+        if (!methodSelect.value) {
+            alert('Selecione uma forma de pagamento.');
+            return;
+        }
+
+        errorDiv.style.display = 'none';
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Processando...';
+
+        try {
+            const option = methodSelect.options[methodSelect.selectedIndex];
+            const resp = await fetch('/reception/reservation/pay', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    reservation_id: document.getElementById('resPayId').value,
+                    amount: amount,
+                    payment_method_id: methodSelect.value,
+                    payment_method_name: option.dataset.name,
+                    origin: 'checkin'
+                })
+            });
+            const result = await resp.json();
+            if (!resp.ok) throw new Error(result.error || 'Erro ao processar pagamento');
+            alert('Pagamento registrado com sucesso!');
+            location.reload();
+        } catch (error) {
+            alert(error.message);
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-check-circle"></i> Confirmar Pagamento';
+        }
     }
 
     function openViewGuestModalFromElement(element) {
@@ -1579,6 +1776,13 @@
 
     document.getElementById('editConsumptionRemoveServiceFee').addEventListener('change', renderEditConsumptionItems);
     initializeEditProducts();
+
+    const autoOpenConsumptionRoom = "{{ open_consumption_room or '' }}";
+    if (autoOpenConsumptionRoom && typeof openConsumptionModal === 'function') {
+        setTimeout(function() {
+            openConsumptionModal(autoOpenConsumptionRoom);
+        }, 150);
+    }
 </script>
 
 {% endblock %}

@@ -25,6 +25,92 @@ class ReservationService:
         "31": 2, "32": 2, "33": 2, "34": 2, "35": 2
     }
 
+    def _load_manual_allocations(self):
+        import json
+        manual_alloc_file = os.path.join(self.RESERVATIONS_DIR, "manual_allocations.json")
+        if not os.path.exists(manual_alloc_file):
+            return {}
+        try:
+            with file_lock(manual_alloc_file):
+                with open(manual_alloc_file, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    return data if isinstance(data, dict) else {}
+        except Exception:
+            return {}
+
+    def _enrich_reservation_for_checkin(self, reservation):
+        if not isinstance(reservation, dict):
+            return reservation
+        res = dict(reservation)
+        rid = str(res.get('id') or '')
+        if not rid:
+            return res
+
+        manual_allocs = self._load_manual_allocations()
+        if rid in manual_allocs and isinstance(manual_allocs.get(rid), dict):
+            room_value = manual_allocs[rid].get('room')
+            if room_value:
+                res['room'] = str(room_value)
+
+        cat_lower = str(res.get('category', '')).lower()
+        if 'família' in cat_lower or 'quadruplo' in cat_lower:
+            res['num_adults'] = 4
+        elif 'triplo' in cat_lower:
+            res['num_adults'] = 3
+        elif 'duplo' in cat_lower or 'casal' in cat_lower:
+            res['num_adults'] = 2
+        elif 'individual' in cat_lower or 'solteiro' in cat_lower:
+            res['num_adults'] = 1
+        elif 'suíte' in cat_lower:
+            res['num_adults'] = 2
+        elif res.get('room') and str(res['room']) in self.ROOM_CAPACITIES:
+            res['num_adults'] = self.ROOM_CAPACITIES[str(res['room'])]
+        else:
+            res['num_adults'] = int(res.get('num_adults') or 1)
+
+        try:
+            details = self.get_guest_details(rid)
+            p_info = details.get('personal_info') if isinstance(details, dict) else {}
+            if isinstance(p_info, dict):
+                if p_info.get('email'):
+                    res['email'] = p_info['email']
+                if p_info.get('phone'):
+                    res['phone'] = p_info['phone']
+
+                doc_value = p_info.get('doc_id') or p_info.get('cpf') or p_info.get('document')
+                if doc_value:
+                    res['doc_id'] = doc_value
+
+                if p_info.get('address'):
+                    res['address'] = p_info['address']
+                if p_info.get('city'):
+                    res['city'] = p_info['city']
+                if p_info.get('state'):
+                    res['state'] = p_info['state']
+
+                zip_value = p_info.get('zipcode') or p_info.get('zip')
+                if zip_value:
+                    res['zipcode'] = zip_value
+
+                if p_info.get('nationality'):
+                    res['nationality'] = p_info['nationality']
+                if p_info.get('profession'):
+                    res['profession'] = p_info['profession']
+                if p_info.get('gender'):
+                    res['gender'] = p_info['gender']
+                if p_info.get('birth_date'):
+                    res['birth_date'] = p_info['birth_date']
+        except Exception:
+            pass
+
+        return res
+
+    def get_reservation_for_checkin(self, reservation_id):
+        res = self.get_reservation_by_id(reservation_id)
+        if not res:
+            return None
+        return self._enrich_reservation_for_checkin(res)
+
     def get_upcoming_checkins(self, days=2):
         """
         Returns a list of reservations checking in within the next 'days'.
@@ -39,16 +125,6 @@ class ReservationService:
         # 1. Get all reservations
         all_res = self.get_february_reservations() 
         
-        # 2. Load Manual Allocations
-        manual_allocs = {}
-        manual_alloc_file = os.path.join(self.RESERVATIONS_DIR, "manual_allocations.json")
-        if os.path.exists(manual_alloc_file):
-            try:
-                with file_lock(manual_alloc_file):
-                    with open(manual_alloc_file, 'r') as f:
-                        manual_allocs = json.load(f)
-            except: pass
-
         for res in all_res:
             # Filter Status
             status = str(res.get('status', '')).lower()
@@ -66,51 +142,7 @@ class ReservationService:
             except: continue
             
             if today <= cin_date < limit_date:
-                # Enhance with Room
-                rid = str(res.get('id'))
-                if rid in manual_allocs:
-                    res['room'] = manual_allocs[rid].get('room')
-                
-                # Default Adults based on Category (heuristic)
-                cat_lower = str(res.get('category', '')).lower()
-                
-                if 'família' in cat_lower or 'quadruplo' in cat_lower:
-                    res['num_adults'] = 4
-                elif 'triplo' in cat_lower:
-                    res['num_adults'] = 3
-                elif 'duplo' in cat_lower or 'casal' in cat_lower:
-                    res['num_adults'] = 2
-                elif 'individual' in cat_lower or 'solteiro' in cat_lower:
-                    res['num_adults'] = 1
-                elif 'suíte' in cat_lower:
-                    res['num_adults'] = 2
-                elif res.get('room') and str(res['room']) in self.ROOM_CAPACITIES:
-                    # Fallback to Room Capacity if category is ambiguous
-                    res['num_adults'] = self.ROOM_CAPACITIES[str(res['room'])]
-                else:
-                    res['num_adults'] = 1
-                
-                # Enhance with Guest Details
-                try:
-                    details = self.get_guest_details(rid)
-                    if details and 'personal_info' in details:
-                        # Merge personal info keys that are missing or overwrite
-                        p_info = details['personal_info']
-                        if p_info.get('email'): res['email'] = p_info['email']
-                        if p_info.get('phone'): res['phone'] = p_info['phone']
-                        if p_info.get('cpf'): res['doc_id'] = p_info['cpf']
-                        if p_info.get('address'): res['address'] = p_info['address']
-                        if p_info.get('city'): res['city'] = p_info['city']
-                        if p_info.get('state'): res['state'] = p_info['state']
-                        if p_info.get('zip'): res['zipcode'] = p_info['zip']
-                        if p_info.get('nationality'): res['nationality'] = p_info['nationality']
-                        if p_info.get('profession'): res['profession'] = p_info['profession']
-                        if p_info.get('gender'): res['gender'] = p_info['gender']
-                        if p_info.get('birth_date'): res['birth_date'] = p_info['birth_date']
-                except Exception as e:
-                    print(f"Error fetching details for res {rid}: {e}")
-
-                target_reservations.append(res)
+                target_reservations.append(self._enrich_reservation_for_checkin(res))
                 
         return target_reservations
 
@@ -173,6 +205,196 @@ class ReservationService:
                             item['source_type'] = 'excel'
                             return item
         return None
+
+    def _parse_date(self, value):
+        if not value:
+            return None
+        if isinstance(value, datetime):
+            return value.date()
+        raw = str(value).strip()
+        for fmt in ('%d/%m/%Y', '%Y-%m-%d'):
+            try:
+                return datetime.strptime(raw, fmt).date()
+            except Exception:
+                continue
+        return None
+
+    def _parse_money(self, value):
+        try:
+            if value is None:
+                return 0.0
+            txt = str(value).replace('R$', '').strip()
+            if ',' in txt:
+                txt = txt.replace('.', '').replace(',', '.')
+            return float(txt)
+        except Exception:
+            return 0.0
+
+    def calculate_reservation_update(self, reservation_id, new_room, new_checkin, new_checkout):
+        from app.services.data_service import load_room_occupancy
+        reservation = self.get_reservation_by_id(reservation_id)
+        if not reservation:
+            return {'valid': False, 'conflict_message': 'Reserva não encontrada'}
+
+        old_checkin = self._parse_date(reservation.get('checkin'))
+        old_checkout = self._parse_date(reservation.get('checkout'))
+        new_checkin_date = self._parse_date(new_checkin)
+        new_checkout_date = self._parse_date(new_checkout)
+
+        if not new_checkin_date or not new_checkout_date or new_checkout_date <= new_checkin_date:
+            return {'valid': False, 'conflict_message': 'Período inválido'}
+
+        old_total = self._parse_money(reservation.get('amount_val') or reservation.get('amount') or reservation.get('total_value'))
+        old_days = max((old_checkout - old_checkin).days, 1) if old_checkin and old_checkout else 1
+        new_days = max((new_checkout_date - new_checkin_date).days, 1)
+        daily_rate = old_total / old_days if old_days else old_total
+        new_total = round(daily_rate * new_days, 2)
+
+        occupancy = load_room_occupancy() or {}
+        occ = occupancy.get(str(new_room))
+        if occ:
+            occ_in = self._parse_date(occ.get('checkin'))
+            occ_out = self._parse_date(occ.get('checkout'))
+            overlap = False
+            if occ_in and occ_out:
+                overlap = new_checkin_date < occ_out and new_checkout_date > occ_in
+            else:
+                overlap = True
+            if overlap:
+                guest = occ.get('guest_name', 'Hóspede')
+                return {
+                    'valid': False,
+                    'conflict_message': f'Quarto {new_room} ocupado por {guest}'
+                }
+
+        reservations = self.get_february_reservations() or []
+        for other in reservations:
+            other_id = str(other.get('id'))
+            if other_id == str(reservation_id):
+                continue
+            other_room = self.get_manual_room(other_id) if hasattr(self, 'get_manual_room') else None
+            other_room = other_room or other.get('allocated_room') or other.get('room') or other.get('room_number')
+            if str(other_room) != str(new_room):
+                continue
+            manual_dates = self.get_manual_dates(other_id) if hasattr(self, 'get_manual_dates') else (None, None)
+            other_checkin = self._parse_date(manual_dates[0]) if manual_dates and manual_dates[0] else self._parse_date(other.get('checkin'))
+            other_checkout = self._parse_date(manual_dates[1]) if manual_dates and manual_dates[1] else self._parse_date(other.get('checkout'))
+            if not other_checkin or not other_checkout:
+                continue
+            if new_checkin_date < other_checkout and new_checkout_date > other_checkin:
+                guest_name = other.get('guest_name', 'Outro hóspede')
+                return {
+                    'valid': False,
+                    'conflict_message': f'Conflito com reserva de {guest_name}'
+                }
+
+        return {
+            'valid': True,
+            'old_total': round(old_total, 2),
+            'new_total': new_total,
+            'days': new_days,
+            'diff': round(new_total - old_total, 2)
+        }
+
+    def search_reservations(self, query):
+        import unicodedata
+        q = str(query or '').strip()
+        if not q:
+            return []
+
+        def norm(text):
+            raw = str(text or '')
+            raw = ''.join(c for c in unicodedata.normalize('NFD', raw) if unicodedata.category(c) != 'Mn')
+            return raw.lower()
+
+        def digits(text):
+            return ''.join(ch for ch in str(text or '') if ch.isdigit())
+
+        q_norm = norm(q)
+        q_digits = digits(q)
+        details = self.get_guest_details_data() if hasattr(self, 'get_guest_details_data') else {}
+        reservations = self.get_february_reservations() or []
+        found = []
+
+        for res in reservations:
+            rid = str(res.get('id'))
+            d = details.get(rid, {}) if isinstance(details, dict) else {}
+            p = d.get('personal_info', {}) if isinstance(d, dict) else {}
+            f = d.get('fiscal_info', {}) if isinstance(d, dict) else {}
+
+            names = [
+                res.get('guest_name', ''),
+                p.get('name', ''),
+            ]
+            docs = [
+                p.get('doc_id', ''),
+                f.get('cpf', ''),
+                f.get('cnpj', ''),
+            ]
+
+            name_match = any(q_norm in norm(name) for name in names if name)
+            doc_match = bool(q_digits) and any(q_digits in digits(doc) for doc in docs if doc)
+
+            if name_match or doc_match:
+                found.append(res)
+
+        found.sort(key=lambda r: self._parse_date(r.get('checkin')) or datetime.min.date(), reverse=True)
+        return found
+
+    def check_collision(self, reservation_id, room_number, checkin, checkout, occupancy_data=None):
+        room_number = str(room_number)
+        checkin_date = self._parse_date(checkin)
+        checkout_date = self._parse_date(checkout)
+        if not checkin_date or not checkout_date or checkout_date <= checkin_date:
+            raise ValueError('Período inválido para alocação.')
+
+        occupancy = occupancy_data if isinstance(occupancy_data, dict) else {}
+        room_occ = occupancy.get(room_number)
+        if room_occ:
+            occ_in = self._parse_date(room_occ.get('checkin'))
+            occ_out = self._parse_date(room_occ.get('checkout'))
+            if occ_in and occ_out and checkin_date < occ_out and checkout_date > occ_in:
+                guest = room_occ.get('guest_name', 'Hóspede')
+                raise ValueError(f'Quarto {room_number} ocupado por {guest} no período selecionado.')
+
+        for res in self.get_february_reservations() or []:
+            rid = str(res.get('id'))
+            if str(reservation_id) != 'new' and rid == str(reservation_id):
+                continue
+            room = self.get_manual_room(rid) if hasattr(self, 'get_manual_room') else None
+            room = room or res.get('allocated_room') or res.get('room') or res.get('room_number')
+            if str(room) != room_number:
+                continue
+            r_in = self._parse_date(res.get('checkin'))
+            r_out = self._parse_date(res.get('checkout'))
+            if r_in and r_out and checkin_date < r_out and checkout_date > r_in:
+                guest = res.get('guest_name', 'Outro hóspede')
+                raise ValueError(f'Conflito com reserva de {guest} no quarto {room_number}.')
+        return True
+
+    def has_availability_for_category(self, category, checkin, checkout):
+        rooms = self.get_room_mapping().get(category, [])
+        for room in rooms:
+            try:
+                self.check_collision('new', room, checkin, checkout)
+                return True
+            except ValueError:
+                continue
+        return False
+
+    def available_categories_for_period(self, checkin, checkout, exclude_category=None):
+        available = []
+        for category, rooms in self.get_room_mapping().items():
+            if exclude_category and str(category) == str(exclude_category):
+                continue
+            for room in rooms:
+                try:
+                    self.check_collision('new', room, checkin, checkout)
+                    available.append(category)
+                    break
+                except ValueError:
+                    continue
+        return available
 
     def add_payment(self, reservation_id, amount, payment_details):
         # print(f"DEBUG: add_payment id={reservation_id} amount={amount}")
@@ -284,6 +506,17 @@ class ReservationService:
         # Ensure structure
         if 'personal_info' not in details:
             details['personal_info'] = {}
+
+        personal_info = details.get('personal_info')
+        if isinstance(personal_info, dict):
+            if not personal_info.get('doc_id') and personal_info.get('cpf'):
+                personal_info['doc_id'] = personal_info.get('cpf')
+            if not personal_info.get('cpf') and personal_info.get('doc_id'):
+                personal_info['cpf'] = personal_info.get('doc_id')
+            if not personal_info.get('zipcode') and personal_info.get('zip'):
+                personal_info['zipcode'] = personal_info.get('zip')
+            if not personal_info.get('zip') and personal_info.get('zipcode'):
+                personal_info['zip'] = personal_info.get('zipcode')
         
         # If we have reservation but name is missing in details, sync it
         if 'name' not in details['personal_info'] or not details['personal_info']['name']:
@@ -359,6 +592,16 @@ class ReservationService:
                 # Also support direct structured updates
                 if 'personal_info' in updates:
                     current_details['personal_info'].update(updates['personal_info'])
+                    pi = current_details['personal_info']
+                    if isinstance(pi, dict):
+                        if not pi.get('cpf') and pi.get('doc_id'):
+                            pi['cpf'] = pi.get('doc_id')
+                        if not pi.get('doc_id') and pi.get('cpf'):
+                            pi['doc_id'] = pi.get('cpf')
+                        if not pi.get('zip') and pi.get('zipcode'):
+                            pi['zip'] = pi.get('zipcode')
+                        if not pi.get('zipcode') and pi.get('zip'):
+                            pi['zipcode'] = pi.get('zip')
                 
                 if 'companions' in updates:
                     current_details['companions'] = updates['companions']

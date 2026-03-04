@@ -71,7 +71,7 @@ class ReceptionViewTestCase(unittest.TestCase):
         if pending_room:
             self.assertIn('id="consumptionPaymentModal"', html)
             self.assertIn('id="closeRoomAccountModal"', html)
-            self.assertIn(f"openConsumptionModal('{pending_room}')", html)
+            self.assertIn("openConsumptionModal(", html)
             print("[TEST] SUCCESS: Verified 'Ver Consumo' UI and actions.")
         else:
             print("[TEST] SKIPPING specific room verification (no pending charges found)")

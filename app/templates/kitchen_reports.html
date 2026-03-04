@@ -101,6 +101,7 @@
                         <th>Rendimento %</th>
                         <th>Perda Total %</th>
                         <th>Custo Total (Líquido)</th>
+                        <th>Preço Final Unitário (Porcionados)</th>
                         <th>Responsável</th>
                         <th>Detalhes</th>
                     </tr>
@@ -127,6 +128,7 @@
                         </td>
                         <td>{{ "%.1f"|format(item.waste_pct) }}%</td>
                         <td class="fw-bold">R$ {{ "%.2f"|format(item.total_cost_liquid) }}</td>
+                        <td><small>{{ item.portioned_items_unit_prices }}</small></td>
                         <td><small class="text-muted">{{ item.staff }}</small></td>
                         <td>
                             <button type="button" class="btn btn-sm btn-link text-decoration-none"
@@ -143,6 +145,7 @@
                                     <strong>Rendimento:</strong> {{ '%.1f'|format(item.yield_pct) }}%<br>
                                     <strong>Perda Total:</strong> {{ '%.1f'|format(item.waste_pct) }}%<br>
                                     <strong>Custo por Kg Útil:</strong> R$ {{ '%.2f'|format(item.cost_per_useful_kg) }}<br>
+                                    <strong>Preço Final Unitário:</strong> {{ item.portioned_items_unit_prices }}<br>
                                     <strong>Descrição:</strong> {{ item.details }}">
                                 <i class="bi bi-info-circle"></i> Ver
                             </button>
@@ -150,7 +153,7 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="8" class="text-center py-5 text-muted">
+                        <td colspan="15" class="text-center py-5 text-muted">
                             <i class="bi bi-inbox fs-1 d-block mb-3"></i>
                             Nenhum registro encontrado para os filtros selecionados.
                         </td>

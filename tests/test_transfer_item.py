@@ -20,23 +20,25 @@ class TestTransferItem(unittest.TestCase):
             sess['user'] = 'SupervisorUser'
             sess['role'] = 'supervisor'
 
-    @patch('app.load_table_orders')
-    @patch('app.save_table_orders')
-    @patch('app.log_action')
+    @patch('app.blueprints.restaurant.routes.load_table_orders')
+    @patch('app.blueprints.restaurant.routes.save_table_orders')
+    @patch('app.blueprints.restaurant.routes.log_action')
     def test_transfer_success(self, mock_log, mock_save, mock_load):
         # Setup Data
         source_table = '10'
-        target_table = '20'
+        target_table = '50'
         
         # Mock the global orders dictionary directly
         app.orders = {
             source_table: {
                 'items': [{'name': 'Coke', 'qty': 2.0, 'price': 5.0, 'printed': True}],
-                'total': 10.0
+                'total': 10.0,
+                'status': 'open'
             },
             target_table: {
                 'items': [],
-                'total': 0.0
+                'total': 0.0,
+                'status': 'open'
             }
         }
         
@@ -79,22 +81,24 @@ class TestTransferItem(unittest.TestCase):
         # Verify Log
         mock_log.assert_called()
 
-    @patch('app.load_table_orders')
-    @patch('app.save_table_orders')
-    @patch('app.log_action')
+    @patch('app.blueprints.restaurant.routes.load_table_orders')
+    @patch('app.blueprints.restaurant.routes.save_table_orders')
+    @patch('app.blueprints.restaurant.routes.log_action')
     def test_transfer_full_quantity(self, mock_log, mock_save, mock_load):
         # Setup Data
         source_table = '10'
-        target_table = '20'
+        target_table = '50'
         
         app.orders = {
             source_table: {
                 'items': [{'name': 'Coke', 'qty': 1.0, 'price': 5.0}],
-                'total': 5.0
+                'total': 5.0,
+                'status': 'open'
             },
             target_table: {
                 'items': [],
-                'total': 0.0
+                'total': 0.0,
+                'status': 'open'
             }
         }
         mock_load.return_value = app.orders
@@ -129,9 +133,9 @@ class TestTransferItem(unittest.TestCase):
         
         self.assertEqual(response.status_code, 403)
 
-    @patch('app.load_table_orders')
+    @patch('app.blueprints.restaurant.routes.load_table_orders')
     def test_invalid_target_table(self, mock_load):
-        app.orders = {'10': {'items': [{'name': 'X', 'qty': 1}]}}
+        app.orders = {'10': {'items': [{'name': 'X', 'qty': 1}], 'status': 'open', 'total': 1.0}}
         mock_load.return_value = app.orders
         
         payload = {
@@ -147,19 +151,19 @@ class TestTransferItem(unittest.TestCase):
         
         self.assertEqual(response.status_code, 400)
         data = json.loads(response.data)
-        self.assertIn('não está aberta', data['error'])
+        self.assertIn('inválida', data['error'])
 
-    @patch('app.load_table_orders')
+    @patch('app.blueprints.restaurant.routes.load_table_orders')
     def test_transfer_from_locked_table(self, mock_load):
         app.orders = {
-            '10': {'items': [{'name': 'X', 'qty': 1}], 'locked': True},
-            '20': {'items': []}
+            '10': {'items': [{'name': 'X', 'qty': 1}], 'locked': True, 'status': 'open', 'total': 1.0},
+            '50': {'items': [], 'status': 'open', 'total': 0.0}
         }
         mock_load.return_value = app.orders
         
         payload = {
             'source_table_id': '10',
-            'target_table_id': '20',
+            'target_table_id': '50',
             'item_index': 0,
             'qty': 1
         }
@@ -172,20 +176,20 @@ class TestTransferItem(unittest.TestCase):
         data = json.loads(response.data)
         self.assertIn('fechada/puxada', data['error'])
 
-    @patch('app.load_table_orders')
-    @patch('app.save_table_orders')
-    @patch('app.log_action')
+    @patch('app.blueprints.restaurant.routes.load_table_orders')
+    @patch('app.blueprints.restaurant.routes.save_table_orders')
+    @patch('app.blueprints.restaurant.routes.log_action')
     def test_save_failure(self, mock_log, mock_save, mock_load):
         app.orders = {
-            '10': {'items': [{'name': 'X', 'qty': 1, 'price': 10}]},
-            '20': {'items': [], 'total': 0}
+            '10': {'items': [{'name': 'X', 'qty': 1, 'price': 10}], 'status': 'open', 'total': 10.0},
+            '50': {'items': [], 'total': 0, 'status': 'open'}
         }
         mock_load.return_value = app.orders
         mock_save.side_effect = Exception("Disk error")
         
         payload = {
             'source_table_id': '10',
-            'target_table_id': '20',
+            'target_table_id': '50',
             'item_index': 0,
             'qty': 1
         }
@@ -196,7 +200,7 @@ class TestTransferItem(unittest.TestCase):
         
         self.assertEqual(response.status_code, 500)
         data = json.loads(response.data)
-        self.assertIn('Falha ao salvar', data['error'])
+        self.assertIn('Erro ao salvar', data['error'])
         
         # Verify log was NOT called
         mock_log.assert_not_called()

@@ -20,10 +20,36 @@
 
     <div class="card">
         <p class="description">Siga as etapas abaixo para registrar o porcionamento e calcular o rendimento.</p>
-        
+        <div class="workflow-dashboard">
+            <div class="workflow-steps">
+                <div class="workflow-title">Progresso do Procedimento</div>
+                <div id="step-indicator-1" class="workflow-step-item">1. Selecionar origem <span class="status-tag">Pendente</span></div>
+                <div id="step-indicator-2" class="workflow-step-item">2. Itens de origem (kit) <span class="status-tag">Opcional</span></div>
+                <div id="step-indicator-3" class="workflow-step-item">3. Informar peso congelado <span class="status-tag">Pendente</span></div>
+                <div id="step-indicator-4" class="workflow-step-item">4. Informar peso descongelado <span class="status-tag">Pendente</span></div>
+                <div id="step-indicator-5" class="workflow-step-item">5. Informar aparas <span class="status-tag">Pendente</span></div>
+                <div id="step-indicator-6" class="workflow-step-item">6. Informar cocção <span class="status-tag">Opcional</span></div>
+                <div id="step-indicator-7" class="workflow-step-item">7. Definir porções destino <span class="status-tag">Pendente</span></div>
+            </div>
+            <div class="workflow-metrics">
+                <div class="metric-card">
+                    <div class="metric-label">Peso útil estimado</div>
+                    <div id="metric-useful" class="metric-value">- g</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Rendimento global</div>
+                    <div id="metric-yield" class="metric-value">- %</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Diferença porcionada</div>
+                    <div id="metric-diff" class="metric-value">- g</div>
+                </div>
+            </div>
+        </div>
+
         <form method="POST" action="{{ url_for('kitchen.kitchen_portion') }}" onsubmit="return validateForm()">
             <!-- Passo 1: Seleção do Item -->
-            <div class="step-section">
+            <div class="step-section" id="step-section-1">
                 <h3>1. Selecionar Item (Origem)</h3>
                 <div class="form-group">
                     <label for="origin_product">Produto a Porcionar:</label>
@@ -32,7 +58,7 @@
             </div>
 
             <!-- Passo 2: Itens de Origem (Kits) -->
-            <div class="step-section">
+            <div class="step-section" id="step-section-2">
                 <h3>2. Itens de Origem (Opcional - Kits)</h3>
                 <p style="font-size: 0.9rem; color: #555;">
                     Use esta seção quando estiver montando um kit com vários itens de origem.
@@ -69,7 +95,7 @@
             </datalist>
 
             <!-- Passo 3: Peso Congelado -->
-            <div class="step-section">
+            <div class="step-section" id="step-section-3">
                 <h3>3. Peso Congelado (Saída do Estoque)</h3>
                 <div class="form-group">
                     <label for="frozen_weight">Peso Bruto / Congelado (g):</label>
@@ -81,7 +107,7 @@
             </div>
 
             <!-- Passo 4: Peso Descongelado -->
-            <div class="step-section">
+            <div class="step-section" id="step-section-4">
                 <h3>4. Peso Descongelado</h3>
                 <div class="form-group">
                     <label for="thawed_weight">Peso após descongelamento (g):</label>
@@ -94,7 +120,7 @@
             </div>
 
             <!-- Passo 5: Aparas e Descartes -->
-            <div class="step-section">
+            <div class="step-section" id="step-section-5">
                 <h3>5. Aparas e Descartes</h3>
                 <div class="form-group">
                     <label for="trim_weight">Peso de Aparas/Limpeza (g):</label>
@@ -106,7 +132,7 @@
             </div>
 
             <!-- Passo 6: Peso Cozido -->
-            <div class="step-section">
+            <div class="step-section" id="step-section-6">
                 <h3>6. Peso Cozido (Após Cocção)</h3>
                 <div class="form-group">
                     <label for="cooked_weight">Peso Final Cozido (g):</label>
@@ -120,7 +146,7 @@
             </div>
 
             <!-- Passo 7: Seleção da Porção Gerada -->
-            <div class="step-section">
+            <div class="step-section" id="step-section-7">
                 <h3>7. Itens Gerados (Porções)</h3>
                 <div id="destination-rows">
                     <div class="destination-row form-row" style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed #ddd; display: flex; gap: 15px; align-items: flex-start;">
@@ -162,6 +188,75 @@
 </div>
 
 <style>
+    .workflow-dashboard {
+        display: grid;
+        grid-template-columns: minmax(260px, 1.2fr) minmax(220px, 1fr);
+        gap: 14px;
+        margin-bottom: 18px;
+    }
+    .workflow-steps,
+    .workflow-metrics {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 12px;
+    }
+    .workflow-title {
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 8px;
+        font-size: 0.98rem;
+    }
+    .workflow-step-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 7px 9px;
+        margin-bottom: 6px;
+        font-size: 0.88rem;
+        color: #374151;
+    }
+    .workflow-step-item.done {
+        border-color: #34d399;
+        background: #ecfdf5;
+    }
+    .status-tag {
+        background: #f3f4f6;
+        color: #374151;
+        border-radius: 999px;
+        padding: 2px 8px;
+        font-size: 0.75rem;
+        white-space: nowrap;
+    }
+    .workflow-step-item.done .status-tag {
+        background: #10b981;
+        color: #ffffff;
+    }
+    .workflow-step-item.warning .status-tag {
+        background: #f59e0b;
+        color: #ffffff;
+    }
+    .metric-card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 10px;
+        margin-bottom: 8px;
+    }
+    .metric-label {
+        color: #6b7280;
+        font-size: 0.78rem;
+        margin-bottom: 3px;
+    }
+    .metric-value {
+        color: #111827;
+        font-weight: 700;
+        font-size: 1.02rem;
+    }
     .step-section {
         background: #f9f9f9;
         padding: 15px;
@@ -178,6 +273,9 @@
     
     /* Mobile Optimization */
     @media (max-width: 768px) {
+        .workflow-dashboard {
+            grid-template-columns: 1fr;
+        }
         .service-page {
             padding: 10px;
         }
@@ -246,7 +344,7 @@
 <script type="application/json" id="all-origin-products-data">
     [
     {% for p in origin_products %}
-        {"name": "{{ p.name }}", "unit": "{{ p.unit }}", "category": "{{ p.category }}"}{% if not loop.last %},{% endif %}
+        {"name": "{{ p.name }}", "unit": "{{ p.unit }}", "category": "{{ p.category }}", "price": {{ p.price | default(0) }} }{% if not loop.last %},{% endif %}
     {% endfor %}
     ]
 </script>
@@ -262,6 +360,52 @@
     const originRowsContainer = document.getElementById('origin-components-rows');
     const addOriginRowBtn = document.getElementById('add-origin-row-btn');
     const destDatalist = document.getElementById('destinationProductsList');
+    const usefulMetric = document.getElementById('metric-useful');
+    const yieldMetric = document.getElementById('metric-yield');
+    const diffMetric = document.getElementById('metric-diff');
+
+    function setStepStatus(stepNumber, done, text) {
+        const row = document.getElementById(`step-indicator-${stepNumber}`);
+        if (!row) return;
+        row.classList.remove('done', 'warning');
+        if (done) row.classList.add('done');
+        const tag = row.querySelector('.status-tag');
+        if (tag) {
+            tag.textContent = text;
+        }
+    }
+
+    function updateWorkflowStatus() {
+        const originFilled = originInput.value.trim().length > 0;
+        setStepStatus(1, originFilled, originFilled ? 'Concluído' : 'Pendente');
+
+        const hasComponent = Array.from(originRowsContainer.querySelectorAll('.origin-component-input')).some(i => i.value.trim().length > 0);
+        setStepStatus(2, hasComponent, hasComponent ? 'Preenchido' : 'Opcional');
+
+        const frozen = (parseFloat(document.getElementById('frozen_weight').value) || 0) > 0;
+        setStepStatus(3, frozen, frozen ? 'Concluído' : 'Pendente');
+
+        const thawed = (parseFloat(document.getElementById('thawed_weight').value) || 0) > 0;
+        setStepStatus(4, thawed, thawed ? 'Concluído' : 'Pendente');
+
+        const trim = (parseFloat(document.getElementById('trim_weight').value) || 0) >= 0 && document.getElementById('trim_weight').value !== '';
+        setStepStatus(5, trim, trim ? 'Concluído' : 'Pendente');
+
+        const cookedRaw = document.getElementById('cooked_weight').value;
+        const cooked = parseFloat(cookedRaw) || 0;
+        const cookedStatus = cookedRaw === '' || cooked <= 0 ? 'Opcional' : 'Concluído';
+        setStepStatus(6, cooked > 0, cookedStatus);
+
+        let hasDest = false;
+        document.querySelectorAll('#destination-rows .destination-row').forEach(row => {
+            const prod = row.querySelector('.dest-product-input');
+            const qty = row.querySelector('.final-qty-input');
+            const count = row.querySelector('.dest-count-input');
+            const isOk = prod && qty && count && prod.value.trim() && (parseFloat(qty.value) || 0) > 0 && (parseFloat(count.value) || 0) > 0;
+            if (isOk) hasDest = true;
+        });
+        setStepStatus(7, hasDest, hasDest ? 'Concluído' : 'Pendente');
+    }
 
     // Initialize TomSelect for an element and store instance
     function initTomSelect(el) {
@@ -290,6 +434,7 @@
             </td>
         `;
         originRowsContainer.appendChild(tr);
+        updateWorkflowStatus();
     }
     
     // Add first row by default
@@ -309,7 +454,11 @@
                 // If it's the last row, just clear values
                 row.querySelectorAll('input').forEach(input => input.value = '');
             }
+            updateWorkflowStatus();
         }
+    });
+    originRowsContainer.addEventListener('input', function() {
+        updateWorkflowStatus();
     });
 
     function checkUnitCompatibility(originUnit, destUnit) {
@@ -396,6 +545,7 @@
         document.querySelectorAll('.dest-product-input').forEach(input => {
             input.value = '';
         });
+        updateWorkflowStatus();
     });
 
     // Event delegation for dynamic rows
@@ -404,6 +554,7 @@
             e.target.closest('.destination-row').remove();
             updateRemoveButtons();
             updateCalculations();
+            updateWorkflowStatus();
         }
     });
 
@@ -434,6 +585,7 @@
         `;
         rowsContainer.appendChild(div);
         updateRemoveButtons();
+        updateWorkflowStatus();
     });
 
     function updateAverageWeight(row) {
@@ -457,6 +609,9 @@
         if (e.target.classList.contains('dest-count-input') || e.target.classList.contains('final-qty-input')) {
             updateAverageWeight(e.target.closest('.destination-row'));
             updateCalculations();
+        }
+        if (e.target.classList.contains('dest-product-input')) {
+            updateWorkflowStatus();
         }
     });
 
@@ -533,13 +688,22 @@
                 const diffPct = (Math.abs(diff) / usefulWeight) * 100;
                 const color = diffPct > 5 ? '#e74c3c' : '#27ae60'; // Red if > 5%, Green otherwise
                 displayText += `<br><span style="color:${color}; font-size:0.9em;">Total Porcionado: ${totalPortioned.toFixed(3)}g (Dif: ${diff.toFixed(3)}g)</span>`;
+                diffMetric.innerText = `${diff.toFixed(2)} g`;
+            } else {
+                diffMetric.innerText = '- g';
             }
             
             document.getElementById('net_weight_display').innerHTML = displayText;
+            usefulMetric.innerText = `${usefulWeight.toFixed(2)} g`;
+            yieldMetric.innerText = `${yieldPct.toFixed(1)} %`;
         } else {
             document.getElementById('net_weight_display').innerText = '';
             document.getElementById('cooking_loss_display').innerText = '';
+            usefulMetric.innerText = '- g';
+            yieldMetric.innerText = '- %';
+            diffMetric.innerText = '- g';
         }
+        updateWorkflowStatus();
     }
     
     function validateForm() {
@@ -618,5 +782,6 @@
 
     // Ensure rules are applied on page load
     updateAllDestRows();
+    updateWorkflowStatus();
 </script>
 {% endblock %}

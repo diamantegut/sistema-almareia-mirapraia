@@ -1,29 +1,363 @@
 [
     {
-        "id": "SESSION_RESERVATION_CASHIER_20260227165554_test_admin",
+        "id": "SESSION_REST_1",
+        "type": "restaurant",
+        "status": "open",
+        "user": "admin",
+        "opened_at": "01/01/2026 10:00",
+        "transactions": [
+            {
+                "id": "TX_20260304122253_0dfab1",
+                "type": "sale",
+                "amount": 50.0,
+                "description": "Pagamento Parcial Mesa 50",
+                "payment_method": "dinheiro",
+                "timestamp": "04/03/2026 12:22",
+                "user": "admin",
+                "details": {}
+            },
+            {
+                "id": "TX_20260304122253_051a1c",
+                "type": "sale",
+                "amount": 200.0,
+                "description": "Pagamento Parcial Mesa 50",
+                "payment_method": "dinheiro",
+                "timestamp": "04/03/2026 12:22",
+                "user": "admin",
+                "details": {}
+            },
+            {
+                "id": "TX_20260304122253_7e4baf",
+                "type": "sale",
+                "amount": 50.0,
+                "description": "Pagamento Parcial Mesa 50",
+                "payment_method": "dinheiro",
+                "timestamp": "04/03/2026 12:22",
+                "user": "admin",
+                "details": {}
+            },
+            {
+                "id": "TX_20260304122253_ddb8c7",
+                "type": "sale",
+                "amount": 50.0,
+                "description": "Pagamento Parcial Mesa 50",
+                "payment_method": "dinheiro",
+                "timestamp": "04/03/2026 12:22",
+                "user": "admin",
+                "details": {}
+            },
+            {
+                "id": "TX_20260304122254_7d6a95",
+                "type": "sale",
+                "amount": 88.0,
+                "description": "Venda Mesa 100 - Dinheiro",
+                "payment_method": "Dinheiro",
+                "timestamp": "04/03/2026 12:22",
+                "user": "admin",
+                "details": {}
+            },
+            {
+                "id": "TX_20260304122254_c0d9aa",
+                "type": "sale",
+                "amount": 88.0,
+                "description": "Venda Mesa 101 - Cartão Crédito",
+                "payment_method": "Cartão Crédito",
+                "timestamp": "04/03/2026 12:22",
+                "user": "admin",
+                "details": {}
+            },
+            {
+                "id": "TX_20260304122255_990409",
+                "type": "sale",
+                "amount": 88.0,
+                "description": "Venda Mesa 102 - PIX",
+                "payment_method": "PIX",
+                "timestamp": "04/03/2026 12:22",
+                "user": "admin",
+                "details": {}
+            },
+            {
+                "id": "TX_20260304122255_d93a48",
+                "type": "sale",
+                "amount": 88.0,
+                "description": "Venda Mesa 103 - Vale Refeição",
+                "payment_method": "Vale Refeição",
+                "timestamp": "04/03/2026 12:22",
+                "user": "admin",
+                "details": {}
+            },
+            {
+                "id": "TX_20260304122258_d4e283",
+                "type": "sale",
+                "amount": 50.0,
+                "description": "Pagamento Parcial Mesa 200",
+                "payment_method": "PIX",
+                "timestamp": "04/03/2026 12:22",
+                "user": "admin",
+                "details": {}
+            },
+            {
+                "id": "TX_20260304122258_4986a1",
+                "type": "sale",
+                "amount": 60.0,
+                "description": "Venda Mesa 200 - Dinheiro",
+                "payment_method": "Dinheiro",
+                "timestamp": "04/03/2026 12:22",
+                "user": "admin",
+                "details": {}
+            },
+            {
+                "id": "TX_20260304122258_20879f",
+                "type": "sale",
+                "amount": 50.0,
+                "description": "Pagamento Parcial Mesa 300",
+                "payment_method": "Cartão Débito",
+                "timestamp": "04/03/2026 12:22",
+                "user": "admin",
+                "details": {}
+            },
+            {
+                "id": "TX_20260304122258_3de4cc",
+                "type": "out",
+                "amount": 50.0,
+                "description": "ESTORNO Pagto Parcial Mesa 300",
+                "payment_method": "Cartão Débito",
+                "timestamp": "04/03/2026 12:22",
+                "user": "admin",
+                "details": {}
+            },
+            {
+                "id": "TX_20260304122259_14f3d2",
+                "type": "sale",
+                "amount": 88.0,
+                "description": "Venda Mesa 400 - Dinheiro",
+                "payment_method": "Dinheiro",
+                "timestamp": "04/03/2026 12:22",
+                "user": "admin",
+                "details": {}
+            },
+            {
+                "id": "TX_20260304122300_98463e",
+                "type": "sale",
+                "amount": 22.0,
+                "description": "Venda Mesa 500 - Dinheiro",
+                "payment_method": "Dinheiro",
+                "timestamp": "04/03/2026 12:23",
+                "user": "admin",
+                "details": {}
+            }
+        ],
+        "opening_balance": 0.0
+    },
+    {
+        "id": "SESSION_GUEST_CONSUMPTION_20260304122040_admin",
+        "user": "admin",
+        "type": "guest_consumption",
+        "entity": "Hotel Almareia",
+        "opened_at": "04/03/2026 12:20",
+        "opening_balance": 0.0,
+        "transactions": [],
+        "status": "open",
+        "closed_at": null,
+        "closing_balance": null,
+        "difference": null
+    },
+    {
+        "id": "SESSION_RESERVATION_CASHIER_20260304122302_admin",
+        "user": "admin",
+        "type": "reservation_cashier",
+        "entity": "Hotel Almareia",
+        "opened_at": "04/03/2026 12:23",
+        "opening_balance": 0.0,
+        "transactions": [
+            {
+                "id": "TX_20260304122302_125ce5",
+                "type": "sale",
+                "amount": 150.0,
+                "description": "Check-in Múltiplo",
+                "payment_method": "Crédito",
+                "timestamp": "04/03/2026 12:23",
+                "user": "admin",
+                "details": {
+                    "payment_group_id": "88db9a33-dd2c-4fd7-9fa0-648efc2951c5"
+                }
+            },
+            {
+                "id": "TX_20260304122303_92defc",
+                "type": "sale",
+                "amount": 50.0,
+                "description": "Check-in Múltiplo",
+                "payment_method": "Dinheiro",
+                "timestamp": "04/03/2026 12:23",
+                "user": "admin",
+                "details": {
+                    "payment_group_id": "88db9a33-dd2c-4fd7-9fa0-648efc2951c5"
+                }
+            },
+            {
+                "id": "TX_20260304122317_bd5923",
+                "type": "sale",
+                "amount": 10.0,
+                "description": "Pagamento Reserva #d977b34b-d5ff-410b-8b64-d8ef83b56bf2 - Concurrent Guest",
+                "payment_method": "Dinheiro",
+                "timestamp": "04/03/2026 12:23",
+                "user": "test_admin",
+                "details": {}
+            },
+            {
+                "id": "TX_20260304122317_fdb38a",
+                "type": "sale",
+                "amount": 20.0,
+                "description": "Pagamento Reserva #d977b34b-d5ff-410b-8b64-d8ef83b56bf2 - Concurrent Guest",
+                "payment_method": "Dinheiro",
+                "timestamp": "04/03/2026 12:23",
+                "user": "test_admin",
+                "details": {}
+            },
+            {
+                "id": "TX_20260304122317_84010c",
+                "type": "sale",
+                "amount": 30.0,
+                "description": "Pagamento Reserva #d977b34b-d5ff-410b-8b64-d8ef83b56bf2 - Concurrent Guest",
+                "payment_method": "Dinheiro",
+                "timestamp": "04/03/2026 12:23",
+                "user": "test_admin",
+                "details": {}
+            },
+            {
+                "id": "TX_20260304122317_29a9e3",
+                "type": "sale",
+                "amount": 40.0,
+                "description": "Pagamento Reserva #d977b34b-d5ff-410b-8b64-d8ef83b56bf2 - Concurrent Guest",
+                "payment_method": "Dinheiro",
+                "timestamp": "04/03/2026 12:23",
+                "user": "test_admin",
+                "details": {}
+            },
+            {
+                "id": "TX_20260304122317_2d01e8",
+                "type": "sale",
+                "amount": 50.0,
+                "description": "Pagamento Reserva #d977b34b-d5ff-410b-8b64-d8ef83b56bf2 - Concurrent Guest",
+                "payment_method": "Dinheiro",
+                "timestamp": "04/03/2026 12:23",
+                "user": "test_admin",
+                "details": {}
+            },
+            {
+                "id": "TX_20260304122317_ff1475",
+                "type": "sale",
+                "amount": 200.0,
+                "description": "Pagamento Inicial Reserva #ea1d5b05-06da-4a44-b381-2fa12154c4de - Integration Guest",
+                "payment_method": "Dinheiro",
+                "timestamp": "04/03/2026 12:23",
+                "user": "test_admin",
+                "details": {}
+            }
+        ],
+        "status": "closed",
+        "closed_at": "04/03/2026 12:23",
+        "closing_balance": 400.0,
+        "difference": 0.0,
+        "closing_cash": 400.0,
+        "closing_non_cash": null,
+        "closed_by": "test_admin"
+    },
+    {
+        "id": "SESSION_RESERVATION_CASHIER_20260304122318_test_admin",
         "user": "test_admin",
         "type": "reservation_cashier",
         "entity": "Hotel Almareia",
-        "opened_at": "27/02/2026 16:55",
+        "opened_at": "04/03/2026 12:23",
+        "opening_balance": 100.0,
+        "transactions": [],
+        "status": "closed",
+        "closed_at": "04/03/2026 12:23",
+        "closing_balance": 100.0,
+        "difference": 0.0,
+        "closing_cash": 100.0,
+        "closing_non_cash": null,
+        "closed_by": "test_admin"
+    },
+    {
+        "id": "SESSION_RESERVATION_CASHIER_20260304122318_test_admin",
+        "user": "test_admin",
+        "type": "reservation_cashier",
+        "entity": "Hotel Almareia",
+        "opened_at": "04/03/2026 12:23",
+        "opening_balance": 0.0,
+        "transactions": [
+            {
+                "id": "TX_20260304122318_d82f7b",
+                "type": "sale",
+                "amount": 200.0,
+                "description": "Pagamento Inicial Reserva #7a8abde2-8ddc-4113-8f3c-81587123f5ce - João Teste",
+                "payment_method": "PIX",
+                "timestamp": "04/03/2026 12:23",
+                "user": "test_admin",
+                "details": {}
+            }
+        ],
+        "status": "closed",
+        "closed_at": "04/03/2026 12:23",
+        "closing_balance": 0.0,
+        "difference": 0.0,
+        "closing_cash": 0.0,
+        "closing_non_cash": null,
+        "closed_by": "test_admin"
+    },
+    {
+        "id": "SESSION_RESERVATION_CASHIER_20260304122318_test_admin",
+        "user": "test_admin",
+        "type": "reservation_cashier",
+        "entity": "Hotel Almareia",
+        "opened_at": "04/03/2026 12:23",
+        "opening_balance": 0.0,
+        "transactions": [
+            {
+                "id": "TX_20260304122318_f1a5c2",
+                "type": "sale",
+                "amount": 300.0,
+                "description": "Pagamento Reserva #78a1afe7-0692-4053-84c1-90cd25c3851e - Maria Teste",
+                "payment_method": "Cartão Crédito",
+                "timestamp": "04/03/2026 12:23",
+                "user": "test_admin",
+                "details": {}
+            }
+        ],
+        "status": "closed",
+        "closed_at": "04/03/2026 12:23",
+        "closing_balance": 0.0,
+        "difference": 0.0,
+        "closing_cash": 0.0,
+        "closing_non_cash": null,
+        "closed_by": "test_admin"
+    },
+    {
+        "id": "SESSION_RESERVATION_CASHIER_20260304122318_test_admin",
+        "user": "test_admin",
+        "type": "reservation_cashier",
+        "entity": "Hotel Almareia",
+        "opened_at": "04/03/2026 12:23",
         "opening_balance": 50.0,
         "transactions": [
             {
-                "id": "TX_20260227165554_b5a023",
+                "id": "TX_20260304122318_b4f3d5",
                 "type": "sale",
                 "amount": 100.0,
                 "description": "T1",
                 "payment_method": "Dinheiro",
-                "timestamp": "27/02/2026 16:55",
+                "timestamp": "04/03/2026 12:23",
                 "user": "test",
                 "details": {}
             },
             {
-                "id": "TX_20260227165554_4488a4",
+                "id": "TX_20260304122318_c20602",
                 "type": "sale",
                 "amount": 200.0,
                 "description": "T2",
                 "payment_method": "PIX",
-                "timestamp": "27/02/2026 16:55",
+                "timestamp": "04/03/2026 12:23",
                 "user": "test",
                 "details": {}
             }

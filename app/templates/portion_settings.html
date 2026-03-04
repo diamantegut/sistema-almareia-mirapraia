@@ -32,13 +32,48 @@
                             <strong>Destinos Permitidos:</strong> {{ rule.destinations | join(', ') }}
                         </div>
                     </div>
-                    <form method="POST" style="margin: 0;">
-                        <input type="hidden" name="action" value="delete_product_rule">
-                        <input type="hidden" name="rule_index" value="{{ loop.index0 }}">
-                        <button type="submit" style="background: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer;">
-                            <i class="bi bi-trash-fill"></i> Remover
-                        </button>
-                    </form>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <details>
+                            <summary style="list-style: none; cursor: pointer; background: #f39c12; color: white; border: none; padding: 8px 12px; border-radius: 4px;">
+                                <i class="bi bi-pencil-square"></i> Editar
+                            </summary>
+                            <div style="position: absolute; right: 20px; z-index: 20; width: min(560px, 92vw); background: white; border: 1px solid #ddd; border-radius: 8px; padding: 14px; margin-top: 8px; box-shadow: 0 8px 22px rgba(0,0,0,0.14);">
+                                <form method="POST">
+                                    <input type="hidden" name="action" value="update_product_rule">
+                                    <input type="hidden" name="rule_index" value="{{ loop.index0 }}">
+                                    <div style="margin-bottom: 12px;">
+                                        <label style="display: block; font-weight: bold; margin-bottom: 6px;">Produto de Origem</label>
+                                        <select name="origin_product" required style="width: 100%; padding: 9px; border-radius: 6px; border: 1px solid #ccc;">
+                                            {% for product in products %}
+                                            <option value="{{ product.name }}" {% if product.name == rule.origin %}selected{% endif %}>{{ product.name }} ({{ product.category }})</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div style="margin-bottom: 14px;">
+                                        <label style="display: block; font-weight: bold; margin-bottom: 6px;">Produtos de Destino</label>
+                                        <div style="max-height: 220px; overflow-y: auto; border: 1px solid #eee; border-radius: 6px; padding: 8px; background: #fafafa;">
+                                            {% for product in products %}
+                                            <label style="display: flex; gap: 8px; align-items: center; padding: 3px 2px;">
+                                                <input type="checkbox" name="destination_products" value="{{ product.name }}" {% if product.name in rule.destinations %}checked{% endif %}>
+                                                <span>{{ product.name }}</span>
+                                            </label>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <button type="submit" style="background: #1e8449; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer;">
+                                        <i class="bi bi-check2-circle"></i> Salvar Edição
+                                    </button>
+                                </form>
+                            </div>
+                        </details>
+                        <form method="POST" style="margin: 0;">
+                            <input type="hidden" name="action" value="delete_product_rule">
+                            <input type="hidden" name="rule_index" value="{{ loop.index0 }}">
+                            <button type="submit" style="background: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer;">
+                                <i class="bi bi-trash-fill"></i> Remover
+                            </button>
+                        </form>
+                    </div>
                 </div>
                 {% endfor %}
             </div>
@@ -101,13 +136,48 @@
                             <strong>Destinos:</strong> {{ rule.destinations | join(', ') }}
                         </div>
                     </div>
-                    <form method="POST" style="margin: 0;">
-                        <input type="hidden" name="action" value="delete">
-                        <input type="hidden" name="rule_index" value="{{ loop.index0 }}">
-                        <button type="submit" style="background: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer;">
-                            <i class="bi bi-trash-fill"></i> Remover
-                        </button>
-                    </form>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <details>
+                            <summary style="list-style: none; cursor: pointer; background: #2e86c1; color: white; border: none; padding: 8px 12px; border-radius: 4px;">
+                                <i class="bi bi-pencil-square"></i> Editar
+                            </summary>
+                            <div style="position: absolute; right: 20px; z-index: 20; width: min(520px, 92vw); background: white; border: 1px solid #ddd; border-radius: 8px; padding: 14px; margin-top: 8px; box-shadow: 0 8px 22px rgba(0,0,0,0.14);">
+                                <form method="POST">
+                                    <input type="hidden" name="action" value="update">
+                                    <input type="hidden" name="rule_index" value="{{ loop.index0 }}">
+                                    <div style="margin-bottom: 12px;">
+                                        <label style="display: block; font-weight: bold; margin-bottom: 6px;">Categoria de Origem</label>
+                                        <select name="origin_category" required style="width: 100%; padding: 9px; border-radius: 6px; border: 1px solid #ccc;">
+                                            {% for category in categories %}
+                                            <option value="{{ category }}" {% if category == rule.origin %}selected{% endif %}>{{ category }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div style="margin-bottom: 14px;">
+                                        <label style="display: block; font-weight: bold; margin-bottom: 6px;">Categorias de Destino</label>
+                                        <div style="max-height: 200px; overflow-y: auto; border: 1px solid #eee; border-radius: 6px; padding: 8px; background: #fafafa;">
+                                            {% for category in categories %}
+                                            <label style="display: flex; gap: 8px; align-items: center; padding: 3px 2px;">
+                                                <input type="checkbox" name="destination_categories" value="{{ category }}" {% if category in rule.destinations %}checked{% endif %}>
+                                                <span>{{ category }}</span>
+                                            </label>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <button type="submit" style="background: #1e8449; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer;">
+                                        <i class="bi bi-check2-circle"></i> Salvar Edição
+                                    </button>
+                                </form>
+                            </div>
+                        </details>
+                        <form method="POST" style="margin: 0;">
+                            <input type="hidden" name="action" value="delete">
+                            <input type="hidden" name="rule_index" value="{{ loop.index0 }}">
+                            <button type="submit" style="background: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer;">
+                                <i class="bi bi-trash-fill"></i> Remover
+                            </button>
+                        </form>
+                    </div>
                 </div>
                 {% endfor %}
             </div>

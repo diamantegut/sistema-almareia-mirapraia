@@ -2041,6 +2041,63 @@ def fiscal_pool_action():
                 pass
             traceback.print_exc()
             return jsonify({'success': False, 'error': f"Erro interno ao emitir: {str(e)}"})
+    elif action == 'queue_nfse_reservation':
+        if not entry_id:
+            return jsonify({'success': False, 'error': 'ID ausente'}), 400
+
+        entry = FiscalPoolService.get_entry(entry_id)
+        if not entry:
+            return jsonify({'success': False, 'error': 'Entrada não encontrada'}), 404
+
+        origin = str(entry.get('origin', '')).lower()
+        if origin not in ['reservations', 'reservation_checkin']:
+            return jsonify({'success': False, 'error': 'Ação disponível apenas para contas de reservas.'}), 400
+
+        raw_cnpj = (request.json or {}).get('emit_cnpj', '')
+        emit_cnpj = ''.join(ch for ch in str(raw_cnpj) if ch.isdigit())
+        pool = FiscalPoolService._load_pool()
+        updated = False
+
+        for item in pool:
+            if item.get('id') != entry_id:
+                continue
+            item['fiscal_type'] = 'nfse'
+            if emit_cnpj:
+                item['cnpj_emitente'] = emit_cnpj
+            elif not item.get('cnpj_emitente'):
+                item['cnpj_emitente'] = '46500590000112'
+            item['status'] = 'pending'
+            note = "Conta preparada para emissão NFS-e via Nuvem Fiscal (CNPJ alternativo)."
+            item['notes'] = f"{(item.get('notes') or '').strip()} | {note}".strip(' |')
+            history = item.get('history') if isinstance(item.get('history'), list) else []
+            history.append({
+                'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                'action': 'queue_nfse_reservation',
+                'user': session.get('user'),
+                'cnpj_emitente': item.get('cnpj_emitente')
+            })
+            item['history'] = history
+            updated = True
+            break
+
+        if not updated:
+            return jsonify({'success': False, 'error': 'Não foi possível atualizar a conta.'}), 500
+
+        FiscalPoolService._save_pool(pool)
+        LoggerService.log_acao(
+            acao='Preparar NFS-e Reserva',
+            entidade='Fiscal Pool',
+            detalhes={
+                'entry_id': entry_id,
+                'origin': origin,
+                'cnpj_emitente': emit_cnpj or entry.get('cnpj_emitente') or '46500590000112',
+                'user': session.get('user')
+            },
+            nivel_severidade='INFO',
+            departamento_id='Financeiro',
+            colaborador_id=session.get('user')
+        )
+        msg = "Conta de reserva preparada para emissão NFS-e."
             
     elif action == 'ignore':
         if not entry_id:

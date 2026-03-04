@@ -1,7 +1,7 @@
 
 import requests
 
-def test(path):
+def smoke_check(path):
     url = f'http://127.0.0.1:5001{path}'
     print(f"Testing {url}...")
     try:
@@ -10,6 +10,7 @@ def test(path):
     except Exception as e:
         print(f"Error: {e}")
 
-test('/')
-test('/login')
-test('/api/reception/return_to_restaurant') # This is POST, but GET should return 405 if route exists
+if __name__ == '__main__':
+    smoke_check('/')
+    smoke_check('/login')
+    smoke_check('/api/reception/return_to_restaurant')

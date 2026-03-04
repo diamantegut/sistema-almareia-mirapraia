@@ -132,9 +132,17 @@ def reception_rooms():
     # Pre-allocation integration
     upcoming_checkins = {}
     upcoming_reservations = []
+    requested_reservation_id = (request.args.get('reservation_id') or '').strip()
+    open_checkin = (request.args.get('open_checkin') or '').strip().lower() in ['1', 'true', 'yes', 'on']
     try:
         res_service = ReservationService()
         upcoming_reservations = res_service.get_upcoming_checkins()
+        if requested_reservation_id:
+            requested_res = res_service.get_reservation_for_checkin(requested_reservation_id)
+            if requested_res:
+                already_loaded = any(str(item.get('id')) == str(requested_reservation_id) for item in upcoming_reservations)
+                if not already_loaded:
+                    upcoming_reservations.append(requested_res)
         for item in upcoming_reservations:
             if item.get('room'):
                 upcoming_checkins[str(item['room'])] = item
@@ -620,7 +628,10 @@ def reception_rooms():
         # Filter for Reception (Close Account)
         reception_payment_methods = [m for m in all_methods if 'reception' in m.get('available_in', []) or 'caixa_recepcao' in m.get('available_in', [])]
         # Filter for Reservations (Receber Reserva)
-        reservation_payment_methods = [m for m in all_methods if 'reservations' in m.get('available_in', [])]
+        reservation_payment_methods = [
+            m for m in all_methods
+            if any(tag in (m.get('available_in') or []) for tag in ['reservations', 'reservas', 'caixa_reservas'])
+        ]
     except Exception as e:
         current_app.logger.error(f"Error loading payment methods: {e}")
         reception_payment_methods = []
@@ -634,6 +645,7 @@ def reception_rooms():
     collaborators = ExperienceService.get_unique_collaborators()
     
     room_capacities = ReservationService.ROOM_CAPACITIES
+    open_consumption_room = (request.args.get('open_consumption_room') or '').strip()
 
     return render_template('reception_rooms.html', 
                            occupancy=occupancy, 
@@ -651,7 +663,10 @@ def reception_rooms():
                            printer_settings=printer_settings,
                            experiences=experiences,
                            collaborators=collaborators,
-                           room_capacities=room_capacities)
+                           room_capacities=room_capacities,
+                           open_consumption_room=open_consumption_room,
+                           open_checkin=open_checkin,
+                           requested_reservation_id=requested_reservation_id)
 
 @reception_bp.route('/reception/cashier', methods=['GET', 'POST'])
 @login_required
@@ -4709,6 +4724,15 @@ def reception_reservation_debt(reservation_id):
 
         total = parse_val(res.get('amount', 0))
         paid = parse_val(res.get('paid_amount', 0))
+
+        if str(res.get('source_type', '')).lower() != 'manual':
+            all_payments = service.get_reservation_payments()
+            sidecar_payments = all_payments.get(str(reservation_id), [])
+            sidecar_total = 0.0
+            for p in sidecar_payments:
+                sidecar_total += parse_val((p or {}).get('amount', 0))
+            paid += sidecar_total
+
         remaining = max(0.0, total - paid)
         
         return jsonify({
@@ -4743,6 +4767,36 @@ def reception_reservation_pay():
         res = service.get_reservation_by_id(res_id)
         if not res:
              return jsonify({'success': False, 'error': 'Reserva não encontrada.'}), 404
+
+        payment_methods = load_payment_methods()
+        method_obj = next((m for m in payment_methods if str(m.get('id')) == str(payment_method_id)), None)
+        if not method_obj:
+            return jsonify({'success': False, 'error': 'Forma de pagamento inválida.'}), 400
+        available_in = method_obj.get('available_in') or []
+        if not any(tag in available_in for tag in ['reservations', 'reservas', 'caixa_reservas']):
+            return jsonify({'success': False, 'error': 'Forma de pagamento não habilitada para Reservas.'}), 400
+        payment_method_name = method_obj.get('name') or payment_method_name or 'Desconhecido'
+
+        def parse_val(val):
+            if isinstance(val, (int, float)):
+                return float(val)
+            try:
+                if ',' in str(val):
+                    clean = str(val).replace('R$', '').replace('.', '').replace(',', '.').strip()
+                else:
+                    clean = str(val).replace('R$', '').strip()
+                return float(clean)
+            except Exception:
+                return 0.0
+
+        total = parse_val(res.get('amount', 0))
+        paid = parse_val(res.get('paid_amount', 0))
+        if str(res.get('source_type', '')).lower() != 'manual':
+            sidecar = service.get_reservation_payments().get(str(res_id), [])
+            paid += sum(parse_val((p or {}).get('amount', 0)) for p in sidecar)
+        remaining_before = max(0.0, total - paid)
+        if amount > remaining_before + 0.05:
+            return jsonify({'success': False, 'error': f'Valor informado excede o saldo pendente (R$ {remaining_before:.2f}).'}), 400
         
         # Determine description based on origin
         desc_prefix = "Pagamento Reserva"
@@ -4757,7 +4811,15 @@ def reception_reservation_pay():
             payment_method=payment_method_name,
             user=session.get('user'),
             transaction_type='sale',
-            is_withdrawal=False
+            is_withdrawal=False,
+            details={
+                'reservation_id': str(res_id),
+                'origin': origin,
+                'category': 'Pagamento de Reserva',
+                'tag': 'reservas',
+                'guest_name': res.get('guest_name', ''),
+                'remaining_before': remaining_before
+            }
         )
         
         # Add to Reservation Payments
@@ -4767,10 +4829,46 @@ def reception_reservation_pay():
             'user': session.get('user'),
             'notes': f'Pagamento via Recepção ({origin})'
         })
+
+        try:
+            FiscalPoolService.add_to_pool(
+                origin='reservations',
+                original_id=f"RESERVATION_PAY_{res_id}_{datetime.now().strftime('%Y%m%d%H%M%S')}",
+                total_amount=amount,
+                items=[
+                    {
+                        'name': f"Reserva #{res_id} - Complemento no Check-in",
+                        'qty': 1,
+                        'price': amount,
+                        'total': amount,
+                        'is_service': True,
+                        'service_code': '0901'
+                    }
+                ],
+                payment_methods=[
+                    {
+                        'method': payment_method_name,
+                        'amount': amount,
+                        'is_fiscal': True,
+                        'fiscal_cnpj': method_obj.get('fiscal_cnpj')
+                    }
+                ],
+                user=session.get('user'),
+                customer_info={
+                    'name': res.get('guest_name', 'Hóspede'),
+                    'cpf_cnpj': res.get('doc_id') or res.get('cpf') or '',
+                    'reservation_id': str(res_id),
+                    'origin': origin
+                },
+                notes=f"Recebimento de reserva na recepção ({origin})"
+            )
+        except Exception as fiscal_error:
+            current_app.logger.error(f"Erro ao enviar pagamento de reserva ao pool fiscal: {fiscal_error}")
         
         log_action('Pagamento Reserva', f"Recebido R$ {amount:.2f} ({payment_method_name}) para Reserva #{res_id} (Origem: {origin})", department='Recepção')
         
-        return jsonify({'success': True})
+        remaining_after = max(0.0, remaining_before - amount)
+        return jsonify({'success': True, 'remaining': remaining_after})
     except Exception as e:
         current_app.logger.error(f"Erro pagamento reserva: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500

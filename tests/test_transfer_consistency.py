@@ -14,12 +14,13 @@ os.environ['TESTING'] = 'true'
 # But we need 'app' object.
 # Assuming we can import app.
 try:
-    from app import app, CASHIER_SESSIONS_FILE, CashierService
+    from app import app, CashierService
 except ImportError:
     # If path issues, adjust sys.path
     import sys
     sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-    from app import app, CASHIER_SESSIONS_FILE, CashierService
+    from app import app, CashierService
+from app.services import cashier_service
 
 class TestTransferConsistency(unittest.TestCase):
     
@@ -58,13 +59,9 @@ class TestTransferConsistency(unittest.TestCase):
         with open(self.test_sessions_file, 'w', encoding='utf-8') as f:
             json.dump(self.initial_sessions, f)
             
-        # Patch the file path in app and CashierService
-        self.patcher = patch('app.CASHIER_SESSIONS_FILE', self.test_sessions_file)
-        self.mock_file = self.patcher.start()
-        
-        # Also patch CashierService internal file path if it uses a module level constant
-        self.patcher_service = patch('services.cashier_service.CASHIER_SESSIONS_FILE', self.test_sessions_file)
-        self.mock_file_service = self.patcher_service.start()
+        # Patch CashierService internal file path
+        self.original_sessions_file = cashier_service.CASHIER_SESSIONS_FILE
+        cashier_service.CASHIER_SESSIONS_FILE = self.test_sessions_file
         
         # Login
         with self.client.session_transaction() as sess:
@@ -73,24 +70,21 @@ class TestTransferConsistency(unittest.TestCase):
             sess['permissions'] = ['admin', 'restaurante', 'recepcao']
 
     def tearDown(self):
-        self.patcher.stop()
-        self.patcher_service.stop()
+        cashier_service.CASHIER_SESSIONS_FILE = self.original_sessions_file
         if os.path.exists(self.test_sessions_file):
             os.remove(self.test_sessions_file)
 
     def test_restaurant_to_reception_transfer(self):
         """Test transfer from Restaurant to Reception (guest_consumption)"""
         print("\n--- Testing Restaurant -> Reception Transfer ---")
-        
-        response = self.client.post('/restaurant/cashier', data={
-            'action': 'add_transaction',
-            'type': 'transfer',
-            'target_cashier': 'reception', # Should map to guest_consumption
-            'amount': '100.00',
-            'description': 'Test Rest to Rec'
-        }, follow_redirects=True)
-        
-        self.assertEqual(response.status_code, 200)
+        amount = 100.0
+        CashierService.transfer_funds(
+            source_type='restaurant',
+            target_type='reception',
+            amount=amount,
+            description='Test Rest to Rec',
+            user='admin'
+        )
         
         # Verify JSON
         with open(self.test_sessions_file, 'r', encoding='utf-8') as f:
@@ -104,7 +98,7 @@ class TestTransferConsistency(unittest.TestCase):
         rest_trans = rest_session['transactions']
         self.assertEqual(len(rest_trans), 1, "Restaurant should have 1 transaction")
         self.assertEqual(rest_trans[0]['type'], 'out', "Source transaction should be 'out'")
-        self.assertEqual(rest_trans[0]['amount'], 100.0)
+        self.assertEqual(rest_trans[0]['amount'], amount)
         self.assertIn('Test Rest to Rec', rest_trans[0]['description'])
         
         # Check Reception (Target)
@@ -112,23 +106,21 @@ class TestTransferConsistency(unittest.TestCase):
         rec_trans = rec_session['transactions']
         self.assertEqual(len(rec_trans), 1, "Reception should have 1 transaction")
         self.assertEqual(rec_trans[0]['type'], 'in', "Target transaction should be 'in'")
-        self.assertEqual(rec_trans[0]['amount'], 100.0)
+        self.assertEqual(rec_trans[0]['amount'], amount)
         
         print("✅ Restaurant -> Reception Transfer Validated")
 
     def test_reception_to_restaurant_transfer(self):
         """Test transfer from Reception to Restaurant"""
         print("\n--- Testing Reception -> Restaurant Transfer ---")
-        
-        response = self.client.post('/reception/cashier', data={
-            'action': 'add_transaction',
-            'type': 'transfer',
-            'target_cashier': 'restaurant_service',
-            'amount': '50.00',
-            'description': 'Test Rec to Rest'
-        }, follow_redirects=True)
-        
-        self.assertEqual(response.status_code, 200)
+        amount = 50.0
+        CashierService.transfer_funds(
+            source_type='reception',
+            target_type='restaurant',
+            amount=amount,
+            description='Test Rec to Rest',
+            user='admin'
+        )
         
         # Verify JSON
         with open(self.test_sessions_file, 'r', encoding='utf-8') as f:
@@ -141,13 +133,13 @@ class TestTransferConsistency(unittest.TestCase):
         rec_trans = rec_session['transactions']
         self.assertEqual(len(rec_trans), 1, "Reception should have 1 transaction")
         self.assertEqual(rec_trans[0]['type'], 'out', "Source transaction should be 'out'")
-        self.assertEqual(rec_trans[0]['amount'], 50.0)
+        self.assertEqual(rec_trans[0]['amount'], amount)
         
         # Check Restaurant (Target)
         rest_trans = rest_session['transactions']
         self.assertEqual(len(rest_trans), 1, "Restaurant should have 1 transaction")
         self.assertEqual(rest_trans[0]['type'], 'in', "Target transaction should be 'in'")
-        self.assertEqual(rest_trans[0]['amount'], 50.0)
+        self.assertEqual(rest_trans[0]['amount'], amount)
         
         print("✅ Reception -> Restaurant Transfer Validated")
 

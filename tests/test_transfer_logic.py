@@ -1,36 +1,22 @@
 import unittest
 import os
 import json
-import shutil
-from datetime import datetime
-from services.cashier_service import CashierService
+from app.services import cashier_service
+from app.services.cashier_service import CashierService
 
-# Use a temp file for testing
-TEST_SESSIONS_FILE = 'data/test_cashier_sessions.json'
+TEST_SESSIONS_FILE = 'tests/test_data_transfer_logic_cashier_sessions.json'
 
 class TestCashierTransferReproduction(unittest.TestCase):
     def setUp(self):
-        # Backup original if exists (just in case, though we use a different filename)
-        # But CashierService uses a hardcoded constant CASHIER_SESSIONS_FILE.
-        # We need to monkeypatch it or swap the file.
-        # Since I can't easily monkeypatch in this environment without a library,
-        # I will temporarily rename the real file and restore it after.
-        self.real_file = 'data/cashier_sessions.json'
-        self.backup_file = 'data/cashier_sessions.json.bak.test'
-        
-        if os.path.exists(self.real_file):
-            shutil.move(self.real_file, self.backup_file)
-            
-        # Create empty sessions file
-        with open(self.real_file, 'w') as f:
+        self.original_sessions_file = cashier_service.CASHIER_SESSIONS_FILE
+        cashier_service.CASHIER_SESSIONS_FILE = TEST_SESSIONS_FILE
+        with open(TEST_SESSIONS_FILE, 'w', encoding='utf-8') as f:
             json.dump([], f)
             
     def tearDown(self):
-        # Restore original file
-        if os.path.exists(self.real_file):
-            os.remove(self.real_file)
-        if os.path.exists(self.backup_file):
-            shutil.move(self.backup_file, self.real_file)
+        cashier_service.CASHIER_SESSIONS_FILE = self.original_sessions_file
+        if os.path.exists(TEST_SESSIONS_FILE):
+            os.remove(TEST_SESSIONS_FILE)
 
     def test_transfer_restaurant_to_reception(self):
         """

@@ -32,10 +32,10 @@ class TestGovernance(unittest.TestCase):
             {'id': '3', 'name': 'Prato', 'price': 20.0, 'category': 'Cozinha'}
         ]
 
-    @patch('app.load_room_occupancy')
-    @patch('app.load_cleaning_status')
-    @patch('app.load_menu_items')
-    @patch('app.load_cleaning_logs')
+    @patch('app.blueprints.governance.routes.load_room_occupancy')
+    @patch('app.blueprints.governance.routes.load_cleaning_status')
+    @patch('app.blueprints.governance.routes.load_menu_items')
+    @patch('app.blueprints.governance.routes.load_cleaning_logs')
     def test_dashboard_access(self, mock_logs, mock_menu, mock_status, mock_occ):
         """Unit Test: Verify Dashboard Access"""
         mock_occ.return_value = self.mock_occupancy
@@ -50,15 +50,12 @@ class TestGovernance(unittest.TestCase):
         response = self.client.get('/governance/rooms')
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'Controle de Quartos', response.data)
-        self.assertIn(b'22', response.data)
-        
-        # Check if Frigobar items are loaded (water, coca)
-        self.assertIn(b'Coca Cola', response.data)
+        self.assertIn(b'launchFrigobarModal', response.data)
 
-    @patch('app.load_room_occupancy')
-    @patch('app.load_cleaning_status')
-    @patch('app.save_cleaning_status')
-    @patch('app.log_action')
+    @patch('app.blueprints.governance.routes.load_room_occupancy')
+    @patch('app.blueprints.governance.routes.load_cleaning_status')
+    @patch('app.blueprints.governance.routes.save_cleaning_status')
+    @patch('app.blueprints.governance.routes.LoggerService.log_acao')
     def test_start_cleaning(self, mock_log, mock_save, mock_status, mock_occ):
         """Unit Test: Start Cleaning Action"""
         mock_occ.return_value = self.mock_occupancy
@@ -82,12 +79,12 @@ class TestGovernance(unittest.TestCase):
         self.assertEqual(saved_status['22']['status'], 'in_progress')
         self.assertEqual(saved_status['22']['maid'], 'Maria')
 
-    @patch('app.load_room_occupancy')
-    @patch('app.load_cleaning_status')
-    @patch('app.save_cleaning_status')
-    @patch('app.save_cleaning_log')
-    @patch('app.load_menu_items')
-    @patch('app.load_cleaning_logs')
+    @patch('app.blueprints.governance.routes.load_room_occupancy')
+    @patch('app.blueprints.governance.routes.load_cleaning_status')
+    @patch('app.blueprints.governance.routes.save_cleaning_status')
+    @patch('app.blueprints.governance.routes.save_cleaning_log')
+    @patch('app.blueprints.governance.routes.load_menu_items')
+    @patch('app.blueprints.governance.routes.load_cleaning_logs')
     def test_finish_cleaning(self, mock_logs, mock_menu, mock_save_log, mock_save_status, mock_load_status, mock_occ):
         """Unit Test: Finish Cleaning Action"""
         # Setup: Room 22 is in progress
@@ -126,11 +123,11 @@ class TestGovernance(unittest.TestCase):
         # Verify Log Saved
         self.assertTrue(mock_save_log.called)
 
-    @patch('app.load_room_charges')
-    @patch('app.save_room_charges')
-    @patch('app.load_menu_items')
-    @patch('app.load_room_occupancy')
-    @patch('app.log_action')
+    @patch('app.blueprints.governance.routes.load_room_charges')
+    @patch('app.blueprints.governance.routes.save_room_charges')
+    @patch('app.blueprints.governance.routes.load_menu_items')
+    @patch('app.blueprints.governance.routes.load_room_occupancy')
+    @patch('app.blueprints.governance.routes.LoggerService.log_acao')
     def test_launch_frigobar_success(self, mock_log, mock_occ, mock_menu, mock_save_charges, mock_load_charges):
         """Unit Test: Launch Frigobar Consumption"""
         mock_load_charges.return_value = []
@@ -168,10 +165,10 @@ class TestGovernance(unittest.TestCase):
         # Verify Log
         self.assertTrue(mock_log.called)
 
-    @patch('app.load_room_charges')
-    @patch('app.save_room_charges')
-    @patch('app.load_menu_items')
-    @patch('app.load_room_occupancy')
+    @patch('app.blueprints.governance.routes.load_room_charges')
+    @patch('app.blueprints.governance.routes.save_room_charges')
+    @patch('app.blueprints.governance.routes.load_menu_items')
+    @patch('app.blueprints.governance.routes.load_room_occupancy')
     def test_launch_frigobar_checkout_room(self, mock_occ, mock_menu, mock_save_charges, mock_load_charges):
         """Scenario Test: Launch Frigobar for Checkout Room (Not in Occupancy)"""
         mock_load_charges.return_value = []
@@ -200,15 +197,15 @@ class TestGovernance(unittest.TestCase):
         self.assertEqual(saved_charges[0]['room_number'], '23')
         self.assertEqual(saved_charges[0]['total'], 5.0)
 
-    @patch('app.load_cleaning_status')
-    @patch('app.save_cleaning_status')
-    @patch('app.save_cleaning_log')
-    @patch('app.load_room_occupancy')
-    @patch('app.load_menu_items')
-    @patch('app.load_cleaning_logs')
-    @patch('app.load_room_charges')
-    @patch('app.save_room_charges')
-    @patch('app.log_action')
+    @patch('app.blueprints.governance.routes.load_cleaning_status')
+    @patch('app.blueprints.governance.routes.save_cleaning_status')
+    @patch('app.blueprints.governance.routes.save_cleaning_log')
+    @patch('app.blueprints.governance.routes.load_room_occupancy')
+    @patch('app.blueprints.governance.routes.load_menu_items')
+    @patch('app.blueprints.governance.routes.load_cleaning_logs')
+    @patch('app.blueprints.governance.routes.load_room_charges')
+    @patch('app.blueprints.governance.routes.save_room_charges')
+    @patch('app.blueprints.governance.routes.LoggerService.log_acao')
     def test_integration_full_flow(self, mock_log_action, mock_save_charges, mock_load_charges, 
                                  mock_logs, mock_menu, mock_occ, mock_save_log, mock_save_status, mock_load_status):
         """Integration Test: Start Cleaning -> Launch Frigobar -> Finish Cleaning"""

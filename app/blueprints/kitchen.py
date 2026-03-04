@@ -9,14 +9,15 @@ import uuid
 from app.services.data_service import (
     load_products, load_settings, save_settings, load_stock_entries,
     save_stock_entry, save_stock_entries, load_stock_logs, STOCK_LOGS_FILE, STOCK_ENTRIES_FILE,
-    load_table_orders, save_table_orders, load_menu_items, load_printers
+    load_table_orders, save_table_orders, load_menu_items, load_printers, secure_save_products
 )
 from app.services.logger_service import LoggerService
 from app.services.kitchen_checklist_service import KitchenChecklistService
 from app.services.data_service import load_products, load_menu_items, save_menu_items
-from app.services.system_config_manager import get_data_path, PRODUCT_PHOTOS_DIR
+from app.services.system_config_manager import get_data_path, PRODUCT_PHOTOS_DIR, PRODUCTS_FILE
 from werkzeug.utils import secure_filename
 from app.services.printing_service import get_default_printer, print_portion_labels
+from app.utils.lock import file_lock
 
 kitchen_bp = Blueprint('kitchen', __name__)
 
@@ -430,6 +431,58 @@ def kitchen_portion_settings():
                     flash('Regra de produto removida.')
             except (ValueError, TypeError):
                 flash('Erro ao remover regra.')
+        elif action == 'update':
+            try:
+                index = int(request.form.get('rule_index'))
+                origin_cat = request.form.get('origin_category')
+                dest_cats = request.form.getlist('destination_categories')
+                if 0 <= index < len(settings['portioning_rules']) and origin_cat and dest_cats:
+                    old_rule = settings['portioning_rules'][index]
+                    settings['portioning_rules'][index] = {
+                        'origin': origin_cat,
+                        'destinations': dest_cats
+                    }
+                    LoggerService.log_acao(
+                        acao='Regra de categoria editada',
+                        entidade='Cozinha',
+                        detalhes={
+                            'old_rule': old_rule,
+                            'new_rule': settings['portioning_rules'][index],
+                            'index': index
+                        },
+                        nivel_severidade='INFO'
+                    )
+                    flash('Regra de categoria atualizada com sucesso.')
+                else:
+                    flash('Dados inválidos para editar regra de categoria.')
+            except (ValueError, TypeError):
+                flash('Erro ao editar regra de categoria.')
+        elif action == 'update_product_rule':
+            try:
+                index = int(request.form.get('rule_index'))
+                origin_prod = request.form.get('origin_product')
+                dest_prods = request.form.getlist('destination_products')
+                if 0 <= index < len(settings['product_portioning_rules']) and origin_prod and dest_prods:
+                    old_rule = settings['product_portioning_rules'][index]
+                    settings['product_portioning_rules'][index] = {
+                        'origin': origin_prod,
+                        'destinations': dest_prods
+                    }
+                    LoggerService.log_acao(
+                        acao='Regra de produto editada',
+                        entidade='Cozinha',
+                        detalhes={
+                            'old_rule': old_rule,
+                            'new_rule': settings['product_portioning_rules'][index],
+                            'index': index
+                        },
+                        nivel_severidade='INFO'
+                    )
+                    flash('Regra de produto atualizada com sucesso.')
+                else:
+                    flash('Dados inválidos para editar regra de produto.')
+            except (ValueError, TypeError):
+                flash('Erro ao editar regra de produto.')
         
         save_settings(settings)
         return redirect(url_for('kitchen.kitchen_portion_settings'))
@@ -667,6 +720,7 @@ def kitchen_portion():
 
             final_qty = dest['count']
             final_price = total_dest_cost / final_qty if final_qty > 0 else 0
+            dest['final_price'] = final_price
             
             entry_entry = {
                 'id': datetime.now().strftime('%Y%m%d%H%M%S') + f"_PORT_IN_{dest['name']}",
@@ -699,6 +753,45 @@ def kitchen_portion():
             copies = int(dest['count']) if dest['count'] and dest['count'] > 0 else 1
             for _ in range(copies):
                 labels.append(label_data)
+
+        updated_products = []
+        try:
+            with file_lock(PRODUCTS_FILE):
+                current_products = load_products()
+                for dest in parsed_destinations:
+                    dest_name = dest.get('name')
+                    dest_price = float(dest.get('final_price', 0) or 0)
+                    product_data = next((p for p in current_products if p.get('name') == dest_name), None)
+                    if not product_data:
+                        continue
+                    old_price = float(product_data.get('price', 0) or 0)
+                    if abs(old_price - dest_price) < 0.000001:
+                        continue
+                    product_data['price'] = round(dest_price, 6)
+                    updated_products.append({
+                        'product': dest_name,
+                        'old_price': old_price,
+                        'new_price': round(dest_price, 6)
+                    })
+                if updated_products:
+                    secure_save_products(current_products, user_id=session.get('user', 'Sistema'))
+                    LoggerService.log_acao(
+                        acao='Preço unitário atualizado por porcionamento',
+                        entidade='Estoque',
+                        detalhes={
+                            'origin_product': origin_name,
+                            'updated_products': updated_products
+                        },
+                        nivel_severidade='INFO'
+                    )
+        except Exception as e:
+            LoggerService.log_acao(
+                acao='Falha ao atualizar preço unitário no porcionamento',
+                entidade='Estoque',
+                detalhes={'origin_product': origin_name, 'erro': str(e)},
+                nivel_severidade='ERRO'
+            )
+            flash('Porcionamento salvo, mas houve falha ao atualizar preço unitário dos produtos.')
 
         if labels:
             try:
@@ -799,6 +892,29 @@ def kitchen_reports():
 
         total_cost = input_weight_kg * float(entry.get('price', 0))
         cost_per_useful_kg = (total_cost / useful_weight_kg) if useful_weight_kg > 0 else 0.0
+        batch_prefix = str(entry.get('id', '')).split('_PORT_')[0]
+        related_portioned_entries = [
+            e for e in entries
+            if str(e.get('id', '')).startswith(f"{batch_prefix}_PORT_IN_")
+            and "PORCIONAMENTO (ENTRADA)" in str(e.get('supplier', ''))
+        ]
+        portioned_items = []
+        for related_entry in related_portioned_entries:
+            product_name = str(related_entry.get('product', '')).strip()
+            if not product_name:
+                continue
+            try:
+                unit_price = float(related_entry.get('price', 0) or 0)
+            except (TypeError, ValueError):
+                unit_price = 0.0
+            portioned_items.append({
+                'product': product_name,
+                'unit_price': unit_price
+            })
+        portioned_items.sort(key=lambda x: x['product'])
+        portioned_items_unit_prices = ' | '.join(
+            f"{item['product']}: R$ {item['unit_price']:.2f}" for item in portioned_items
+        ) if portioned_items else '-'
         
         filtered_data.append({
             'id': entry['id'],
@@ -817,6 +933,7 @@ def kitchen_reports():
             'useful_kg': useful_weight_kg,
             'total_cost_liquid': total_cost,
             'cost_per_useful_kg': cost_per_useful_kg,
+            'portioned_items_unit_prices': portioned_items_unit_prices,
             'details': invoice_text
         })
         
@@ -915,6 +1032,29 @@ def kitchen_reports_export():
 
         total_cost = input_weight_kg * float(entry.get('price', 0))
         cost_per_useful_kg = (total_cost / useful_kg) if useful_kg > 0 else 0.0
+        batch_prefix = str(entry.get('id', '')).split('_PORT_')[0]
+        related_portioned_entries = [
+            e for e in entries
+            if str(e.get('id', '')).startswith(f"{batch_prefix}_PORT_IN_")
+            and "PORCIONAMENTO (ENTRADA)" in str(e.get('supplier', ''))
+        ]
+        portioned_items = []
+        for related_entry in related_portioned_entries:
+            product_name = str(related_entry.get('product', '')).strip()
+            if not product_name:
+                continue
+            try:
+                unit_price = float(related_entry.get('price', 0) or 0)
+            except (TypeError, ValueError):
+                unit_price = 0.0
+            portioned_items.append({
+                'product': product_name,
+                'unit_price': unit_price
+            })
+        portioned_items.sort(key=lambda x: x['product'])
+        portioned_items_unit_prices = ' | '.join(
+            f"{item['product']}: R$ {item['unit_price']:.2f}" for item in portioned_items
+        ) if portioned_items else '-'
 
         filtered_data.append({
             'date': e_date.strftime('%d/%m/%Y %H:%M'),
@@ -930,7 +1070,8 @@ def kitchen_reports_export():
             'cooking_loss_kg': cooking_loss,
             'useful_kg': useful_kg,
             'total_cost': total_cost,
-            'cost_per_useful_kg': cost_per_useful_kg
+            'cost_per_useful_kg': cost_per_useful_kg,
+            'portioned_items_unit_prices': portioned_items_unit_prices
         })
     
     if fmt == 'csv':
@@ -950,7 +1091,8 @@ def kitchen_reports_export():
             'Preco Bruto/Kg',
             'Perda Gelo %',
             'Custo/ Kg Útil',
-            'Custo Total'
+            'Custo Total',
+            'Preço Unitário Final (Itens Porcionados)'
         ])
         for row in filtered_data:
             cw.writerow([
@@ -967,7 +1109,8 @@ def kitchen_reports_export():
                 f"{row['price_gross']:.2f}".replace('.', ','),
                 f"{row['ice_loss_pct']:.1f}".replace('.', ','),
                 f"{row['cost_per_useful_kg']:.2f}".replace('.', ','),
-                f"{row['total_cost']:.2f}".replace('.', ',')
+                f"{row['total_cost']:.2f}".replace('.', ','),
+                row['portioned_items_unit_prices']
             ])
         output = make_response(si.getvalue())
         output.headers["Content-Disposition"] = f"attachment; filename=relatorio_porcionamento_{datetime.now().strftime('%Y%m%d')}.csv"

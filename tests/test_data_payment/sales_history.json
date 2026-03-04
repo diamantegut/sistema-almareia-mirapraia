@@ -2,42 +2,57 @@
     {
         "items": [
             {
-                "id": "e7d42a74-85fd-4b79-8574-6af28cc03d0c",
+                "id": "0a0197e3-b3b7-47ff-ad81-d81dea81e733",
                 "product_id": "102",
                 "name": "Coca Cola",
                 "price": 10.0,
                 "qty": 2.0,
                 "category": "Bebidas",
-                "created_at": "09/02/2026 22:21",
+                "created_at": "04/03/2026 12:23",
                 "waiter": "Admin",
-                "printed": false,
-                "print_status": "error",
+                "printed": true,
+                "print_status": "printed",
                 "complements": [],
                 "observations": [],
                 "accompaniments": [],
                 "flavor": "",
-                "questions_answers": []
+                "questions_answers": [],
+                "ncm": null,
+                "cest": null,
+                "cfop": null,
+                "origin": 0,
+                "tax_info": null
             }
         ],
         "total": 20.0,
-        "status": "open",
-        "opened_at": "09/02/2026 22:21",
+        "status": "closed",
+        "opened_at": "04/03/2026 12:23",
         "num_adults": 2,
         "customer_type": "passante",
         "customer_name": "",
         "room_number": null,
         "waiter": "Admin",
         "staff_name": null,
+        "is_breakfast": false,
         "partial_payments": [],
         "total_paid": 0.0,
-        "closed_at": "09/02/2026 22:21",
+        "closed_at": "04/03/2026 12:23",
         "final_total": 22.0,
         "discount": 0.0,
+        "closed_by": "admin",
+        "close_id": "CLOSE_20260304122300_500_c04486",
         "payments": [
             {
+                "id": "abc0778e-f8d1-4697-aff8-a47bca508500",
+                "timestamp": "04/03/2026 12:23",
+                "amount": 22.0,
                 "method": "Dinheiro",
-                "amount": 22.0
+                "user": "admin",
+                "type": "final_payment"
             }
-        ]
+        ],
+        "waiter_breakdown": {
+            "Admin": 22.0
+        }
     }
 ]

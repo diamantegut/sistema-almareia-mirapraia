@@ -249,7 +249,7 @@
                         {% for entry in pool %}
                         <tr id="row-{{ entry.id }}">
                             <td>
-                                {% if entry.status in ['pending', 'error', 'failed'] %}
+                                {% if entry.status in ['pending', 'error', 'failed'] and entry.fiscal_type != 'nfse' %}
                                     <input class="form-check-input row-checkbox" type="checkbox" value="{{ entry.id }}" onclick="updateSelectedCount()">
                                 {% endif %}
                             </td>
@@ -261,6 +261,8 @@
                                     <span class="badge bg-info text-dark"><i class="bi bi-door-open"></i> Rec.</span>
                                 {% elif entry.origin == 'daily_rates' %}
                                     <span class="badge bg-primary"><i class="bi bi-building"></i> Diárias</span>
+                                {% elif entry.origin in ['reservations', 'reservation_checkin'] %}
+                                    <span class="badge bg-secondary"><i class="bi bi-calendar2-check"></i> Reservas</span>
                                 {% else %}
                                     <span class="badge bg-secondary">{{ entry.origin|truncate(4, True, '') }}</span>
                                 {% endif %}
@@ -301,9 +303,15 @@
                                     </button>
                                 {% endif %}
                                 {% if entry.status in ['pending','error','failed'] %}
+                                    {% if entry.fiscal_type == 'nfse' or entry.origin in ['reservations', 'reservation_checkin'] %}
+                                    <button class="btn btn-sm btn-warning p-1 px-2" onclick="openNfseReservationModal('{{ entry.id }}')" title="Preparar NFS-e">
+                                        <i class="bi bi-receipt"></i>
+                                    </button>
+                                    {% else %}
                                     <button class="btn btn-sm btn-success p-1 px-2" onclick="emitInvoice('{{ entry.id }}')" title="Emitir">
                                         <i class="bi bi-cloud-upload"></i>
                                     </button>
+                                    {% endif %}
                                     <button class="btn btn-sm btn-outline-secondary p-1 px-2" onclick="ignoreEntry('{{ entry.id }}')" title="Ignorar">
                                         <i class="bi bi-x-circle"></i>
                                     </button>
@@ -335,6 +343,38 @@
             </div>
             <div class="modal-footer d-none" id="detailsFooter">
                 <!-- Loaded via JS -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="nfseReservationModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title">Preparar Emissão NFS-e</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="nfseReservationEntryId">
+                <div class="alert alert-info mb-3">
+                    Esta conta de reserva será preparada para emissão NFS-e via Nuvem Fiscal com CNPJ alternativo.
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">ID da Conta no Pool</label>
+                    <input type="text" class="form-control" id="nfseReservationEntryIdView" readonly>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">CNPJ Emissor Alternativo (opcional)</label>
+                    <input type="text" class="form-control" id="nfseReservationCnpj" placeholder="Somente números ou formatado">
+                    <div class="form-text">Se deixar vazio, o sistema mantém o CNPJ padrão atual e você pode alterar depois.</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-warning" id="btnConfirmNfseReservation" onclick="submitNfseReservationPreparation()">
+                    <i class="bi bi-save"></i> Preparar NFS-e
+                </button>
             </div>
         </div>
     </div>
@@ -668,6 +708,44 @@ async function ignoreEntry(id) {
             btn.disabled = false;
             btn.innerHTML = '<i class="bi bi-x-circle"></i>';
         }
+    }
+}
+
+function openNfseReservationModal(entryId) {
+    document.getElementById('nfseReservationEntryId').value = entryId;
+    document.getElementById('nfseReservationEntryIdView').value = entryId;
+    document.getElementById('nfseReservationCnpj').value = '';
+    const modal = new bootstrap.Modal(document.getElementById('nfseReservationModal'));
+    modal.show();
+}
+
+async function submitNfseReservationPreparation() {
+    const entryId = document.getElementById('nfseReservationEntryId').value;
+    const cnpj = document.getElementById('nfseReservationCnpj').value;
+    const btn = document.getElementById('btnConfirmNfseReservation');
+    const original = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Salvando...';
+    try {
+        const response = await fetch('/admin/fiscal/pool/action', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                action: 'queue_nfse_reservation',
+                id: entryId,
+                emit_cnpj: cnpj
+            })
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+            throw new Error(result.error || 'Falha ao preparar conta para NFS-e');
+        }
+        alert(result.message || 'Conta preparada para emissão NFS-e.');
+        location.reload();
+    } catch (error) {
+        alert(error.message);
+        btn.disabled = false;
+        btn.innerHTML = original;
     }
 }
 </script>

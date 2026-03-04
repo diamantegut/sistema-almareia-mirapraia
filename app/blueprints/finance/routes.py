@@ -45,7 +45,8 @@ from app.services.security_service import check_sensitive_access
 from app.services.import_sales import calculate_monthly_sales
 from app.services.card_reconciliation_service import (
     fetch_pagseguro_transactions, fetch_rede_transactions,
-    reconcile_transactions, parse_pagseguro_csv, parse_rede_csv
+    reconcile_transactions, parse_pagseguro_csv, parse_rede_csv,
+    append_reconciliation_audit, load_reconciliation_audits
 )
 
 
@@ -55,6 +56,232 @@ def _load_cashier_sessions():
         return app_loader()
     except Exception:
         return load_cashier_sessions()
+
+
+def _normalize_pagseguro_configs(settings):
+    configs = settings.get('pagseguro', [])
+    if isinstance(configs, dict):
+        return [configs]
+    if isinstance(configs, list):
+        return configs
+    return []
+
+
+def _extract_pagseguro_alias(provider_name):
+    text = str(provider_name or '')
+    prefix = 'PagSeguro ('
+    if text.startswith(prefix) and text.endswith(')'):
+        return text[len(prefix):-1]
+    return ''
+
+
+def _serialize_reconciliation_value(value):
+    if isinstance(value, datetime):
+        return value.isoformat()
+    if isinstance(value, dict):
+        return {k: _serialize_reconciliation_value(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_serialize_reconciliation_value(v) for v in value]
+    return value
+
+
+def _extract_room_number_from_transaction(tx):
+    details = tx.get('details') or {}
+    if isinstance(details, str):
+        try:
+            details = json.loads(details)
+        except Exception:
+            details = {}
+    room_number = details.get('room_number')
+    if room_number:
+        return str(room_number)
+    description = str(tx.get('description') or '')
+    match = re.search(r'quarto\s+(\d+)', description, re.IGNORECASE)
+    if match:
+        return match.group(1)
+    return ''
+
+
+def _extract_guest_name_from_transaction(tx):
+    details = tx.get('details') or {}
+    if isinstance(details, str):
+        try:
+            details = json.loads(details)
+        except Exception:
+            details = {}
+    guest_name = details.get('guest_name')
+    if guest_name:
+        return str(guest_name)
+    return ''
+
+
+def _build_suspected_time_gap_matches(
+    unmatched_system,
+    unmatched_card,
+    tolerance_val=0.05,
+    min_gap_minutes=120,
+    max_percent_diff=0.05
+):
+    suspects = []
+    used_card_indexes = set()
+
+    for sys_tx in unmatched_system:
+        sys_time = sys_tx.get('timestamp')
+        sys_amount = float(sys_tx.get('amount', 0.0) or 0.0)
+        if not isinstance(sys_time, datetime):
+            continue
+
+        best_idx = -1
+        best_gap = None
+        for idx, card_tx in enumerate(unmatched_card):
+            if idx in used_card_indexes:
+                continue
+            card_time = card_tx.get('date')
+            if not isinstance(card_time, datetime):
+                continue
+            card_amount = float(card_tx.get('amount', 0.0) or 0.0)
+            time_gap = abs((sys_time - card_time).total_seconds()) / 60
+            amount_diff = abs(sys_amount - card_amount)
+            amount_pct_diff = (amount_diff / sys_amount) if sys_amount > 0 else 0.0
+            is_time_gap_case = amount_diff <= tolerance_val and time_gap > min_gap_minutes
+            is_percent_case = amount_pct_diff <= max_percent_diff
+            if not is_time_gap_case and not is_percent_case:
+                continue
+            if best_gap is None or time_gap < best_gap:
+                best_gap = time_gap
+                best_idx = idx
+
+        if best_idx >= 0:
+            used_card_indexes.add(best_idx)
+            card_item = unmatched_card[best_idx]
+            amount_diff = abs(sys_amount - float(card_item.get('amount', 0.0) or 0.0))
+            amount_pct_diff = (amount_diff / sys_amount) if sys_amount > 0 else 0.0
+            reason = 'Diferença de horário elevada'
+            if amount_pct_diff <= max_percent_diff and amount_diff > tolerance_val:
+                reason = 'Diferença de valor até 5%'
+            approval_signature = f"{sys_tx.get('id','')}|{str(card_item.get('provider',''))}|{float(card_item.get('amount', 0.0) or 0.0):.2f}"
+            suspects.append({
+                'system': sys_tx,
+                'card': card_item,
+                'time_gap_minutes': int(best_gap or 0),
+                'status': 'needs_admin_approval',
+                'approval_signature': approval_signature,
+                'reason': reason,
+                'amount_diff': round(amount_diff, 2),
+                'amount_diff_percent': round(amount_pct_diff * 100, 2)
+            })
+
+    return suspects
+
+
+def _annotate_reconciliation_results(results, settings):
+    configs = _normalize_pagseguro_configs(settings)
+    aliases = [str(c.get('alias') or '').strip() for c in configs if str(c.get('alias') or '').strip()]
+    primary_alias = aliases[0] if aliases else ''
+
+    for item in results.get('matched', []):
+        card = item.get('card', {}) or {}
+        provider_name = str(card.get('provider', ''))
+        alias = _extract_pagseguro_alias(provider_name)
+        tags = []
+        if alias and len(aliases) > 1 and primary_alias and alias != primary_alias:
+            tags.append('Encontrado por outro token (sob confirmação)')
+        if item.get('status') == 'matched_group':
+            tags.append('Pagamento agrupado conciliado')
+        if item.get('status') == 'manual_approved':
+            tags.append('Aprovado manualmente pelo ADM')
+        item['confirmation_tag'] = ' | '.join(tags) if tags else ''
+        item['token_alias'] = alias
+    return results
+
+
+def _load_manual_approval_signatures():
+    approvals = set()
+    for entry in load_reconciliation_audits():
+        if str(entry.get('source')) != 'manual_approval':
+            continue
+        results = entry.get('results') or {}
+        signature = results.get('approval_signature')
+        if signature:
+            approvals.add(signature)
+    return approvals
+
+
+def _apply_manual_approved_suspects(results, suspected_matches, approved_signatures):
+    remaining_suspects = []
+    for suspect in suspected_matches:
+        signature = suspect.get('approval_signature')
+        if signature and signature in approved_signatures:
+            manual_match = {
+                'system': suspect.get('system'),
+                'card': suspect.get('card'),
+                'status': 'manual_approved',
+                'approval_signature': signature
+            }
+            results.setdefault('matched', []).append(manual_match)
+            if suspect.get('system') in results.get('unmatched_system', []):
+                results['unmatched_system'].remove(suspect.get('system'))
+            if suspect.get('card') in results.get('unmatched_card', []):
+                results['unmatched_card'].remove(suspect.get('card'))
+            continue
+        remaining_suspects.append(suspect)
+    return remaining_suspects
+
+
+def _save_reconciliation_audit(source, provider, start_date, end_date, results, summary):
+    entry = {
+        'id': f"RECON_{datetime.now().strftime('%Y%m%d%H%M%S%f')}",
+        'created_at': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
+        'source': source,
+        'provider': provider,
+        'period_start': start_date,
+        'period_end': end_date,
+        'user': session.get('user'),
+        'summary': summary,
+        'results': _serialize_reconciliation_value(results)
+    }
+    append_reconciliation_audit(entry)
+
+
+@finance_bp.route('/admin/reconciliation/approve', methods=['POST'])
+@login_required
+def finance_reconciliation_approve():
+    if session.get('role') != 'admin':
+        flash('Acesso Restrito.')
+        return redirect(url_for('main.index'))
+
+    provider = request.form.get('provider') or 'pagseguro'
+    start_date = request.form.get('start_date') or datetime.now().strftime('%Y-%m-%d')
+    end_date = request.form.get('end_date') or start_date
+    system_id = request.form.get('system_id')
+    card_provider = request.form.get('card_provider')
+    card_amount = request.form.get('card_amount')
+    card_date = request.form.get('card_date')
+    room_number = request.form.get('room_number')
+    approved_reason = request.form.get('approved_reason') or 'Aprovação manual por intervalo de horário.'
+
+    append_reconciliation_audit({
+        'id': f"RECON_APPROVAL_{datetime.now().strftime('%Y%m%d%H%M%S%f')}",
+        'created_at': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
+        'source': 'manual_approval',
+        'provider': provider,
+        'period_start': start_date,
+        'period_end': end_date,
+        'user': session.get('user'),
+        'summary': {'manual_approval': 1},
+        'results': {
+            'system_id': system_id,
+            'room_number': room_number,
+            'card_provider': card_provider,
+            'card_amount': card_amount,
+            'card_date': card_date,
+            'approval_signature': request.form.get('approval_signature') or f"{system_id}|{card_provider}|{float(card_amount or 0):.2f}",
+            'approved_reason': approved_reason
+        }
+    })
+
+    flash('Conciliação marcada para aprovação administrativa.')
+    return redirect(url_for('finance.finance_reconciliation'))
 
 @finance_bp.route('/accounting/emission')
 @login_required
@@ -2413,13 +2640,23 @@ def finance_reconciliation():
     summary = {
         'matched_count': 0,
         'unmatched_system_count': 0,
-        'unmatched_card_count': 0
+        'unmatched_card_count': 0,
+        'suspected_count': 0
     }
     
     settings = load_card_settings()
     today_date = datetime.now().strftime('%Y-%m-%d')
     
-    return render_template('finance_reconciliation.html', results=results, summary=summary, settings=settings, today_date=today_date)
+    return render_template(
+        'finance_reconciliation.html',
+        results=results,
+        suspected_matches=[],
+        summary=summary,
+        settings=settings,
+        today_date=today_date,
+        start_date=today_date,
+        end_date=today_date
+    )
 
 @finance_bp.route('/admin/reconciliation/account/add', methods=['POST'])
 @login_required
@@ -2499,18 +2736,27 @@ def finance_reconciliation_sync():
         return redirect(url_for('main.index'))
 
     provider = request.form.get('provider')
-    date_str = request.form.get('date')
-    
-    if not date_str:
-        flash('Selecione uma data.')
+    start_date_str = (request.form.get('start_date') or '').strip()
+    end_date_str = (request.form.get('end_date') or '').strip()
+    date_str = (request.form.get('date') or '').strip()
+
+    if not start_date_str and not end_date_str and date_str:
+        start_date_str = date_str
+        end_date_str = date_str
+
+    if not start_date_str or not end_date_str:
+        flash('Selecione o período inicial e final.')
         return redirect(url_for('finance.finance_reconciliation'))
-        
+
     try:
-        target_date = datetime.strptime(date_str, '%Y-%m-%d')
-        start_date = target_date.replace(hour=0, minute=0, second=0)
-        end_date = target_date.replace(hour=23, minute=59, second=59)
+        start_date = datetime.strptime(start_date_str, '%Y-%m-%d').replace(hour=0, minute=0, second=0)
+        end_date = datetime.strptime(end_date_str, '%Y-%m-%d').replace(hour=23, minute=59, second=59)
     except:
         flash('Data inválida.')
+        return redirect(url_for('finance.finance_reconciliation'))
+
+    if end_date < start_date:
+        flash('Período inválido: data final menor que data inicial.')
         return redirect(url_for('finance.finance_reconciliation'))
 
     card_transactions = []
@@ -2524,14 +2770,20 @@ def finance_reconciliation_sync():
         card_transactions = fetch_rede_transactions(start_date, end_date)
         if not card_transactions:
             flash('Nenhuma transação encontrada ou erro na API (verifique credenciais).')
+    else:
+        flash('Adquirente inválido.')
+        return redirect(url_for('finance.finance_reconciliation'))
     
-    start_search = start_date - timedelta(days=1)
-    end_search = end_date + timedelta(days=1)
+    start_search = start_date
+    end_search = end_date
     
     sessions = _load_cashier_sessions()
     system_transactions = []
     
     for s in sessions:
+        session_type = str(s.get('type', '')).lower()
+        if session_type not in ['guest_consumption', 'reception_room_billing', 'reservation_cashier', 'reception', 'restaurant', 'restaurant_service']:
+            continue
         for tx in s.get('transactions', []):
             if tx['type'] == 'sale': 
                 try:
@@ -2544,22 +2796,70 @@ def finance_reconciliation_sync():
                                 'timestamp': tx_time,
                                 'amount': float(tx['amount']),
                                 'description': tx['description'],
-                                'payment_method': tx['payment_method']
+                                'payment_method': tx['payment_method'],
+                                'details': tx.get('details', {}),
+                                'user': tx.get('user', ''),
+                                'room_number': _extract_room_number_from_transaction(tx),
+                                'guest_name': _extract_guest_name_from_transaction(tx)
                             })
                 except:
                     continue
                     
     results = reconcile_transactions(system_transactions, card_transactions)
     
+    settings = load_card_settings()
+    if provider == 'pagseguro':
+        pagseguro_accounts = _normalize_pagseguro_configs(settings)
+        if len(pagseguro_accounts) > 1:
+            flash(f'Conciliação PagSeguro processada em {len(pagseguro_accounts)} tokens.')
+    results = _annotate_reconciliation_results(results, settings)
+    approved_signatures = _load_manual_approval_signatures()
+    suspected_matches = _build_suspected_time_gap_matches(
+        results.get('unmatched_system', []),
+        results.get('unmatched_card', [])
+    )
+    suspected_matches = _apply_manual_approved_suspects(results, suspected_matches, approved_signatures)
+    results = _annotate_reconciliation_results(results, settings)
     summary = {
         'matched_count': len(results['matched']),
         'unmatched_system_count': len(results['unmatched_system']),
-        'unmatched_card_count': len(results['unmatched_card'])
+        'unmatched_card_count': len(results['unmatched_card']),
+        'suspected_count': len(suspected_matches)
     }
-    
-    settings = load_card_settings()
-    
-    return render_template('finance_reconciliation.html', results=results, summary=summary, settings=settings, today_date=date_str)
+    display_start = start_date.strftime('%Y-%m-%d')
+    display_end = end_date.strftime('%Y-%m-%d')
+    _save_reconciliation_audit(
+        source='api_sync',
+        provider=provider,
+        start_date=display_start,
+        end_date=display_end,
+        results=results,
+        summary=summary
+    )
+    log_system_action(
+        'Conciliação de Cartões',
+        {
+            'provider': provider,
+            'period_start': display_start,
+            'period_end': display_end,
+            'matched_count': summary['matched_count'],
+            'unmatched_system_count': summary['unmatched_system_count'],
+            'unmatched_card_count': summary['unmatched_card_count'],
+            'user': session.get('user')
+        },
+        category='Financeiro'
+    )
+
+    return render_template(
+        'finance_reconciliation.html',
+        results=results,
+        suspected_matches=suspected_matches,
+        summary=summary,
+        settings=settings,
+        today_date=display_start,
+        start_date=display_start,
+        end_date=display_end
+    )
 
 @finance_bp.route('/admin/reconciliation/upload', methods=['POST'])
 @login_required
@@ -2581,7 +2881,9 @@ def finance_reconciliation_upload():
         
     if file:
         filename = secure_filename(file.filename)
-        filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+        upload_folder = current_app.config.get('UPLOAD_FOLDER') or os.path.join(os.getcwd(), 'uploads')
+        os.makedirs(upload_folder, exist_ok=True)
+        filepath = os.path.join(upload_folder, filename)
         file.save(filepath)
         
         card_transactions = []
@@ -2602,13 +2904,16 @@ def finance_reconciliation_upload():
         min_date = min(dates)
         max_date = max(dates)
         
-        start_search = min_date - timedelta(days=1)
-        end_search = max_date + timedelta(days=1)
+        start_search = min_date.replace(hour=0, minute=0, second=0, microsecond=0)
+        end_search = max_date.replace(hour=23, minute=59, second=59, microsecond=999999)
         
         sessions = _load_cashier_sessions()
         system_transactions = []
         
         for s in sessions:
+            session_type = str(s.get('type', '')).lower()
+            if session_type not in ['guest_consumption', 'reception_room_billing', 'reservation_cashier', 'reception', 'restaurant', 'restaurant_service']:
+                continue
             for tx in s.get('transactions', []):
                 if tx['type'] == 'sale': 
                     try:
@@ -2621,24 +2926,70 @@ def finance_reconciliation_upload():
                                     'timestamp': tx_time,
                                     'amount': float(tx['amount']),
                                     'description': tx['description'],
-                                    'payment_method': tx['payment_method']
+                                    'payment_method': tx['payment_method'],
+                                    'details': tx.get('details', {}),
+                                    'user': tx.get('user', ''),
+                                    'room_number': _extract_room_number_from_transaction(tx),
+                                    'guest_name': _extract_guest_name_from_transaction(tx)
                                 })
                     except:
                         continue
                         
         results = reconcile_transactions(system_transactions, card_transactions)
         
-        summary = {
-            'matched_count': len(results['matched']),
-            'unmatched_system_count': len(results['unmatched_system']),
-            'unmatched_card_count': len(results['unmatched_card'])
-        }
-        
         try:
             os.remove(filepath)
         except: pass
+        settings = load_card_settings()
+        results = _annotate_reconciliation_results(results, settings)
+        approved_signatures = _load_manual_approval_signatures()
+        suspected_matches = _build_suspected_time_gap_matches(
+            results.get('unmatched_system', []),
+            results.get('unmatched_card', [])
+        )
+        suspected_matches = _apply_manual_approved_suspects(results, suspected_matches, approved_signatures)
+        results = _annotate_reconciliation_results(results, settings)
+        summary = {
+            'matched_count': len(results['matched']),
+            'unmatched_system_count': len(results['unmatched_system']),
+            'unmatched_card_count': len(results['unmatched_card']),
+            'suspected_count': len(suspected_matches)
+        }
+        display_start = min_date.strftime('%Y-%m-%d')
+        display_end = max_date.strftime('%Y-%m-%d')
+        _save_reconciliation_audit(
+            source='file_upload',
+            provider=provider,
+            start_date=display_start,
+            end_date=display_end,
+            results=results,
+            summary=summary
+        )
+        log_system_action(
+            'Conciliação de Cartões via Arquivo',
+            {
+                'provider': provider,
+                'period_start': display_start,
+                'period_end': display_end,
+                'matched_count': summary['matched_count'],
+                'unmatched_system_count': summary['unmatched_system_count'],
+                'unmatched_card_count': summary['unmatched_card_count'],
+                'user': session.get('user'),
+                'filename': filename
+            },
+            category='Financeiro'
+        )
         
-        return render_template('finance_reconciliation.html', results=results, summary=summary)
+        return render_template(
+            'finance_reconciliation.html',
+            results=results,
+            suspected_matches=suspected_matches,
+            summary=summary,
+            settings=settings,
+            today_date=display_start,
+            start_date=display_start,
+            end_date=display_end
+        )
         
     return redirect(url_for('finance.finance_reconciliation'))
 

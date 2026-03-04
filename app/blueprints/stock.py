@@ -289,21 +289,25 @@ def stock_products():
                 pkg_size_val = float(str(package_size).replace(',', '.').strip()) if package_size and str(package_size).strip() else 1.0
             except (ValueError, AttributeError):
                 pkg_size_val = 1.0
+            pkg_size_val = round(pkg_size_val, 2)
             
             try:
                 price_val = float(str(price).replace(',', '.').strip()) if price and str(price).strip() else 0.0
             except (ValueError, AttributeError):
                 price_val = 0.0
+            price_val = round(price_val, 2)
 
             try:
                 min_stock_val = float(str(min_stock).replace(',', '.').strip()) if min_stock and str(min_stock).strip() else 0.0
             except (ValueError, AttributeError):
                 min_stock_val = 0.0
+            min_stock_val = round(min_stock_val, 2)
 
             try:
                 icms_val = float(str(icms_rate).replace(',', '.').strip()) if icms_rate and str(icms_rate).strip() else 0.0
             except (ValueError, AttributeError):
                 icms_val = 0.0
+            icms_val = round(icms_val, 2)
 
             with file_lock(PRODUCTS_FILE):
                 # Re-load products to ensure we have the latest version before modification
@@ -414,10 +418,14 @@ def stock_products():
     # --- 1. Calcular saldos e valores (Necessário para filtros) ---
     for p in products:
         try:
-            p['balance'] = balances.get(str(p['id']), 0.0)
+            p['balance'] = round(float(balances.get(str(p['id']), 0.0) or 0.0), 2)
             price = p.get('price', 0.0)
             if price is None: price = 0.0
-            p['total_value'] = p['balance'] * float(price)
+            p['price'] = round(float(price or 0.0), 2)
+            p['min_stock'] = round(float(p.get('min_stock', 0.0) or 0.0), 2)
+            if p.get('package_size') is not None:
+                p['package_size'] = round(float(p.get('package_size') or 0.0), 2)
+            p['total_value'] = round(p['balance'] * p['price'], 2)
         except (ValueError, TypeError):
             p['total_value'] = 0.0
         
@@ -548,7 +556,7 @@ def api_create_product():
             'name': name,
             'department': department,
             'unit': unit or 'Un',
-            'price': float(price) if price else 0.0,
+            'price': round(float(price), 2) if price else 0.0,
             'category': 'Geral',
             'min_stock': 0.0,
             'suppliers': [],
@@ -1282,7 +1290,7 @@ def update_min_stock():
         
     try:
         product_id = request.form.get('id')
-        new_min = float(request.form.get('min_stock'))
+        new_min = round(float(request.form.get('min_stock')), 2)
         
         products = load_products()
         updated = False
@@ -1291,7 +1299,7 @@ def update_min_stock():
         for p in products:
             if p['id'] == str(product_id):
                 product_name = p['name']
-                old_min = p.get('min_stock', 0)
+                old_min = round(float(p.get('min_stock', 0) or 0), 2)
                 p['min_stock'] = new_min
                 updated = True
                 break
@@ -1345,11 +1353,11 @@ def update_min_stock_bulk():
         
         for update in updates:
             p_id = str(update.get('id'))
-            new_min = float(update.get('min_stock'))
+            new_min = round(float(update.get('min_stock')), 2)
             
             if p_id in product_map:
                 p = product_map[p_id]
-                old_min = p.get('min_stock', 0)
+                old_min = round(float(p.get('min_stock', 0) or 0), 2)
                 if abs(old_min - new_min) > 0.001:
                     p['min_stock'] = new_min
                     count += 1

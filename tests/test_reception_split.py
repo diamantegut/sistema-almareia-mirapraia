@@ -2,10 +2,12 @@ import unittest
 from unittest.mock import patch, MagicMock
 from app import create_app
 import json
+from flask import session
 
 class TestReceptionSplit(unittest.TestCase):
     def setUp(self):
         self.app = create_app('testing')
+        self.app.config['TESTING'] = True
         self.client = self.app.test_client()
         self.app_context = self.app.app_context()
         self.app_context.push()
@@ -55,12 +57,15 @@ class TestReceptionSplit(unittest.TestCase):
             {'id': 'card', 'name': 'Cartão', 'is_fiscal': True}
         ]
 
-        # Execute POST
-        response = self.client.post('/reception/close_account/10', json={
+        from app.blueprints.reception.routes import reception_close_account
+        with self.app.test_request_context('/reception/close_account/10', method='POST', json={
             'payment_method': 'card',
             'print_receipt': False
-        })
-        
+        }):
+            session['user'] = 'Angelo'
+            session['role'] = 'admin'
+            session['permissions'] = ['recepcao', 'admin']
+            response = reception_close_account.__wrapped__('10')
         self.assertEqual(response.status_code, 200)
         
         # Verify Fiscal Pool Calls

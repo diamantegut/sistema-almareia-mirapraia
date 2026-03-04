@@ -3,12 +3,12 @@
 {% block title %}{{ service.name }} - Almareia Mirapraia{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="{{ service.icon }}"></i> {{ service.name }}</h2>
+<div class="container mt-4 {% if service.id == 'rh' %}theme-page-shell{% endif %}">
+    <div class="d-flex justify-content-between align-items-center mb-4 {% if service.id == 'rh' %}theme-section-header{% endif %}">
+        <h2 class="mb-0"><i class="{{ service.icon }}"></i> {{ service.name }}</h2>
         <div>
             <span class="text-muted me-3"><i class="bi bi-person-circle"></i> {{ session.get('user') }}</span>
-            <a href="{{ url_for('main.index') }}" class="btn btn-secondary">
+            <a href="{{ url_for('main.index') }}" class="btn {% if service.id == 'rh' %}theme-action-soft{% else %}btn-secondary{% endif %} theme-focusable">
                 <i class="bi bi-house-door-fill"></i> Home
             </a>
         </div>
@@ -304,43 +304,57 @@
         <!-- RH -->
         {% if service.id == 'rh' %}
             <div class="col">
-                <div class="card h-100 shadow-sm hover-card">
+                <div class="card h-100 shadow-sm hover-card theme-card">
                     <div class="card-body text-center p-4">
-                        <div class="mb-3 text-primary">
+                        <div class="mb-3 theme-icon-alma">
                             <i class="bi bi-person-lines-fill display-4"></i>
                         </div>
                         <h4 class="card-title">Gerenciar Usuários</h4>
                         <p class="card-text text-muted">Cadastro e edição de funcionários e acessos.</p>
-                        <a href="{{ url_for('admin.admin_users') }}" class="btn btn-primary w-100 stretched-link">
+                        <a href="{{ url_for('admin.admin_users') }}" class="btn theme-action-primary w-100 stretched-link theme-focusable">
                             Gerenciar
                         </a>
                     </div>
                 </div>
             </div>
             <div class="col">
-                <div class="card h-100 shadow-sm hover-card">
+                <div class="card h-100 shadow-sm hover-card theme-card">
                     <div class="card-body text-center p-4">
-                        <div class="mb-3 text-secondary">
+                        <div class="mb-3 theme-icon-areia">
                             <i class="bi bi-archive display-4"></i>
                         </div>
                         <h4 class="card-title">Ex-Funcionários</h4>
                         <p class="card-text text-muted">Histórico de colaboradores desligados.</p>
-                        <a href="{{ url_for('hr.rh_ex_employees') }}" class="btn btn-secondary w-100 stretched-link">
+                        <a href="{{ url_for('hr.rh_ex_employees') }}" class="btn theme-action-secondary w-100 stretched-link theme-focusable">
                             Ver Arquivo
                         </a>
                     </div>
                 </div>
             </div>
             <div class="col">
-                <div class="card h-100 shadow-sm hover-card">
+                <div class="card h-100 shadow-sm hover-card theme-card">
                     <div class="card-body text-center p-4">
-                        <div class="mb-3 text-info">
+                        <div class="mb-3 theme-icon-mar">
                             <i class="bi bi-clock-history display-4"></i>
                         </div>
                         <h4 class="card-title">Relatórios de Ponto</h4>
                         <p class="card-text text-muted">Controle de jornada e horas trabalhadas.</p>
-                        <a href="{{ url_for('hr.rh_timesheet') }}" class="btn btn-info w-100 stretched-link text-white">
+                        <a href="{{ url_for('hr.rh_timesheet') }}" class="btn theme-action-primary w-100 stretched-link theme-focusable">
                             Acessar Ponto
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100 shadow-sm hover-card theme-card">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3 theme-icon-mar">
+                            <i class="bi bi-file-earmark-text display-4"></i>
+                        </div>
+                        <h4 class="card-title">Documentos</h4>
+                        <p class="card-text text-muted">Envio, gestão e acompanhamento de documentos de RH.</p>
+                        <a href="{{ url_for('hr.rh_documents') }}" class="btn theme-action-soft w-100 stretched-link theme-focusable">
+                            Acessar Documentos
                         </a>
                     </div>
                 </div>
@@ -605,7 +619,7 @@
         {% endif %}
 
         <!-- GENERIC ACTIONS (If not covered above or additional ones) -->
-        {% if service.actions and service.id != 'financeiro' %}
+        {% if service.actions and service.id not in ['financeiro', 'rh'] %}
             {% for action in service.actions %}
             <div class="col">
                 <div class="card h-100 shadow-sm hover-card">
@@ -639,5 +653,13 @@
     .card-body i.display-4 {
         font-size: 2.5rem;
     }
+    {% if service.id == 'rh' %}
+    body {
+        background: radial-gradient(circle at 20% 20%, var(--theme-bg-accent) 0%, var(--theme-bg-main) 35%), linear-gradient(180deg, var(--theme-bg-main) 0%, #E8D8C3 100%) !important;
+    }
+    .theme-card.hover-card {
+        border: 1px solid var(--theme-border-soft);
+    }
+    {% endif %}
 </style>
 {% endblock %}

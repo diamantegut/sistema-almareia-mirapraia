@@ -3,6 +3,7 @@ import json
 import os
 from datetime import datetime, timedelta
 import re
+import itertools
 import requests
 import xml.etree.ElementTree as ET
 import base64
@@ -11,6 +12,7 @@ from app.services.system_config_manager import get_data_path
 
 # Configuration
 SETTINGS_FILE = get_data_path('card_settings.json')
+RECONCILIATION_AUDIT_FILE = get_data_path('card_reconciliation_audit.json')
 
 def load_card_settings():
     if not os.path.exists(SETTINGS_FILE):
@@ -24,6 +26,30 @@ def load_card_settings():
 def save_card_settings(data):
     with open(SETTINGS_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=4, ensure_ascii=False)
+
+
+def load_reconciliation_audits():
+    if not os.path.exists(RECONCILIATION_AUDIT_FILE):
+        return []
+    try:
+        with open(RECONCILIATION_AUDIT_FILE, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            return data if isinstance(data, list) else []
+    except Exception:
+        return []
+
+
+def save_reconciliation_audits(audits):
+    with open(RECONCILIATION_AUDIT_FILE, 'w', encoding='utf-8') as f:
+        json.dump(audits, f, indent=2, ensure_ascii=False)
+
+
+def append_reconciliation_audit(audit_entry):
+    audits = load_reconciliation_audits()
+    audits.append(audit_entry)
+    if len(audits) > 2000:
+        audits = audits[-2000:]
+    save_reconciliation_audits(audits)
 
 def fetch_pagseguro_transactions(start_date, end_date):
     """
@@ -333,6 +359,45 @@ def parse_rede_csv(file_path):
         print(f"Failed to parse Rede file: {e}")
         return []
 
+def _is_card_time_match(sys_time, card_time, tolerance_mins):
+    if card_time.hour == 0 and card_time.minute == 0:
+        return sys_time.date() == card_time.date()
+    time_diff = abs((sys_time - card_time).total_seconds()) / 60
+    return time_diff <= tolerance_mins
+
+
+def _build_grouped_system_transaction(grouped_items):
+    grouped_sorted = sorted(grouped_items, key=lambda x: x.get('timestamp', datetime.min))
+    amount = round(sum(float(i.get('amount', 0.0) or 0.0) for i in grouped_sorted), 2)
+    first_item = grouped_sorted[0] if grouped_sorted else {}
+    return {
+        'id': f"GROUP_{first_item.get('id', 'NA')}",
+        'timestamp': first_item.get('timestamp', datetime.now()),
+        'amount': amount,
+        'description': f"Pagamento Agrupado ({len(grouped_sorted)} lançamentos)",
+        'payment_method': 'Múltiplo',
+        'grouped_ids': [i.get('id') for i in grouped_sorted]
+    }
+
+
+def _find_combination_match(system_items, target_amount, card_time, tolerance_mins, tolerance_val, max_group_size=4):
+    if not system_items:
+        return None
+
+    ordered = sorted(system_items, key=lambda x: x.get('timestamp', datetime.min))
+    limited = ordered[:12]
+
+    for size in range(2, min(max_group_size, len(limited)) + 1):
+        for combo in itertools.combinations(limited, size):
+            combo_sum = round(sum(float(t.get('amount', 0.0) or 0.0) for t in combo), 2)
+            if abs(combo_sum - target_amount) > tolerance_val:
+                continue
+            if not all(_is_card_time_match(t.get('timestamp'), card_time, tolerance_mins) for t in combo):
+                continue
+            return list(combo)
+    return None
+
+
 def reconcile_transactions(system_transactions, card_transactions, tolerance_mins=60, tolerance_val=0.05):
     """
     Matches system transactions with card transactions.
@@ -353,11 +418,7 @@ def reconcile_transactions(system_transactions, card_transactions, tolerance_min
     unmatched_system = system_transactions[:] # Copy
     unmatched_card = card_transactions[:] # Copy
     
-    # Sort by time to optimize matching
-    # unmatched_system.sort(key=lambda x: x['timestamp'])
-    
-    # Greedy matching
-    for sys_tx in list(unmatched_system): # Iterate over copy to modify original
+    for sys_tx in list(unmatched_system):
         best_match = None
         best_match_idx = -1
         
@@ -368,22 +429,11 @@ def reconcile_transactions(system_transactions, card_transactions, tolerance_min
             card_time = card_tx['date']
             card_amount = card_tx['amount']
             
-            # Check Amount
             if abs(sys_amount - card_amount) <= tolerance_val:
-                # Check Time
-                # If card_tx has no time (hour=0, min=0), only check date
-                if card_time.hour == 0 and card_time.minute == 0:
-                    is_same_day = sys_time.date() == card_time.date()
-                    if is_same_day:
-                        best_match = card_tx
-                        best_match_idx = i
-                        break # Found a candidate
-                else:
-                    time_diff = abs((sys_time - card_time).total_seconds()) / 60
-                    if time_diff <= tolerance_mins:
-                        best_match = card_tx
-                        best_match_idx = i
-                        break
+                if _is_card_time_match(sys_time, card_time, tolerance_mins):
+                    best_match = card_tx
+                    best_match_idx = i
+                    break
         
         if best_match:
             matched.append({
@@ -393,6 +443,73 @@ def reconcile_transactions(system_transactions, card_transactions, tolerance_min
             })
             unmatched_system.remove(sys_tx)
             del unmatched_card[best_match_idx]
+
+    grouped_by_payment = {}
+    for sys_tx in unmatched_system:
+        details = sys_tx.get('details') or {}
+        if isinstance(details, str):
+            try:
+                details = json.loads(details)
+            except Exception:
+                details = {}
+        group_id = details.get('payment_group_id')
+        if group_id:
+            grouped_by_payment.setdefault(group_id, []).append(sys_tx)
+
+    for group_id, group_items in list(grouped_by_payment.items()):
+        if len(group_items) < 2:
+            continue
+        system_group_tx = _build_grouped_system_transaction(group_items)
+        group_amount = system_group_tx['amount']
+        group_time = system_group_tx['timestamp']
+        matched_idx = -1
+        matched_card = None
+
+        for i, card_tx in enumerate(unmatched_card):
+            if abs(group_amount - float(card_tx.get('amount', 0.0) or 0.0)) <= tolerance_val and _is_card_time_match(group_time, card_tx['date'], tolerance_mins):
+                matched_idx = i
+                matched_card = card_tx
+                break
+
+        if matched_card is None:
+            continue
+
+        matched.append({
+            'system': system_group_tx,
+            'system_items': group_items,
+            'card': matched_card,
+            'status': 'matched_group'
+        })
+
+        for item in group_items:
+            if item in unmatched_system:
+                unmatched_system.remove(item)
+        del unmatched_card[matched_idx]
+
+    for card_tx in list(unmatched_card):
+        combo = _find_combination_match(
+            system_items=unmatched_system,
+            target_amount=float(card_tx.get('amount', 0.0) or 0.0),
+            card_time=card_tx['date'],
+            tolerance_mins=tolerance_mins,
+            tolerance_val=tolerance_val
+        )
+        if not combo:
+            continue
+
+        system_group_tx = _build_grouped_system_transaction(combo)
+        matched.append({
+            'system': system_group_tx,
+            'system_items': combo,
+            'card': card_tx,
+            'status': 'matched_group'
+        })
+
+        for item in combo:
+            if item in unmatched_system:
+                unmatched_system.remove(item)
+        if card_tx in unmatched_card:
+            unmatched_card.remove(card_tx)
             
     return {
         'matched': matched,
