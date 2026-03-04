@@ -9,24 +9,25 @@ from datetime import datetime
 # Add project root to path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from app import app
+from app import create_app
 
 class TestReceptionCloseAccount(unittest.TestCase):
     def setUp(self):
-        app.config['TESTING'] = True
-        self.app = app.test_client()
+        flask_app = create_app()
+        flask_app.config['TESTING'] = True
+        self.app = flask_app.test_client()
         self.app.testing = True
         
         # Mock session data
         self.user = 'test_user'
         
-    @patch('app.load_room_occupancy')
-    @patch('app.load_room_charges')
-    @patch('app.save_room_charges')
-    @patch('app.load_payment_methods')
-    @patch('app.CashierService.add_transaction')
-    @patch('app.CashierService.get_active_session')
-    @patch('app.log_action')
+    @patch('app.blueprints.reception.routes.load_room_occupancy')
+    @patch('app.blueprints.reception.routes.load_room_charges')
+    @patch('app.blueprints.reception.routes.save_room_charges')
+    @patch('app.blueprints.reception.routes.load_payment_methods')
+    @patch('app.blueprints.reception.routes.CashierService.add_transaction')
+    @patch('app.blueprints.reception.routes.CashierService.get_active_session')
+    @patch('app.blueprints.reception.routes.log_action')
     def test_close_account_success(self, mock_log, mock_get_session, mock_add_tx, mock_load_methods, mock_save_charges, mock_load_charges, mock_load_occupancy):
         # Setup Mocks
         with self.app.session_transaction() as sess:
@@ -81,10 +82,9 @@ class TestReceptionCloseAccount(unittest.TestCase):
         self.assertEqual(kwargs['user'], self.user)
         self.assertEqual(kwargs['details']['category'], 'Baixa de Conta')
 
-    @patch('app.load_room_occupancy')
-    @patch('app.load_room_charges')
-    @patch('app.load_cashier_sessions')
-    def test_missing_payment_method(self, mock_load_sessions, mock_load_charges, mock_load_occupancy):
+    @patch('app.blueprints.reception.routes.load_room_occupancy')
+    @patch('app.blueprints.reception.routes.load_room_charges')
+    def test_missing_payment_method(self, mock_load_charges, mock_load_occupancy):
         with self.app.session_transaction() as sess:
             sess['user'] = self.user
             sess['role'] = 'recepcao'
@@ -99,8 +99,8 @@ class TestReceptionCloseAccount(unittest.TestCase):
         self.assertFalse(data['success'])
         self.assertIn('Forma de pagamento é obrigatória', data['error'])
 
-    @patch('app.load_room_occupancy')
-    @patch('app.CashierService.get_active_session')
+    @patch('app.blueprints.reception.routes.load_room_occupancy')
+    @patch('app.blueprints.reception.routes.CashierService.get_active_session')
     def test_no_open_cashier(self, mock_get_session, mock_load_occupancy):
         with self.app.session_transaction() as sess:
             sess['user'] = self.user

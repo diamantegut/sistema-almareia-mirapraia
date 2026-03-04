@@ -2,7 +2,12 @@ import unittest
 import json
 import os
 import re
+import sys
 from datetime import datetime
+from unittest.mock import patch
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from app import create_app
 from app.services import data_service
 
@@ -61,24 +66,17 @@ class TestReceptionCheckinFix(unittest.TestCase):
             import shutil
             shutil.rmtree(TEST_DATA_DIR)
 
-    def test_reception_rooms_page_loads_and_contains_fixed_js(self):
-        """Test that /reception/rooms loads and contains the fixed JS function structure."""
+    def test_reception_rooms_page_loads_and_contains_checkin_js(self):
+        """Test that /reception/rooms loads and contains check-in JS structure."""
         response = self.client.get('/reception/rooms')
         self.assertEqual(response.status_code, 200)
         
         html = response.data.decode('utf-8')
         
-        # Verify openCheckinModal is defined
-        self.assertIn('window.openCheckinModal = function(roomNum)', html)
-        
-        # Verify it is at the end of the file (after "Check-in script loading")
-        self.assertIn('console.log(\'Check-in script loading...\');', html)
-        
-        # Verify Bootstrap check inside the function
-        self.assertIn('if (typeof bootstrap === \'undefined\')', html)
-        
-        # Verify it handles TomSelect
-        self.assertIn('if (select.tomselect)', html)
+        self.assertIn('function openCheckinModal(room)', html)
+        self.assertIn("document.getElementById('checkin_room_select').value = room;", html)
+        self.assertIn("var modal = new bootstrap.Modal(document.getElementById('checkinModal'));", html)
+        self.assertIn('modal.show();', html)
 
     def test_checkin_submission(self):
         """Test the backend processing of a check-in."""
@@ -90,16 +88,17 @@ class TestReceptionCheckinFix(unittest.TestCase):
             'checkout_date': (datetime.now()).strftime('%Y-%m-%d'),
             'num_adults': '1'
         }
-        
-        response = self.client.post('/reception/checkin', data=data, follow_redirects=True)
-        self.assertEqual(response.status_code, 200)
-        
-        # Verify occupancy updated
-        with open(self.test_occupancy, 'r') as f:
-            occupancy = json.load(f)
-        
-        self.assertIn('101', occupancy)
-        self.assertEqual(occupancy['101']['guest_name'], 'Test Guest')
+
+        with patch('app.blueprints.reception.routes.load_room_occupancy', return_value={}), \
+             patch('app.blueprints.reception.routes.save_room_occupancy') as mock_save_occupancy, \
+             patch('app.blueprints.reception.routes.load_table_orders', return_value={}), \
+             patch('app.blueprints.reception.routes.save_table_orders'):
+            response = self.client.post('/reception/checkin', data=data, follow_redirects=True)
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue(mock_save_occupancy.called)
+            saved_occupancy = mock_save_occupancy.call_args[0][0]
+            self.assertIn('101', saved_occupancy)
+            self.assertEqual(saved_occupancy['101']['guest_name'], 'Test Guest')
         # Occupancy dictionary does not have a 'status' field, presence implies occupancy
         # self.assertEqual(occupancy['101']['status'], 'occupied')
 

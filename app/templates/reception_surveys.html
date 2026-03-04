@@ -162,13 +162,13 @@
             </td>
             <td class="text-end" style="min-width: 220px;">
               <div class="btn-group btn-group-sm" role="group">
-                <a class="btn btn-outline-primary" href="{{ url_for('reception.reception_dashboard', survey_id=s.id) }}">
+                <a class="btn btn-outline-primary" href="{{ url_for('reception.reception_survey_edit', survey_id=s.id) }}">
                   <i class="bi bi-sliders"></i> Editar
                 </a>
-                <a class="btn btn-outline-success" href="{{ url_for('reception.reception_dashboard', survey_id=s.id) }}">
+                <a class="btn btn-outline-success" href="{{ url_for('reception.reception_survey_questions', survey_id=s.id) }}">
                   <i class="bi bi-list-check"></i> Perguntas
                 </a>
-                <a class="btn btn-outline-secondary" href="{{ url_for('reception.reception_dashboard', survey_id=s.id) }}">
+                <a class="btn btn-outline-secondary" href="{{ url_for('reception.reception_survey_dashboard', survey_id=s.id) }}">
                   <i class="bi bi-graph-up"></i> Dashboard
                 </a>
                 <form method="POST" class="d-inline" onsubmit="return confirm('Remover esta pesquisa?')">

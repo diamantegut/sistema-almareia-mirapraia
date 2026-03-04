@@ -17,12 +17,12 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2><i class="bi bi-bell-fill"></i> Recepção - Gestão de Quartos</h2>
         <div>
-            <a href="{{ url_for('reception.waiting_list') }}" class="btn btn-outline-warning text-dark me-2" title="Gerenciar Fila de Espera">
+            <a href="{{ url_for('reception.reception_waiting_list') }}" class="btn btn-outline-warning text-dark me-2" title="Gerenciar Fila de Espera">
                 <i class="bi bi-people-fill"></i> <span class="d-none d-sm-inline">Chamar Próximo</span>
             </a>
-            <a href="{{ url_for('reception.reception_chat') }}" class="btn btn-outline-success me-2" title="Chat WhatsApp">
+            {# <a href="{{ url_for('reception.reception_chat') }}" class="btn btn-outline-success me-2" title="Chat WhatsApp">
                 <i class="bi bi-whatsapp"></i> <span class="d-none d-sm-inline">Chat</span>
-            </a>
+            </a> #}
             <a href="{{ url_for('reception.reception_dashboard') }}" class="btn btn-secondary me-2">
                 <i class="bi bi-arrow-left"></i> Voltar
             </a>
@@ -65,8 +65,11 @@
                             {% if occ_data %}
                                 <h5 class="card-title">
                                     {% if occ_data.reservation_id %}
-                                    <a href="#" class="text-decoration-none text-dark" 
-                                       onclick="openViewGuestModal('{{ occ_data.reservation_id }}', '{{ occ_data.guest_name }}', '{{ room_num }}'); return false;"
+                                    <a href="#" class="text-decoration-none text-dark"
+                                       data-reservation-id="{{ occ_data.reservation_id }}"
+                                       data-guest-name="{{ occ_data.guest_name }}"
+                                       data-room-num="{{ room_num }}"
+                                       onclick="openViewGuestModalFromElement(this); return false;"
                                        title="Ver Ficha do Hóspede">
                                         {{ occ_data.guest_name }} <i class="bi bi-person-badge text-primary small ms-1"></i>
                                     </a>
@@ -82,15 +85,29 @@
                                 </p>
 
                                 <div class="d-flex gap-2 mb-2">
-                                    <button class="btn btn-outline-primary btn-sm w-50" onclick="openTransferModal('{{ room_num }}', '{{ occ_data.guest_name }}')">
+                                    <button class="btn btn-outline-primary btn-sm w-50"
+                                            data-room-num="{{ room_num }}"
+                                            data-guest-name="{{ occ_data.guest_name }}"
+                                            onclick="openTransferModalFromElement(this)">
                                         <i class="bi bi-arrow-left-right"></i> Trocar
                                     </button>
-                                    <button class="btn btn-outline-secondary btn-sm w-50" onclick="openEditGuestModal('{{ room_num }}', '{{ occ_data.guest_name }}')">
+                                    <button class="btn btn-outline-secondary btn-sm w-50"
+                                            data-room-num="{{ room_num }}"
+                                            data-guest-name="{{ occ_data.guest_name }}"
+                                            onclick="openEditGuestModalFromElement(this)">
                                         <i class="bi bi-pencil-square"></i> Editar
                                     </button>
                                 </div>
                                 
-                                <form method="POST" action="{{ url_for('reception.reception_checkout') }}" onsubmit="return confirm('Confirmar check-out do quarto {{ room_num }}?');">
+                                <button class="btn btn-outline-info btn-sm w-100 mb-2" onclick="openConsumptionModal('{{ room_num }}')">
+                                    <i class="bi bi-receipt"></i> Ver Consumo
+                                </button>
+
+                                <a href="{{ url_for('restaurant.restaurant_table_order', table_id=room_num, mode='reception') }}" class="btn btn-outline-success btn-sm w-100 mb-2">
+                                    <i class="bi bi-cart-plus"></i> Lançar Consumo
+                                </a>
+
+                                <form method="POST" action="{{ url_for('reception.reception_rooms') }}" onsubmit="return confirm('Confirmar check-out do quarto {{ room_num }}?');">
                                     <input type="hidden" name="action" value="checkout">
                                     <input type="hidden" name="room_number" value="{{ room_num }}">
                                     <button type="submit" class="btn btn-outline-danger btn-sm w-100">
@@ -149,7 +166,21 @@
             <form method="POST" action="{{ url_for('reception.reception_checkin') }}">
                 <div class="modal-body">
                     <input type="hidden" name="action" value="checkin">
+                    <input type="hidden" name="reservation_id" id="checkin_reservation_id">
                     
+                    <!-- Pre-fill from Reservation -->
+                    <div class="mb-3 bg-light p-2 rounded border">
+                        <label class="form-label small text-muted fw-bold"><i class="bi bi-calendar-event"></i> Carregar Reserva (Hoje/Amanhã)</label>
+                        <select class="form-select form-select-sm" id="reservation_loader" onchange="loadReservationData(this.value)">
+                            <option value="">-- Selecionar Reserva --</option>
+                            {% for res in upcoming_reservations %}
+                                <option value="{{ res.id }}">
+                                    {{ res.guest_name }} ({{ res.checkin }} - Quarto: {{ res.room or 'S/N' }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <label class="form-label">Quarto *</label>
@@ -259,7 +290,7 @@
                 <h5 class="modal-title"><i class="bi bi-arrow-left-right"></i> Trocar Quarto</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <form method="POST" action="{{ url_for('reception.transfer_guest') }}">
+            <form method="POST" action="{{ url_for('reception.reception_rooms') }}">
                 <div class="modal-body">
                     <input type="hidden" name="action" value="transfer_guest">
                     <input type="hidden" name="old_room" id="transfer_old_room">
@@ -312,7 +343,7 @@
                 <h5 class="modal-title"><i class="bi bi-pencil-square"></i> Editar Hóspede</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <form method="POST" action="{{ url_for('reception.edit_guest_name') }}">
+            <form method="POST" action="{{ url_for('reception.reception_rooms') }}">
                 <div class="modal-body">
                     <input type="hidden" name="action" value="edit_guest_name">
                     <input type="hidden" name="room_number" id="edit_guest_room">
@@ -501,7 +532,7 @@
                 <h5 class="modal-title"><i class="bi bi-clipboard-check"></i> Checklist de Inspeção de Quarto</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <form method="POST" id="inspectionForm" action="{{ url_for('reception.inspect_room') }}">
+            <form method="POST" id="inspectionForm" action="{{ url_for('reception.reception_rooms') }}">
                 <div class="modal-body">
                     <input type="hidden" name="action" value="inspect_room">
                     <input type="hidden" name="room_number" id="inspect_room_number">
@@ -566,7 +597,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <form method="POST" action="{{ url_for('reception.manage_checklist') }}" class="d-flex gap-2 mb-4">
+                <form method="POST" action="{{ url_for('reception.reception_rooms') }}" class="d-flex gap-2 mb-4">
                     <input type="hidden" name="action" value="add_checklist_item">
                     <input type="text" class="form-control" name="item_name" placeholder="Novo item..." required>
                     <button type="submit" class="btn btn-success">
@@ -579,7 +610,7 @@
                     {% for item in checklist_items %}
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         {{ item }}
-                        <form method="POST" action="{{ url_for('reception.manage_checklist') }}" style="display:inline;">
+                        <form method="POST" action="{{ url_for('reception.reception_rooms') }}" style="display:inline;">
                             <input type="hidden" name="action" value="delete_checklist_item">
                             <input type="hidden" name="item_name" value="{{ item }}">
                             <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Remover este item?')">
@@ -597,423 +628,192 @@
     </div>
 </div>
 
-<!-- Room Charges Modals (Generated Loop) -->
-{% for room_num, charges in grouped_charges.items() %}
-<div class="modal fade" id="roomChargesModal{{ room_num }}" tabindex="-1">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">Detalhes da Conta - Quarto {{ room_num }}</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover">
-                        <thead>
-                            <tr>
-                                <th>Data</th>
-                                <th>Item</th>
-                                <th>Qtd</th>
-                                <th>Valor Unit.</th>
-                                <th>Total</th>
-                                <th>Status</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for charge in charges %}
-                            <tr>
-                                <td>{{ charge.date }}</td>
-                                <td>{{ charge.description }}</td>
-                                <td>{{ charge.qty }}</td>
-                                <td>R$ {{ charge.value|float|round(2) }}</td>
-                                <td>R$ {{ charge.total|float|round(2) }}</td>
-                                <td>
-                                    <span class="badge bg-{{ 'success' if charge.status == 'paid' else 'warning' }}">
-                                        {{ charge.status }}
-                                    </span>
-                                </td>
-                                <td>
-                                    {% if charge.status == 'pending' %}
-                                    <button class="btn btn-sm btn-outline-success me-1" 
-                                            onclick="openPaymentModal('{{ charge.id }}', '{{ room_num }}', '{{ charge.total }}')"
-                                            title="Pagar Item">
-                                        <i class="bi bi-currency-dollar"></i>
-                                    </button>
-                                    {% endif %}
-                                    <button class="btn btn-sm btn-outline-primary" onclick="openEditModal(this)" 
-                                            data-id="{{ charge.id }}" 
-                                            data-total="{{ charge.total }}"
-                                            data-date="{{ charge.date }}"
-                                            data-status="{{ charge.status }}"
-                                            data-notes="{{ charge.notes }}"
-                                            data-items='{{ charge.items|tojson|safe }}'
-                                            data-audit='{{ charge.audit_log|tojson|safe }}'>
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                <button type="button" class="btn btn-success" onclick="openCloseAccountModal('{{ room_num }}', '{{ charges|sum(attribute='total') }}')">
-                    <i class="bi bi-cash-coin"></i> Fechar Conta
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-{% endfor %}
-
-<!-- Edit Charge Modal -->
-<div class="modal fade" id="editChargeModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">Editar Conta</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <form method="POST" action="/reception/charge/edit" onsubmit="prepareEditSubmit()">
-                <input type="hidden" name="source_page" value="reception_rooms">
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-5 border-end">
-                            <ul class="nav nav-tabs mb-3" id="editTabs" role="tablist">
-                                <li class="nav-item">
-                                    <button class="nav-link active" id="details-tab" data-bs-toggle="tab" data-bs-target="#details" type="button">Detalhes</button>
-                                </li>
-                            </ul>
-                            <div class="tab-content" id="editTabContent">
-                                <div class="tab-pane fade show active" id="details" role="tabpanel">
-                                    <div class="mb-2">
-                                        <label class="form-label text-muted small">ID da Conta</label>
-                                        <input type="text" class="form-control-plaintext fw-bold py-0" name="charge_id" id="editChargeId" readonly>
-                                    </div>
-                                    <div class="mb-2">
-                                        <label class="form-label small">Data</label>
-                                        <input type="text" class="form-control form-control-sm" name="new_date" id="editChargeDate" required placeholder="DD/MM/YYYY HH:MM">
-                                    </div>
-                                    <div class="mb-2">
-                                        <label class="form-label small">Status</label>
-                                        <select class="form-select form-select-sm" name="new_status" id="editChargeStatus">
-                                            <option value="pending">Pendente</option>
-                                            <option value="cancelled">Cancelado</option>
-                                            <option value="paid">Pago (Manual)</option>
-                                        </select>
-                                    </div>
-                                    <div class="mb-2">
-                                        <label class="form-label small fw-bold text-danger">Motivo da Edição *</label>
-                                        <textarea class="form-control form-control-sm" name="justification" id="editJustification" rows="2" required placeholder="Obrigatório para auditoria..."></textarea>
-                                    </div>
-                                    <div class="mb-2">
-                                        <label class="form-label small">Observações (Internas)</label>
-                                        <textarea class="form-control form-control-sm" name="new_notes" id="editChargeNotes" rows="2"></textarea>
-                                    </div>
-                                    <div class="alert alert-warning small py-1 mt-2">
-                                        <i class="bi bi-exclamation-triangle"></i> Estoque ajustado auto.
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-7">
-                            <h6 class="text-primary mb-3">Itens do Pedido</h6>
-                            <div class="card bg-light mb-3">
-                                <div class="card-body p-2">
-                                    <label class="form-label small fw-bold">Adicionar Item</label>
-                                    <div class="input-group input-group-sm mb-2">
-                                        <select class="form-select" id="newItemSelect">
-                                            <option value="">Selecione um produto...</option>
-                                            {% for product in products %}
-                                            <option value="{{ product.id }}" data-name="{{ product.name }}" data-price="{{ product.price }}">{{ product.name }} - R$ {{ product.price }}</option>
-                                            {% endfor %}
-                                        </select>
-                                        <input type="number" class="form-control" id="newItemQty" value="1" min="0.1" step="0.1" style="max-width: 70px;">
-                                        <button type="button" class="btn btn-success" onclick="addNewEditItem()">
-                                            <i class="bi bi-plus-lg"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="table-responsive" style="max-height: 300px; overflow-y: auto">
-                                <table class="table table-sm table-hover" id="editItemsTable">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>Item</th>
-                                            <th class="text-end">Qtd</th>
-                                            <th class="text-end">Total</th>
-                                            <th class="text-center">Ação</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="editItemsList"></tbody>
-                                </table>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="removeServiceFee" name="remove_service_fee" onchange="renderEditItems()">
-                                    <label class="form-check-label small" for="removeServiceFee">Retirar 10% (Serviço)</label>
-                                </div>
-                                <div class="text-end">
-                                    <span class="text-muted small d-block">Total Estimado:</span>
-                                    <span class="fw-bold fs-5 text-primary" id="editGrandTotal">R$ 0.00</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <input type="hidden" name="items_to_add" id="itemsToAddInput">
-                    <input type="hidden" name="items_to_remove" id="itemsToRemoveInput">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary">Salvar Alterações</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Print Preview Modal -->
-<div class="modal fade" id="printPreviewModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Pré-visualização do Relatório</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" id="printPreviewContent">
-                <div class="text-center py-5">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Carregando...</span>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                <button type="button" class="btn btn-primary" onclick="printReport()">
-                    <i class="bi bi-printer"></i> Imprimir
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Cancel Confirmation Modal -->
-<div class="modal fade" id="cancelConsumptionModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title"><i class="bi bi-exclamation-triangle-fill"></i> Cancelar Consumo</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p>Tem certeza que deseja cancelar este consumo?</p>
-                <div class="alert alert-light border">
-                    <p class="mb-1"><strong>Hóspede:</strong> <span id="cancelGuestName"></span></p>
-                    <p class="mb-1"><strong>Data:</strong> <span id="cancelDate"></span></p>
-                    <p class="mb-0"><strong>Valor:</strong> R$ <span id="cancelTotal"></span></p>
-                </div>
-                <form id="cancelConsumptionForm">
-                    <input type="hidden" id="cancelChargeId" name="charge_id">
-                    <div class="mb-3">
-                        <label for="cancelJustification" class="form-label fw-bold">Justificativa (Obrigatório)</label>
-                        <textarea class="form-control" id="cancelJustification" rows="3" required placeholder="Motivo do cancelamento..."></textarea>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                <button type="button" class="btn btn-danger" onclick="submitCancelConsumption()">Confirmar Cancelamento</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Close Account Confirmation Modal -->
-<div class="modal fade" id="closeAccountModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title"><i class="bi bi-check-circle"></i> Dar Baixa na Conta</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p>Confirma a baixa total da conta do quarto <strong id="closeAccountRoomNum"></strong>?</p>
-                <div class="alert alert-info">
-                    <div class="d-flex justify-content-between mb-1">
-                        <span>Total a Pagar:</span>
-                        <strong class="fs-5" id="closeAccountTotal">R$ 0,00</strong>
-                    </div>
-                    <small class="text-muted">Incluindo taxas de serviço e consumo.</small>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Pagamentos</label>
-                    <div class="bg-light p-2 rounded mb-2 border">
-                        <div id="paymentList" class="mb-2">
-                            <div class="text-muted small text-center fst-italic py-1" id="noPaymentMsg">Nenhum pagamento adicionado</div>
-                        </div>
-                        <div class="d-flex justify-content-between border-top pt-2">
-                            <span class="small fw-bold">Total Pago:</span>
-                            <span class="small fw-bold text-success" id="totalPaidDisplay">R$ 0,00</span>
-                        </div>
-                        <div class="d-flex justify-content-between">
-                            <span class="small fw-bold">Restante:</span>
-                            <span class="small fw-bold text-danger" id="remainingDisplay">R$ 0,00</span>
-                        </div>
-                    </div>
-                    <div class="input-group input-group-sm">
-                        <select class="form-select" id="newPaymentMethod">
-                             <option value="">Selecione...</option>
-                             {% for method in payment_methods %}
-                             <option value="{{ method.id }}">{{ method.name }}</option>
-                             {% endfor %}
-                        </select>
-                        <input type="text" class="form-control" id="newPaymentAmount" placeholder="Valor" onkeyup="formatCurrency(this)">
-                        <button class="btn btn-primary" type="button" onclick="addPayment()">
-                            <i class="bi bi-plus-lg"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="form-check mb-3">
-                    <input class="form-check-input" type="checkbox" id="closeAccountPrintReceipt" checked>
-                    <label class="form-check-label" for="closeAccountPrintReceipt">
-                        Imprimir comprovante automaticamente
-                    </label>
-                </div>
-                <p class="text-muted small mb-0">Esta ação irá marcar todos os itens pendentes como "Pagos" e registrar o fechamento da conta.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-success" onclick="submitCloseAccount()">Confirmar Baixa</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Single Charge Payment Modal -->
-<div class="modal fade" id="paymentModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title">Pagar Item Individual</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p>Confirma o pagamento do item?</p>
-                <div class="alert alert-info">
-                    <strong>Total do Item: R$ <span id="paymentModalTotal"></span></strong>
-                </div>
-                <input type="hidden" id="paymentChargeId">
-                <input type="hidden" id="paymentRoomNum">
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Pagamentos</label>
-                    <div class="bg-light p-2 rounded mb-2 border">
-                        <div id="paymentListSingle" class="mb-2">
-                            <div class="text-muted small text-center fst-italic py-1" id="noPaymentMsgSingle">Nenhum pagamento adicionado</div>
-                        </div>
-                        <div class="d-flex justify-content-between border-top pt-2">
-                            <span class="small fw-bold">Total Pago:</span>
-                            <span class="small fw-bold text-success" id="totalPaidDisplaySingle">R$ 0,00</span>
-                        </div>
-                        <div class="d-flex justify-content-between">
-                            <span class="small fw-bold">Restante:</span>
-                            <span class="small fw-bold text-danger" id="remainingDisplaySingle">R$ 0,00</span>
-                        </div>
-                    </div>
-                    <div class="input-group input-group-sm">
-                        <select class="form-select" id="newPaymentMethodSingle">
-                             <option value="">Selecione...</option>
-                             {% for method in payment_methods %}
-                             <option value="{{ method.id }}">{{ method.name }}</option>
-                             {% endfor %}
-                        </select>
-                        <input type="text" class="form-control" id="newPaymentAmountSingle" placeholder="Valor" onkeyup="formatCurrency(this)">
-                        <button class="btn btn-primary" type="button" onclick="addPaymentSingle()">
-                            <i class="bi bi-plus-lg"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-success" onclick="submitSinglePayment()">Confirmar Pagamento</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Loading Modal -->
-<div class="modal fade" id="loadingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered text-center">
-        <div class="modal-content bg-transparent border-0 shadow-none">
-            <div class="spinner-border text-light" style="width: 3rem; height: 3rem;" role="status">
-                <span class="visually-hidden">Carregando...</span>
-            </div>
-            <h5 class="text-light mt-3">Processando...</h5>
-        </div>
-    </div>
-</div>
-
-<!-- Scripts -->
-<script src="/static/js/guest_view.js"></script>
+<script id="checkinConfigData" type="application/json">{{ {'upcoming_reservations': upcoming_reservations, 'room_capacities': room_capacities} | tojson | safe }}</script>
 <script>
-    // Functions for Modals
-    window.openCheckinModal = function(roomNum) {
-        if (roomNum) {
-            const select = document.getElementById('checkin_room_select');
-            if (select) {
-                select.value = roomNum;
-            }
+    const checkinConfigData = JSON.parse(document.getElementById('checkinConfigData').textContent || '{}');
+    const upcomingReservations = checkinConfigData.upcoming_reservations || [];
+    const roomCapacities = checkinConfigData.room_capacities || {};
+
+    function validateCapacity() {
+        const roomSelect = document.getElementById('checkin_room_select');
+        const adultsInput = document.querySelector('#checkinModal input[name="num_adults"]');
+        
+        if (roomSelect && adultsInput) {
+             const room = roomSelect.value;
+             const adults = parseInt(adultsInput.value);
+             
+             if (room && adults && roomCapacities && roomCapacities[room]) {
+                 if (adults > roomCapacities[room]) {
+                     alert(`Atenção: O quarto ${room} tem capacidade máxima para ${roomCapacities[room]} adultos.`);
+                     adultsInput.classList.add('is-invalid');
+                 } else {
+                     adultsInput.classList.remove('is-invalid');
+                 }
+             }
+        }
+    }
+
+    function openCheckinModal(room) {
+        if (room) {
+            document.getElementById('checkin_room_select').value = room;
         } else {
-             const select = document.getElementById('checkin_room_select');
-             if (select) select.value = "";
+             document.getElementById('checkin_room_select').value = '';
+        }
+        var modal = new bootstrap.Modal(document.getElementById('checkinModal'));
+        modal.show();
+    }
+    
+    // Add event listeners for capacity validation
+    document.addEventListener('DOMContentLoaded', function() {
+        const roomSelect = document.getElementById('checkin_room_select');
+        const adultsInput = document.querySelector('#checkinModal input[name="num_adults"]');
+        if (roomSelect) roomSelect.addEventListener('change', validateCapacity);
+        if (adultsInput) adultsInput.addEventListener('change', validateCapacity);
+    });
+    
+    function loadReservationData(id) {
+        if (!id) return;
+        const res = upcomingReservations.find(r => r.id == id);
+        if (!res) return;
+
+        // Populate Reservation ID
+        document.getElementById('checkin_reservation_id').value = res.id || '';
+
+        // Populate Name
+        const nameInput = document.querySelector('#checkinModal input[name="guest_name"]');
+        if (nameInput) nameInput.value = res.guest_name || '';
+        
+        // Populate Personal Info
+        const docInput = document.querySelector('#checkinModal input[name="doc_id"]');
+        if (docInput) docInput.value = res.doc_id || res.cpf || '';
+
+        const birthInput = document.querySelector('#checkinModal input[name="birth_date"]');
+        if (birthInput && res.birth_date) {
+             if (res.birth_date.includes('/')) {
+                 const parts = res.birth_date.split('/');
+                 if (parts.length === 3) birthInput.value = `${parts[2]}-${parts[1]}-${parts[0]}`;
+             } else {
+                 birthInput.value = res.birth_date;
+             }
+        }
+
+        const genderSelect = document.querySelector('#checkinModal select[name="gender"]');
+        if (genderSelect) genderSelect.value = res.gender || '';
+
+        const natInput = document.querySelector('#checkinModal input[name="nationality"]');
+        if (natInput) natInput.value = res.nationality || 'Brasileira';
+
+        const profInput = document.querySelector('#checkinModal input[name="profession"]');
+        if (profInput) profInput.value = res.profession || '';
+
+        const emailInput = document.querySelector('#checkinModal input[name="email"]');
+        if (emailInput) emailInput.value = res.email || '';
+
+        const phoneInput = document.querySelector('#checkinModal input[name="phone"]');
+        if (phoneInput) phoneInput.value = res.phone || '';
+
+        // Address
+        const zipInput = document.querySelector('#checkinModal input[name="zipcode"]');
+        if (zipInput) zipInput.value = res.zipcode || '';
+
+        const addrInput = document.querySelector('#checkinModal input[name="address"]');
+        if (addrInput) addrInput.value = res.address || '';
+
+        const cityInput = document.querySelector('#checkinModal input[name="city"]');
+        if (cityInput) cityInput.value = res.city || '';
+
+        const stateInput = document.querySelector('#checkinModal input[name="state"]');
+        if (stateInput) stateInput.value = res.state || '';
+        
+        // Populate Num Adults
+        const adultsInput = document.querySelector('#checkinModal input[name="num_adults"]');
+        if (adultsInput && res.num_adults) {
+            adultsInput.value = res.num_adults;
+        }
+
+        // Populate Room
+        if (res.room) {
+            const roomSelect = document.getElementById('checkin_room_select');
+            if (roomSelect) {
+                // Check if option exists (is not excluded or occupied)
+                let exists = false;
+                for (let i = 0; i < roomSelect.options.length; i++) {
+                    if (roomSelect.options[i].value === res.room) {
+                        exists = true;
+                        break;
+                    }
+                }
+                if (exists) {
+                    roomSelect.value = res.room;
+                } else {
+                    // Optional: Show warning or force add option?
+                    // For now, just don't select if not available
+                    console.warn(`Room ${res.room} not available for selection (occupied or excluded).`);
+                }
+            }
         }
         
-        var myModal = new bootstrap.Modal(document.getElementById('checkinModal'));
-        myModal.show();
-    };
+        // Populate Checkout
+        // res.checkout is DD/MM/YYYY
+        if (res.checkout) {
+            const parts = res.checkout.split('/');
+            if (parts.length === 3) {
+                // ISO YYYY-MM-DD
+                const isoDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                const checkoutInput = document.querySelector('#checkinModal input[name="checkout_date"]');
+                if (checkoutInput) checkoutInput.value = isoDate;
+            }
+        }
+        
+        // Trigger validation after loading
+        validateCapacity();
+    }
 
-    function openTransferModal(roomNum, guestName) {
-        document.getElementById('transfer_old_room').value = roomNum;
-        document.getElementById('transfer_old_room_display').value = roomNum;
+    function openTransferModal(room, guestName) {
+        document.getElementById('transfer_old_room').value = room;
+        document.getElementById('transfer_old_room_display').value = room;
         document.getElementById('transfer_guest_name').value = guestName;
         
-        var myModalEl = document.getElementById('transferModal');
-        var modal = new bootstrap.Modal(myModalEl);
+        var modal = new bootstrap.Modal(document.getElementById('transferModal'));
         modal.show();
     }
 
-    function openCheckinModal(roomNum) {
-        var modal = new bootstrap.Modal(document.getElementById('checkinModal'));
-        if (roomNum) {
-            var select = document.getElementById('checkin_room_select');
-            if (select) {
-                select.value = roomNum;
-            }
-        }
-        modal.show();
+    function openViewGuestModalFromElement(element) {
+        const reservationId = element.getAttribute('data-reservation-id') || '';
+        const guestName = element.getAttribute('data-guest-name') || '';
+        const roomNum = element.getAttribute('data-room-num') || '';
+        openViewGuestModal(reservationId, guestName, roomNum);
     }
 
-    function openEditGuestModal(roomNum, guestName) {
-        document.getElementById('edit_guest_room').value = roomNum;
-        document.getElementById('edit_guest_room_display').value = roomNum;
-        document.getElementById('edit_guest_old_name').value = guestName;
-        document.getElementById('edit_guest_new_name').value = guestName;
+    function openTransferModalFromElement(element) {
+        const roomNum = element.getAttribute('data-room-num') || '';
+        const guestName = element.getAttribute('data-guest-name') || '';
+        openTransferModal(roomNum, guestName);
+    }
+
+    function openEditGuestModalFromElement(element) {
+        const roomNum = element.getAttribute('data-room-num') || '';
+        const guestName = element.getAttribute('data-guest-name') || '';
+        openEditGuestModal(roomNum, guestName);
+    }
+
+    function openEditGuestModal(room, currentName) {
+        document.getElementById('edit_guest_room').value = room;
+        document.getElementById('edit_guest_room_display').value = room;
+        document.getElementById('edit_guest_old_name').value = currentName;
+        document.getElementById('edit_guest_new_name').value = currentName;
         
-        var myModalEl = document.getElementById('editGuestModal');
-        var modal = new bootstrap.Modal(myModalEl);
+        var modal = new bootstrap.Modal(document.getElementById('editGuestModal'));
         modal.show();
     }
 
-    function openInspectModal(roomNum) {
-        document.getElementById('inspect_room_number').value = roomNum;
-        document.getElementById('inspect_room_display').innerText = roomNum;
+    function openInspectModal(room) {
+        document.getElementById('inspect_room_number').value = room;
+        document.getElementById('inspect_room_display').textContent = room;
         
-        // Reset form state
+        // Reset form
+        document.getElementById('inspectionForm').reset();
         document.getElementById('result_passed').checked = true;
-        document.querySelectorAll('.item-check').forEach(c => c.checked = false);
         toggleObservation();
         
         var modal = new bootstrap.Modal(document.getElementById('inspectModal'));
@@ -1022,517 +822,763 @@
 
     function toggleObservation() {
         const isFailed = document.getElementById('result_failed').checked;
-        const obsContainer = document.getElementById('obs_container');
-        const obsInput = document.getElementById('inspection_obs');
-        const submitBtn = document.getElementById('submit_inspection_btn');
+        const container = document.getElementById('obs_container');
+        const obsField = document.getElementById('inspection_obs');
+        const btn = document.getElementById('submit_inspection_btn');
         
         if (isFailed) {
-            obsContainer.style.display = 'block';
-            obsInput.required = true;
-            submitBtn.classList.remove('btn-info');
-            submitBtn.classList.add('btn-danger');
-            submitBtn.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Reprovar Quarto';
+            container.style.display = 'block';
+            obsField.required = true;
+            btn.classList.remove('btn-info');
+            btn.classList.add('btn-danger');
+            btn.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Reportar Falha';
         } else {
-            obsContainer.style.display = 'none';
-            obsInput.required = false;
-            submitBtn.classList.remove('btn-danger');
-            submitBtn.classList.add('btn-info');
-            submitBtn.innerHTML = '<i class="bi bi-check-lg"></i> Confirmar e Liberar';
+            container.style.display = 'none';
+            obsField.required = false;
+            btn.classList.remove('btn-danger');
+            btn.classList.add('btn-info');
+            btn.innerHTML = '<i class="bi bi-save"></i> Salvar Inspeção';
         }
     }
+</script>
 
-    // --- Charge Edit Logic ---
-    let editOriginalItems = [];
-    let editAddedItems = [];
-    let editRemovedIndices = []; // Track indices for UI hiding
-    let editRemovedIds = [];     // Track IDs for backend
+<!-- Include other scripts (Guest View) -->
+<script src="{{ url_for('static', filename='js/guest_view.js') }}"></script>
 
-    function openEditModal(btn) {
-        const id = btn.getAttribute('data-id');
-        const total = btn.getAttribute('data-total');
-        const date = btn.getAttribute('data-date');
-        const status = btn.getAttribute('data-status');
-        const notes = btn.getAttribute('data-notes');
-        const items = JSON.parse(btn.getAttribute('data-items') || '[]');
-        
-        document.getElementById('editChargeId').value = id;
-        document.getElementById('editChargeDate').value = date;
-        document.getElementById('editChargeStatus').value = status;
-        document.getElementById('editChargeNotes').value = notes || '';
-        document.getElementById('editJustification').value = ''; // Reset justification
-        
-        // Initialize Items
-        editOriginalItems = items;
-        editAddedItems = [];
-        editRemovedIndices = [];
-        editRemovedIds = [];
-        
-        renderEditItems();
-        
-        var modal = new bootstrap.Modal(document.getElementById('editChargeModal'));
+<!-- Consumption Modal -->
+<div class="modal fade" id="consumptionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title"><i class="bi bi-receipt"></i> Consumo do Quarto <span id="consumptionRoomNum"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Origem</th>
+                                <th>Itens</th>
+                                <th class="text-end">Valor</th>
+                                <th class="text-end">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="consumptionTableBody">
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-info">
+                                <td colspan="4" class="text-end fw-bold">Total:</td>
+                                <td class="text-end fw-bold" id="consumptionTotal">R$ 0,00</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-dark" onclick="printCurrentRoomConsumption()">
+                    <i class="bi bi-printer"></i> Imprimir Consumo
+                </button>
+                <button type="button" class="btn btn-primary" onclick="openCloseRoomAccountModal()">
+                    <i class="bi bi-check2-circle"></i> Dar Baixa da Conta
+                </button>
+                <a href="{{ url_for('reception.reception_cashier') }}" class="btn btn-success">
+                    <i class="bi bi-cash-coin"></i> Ir para Caixa
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="consumptionPaymentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">Pagamento Individual</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('reception.reception_rooms') }}" id="consumptionPaymentForm">
+                <div class="modal-body">
+                    <input type="hidden" name="action" value="pay_charge">
+                    <input type="hidden" name="charge_id" id="consumptionPayChargeId">
+                    <input type="hidden" name="payment_data" id="consumptionPayData">
+                    <div class="mb-3">
+                        <label class="form-label">Valor da Conta</label>
+                        <input type="text" class="form-control" id="consumptionPayTotal" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Adicionar Pagamento</label>
+                        <div class="row g-2">
+                            <div class="col-7">
+                                <select class="form-select" id="consumptionPayMethod">
+                                    <option value="">Selecione...</option>
+                                    {% for method in payment_methods %}
+                                    <option value="{{ method.id }}" data-name="{{ method.name }}">{{ method.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-5">
+                                <input type="text" class="form-control" id="consumptionPayAmount">
+                            </div>
+                        </div>
+                        <div class="d-grid mt-2">
+                            <button type="button" class="btn btn-outline-success" onclick="addConsumptionPayment()">Adicionar Forma</button>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <ul class="list-group" id="consumptionPaymentList"></ul>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center border rounded p-2 bg-light">
+                        <span class="small text-muted">Falta pagar</span>
+                        <span class="fw-bold" id="consumptionPayRemaining">R$ 0,00</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Confirmar Pagamento</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="closeRoomAccountModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Dar Baixa da Conta do Quarto <span id="closeRoomNumber"></span></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Total Pendente</label>
+                    <input type="text" class="form-control" id="closeRoomTotal" readonly>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Adicionar Pagamento</label>
+                    <div class="row g-2">
+                        <div class="col-7">
+                            <select class="form-select" id="closeRoomPaymentMethod">
+                                <option value="">Selecione...</option>
+                                {% for method in payment_methods %}
+                                <option value="{{ method.id }}" data-name="{{ method.name }}">{{ method.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-5">
+                            <input type="text" class="form-control" id="closeRoomPaymentAmount">
+                        </div>
+                    </div>
+                    <div class="d-grid mt-2">
+                        <button type="button" class="btn btn-outline-primary" onclick="addCloseRoomPayment()">Adicionar Forma</button>
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <ul class="list-group" id="closeRoomPaymentList"></ul>
+                </div>
+                <div class="d-flex justify-content-between align-items-center border rounded p-2 bg-light mb-3">
+                    <span class="small text-muted">Falta pagar</span>
+                    <span class="fw-bold" id="closeRoomRemaining">R$ 0,00</span>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="closeRoomPrintReceipt">
+                    <label class="form-check-label" for="closeRoomPrintReceipt">Imprimir comprovante após baixa</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="submitCloseRoomAccount()">Confirmar Baixa</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editConsumptionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title">Editar Conta</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('reception.reception_edit_charge') }}">
+                <div class="modal-body">
+                    <input type="hidden" name="charge_id" id="editConsumptionChargeId">
+                    <input type="hidden" name="source_page" value="reception_rooms">
+                    <input type="hidden" name="items_to_add" id="editItemsToAddInput" value="[]">
+                    <input type="hidden" name="items_to_remove" id="editItemsToRemoveInput" value="[]">
+                    <input type="hidden" name="removal_justifications" id="editRemovalJustificationsInput" value="{}">
+                    <div class="mb-3">
+                        <label class="form-label">Data</label>
+                        <input type="text" class="form-control" name="new_date" id="editConsumptionDate" placeholder="dd/mm/aaaa">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Status</label>
+                        <select class="form-select" name="new_status" id="editConsumptionStatus">
+                            <option value="pending">Pendente</option>
+                            <option value="paid">Pago</option>
+                            <option value="cancelled">Cancelado</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Observações</label>
+                        <textarea class="form-control" name="new_notes" id="editConsumptionNotes" rows="3"></textarea>
+                    </div>
+                    <div class="border rounded p-2 mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <strong>Itens da Conta</strong>
+                            <span class="badge bg-primary" id="editConsumptionEstimatedTotal">R$ 0,00</span>
+                        </div>
+                        <div class="table-responsive mb-2">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Item</th>
+                                        <th class="text-end">Qtd</th>
+                                        <th class="text-end">Valor</th>
+                                        <th class="text-end">Ação</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="editConsumptionItemsList"></tbody>
+                            </table>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-7">
+                                <select class="form-select form-select-sm" id="editConsumptionProductSelect">
+                                    <option value="">Selecionar produto...</option>
+                                </select>
+                            </div>
+                            <div class="col-3">
+                                <input type="number" min="1" step="1" value="1" class="form-control form-control-sm" id="editConsumptionProductQty">
+                            </div>
+                            <div class="col-2 d-grid">
+                                <button type="button" class="btn btn-sm btn-outline-success" onclick="addEditConsumptionItem()">+</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="editConsumptionRemoveServiceFee" name="remove_service_fee">
+                        <label class="form-check-label" for="editConsumptionRemoveServiceFee">Retirar 10% de taxa de serviço</label>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Justificativa</label>
+                        <textarea class="form-control" name="justification" id="editConsumptionJustification" rows="3" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-warning">Salvar Edição</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteConsumptionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Apagar Conta Ausente</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('reception.reception_rooms') }}">
+                <div class="modal-body">
+                    <input type="hidden" name="action" value="cancel_charge">
+                    <input type="hidden" name="charge_id" id="deleteConsumptionChargeId">
+                    <p class="mb-2">Esta ação cancela o lançamento selecionado.</p>
+                    <p class="small text-muted mb-3">Conta: <span id="deleteConsumptionLabel"></span></p>
+                    <div class="mb-3">
+                        <label class="form-label">Justificativa</label>
+                        <textarea class="form-control" name="cancellation_reason" rows="3" required>Conta ausente na conferência da recepção.</textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="submit" class="btn btn-danger">Confirmar Cancelamento</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script id="consumptionConfigData" type="application/json">{{ {'grouped_charges': grouped_charges, 'occupancy': occupancy, 'printer_settings': printer_settings, 'can_delete_consumption': session.get('role') == 'admin', 'products': products} | tojson | safe }}</script>
+<script>
+    const consumptionConfigData = JSON.parse(document.getElementById('consumptionConfigData').textContent || '{}');
+    const groupedCharges = consumptionConfigData.grouped_charges || {};
+    const occupancyData = consumptionConfigData.occupancy || {};
+    const printerSettings = consumptionConfigData.printer_settings || {};
+    const canDeleteConsumption = Boolean(consumptionConfigData.can_delete_consumption);
+    const availableProducts = consumptionConfigData.products || [];
+    const defaultReceptionPrinter = printerSettings.reception_printer_id || printerSettings.default_reception_report_printer_id || '';
+    let currentConsumptionRoom = null;
+    let currentConsumptionTotal = 0;
+    let currentChargeTotal = 0;
+    let currentChargeId = null;
+    let individualPayments = [];
+    let closeRoomPayments = [];
+    let editBaseItems = [];
+    let editItemsToAdd = [];
+    let editItemsToRemove = [];
+    let editRemovalJustifications = {};
+
+    function formatMoney(value) {
+        const number = Number(value || 0);
+        return `R$ ${number.toFixed(2).replace('.', ',')}`;
+    }
+
+    function parseCurrency(value) {
+        const normalized = String(value || '').replace(/\./g, '').replace(',', '.').replace(/[^\d.-]/g, '');
+        const amount = parseFloat(normalized);
+        return Number.isNaN(amount) ? 0 : amount;
+    }
+
+    function escapeHtml(value) {
+        return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function getRoomGuestName(roomNum) {
+        return (occupancyData[roomNum] && occupancyData[roomNum].guest_name) ? occupancyData[roomNum].guest_name : 'Hóspede';
+    }
+
+    function getRoomChargeIds(roomNum) {
+        const charges = groupedCharges[roomNum] || [];
+        return charges.filter(c => c && c.id).map(c => c.id);
+    }
+
+    function findCharge(roomNum, chargeId) {
+        const charges = groupedCharges[roomNum] || [];
+        return charges.find(c => c.id === chargeId);
+    }
+
+    function openConsumptionPaymentModal(roomNum, chargeId, chargeTotal) {
+        currentChargeTotal = Number(chargeTotal || 0);
+        currentChargeId = chargeId;
+        individualPayments = [];
+        document.getElementById('consumptionPayChargeId').value = chargeId;
+        document.getElementById('consumptionPayData').value = '';
+        document.getElementById('consumptionPayMethod').value = '';
+        document.getElementById('consumptionPayTotal').value = `${formatMoney(currentChargeTotal)} - Quarto ${roomNum}`;
+        document.getElementById('consumptionPayAmount').value = currentChargeTotal.toFixed(2).replace('.', ',');
+        renderIndividualPayments();
+        const modal = new bootstrap.Modal(document.getElementById('consumptionPaymentModal'));
         modal.show();
     }
 
-    function addNewEditItem() {
-        const select = document.getElementById('newItemSelect');
-        const qtyInput = document.getElementById('newItemQty');
-        
-        const productId = select.value;
-        if (!productId) return;
-        
-        const option = select.options[select.selectedIndex];
-        const name = option.getAttribute('data-name');
-        const price = parseFloat(option.getAttribute('data-price'));
-        const qty = parseFloat(qtyInput.value);
-        
-        if (qty <= 0) {
-            alert("Quantidade inválida");
+    function openConsumptionEditModal(roomNum, chargeId) {
+        const charge = findCharge(roomNum, chargeId);
+        if (!charge) {
+            alert('Conta não encontrada para edição.');
             return;
         }
-        
-        editAddedItems.push({
-            id: productId, // Using product ID for new items (backend expects 'id' to find product def)
-            name: name,
-            qty: qty,
-            unit_price: price,
-            total: price * qty
-        });
-        
-        // Reset inputs
-        select.value = "";
-        qtyInput.value = "1";
-        
-        renderEditItems();
-    }
-
-    function removeEditItem(index, isOriginal) {
-        if (isOriginal) {
-            if (!editRemovedIndices.includes(index)) {
-                editRemovedIndices.push(index);
-                const item = editOriginalItems[index];
-                if (item && item.id) {
-                    editRemovedIds.push(item.id);
-                }
-            }
-        } else {
-            // Remove from added items array
-            editAddedItems.splice(index, 1);
-        }
-        renderEditItems();
-    }
-
-    function renderEditItems() {
-        const tbody = document.getElementById('editItemsList');
-        tbody.innerHTML = '';
-        
-        let grandTotal = 0;
-        
-        // Render Original Items
-        editOriginalItems.forEach((item, index) => {
-            if (editRemovedIndices.includes(index)) return; // Skip removed
-            
-            // Calculate total safely
-            let total = 0;
-            if (item.total) {
-                total = parseFloat(item.total);
-            } else if (item.unit_price && item.qty) {
-                total = parseFloat(item.unit_price) * parseFloat(item.qty);
-            }
-            
-            grandTotal += total;
-            
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><span class="badge bg-secondary me-1">Orig</span> ${item.name || item.description || 'Item'}</td>
-                <td class="text-end">${item.qty}</td>
-                <td class="text-end">R$ ${total.toFixed(2)}</td>
-                <td class="text-center">
-                    <button type="button" class="btn btn-xs btn-outline-danger" onclick="removeEditItem(${index}, true)">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
-        
-        // Render Added Items
-        editAddedItems.forEach((item, index) => {
-            const total = item.total;
-            grandTotal += total;
-            
-            const tr = document.createElement('tr');
-            tr.classList.add('table-success'); // Highlight new items
-            tr.innerHTML = `
-                <td><span class="badge bg-success me-1">Novo</span> ${item.name}</td>
-                <td class="text-end">${item.qty}</td>
-                <td class="text-end">R$ ${total.toFixed(2)}</td>
-                <td class="text-center">
-                    <button type="button" class="btn btn-xs btn-outline-danger" onclick="removeEditItem(${index}, false)">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
-        
-        // Update Total
-        const removeService = document.getElementById('removeServiceFee').checked;
-        if (removeService) {
-            // grandTotal = grandTotal / 1.1; // Don't adjust display, just total
-        }
-        
-        document.getElementById('editGrandTotal').textContent = 'R$ ' + grandTotal.toFixed(2);
-        
-        // Update Hidden Inputs
-        document.getElementById('itemsToAddInput').value = JSON.stringify(editAddedItems);
-        document.getElementById('itemsToRemoveInput').value = JSON.stringify(editRemovedIds);
-    }
-    
-    function prepareEditSubmit() {
-        // Ensure hidden inputs are ready (already updated in render)
-        return true;
-    }
-
-    // --- Close Account Logic ---
-    let closeAccountPayments = [];
-    let closeAccountTotalVal = 0;
-    
-    function openCloseAccountModal(roomNum, total) {
-        document.getElementById('closeAccountRoomNum').textContent = roomNum;
-        closeAccountTotalVal = parseFloat(total);
-        document.getElementById('closeAccountTotal').textContent = 'R$ ' + closeAccountTotalVal.toFixed(2);
-        
-        // Reset
-        closeAccountPayments = [];
-        renderPayments();
-        
-        var modal = new bootstrap.Modal(document.getElementById('closeAccountModal'));
+        document.getElementById('editConsumptionChargeId').value = charge.id || '';
+        document.getElementById('editConsumptionDate').value = charge.date || '';
+        document.getElementById('editConsumptionStatus').value = charge.status || 'pending';
+        document.getElementById('editConsumptionNotes').value = charge.notes || '';
+        document.getElementById('editConsumptionJustification').value = '';
+        document.getElementById('editConsumptionProductSelect').value = '';
+        document.getElementById('editConsumptionProductQty').value = '1';
+        document.getElementById('editConsumptionRemoveServiceFee').checked = Boolean(charge.service_fee_removed);
+        editBaseItems = Array.isArray(charge.items) ? JSON.parse(JSON.stringify(charge.items)) : [];
+        editItemsToAdd = [];
+        editItemsToRemove = [];
+        editRemovalJustifications = {};
+        renderEditConsumptionItems();
+        const modal = new bootstrap.Modal(document.getElementById('editConsumptionModal'));
         modal.show();
     }
-    
-    function addPayment() {
-        const select = document.getElementById('newPaymentMethod');
-        const amountInput = document.getElementById('newPaymentAmount');
-        
-        const methodId = select.value;
-        const methodName = select.options[select.selectedIndex].text;
-        
-        // Parse currency input (pt-BR format or simple float)
-        let amountStr = amountInput.value.replace('R$', '').trim();
-        if (amountStr.includes(',') && !amountStr.includes('.')) {
-             amountStr = amountStr.replace('.', '').replace(',', '.'); // 1.000,00 -> 1000.00
-        } else if (amountStr.includes(',') && amountStr.includes('.')) {
-             amountStr = amountStr.replace('.', '').replace(',', '.');
-        }
-        
-        const amount = parseFloat(amountStr);
-        
-        if (!methodId || isNaN(amount) || amount <= 0) {
-            alert("Selecione um método e informe um valor válido.");
+
+    function openConsumptionDeleteModal(chargeId, dateLabel, totalLabel) {
+        document.getElementById('deleteConsumptionChargeId').value = chargeId;
+        document.getElementById('deleteConsumptionLabel').textContent = `${dateLabel} - ${totalLabel}`;
+        const modal = new bootstrap.Modal(document.getElementById('deleteConsumptionModal'));
+        modal.show();
+    }
+
+    function openCloseRoomAccountModal() {
+        if (!currentConsumptionRoom) {
             return;
         }
-        
-        closeAccountPayments.push({
-            method_id: methodId,
-            method_name: methodName,
-            amount: amount
-        });
-        
-        amountInput.value = "";
-        renderPayments();
+        closeRoomPayments = [];
+        document.getElementById('closeRoomNumber').textContent = currentConsumptionRoom;
+        document.getElementById('closeRoomTotal').value = formatMoney(currentConsumptionTotal);
+        document.getElementById('closeRoomPaymentMethod').value = '';
+        document.getElementById('closeRoomPaymentAmount').value = currentConsumptionTotal.toFixed(2).replace('.', ',');
+        document.getElementById('closeRoomPrintReceipt').checked = false;
+        renderCloseRoomPayments();
+        const modal = new bootstrap.Modal(document.getElementById('closeRoomAccountModal'));
+        modal.show();
     }
-    
-    function renderPayments() {
-        const list = document.getElementById('paymentList');
-        const totalPaidEl = document.getElementById('totalPaidDisplay');
-        const remainingEl = document.getElementById('remainingDisplay');
-        const msg = document.getElementById('noPaymentMsg');
-        
+
+    function renderIndividualPayments() {
+        const list = document.getElementById('consumptionPaymentList');
+        const remainingEl = document.getElementById('consumptionPayRemaining');
         list.innerHTML = '';
-        let totalPaid = 0;
-        
-        closeAccountPayments.forEach((p, index) => {
-            totalPaid += p.amount;
-            const div = document.createElement('div');
-            div.className = 'd-flex justify-content-between align-items-center mb-1 small';
-            div.innerHTML = `
-                <span>${p.method_name}</span>
-                <span>R$ ${p.amount.toFixed(2)} <i class="bi bi-x text-danger cursor-pointer ms-2" onclick="removePayment(${index})"></i></span>
-            `;
-            list.appendChild(div);
+        let total = 0;
+        individualPayments.forEach((p, index) => {
+            total += Number(p.amount || 0);
+            const li = document.createElement('li');
+            li.className = 'list-group-item d-flex justify-content-between align-items-center';
+            li.innerHTML = `<span>${escapeHtml(p.name)} - ${formatMoney(p.amount)}</span><button type="button" class="btn btn-sm btn-outline-danger">Remover</button>`;
+            li.querySelector('button').addEventListener('click', () => {
+                individualPayments.splice(index, 1);
+                renderIndividualPayments();
+            });
+            list.appendChild(li);
         });
-        
-        if (closeAccountPayments.length === 0) {
-            list.appendChild(msg);
-            msg.style.display = 'block';
-        } else {
-            msg.style.display = 'none'; // Clone doesn't work well with display toggle if we append.
-            // Actually, recreating the list removes the msg element if not re-added.
-            // So just adding msg if empty is enough.
-        }
-        
-        totalPaidEl.textContent = 'R$ ' + totalPaid.toFixed(2);
-        const remaining = closeAccountTotalVal - totalPaid;
-        remainingEl.textContent = 'R$ ' + Math.max(0, remaining).toFixed(2);
-        
-        if (remaining <= 0.01) {
-            remainingEl.classList.remove('text-danger');
-            remainingEl.classList.add('text-success');
-        } else {
-            remainingEl.classList.remove('text-success');
-            remainingEl.classList.add('text-danger');
-        }
+        const remaining = currentChargeTotal - total;
+        remainingEl.textContent = formatMoney(remaining);
+        document.getElementById('consumptionPayData').value = JSON.stringify(individualPayments.map(p => ({ id: p.id, name: p.name, amount: Number(p.amount) })));
     }
-    
-    function removePayment(index) {
-        closeAccountPayments.splice(index, 1);
-        renderPayments();
-    }
-    
-    function submitCloseAccount() {
-        const roomNum = document.getElementById('closeAccountRoomNum').textContent;
-        const printReceipt = document.getElementById('closeAccountPrintReceipt').checked;
-        
-        // Validate total
-        let totalPaid = closeAccountPayments.reduce((acc, p) => acc + p.amount, 0);
-        if (Math.abs(totalPaid - closeAccountTotalVal) > 0.05) { // 5 cent tolerance
-            if (!confirm("O valor pago (R$ " + totalPaid.toFixed(2) + ") é diferente do total (R$ " + closeAccountTotalVal.toFixed(2) + "). Deseja continuar mesmo assim?")) {
-                return;
-            }
-        }
-        
-        if (closeAccountPayments.length === 0 && closeAccountTotalVal > 0) {
-             alert("Adicione pelo menos um pagamento.");
-             return;
-        }
 
-        // Show Loading
-        var modalEl = document.getElementById('closeAccountModal');
-        var modal = bootstrap.Modal.getInstance(modalEl);
-        modal.hide();
-        
-        var loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
-        loadingModal.show();
-        
-        // Construct Payload
+    function addConsumptionPayment() {
+        const methodSelect = document.getElementById('consumptionPayMethod');
+        const methodId = methodSelect.value;
+        const option = methodSelect.options[methodSelect.selectedIndex];
+        const methodName = option ? (option.dataset.name || option.textContent) : '';
+        const amount = parseCurrency(document.getElementById('consumptionPayAmount').value);
+        if (!methodId || !methodName) {
+            alert('Selecione a forma de pagamento.');
+            return;
+        }
+        if (amount <= 0) {
+            alert('Informe um valor válido.');
+            return;
+        }
+        individualPayments.push({ id: methodId, name: methodName, amount });
+        const total = individualPayments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
+        const remaining = Math.max(currentChargeTotal - total, 0);
+        document.getElementById('consumptionPayAmount').value = remaining.toFixed(2).replace('.', ',');
+        methodSelect.value = '';
+        renderIndividualPayments();
+    }
+
+    function renderCloseRoomPayments() {
+        const list = document.getElementById('closeRoomPaymentList');
+        const remainingEl = document.getElementById('closeRoomRemaining');
+        list.innerHTML = '';
+        let total = 0;
+        closeRoomPayments.forEach((p, index) => {
+            total += Number(p.amount || 0);
+            const li = document.createElement('li');
+            li.className = 'list-group-item d-flex justify-content-between align-items-center';
+            li.innerHTML = `<span>${escapeHtml(p.name)} - ${formatMoney(p.amount)}</span><button type="button" class="btn btn-sm btn-outline-danger">Remover</button>`;
+            li.querySelector('button').addEventListener('click', () => {
+                closeRoomPayments.splice(index, 1);
+                renderCloseRoomPayments();
+            });
+            list.appendChild(li);
+        });
+        const remaining = currentConsumptionTotal - total;
+        remainingEl.textContent = formatMoney(remaining);
+    }
+
+    function addCloseRoomPayment() {
+        const methodSelect = document.getElementById('closeRoomPaymentMethod');
+        const methodId = methodSelect.value;
+        const option = methodSelect.options[methodSelect.selectedIndex];
+        const methodName = option ? (option.dataset.name || option.textContent) : '';
+        const amount = parseCurrency(document.getElementById('closeRoomPaymentAmount').value);
+        if (!methodId || !methodName) {
+            alert('Selecione a forma de pagamento.');
+            return;
+        }
+        if (amount <= 0) {
+            alert('Informe um valor válido.');
+            return;
+        }
+        closeRoomPayments.push({ method_id: methodId, method_name: methodName, amount });
+        const total = closeRoomPayments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
+        const remaining = Math.max(currentConsumptionTotal - total, 0);
+        document.getElementById('closeRoomPaymentAmount').value = remaining.toFixed(2).replace('.', ',');
+        methodSelect.value = '';
+        renderCloseRoomPayments();
+    }
+
+    function openPreviewWindow(previewText, title) {
+        const win = window.open('', '_blank');
+        if (!win) {
+            alert('Não foi possível abrir a pré-visualização de impressão.');
+            return;
+        }
+        const safeText = escapeHtml(previewText);
+        const safeTitle = escapeHtml(title);
+        win.document.write(`<html><head><title>${safeTitle}</title></head><body><pre>${safeText}</pre></body></html>`);
+        win.document.close();
+        win.focus();
+        win.print();
+    }
+
+    function previewConsumption(roomNum, selectedIds) {
         const payload = {
             room_number: roomNum,
-            payments: closeAccountPayments,
-            print_receipt: printReceipt
+            guest_name: getRoomGuestName(roomNum),
+            selected_charge_ids: selectedIds
         };
-        
-        fetch('/reception/close_account/' + roomNum, {
+        fetch('/reception/preview_individual_bills', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         })
-        .then(response => response.json())
+        .then(res => res.json())
         .then(data => {
-            loadingModal.hide();
+            if (!data.success) {
+                alert(data.message || 'Não foi possível gerar a prévia de impressão.');
+                return;
+            }
+            openPreviewWindow(data.preview_text, `Consumo Quarto ${roomNum}`);
+        })
+        .catch(() => alert('Falha ao gerar prévia de impressão.'));
+    }
+
+    function printCurrentRoomConsumption() {
+        if (!currentConsumptionRoom) {
+            return;
+        }
+        const selectedIds = getRoomChargeIds(currentConsumptionRoom);
+        if (selectedIds.length === 0) {
+            alert('Nenhuma conta pendente para impressão.');
+            return;
+        }
+
+        if (!defaultReceptionPrinter) {
+            previewConsumption(currentConsumptionRoom, selectedIds);
+            return;
+        }
+
+        fetch('/reception/print_individual_bills', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                room_number: currentConsumptionRoom,
+                guest_name: getRoomGuestName(currentConsumptionRoom),
+                printer_id: defaultReceptionPrinter,
+                selected_charge_ids: selectedIds
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
             if (data.success) {
-                alert("Conta fechada com sucesso!");
-                location.reload();
-            } else {
-                alert("Erro ao fechar conta: " + (data.error || "Desconhecido"));
-                modal.show(); // Reopen on error
+                alert(data.message || 'Consumo enviado para impressão.');
+                return;
             }
+            previewConsumption(currentConsumptionRoom, selectedIds);
         })
-        .catch(err => {
-            loadingModal.hide();
-            console.error(err);
-            alert("Erro de comunicação.");
-            modal.show();
-        });
+        .catch(() => previewConsumption(currentConsumptionRoom, selectedIds));
     }
 
-    function formatCurrency(input) {
-        let value = input.value.replace(/\D/g, '');
-        value = (value / 100).toFixed(2) + '';
-        value = value.replace(".", ",");
-        value = value.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
-        input.value = "R$ " + value;
-    }
-
-    // --- Single Payment Logic ---
-    let singlePaymentPayments = [];
-    let singlePaymentTotalVal = 0;
-    
-    function openPaymentModal(chargeId, roomNum, total) {
-        document.getElementById('paymentChargeId').value = chargeId;
-        document.getElementById('paymentRoomNum').value = roomNum;
-        singlePaymentTotalVal = parseFloat(total);
-        document.getElementById('paymentModalTotal').textContent = singlePaymentTotalVal.toFixed(2);
-        
-        // Reset
-        singlePaymentPayments = [];
-        renderPaymentsSingle();
-        
-        var modal = new bootstrap.Modal(document.getElementById('paymentModal'));
-        modal.show();
-    }
-
-    function addPaymentSingle() {
-        const select = document.getElementById('newPaymentMethodSingle');
-        const amountInput = document.getElementById('newPaymentAmountSingle');
-        
-        const methodId = select.value;
-        const methodName = select.options[select.selectedIndex].text;
-        
-        let amountStr = amountInput.value.replace('R$', '').trim();
-        if (amountStr.includes(',') && !amountStr.includes('.')) {
-             amountStr = amountStr.replace('.', '').replace(',', '.');
-        } else if (amountStr.includes(',') && amountStr.includes('.')) {
-             amountStr = amountStr.replace('.', '').replace(',', '.');
-        }
-        
-        const amount = parseFloat(amountStr);
-        
-        if (!methodId || isNaN(amount) || amount <= 0) {
-            alert("Selecione um método e informe um valor válido.");
+    function submitCloseRoomAccount() {
+        if (!currentConsumptionRoom) {
             return;
         }
-        
-        singlePaymentPayments.push({
-            id: methodId, // Backend expects 'id' in payment_data
-            name: methodName,
-            amount: amount
-        });
-        
-        amountInput.value = "";
-        renderPaymentsSingle();
-    }
-    
-    function renderPaymentsSingle() {
-        const list = document.getElementById('paymentListSingle');
-        const totalPaidEl = document.getElementById('totalPaidDisplaySingle');
-        const remainingEl = document.getElementById('remainingDisplaySingle');
-        const msg = document.getElementById('noPaymentMsgSingle');
-        
-        list.innerHTML = '';
-        let totalPaid = 0;
-        
-        singlePaymentPayments.forEach((p, index) => {
-            totalPaid += p.amount;
-            const div = document.createElement('div');
-            div.className = 'd-flex justify-content-between align-items-center mb-1 small';
-            div.innerHTML = `
-                <span>${p.name}</span>
-                <span>R$ ${p.amount.toFixed(2)} <i class="bi bi-x text-danger cursor-pointer ms-2" onclick="removePaymentSingle(${index})"></i></span>
-            `;
-            list.appendChild(div);
-        });
-        
-        if (singlePaymentPayments.length === 0) {
-            list.appendChild(msg);
-            msg.style.display = 'block';
-        } else {
-            msg.style.display = 'none';
+        const printReceipt = document.getElementById('closeRoomPrintReceipt').checked;
+        const totalPaid = closeRoomPayments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
+        if (!closeRoomPayments.length) {
+            alert('Adicione pelo menos uma forma de pagamento.');
+            return;
         }
-        
-        totalPaidEl.textContent = 'R$ ' + totalPaid.toFixed(2);
-        const remaining = singlePaymentTotalVal - totalPaid;
-        remainingEl.textContent = 'R$ ' + Math.max(0, remaining).toFixed(2);
-        
-        if (remaining <= 0.01) {
-            remainingEl.classList.remove('text-danger');
-            remainingEl.classList.add('text-success');
-        } else {
-            remainingEl.classList.remove('text-success');
-            remainingEl.classList.add('text-danger');
+        if (Math.abs(totalPaid - currentConsumptionTotal) > 0.05) {
+            alert(`A soma dos pagamentos deve ser igual ao total (${formatMoney(currentConsumptionTotal)}).`);
+            return;
         }
-    }
-    
-    function removePaymentSingle(index) {
-        singlePaymentPayments.splice(index, 1);
-        renderPaymentsSingle();
-    }
-    
-    function submitSinglePayment() {
-        const chargeId = document.getElementById('paymentChargeId').value;
-        const roomNum = document.getElementById('paymentRoomNum').value;
-        
-        // Validate total
-        let totalPaid = singlePaymentPayments.reduce((acc, p) => acc + p.amount, 0);
-        if (Math.abs(totalPaid - singlePaymentTotalVal) > 0.05) {
-             alert("O valor pago deve ser igual ao total do item.");
-             return;
-        }
-        
-        // Construct Payload for /reception/pay_charge/<charge_id>
-        const payload = {
-            room_num: roomNum,
-            payments: singlePaymentPayments
-        };
-        
-        fetch('/reception/pay_charge/' + chargeId, {
+
+        fetch(`/reception/close_account/${encodeURIComponent(currentConsumptionRoom)}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+            body: JSON.stringify({
+                payments: closeRoomPayments,
+                print_receipt: printReceipt
+            })
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success !== false) { // backend might return redirect or success:true
-                 // If redirect, it might not be JSON, but here we expect JSON or success
-                 alert("Pagamento realizado com sucesso!");
-                 location.reload();
-            } else {
-                alert("Erro ao pagar: " + (data.message || "Desconhecido"));
+        .then(res => res.json().then(data => ({ status: res.status, data })))
+        .then(({ status, data }) => {
+            if (status >= 200 && status < 300 && data.success) {
+                alert(data.message || 'Conta baixada com sucesso.');
+                window.location.reload();
+                return;
             }
+            alert(data.error || data.message || 'Falha ao dar baixa na conta.');
         })
-        .catch(err => {
-            console.error(err);
-            alert("Erro de comunicação.");
-        });
+        .catch(() => alert('Erro de comunicação ao dar baixa na conta.'));
     }
 
-    // --- Cancellation Logic ---
-    function openCancelModal(chargeId, guestName, date, total) {
-        document.getElementById('cancelChargeId').value = chargeId;
-        document.getElementById('cancelGuestName').textContent = guestName;
-        document.getElementById('cancelDate').textContent = date;
-        document.getElementById('cancelTotal').textContent = total;
-        document.getElementById('cancelJustification').value = '';
-        
-        var modal = new bootstrap.Modal(document.getElementById('cancelConsumptionModal'));
+    function openConsumptionModal(roomNum) {
+        const charges = groupedCharges[roomNum] || [];
+        const tbody = document.getElementById('consumptionTableBody');
+        const totalEl = document.getElementById('consumptionTotal');
+        const roomNumEl = document.getElementById('consumptionRoomNum');
+        currentConsumptionRoom = roomNum;
+        roomNumEl.textContent = roomNum;
+        tbody.innerHTML = '';
+        let total = 0;
+
+        if (charges.length === 0) {
+            currentConsumptionTotal = 0;
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Nenhum consumo registrado.</td></tr>';
+            totalEl.textContent = formatMoney(0);
+            const modal = new bootstrap.Modal(document.getElementById('consumptionModal'));
+            modal.show();
+            return;
+        }
+
+        charges.forEach(charge => {
+            const chargeTotal = parseFloat(charge.total || 0);
+            total += chargeTotal;
+            
+            let itemsHtml = '';
+            const items = charge.items || [];
+            if (items.length > 0) {
+                itemsHtml = items.map(item => `<div><small>${item.qty}x ${item.name}</small></div>`).join('');
+            } else {
+                itemsHtml = '<span class="text-muted small">Sem itens detalhados</span>';
+            }
+            
+            const date = charge.date || '-';
+            let sourceBadge = '<span class="badge bg-secondary">Restaurante</span>';
+            if (charge.source === 'minibar' || (charge.items && charge.items.some(i => i.category === 'Frigobar'))) {
+                sourceBadge = '<span class="badge bg-info text-dark">Frigobar</span>';
+            }
+            const actionButtons = [];
+            actionButtons.push(`<button type="button" class="btn btn-sm btn-success me-1" onclick="openConsumptionPaymentModal('${roomNum}', '${charge.id}', ${chargeTotal})">Pagar</button>`);
+            actionButtons.push(`<button type="button" class="btn btn-sm btn-secondary me-1" onclick="openConsumptionEditModal('${roomNum}', '${charge.id}')">Editar</button>`);
+            if (charge.table_id) {
+                actionButtons.push(`<a class="btn btn-sm btn-outline-primary me-1" href="/restaurant/table/${encodeURIComponent(charge.table_id)}?mode=reception">Lançamento</a>`);
+            }
+            actionButtons.push(`<button type="button" class="btn btn-sm btn-dark me-1" onclick="previewConsumption('${roomNum}', ['${charge.id}'])">Imprimir</button>`);
+            if (canDeleteConsumption) {
+                actionButtons.push(`<button type="button" class="btn btn-sm btn-danger" onclick="openConsumptionDeleteModal('${charge.id}', '${escapeHtml(date)}', '${chargeTotal.toFixed(2)}')">Apagar</button>`);
+            }
+            const row = `
+                <tr>
+                    <td>${escapeHtml(date)}</td>
+                    <td>${sourceBadge}</td>
+                    <td>${itemsHtml}</td>
+                    <td class="text-end fw-bold">R$ ${chargeTotal.toFixed(2)}</td>
+                    <td class="text-end">${actionButtons.join('')}</td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        });
+        currentConsumptionTotal = total;
+        totalEl.textContent = formatMoney(total);
+        const modal = new bootstrap.Modal(document.getElementById('consumptionModal'));
         modal.show();
     }
 
-    function submitCancelConsumption() {
-        const chargeId = document.getElementById('cancelChargeId').value;
-        const justification = document.getElementById('cancelJustification').value;
-        
-        if (!justification) {
-            alert("Justificativa é obrigatória.");
+    function initializeEditProducts() {
+        const select = document.getElementById('editConsumptionProductSelect');
+        if (!select) {
             return;
         }
-        
-        // Use edit endpoint with cancelled status
-        const formData = new FormData();
-        formData.append('charge_id', chargeId);
-        formData.append('new_status', 'cancelled');
-        formData.append('justification', justification);
-        formData.append('source_page', 'reception_rooms');
-        
-        fetch('/reception/charge/edit', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => {
-            if (response.ok) {
-                alert("Consumo cancelado com sucesso.");
-                location.reload();
-            } else {
-                alert("Erro ao cancelar consumo.");
+        const options = ['<option value="">Selecionar produto...</option>'];
+        availableProducts.forEach(p => {
+            const id = String(p.id || '');
+            const name = String(p.name || 'Produto');
+            const price = Number(p.price || 0);
+            options.push(`<option value="${escapeHtml(id)}" data-name="${escapeHtml(name)}" data-price="${price}">${escapeHtml(name)} - ${formatMoney(price)}</option>`);
+        });
+        select.innerHTML = options.join('');
+    }
+
+    function renderEditConsumptionItems() {
+        const tbody = document.getElementById('editConsumptionItemsList');
+        if (!tbody) {
+            return;
+        }
+        tbody.innerHTML = '';
+        let subtotal = 0;
+        editBaseItems.forEach((item, idx) => {
+            const itemKey = item.id || `__idx_${idx}`;
+            if (editItemsToRemove.includes(itemKey)) {
+                return;
             }
-        })
-        .catch(err => console.error(err));
+            const qty = Number(item.qty || 1);
+            const price = Number(item.price || 0);
+            const line = qty * price;
+            subtotal += line;
+            const actionHtml = `<button type="button" class="btn btn-sm btn-outline-danger" onclick="removeExistingEditItem('${itemKey}')">Remover</button>`;
+            tbody.innerHTML += `<tr><td>${escapeHtml(item.name || 'Item')}</td><td class="text-end">${qty}</td><td class="text-end">${formatMoney(line)}</td><td class="text-end">${actionHtml}</td></tr>`;
+        });
+        editItemsToAdd.forEach((item, idx) => {
+            const qty = Number(item.qty || 1);
+            const price = Number(item.price || 0);
+            const line = qty * price;
+            subtotal += line;
+            tbody.innerHTML += `<tr><td>${escapeHtml(item.name || 'Item')} <span class="badge bg-success ms-1">Novo</span></td><td class="text-end">${qty}</td><td class="text-end">${formatMoney(line)}</td><td class="text-end"><button type="button" class="btn btn-sm btn-outline-danger" onclick="removeNewEditItem(${idx})">Remover</button></td></tr>`;
+        });
+        if (!tbody.innerHTML) {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Sem itens na conta.</td></tr>';
+        }
+        const feeRemoved = document.getElementById('editConsumptionRemoveServiceFee').checked;
+        const fee = feeRemoved ? 0 : subtotal * 0.10;
+        document.getElementById('editConsumptionEstimatedTotal').textContent = formatMoney(subtotal + fee);
+        document.getElementById('editItemsToAddInput').value = JSON.stringify(editItemsToAdd.map(i => ({ id: i.id, qty: i.qty })));
+        document.getElementById('editItemsToRemoveInput').value = JSON.stringify(editItemsToRemove);
+        document.getElementById('editRemovalJustificationsInput').value = JSON.stringify(editRemovalJustifications);
     }
 
-    // --- Print Logic ---
-    function printReport() {
-        window.print();
+    function addEditConsumptionItem() {
+        const select = document.getElementById('editConsumptionProductSelect');
+        const productId = select.value;
+        const qty = Number(document.getElementById('editConsumptionProductQty').value || 0);
+        if (!productId) {
+            alert('Selecione um produto.');
+            return;
+        }
+        if (qty <= 0) {
+            alert('Quantidade inválida.');
+            return;
+        }
+        const option = select.options[select.selectedIndex];
+        const name = option.dataset.name || option.textContent;
+        const price = Number(option.dataset.price || 0);
+        editItemsToAdd.push({ id: productId, name, price, qty });
+        select.value = '';
+        document.getElementById('editConsumptionProductQty').value = '1';
+        renderEditConsumptionItems();
     }
 
+    function removeExistingEditItem(itemId) {
+        if (!editItemsToRemove.includes(itemId)) {
+            editItemsToRemove.push(itemId);
+            editRemovalJustifications[itemId] = 'Removido na edição da conta pela recepção.';
+        }
+        renderEditConsumptionItems();
+    }
 
+    function removeNewEditItem(index) {
+        editItemsToAdd.splice(index, 1);
+        renderEditConsumptionItems();
+    }
+
+    window.removeExistingEditItem = removeExistingEditItem;
+    window.removeNewEditItem = removeNewEditItem;
+    window.addEditConsumptionItem = addEditConsumptionItem;
+    window.addConsumptionPayment = addConsumptionPayment;
+    window.addCloseRoomPayment = addCloseRoomPayment;
+
+    document.getElementById('consumptionPaymentForm').addEventListener('submit', function(event) {
+        const totalPaid = individualPayments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
+        if (!individualPayments.length) {
+            event.preventDefault();
+            alert('Adicione pelo menos uma forma de pagamento.');
+            return;
+        }
+        if (Math.abs(totalPaid - currentChargeTotal) > 0.05) {
+            event.preventDefault();
+            alert(`O pagamento individual deve ser igual ao valor da conta (${formatMoney(currentChargeTotal)}).`);
+            return;
+        }
+        document.getElementById('consumptionPayData').value = JSON.stringify(individualPayments.map(p => ({ id: p.id, name: p.name, amount: Number(p.amount) })));
+    });
+
+    document.getElementById('editConsumptionRemoveServiceFee').addEventListener('change', renderEditConsumptionItems);
+    initializeEditProducts();
 </script>
+
 {% endblock %}

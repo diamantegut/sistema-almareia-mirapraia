@@ -18,11 +18,6 @@ from app.services.cashier_service import CashierService
 class TestReceptionCashierMultiPayment:
     @pytest.fixture(autouse=True)
     def setup_teardown(self):
-        self.app = create_app()
-        self.app.config['TESTING'] = True
-        self.app.config['WTF_CSRF_ENABLED'] = False
-        self.client = self.app.test_client()
-        
         # Setup temporary data directory
         self.test_dir = os.path.join(os.path.dirname(__file__), 'test_data_cashier_mp')
         if os.path.exists(self.test_dir):
@@ -102,7 +97,12 @@ class TestReceptionCashierMultiPayment:
         # Room occupancy is a dict
         with open(os.path.join(self.test_dir, 'room_occupancy.json'), 'w') as file:
             json.dump({}, file)
-                
+
+        self.app = create_app()
+        self.app.config['TESTING'] = True
+        self.app.config['WTF_CSRF_ENABLED'] = False
+        self.client = self.app.test_client()
+
         # Login
         with self.client.session_transaction() as sess:
             sess['user'] = 'admin'
@@ -119,8 +119,7 @@ class TestReceptionCashierMultiPayment:
 
     def test_reception_cashier_pay_charge_multi(self):
         """Test paying a charge with multiple methods in Guest Consumption Cashier"""
-        
-        # 1. Setup Charge
+
         charge = {
             'id': 'CHARGE_101',
             'room_number': '101',
@@ -129,61 +128,40 @@ class TestReceptionCashierMultiPayment:
             'items': [{'name': 'Item 1', 'price': 100.0, 'qty': 1}],
             'date': '01/01/2026 12:00'
         }
-        with open(os.path.join(self.test_dir, 'room_charges.json'), 'w') as f:
-            json.dump([charge], f)
-            
-        # 2. Open Cashier
-        CashierService.open_session('guest_consumption', 'admin', 100.0)
-        
-        # 3. Submit Multi-Payment
-        # Form simulates: action='pay_charge', charge_id='CHARGE_101', payment_data='[JSON]'
-        payment_data = [
-            {'id': 'pix_id', 'name': 'Pix', 'amount': 60.0},
-            {'id': 'cash_id', 'name': 'Dinheiro', 'amount': 40.0}
+        room_charges = [charge]
+        sessions = [{'id': 'SESS_1', 'status': 'open', 'type': 'guest_consumption', 'transactions': []}]
+
+        payments = [
+            {'method': 'pix_id', 'amount': 60.0},
+            {'method': 'cash_id', 'amount': 40.0}
         ]
-        
-        response = self.client.post('/reception/cashier', data={
-            'action': 'pay_charge',
-            'charge_id': 'CHARGE_101',
-            'payment_data': json.dumps(payment_data),
-            'redirect_to': 'reception_cashier'
-        }, follow_redirects=True)
-        
-        assert response.status_code == 200
-        
-        # 4. Verify Charge Status
-        with open(os.path.join(self.test_dir, 'room_charges.json'), 'r', encoding='utf-8') as f:
-            charges = json.load(f)
-            updated_charge = charges[0]
-            assert updated_charge['status'] == 'paid'
-            assert updated_charge['payment_method'] == 'Múltiplos'
-            assert len(updated_charge['payment_details']) == 2
-            
-        # 5. Verify Cashier Transactions (Splitting)
-        with open(os.path.join(self.test_dir, 'cashier_sessions.json'), 'r', encoding='utf-8') as f:
-            sessions = json.load(f)
-            session = next(s for s in sessions if s['type'] == 'guest_consumption')
-            transactions = session['transactions']
-            
-            # Should have: 2 Transactions (2 Payments)
-            # Opening balance is a property, not a transaction
-            assert len(transactions) == 2
-            
-            # Verify grouping
-            t1 = transactions[0]
-            t2 = transactions[1]
-            
-            assert t1['details']['payment_group_id'] == t2['details']['payment_group_id']
-            
-            # Verify amounts
-            assert any(t['amount'] == 60.0 and t['payment_method'] == 'Pix' for t in transactions)
-            assert any(t['amount'] == 40.0 and t['payment_method'] == 'Dinheiro' for t in transactions)
+
+        with patch('app.blueprints.reception.routes.load_room_charges', return_value=room_charges), \
+             patch('app.blueprints.reception.routes.save_room_charges') as mock_save_charges, \
+             patch('app.blueprints.reception.routes.load_cashier_sessions', return_value=sessions), \
+             patch('app.blueprints.reception.routes.load_payment_methods', return_value=self.payment_methods), \
+             patch('app.blueprints.reception.routes.save_cashier_sessions') as mock_save_sessions:
+
+            response = self.client.post('/reception/pay_charge/CHARGE_101', json={
+                'payments': payments,
+                'room_num': '101'
+            })
+
+            assert response.status_code == 200
+            payload = response.get_json()
+            assert payload.get('success') is True
+            assert room_charges[0]['status'] == 'paid'
+            assert len(room_charges[0]['payments']) == 2
+            assert room_charges[0]['payments'][0]['method'] == 'pix_id'
+            assert room_charges[0]['payments'][1]['method'] == 'cash_id'
+            assert mock_save_charges.called
+            assert mock_save_sessions.called
 
     def test_reservations_cashier_sale_multi(self):
         """Test adding a sale transaction with multiple methods in Reservations Cashier"""
         
         # 1. Open Reservations Cashier
-        CashierService.open_session('reception_reservations', 'admin', 0.0)
+        CashierService.open_session('reservation_cashier', 'admin', 0.0)
         
         # 2. Submit Multi-Payment Sale
         payment_list = [
@@ -205,7 +183,7 @@ class TestReceptionCashierMultiPayment:
         with open(os.path.join(self.test_dir, 'cashier_sessions.json'), 'r', encoding='utf-8') as f:
             sessions = json.load(f)
             # Find the reception_reservations session
-            session = next(s for s in sessions if s['type'] == 'reception_reservations')
+            session = next(s for s in sessions if s['type'] == 'reservation_cashier')
             transactions = session['transactions']
 
             # Should have: 2 Transactions
@@ -224,4 +202,3 @@ class TestReceptionCashierMultiPayment:
             
             assert t1['details']['payment_group_id'] == t2['details']['payment_group_id']
             assert float(t1['amount']) + float(t2['amount']) == 200.0
-

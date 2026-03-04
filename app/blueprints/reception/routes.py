@@ -131,11 +131,13 @@ def reception_rooms():
     
     # Pre-allocation integration
     upcoming_checkins = {}
+    upcoming_reservations = []
     try:
         res_service = ReservationService()
-        upcoming_list = res_service.get_upcoming_checkins()
-        for item in upcoming_list:
-            upcoming_checkins[item['room']] = item
+        upcoming_reservations = res_service.get_upcoming_checkins()
+        for item in upcoming_reservations:
+            if item.get('room'):
+                upcoming_checkins[str(item['room'])] = item
     except Exception as e:
         print(f"Error loading upcoming checkins: {e}")
 
@@ -570,19 +572,27 @@ def reception_rooms():
     # Load and Group Pending Charges for "Ver Consumo" modal
     try:
         room_charges = load_room_charges()
-        pending_charges = [c for c in room_charges if c.get('status') == 'pending']
+        pending_charges = [c for c in room_charges if isinstance(c, dict) and c.get('status') == 'pending']
         
         grouped_charges = {}
         any_commissionable_charge = False
         has_commissionable_service_fee_charge = False
         for charge in pending_charges:
-            room_num = str(charge.get('room_number'))
+            room_num = format_room_number(charge.get('room_number'))
+            if not room_num:
+                continue
+
             if room_num not in grouped_charges:
                 grouped_charges[room_num] = []
             
+            items = charge.get('items')
+            if not isinstance(items, list):
+                items = []
+                charge['items'] = items
+
             # Ensure source is set for display
             if 'source' not in charge:
-                has_minibar = any(item.get('category') == 'Frigobar' for item in charge.get('items', []))
+                has_minibar = any(isinstance(item, dict) and item.get('category') == 'Frigobar' for item in items)
                 charge['source'] = 'minibar' if has_minibar else 'restaurant'
                 
             grouped_charges[room_num].append(charge)
@@ -622,6 +632,8 @@ def reception_rooms():
     # Load Active Experiences for Launch Modal
     experiences = ExperienceService.get_all_experiences(only_active=True)
     collaborators = ExperienceService.get_unique_collaborators()
+    
+    room_capacities = ReservationService.ROOM_CAPACITIES
 
     return render_template('reception_rooms.html', 
                            occupancy=occupancy, 
@@ -633,11 +645,13 @@ def reception_rooms():
                            reservation_payment_methods=reservation_payment_methods, # Used by Receber Reserva
                            products=products,
                            upcoming_checkins=upcoming_checkins,
+                           upcoming_reservations=upcoming_reservations,
                            today=datetime.now().strftime('%Y-%m-%d'),
                            printers=printers,
                            printer_settings=printer_settings,
                            experiences=experiences,
-                           collaborators=collaborators)
+                           collaborators=collaborators,
+                           room_capacities=room_capacities)
 
 @reception_bp.route('/reception/cashier', methods=['GET', 'POST'])
 @login_required
@@ -2561,9 +2575,16 @@ def reception_pay_charge(charge_id):
 def reception_edit_charge():
     user_role = session.get('role')
     user_perms = session.get('permissions', [])
+    source_page = request.form.get('source_page')
+
+    def _redirect_after_edit():
+        if source_page == 'reception_rooms':
+            return redirect(url_for('reception.reception_rooms'))
+        return redirect(url_for('reception.reception_cashier'))
+
     if user_role not in ['admin', 'gerente', 'supervisor'] and 'recepcao' not in user_perms:
         flash('Acesso não autorizado para editar contas.')
-        return redirect(url_for('reception.reception_cashier'))
+        return _redirect_after_edit()
 
     charge_id = sanitize_input(request.form.get('charge_id'))
     new_date = sanitize_input(request.form.get('new_date'))
@@ -2573,7 +2594,7 @@ def reception_edit_charge():
     
     if not justification:
         flash('Justificativa é obrigatória para edição de contas.')
-        return redirect(url_for('reception.reception_cashier'))
+        return _redirect_after_edit()
 
     items_to_add_json = request.form.get('items_to_add', '[]')
     items_to_remove_json = request.form.get('items_to_remove', '[]')
@@ -2594,14 +2615,14 @@ def reception_edit_charge():
                  
     except (json.JSONDecodeError, ValueError) as e:
         flash(f'Erro ao processar itens da conta: {str(e)}')
-        return redirect(url_for('reception.reception_cashier'))
+        return _redirect_after_edit()
 
     room_charges = load_room_charges()
     charge = next((c for c in room_charges if c['id'] == charge_id), None)
     
     if not charge:
         flash('Conta não encontrada.')
-        return redirect(url_for('reception.reception_cashier'))
+        return _redirect_after_edit()
         
     old_status = charge.get('status')
     original_total = float(charge.get('total', 0))
@@ -2635,8 +2656,11 @@ def reception_edit_charge():
         kept_items = []
         removed_list = charge.get('removed_items', [])
 
-        for item in current_items:
-            if item.get('id') in items_to_remove:
+        for idx, item in enumerate(current_items):
+            item_id = item.get('id')
+            item_idx_key = f"__idx_{idx}"
+            should_remove = item_id in items_to_remove or item_idx_key in items_to_remove
+            if should_remove:
                 item_name = item.get('name')
                 qty_removed = float(item.get('qty', 1))
                 
@@ -2667,7 +2691,11 @@ def reception_edit_charge():
                     except Exception as e:
                         print(f"Stock refund error (Reception): {e}")
                 
-                justification_text = removal_justifications.get(item.get('id'), 'Sem justificativa')
+                justification_text = (
+                    removal_justifications.get(item_id) or
+                    removal_justifications.get(item_idx_key) or
+                    'Sem justificativa'
+                )
                 changes.append(f"Item Removido: {item_name} (x{qty_removed}) - Justificativa: {justification_text}")
                 
                 # Store for reversibility
@@ -2895,11 +2923,7 @@ def reception_edit_charge():
     else:
         flash('Nenhuma alteração realizada.')
 
-    source_page = request.form.get('source_page')
-    if source_page == 'reception_rooms':
-        return redirect(url_for('reception.reception_rooms'))
-        
-    return redirect(url_for('reception.reception_cashier'))
+    return _redirect_after_edit()
 
 @reception_bp.route('/api/reception/cashier/summary')
 @login_required
@@ -4848,6 +4872,15 @@ def reception_checkin():
     # Format room number
     room_num = format_room_number(room_num_raw)
     
+    # Validation: Capacity Check
+    room_capacities = ReservationService.ROOM_CAPACITIES
+    if str(room_num) in room_capacities:
+        max_capacity = room_capacities[str(room_num)]
+        if num_adults > max_capacity:
+            log_action('Checkin Blocked', f"Capacity exceeded for room {room_num}: {num_adults} > {max_capacity}", department='Recepção')
+            flash(f'Erro: Quarto {room_num} comporta no máximo {max_capacity} adultos.')
+            return redirect(url_for('reception.reception_rooms'))
+    
     # Validation: Check if room is already occupied
     if str(room_num) in occupancy:
         current_guest = occupancy[str(room_num)].get('guest_name', 'Hóspede Desconhecido')
@@ -4877,10 +4910,25 @@ def reception_checkin():
         res_service = ReservationService()
 
         # Heuristic: Try to find reservation if not provided but matches upcoming
-        if not reservation_id and room_num in upcoming_checkins:
-            upcoming = upcoming_checkins[room_num]
-            if upcoming.get('guest', '').lower() == guest_name.lower():
-                reservation_id = upcoming.get('id')
+        if not reservation_id:
+            g_name = normalize_text(guest_name)
+            
+            # Strategy 1: Match by Room (High Confidence)
+            if room_num in upcoming_checkins:
+                upcoming = upcoming_checkins[room_num]
+                u_name = normalize_text(upcoming.get('guest_name', ''))
+                # Allow partial match if room matches
+                if u_name and g_name and (u_name in g_name or g_name in u_name):
+                    reservation_id = upcoming.get('id')
+
+            # Strategy 2: Match by Name (Medium Confidence) - Only if Strategy 1 failed
+            if not reservation_id:
+                for item in upcoming_list:
+                    u_name = normalize_text(item.get('guest_name', ''))
+                    if u_name and g_name and u_name == g_name:
+                        reservation_id = item.get('id')
+                        log_action('Checkin Link', f"Linked reservation {reservation_id} by name match '{guest_name}' (allocated room: {item.get('room')})", department='Recepção')
+                        break
 
         # Collect Personal Info for Guest Details
         personal_info = {

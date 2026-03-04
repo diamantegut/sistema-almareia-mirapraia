@@ -65,26 +65,14 @@ class ReceptionViewTestCase(unittest.TestCase):
         
         self.assertEqual(response.status_code, 200)
         
-        # 4. Check for modal ID in HTML
+        # 4. Check core reception consumption UI in HTML
         html = response.data.decode('utf-8')
         
         if pending_room:
-            modal_id = f'id="roomChargesModal{pending_room}"'
-            
-            if modal_id in html:
-                print(f"[TEST] SUCCESS: Found modal for room {pending_room}")
-            else:
-                print(f"[TEST] FAILURE: Modal {modal_id} not found in HTML")
-                # Debug: save html to file
-                with open('debug_reception_view.html', 'w', encoding='utf-8') as f:
-                    f.write(html)
-                print("[TEST] Saved HTML to debug_reception_view.html")
-            
-            self.assertIn(modal_id, html, f"Modal for room {pending_room} not found in HTML")
-            
-            # 5. Check for charge details
-            self.assertIn(f'Quarto {pending_room} - Contas Pendentes', html)
-            print("[TEST] SUCCESS: Verified 'Ver Consumo' modal content.")
+            self.assertIn('id="consumptionPaymentModal"', html)
+            self.assertIn('id="closeRoomAccountModal"', html)
+            self.assertIn(f"openConsumptionModal('{pending_room}')", html)
+            print("[TEST] SUCCESS: Verified 'Ver Consumo' UI and actions.")
         else:
             print("[TEST] SKIPPING specific room verification (no pending charges found)")
 

@@ -1,1 +1,38 @@
-[]
+[
+    {
+        "id": "charge_no_item_id",
+        "room_number": "12",
+        "table_id": "91",
+        "total": 0.0,
+        "status": "pending",
+        "service_fee_removed": true,
+        "items": [],
+        "date": "04/03/2026 11:29",
+        "notes": "Removido item sem id",
+        "removed_items": [
+            {
+                "name": "Prato sem ID",
+                "qty": 1,
+                "price": 100.0,
+                "category": "Restaurante",
+                "removed_at": "2026-03-04 11:29:44",
+                "removed_by": "admin_tester",
+                "removal_justification": "Sem consumo"
+            }
+        ],
+        "service_fee": 0.0,
+        "audit_log": [
+            {
+                "timestamp": "04/03/2026 11:29:44",
+                "user": "admin_tester",
+                "changes": [
+                    "Obs:  -> Removido item sem id",
+                    "Item Removido: Prato sem ID (x1.0) - Justificativa: Sem consumo",
+                    "Comissão de 10% removida",
+                    "Recálculo Total: 110.00 -> 0.00"
+                ],
+                "justification": "Teste remoção sem id"
+            }
+        ]
+    }
+]

@@ -17,6 +17,103 @@ class ReservationService:
     
     RESERVATION_PAYMENTS_FILE = os.path.join(RESERVATIONS_DIR, "reservation_payments.json")
 
+    ROOM_CAPACITIES = {
+        "01": 2, "02": 2, "03": 2,
+        "11": 4, # Family
+        "12": 2, "14": 2, "15": 2, "16": 2, "17": 2,
+        "21": 2, "22": 2, "23": 2, "24": 2, "25": 2, "26": 2,
+        "31": 2, "32": 2, "33": 2, "34": 2, "35": 2
+    }
+
+    def get_upcoming_checkins(self, days=2):
+        """
+        Returns a list of reservations checking in within the next 'days'.
+        """
+        import json
+        from datetime import datetime, timedelta
+
+        target_reservations = []
+        today = datetime.now().date()
+        limit_date = today + timedelta(days=days)
+        
+        # 1. Get all reservations
+        all_res = self.get_february_reservations() 
+        
+        # 2. Load Manual Allocations
+        manual_allocs = {}
+        manual_alloc_file = os.path.join(self.RESERVATIONS_DIR, "manual_allocations.json")
+        if os.path.exists(manual_alloc_file):
+            try:
+                with file_lock(manual_alloc_file):
+                    with open(manual_alloc_file, 'r') as f:
+                        manual_allocs = json.load(f)
+            except: pass
+
+        for res in all_res:
+            # Filter Status
+            status = str(res.get('status', '')).lower()
+            if 'cancel' in status: continue
+            
+            # Filter Date
+            cin_str = res.get('checkin')
+            if not cin_str: continue
+            
+            try:
+                if '-' in cin_str:
+                    cin_date = datetime.strptime(cin_str, '%Y-%m-%d').date()
+                else:
+                    cin_date = datetime.strptime(cin_str, '%d/%m/%Y').date()
+            except: continue
+            
+            if today <= cin_date < limit_date:
+                # Enhance with Room
+                rid = str(res.get('id'))
+                if rid in manual_allocs:
+                    res['room'] = manual_allocs[rid].get('room')
+                
+                # Default Adults based on Category (heuristic)
+                cat_lower = str(res.get('category', '')).lower()
+                
+                if 'família' in cat_lower or 'quadruplo' in cat_lower:
+                    res['num_adults'] = 4
+                elif 'triplo' in cat_lower:
+                    res['num_adults'] = 3
+                elif 'duplo' in cat_lower or 'casal' in cat_lower:
+                    res['num_adults'] = 2
+                elif 'individual' in cat_lower or 'solteiro' in cat_lower:
+                    res['num_adults'] = 1
+                elif 'suíte' in cat_lower:
+                    res['num_adults'] = 2
+                elif res.get('room') and str(res['room']) in self.ROOM_CAPACITIES:
+                    # Fallback to Room Capacity if category is ambiguous
+                    res['num_adults'] = self.ROOM_CAPACITIES[str(res['room'])]
+                else:
+                    res['num_adults'] = 1
+                
+                # Enhance with Guest Details
+                try:
+                    details = self.get_guest_details(rid)
+                    if details and 'personal_info' in details:
+                        # Merge personal info keys that are missing or overwrite
+                        p_info = details['personal_info']
+                        if p_info.get('email'): res['email'] = p_info['email']
+                        if p_info.get('phone'): res['phone'] = p_info['phone']
+                        if p_info.get('cpf'): res['doc_id'] = p_info['cpf']
+                        if p_info.get('address'): res['address'] = p_info['address']
+                        if p_info.get('city'): res['city'] = p_info['city']
+                        if p_info.get('state'): res['state'] = p_info['state']
+                        if p_info.get('zip'): res['zipcode'] = p_info['zip']
+                        if p_info.get('nationality'): res['nationality'] = p_info['nationality']
+                        if p_info.get('profession'): res['profession'] = p_info['profession']
+                        if p_info.get('gender'): res['gender'] = p_info['gender']
+                        if p_info.get('birth_date'): res['birth_date'] = p_info['birth_date']
+                except Exception as e:
+                    print(f"Error fetching details for res {rid}: {e}")
+
+                target_reservations.append(res)
+                
+        return target_reservations
+
     def get_reservation_payments(self):
         import json
         if not os.path.exists(self.RESERVATION_PAYMENTS_FILE):

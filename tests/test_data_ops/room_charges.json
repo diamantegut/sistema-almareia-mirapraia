@@ -1,43 +1,26 @@
 [
     {
-        "id": "CHARGE_33_20260217091345_4ae3c5_REST",
-        "room_number": "33",
-        "table_id": "33",
-        "total": 5.5,
+        "id": "CHARGE_TEST_1",
+        "room_number": "101",
+        "table_id": "20",
+        "total": 110.0,
         "items": [
             {
-                "id": "7a2ac2d4-c2cd-4321-b00e-dd8ad643de8d",
-                "product_id": "1",
-                "name": "Coca Cola",
-                "price": 5.0,
-                "qty": 1.0,
-                "category": "Bebidas",
-                "created_at": "17/02/2026 09:13",
-                "waiter": "GarcomZ",
-                "printed": false,
-                "print_status": "error",
-                "complements": [],
-                "observations": [],
-                "accompaniments": [],
-                "flavor": "",
-                "questions_answers": [],
-                "ncm": null,
-                "cest": null,
-                "cfop": null,
-                "origin": 0,
-                "tax_info": null
+                "name": "Item 1",
+                "price": 100.0,
+                "qty": 1
             }
         ],
-        "service_fee": 0.5,
-        "discount": 0,
-        "flags": [],
-        "waiter": "GarcomZ",
+        "service_fee": 10.0,
+        "status": "paid",
+        "waiter": "GarcomX",
         "waiter_breakdown": {
-            "GarcomZ": 11.0
+            "GarcomX": 110.0
         },
-        "service_fee_removed": false,
-        "date": "17/02/2026 09:13",
-        "status": "pending",
-        "type": "restaurant"
+        "date": "04/03/2026 11:15",
+        "source": "restaurant",
+        "paid_at": "04/03/2026 11:15",
+        "reception_cashier_id": "SESSION_GUEST_CONSUMPTION_20260304111528_admin",
+        "payment_method": null
     }
 ]

@@ -1,1 +1,34 @@
-[]
+[
+    {
+        "id": "SESSION_GUEST_CONSUMPTION_20260304111528_admin",
+        "user": "admin",
+        "type": "guest_consumption",
+        "entity": "Hotel Almareia",
+        "opened_at": "04/03/2026 11:15",
+        "opening_balance": 0.0,
+        "transactions": [
+            {
+                "id": "TRANS_20260304111528_11000",
+                "type": "in",
+                "category": "Pagamento de Conta",
+                "description": "Pagamento Quarto 101 (None)",
+                "amount": 110.0,
+                "payment_method": null,
+                "emit_invoice": false,
+                "timestamp": "04/03/2026 11:15",
+                "time": "11:15",
+                "waiter": "GarcomX",
+                "waiter_breakdown": {
+                    "GarcomX": 110.0
+                },
+                "service_fee_removed": false,
+                "related_charge_id": "CHARGE_TEST_1",
+                "details": {}
+            }
+        ],
+        "status": "open",
+        "closed_at": null,
+        "closing_balance": null,
+        "difference": null
+    }
+]
