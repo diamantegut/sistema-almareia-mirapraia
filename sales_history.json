@@ -111957,6 +111957,7 @@
     {
         "items": [
             {
+<<<<<<< HEAD
                 "id": "10728670-ab76-4f12-b934-8f10f43cc660",
                 "product_id": "118",
                 "name": "Arroz de Polvo (Individual)",
@@ -122433,5 +122434,38 @@
         "waiter_breakdown": {
             "Garcom Teste": 110.00000000000001
         }
+=======
+                "id": "item_food",
+                "name": "Steak",
+                "price": 100.0,
+                "qty": 1,
+                "category": "Pratos",
+                "waiter": "Waiter A",
+                "printed": true,
+                "complements": []
+            },
+            {
+                "id": "item_cover",
+                "name": "Couvert Artistico",
+                "price": 30.0,
+                "qty": 1,
+                "category": "Couvert",
+                "waiter": "Waiter A",
+                "printed": true,
+                "complements": [],
+                "source": "auto_cover_activation"
+            }
+        ],
+        "total": 130.0,
+        "status": "closed",
+        "opened_at": "03/03/2026 11:28",
+        "customer_type": "hospede",
+        "room_number": "101",
+        "waiter": "Waiter A",
+        "closed_at": "03/03/2026 11:28",
+        "payment_method": "Room Charge",
+        "room_charge": "101",
+        "final_total": 143.0
+>>>>>>> decc2a1cf65dad5dc2f0d021d2907b436f457ba0
     }
 ]

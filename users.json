@@ -483,6 +483,7 @@
         "role": "colaborador",
         "score": 2,
         "permissions": [
+<<<<<<< HEAD
             "",
             "",
             "",
@@ -491,6 +492,10 @@
             "",
             "",
             ""
+=======
+            "principal",
+            "conferencia"
+>>>>>>> decc2a1cf65dad5dc2f0d021d2907b436f457ba0
         ],
         "full_name": "Pedro Lucas Silva Dos Santos",
         "admission_date": "2025-08-15",
@@ -500,6 +505,7 @@
         "permissions_v2": {
             "version": 2,
             "areas": {
+<<<<<<< HEAD
                 "conferencia": {
                     "all": false,
                     "pages": {}
@@ -509,6 +515,29 @@
                     "pages": {}
                 },
                 "estoque_principal": {
+=======
+                "estoque_principal": {
+                    "all": true,
+                    "pages": {}
+                },
+                "recepcao": {
+                    "all": true,
+                    "pages": {}
+                },
+                "restaurante_mirapraia": {
+                    "all": true,
+                    "pages": {}
+                },
+                "cozinha": {
+                    "all": true,
+                    "pages": {}
+                },
+                "governanca": {
+                    "all": false,
+                    "pages": {}
+                },
+                "conferencia": {
+>>>>>>> decc2a1cf65dad5dc2f0d021d2907b436f457ba0
                     "all": true,
                     "pages": {}
                 },
@@ -516,6 +545,7 @@
                     "all": false,
                     "pages": {}
                 },
+<<<<<<< HEAD
                 "governanca": {
                     "all": false,
                     "pages": {}
@@ -531,6 +561,11 @@
                 "restaurante_mirapraia": {
                     "all": true,
                     "pages": {}
+=======
+                "recursos_humanos": {
+                    "all": false,
+                    "pages": {}
+>>>>>>> decc2a1cf65dad5dc2f0d021d2907b436f457ba0
                 }
             },
             "level_pages": []
@@ -820,5 +855,13 @@
         "birthday": "1987-01-22",
         "daily_target_hours": 8,
         "weekly_day_off": 2
+<<<<<<< HEAD
+=======
+    },
+    "admin": {
+        "password": "123",
+        "role": "admin",
+        "department": "Diretoria"
+>>>>>>> decc2a1cf65dad5dc2f0d021d2907b436f457ba0
     }
 }

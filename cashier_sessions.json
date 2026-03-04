@@ -288,38 +288,6 @@
         ]
     },
     {
-        "id": "SESSION_GUEST_CONSUMPTION_20260130150549_admin",
-        "user": "admin",
-        "type": "guest_consumption",
-        "opened_at": "30/01/2026 15:05",
-        "opening_balance": 100.0,
-        "transactions": [
-            {
-                "id": "TX_20260130190643_9665f5",
-                "type": "sale",
-                "amount": 165.0,
-                "description": "Fechamento Conta Quarto 101 - Guest Flow",
-                "payment_method": "Cartão de Crédito",
-                "timestamp": "30/01/2026 19:06",
-                "user": "admin",
-                "details": {
-                    "room_number": "101",
-                    "guest_name": "Guest Flow",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "Waiter A": 10.0,
-                        "Waiter B": 5.0
-                    }
-                }
-            }
-        ],
-        "status": "closed",
-        "closed_at": "31/01/2026 09:01",
-        "closing_balance": 265.0,
-        "difference": 165.0,
-        "closed_by": "Angelo"
-    },
-    {
         "id": "CASHIER_REST_20260131090017_Angelo",
         "user": "Angelo",
         "type": "restaurant_service",
@@ -477,374 +445,6 @@
                 }
             }
         ]
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260131090109_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "opened_at": "31/01/2026 09:01",
-        "opening_balance": 100.0,
-        "transactions": [
-            {
-                "id": "TRANS_20260131090426_500",
-                "type": "in",
-                "category": "Pagamento de Conta",
-                "description": "Pagamento Quarto 22 (Dinheiro)",
-                "amount": 5.0,
-                "payment_method": "Dinheiro",
-                "emit_invoice": false,
-                "timestamp": "31/01/2026 09:04",
-                "time": "09:04",
-                "waiter": null,
-                "waiter_breakdown": null,
-                "service_fee_removed": false,
-                "related_charge_id": "CHARGE_GOV_22_20260129182423_00ab8d"
-            },
-            {
-                "id": "TRANS_20260131090433_500",
-                "type": "in",
-                "category": "Pagamento de Conta",
-                "description": "Pagamento Quarto 22 (Credito)",
-                "amount": 5.0,
-                "payment_method": "Credito",
-                "emit_invoice": false,
-                "timestamp": "31/01/2026 09:04",
-                "time": "09:04",
-                "waiter": null,
-                "waiter_breakdown": null,
-                "service_fee_removed": false,
-                "related_charge_id": "CHARGE_GOV_22_20260129182434_4bcb93"
-            },
-            {
-                "id": "TX_20260131100013_f97865",
-                "type": "sale",
-                "amount": 262.9,
-                "description": "Fechamento Conta Quarto 33 - Teste",
-                "payment_method": "credito",
-                "timestamp": "31/01/2026 10:00",
-                "user": "Angelo",
-                "details": {
-                    "room_number": "33",
-                    "guest_name": "Teste",
-                    "category": "Baixa de Conta"
-                }
-            },
-            {
-                "id": "TRANS_20260131100044",
-                "type": "out",
-                "category": "Sangria",
-                "description": "teste",
-                "amount": 10.0,
-                "payment_method": "Dinheiro",
-                "time": "10:00"
-            },
-            {
-                "id": "TRANS_20260131100050",
-                "type": "in",
-                "category": "Suprimento",
-                "description": "teste",
-                "amount": 10.0,
-                "payment_method": "Dinheiro",
-                "time": "10:00"
-            },
-            {
-                "id": "TX_20260131110023_a10b25",
-                "type": "sale",
-                "amount": 25.189999999999998,
-                "description": "Fechamento Conta Quarto 03 - Quarto Teste Nao Fechar",
-                "payment_method": "credito",
-                "timestamp": "31/01/2026 11:00",
-                "user": "Angelo",
-                "details": {
-                    "room_number": "03",
-                    "guest_name": "Quarto Teste Nao Fechar",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "Angelo": 25.189999999999998
-                    }
-                }
-            },
-            {
-                "id": "TX_20260131110217_f46d1b",
-                "type": "sale",
-                "amount": 125.95,
-                "description": "Fechamento Conta Quarto 03 - Quarto Teste Nao Fechar",
-                "payment_method": "credito",
-                "timestamp": "31/01/2026 11:02",
-                "user": "Angelo",
-                "details": {
-                    "room_number": "03",
-                    "guest_name": "Quarto Teste Nao Fechar",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "Angelo": 125.95
-                    }
-                }
-            },
-            {
-                "id": "TX_20260131134207_0ecb45",
-                "type": "sale",
-                "amount": 302.28,
-                "description": "Fechamento Conta Quarto 01 - Quarto Teste Nao Fechar",
-                "payment_method": "Credito Angelo",
-                "timestamp": "31/01/2026 13:42",
-                "user": "Angelo",
-                "details": {
-                    "room_number": "01",
-                    "guest_name": "Quarto Teste Nao Fechar",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "Angelo": 302.28
-                    }
-                }
-            }
-        ],
-        "status": "closed",
-        "closed_at": "01/02/2026 10:22",
-        "closing_balance": 826.32,
-        "difference": 716.32,
-        "closed_by": "luiz",
-        "difference_approved": true
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260201102247_luiz",
-        "user": "luiz",
-        "type": "guest_consumption",
-        "opened_at": "01/02/2026 10:22",
-        "opening_balance": 474.8,
-        "transactions": [
-            {
-                "id": "TX_20260201120249_6a0f47",
-                "type": "sale",
-                "amount": 390.7,
-                "description": "Fechamento Conta Quarto 26 - Fernando Dionísio e Marcia Coelho",
-                "payment_method": "Credito Angelo",
-                "timestamp": "01/02/2026 12:02",
-                "user": "jose",
-                "details": {
-                    "room_number": "26",
-                    "guest_name": "Fernando Dionísio e Marcia Coelho",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "luiz": 382.8
-                    }
-                }
-            },
-            {
-                "id": "TX_20260201124149_11910c",
-                "type": "sale",
-                "amount": 696.1999999999997,
-                "description": "Fechamento Conta Quarto 33 - Marcelo Brasil E Fabíola Melo",
-                "payment_method": "Credito Angelo",
-                "timestamp": "01/02/2026 12:41",
-                "user": "jose",
-                "details": {
-                    "room_number": "33",
-                    "guest_name": "Marcelo Brasil E Fabíola Melo",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "luiz": 646.8
-                    }
-                }
-            },
-            {
-                "id": "TX_20260201124229_71fb87",
-                "type": "sale",
-                "amount": 819.0,
-                "description": "Fechamento Conta Quarto 02 - Cláudia Bitar e Fabio Bitar",
-                "payment_method": "Credito Angelo",
-                "timestamp": "01/02/2026 12:42",
-                "user": "jose",
-                "details": {
-                    "room_number": "02",
-                    "guest_name": "Cláudia Bitar e Fabio Bitar",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "jose": 785.51,
-                        "luiz": 9.790000000000001
-                    }
-                }
-            },
-            {
-                "id": "TX_20260201124922_d02a52",
-                "type": "sale",
-                "amount": 1598.46,
-                "description": "Fechamento Conta Quarto 12 - Leandro Matieli e Paula Conceição",
-                "payment_method": "Credito Angelo",
-                "timestamp": "01/02/2026 12:49",
-                "user": "jose",
-                "details": {
-                    "room_number": "12",
-                    "guest_name": "Leandro Matieli e Paula Conceição",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "jose": 1242.89,
-                        "Angelo": 331.87
-                    }
-                }
-            },
-            {
-                "id": "TX_20260201125039_5237b7",
-                "type": "sale",
-                "amount": 1105.4999999999995,
-                "description": "Fechamento Conta Quarto 32 - Roberto Oliveira E Célvora Marra",
-                "payment_method": "Credito Angelo",
-                "timestamp": "01/02/2026 12:50",
-                "user": "jose",
-                "details": {
-                    "room_number": "32",
-                    "guest_name": "Roberto Oliveira E Célvora Marra",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "luiz": 1404.81,
-                        "Angelo": 41.58
-                    }
-                }
-            },
-            {
-                "id": "TX_20260201205651_44e81f",
-                "type": "sale",
-                "amount": 291.72,
-                "description": "Fechamento Conta Quarto 16 - Henrique Neitzke E Guilherme Guerra",
-                "payment_method": "Credito Angelo",
-                "timestamp": "01/02/2026 20:56",
-                "user": "priscila",
-                "details": {
-                    "room_number": "16",
-                    "guest_name": "Henrique Neitzke E Guilherme Guerra",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "luiz": 251.339,
-                        "Angelo": 108.79,
-                        "priscila": 31.79
-                    }
-                }
-            }
-        ],
-        "status": "closed",
-        "closed_at": "01/02/2026 21:30",
-        "closing_balance": 5376.38,
-        "difference": 4901.58,
-        "closed_by": "priscila",
-        "difference_approved": true
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260202080637_priscila",
-        "user": "priscila",
-        "type": "guest_consumption",
-        "opened_at": "02/02/2026 08:06",
-        "opening_balance": 474.8,
-        "transactions": [
-            {
-                "id": "TX_20260202080706_4035cd",
-                "type": "sale",
-                "amount": 3286.189,
-                "description": "Fechamento Conta Quarto 21 - Guilherme Castro e Kelma Borges",
-                "payment_method": "Credito Angelo",
-                "timestamp": "02/02/2026 08:07",
-                "user": "jose",
-                "details": {
-                    "room_number": "21",
-                    "guest_name": "Guilherme Castro e Kelma Borges",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "jose": 1284.899,
-                        "carlos": 1529.3700000000001,
-                        "jose.silva": 71.17,
-                        "welington": 273.3500000000001
-                    }
-                }
-            },
-            {
-                "id": "TX_20260202111220_8d0121",
-                "type": "sale",
-                "amount": 376.53,
-                "description": "Fechamento Conta Quarto 22 - Julia Abreu e Alicia Abreu",
-                "payment_method": "Credito Angelo",
-                "timestamp": "02/02/2026 11:12",
-                "user": "alan",
-                "details": {
-                    "room_number": "22",
-                    "guest_name": "Julia Abreu e Alicia Abreu",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "jose": 101.86,
-                        "Angelo": 200.2,
-                        "welington": 74.47
-                    }
-                }
-            },
-            {
-                "id": "TX_20260202111243_8eed14",
-                "type": "sale",
-                "amount": 1028.8199999999997,
-                "description": "Fechamento Conta Quarto 23 - Cristiane Abreu e Daniel Abreu",
-                "payment_method": "Credito Angelo",
-                "timestamp": "02/02/2026 11:12",
-                "user": "alan",
-                "details": {
-                    "room_number": "23",
-                    "guest_name": "Cristiane Abreu e Daniel Abreu",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "jose": 694.6500000000001,
-                        "adailton": 42.57,
-                        "bartolomeu": 11.990000000000002,
-                        "Angelo": 173.1,
-                        "welington": 114.07
-                    }
-                }
-            },
-            {
-                "id": "TX_20260202112225_b2a556",
-                "type": "sale",
-                "amount": 936.79,
-                "description": "Fechamento Conta Quarto 17 - Janine Diniz E Guilherme Figueiredo",
-                "payment_method": "Credito Angelo",
-                "timestamp": "02/02/2026 11:22",
-                "user": "jose",
-                "details": {
-                    "room_number": "17",
-                    "guest_name": "Janine Diniz E Guilherme Figueiredo",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "luiz": 695.3100000000001,
-                        "Angelo": 200.0,
-                        "adailton": 53.862602365787076,
-                        "jose.silva": 182.91739763421293
-                    }
-                }
-            },
-            {
-                "id": "TX_20260202151352_7ddb6a",
-                "type": "sale",
-                "amount": 901.2300000000001,
-                "description": "Fechamento Conta Quarto 34 - Rubia Pascoal E Nilson César",
-                "payment_method": "Debito Angelo",
-                "timestamp": "02/02/2026 15:13",
-                "user": "alan",
-                "details": {
-                    "room_number": "34",
-                    "guest_name": "Rubia Pascoal E Nilson César",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "priscila": 461.56000000000006,
-                        "jose.silva": 207.35,
-                        "bartolomeu": 137.28000000000003,
-                        "adailton": 18.589999999999996,
-                        "erique": 29.479999999999997,
-                        "guilherme": 37.17999999999999,
-                        "filipe": 9.79
-                    }
-                }
-            }
-        ],
-        "status": "closed",
-        "closed_at": "02/02/2026 21:35",
-        "closing_balance": 7019.36,
-        "difference": 6544.5599999999995,
-        "closed_by": "alan",
-        "difference_approved": true
     },
     {
         "id": "CASHIER_REST_20260202133247_Angelo",
@@ -1228,123 +828,6 @@
         ]
     },
     {
-        "id": "SESSION_GUEST_CONSUMPTION_20260203090259_jose",
-        "user": "jose",
-        "type": "guest_consumption",
-        "opened_at": "03/02/2026 09:02",
-        "opening_balance": 489.8,
-        "transactions": [
-            {
-                "id": "TX_20260203093931_32684b",
-                "type": "sale",
-                "amount": 446.39000000000004,
-                "description": "Fechamento Conta Quarto 15 - Vanda Olegário",
-                "payment_method": "Credito Angelo",
-                "timestamp": "03/02/2026 09:39",
-                "user": "Angelo",
-                "details": {
-                    "room_number": "15",
-                    "guest_name": "Vanda Olegário",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "jose": 341.44000000000005,
-                        "Angelo": 34.870000000000005,
-                        "erique": 11.99,
-                        "welington": 8.69
-                    }
-                }
-            },
-            {
-                "id": "TX_20260203103234_1a6949",
-                "type": "sale",
-                "amount": 844.1790000000001,
-                "description": "Fechamento Conta Quarto 14 - Bruna Picolo e Fernando Cesar",
-                "payment_method": "Credito Angelo",
-                "timestamp": "03/02/2026 10:32",
-                "user": "Angelo",
-                "details": {
-                    "room_number": "14",
-                    "guest_name": "Bruna Picolo e Fernando Cesar",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "luiz": 178.85999999999999,
-                        "jose.santos": 284.13,
-                        "erique": 90.74999999999999,
-                        "welington": 266.73900000000003
-                    }
-                }
-            },
-            {
-                "id": "TX_20260203110943_6732e2",
-                "type": "sale",
-                "amount": 2233.0899999999997,
-                "description": "Fechamento Conta Quarto 03 - Juliana Moraes e Samuel Augusto",
-                "payment_method": "Credito Angelo",
-                "timestamp": "03/02/2026 11:09",
-                "user": "Angelo",
-                "details": {
-                    "room_number": "03",
-                    "guest_name": "Juliana Moraes e Samuel Augusto",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "adailton": 416.78999999999996,
-                        "jose.silva": 208.89000000000001,
-                        "welington": 1113.0,
-                        "guilherme": 396.7700000000001
-                    }
-                }
-            }
-        ],
-        "status": "closed",
-        "closed_at": "03/02/2026 22:04",
-        "closing_balance": 4013.46,
-        "difference": 3523.66,
-        "closed_by": "Angelo",
-        "difference_approved": true
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260204083241_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "opened_at": "04/02/2026 08:32",
-        "opening_balance": 489.8,
-        "transactions": [
-            {
-                "id": "TRANS_20260204190708",
-                "type": "out",
-                "category": "Sangria",
-                "description": "pagamento do premio de melhor vendedor (welligton)",
-                "amount": 400.0,
-                "payment_method": "Dinheiro",
-                "time": "19:07"
-            },
-            {
-                "id": "TRANS_20260204190755",
-                "type": "out",
-                "category": "Sangria",
-                "description": "pagamento de diarias teste de ( Luana)",
-                "amount": 400.0,
-                "payment_method": "Dinheiro",
-                "time": "19:07"
-            },
-            {
-                "id": "TRANS_20260204200722",
-                "type": "in",
-                "category": "Suprimento",
-                "description": "Entrada Restaruante",
-                "amount": 486.31,
-                "payment_method": "Dinheiro",
-                "time": "20:07"
-            }
-        ],
-        "status": "closed",
-        "closed_at": "04/02/2026 22:04",
-        "closing_balance": 176.25,
-        "difference": 0.13999999999998636,
-        "closed_by": "priscila",
-        "difference_approved": true
-    },
-    {
         "id": "CASHIER_REST_20260204104025_Angelo",
         "user": "Angelo",
         "type": "restaurant_service",
@@ -1541,98 +1024,6 @@
                 }
             }
         ]
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260205083822_luiz",
-        "user": "luiz",
-        "type": "guest_consumption",
-        "opened_at": "05/02/2026 08:38",
-        "opening_balance": 0.0,
-        "transactions": [
-            {
-                "id": "TX_20260205111411_0aefef",
-                "type": "sale",
-                "amount": 1601.109,
-                "description": "Fechamento Conta Quarto 11 - Orlando Gros e Andrea Urenda",
-                "payment_method": "PIX CNPJ 28952732000109",
-                "timestamp": "05/02/2026 11:14",
-                "user": "luiz",
-                "details": {
-                    "room_number": "11",
-                    "guest_name": "Orlando Gros e Andrea Urenda",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "erique": 537.6800000000001,
-                        "bartolomeu": 172.359,
-                        "filipe": 53.57000000000001,
-                        "welington": 318.23,
-                        "jose.santos": 18.589999999999996,
-                        "adailton": 47.08,
-                        "henrique": 162.47,
-                        "leo": 245.85
-                    }
-                }
-            },
-            {
-                "id": "TX_20260205120623_640a44",
-                "type": "sale",
-                "amount": 1228.7079999999999,
-                "description": "Fechamento Conta Quarto 21 - Gary Ascarrunz e Maria Jeancarla",
-                "payment_method": "Credito Angelo",
-                "timestamp": "05/02/2026 12:06",
-                "user": "luiz",
-                "details": {
-                    "room_number": "21",
-                    "guest_name": "Gary Ascarrunz e Maria Jeancarla",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "welington": 493.77900000000005,
-                        "bartolomeu": 171.16,
-                        "adailton": 36.190000000000005,
-                        "henrique": 199.65000000000003,
-                        "leo": 265.529
-                    }
-                }
-            },
-            {
-                "id": "TX_20260205133849_79e0b8",
-                "type": "sale",
-                "amount": 1281.21,
-                "description": "Fechamento Conta Quarto 25 - Luciano Ferragut e Célia Pereira",
-                "payment_method": "Credito Grasi",
-                "timestamp": "05/02/2026 13:38",
-                "user": "luiz",
-                "details": {
-                    "room_number": "25",
-                    "guest_name": "Luciano Ferragut e Célia Pereira",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "luiz": 399.3,
-                        "jose.silva": 112.74999999999997,
-                        "adailton": 281.81999999999994,
-                        "bartolomeu": 45.97999999999999,
-                        "erique": 30.58,
-                        "jose.santos": 302.72,
-                        "guilherme": 11.989999999999998,
-                        "henrique": 36.18999999999999
-                    }
-                }
-            },
-            {
-                "id": "TRANS_20260205215106",
-                "type": "out",
-                "category": "Sangria",
-                "description": "Fechamento de conta relacionado no caixa do restaurante.",
-                "amount": 1000.0,
-                "payment_method": "Dinheiro",
-                "time": "21:51"
-            }
-        ],
-        "status": "closed",
-        "closed_at": "05/02/2026 22:06",
-        "closing_balance": 3111.03,
-        "difference": 0.003000000000156433,
-        "closed_by": "bruno"
     },
     {
         "id": "CASHIER_REST_20260205110405_carlos",
@@ -2086,216 +1477,6 @@
         ]
     },
     {
-        "id": "SESSION_GUEST_CONSUMPTION_20260206081918_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "opened_at": "06/02/2026 08:19",
-        "opening_balance": 0.0,
-        "transactions": [
-            {
-                "id": "TRANS_20260206081938_20163",
-                "type": "in",
-                "category": "Pagamento de Conta",
-                "description": "Pagamento Quarto 02 (Credito Angelo)",
-                "amount": 201.63,
-                "payment_method": "Credito Angelo",
-                "emit_invoice": false,
-                "timestamp": "06/02/2026 08:19",
-                "time": "08:19",
-                "waiter": "adailton",
-                "waiter_breakdown": {
-                    "adailton": 102.84999999999998,
-                    "erique": 98.77999999999999
-                },
-                "service_fee_removed": false,
-                "related_charge_id": "CHARGE_63_20260205193313_2f6edc_REST"
-            },
-            {
-                "id": "TRANS_20260206082003_17237",
-                "type": "in",
-                "category": "Pagamento de Conta",
-                "description": "Pagamento Quarto 01 (Credito Angelo)",
-                "amount": 172.37,
-                "payment_method": "Credito Angelo",
-                "emit_invoice": false,
-                "timestamp": "06/02/2026 08:20",
-                "time": "08:20",
-                "waiter": "edson",
-                "waiter_breakdown": {
-                    "edson": 117.47999999999999,
-                    "erique": 54.889999999999986
-                },
-                "service_fee_removed": false,
-                "related_charge_id": "CHARGE_71_20260205193202_001ac7_REST"
-            },
-            {
-                "id": "TX_20260206082646_948494",
-                "type": "sale",
-                "amount": 200.0,
-                "description": "Fechamento Conta Quarto 01 - Lorena Araujo E GUILHERME FERRAZ (Credito Angelo)",
-                "payment_method": "Credito Angelo",
-                "timestamp": "06/02/2026 08:26",
-                "user": "Angelo",
-                "details": {
-                    "room_number": "01",
-                    "guest_name": "Lorena Araujo E GUILHERME FERRAZ",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "adailton": 78.87,
-                        "edson": 193.05,
-                        "filipe": 50.48999999999999
-                    }
-                }
-            },
-            {
-                "id": "TX_20260206082646_8dbcf2",
-                "type": "sale",
-                "amount": 122.41,
-                "description": "Fechamento Conta Quarto 01 - Lorena Araujo E GUILHERME FERRAZ (Credito Grasi)",
-                "payment_method": "Credito Grasi",
-                "timestamp": "06/02/2026 08:26",
-                "user": "Angelo",
-                "details": {
-                    "room_number": "01",
-                    "guest_name": "Lorena Araujo E GUILHERME FERRAZ",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "adailton": 78.87,
-                        "edson": 193.05,
-                        "filipe": 50.48999999999999
-                    }
-                }
-            },
-            {
-                "id": "TX_20260206133530_3e0c96",
-                "type": "sale",
-                "amount": 8.9,
-                "description": "Fechamento Conta Quarto 12 - Ingrid , OLEH , e Krisztina ",
-                "payment_method": "Debito Angelo",
-                "timestamp": "06/02/2026 13:35",
-                "user": "jose",
-                "details": {
-                    "room_number": "12",
-                    "guest_name": "Ingrid , OLEH , e Krisztina ",
-                    "category": "Baixa de Conta"
-                }
-            },
-            {
-                "id": "TX_20260206133829_d44d24",
-                "type": "sale",
-                "amount": 536.69,
-                "description": "Fechamento Conta Quarto 15 - LAZARO BENEDITO E ALESSANDRA OLIVEIRA",
-                "payment_method": "Credito Angelo",
-                "timestamp": "06/02/2026 13:38",
-                "user": "jose",
-                "details": {
-                    "room_number": "15",
-                    "guest_name": "LAZARO BENEDITO E ALESSANDRA OLIVEIRA",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "jose.silva": 272.36,
-                        "filipe": 17.380000000000003,
-                        "bartolomeu": 229.57,
-                        "leo": 17.38
-                    }
-                }
-            },
-            {
-                "id": "TX_20260206135956_13701f",
-                "type": "sale",
-                "amount": 26.700000000000003,
-                "description": "Fechamento Conta Quarto 31 - Luiz Pessoa e Sueli pessoa",
-                "payment_method": "Credito Angelo",
-                "timestamp": "06/02/2026 13:59",
-                "user": "jose",
-                "details": {
-                    "room_number": "31",
-                    "guest_name": "Luiz Pessoa e Sueli pessoa",
-                    "category": "Baixa de Conta"
-                }
-            },
-            {
-                "id": "TX_20260206140055_1a6c3d",
-                "type": "sale",
-                "amount": 4037.637999999999,
-                "description": "Fechamento Conta Quarto 26 - Lais Ferraz e Lucas Ferraz",
-                "payment_method": "Credito Angelo",
-                "timestamp": "06/02/2026 14:00",
-                "user": "jose",
-                "details": {
-                    "room_number": "26",
-                    "guest_name": "Lais Ferraz e Lucas Ferraz",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "jose.silva": 449.1300000000001,
-                        "bartolomeu": 707.96,
-                        "adailton": 40.36999999999999,
-                        "welington": 1362.669,
-                        "erique": 736.1199999999999,
-                        "guilherme": 189.75000000000006,
-                        "edson": 39.16,
-                        "leo": 484.209
-                    }
-                }
-            },
-            {
-                "id": "TX_20260206152307_5d6c74",
-                "type": "sale",
-                "amount": 1166.469,
-                "description": "Fechamento Conta Quarto 16 - PATRICIA SILVA DE SOUZA PENA ",
-                "payment_method": "Credito Angelo",
-                "timestamp": "06/02/2026 15:23",
-                "user": "jose",
-                "details": {
-                    "room_number": "16",
-                    "guest_name": "PATRICIA SILVA DE SOUZA PENA ",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "adailton": 255.64000000000001,
-                        "welington": 34.870000000000005,
-                        "filipe": 247.159,
-                        "jose.santos": 110.88000000000001,
-                        "guilherme": 18.59,
-                        "jose.silva": 18.59,
-                        "edson": 209.88000000000002,
-                        "luiz": 98.89,
-                        "leo": 129.47
-                    }
-                }
-            },
-            {
-                "id": "TX_20260206163317_abe47e",
-                "type": "sale",
-                "amount": 1503.625,
-                "description": "Fechamento Conta Quarto 34 - Lilian Aragão e Sergio Aragão",
-                "payment_method": "Credito Angelo",
-                "timestamp": "06/02/2026 16:33",
-                "user": "jose",
-                "details": {
-                    "room_number": "34",
-                    "guest_name": "Lilian Aragão e Sergio Aragão",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "bartolomeu": 233.959,
-                        "erique": 30.58,
-                        "welington": 381.01800000000003,
-                        "filipe": 76.66999999999999,
-                        "jose.santos": 9.79,
-                        "adailton": 238.35899999999998,
-                        "guilherme": 219.769,
-                        "leo": 197.78000000000003
-                    }
-                }
-            }
-        ],
-        "status": "closed",
-        "closed_at": "06/02/2026 22:05",
-        "closing_balance": 7265.11,
-        "difference": -711.3219999999992,
-        "closed_by": "priscila",
-        "difference_approved": true
-    },
-    {
         "id": "CASHIER_REST_20260206141318_carlos",
         "user": "carlos",
         "type": "restaurant_service",
@@ -2650,163 +1831,6 @@
         "transactions": []
     },
     {
-        "id": "SESSION_GUEST_CONSUMPTION_20260207101924_jose",
-        "user": "jose",
-        "type": "guest_consumption",
-        "opened_at": "07/02/2026 10:19",
-        "opening_balance": 0.0,
-        "transactions": [
-            {
-                "id": "TX_20260207101957_80730e",
-                "type": "sale",
-                "amount": 1324.9499999999998,
-                "description": "Fechamento Conta Quarto 14 - Maria ligia, Lucidalva maria, Raul Gomes",
-                "payment_method": "PIX CNPJ 28952732000109",
-                "timestamp": "07/02/2026 10:19",
-                "user": "jose",
-                "details": {
-                    "room_number": "14",
-                    "guest_name": "Maria ligia, Lucidalva maria, Raul Gomes",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "leo": 321.20000000000005,
-                        "adailton": 233.75000000000003,
-                        "carlos": 569.25,
-                        "erique": 56.980000000000004,
-                        "filipe": 55.77
-                    }
-                }
-            },
-            {
-                "id": "TX_20260207105932_152fb0",
-                "type": "sale",
-                "amount": 2914.728,
-                "description": "Fechamento Conta Quarto 32 - Giovanna Mori e Hassene Bchir",
-                "payment_method": "Credito Angelo",
-                "timestamp": "07/02/2026 10:59",
-                "user": "jose",
-                "details": {
-                    "room_number": "32",
-                    "guest_name": "Giovanna Mori e Hassene Bchir",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "welington": 1988.939,
-                        "henrique": 53.57000000000001,
-                        "edson": 193.38000000000002,
-                        "adailton": 443.399,
-                        "filipe": 9.79,
-                        "erique": 35.97,
-                        "jose.santos": 108.68
-                    }
-                }
-            },
-            {
-                "id": "TX_20260207211846_aa3be9",
-                "type": "sale",
-                "amount": 875.9299999999998,
-                "description": "Fechamento Conta Quarto 01 - Lorena Araujo E GUILHERME FERRAZ",
-                "payment_method": "Credito Angelo",
-                "timestamp": "07/02/2026 21:18",
-                "user": "priscila",
-                "details": {
-                    "room_number": "01",
-                    "guest_name": "Lorena Araujo E GUILHERME FERRAZ",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "jose.santos": 50.37999999999998,
-                        "filipe": 18.589999999999993,
-                        "leo": 54.669999999999995,
-                        "welington": 79.97,
-                        "edson": 125.95000000000005,
-                        "erique": 113.96000000000004,
-                        "adailton": 190.9600000000001,
-                        "henrique": 241.4500000000001
-                    }
-                }
-            },
-            {
-                "id": "TX_20260207211918_80afa8",
-                "type": "sale",
-                "amount": 741.82,
-                "description": "Fechamento Conta Quarto 02 - Laura Melo e Eduardo Bona",
-                "payment_method": "Credito Angelo",
-                "timestamp": "07/02/2026 21:19",
-                "user": "priscila",
-                "details": {
-                    "room_number": "02",
-                    "guest_name": "Laura Melo e Eduardo Bona",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "carlos": 9.790000000000001,
-                        "leo": 590.5899999999999,
-                        "edson": 72.15999999999998,
-                        "filipe": 18.589999999999993,
-                        "erique": 42.79
-                    }
-                }
-            },
-            {
-                "id": "TX_20260207212058_6e2263",
-                "type": "sale",
-                "amount": 1301.17,
-                "description": "Fechamento Conta Quarto 03 - RENATA MARINHO e Carlos Eduardo",
-                "payment_method": "Credito Angelo",
-                "timestamp": "07/02/2026 21:20",
-                "user": "priscila",
-                "details": {
-                    "room_number": "03",
-                    "guest_name": "RENATA MARINHO e Carlos Eduardo",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "filipe": 202.72528868360277,
-                        "adailton": 266.5619053117782,
-                        "erique": 302.14391321071344,
-                        "edson": 150.54692511997717,
-                        "leo": 154.77000000000004,
-                        "jose.santos": 39.38,
-                        "welington": 46.97,
-                        "henrique": 121.17196767392832
-                    }
-                }
-            },
-            {
-                "id": "TX_20260207212308_115656",
-                "type": "sale",
-                "amount": 1015.17,
-                "description": "Fechamento Conta Quarto 35 - LEONIDAS BRITO e Iluska Borges",
-                "payment_method": "Dinheiro",
-                "timestamp": "07/02/2026 21:23",
-                "user": "priscila",
-                "details": {
-                    "room_number": "35",
-                    "guest_name": "LEONIDAS BRITO e Iluska Borges",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "leo": 581.57,
-                        "filipe": 20.79,
-                        "edson": 38.39,
-                        "bruno": 17.380000000000003,
-                        "adailton": 339.24
-                    }
-                }
-            },
-            {
-                "id": "TRANS_20260207212725",
-                "type": "out",
-                "category": "Sangria",
-                "description": "950 pago hoje e 15 reais foi junto com a estadia ",
-                "amount": 965.0,
-                "payment_method": "Dinheiro",
-                "time": "21:27"
-            }
-        ],
-        "status": "closed",
-        "closed_at": "07/02/2026 22:29",
-        "closing_balance": 7208.77,
-        "difference": 0.0020000000004074536,
-        "closed_by": "priscila"
-    },
-    {
         "id": "CASHIER_REST_20260207102224_guilherme",
         "user": "guilherme",
         "type": "restaurant_service",
@@ -3144,173 +2168,6 @@
         ]
     },
     {
-        "id": "SESSION_GUEST_CONSUMPTION_20260208075001_jose",
-        "user": "jose",
-        "type": "guest_consumption",
-        "opened_at": "08/02/2026 07:50",
-        "opening_balance": 0.0,
-        "transactions": [
-            {
-                "id": "TX_20260208105043_7ad554",
-                "type": "sale",
-                "amount": 158.93,
-                "description": "Fechamento Conta Quarto 31 - Carolina Almeida e Nicole sartor ",
-                "payment_method": "Debito Angelo",
-                "timestamp": "08/02/2026 10:50",
-                "user": "jose",
-                "details": {
-                    "room_number": "31",
-                    "guest_name": "Carolina Almeida e Nicole sartor ",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "jose.santos": 55.77,
-                        "leo": 21.78,
-                        "edson": 73.47999999999999
-                    }
-                }
-            },
-            {
-                "id": "TX_20260208110601_e75ab8",
-                "type": "sale",
-                "amount": 1177.9899999999998,
-                "description": "Fechamento Conta Quarto 12 - Antonio e Maria apareceida ",
-                "payment_method": "Credito Angelo",
-                "timestamp": "08/02/2026 11:06",
-                "user": "jose",
-                "details": {
-                    "room_number": "12",
-                    "guest_name": "Antonio e Maria apareceida ",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "erique": 428.4000938201102,
-                        "adailton": 68.58669794003673,
-                        "carlos": 84.15000000000003,
-                        "guilherme": 11.990000000000006,
-                        "jose.santos": 18.590000000000007,
-                        "dudu": 55.252969610442584,
-                        "leo": 20.59726086069753,
-                        "welington": 446.92297776871305
-                    }
-                }
-            },
-            {
-                "id": "TX_20260208110655_7ba858",
-                "type": "sale",
-                "amount": 506.49,
-                "description": "Fechamento Conta Quarto 15 - Vinicius e Thais ",
-                "payment_method": "Credito Angelo",
-                "timestamp": "08/02/2026 11:06",
-                "user": "jose",
-                "details": {
-                    "room_number": "15",
-                    "guest_name": "Vinicius e Thais ",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "welington": 256.8515592313306,
-                        "leo": 240.73844076866942
-                    }
-                }
-            },
-            {
-                "id": "TX_20260208121543_ed20f8",
-                "type": "sale",
-                "amount": 199.43,
-                "description": "Fechamento Conta Quarto 14 - Lineu e Karla",
-                "payment_method": "Credito Angelo",
-                "timestamp": "08/02/2026 12:15",
-                "user": "jose",
-                "details": {
-                    "room_number": "14",
-                    "guest_name": "Lineu e Karla",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "welington": 179.85,
-                        "erique": 9.790000000000001
-                    }
-                }
-            },
-            {
-                "id": "TX_20260208152650_dfb4b6",
-                "type": "sale",
-                "amount": 766.7900000000001,
-                "description": "Fechamento Conta Quarto 16 - katia ferraz E RITA DE CASSIA",
-                "payment_method": "Credito Angelo",
-                "timestamp": "08/02/2026 15:26",
-                "user": "jose",
-                "details": {
-                    "room_number": "16",
-                    "guest_name": "katia ferraz E RITA DE CASSIA",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "jose.santos": 153.77999999999997,
-                        "leo": 89.75999999999998,
-                        "welington": 299.42,
-                        "erique": 23.980000000000004,
-                        "dudu": 18.59,
-                        "adailton": 27.389999999999997,
-                        "edson": 136.07000000000002
-                    }
-                }
-            },
-            {
-                "id": "TX_20260208160934_4c7cfe",
-                "type": "sale",
-                "amount": 1909.6689999999999,
-                "description": "Fechamento Conta Quarto 17 - ANGELO LEANDRO E MARIA FERNANDA",
-                "payment_method": "Credito Angelo",
-                "timestamp": "08/02/2026 16:09",
-                "user": "jose",
-                "details": {
-                    "room_number": "17",
-                    "guest_name": "ANGELO LEANDRO E MARIA FERNANDA",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "jose.silva": 493.68,
-                        "welington": 98.56,
-                        "guilherme": 122.87,
-                        "adailton": 162.02999999999997,
-                        "edson": 117.48000000000002,
-                        "filipe": 18.59,
-                        "erique": 511.159,
-                        "henrique": 58.96000000000001,
-                        "leo": 281.05000000000007,
-                        "dudu": 18.590000000000003
-                    }
-                }
-            },
-            {
-                "id": "TRANS_20260208163654_OUT",
-                "document_id": "20260208163654",
-                "type": "out",
-                "category": "Transferência Enviada",
-                "amount": 19.3,
-                "description": "Transferência para restaurant_service: Teste",
-                "payment_method": "Transferência",
-                "timestamp": "08/02/2026 16:36",
-                "time": "16:36",
-                "user": "dudu"
-            },
-            {
-                "id": "TRANS_20260208163741_IN",
-                "document_id": "20260208163741",
-                "type": "in",
-                "category": "Transferência Recebida",
-                "amount": 19.3,
-                "description": "Transferência de restaurant: Teste devolução ",
-                "payment_method": "Transferência",
-                "timestamp": "08/02/2026 16:37",
-                "time": "16:37",
-                "user": "dudu"
-            }
-        ],
-        "status": "closed",
-        "closed_at": "08/02/2026 19:43",
-        "closing_balance": 100.0,
-        "difference": -4619.299,
-        "closed_by": "Angelo",
-        "difference_approved": true
-    },
-    {
         "id": "CASHIER_REST_20260208093855_guilherme",
         "user": "guilherme",
         "type": "restaurant_service",
@@ -3438,75 +2295,6 @@
                 "user": "dudu"
             }
         ]
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260209084702_alan",
-        "user": "alan",
-        "type": "guest_consumption",
-        "opened_at": "09/02/2026 08:47",
-        "opening_balance": 932.0,
-        "transactions": [
-            {
-                "id": "TX_20260209084726_4d1e84",
-                "type": "sale",
-                "amount": 2767.71,
-                "description": "Fechamento Conta Quarto 21 - Milton George Mantau e Rúbia Gomes",
-                "payment_method": "Credito Angelo",
-                "timestamp": "09/02/2026 08:47",
-                "user": "alan",
-                "details": {
-                    "room_number": "21",
-                    "guest_name": "Milton George Mantau e Rúbia Gomes",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "adailton": 296.78,
-                        "carlos": 155.32000000000002,
-                        "filipe": 497.75,
-                        "leo": 341.1544324324325,
-                        "erique": 445.42436679238995,
-                        "jose.santos": 275.55,
-                        "welington": 601.8507716096976,
-                        "edson": 113.38042916548002
-                    }
-                }
-            },
-            {
-                "id": "TX_20260209101857_f80e2a",
-                "type": "sale",
-                "amount": 1334.39,
-                "description": "Fechamento Conta Quarto 33 -  SILAS SANTIAGO e Ivone Aparecida ",
-                "payment_method": "Credito Angelo",
-                "timestamp": "09/02/2026 10:18",
-                "user": "alan",
-                "details": {
-                    "room_number": "33",
-                    "guest_name": " SILAS SANTIAGO e Ivone Aparecida ",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "leo": 306.67999999999995,
-                        "carlos": 352.33,
-                        "erique": 35.970000000000006,
-                        "welington": 253.0,
-                        "edson": 10.89,
-                        "henrique": 250.25000000000006
-                    }
-                }
-            },
-            {
-                "id": "TRANS_20260209214220",
-                "type": "out",
-                "category": "Sangria",
-                "description": "caixa serviço ",
-                "amount": 932.0,
-                "payment_method": "Dinheiro",
-                "time": "21:42"
-            }
-        ],
-        "status": "closed",
-        "closed_at": "09/02/2026 21:46",
-        "closing_balance": 4102.1,
-        "difference": 0.0,
-        "closed_by": "priscila"
     },
     {
         "id": "CASHIER_REST_20260209094233_guilherme",
@@ -3720,129 +2508,6 @@
                 }
             }
         ]
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260210084701_jose",
-        "user": "jose",
-        "type": "guest_consumption",
-        "opened_at": "10/02/2026 08:47",
-        "opening_balance": 0.0,
-        "transactions": [
-            {
-                "id": "TX_20260210095136_e80412",
-                "type": "sale",
-                "amount": 244.86000000000004,
-                "description": "Fechamento Conta Quarto 24 - Nadirce Maria e Gabriel Sperdutti",
-                "payment_method": "Credito Angelo",
-                "timestamp": "10/02/2026 09:51",
-                "user": "jose",
-                "details": {
-                    "room_number": "24",
-                    "guest_name": "Nadirce Maria e Gabriel Sperdutti",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "henrique": 109.77999999999997,
-                        "welington": 18.589999999999993,
-                        "leo": 18.589999999999993
-                    }
-                }
-            },
-            {
-                "id": "TX_20260210095157_d6c01f",
-                "type": "sale",
-                "amount": 5400.111999999998,
-                "description": "Fechamento Conta Quarto 22 - Victor Alexandre  e Milena Azevedo ",
-                "payment_method": "Credito Angelo",
-                "timestamp": "10/02/2026 09:51",
-                "user": "jose",
-                "details": {
-                    "room_number": "22",
-                    "guest_name": "Victor Alexandre  e Milena Azevedo ",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "welington": 2683.9450000000006,
-                        "erique": 342.21000000000015,
-                        "adailton": 459.77799999999996,
-                        "leo": 1147.509,
-                        "carlos": 306.13000000000005,
-                        "jose.santos": 18.59,
-                        "edson": 74.36000000000001,
-                        "dudu": 18.590000000000003,
-                        "henrique": 303.71000000000015,
-                        "filipe": 18.590000000000007
-                    }
-                }
-            },
-            {
-                "id": "TX_20260210110925_ea0297",
-                "type": "sale",
-                "amount": 1421.17,
-                "description": "Fechamento Conta Quarto 12 - Helena e Carlos",
-                "payment_method": "Credito Angelo",
-                "timestamp": "10/02/2026 11:09",
-                "user": "jose",
-                "details": {
-                    "room_number": "12",
-                    "guest_name": "Helena e Carlos",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "erique": 233.86000000000004,
-                        "leo": 66.66,
-                        "welington": 680.3500000000001,
-                        "filipe": 423.5
-                    }
-                }
-            },
-            {
-                "id": "TX_20260210111421_f61bb6",
-                "type": "sale",
-                "amount": 805.61,
-                "description": "Fechamento Conta Quarto 11 - Elga, Clauber e Ana Loren",
-                "payment_method": "Credito Angelo",
-                "timestamp": "10/02/2026 11:14",
-                "user": "jose",
-                "details": {
-                    "room_number": "11",
-                    "guest_name": "Elga, Clauber e Ana Loren",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "erique": 169.83999999999997,
-                        "adailton": 31.79,
-                        "leo": 198.44,
-                        "welington": 327.57,
-                        "henrique": 21.78,
-                        "filipe": 38.39
-                    }
-                }
-            },
-            {
-                "id": "TX_20260210124746_06a638",
-                "type": "sale",
-                "amount": 1337.26,
-                "description": "Fechamento Conta Quarto 23 - PATRICIA PARISI",
-                "payment_method": "Credito Angelo",
-                "timestamp": "10/02/2026 12:47",
-                "user": "jose",
-                "details": {
-                    "room_number": "23",
-                    "guest_name": "PATRICIA PARISI",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "welington": 253.55,
-                        "leo": 417.12000000000006,
-                        "jose.santos": 133.98000000000002,
-                        "edson": 212.96,
-                        "erique": 188.87,
-                        "henrique": 121.88000000000001
-                    }
-                }
-            }
-        ],
-        "status": "closed",
-        "closed_at": "10/02/2026 22:14",
-        "closing_balance": 9209.01,
-        "difference": -0.001999999996769475,
-        "closed_by": "priscila"
     },
     {
         "id": "CASHIER_REST_20260210100442_guilherme",
@@ -4153,83 +2818,6 @@
         ]
     },
     {
-        "id": "SESSION_GUEST_CONSUMPTION_20260211082347_luiz",
-        "user": "luiz",
-        "type": "guest_consumption",
-        "opened_at": "11/02/2026 08:23",
-        "opening_balance": 0.0,
-        "transactions": [
-            {
-                "id": "TX_20260211083007_b12c62",
-                "type": "sale",
-                "amount": 238.70000000000005,
-                "description": "Fechamento Conta Quarto 25 - WASHINGTON E ANA CLARA",
-                "payment_method": "Credito Angelo",
-                "timestamp": "11/02/2026 08:30",
-                "user": "luiz",
-                "details": {
-                    "room_number": "25",
-                    "guest_name": "WASHINGTON E ANA CLARA",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "henrique": 48.07,
-                        "adailton": 48.17999999999999,
-                        "edson": 11.99,
-                        "welington": 107.58,
-                        "erique": 11.99
-                    }
-                }
-            },
-            {
-                "id": "TX_20260211104151_9ffbc1",
-                "type": "sale",
-                "amount": 1133.1,
-                "description": "Fechamento Conta Quarto 32 - Laerte e Juliana",
-                "payment_method": "Credito Angelo",
-                "timestamp": "11/02/2026 10:41",
-                "user": "luiz",
-                "details": {
-                    "room_number": "32",
-                    "guest_name": "Laerte e Juliana",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "erique": 91.74000000000001,
-                        "henrique": 270.49,
-                        "edson": 30.580000000000002,
-                        "leo": 96.47,
-                        "welington": 439.3400000000001,
-                        "adailton": 116.38000000000002
-                    }
-                }
-            },
-            {
-                "id": "TX_20260211220946_37b28b",
-                "type": "sale",
-                "amount": 946.2799999999999,
-                "description": "Fechamento Conta Quarto 35 - Dyexon Oliveira e Cristiane Gomes",
-                "payment_method": "Debito Angelo",
-                "timestamp": "11/02/2026 22:09",
-                "user": "bruno",
-                "details": {
-                    "room_number": "35",
-                    "guest_name": "Dyexon Oliveira e Cristiane Gomes",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "erique": 447.4800000000002,
-                        "adailton": 325.27,
-                        "henrique": 52.470000000000006,
-                        "edson": 76.56
-                    }
-                }
-            }
-        ],
-        "status": "closed",
-        "closed_at": "11/02/2026 22:23",
-        "closing_balance": 2318.08,
-        "difference": 0.0,
-        "closed_by": "bruno"
-    },
-    {
         "id": "CASHIER_REST_20260211084229_guilherme",
         "user": "guilherme",
         "type": "restaurant_service",
@@ -4381,119 +2969,6 @@
         ]
     },
     {
-        "id": "SESSION_GUEST_CONSUMPTION_20260212021332_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "12/02/2026 02:13",
-        "opening_balance": 100.0,
-        "transactions": [],
-        "status": "closed",
-        "closed_at": "12/02/2026 02:13",
-        "closing_balance": 100.0,
-        "difference": 0.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260212085623_jose",
-        "user": "jose",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "12/02/2026 08:56",
-        "opening_balance": 0.0,
-        "transactions": [
-            {
-                "id": "TX_20260212111644_f9ed4c",
-                "type": "sale",
-                "amount": 811.8799999999999,
-                "description": "Fechamento Conta Quarto 22 - FILIPE E SANDRO",
-                "payment_method": "Credito Angelo",
-                "timestamp": "12/02/2026 11:16",
-                "user": "jose",
-                "details": {
-                    "room_number": "22",
-                    "guest_name": "FILIPE E SANDRO",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "henrique": 229.79000000000008,
-                        "dudu": 229.79000000000008,
-                        "welington": 315.7
-                    }
-                }
-            },
-            {
-                "id": "TX_20260212112138_5b778b",
-                "type": "sale",
-                "amount": 1163.0699999999997,
-                "description": "Fechamento Conta Quarto 24 - SAMUEL E MAYKON",
-                "payment_method": "Credito Angelo",
-                "timestamp": "12/02/2026 11:21",
-                "user": "jose",
-                "details": {
-                    "room_number": "24",
-                    "guest_name": "SAMUEL E MAYKON",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "henrique": 361.6800000000001,
-                        "adailton": 262.35000000000014,
-                        "welington": 402.38000000000005,
-                        "guilherme": 74.36000000000003
-                    }
-                }
-            },
-            {
-                "id": "TX_20260212114707_5d44b7",
-                "type": "sale",
-                "amount": 482.51,
-                "description": "Fechamento Conta Quarto 21 - JULIANA E CLAUDIO",
-                "payment_method": "Credito Angelo",
-                "timestamp": "12/02/2026 11:47",
-                "user": "jose",
-                "details": {
-                    "room_number": "21",
-                    "guest_name": "JULIANA E CLAUDIO",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "adailton": 18.59,
-                        "henrique": 18.59,
-                        "guilherme": 18.59,
-                        "dudu": 198.0,
-                        "welington": 126.17000000000002,
-                        "leo": 37.18,
-                        "Angelo": 11.99
-                    }
-                }
-            },
-            {
-                "id": "TX_20260212165732_89356e",
-                "type": "sale",
-                "amount": 811.9090000000001,
-                "description": "Fechamento Conta Quarto 34 - Lilian Aragão e Sergio Aragão",
-                "payment_method": "Credito Angelo",
-                "timestamp": "12/02/2026 16:57",
-                "user": "bruno",
-                "details": {
-                    "room_number": "34",
-                    "guest_name": "Lilian Aragão e Sergio Aragão",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "filipe": 30.58,
-                        "edson": 30.58,
-                        "henrique": 42.57,
-                        "erique": 219.56000000000003,
-                        "adailton": 301.719
-                    }
-                }
-            }
-        ],
-        "status": "closed",
-        "closed_at": "12/02/2026 21:50",
-        "closing_balance": 3419.37,
-        "difference": 3419.37,
-        "closed_by": "bruno",
-        "difference_approved": true
-    },
-    {
         "id": "SESSION_RESTAURANT_20260212085648_dudu",
         "user": "dudu",
         "type": "restaurant",
@@ -4642,20 +3117,6 @@
         "difference": 2383.57,
         "closed_by": "filipe",
         "difference_approved": true
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260213080515_luiz",
-        "user": "luiz",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "13/02/2026 08:05",
-        "opening_balance": 0.0,
-        "transactions": [],
-        "status": "closed",
-        "closed_at": "13/02/2026 22:19",
-        "closing_balance": 0.0,
-        "difference": 0.0,
-        "closed_by": "priscila"
     },
     {
         "id": "SESSION_RESTAURANT_20260213104429_guilherme",
@@ -4837,64 +3298,6 @@
         "closing_balance": 3721.13,
         "difference": 3479.38,
         "closed_by": "dudu",
-        "difference_approved": true
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260214095042_luiz",
-        "user": "luiz",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "14/02/2026 09:50",
-        "opening_balance": 0.0,
-        "transactions": [
-            {
-                "id": "TX_20260214095105_73b51f",
-                "type": "sale",
-                "amount": 595.58,
-                "description": "Fechamento Conta Quarto 34 - Lilian Aragão e Sergio Aragão",
-                "payment_method": "Credito Angelo",
-                "timestamp": "14/02/2026 09:51",
-                "user": "luiz",
-                "details": {
-                    "room_number": "34",
-                    "guest_name": "Lilian Aragão e Sergio Aragão",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "edson": 450.12,
-                        "erique": 61.379999999999995,
-                        "dudu": 21.78
-                    }
-                }
-            },
-            {
-                "id": "TX_20260214112302_70bea2",
-                "type": "sale",
-                "amount": 2052.2259999999997,
-                "description": "Fechamento Conta Quarto 15 - Rodrigo Escudeiro e Catalina Javiera",
-                "payment_method": "Credito Angelo",
-                "timestamp": "14/02/2026 11:23",
-                "user": "luiz",
-                "details": {
-                    "room_number": "15",
-                    "guest_name": "Rodrigo Escudeiro e Catalina Javiera",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "henrique": 545.27,
-                        "erique": 655.9079999999999,
-                        "welington": 156.96,
-                        "filipe": 104.489,
-                        "guilherme": 55.769999999999996,
-                        "adailton": 177.969,
-                        "edson": 156.85999999999999
-                    }
-                }
-            }
-        ],
-        "status": "closed",
-        "closed_at": "14/02/2026 21:49",
-        "closing_balance": 2647.81,
-        "difference": 2647.81,
-        "closed_by": "priscila",
         "difference_approved": true
     },
     {
@@ -5710,77 +4113,6 @@
         "difference_approved": true
     },
     {
-        "id": "SESSION_GUEST_CONSUMPTION_20260215144727_priscila",
-        "user": "priscila",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "15/02/2026 14:47",
-        "opening_balance": 0.0,
-        "transactions": [
-            {
-                "id": "TX_20260215214136_faac42",
-                "type": "sale",
-                "amount": 1310.808,
-                "description": "Fechamento Conta Quarto 31 - GUILHERME E CASSIA",
-                "payment_method": "Dinheiro",
-                "timestamp": "15/02/2026 21:41",
-                "user": "priscila",
-                "details": {
-                    "room_number": "31",
-                    "guest_name": "GUILHERME E CASSIA",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "erique": 23.98,
-                        "adailton": 268.40000000000003,
-                        "henrique": 36.19,
-                        "leo": 267.949,
-                        "welington": 544.049,
-                        "guilherme": 124.85000000000001
-                    }
-                }
-            },
-            {
-                "id": "TX_20260215214400_b6ba10",
-                "type": "out",
-                "amount": 3.81,
-                "description": "não deu para dar desconto na mesa ap31guilherme ",
-                "payment_method": "Dinheiro",
-                "timestamp": "15/02/2026 21:44",
-                "user": "priscila",
-                "details": {
-                    "idempotency_key": "beda4a62-0dee-44eb-9035-5974355872a3"
-                }
-            },
-            {
-                "id": "TX_20260215220722_139ffe",
-                "type": "sale",
-                "amount": 820.03,
-                "description": "Fechamento Conta Quarto 16 - HELIO MISAN e  Anna Maria",
-                "payment_method": "Debito Angelo",
-                "timestamp": "15/02/2026 22:07",
-                "user": "priscila",
-                "details": {
-                    "room_number": "16",
-                    "guest_name": "HELIO MISAN e  Anna Maria",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "welington": 602.9100000000001,
-                        "leo": 63.360000000000014,
-                        "filipe": 18.59,
-                        "adailton": 107.58,
-                        "eduardo": 9.790000000000001
-                    }
-                }
-            }
-        ],
-        "status": "closed",
-        "closed_at": "15/02/2026 22:21",
-        "closing_balance": 820.03,
-        "difference": -486.9680000000001,
-        "closed_by": "priscila",
-        "difference_approved": true
-    },
-    {
         "id": "SESSION_RESTAURANT_20260216073532_Angelo",
         "user": "Angelo",
         "type": "restaurant",
@@ -5793,109 +4125,6 @@
         "closing_balance": 0.0,
         "difference": 0.0,
         "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260216073553_Angelo",
-        "user": "Angelo",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "16/02/2026 07:35",
-        "opening_balance": 0.0,
-        "transactions": [],
-        "status": "closed",
-        "closed_at": "16/02/2026 07:36",
-        "closing_balance": 0.0,
-        "difference": 0.0,
-        "closed_by": "Angelo"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260216084720_luiz",
-        "user": "luiz",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "16/02/2026 08:47",
-        "opening_balance": 0.0,
-        "transactions": [
-            {
-                "id": "TX_20260216095933_d5ec2c",
-                "type": "sale",
-                "amount": 2325.54,
-                "description": "Fechamento Conta Quarto 17 - KATIA E RITA",
-                "payment_method": "Credito Angelo",
-                "timestamp": "16/02/2026 09:59",
-                "user": "luiz",
-                "details": {
-                    "room_number": "17",
-                    "guest_name": "KATIA E RITA",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "edson": 224.95000000000002,
-                        "welington": 552.41,
-                        "leo": 490.82000000000005,
-                        "henrique": 267.23278350515466,
-                        "erique": 346.83,
-                        "filipe": 120.67000000000002,
-                        "adailton": 226.54721649484534,
-                        "guilherme": 42.67999999999999
-                    }
-                }
-            },
-            {
-                "id": "TX_20260216100001_60ca3b",
-                "type": "sale",
-                "amount": 3343.847,
-                "description": "Fechamento Conta Quarto 26 - ANA ELISABETH E MARIA ISABEL",
-                "payment_method": "Credito Angelo",
-                "timestamp": "16/02/2026 10:00",
-                "user": "luiz",
-                "details": {
-                    "room_number": "26",
-                    "guest_name": "ANA ELISABETH E MARIA ISABEL",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "welington": 801.68,
-                        "leo": 629.948,
-                        "erique": 479.49,
-                        "edson": 474.97999999999996,
-                        "henrique": 490.6000000000001,
-                        "adailton": 302.37899999999996,
-                        "filipe": 57.969999999999985
-                    }
-                }
-            },
-            {
-                "id": "TX_20260216204524_07efd8",
-                "type": "sale",
-                "amount": 2279.0699999999997,
-                "description": "Fechamento Conta Quarto 23 - JULIANA DE OLIVEIRA e ROMAN SLONIEWSKI",
-                "payment_method": "Credito Angelo",
-                "timestamp": "16/02/2026 20:45",
-                "user": "priscila",
-                "details": {
-                    "room_number": "23",
-                    "guest_name": "JULIANA DE OLIVEIRA e ROMAN SLONIEWSKI",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "welington": 852.28,
-                        "edson": 226.27000000000004,
-                        "erique": 484.7700000000001,
-                        "henrique": 224.07000000000005,
-                        "guilherme": 152.35000000000002,
-                        "leo": 721.6000000000001,
-                        "filipe": 219.77999999999997,
-                        "adailton": 111.54000000000002
-                    }
-                }
-            }
-        ],
-        "status": "closed",
-        "closed_at": "16/02/2026 22:37",
-        "closing_balance": 7948.45,
-        "difference": 7948.45,
-        "closing_cash": 7948.45,
-        "closing_non_cash": 0.0,
-        "closed_by": "priscila",
-        "difference_approved": true
     },
     {
         "id": "SESSION_RESTAURANT_20260216085351_luiz",
@@ -6398,49 +4627,6 @@
         "difference_approved": true
     },
     {
-        "id": "SESSION_GUEST_CONSUMPTION_20260217083124_luiz",
-        "user": "luiz",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "17/02/2026 08:31",
-        "opening_balance": 0.0,
-        "transactions": [
-            {
-                "id": "TX_20260217104850_77ba91",
-                "type": "sale",
-                "amount": 2213.7899999999995,
-                "description": "Fechamento Conta Quarto 01 - Patricia Peres e Alexandre Araujo",
-                "payment_method": "Credito Angelo",
-                "timestamp": "17/02/2026 10:48",
-                "user": "luiz",
-                "details": {
-                    "room_number": "01",
-                    "guest_name": "Patricia Peres e Alexandre Araujo",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "welington": 845.46,
-                        "priscila": 54.78,
-                        "dudu": 74.36,
-                        "erique": 562.1,
-                        "adailton": 38.39000000000001,
-                        "filipe": 54.89000000000001,
-                        "edson": 605.8799999999999,
-                        "henrique": 253.66,
-                        "leo": 210.76000000000002
-                    }
-                }
-            }
-        ],
-        "status": "closed",
-        "closed_at": "17/02/2026 22:10",
-        "closing_balance": 2213.79,
-        "difference": 2213.79,
-        "closing_cash": 2213.79,
-        "closing_non_cash": 0.0,
-        "closed_by": "jose",
-        "difference_approved": true
-    },
-    {
         "id": "SESSION_RESTAURANT_20260217083750_luiz",
         "user": "luiz",
         "type": "restaurant",
@@ -6881,329 +5067,6 @@
         "closing_non_cash": 12332.66,
         "closed_by": "eduardo",
         "difference_approved": true
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260218084332_luiz",
-        "user": "luiz",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "18/02/2026 08:43",
-        "opening_balance": 0.0,
-        "transactions": [
-            {
-                "id": "TX_20260218091053_f579d5",
-                "type": "sale",
-                "amount": 1272.9199999999996,
-                "description": "Fechamento Conta Quarto 22 - Adriana e José",
-                "payment_method": "Credito Angelo",
-                "timestamp": "18/02/2026 09:10",
-                "user": "luiz",
-                "details": {
-                    "room_number": "22",
-                    "guest_name": "Adriana e José",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "guilherme": 172.92,
-                        "welington": 186.45,
-                        "henrique": 547.6900000000002,
-                        "edson": 18.59,
-                        "erique": 437.1400000000002,
-                        "adailton": 430.7600000000002,
-                        "filipe": 219.12000000000012
-                    }
-                }
-            },
-            {
-                "id": "TX_20260218093255_d736bc",
-                "type": "sale",
-                "amount": 2278.507,
-                "description": "Fechamento Conta Quarto 02 - ATIANE MONTEIRO E FABIO MONTEIRO",
-                "payment_method": "Credito Angelo",
-                "timestamp": "18/02/2026 09:32",
-                "user": "luiz",
-                "details": {
-                    "room_number": "02",
-                    "guest_name": "ATIANE MONTEIRO E FABIO MONTEIRO",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "adailton": 455.4,
-                        "welington": 1223.398,
-                        "edson": 185.35000000000002,
-                        "henrique": 808.1699999999998,
-                        "erique": 216.59000000000003,
-                        "leo": 567.358
-                    }
-                }
-            },
-            {
-                "id": "TX_20260218094959_d17ec7",
-                "type": "sale",
-                "amount": 2581.1399999999994,
-                "description": "Fechamento Conta Quarto 11 - Virginia Oswaldo e Ana Luiza",
-                "payment_method": "Credito Angelo",
-                "timestamp": "18/02/2026 09:49",
-                "user": "luiz",
-                "details": {
-                    "room_number": "11",
-                    "guest_name": "Virginia Oswaldo e Ana Luiza",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "adailton": 705.8699999999999,
-                        "erique": 512.2699999999999,
-                        "henrique": 350.9,
-                        "edson": 933.8999999999997,
-                        "leo": 515.5699999999999,
-                        "guilherme": 284.2399999999999,
-                        "welington": 434.16999999999985,
-                        "filipe": 197.77999999999997
-                    }
-                }
-            },
-            {
-                "id": "TX_20260218102440_4d5bca",
-                "type": "sale",
-                "amount": 1242.1000000000001,
-                "description": "Fechamento Conta Quarto 33 - PATRICIA Fruchtengarten  e RENATO FRUCHTENGARTEN",
-                "payment_method": "Credito Angelo",
-                "timestamp": "18/02/2026 10:24",
-                "user": "luiz",
-                "details": {
-                    "room_number": "33",
-                    "guest_name": "PATRICIA Fruchtengarten  e RENATO FRUCHTENGARTEN",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "leo": 248.05,
-                        "henrique": 213.72999999999988,
-                        "adailton": 330.33,
-                        "erique": 524.37,
-                        "filipe": 150.14999999999992,
-                        "edson": 67.64999999999996,
-                        "welington": 200.53
-                    }
-                }
-            },
-            {
-                "id": "TX_20260218104812_9148dd",
-                "type": "sale",
-                "amount": 1515.87,
-                "description": "Fechamento Conta Quarto 15 - Jessica E Walter",
-                "payment_method": "Credito Angelo",
-                "timestamp": "18/02/2026 10:48",
-                "user": "luiz",
-                "details": {
-                    "room_number": "15",
-                    "guest_name": "Jessica E Walter",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "erique": 432.84999999999997,
-                        "henrique": 348.47999999999996,
-                        "welington": 1241.24,
-                        "leo": 65.56,
-                        "filipe": 43.56000000000001,
-                        "adailton": 144.32,
-                        "edson": 122.75999999999999,
-                        "eduardo": 41.57999999999999
-                    }
-                }
-            },
-            {
-                "id": "TX_20260218113057_3949c4",
-                "type": "sale",
-                "amount": 1686.51,
-                "description": "Fechamento Conta Quarto 32 - JOÃO BATISTA e Marileia de Miranda",
-                "payment_method": "Credito Angelo",
-                "timestamp": "18/02/2026 11:30",
-                "user": "luiz",
-                "details": {
-                    "room_number": "32",
-                    "guest_name": "JOÃO BATISTA e Marileia de Miranda",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "erique": 84.14999999999999,
-                        "guilherme": 243.76000000000005,
-                        "leo": 312.17999999999995,
-                        "henrique": 505.34000000000015,
-                        "edson": 149.71000000000004,
-                        "adailton": 1018.0499999999998,
-                        "filipe": 28.380000000000006
-                    }
-                }
-            },
-            {
-                "id": "TX_20260218115304_4c602e",
-                "type": "sale",
-                "amount": 1096.32,
-                "description": "Fechamento Conta Quarto 34 - KELY E NILTON",
-                "payment_method": "Pix QR Angelo",
-                "timestamp": "18/02/2026 11:53",
-                "user": "luiz",
-                "details": {
-                    "room_number": "34",
-                    "guest_name": "KELY E NILTON",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "edson": 287.1,
-                        "filipe": 310.74999999999994,
-                        "erique": 218.45999999999992,
-                        "welington": 19.579999999999995,
-                        "leo": 827.4200000000001,
-                        "henrique": 19.580000000000005
-                    }
-                }
-            },
-            {
-                "id": "TX_20260218120835_f71e57",
-                "type": "sale",
-                "amount": 1181.7679999999998,
-                "description": "Fechamento Conta Quarto 16 - ALAN  E ROBERTO ",
-                "payment_method": "Credito Angelo",
-                "timestamp": "18/02/2026 12:08",
-                "user": "luiz",
-                "details": {
-                    "room_number": "16",
-                    "guest_name": "ALAN  E ROBERTO ",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "edson": 98.33999999999997,
-                        "welington": 1553.1559999999997,
-                        "erique": 109.33999999999999,
-                        "henrique": 439.3399999999999,
-                        "leo": 50.37999999999999
-                    }
-                }
-            },
-            {
-                "id": "TX_20260218122248_c44d39",
-                "type": "sale",
-                "amount": 2476.99,
-                "description": "Fechamento Conta Quarto 03 - Lucas e Natalia",
-                "payment_method": "Pix QR Angelo",
-                "timestamp": "18/02/2026 12:22",
-                "user": "luiz",
-                "details": {
-                    "room_number": "03",
-                    "guest_name": "Lucas e Natalia",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "filipe": 55.769999999999996,
-                        "welington": 1963.1699999999998,
-                        "henrique": 134.96999999999997,
-                        "edson": 133.31999999999996,
-                        "eduardo": 127.49000000000001,
-                        "erique": 340.2299999999999,
-                        "leo": 74.35999999999999,
-                        "guilherme": 159.9399999999999
-                    }
-                }
-            },
-            {
-                "id": "TX_20260218153500_17eb74",
-                "type": "sale",
-                "amount": 1862.38,
-                "description": "Fechamento Conta Quarto 35 - ERIKA FLENIK e Marco Aurélio",
-                "payment_method": "Credito Angelo",
-                "timestamp": "18/02/2026 15:35",
-                "user": "priscila",
-                "details": {
-                    "room_number": "35",
-                    "guest_name": "ERIKA FLENIK e Marco Aurélio",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "welington": 1233.7599999999998,
-                        "erique": 419.32000000000005,
-                        "henrique": 139.26,
-                        "edson": 219.67000000000002,
-                        "filipe": 37.18,
-                        "leo": 83.15999999999998,
-                        "adailton": 417.55999999999995,
-                        "guilherme": 32.779999999999994,
-                        "priscila": 9.790000000000001
-                    }
-                }
-            },
-            {
-                "id": "TX_20260218210054_bff947",
-                "type": "sale",
-                "amount": 1264.9589999999998,
-                "description": "Fechamento Conta Quarto 24 - PAULA BOSCHESI e Carolina Gomes",
-                "payment_method": "Credito Angelo",
-                "timestamp": "18/02/2026 21:00",
-                "user": "priscila",
-                "details": {
-                    "room_number": "24",
-                    "guest_name": "PAULA BOSCHESI e Carolina Gomes",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "filipe": 349.03000000000003,
-                        "adailton": 37.179999999999986,
-                        "henrique": 63.359999999999985,
-                        "welington": 115.93999999999998,
-                        "edson": 643.0805878462174,
-                        "erique": 38.84158141982035,
-                        "guilherme": 38.84158141982035,
-                        "leo": 98.34000000000002,
-                        "priscila": 162.58
-                    }
-                }
-            },
-            {
-                "id": "TX_20260218221912_a54cb1",
-                "type": "sale",
-                "amount": 1328.3799999999999,
-                "description": "Fechamento Conta Quarto 12 - Isabela Rocha e Edward Frank",
-                "payment_method": "Credito Angelo",
-                "timestamp": "18/02/2026 22:19",
-                "user": "priscila",
-                "details": {
-                    "room_number": "12",
-                    "guest_name": "Isabela Rocha e Edward Frank",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "erique": 521.9168010075567,
-                        "guilherme": 101.85999999999999,
-                        "leo": 31.68,
-                        "dudu": 106.48000000000002,
-                        "welington": 452.32,
-                        "filipe": 154.66,
-                        "edson": 56.75999999999999,
-                        "henrique": 23.98,
-                        "eduardo": 47.19
-                    }
-                }
-            },
-            {
-                "id": "TX_20260218222058_ead452",
-                "type": "sale",
-                "amount": 2495.72,
-                "description": "Fechamento Conta Quarto 14 - Adriana Rocha e Jorge Luiz",
-                "payment_method": "Credito Angelo",
-                "timestamp": "18/02/2026 22:20",
-                "user": "priscila",
-                "details": {
-                    "room_number": "14",
-                    "guest_name": "Adriana Rocha e Jorge Luiz",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "filipe": 259.92999999999995,
-                        "welington": 708.1800000000002,
-                        "henrique": 86.34999999999998,
-                        "leo": 272.25,
-                        "erique": 920.3699999999999,
-                        "adailton": 91.73999999999998,
-                        "guilherme": 354.74999999999994,
-                        "eduardo": 299.96999999999997,
-                        "edson": 18.589999999999996
-                    }
-                }
-            }
-        ],
-        "status": "closed",
-        "closed_at": "18/02/2026 22:42",
-        "closing_balance": 22283.57,
-        "difference": 0.0,
-        "closing_cash": 0.0,
-        "closing_non_cash": 22283.57,
-        "closed_by": "priscila"
     },
     {
         "id": "SESSION_RESTAURANT_20260218115810_luiz",
@@ -7698,90 +5561,6 @@
         "difference_approved": true
     },
     {
-        "id": "SESSION_GUEST_CONSUMPTION_20260219082756_priscila",
-        "user": "priscila",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "19/02/2026 08:27",
-        "opening_balance": 0.0,
-        "transactions": [
-            {
-                "id": "TX_20260219111533_96cf87",
-                "type": "sale",
-                "amount": 696.5,
-                "description": "Fechamento Conta Quarto 25 - CONSTANZA KERKHOFFS e Anibal Muñoz ",
-                "payment_method": "Credito Angelo",
-                "timestamp": "19/02/2026 11:15",
-                "user": "luiz",
-                "details": {
-                    "room_number": "25",
-                    "guest_name": "CONSTANZA KERKHOFFS e Anibal Muñoz ",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "leo": 194.04,
-                        "erique": 231.32999999999998,
-                        "filipe": 56.98,
-                        "adailton": 18.59,
-                        "edson": 189.75
-                    }
-                }
-            },
-            {
-                "id": "TX_20260219111553_7201b2",
-                "type": "sale",
-                "amount": 976.6669289940828,
-                "description": "Fechamento Conta Quarto 17 - ANDRE HOFMANN e Nicole Barbara",
-                "payment_method": "Credito Angelo",
-                "timestamp": "19/02/2026 11:15",
-                "user": "luiz",
-                "details": {
-                    "room_number": "17",
-                    "guest_name": "ANDRE HOFMANN e Nicole Barbara",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "welington": 918.3351901193935,
-                        "edson": 115.53236283743567,
-                        "leo": 80.95999999999998,
-                        "eduardo": 170.7199999999999,
-                        "henrique": 231.42899999999997
-                    }
-                }
-            },
-            {
-                "id": "TX_20260219214544_742b2a",
-                "type": "sale",
-                "amount": 1962.74,
-                "description": "Fechamento Conta Quarto 31 - Felipe Cristiano  e Thamiris leal",
-                "payment_method": "Credito Angelo",
-                "timestamp": "19/02/2026 21:45",
-                "user": "priscila",
-                "details": {
-                    "room_number": "31",
-                    "guest_name": "Felipe Cristiano  e Thamiris leal",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "welington": 295.34999999999997,
-                        "henrique": 506.7699999999998,
-                        "filipe": 670.6699999999997,
-                        "edson": 539.1099999999999,
-                        "eduardo": 564.2999999999998,
-                        "adailton": 32.67,
-                        "priscila": 197.78000000000003,
-                        "erique": 110.88000000000001,
-                        "leo": 197.89000000000001
-                    }
-                }
-            }
-        ],
-        "status": "closed",
-        "closed_at": "19/02/2026 22:29",
-        "closing_balance": 3635.91,
-        "difference": 0.0,
-        "closing_cash": 0.0,
-        "closing_non_cash": 3635.91,
-        "closed_by": "priscila"
-    },
-    {
         "id": "SESSION_RESTAURANT_20260219091351_luiz",
         "user": "luiz",
         "type": "restaurant",
@@ -8033,80 +5812,6 @@
         "closing_cash": 2102.0,
         "closing_non_cash": 6651.55,
         "closed_by": "filipe"
-    },
-    {
-        "id": "SESSION_GUEST_CONSUMPTION_20260220090407_luiz",
-        "user": "luiz",
-        "type": "guest_consumption",
-        "entity": "Hotel Almareia",
-        "opened_at": "20/02/2026 09:04",
-        "opening_balance": 0.0,
-        "transactions": [
-            {
-                "id": "TX_20260220095043_b01ae7",
-                "type": "sale",
-                "amount": 17.8,
-                "description": "Fechamento Conta Quarto 31 - Felipe Cristiano  e Thamiris leal",
-                "payment_method": "Credito Angelo",
-                "timestamp": "20/02/2026 09:50",
-                "user": "luiz",
-                "details": {
-                    "room_number": "31",
-                    "guest_name": "Felipe Cristiano  e Thamiris leal",
-                    "category": "Baixa de Conta",
-                    "service_fee_removed": true
-                }
-            },
-            {
-                "id": "TX_20260220110354_ab62f8",
-                "type": "sale",
-                "amount": 655.5699999999999,
-                "description": "Fechamento Conta Quarto 15 - José Mendes Freire Neto, Marília de Novaes",
-                "payment_method": "Credito Angelo",
-                "timestamp": "20/02/2026 11:03",
-                "user": "luiz",
-                "details": {
-                    "room_number": "15",
-                    "guest_name": "José Mendes Freire Neto, Marília de Novaes",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "henrique": 132.00000000000003,
-                        "erique": 41.58,
-                        "adailton": 96.47,
-                        "edson": 358.82
-                    }
-                }
-            },
-            {
-                "id": "TX_20260220113516_ead2b7",
-                "type": "sale",
-                "amount": 2408.08,
-                "description": "Fechamento Conta Quarto 21 - MAYSA, VALDESIR e MARLENE LIBERATI",
-                "payment_method": "Credito Angelo",
-                "timestamp": "20/02/2026 11:35",
-                "user": "luiz",
-                "details": {
-                    "room_number": "21",
-                    "guest_name": "MAYSA, VALDESIR e MARLENE LIBERATI",
-                    "category": "Baixa de Conta",
-                    "waiter_breakdown": {
-                        "erique": 406.45000000000005,
-                        "adailton": 160.16000000000003,
-                        "edson": 270.93,
-                        "welington": 211.42000000000002,
-                        "leo": 517.1099999999999,
-                        "henrique": 990.77
-                    }
-                }
-            }
-        ],
-        "status": "closed",
-        "closed_at": "20/02/2026 22:09",
-        "closing_balance": 3081.45,
-        "difference": 0.0,
-        "closing_cash": 0.0,
-        "closing_non_cash": 3081.45,
-        "closed_by": "priscila"
     },
     {
         "id": "SESSION_RESTAURANT_20260220104708_luiz",
@@ -8528,6 +6233,7 @@
         "closed_by": "eduardo"
     },
     {
+<<<<<<< HEAD
         "id": "SESSION_GUEST_CONSUMPTION_20260221084347_luiz",
         "user": "luiz",
         "type": "guest_consumption",
@@ -8603,6 +6309,8 @@
         "closed_by": "priscila"
     },
     {
+=======
+>>>>>>> decc2a1cf65dad5dc2f0d021d2907b436f457ba0
         "id": "SESSION_RESTAURANT_20260221114459_luiz",
         "user": "luiz",
         "type": "restaurant",
@@ -8830,6 +6538,7 @@
         "closed_by": "eduardo"
     },
     {
+<<<<<<< HEAD
         "id": "SESSION_GUEST_CONSUMPTION_20260222093831_luiz",
         "user": "luiz",
         "type": "guest_consumption",
@@ -9070,6 +6779,8 @@
         "closed_by": "priscila"
     },
     {
+=======
+>>>>>>> decc2a1cf65dad5dc2f0d021d2907b436f457ba0
         "id": "SESSION_RESTAURANT_20260222104625_guilherme",
         "user": "guilherme",
         "type": "restaurant",
@@ -9371,6 +7082,7 @@
         "closed_by": "eduardo"
     },
     {
+<<<<<<< HEAD
         "id": "SESSION_GUEST_CONSUMPTION_20260223080445_jose",
         "user": "jose",
         "type": "guest_consumption",
@@ -9487,6 +7199,8 @@
         "closed_by": "priscila"
     },
     {
+=======
+>>>>>>> decc2a1cf65dad5dc2f0d021d2907b436f457ba0
         "id": "SESSION_RESTAURANT_20260223130021_guilherme",
         "user": "guilherme",
         "type": "restaurant",
@@ -9664,6 +7378,7 @@
         "closed_by": "filipe"
     },
     {
+<<<<<<< HEAD
         "id": "SESSION_GUEST_CONSUMPTION_20260224085939_luiz",
         "user": "luiz",
         "type": "guest_consumption",
@@ -9705,6 +7420,8 @@
         "closed_by": "bruno"
     },
     {
+=======
+>>>>>>> decc2a1cf65dad5dc2f0d021d2907b436f457ba0
         "id": "SESSION_RESTAURANT_20260224090700_luiz",
         "user": "luiz",
         "type": "restaurant",
@@ -9896,6 +7613,7 @@
         "closed_by": "filipe"
     },
     {
+<<<<<<< HEAD
         "id": "SESSION_GUEST_CONSUMPTION_20260225080457_luiz",
         "user": "luiz",
         "type": "guest_consumption",
@@ -9958,6 +7676,8 @@
         "closed_by": "priscila"
     },
     {
+=======
+>>>>>>> decc2a1cf65dad5dc2f0d021d2907b436f457ba0
         "id": "SESSION_RESTAURANT_20260225082701_luiz",
         "user": "luiz",
         "type": "restaurant",
@@ -10139,6 +7859,7 @@
         "closed_by": "Angelo"
     },
     {
+<<<<<<< HEAD
         "id": "SESSION_GUEST_CONSUMPTION_20260226093614_luiz",
         "user": "luiz",
         "type": "guest_consumption",
@@ -10171,6 +7892,8 @@
         "closed_by": "priscila"
     },
     {
+=======
+>>>>>>> decc2a1cf65dad5dc2f0d021d2907b436f457ba0
         "id": "SESSION_RESTAURANT_20260226094104_luiz",
         "user": "luiz",
         "type": "restaurant",
@@ -10348,6 +8071,7 @@
         "closed_by": "filipe"
     },
     {
+<<<<<<< HEAD
         "id": "SESSION_GUEST_CONSUMPTION_20260227084654_luiz",
         "user": "luiz",
         "type": "guest_consumption",
@@ -10505,6 +8229,8 @@
         "closed_by": "priscila"
     },
     {
+=======
+>>>>>>> decc2a1cf65dad5dc2f0d021d2907b436f457ba0
         "id": "SESSION_RESTAURANT_20260227091153_luiz",
         "user": "luiz",
         "type": "restaurant",
@@ -10829,6 +8555,7 @@
         "difference": null
     },
     {
+<<<<<<< HEAD
         "id": "SESSION_GUEST_CONSUMPTION_20260228090522_luiz",
         "user": "luiz",
         "type": "guest_consumption",
@@ -10932,6 +8659,8 @@
         "closed_by": "priscila"
     },
     {
+=======
+>>>>>>> decc2a1cf65dad5dc2f0d021d2907b436f457ba0
         "id": "SESSION_RESTAURANT_20260228114324_luiz",
         "user": "luiz",
         "type": "restaurant",
@@ -11153,6 +8882,7 @@
                 "timestamp": "01/03/2026 12:50",
                 "user": "adailton",
                 "details": {}
+<<<<<<< HEAD
             },
             {
                 "id": "TX_20260301133910_eba947",
@@ -12310,11 +10040,50 @@
                 "details": {
                     "idempotency_key": "625a319a-5124-4435-bd13-529aa81f45cc"
                 }
+=======
+>>>>>>> decc2a1cf65dad5dc2f0d021d2907b436f457ba0
             }
         ],
         "status": "open",
         "closed_at": null,
         "closing_balance": null,
         "difference": null
+    },
+    {
+        "id": "SESSION_RESERVATION_CASHIER_20260301143054_Angelo",
+        "user": "Angelo",
+        "type": "reservation_cashier",
+        "entity": "Hotel Almareia",
+        "opened_at": "01/03/2026 14:30",
+        "opening_balance": 0.0,
+        "transactions": [],
+        "status": "open",
+        "closed_at": null,
+        "closing_balance": null,
+        "difference": null
+    },
+    {
+        "id": "sess_gc_cover",
+        "type": "guest_consumption",
+        "status": "open",
+        "transactions": [
+            {
+                "id": "TX_20260303112844_d8b080",
+                "type": "sale",
+                "amount": 426.0,
+                "description": "Fechamento Conta Quarto 101 - Cover Guest",
+                "payment_method": "Dinheiro",
+                "timestamp": "03/03/2026 11:28",
+                "user": "admin",
+                "details": {
+                    "room_number": "101",
+                    "guest_name": "Cover Guest",
+                    "category": "Baixa de Conta",
+                    "waiter_breakdown": {
+                        "Waiter A": 327.6923076923077
+                    }
+                }
+            }
+        ]
     }
 ]
