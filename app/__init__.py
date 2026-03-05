@@ -1,12 +1,13 @@
 import os
 import sys
-from flask import Flask
+from flask import Flask, redirect, url_for
 from app.models.database import db
 
 
 def create_app(config_name=None):
     app = Flask(__name__, template_folder='templates', static_folder='static')
     app.secret_key = os.environ.get('SECRET_KEY', 'chave_secreta_almareia_hotel')
+    app.config['EXTERNAL_OPEN_MODE'] = str(os.environ.get('ALMAREIA_EXTERNAL_OPEN_MODE', '0')).strip().lower() in ('1', 'true', 'yes', 'on')
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     data_dir = os.path.join(base_dir, 'data')
     db_path = os.path.join(data_dir, 'department_logs.db')
@@ -67,14 +68,86 @@ def create_app(config_name=None):
             print(f"Failed to start scheduler: {e}")
 
     import time
-    from flask import request, g
+    from flask import request, g, session
 
     @app.before_request
     def start_timer():
         g.start = time.time()
 
     @app.before_request
+    def external_open_access():
+        if not app.config.get('EXTERNAL_OPEN_MODE'):
+            return None
+        try:
+            users = load_users()
+        except Exception:
+            users = {}
+        open_user = 'admin'
+        if isinstance(users, dict) and users:
+            if open_user not in users:
+                admin_user = next(
+                    (
+                        uname for uname, udata in users.items()
+                        if isinstance(udata, dict) and 'admin' in str(udata.get('role', '')).lower()
+                    ),
+                    None
+                )
+                if admin_user:
+                    open_user = admin_user
+                else:
+                    open_user = next(iter(users.keys()))
+        session['user'] = open_user
+        session['role'] = 'admin'
+        session['department'] = 'Diretoria'
+        session['full_name'] = 'Acesso Externo'
+        session['permissions'] = [
+            'recepcao',
+            'principal',
+            'restaurante_full_access',
+            'rh',
+            'financeiro',
+            'governanca',
+            'conferencia',
+            'estoque',
+            'cozinha',
+        ]
+        session['permissions_v2'] = {
+            "version": 2,
+            "areas": {
+                "cozinha": {"all": True, "pages": {}},
+                "estoque_principal": {"all": True, "pages": {}},
+                "restaurante_mirapraia": {"all": True, "pages": {}},
+                "recepcao": {"all": True, "pages": {}},
+                "governanca": {"all": True, "pages": {}},
+                "conferencia": {"all": True, "pages": {}},
+                "financeiro": {"all": True, "pages": {}},
+                "recursos_humanos": {"all": True, "pages": {}},
+            },
+            "level_pages": [],
+        }
+        if not session.get('_external_open_mode_logged'):
+            LoggerService.log_acao(
+                acao="Acesso externo liberado",
+                entidade="Autenticação",
+                detalhes={
+                    "path": request.path,
+                    "endpoint": request.endpoint,
+                    "external_open_mode": True,
+                    "user": open_user,
+                },
+                nivel_severidade="WARNING",
+                colaborador_id=open_user,
+                departamento_id="Sistema"
+            )
+            session['_external_open_mode_logged'] = True
+        if request.endpoint == 'auth.login':
+            return redirect(url_for('main.index'))
+        return None
+
+    @app.before_request
     def enforce_permissions():
+        if app.config.get('EXTERNAL_OPEN_MODE'):
+            return None
         try:
             from app.services.permission_service import enforce_request_access
             return enforce_request_access()

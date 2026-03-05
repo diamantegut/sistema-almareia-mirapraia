@@ -26,7 +26,7 @@ def update_system_config(port):
     except Exception as e:
         print(f"[ERROR] Failed to update system_config.json: {e}")
 
-def update_ngrok_config(env, port, domain, guest_domain=None):
+def update_ngrok_config(env, port, domain, guest_domain=None, staff_only=False):
     if not os.path.exists(NGROK_CONFIG_PATH):
         print(f"[WARN] {NGROK_CONFIG_PATH} not found.")
         return
@@ -44,8 +44,10 @@ def update_ngrok_config(env, port, domain, guest_domain=None):
 
         # Update staff tunnel domain (other tunnels, including 'menu', keep fixed domains/ports)
         modified = False
+        staff_tunnel = None
         for tunnel in config[env]['tunnels']:
             if tunnel['name'] == 'staff':
+                staff_tunnel = tunnel
                 if tunnel.get('domain') != domain:
                     tunnel['domain'] = domain
                     modified = True
@@ -56,6 +58,21 @@ def update_ngrok_config(env, port, domain, guest_domain=None):
                     modified = True
                     print(f"[FIX] Updated {env} 'guest_portal' tunnel domain to {guest_domain}")
         
+        if staff_only:
+            if not staff_tunnel:
+                staff_tunnel = {
+                    "name": "staff",
+                    "domain": domain,
+                    "description": "Acesso Colaboradores"
+                }
+                config[env]['tunnels'] = [staff_tunnel]
+                modified = True
+                print(f"[FIX] Created {env} 'staff' tunnel with domain {domain}")
+            elif len(config[env]['tunnels']) != 1 or config[env]['tunnels'][0].get('name') != 'staff':
+                config[env]['tunnels'] = [staff_tunnel]
+                modified = True
+                print(f"[FIX] Restricted {env} tunnels to only 'staff'")
+
         if modified or config[env]['port'] != int(port):
             with open(NGROK_CONFIG_PATH, 'w', encoding='utf-8') as f:
                 json.dump(config, f, indent=4)
@@ -96,6 +113,11 @@ if __name__ == "__main__":
     parser.add_argument('--domain', help='Ngrok domain')
     parser.add_argument('--guest-domain', help='Ngrok guest domain')
     parser.add_argument(
+        '--staff-only',
+        action='store_true',
+        help='Mantem somente o tunnel staff para o ambiente informado'
+    )
+    parser.add_argument(
         '--no-ngrok',
         action='store_true',
         help='Atualiza apenas a porta em system_config.json, sem alterar ngrok_config/settings'
@@ -112,7 +134,7 @@ if __name__ == "__main__":
             sys.exit(1)
 
         print(f"--- Atualizando configuracao do NGROK ({args.env.upper()}, Domain: {args.domain}) ---")
-        update_ngrok_config(args.env, args.port, args.domain, args.guest_domain)
+        update_ngrok_config(args.env, args.port, args.domain, args.guest_domain, args.staff_only)
         update_settings(args.domain)
 
     print("---------------------------------------------------------------")

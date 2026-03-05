@@ -28,6 +28,10 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
         </div>
         <div class="d-flex align-items-center gap-2">
             <span class="text-white kds-clock" id="kds-clock"></span>
+            <button type="button" class="btn btn-sm btn-outline-light" id="kds-fullscreen-toggle">
+                <i class="bi bi-arrows-fullscreen"></i>
+                Tela cheia
+            </button>
             <span class="badge bg-info text-dark kds-refresh-label">Atualizando a cada 20s</span>
             <button type="button" class="btn btn-sm btn-outline-light" id="kds-refresh-now">
                 <i class="bi bi-arrow-clockwise"></i>
@@ -61,6 +65,9 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
     const kdsMarkReceivedUrl = "{{ url_for('kitchen.kitchen_kds_mark_received') }}";
     const kdsLocalDone = new Set();
     let kdsOverlayTimer = null;
+    let kdsKnownActiveItems = new Set();
+    let kdsFirstFetchCompleted = false;
+    let kdsAudioContext = null;
 
     function formatTimeFromIso(isoString) {
         if (!isoString) return "";
@@ -84,6 +91,79 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
         if (!el) return;
         const now = new Date();
         el.textContent = now.toLocaleTimeString();
+    }
+
+    function parseIsoToMs(isoString) {
+        if (!isoString) return NaN;
+        const date = new Date(isoString);
+        return date.getTime();
+    }
+
+    function getWaitLevel(minutes) {
+        const mins = Number.isFinite(minutes) ? minutes : 0;
+        if (mins >= 20) return "critical";
+        if (mins >= 10) return "warning";
+        return "normal";
+    }
+
+    function getWaitClass(minutes) {
+        const level = getWaitLevel(minutes);
+        if (level === "critical") return "kds-wait-critical";
+        if (level === "warning") return "kds-wait-warning";
+        return "kds-wait-normal";
+    }
+
+    function playNewOrderSound() {
+        try {
+            if (!kdsAudioContext) {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                kdsAudioContext = new AudioCtx();
+            }
+            const ctx = kdsAudioContext;
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = "triangle";
+            osc.frequency.setValueAtTime(920, now);
+            gain.gain.setValueAtTime(0.0001, now);
+            gain.gain.exponentialRampToValueAtTime(0.16, now + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.16);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.18);
+        } catch (_) {}
+    }
+
+    function syncNewOrderAlertState(payload) {
+        const orders = payload && Array.isArray(payload.orders) ? payload.orders : [];
+        const currentActive = new Set();
+        orders.forEach(order => {
+            const sections = Array.isArray(order.sections) ? order.sections : [];
+            sections.forEach(section => {
+                const items = Array.isArray(section.items) ? section.items : [];
+                items.forEach(item => {
+                    if (item.status === "pending" || item.status === "preparing") {
+                        const key = (order.table_id || "") + "::" + (item.id || "");
+                        currentActive.add(key);
+                    }
+                });
+            });
+        });
+        if (kdsFirstFetchCompleted) {
+            let hasNew = false;
+            currentActive.forEach(key => {
+                if (!kdsKnownActiveItems.has(key)) {
+                    hasNew = true;
+                }
+            });
+            if (hasNew) {
+                playNewOrderSound();
+            }
+        }
+        kdsKnownActiveItems = currentActive;
+        kdsFirstFetchCompleted = true;
     }
 
     function clearOrders() {
@@ -184,12 +264,6 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
         const barDrinksCards = [];
         const barMainCards = [];
 
-        function parseIso(ts) {
-            if (!ts) return NaN;
-            const d = new Date(ts);
-            return d.getTime();
-        }
-
         orders.forEach(order => {
             const sections = Array.isArray(order.sections) ? order.sections : [];
             if (!sections.length) return;
@@ -197,34 +271,41 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
                 const items = Array.isArray(section.items) ? section.items : [];
                 if (!items.length) return;
                 const times = items
-                    .map(i => parseIso(i.order_time))
+                    .map(i => parseIsoToMs(i.order_time))
                     .filter(v => !Number.isNaN(v) && Number.isFinite(v));
-                let ts = Math.min.apply(null, times.length ? times : [parseIso(order.opened_at)]);
+                let ts = Math.min.apply(null, times.length ? times : [parseIsoToMs(order.opened_at)]);
                 if (!Number.isFinite(ts)) ts = Date.now();
+                const waitMinutesList = items
+                    .map(i => Number.parseInt(i.wait_minutes, 10))
+                    .filter(v => Number.isFinite(v));
+                const waitMinutes = waitMinutesList.length ? Math.max.apply(null, waitMinutesList) : 0;
 
                 if (isBar) {
                     const secName = (section.name || "").toString().toLowerCase();
                     if (secName.indexOf("drink") !== -1) {
-                        barDrinksCards.push({ order, section, items, ts });
+                        barDrinksCards.push({ order, section, items, ts, waitMinutes });
                     } else {
-                        barMainCards.push({ order, section, items, ts });
+                        barMainCards.push({ order, section, items, ts, waitMinutes });
                     }
                 } else {
                     const secName = (section.name || "").toString().toLowerCase();
                     if (secName.indexOf("entrada") !== -1 || secName.indexOf("sobremesa") !== -1) {
-                        secondaryCards.push({ order, section, items, ts });
+                        secondaryCards.push({ order, section, items, ts, waitMinutes });
                     } else {
-                        mainCards.push({ order, section, items, ts });
+                        mainCards.push({ order, section, items, ts, waitMinutes });
                     }
                 }
             });
         });
 
-        function byTs(a, b) { return a.ts - b.ts; }
-        mainCards.sort(byTs);
-        secondaryCards.sort(byTs);
-        barDrinksCards.sort(byTs);
-        barMainCards.sort(byTs);
+        function byPriority(a, b) {
+            if (b.waitMinutes !== a.waitMinutes) return b.waitMinutes - a.waitMinutes;
+            return a.ts - b.ts;
+        }
+        mainCards.sort(byPriority);
+        secondaryCards.sort(byPriority);
+        barDrinksCards.sort(byPriority);
+        barMainCards.sort(byPriority);
 
         function buildCardEl(order, section, items) {
             const col = document.createElement("div");
@@ -254,6 +335,16 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
                 cardStatus = "preparing";
             } else {
                 cardStatus = "done";
+            }
+            const itemWait = items
+                .map(i => Number.parseInt(i.wait_minutes, 10))
+                .filter(v => Number.isFinite(v));
+            const cardWaitMinutes = itemWait.length ? Math.max.apply(null, itemWait) : 0;
+            const isOverAvg = items.some(i => Boolean(i.is_over_avg));
+            card.classList.add("kds-order-state-" + cardStatus);
+            card.classList.add(getWaitClass(cardWaitMinutes));
+            if (isOverAvg) {
+                card.classList.add("kds-order-overdue");
             }
             const actionBtn = document.createElement("button");
             actionBtn.type = "button";
@@ -345,17 +436,21 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
             sectionBadge.className = "kds-badge-section";
             sectionBadge.textContent = section.name || "";
             metaWrap.appendChild(sectionBadge);
+            const waitBadge = document.createElement("span");
+            waitBadge.className = "kds-badge-wait " + getWaitClass(cardWaitMinutes);
+            waitBadge.textContent = cardWaitMinutes + " min";
+            metaWrap.appendChild(waitBadge);
             const openTime = document.createElement("span");
             openTime.className = "kds-badge-time";
             openTime.textContent = formatTimeFromIso(order.opened_at);
             let durSpanNode = null;
-            if (order.opened_at) {
+            if (order.opened_at && cardStatus === "preparing") {
                 const nowIso = new Date().toISOString();
                 const duration = formatDurationMinutes(order.opened_at, nowIso);
                 if (duration) {
                     const durSpan = document.createElement("span");
                     durSpan.className = "kds-badge-duration";
-                    durSpan.textContent = duration;
+                    durSpan.textContent = "Em preparo: " + duration;
                     durSpanNode = durSpan;
                 }
             }
@@ -436,6 +531,12 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
             card.appendChild(body);
             const footer = document.createElement("div");
             footer.className = "kds-order-footer";
+            if (cardStatus === "done") {
+                const doneMark = document.createElement("span");
+                doneMark.className = "kds-done-mark";
+                doneMark.textContent = "✔";
+                footer.appendChild(doneMark);
+            }
             card.appendChild(footer);
             card.addEventListener("click", function () {
                 openKdsOverlay(card);
@@ -505,6 +606,7 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
                 if (!json || json.success !== true || !json.data) {
                     throw new Error("Resposta inválida");
                 }
+                syncNewOrderAlertState(json.data);
                 renderKds(json.data);
             })
             .catch(() => {
@@ -521,6 +623,7 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
     }
 
     document.addEventListener("DOMContentLoaded", function () {
+        document.body.classList.add("kds-mode");
         updateClock();
         setInterval(updateClock, 1000);
         const btnRefresh = document.getElementById("kds-refresh-now");
@@ -545,6 +648,25 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
                 closeKdsOverlay();
             });
         }
+        const fullScreenBtn = document.getElementById("kds-fullscreen-toggle");
+        if (fullScreenBtn) {
+            fullScreenBtn.addEventListener("click", function (ev) {
+                ev.stopPropagation();
+                const inFullscreen = Boolean(document.fullscreenElement);
+                if (!inFullscreen) {
+                    document.documentElement.requestFullscreen().catch(() => null);
+                } else {
+                    document.exitFullscreen().catch(() => null);
+                }
+            });
+        }
+        document.addEventListener("fullscreenchange", function () {
+            if (document.fullscreenElement) {
+                document.body.classList.add("kds-fullscreen");
+            } else {
+                document.body.classList.remove("kds-fullscreen");
+            }
+        });
         startKdsPolling();
     });
 </script>
@@ -561,6 +683,29 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
 <style>
     body {
         background-color: #343a40;
+    }
+
+    body.kds-mode #background-watermark,
+    body.kds-mode > header,
+    body.kds-mode .cs_preloader,
+    body.kds-mode .cs_site_main > .container.cs_py_40 > div:first-child {
+        display: none !important;
+    }
+
+    body.kds-mode .cs_site_main {
+        padding-top: 0 !important;
+    }
+
+    body.kds-mode .cs_site_main > .container.cs_py_40 {
+        width: 100%;
+        max-width: 100%;
+        padding: 0.25rem 0.45rem;
+    }
+
+    body.kds-fullscreen .kds-refresh-label,
+    body.kds-fullscreen #kds-refresh-now,
+    body.kds-fullscreen #kds-fullscreen-toggle {
+        display: none !important;
     }
 
     .kds-page {
@@ -660,10 +805,57 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
         min-height: 150px;
         max-height: 230px;
         cursor: pointer;
+        border: 2px solid rgba(255, 255, 255, 0.08);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
     }
 
     .kds-order-late {
         border: 2px solid #ff6b6b;
+    }
+
+    .kds-order-state-pending {
+        border-color: #dc3545;
+    }
+
+    .kds-order-state-preparing {
+        border-color: #fd7e14;
+    }
+
+    .kds-order-state-done {
+        border-color: #198754;
+    }
+
+    .kds-order-state-pending .kds-order-title {
+        color: #ff6b6b;
+    }
+
+    .kds-order-state-preparing .kds-order-title {
+        color: #ffd43b;
+    }
+
+    .kds-order-state-done .kds-order-title {
+        color: #8ce99a;
+    }
+
+    .kds-order-state-pending {
+        animation: kdsPulsePending 1.4s infinite;
+    }
+
+    .kds-order-overdue {
+        border-color: #ff0000 !important;
+        box-shadow: 0 0 0.85rem rgba(255, 0, 0, 0.45);
+    }
+
+    .kds-wait-normal {
+        color: #e9ecef;
+    }
+
+    .kds-wait-warning {
+        color: #ffd43b;
+    }
+
+    .kds-wait-critical {
+        color: #ff6b6b;
     }
 
     .kds-order-header {
@@ -724,6 +916,14 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
 
     .kds-badge-time {
         color: #f1f3f5;
+    }
+
+    .kds-badge-wait {
+        border-radius: 999px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 0.08rem 0.45rem;
+        border: 1px solid currentColor;
     }
 
     .kds-badge-duration {
@@ -828,6 +1028,17 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
         font-size: 0.7rem;
     }
 
+    .kds-done-mark {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: 800;
+        color: #51cf66;
+        line-height: 1;
+        width: 100%;
+    }
+
     .kds-overlay {
         position: fixed;
         inset: 0;
@@ -904,6 +1115,18 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
     .kds-empty-alert {
         font-size: 1.4rem;
         margin: 0;
+    }
+
+    @keyframes kdsPulsePending {
+        0% {
+            box-shadow: 0 0 0 rgba(220, 53, 69, 0.32);
+        }
+        50% {
+            box-shadow: 0 0 0.8rem rgba(220, 53, 69, 0.58);
+        }
+        100% {
+            box-shadow: 0 0 0 rgba(220, 53, 69, 0.32);
+        }
     }
 </style>
 {% endblock %}

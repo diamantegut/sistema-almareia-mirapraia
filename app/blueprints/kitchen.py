@@ -44,6 +44,48 @@ def _classify_section(category):
     return 'Pratos Principais'
 
 
+def _compute_order_wait_bucket(wait_minutes):
+    try:
+        minutes = float(wait_minutes)
+    except Exception:
+        minutes = 0
+    if minutes >= 20:
+        return 'critical'
+    if minutes >= 10:
+        return 'warning'
+    return 'normal'
+
+
+def _compute_avg_prep_seconds(orders):
+    durations = []
+    for order in (orders or {}).values():
+        items = order.get('items') or []
+        for item in items:
+            try:
+                sec = int(item.get('kds_preparing_duration_sec') or 0)
+            except Exception:
+                sec = 0
+            if sec > 0:
+                durations.append(sec)
+    if not durations:
+        return 20 * 60
+    return int(sum(durations) / len(durations))
+
+
+def _emit_server_done_sound():
+    try:
+        import winsound
+        winsound.Beep(1500, 140)
+        winsound.Beep(1800, 160)
+        return
+    except Exception:
+        pass
+    try:
+        print('\a', end='', flush=True)
+    except Exception:
+        pass
+
+
 def _build_kds_payload(station, now=None):
     if now is None:
         now = datetime.now()
@@ -55,6 +97,7 @@ def _build_kds_payload(station, now=None):
     default_kitchen = get_default_printer('kitchen')
     result_orders = []
     sections_counter = {}
+    avg_prep_seconds = _compute_avg_prep_seconds(orders)
     changed = False
     for table_id, order in orders.items():
         status = str(order.get('status', '')).lower()
@@ -139,6 +182,9 @@ def _build_kds_payload(station, now=None):
                 sections_counter[section_name] += 1
             order_age = (now - created_at).total_seconds() / 60.0
             is_late = order_age >= 40
+            wait_minutes = max(0, int(order_age))
+            wait_bucket = _compute_order_wait_bucket(wait_minutes)
+            is_over_avg = (wait_minutes * 60) > avg_prep_seconds
             observations = item.get('observations') or []
             if isinstance(observations, list):
                 notes_parts = [str(o) for o in observations if o]
@@ -184,7 +230,10 @@ def _build_kds_payload(station, now=None):
                 'start_time': start_time,
                 'done_time': done_time,
                 'notes': notes,
-                'is_late': is_late
+                'is_late': is_late,
+                'wait_minutes': wait_minutes,
+                'wait_bucket': wait_bucket,
+                'is_over_avg': is_over_avg
             })
         # Se houve auto-archive, persistir após processar esta mesa
         if not table_items:
@@ -199,6 +248,11 @@ def _build_kds_payload(station, now=None):
         else:
             overall_status = 'done'
         order_late = any(i['is_late'] for i in table_items)
+        active_items = [i for i in table_items if i['status'] in ['pending', 'preparing']]
+        basis_items = active_items if active_items else table_items
+        order_wait_minutes = max((i.get('wait_minutes') or 0) for i in basis_items) if basis_items else 0
+        wait_bucket = _compute_order_wait_bucket(order_wait_minutes)
+        is_over_avg = (order_wait_minutes * 60) > avg_prep_seconds
         sections = {}
         for i in table_items:
             key = i['section']
@@ -229,6 +283,9 @@ def _build_kds_payload(station, now=None):
             'status': overall_status,
             'is_late': order_late,
             'opened_at': opened_at.isoformat(),
+            'wait_minutes': order_wait_minutes,
+            'wait_bucket': wait_bucket,
+            'is_over_avg': is_over_avg,
             'sections': sections_list,
             'totals': {
                 'pending': pending_count,
@@ -242,6 +299,8 @@ def _build_kds_payload(station, now=None):
     payload = {
         'station': station,
         'generated_at': now.isoformat(),
+        'avg_prep_seconds': avg_prep_seconds,
+        'avg_prep_minutes': max(1, int(round(avg_prep_seconds / 60.0))),
         'orders': result_orders,
         'sections_summary': sections_summary
     }
@@ -305,6 +364,7 @@ def kitchen_kds_update_status():
     if not target:
         return jsonify({'success': False, 'error': 'Item não encontrado.'}), 404
     now_str = datetime.now().strftime('%d/%m/%Y %H:%M')
+    old_status = target.get('kds_status') or 'pending'
     if new_status == 'pending':
         target['kds_status'] = 'pending'
         target.pop('kds_start_time', None)
@@ -338,6 +398,31 @@ def kitchen_kds_update_status():
         target['kds_status'] = 'archived'
         target['kds_archived_time'] = now_str
     save_table_orders(orders)
+    LoggerService.log_acao(
+        acao='KDS status atualizado',
+        entidade='Cozinha',
+        detalhes={
+            'table_id': table_id,
+            'item_id': item_id,
+            'old_status': old_status,
+            'new_status': new_status,
+            'item_name': target.get('name'),
+            'station': data.get('station') or _normalize_station(session.get('kds_station')) or 'kitchen'
+        },
+        nivel_severidade='INFO'
+    )
+    if new_status == 'done' and old_status != 'done':
+        _emit_server_done_sound()
+        LoggerService.log_acao(
+            acao='KDS alerta sonoro finalizado',
+            entidade='Cozinha',
+            detalhes={
+                'table_id': table_id,
+                'item_id': item_id,
+                'item_name': target.get('name')
+            },
+            nivel_severidade='INFO'
+        )
     return jsonify({'success': True})
 
 
@@ -364,6 +449,16 @@ def kitchen_kds_mark_received():
         if str(item.get('id')) in item_ids:
             item['kds_status'] = 'archived'
     save_table_orders(orders)
+    LoggerService.log_acao(
+        acao='KDS itens recebidos',
+        entidade='Cozinha',
+        detalhes={
+            'table_id': table_id,
+            'item_ids': item_ids,
+            'items_count': len(item_ids)
+        },
+        nivel_severidade='INFO'
+    )
     return jsonify({'success': True})
 
 @kitchen_bp.route('/kitchen/portion/settings', methods=['GET', 'POST'])

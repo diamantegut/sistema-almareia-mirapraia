@@ -165,6 +165,12 @@
         padding: 0.5rem;
         border-radius: 4px;
     }
+
+    .special-tags-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 0.5rem 1rem;
+    }
     
     /* Utility */
     .w-full { width: 100%; }
@@ -320,6 +326,36 @@
                             <div class="d-flex align-items-center gap-2">
                                 <input type="checkbox" id="highlight" name="highlight">
                                 <label for="highlight" class="mb-0 small fw-bold text-primary"><i class="bi bi-star-fill"></i> Destacar</label>
+                            </div>
+                        </div>
+
+                        <div class="p-2 border rounded bg-light mb-3">
+                            <label class="small fw-bold mb-2 d-block">Informações Especiais no Menu Digital</label>
+                            <div class="special-tags-grid">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="is_vegan" name="is_vegan">
+                                    <label class="form-check-label small" for="is_vegan">Vegano</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="lactose_free" name="lactose_free">
+                                    <label class="form-check-label small" for="lactose_free">Sem Lactose</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="gluten_free" name="gluten_free">
+                                    <label class="form-check-label small" for="gluten_free">Sem Glúten</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="extra_salty" name="extra_salty">
+                                    <label class="form-check-label small" for="extra_salty">Mais Salgado</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="has_seafood" name="has_seafood">
+                                    <label class="form-check-label small" for="has_seafood">Contém Frutos do Mar</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="spicy" name="spicy">
+                                    <label class="form-check-label small" for="spicy">Apimentado</label>
+                                </div>
                             </div>
                         </div>
 
@@ -1384,6 +1420,12 @@ function editProduct(product) {
         : true;
     document.getElementById('highlight').checked = isTrue(product.highlight);
     document.getElementById('service_fee_exempt').checked = isTrue(product.service_fee_exempt);
+    document.getElementById('is_vegan').checked = isTrue(product.is_vegan);
+    document.getElementById('lactose_free').checked = isTrue(product.lactose_free);
+    document.getElementById('gluten_free').checked = isTrue(product.gluten_free);
+    document.getElementById('extra_salty').checked = isTrue(product.extra_salty);
+    document.getElementById('has_seafood').checked = isTrue(product.has_seafood);
+    document.getElementById('spicy').checked = isTrue(product.spicy);
     
     togglePauseDetails();
     if(product.paused) {

@@ -1175,6 +1175,8 @@ def restaurant_table_order(table_id):
 
                 # Idempotency: prevent duplicate submission by batch_id within 60s
                 batch_id = request.form.get('batch_id')
+                if not batch_id:
+                    batch_id = f"batch_{int(time.time() * 1000)}_{uuid.uuid4().hex[:8]}"
                 now = time.time()
                 # Prune old entries (> 5 minutes)
                 for k, t in list(PROCESSED_BATCHES.items()):
@@ -1370,6 +1372,9 @@ def restaurant_table_order(table_id):
                         'origin': product.get('origin', 0),
                         'tax_info': product.get('tax_info') # Optional
                     }
+                    order_item['batch_id'] = batch_id
+                    order_item['batch_user'] = session.get('user')
+                    order_item['batch_created_at'] = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
                     
                     # Complements (Resolve IDs)
                     if item_data.get('complements'):
@@ -1412,6 +1417,16 @@ def restaurant_table_order(table_id):
                     
                     save_table_orders(orders)
                     log_action('Pedido Adicionado', f'Mesa {table_id}: {len(new_order_items)} itens adicionados por {session.get("user")}', department='Restaurante')
+                    log_system_action(
+                        'Pedido em Lote Enviado',
+                        {
+                            'table': table_id,
+                            'batch_id': batch_id,
+                            'items_count': len(new_order_items),
+                            'user': session.get('user')
+                        },
+                        category='Restaurante'
+                    )
                     
                     # Print
                     printers = load_printers()
@@ -1435,6 +1450,13 @@ def restaurant_table_order(table_id):
                         flash(f"Itens adicionados, mas houve erro na impressão: {print_res['results']['error']}")
                     else:
                         flash("Pedido enviado com sucesso!")
+                    return redirect(url_for(
+                        'restaurant.restaurant_table_order',
+                        table_id=table_id,
+                        batch_success='1',
+                        batch_id=batch_id,
+                        **({'mode': mode} if mode else {})
+                    ))
                 else:
                     if errors:
                         error_msg = "; ".join(errors[:3])
@@ -1442,11 +1464,94 @@ def restaurant_table_order(table_id):
                         flash(f"Nenhum item adicionado. Detalhes: {error_msg}")
                     else:
                         flash("Nenhum item válido adicionado.")
-                # Always redirect after handling batch to avoid resubmission on refresh (PRG)
                 return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
                         
             except Exception as e:
                 flash(f"Erro ao adicionar itens: {str(e)}")
+                return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
+
+        elif action == 'undo_last_batch':
+            try:
+                batch_id = sanitize_input(request.form.get('batch_id'))
+                if not batch_id:
+                    flash('Lote inválido para desfazer.')
+                    return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
+
+                if str_table_id not in orders:
+                    flash('Mesa não encontrada.')
+                    return redirect(url_for('restaurant.restaurant_tables'))
+
+                order = orders[str_table_id]
+                order_items = order.get('items', [])
+                batch_items = [item for item in order_items if str(item.get('batch_id', '')) == str(batch_id)]
+
+                if not batch_items:
+                    flash('Lote não encontrado ou já desfeito.')
+                    return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
+
+                batch_user = str(batch_items[0].get('batch_user', '') or '')
+                can_force = session.get('role') in ['admin', 'gerente', 'supervisor']
+                if not can_force and batch_user and batch_user != session.get('user'):
+                    flash('Você só pode desfazer lotes lançados por você.')
+                    return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
+
+                removed_ids = {str(item.get('id')) for item in batch_items}
+                order['items'] = [item for item in order_items if str(item.get('id')) not in removed_ids]
+
+                total = 0
+                for item in order['items']:
+                    item_price = float(item.get('price', 0))
+                    item_qty = float(item.get('qty', 1))
+                    comps_price = sum(float(c.get('price', 0)) for c in item.get('complements', []))
+                    total += item_qty * (item_price + comps_price)
+                order['total'] = total
+                save_table_orders(orders)
+
+                try:
+                    printers = load_printers()
+                    menu_items = load_menu_items()
+                    print_cancellation_items(
+                        table_id,
+                        session.get('user'),
+                        batch_items,
+                        printers,
+                        menu_items,
+                        justification=f"Desfazer lote {batch_id}"
+                    )
+                except Exception as e:
+                    current_app.logger.error(f"Erro ao imprimir cancelamento do lote {batch_id}: {e}")
+
+                log_action(
+                    'Desfazer Lote',
+                    f'Mesa {table_id}: lote {batch_id} desfeito por {session.get("user")} ({len(batch_items)} itens)',
+                    department='Restaurante'
+                )
+                log_system_action(
+                    'Lote Desfeito',
+                    {
+                        'table': table_id,
+                        'batch_id': batch_id,
+                        'items_count': len(batch_items),
+                        'user': session.get('user')
+                    },
+                    category='Restaurante'
+                )
+                log_security_audit(
+                    event_type='ORDER_BATCH_UNDO',
+                    details={
+                        'table_id': table_id,
+                        'batch_id': batch_id,
+                        'items': batch_items
+                    },
+                    user=session.get('user'),
+                    ip_address=request.remote_addr
+                )
+
+                flash(f'Lote desfeito com sucesso ({len(batch_items)} item(ns)).')
+                return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id, **({'mode': mode} if mode else {})))
+            except Exception as e:
+                current_app.logger.error(f"Erro ao desfazer lote na mesa {table_id}: {e}")
+                flash(f'Erro ao desfazer lote: {str(e)}')
                 return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
 
         elif action == 'close_order':

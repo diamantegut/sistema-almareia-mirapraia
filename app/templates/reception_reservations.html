@@ -318,7 +318,8 @@
     }
 </script>
 
-<div class="container-fluid px-4 py-4 bg-light min-vh-100">
+<div class="container-fluid px-4 py-4 min-vh-100">
+    <div class="theme-page-shell">
     <!-- Header Section -->
     <div class="row align-items-center mb-4 g-3">
         <!-- Title & Date Nav -->
@@ -382,11 +383,11 @@
                     <input type="file" id="fileUploadInput" class="d-none" accept=".xlsx" onchange="handleFileSelect(this)">
     
                     <!-- Navigation & Cashier -->
-                    <a href="{{ url_for('reception.reception_reservations_cashier') }}" class="btn btn-success btn-sm shadow-sm d-flex align-items-center gap-2 px-3 fw-bold">
+                    <a href="{{ url_for('reception.reception_reservations_cashier') }}" class="btn btn-primary btn-sm shadow-sm d-flex align-items-center gap-2 px-3 fw-bold">
                         <i class="bi bi-wallet2"></i> Caixa
                     </a>
                     
-                    <a href="{{ url_for('reception.reception_dashboard') }}" class="btn btn-outline-secondary btn-sm shadow-sm d-flex align-items-center gap-2 px-3">
+                    <a href="{{ url_for('reception.reception_dashboard') }}" class="btn btn-primary btn-sm shadow-sm d-flex align-items-center gap-2 px-3">
                         <i class="bi bi-arrow-return-left"></i> Voltar
                     </a>
                 </div>
@@ -394,8 +395,101 @@
         </div>
     </div>
 
+    {% set ns = namespace(today_index=-1) %}
+    {% for d in days %}
+        {% if d.is_today %}
+            {% set ns.today_index = loop.index0 %}
+        {% endif %}
+    {% endfor %}
+    {% set today_slot_start = ns.today_index * 2 %}
+    {% set today_slot_end = today_slot_start + 1 %}
+
+    {% set summary = namespace(checkin_today=0, checkout_today=0, occupied_rooms=0, free_rooms=0, total_rooms=0) %}
+    {% for group in grouped_rooms %}
+        {% for room in group.rooms %}
+            {% set summary.total_rooms = summary.total_rooms + 1 %}
+            {% if room|string in occupied_room_numbers %}
+                {% set summary.occupied_rooms = summary.occupied_rooms + 1 %}
+            {% else %}
+                {% set summary.free_rooms = summary.free_rooms + 1 %}
+            {% endif %}
+            {% for segment in segments.get(room, []) %}
+                {% if segment.type != 'empty' %}
+                    {% set cell = segment.data %}
+                    {% if cell.checkin == today_br %}
+                        {% set summary.checkin_today = summary.checkin_today + 1 %}
+                    {% endif %}
+                    {% if cell.checkout == today_br %}
+                        {% set summary.checkout_today = summary.checkout_today + 1 %}
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+    {% endfor %}
+    {% set occupancy_rate = ((summary.occupied_rooms * 100 / summary.total_rooms) if summary.total_rooms else 0)|round(1) %}
+
+    <div class="row g-3 mb-3">
+        <div class="col-6 col-lg-2">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-2">
+                    <div class="small text-muted text-uppercase fw-bold">Check-ins Hoje</div>
+                    <div class="fs-4 fw-bold text-primary" id="summaryCheckins">{{ summary.checkin_today }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-2">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-2">
+                    <div class="small text-muted text-uppercase fw-bold">Check-outs Hoje</div>
+                    <div class="fs-4 fw-bold text-danger" id="summaryCheckouts">{{ summary.checkout_today }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-2">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-2">
+                    <div class="small text-muted text-uppercase fw-bold">Quartos Ocupados</div>
+                    <div class="fs-4 fw-bold text-info" id="summaryOccupied">{{ summary.occupied_rooms }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-2">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-2">
+                    <div class="small text-muted text-uppercase fw-bold">Quartos Livres</div>
+                    <div class="fs-4 fw-bold text-success" id="summaryFree">{{ summary.free_rooms }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-2">
+                    <div class="small text-muted text-uppercase fw-bold">Taxa de Ocupação</div>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="fs-4 fw-bold text-dark" id="summaryRate">{{ occupancy_rate }}%</div>
+                        <div class="small text-muted">Suíte Areia · Suíte Mar · Suíte Alma</div>
+                    </div>
+                    <div class="small text-muted" id="summaryDateRef">Referência: {{ today_br }}</div>
+                    <div class="progress mt-1" style="height: 6px;">
+                        <div class="progress-bar bg-info" id="summaryRateBar" role="progressbar" style="width: {{ occupancy_rate }}%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2 align-items-center mb-3" id="mapQuickFilters">
+        <button type="button" class="btn btn-sm btn-outline-primary active map-filter-chip" data-filter="all">Todas</button>
+        <button type="button" class="btn btn-sm btn-outline-primary map-filter-chip" data-filter="checkin_today">Check-in no Dia</button>
+        <button type="button" class="btn btn-sm btn-outline-danger map-filter-chip" data-filter="checkout_today">Check-out no Dia</button>
+        <button type="button" class="btn btn-sm btn-outline-success map-filter-chip" data-filter="room_free">Quartos Livres</button>
+        <button type="button" class="btn btn-sm btn-outline-info map-filter-chip" data-filter="room_occupied">Quartos Ocupados</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary map-filter-chip" data-filter="future">Próximos Check-ins</button>
+        <span class="badge text-bg-light border border-secondary-subtle" id="activeFilterDateLabel">Filtro aplicado para {{ today_br }}</span>
+    </div>
+
     <!-- Gantt Chart Card -->
-    <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+    <div class="card theme-card border-0 shadow-sm rounded-3 overflow-hidden">
         <!-- Optional: Filter Bar inside Card Header could go here -->
         <div class="card-body p-0">
             <div class="table-responsive">
@@ -403,15 +497,15 @@
                     <colgroup>
                         <col style="width: 100px;">
                         {% for d in days %}
-                        <col>
-                        <col>
+                        <col class="{{ 'col-today' if d.is_today else '' }}">
+                        <col class="{{ 'col-today' if d.is_today else '' }}">
                         {% endfor %}
                     </colgroup>
                     <thead class="table-light text-center sticky-top">
                         <tr>
                             <th style="width: 100px;" class="bg-light sticky-start">Quarto</th>
                             {% for d in days %}
-                            <th colspan="2" style="font-size: 0.6rem; padding: 1px;" class="{{ 'bg-warning text-dark' if d.is_weekend else '' }} text-center align-middle">
+                            <th colspan="2" style="font-size: 0.6rem; padding: 1px;" class="{{ 'bg-warning text-dark' if d.is_weekend else '' }} {{ 'today-column-header' if d.is_today else '' }} text-center align-middle" data-iso-date="{{ d.iso_date }}">
                                 <div class="d-flex flex-column align-items-center" style="line-height: 1;">
                                     <span class="fw-bold">{{ d.day }}</span>
                                     <span style="font-size: 0.5rem; text-transform: uppercase;">{{ d.weekday }}</span>
@@ -432,14 +526,15 @@
                         {% elif 'Diamante' in group.category %} {% set cat_class = 'cat-master' %}
                         {% endif %}
                         
-                        <tr class="{{ cat_class }}">
+                        <tr class="{{ cat_class }} category-row">
                             <td colspan="{{ (days|length * 2) + 1 }}" class="fw-bold px-1 py-0 text-uppercase small text-muted" style="font-size: 0.7rem; background: inherit;">
                                 {{ group.category }}
                             </td>
                         </tr>
                         
                         {% for room in group.rooms %}
-                        <tr>
+                        {% set room_occupied_now = room|string in occupied_room_numbers %}
+                        <tr class="reservation-room-row" data-room-occupied="{{ '1' if room_occupied_now else '0' }}" data-room-free="{{ '0' if room_occupied_now else '1' }}">
                             <td class="fw-bold text-center bg-light sticky-start p-0 align-middle" style="height: 24px; line-height: 24px; font-size: 0.75rem;">{{ room }}</td>
                             {% for segment in segments.get(room, []) %}
                                 {% set start_slot = segment.data.start_day %}
@@ -448,7 +543,7 @@
                                 {% set border_class = 'border-midnight' if is_midnight else 'border-noon' %}
 
                                 {% if segment.type == 'empty' %}
-                                    <td colspan="{{ segment.length }}" class="p-0 droppable-cell {{ border_class }}"
+                                    <td colspan="{{ segment.length }}" class="p-0 droppable-cell {{ border_class }} {% if days[((segment.data.start_day|int) // 2)] and days[((segment.data.start_day|int) // 2)].is_today %}reservation-cell-today{% endif %}"
                                         data-room="{{ room }}"
                                         data-day-start="{{ segment.data.start_day }}"
                                         data-length="{{ segment.length }}">
@@ -456,13 +551,54 @@
                                     </td>
                                 {% else %}
                                     {% set cell = segment.data %}
-                                    {% set bg_class = 'bg-occupied' if segment.type == 'occupied' else 'bg-reserved' %}
+                                    {% set checkout_today = cell.checkout == today_br %}
+                                    {% set checkin_today = cell.checkin == today_br %}
+                                    {% set status_text = (cell.payment_status or '')|lower %}
+                                    {% if checkout_today %}
+                                        {% set bg_class = 'bg-checkout-today' %}
+                                    {% elif 'bloqueio' in status_text or 'blocked' in status_text %}
+                                        {% set bg_class = 'bg-blocked' %}
+                                    {% elif 'pre' in status_text %}
+                                        {% set bg_class = 'bg-prereserva' %}
+                                    {% elif segment.type == 'occupied' or 'hospedado' in status_text or 'checked-in' in status_text or 'ocupado' in status_text %}
+                                        {% set bg_class = 'bg-hospedado' %}
+                                    {% else %}
+                                        {% set bg_class = 'bg-confirmada' %}
+                                    {% endif %}
                                     {% set text_class = '' %} <!-- Text color handled by CSS now -->
                                     {% set is_draggable = true %} {# Always draggable if reserved or occupied #}
+                                    {% set payment_label = 'Pendente' %}
+                                    {% set payment_dot_class = 'reservation-payment-dot--pending' %}
+                                    {% if cell.payment_status == 'Pago' %}
+                                        {% set payment_label = 'Pago' %}
+                                        {% set payment_dot_class = 'reservation-payment-dot--paid' %}
+                                    {% elif cell.payment_status == 'Parcial' %}
+                                        {% set payment_label = 'Parcial' %}
+                                        {% set payment_dot_class = 'reservation-payment-dot--partial' %}
+                                    {% endif %}
+                                    {% set channel = (cell.channel or '')|lower %}
+                                    {% if 'booking' in channel %}
+                                        {% set channel_label = 'Booking' %}
+                                    {% elif 'expedia' in channel %}
+                                        {% set channel_label = 'Expedia' %}
+                                    {% elif 'direto' in channel or 'balcão' in channel %}
+                                        {% set channel_label = 'Direta' %}
+                                    {% elif 'motor' in channel %}
+                                        {% set channel_label = 'Motor de Reservas' %}
+                                    {% elif 'airbnb' in channel %}
+                                        {% set channel_label = 'Airbnb' %}
+                                    {% elif 'whatsapp' in channel %}
+                                        {% set channel_label = 'WhatsApp' %}
+                                    {% else %}
+                                        {% set channel_label = 'Outros' %}
+                                    {% endif %}
                                     
                                     <td colspan="{{ segment.length }}" class="text-center p-0 position-relative {{ border_class }}" 
                                         style="vertical-align: middle;"
-                                        title="{{ cell.guest }} ({{ cell.checkin }} - {{ cell.checkout }})"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="top"
+                                        data-bs-html="true"
+                                        title="<strong>{{ cell.guest|e }}</strong><br>Check-in: {{ cell.checkin|e }}<br>Check-out: {{ cell.checkout|e }}<br>Valor: {{ (cell.amount or 'R$ 0,00')|e }}<br>Pagamento: {{ (cell.payment_status or 'Pendente')|e }}<br>Origem: {{ channel_label|e }}<br>Hóspedes: {{ (cell.num_adults or '-')|e }}"
                                         data-res-id="{{ cell.id }}"
                                         data-room="{{ room }}"
                                         data-guest="{{ cell.guest }}"
@@ -475,7 +611,9 @@
                                         data-paid="{{ cell.paid_amount }}"
                                         data-to-receive="{{ cell.to_receive }}"
                                         data-days="{{ segment.length }}"
-                                        data-start-day="{{ segment.data.start_day }}">
+                                        data-start-day="{{ segment.data.start_day }}"
+                                        data-checkin-today="{{ '1' if checkin_today else '0' }}"
+                                        data-checkout-today="{{ '1' if checkout_today else '0' }}">
                                         
                                         <!-- Resize handles desativados -->
                                         
@@ -483,7 +621,6 @@
                                              style="cursor: grab;">
                                             <!-- Channel Icon (Left) -->
                                             <div class="me-1 small opacity-75">
-                                                {% set channel = (cell.channel or '')|lower %}
                                                 {% if 'booking' in channel %}
                                                     <i class="bi bi-calendar-check" title="Booking.com"></i>
                                                 {% elif 'airbnb' in channel %}
@@ -500,17 +637,19 @@
                                             </div>
 
                                             <!-- Guest Name (Center/Truncated) -->
-                                            <span class="fw-bold text-truncate flex-grow-1 text-start px-1" style="font-size: 0.75rem;">{{ cell.guest }}</span>
+                                            <span class="reservation-guest-name text-truncate flex-grow-1 text-start px-1">
+                                                {{ cell.guest }}
+                                            </span>
 
                                             <!-- Status Icon (Right) -->
-                                            <div class="ms-1 small">
-                                                {% if cell.payment_status == 'Pago' %}
-                                                    <i class="bi bi-check-circle-fill text-white" title="Pago"></i>
-                                                {% elif cell.payment_status == 'Parcial' %}
-                                                    <i class="bi bi-pie-chart-fill text-dark" title="Parcial" style="opacity: 0.6;"></i>
-                                                {% else %}
-                                                    <i class="bi bi-exclamation-circle-fill text-danger" title="Pendente"></i>
+                                            <div class="ms-1 small d-flex align-items-center gap-1">
+                                                {% if checkin_today %}
+                                                    <span class="badge bg-primary">CHECK-IN HOJE</span>
                                                 {% endif %}
+                                                {% if checkout_today %}
+                                                    <span class="badge bg-danger">CHECK-OUT HOJE</span>
+                                                {% endif %}
+                                                <span class="reservation-payment-dot {{ payment_dot_class }}" title="{{ payment_label }}"></span>
                                             </div>
                                         </div>
                                     </td>
@@ -525,6 +664,7 @@
         </div>
     </div>
 </div>
+</div>
 
 <style>
     /* Modern UI Tweaks */
@@ -533,8 +673,8 @@
         border: 1px solid transparent;
     }
     .action-btn:hover {
-        background-color: #f8f9fa;
-        border-color: #dee2e6;
+        background-color: var(--color-bg-secondary);
+        border-color: var(--color-border);
         transform: translateY(-1px);
     }
     .action-btn:active {
@@ -545,19 +685,36 @@
     .cat-areia { background-color: #fff8e1; border-left: 4px solid #ffc107; }
     .cat-mar-familia { background-color: #e3f2fd; border-left: 4px solid #0dcaf0; }
     .cat-mar { background-color: #e8f4fd; border-left: 4px solid #0d6efd; }
-    .cat-alma-banheira { background-color: #f8d7da; border-left: 4px solid #dc3545; }
-    .cat-alma { background-color: #f2dae2; border-left: 4px solid #d63384; }
+    .cat-alma-banheira { background-color: #ffe8d6; border-left: 4px solid #fd7e14; }
+    .cat-alma { background-color: #ffedd8; border-left: 4px solid #f39c12; }
     .cat-master { background-color: #e9ecef; border-left: 4px solid #212529; }
 
     /* Grid Lines */
     .border-midnight { border-right: 1px solid #adb5bd !important; } /* Stronger line for day separation */
     .border-noon { border-right: 1px dashed #dee2e6 !important; } /* Softer line for noon */
+    .col-today {
+        background-color: rgba(13, 110, 253, 0.08);
+    }
+    th.today-column-header {
+        background: rgba(13, 110, 253, 0.18) !important;
+        color: #0b3a75 !important;
+        box-shadow: inset 0 -2px 0 rgba(13, 110, 253, 0.35);
+        cursor: pointer;
+    }
+    th.selected-date-header {
+        background: rgba(25, 135, 84, 0.22) !important;
+        color: #0f5132 !important;
+        box-shadow: inset 0 -2px 0 rgba(25, 135, 84, 0.5);
+    }
+    .reservation-cell-today {
+        background-color: rgba(13, 110, 253, 0.05);
+    }
 
     /* Reservation Bars */
     .res-bar-content {
         height: 28px; /* Slightly taller */
         width: 100%; 
-        font-size: 0.7rem; 
+        font-size: 0.66rem; 
         line-height: 28px; 
         overflow: hidden; 
         white-space: nowrap; 
@@ -571,8 +728,45 @@
     }
     
     /* Occupied vs Reserved Colors */
-    .bg-occupied { background: linear-gradient(135deg, #0d6efd, #0b5ed7); color: white; }
-    .bg-reserved { background: linear-gradient(135deg, #ffc107, #ffca2c); color: #212529; }
+    .bg-confirmada { background: linear-gradient(135deg, #ffc107, #ffca2c); color: #212529; }
+    .bg-hospedado { background: linear-gradient(135deg, #0d6efd, #0b5ed7); color: #fff; }
+    .bg-checkout-today { background: linear-gradient(135deg, #dc3545, #bb2d3b); color: #fff; }
+    .bg-prereserva { background: linear-gradient(135deg, #adb5bd, #868e96); color: #fff; }
+    .bg-blocked { background: linear-gradient(135deg, #6f42c1, #59359c); color: #fff; }
+    .reservation-guest-name {
+        font-size: 0.74rem;
+        font-weight: 800;
+        min-width: 0;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+    .reservation-payment-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        display: inline-block;
+        flex: 0 0 9px;
+        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.65);
+    }
+    .reservation-payment-dot--pending {
+        background: #dc3545;
+    }
+    .reservation-payment-dot--partial {
+        background: #0d6efd;
+    }
+    .reservation-payment-dot--paid {
+        background: #198754;
+    }
+    .map-filter-chip.active {
+        color: #fff !important;
+        background: #0d6efd !important;
+        border-color: #0d6efd !important;
+    }
+    #activeFilterDateLabel {
+        font-size: 0.72rem;
+        font-weight: 600;
+    }
     
     /* Table Header Sticky Fixes */
     thead.sticky-top th {
@@ -608,6 +802,188 @@
     .res-bar-content .resize-handle { pointer-events: auto; }
     .res-bar-content { user-select: none; -webkit-user-select: none; -ms-user-select: none; }
 </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipElements = document.querySelectorAll('td[data-bs-toggle="tooltip"]');
+        tooltipElements.forEach(function(el) {
+            bootstrap.Tooltip.getOrCreateInstance(el);
+        });
+
+        var filterButtons = Array.from(document.querySelectorAll('#mapQuickFilters .map-filter-chip'));
+        var roomRows = Array.from(document.querySelectorAll('tr.reservation-room-row'));
+        var categoryRows = Array.from(document.querySelectorAll('tr.category-row'));
+        var dateHeaders = Array.from(document.querySelectorAll('thead th[data-iso-date]'));
+        var selectedIso = '{{ today_iso }}';
+        var selectedFilter = 'all';
+        var checkinsEl = document.getElementById('summaryCheckins');
+        var checkoutsEl = document.getElementById('summaryCheckouts');
+        var occupiedEl = document.getElementById('summaryOccupied');
+        var freeEl = document.getElementById('summaryFree');
+        var rateEl = document.getElementById('summaryRate');
+        var rateBarEl = document.getElementById('summaryRateBar');
+        var dateRefEl = document.getElementById('summaryDateRef');
+        var activeFilterDateLabelEl = document.getElementById('activeFilterDateLabel');
+
+        function parseBrDate(value) {
+            var parts = String(value || '').split('/');
+            if (parts.length !== 3) return null;
+            var d = new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
+            return Number.isNaN(d.getTime()) ? null : d;
+        }
+
+        function parseIsoDate(value) {
+            var parts = String(value || '').split('-');
+            if (parts.length !== 3) return null;
+            var d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+            return Number.isNaN(d.getTime()) ? null : d;
+        }
+
+        function toBrDate(value) {
+            var d = parseIsoDate(value);
+            if (!d) return '--/--/----';
+            var dd = String(d.getDate()).padStart(2, '0');
+            var mm = String(d.getMonth() + 1).padStart(2, '0');
+            var yy = d.getFullYear();
+            return dd + '/' + mm + '/' + yy;
+        }
+
+        function getDayIndexFromIso(isoDate) {
+            for (var i = 0; i < dateHeaders.length; i++) {
+                if ((dateHeaders[i].getAttribute('data-iso-date') || '') === isoDate) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        function overlapsSelectedDay(cell, dayIndex) {
+            var startSlot = parseInt(cell.getAttribute('data-start-day') || cell.getAttribute('data-day-start') || '0', 10);
+            var span = parseInt(cell.getAttribute('data-days') || cell.getAttribute('data-length') || String(cell.colSpan || 1), 10);
+            var endSlot = startSlot + span - 1;
+            var selectedStart = dayIndex * 2;
+            var selectedEnd = selectedStart + 1;
+            return startSlot <= selectedEnd && endSlot >= selectedStart;
+        }
+
+        function computeSummaryForDate(isoDate) {
+            var brDate = toBrDate(isoDate);
+            var dayIndex = getDayIndexFromIso(isoDate);
+            var checkinIds = new Set();
+            var checkoutIds = new Set();
+            var occupiedRooms = 0;
+            var totalRooms = roomRows.length;
+
+            roomRows.forEach(function(row) {
+                var reservationCells = Array.from(row.querySelectorAll('td[data-res-id]'));
+                var roomOccupied = reservationCells.some(function(cell) {
+                    return dayIndex >= 0 && overlapsSelectedDay(cell, dayIndex);
+                });
+                if (roomOccupied) occupiedRooms += 1;
+
+                reservationCells.forEach(function(cell) {
+                    var resId = String(cell.getAttribute('data-res-id') || '');
+                    if (!resId) return;
+                    if ((cell.getAttribute('data-checkin') || '') === brDate) checkinIds.add(resId);
+                    if ((cell.getAttribute('data-checkout') || '') === brDate) checkoutIds.add(resId);
+                });
+            });
+
+            var freeRooms = Math.max(0, totalRooms - occupiedRooms);
+            var rate = totalRooms ? ((occupiedRooms * 100) / totalRooms) : 0;
+
+            if (checkinsEl) checkinsEl.textContent = String(checkinIds.size);
+            if (checkoutsEl) checkoutsEl.textContent = String(checkoutIds.size);
+            if (occupiedEl) occupiedEl.textContent = String(occupiedRooms);
+            if (freeEl) freeEl.textContent = String(freeRooms);
+            if (rateEl) rateEl.textContent = rate.toFixed(1) + '%';
+            if (rateBarEl) rateBarEl.style.width = rate.toFixed(1) + '%';
+            if (dateRefEl) dateRefEl.textContent = 'Referência: ' + brDate;
+            if (activeFilterDateLabelEl) activeFilterDateLabelEl.textContent = 'Filtro aplicado para ' + brDate;
+        }
+
+        function applyMapFilter(filterKey) {
+            var selectedDate = parseIsoDate(selectedIso);
+            var selectedBr = toBrDate(selectedIso);
+            var dayIndex = getDayIndexFromIso(selectedIso);
+
+            roomRows.forEach(function(row) {
+                var showRow = true;
+                var reservationCells = Array.from(row.querySelectorAll('td[data-res-id]'));
+                var roomOccupiedSelected = reservationCells.some(function(cell) {
+                    return dayIndex >= 0 && overlapsSelectedDay(cell, dayIndex);
+                });
+
+                if (filterKey === 'room_free') {
+                    showRow = !roomOccupiedSelected;
+                } else if (filterKey === 'room_occupied') {
+                    showRow = roomOccupiedSelected;
+                } else if (filterKey === 'checkin_today' || filterKey === 'checkout_today' || filterKey === 'future') {
+                    if (filterKey === 'checkin_today') {
+                        showRow = reservationCells.some(function(cell) {
+                            return (cell.getAttribute('data-checkin') || '') === selectedBr;
+                        });
+                    } else if (filterKey === 'checkout_today') {
+                        showRow = reservationCells.some(function(cell) {
+                            return (cell.getAttribute('data-checkout') || '') === selectedBr;
+                        });
+                    } else {
+                        var hasFutureCheckin = reservationCells.some(function(cell) {
+                            var checkin = parseBrDate(cell.getAttribute('data-checkin'));
+                            return !!(checkin && selectedDate && checkin > selectedDate);
+                        });
+                        showRow = hasFutureCheckin;
+                    }
+                }
+                row.style.display = showRow ? '' : 'none';
+            });
+
+            categoryRows.forEach(function(catRow) {
+                var next = catRow.nextElementSibling;
+                var hasVisibleRoom = false;
+                while (next && !next.classList.contains('category-row')) {
+                    if (next.classList.contains('reservation-room-row') && next.style.display !== 'none') {
+                        hasVisibleRoom = true;
+                        break;
+                    }
+                    next = next.nextElementSibling;
+                }
+                catRow.style.display = hasVisibleRoom ? '' : 'none';
+            });
+        }
+
+        function refreshSelectedDateUI() {
+            dateHeaders.forEach(function(th) {
+                var isSelected = (th.getAttribute('data-iso-date') || '') === selectedIso;
+                th.classList.toggle('selected-date-header', isSelected);
+            });
+            computeSummaryForDate(selectedIso);
+            applyMapFilter(selectedFilter);
+        }
+
+        filterButtons.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                selectedFilter = btn.getAttribute('data-filter') || 'all';
+                filterButtons.forEach(function(b) { b.classList.remove('active'); });
+                btn.classList.add('active');
+                applyMapFilter(selectedFilter);
+            });
+        });
+
+        dateHeaders.forEach(function(th) {
+            th.addEventListener('click', function() {
+                selectedIso = th.getAttribute('data-iso-date') || selectedIso;
+                refreshSelectedDateUI();
+            });
+        });
+
+        if (!dateHeaders.some(function(th){ return (th.getAttribute('data-iso-date') || '') === selectedIso; }) && dateHeaders.length) {
+            selectedIso = dateHeaders[0].getAttribute('data-iso-date') || selectedIso;
+        }
+
+        refreshSelectedDateUI();
+    });
+</script>
 
 <script id="grid-data" type="application/json">{{ grid|tojson }}</script>
 <script id="room-category-map" type="application/json">
@@ -1509,7 +1885,7 @@
             document.getElementById('modalAvgDaily').textContent = 'Carregando...';
             
             if (id) {
-                fetch('/api/guest/details/' + id)
+                fetch('/api/guest/details?reservation_id=' + encodeURIComponent(id))
                     .then(res => res.json())
                     .then(data => {
                         if(data.success) {
@@ -4116,12 +4492,20 @@ async function openReservationPaymentModal(guestId, guestName, roomInfo) {
         const methodsResp = await fetch('/api/payment-methods');
         if (!methodsResp.ok) throw new Error('Erro ao buscar formas de pagamento');
         let methods = await methodsResp.json();
-        
-        // Filter for Reservations
-        methods = methods.filter(m => (m.available_in || []).includes('reservations'));
+
+        const reservationTags = ['reservations', 'reservas', 'caixa_reservas'];
+        methods = (methods || []).filter(m => {
+            const availableInRaw = m && m.available_in ? m.available_in : [];
+            const availableIn = Array.isArray(availableInRaw) ? availableInRaw : [availableInRaw];
+            const normalized = availableIn.map(v => String(v || '').toLowerCase().trim());
+            return reservationTags.some(tag => normalized.includes(tag));
+        });
         
         const select = document.getElementById('resPayMethod');
         select.innerHTML = '<option value="">Selecione...</option>';
+        if (!methods.length) {
+            throw new Error('Nenhuma forma de pagamento cadastrada para Reservas.');
+        }
         methods.forEach(m => {
             const option = document.createElement('option');
             option.value = m.id;

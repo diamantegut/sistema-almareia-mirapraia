@@ -797,6 +797,12 @@ def menu_management():
             visible_virtual_menu = request.form.get('visible_virtual_menu') == 'on'
             highlight = request.form.get('highlight') == 'on'
             active = request.form.get('active') == 'on'
+            is_vegan = request.form.get('is_vegan') == 'on'
+            lactose_free = request.form.get('lactose_free') == 'on'
+            gluten_free = request.form.get('gluten_free') == 'on'
+            extra_salty = request.form.get('extra_salty') == 'on'
+            has_seafood = request.form.get('has_seafood') == 'on'
+            spicy = request.form.get('spicy') == 'on'
 
             # Pause Info
             paused = request.form.get('paused') == 'on'
@@ -963,6 +969,12 @@ def menu_management():
                         item['visible_virtual_menu'] = visible_virtual_menu
                         item['highlight'] = highlight
                         item['active'] = active
+                        item['is_vegan'] = is_vegan
+                        item['lactose_free'] = lactose_free
+                        item['gluten_free'] = gluten_free
+                        item['extra_salty'] = extra_salty
+                        item['has_seafood'] = has_seafood
+                        item['spicy'] = spicy
                         item['recipe'] = recipe
                         item['mandatory_questions'] = mandatory_questions
                         item['flavor_group_id'] = flavor_group_id
@@ -1063,6 +1075,12 @@ def menu_management():
                     'visible_virtual_menu': visible_virtual_menu,
                     'highlight': highlight,
                     'active': active,
+                    'is_vegan': is_vegan,
+                    'lactose_free': lactose_free,
+                    'gluten_free': gluten_free,
+                    'extra_salty': extra_salty,
+                    'has_seafood': has_seafood,
+                    'spicy': spicy,
                     'recipe': recipe,
                     'mandatory_questions': mandatory_questions,
                     'flavor_group_id': flavor_group_id,

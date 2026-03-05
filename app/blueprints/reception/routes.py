@@ -1669,12 +1669,15 @@ def reception_reservations():
     segments = service.get_gantt_segments(grid, start_date, num_days)
     
     days = []
+    today_date = datetime.now().date()
     curr = start_date
     for i in range(num_days):
         days.append({
             'day': curr.day,
             'weekday': curr.strftime('%a'),
-            'is_weekend': curr.weekday() >= 5
+            'is_weekend': curr.weekday() >= 5,
+            'is_today': curr.date() == today_date,
+            'iso_date': curr.strftime('%Y-%m-%d')
         })
         curr += timedelta(days=1)
         
@@ -1682,6 +1685,17 @@ def reception_reservations():
     grouped_rooms = []
     for cat, rooms in mapping.items():
         grouped_rooms.append({'category': cat, 'rooms': rooms})
+
+    occupied_room_numbers = set()
+    for room_key, room_data in (occupancy or {}).items():
+        if not room_data:
+            continue
+        room_str = str(room_key).strip()
+        if not room_str:
+            continue
+        occupied_room_numbers.add(room_str)
+        if room_str.isdigit():
+            occupied_room_numbers.add(room_str.zfill(2))
         
     return render_template('reception_reservations.html',
                           start_date=start_date,
@@ -1689,6 +1703,9 @@ def reception_reservations():
                           grouped_rooms=grouped_rooms,
                           segments=segments,
                           grid=grid,
+                          occupied_room_numbers=sorted(occupied_room_numbers),
+                          today_iso=today_date.strftime('%Y-%m-%d'),
+                          today_br=today_date.strftime('%d/%m/%Y'),
                           year=start_date.year,
                           month=start_date.month)
 
@@ -4121,10 +4138,16 @@ def cancel_consumption():
         print(f"Error cancelling consumption: {e}")
         return jsonify({'success': False, 'message': str(e)}), 500
 
-@reception_bp.route('/api/guest/details/<reservation_id>')
+@reception_bp.route('/api/guest/details', defaults={'reservation_id': None})
+@reception_bp.route('/api/guest/details/<path:reservation_id>')
 @login_required
 def api_guest_details(reservation_id):
     try:
+        reservation_id = reservation_id or request.args.get('reservation_id')
+        reservation_id = sanitize_input(reservation_id)
+        if not reservation_id:
+            return jsonify({'success': False, 'error': 'ID da reserva não informado'}), 400
+
         service = ReservationService()
         
         # 1. Get Basic Info

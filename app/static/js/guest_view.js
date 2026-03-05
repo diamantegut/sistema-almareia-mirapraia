@@ -22,14 +22,13 @@
             return;
         }
 
-        fetch('/api/guest/details/' + guestId)
+        fetch('/api/guest/details?reservation_id=' + encodeURIComponent(guestId))
             .then(response => {
-                if (!response.ok) throw new Error("Hóspede não encontrado");
-                return response.json();
+                return response.json().then(data => ({ status: response.status, body: data }));
             })
-            .then(data => {
-                if (!data.success) throw new Error(data.error || "Erro desconhecido");
-                populateGuestModal(data.data, roomNum);
+            .then(({ status, body }) => {
+                if (status >= 400 || !body.success) throw new Error((body && body.error) || "Erro ao carregar ficha do hóspede");
+                populateGuestModal(body.data, roomNum);
             })
             .catch(err => {
                 console.error(err);

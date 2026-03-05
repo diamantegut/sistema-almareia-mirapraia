@@ -2,19 +2,20 @@
 
 {% block content %}
 <div class="container-fluid mt-3">
+  <div class="theme-page-shell">
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h2>📊 Restaurante — Dashboard</h2>
     <div class="d-flex gap-2">
       <input type="date" id="datePicker" class="form-control form-control-sm" style="width: 180px;">
-      <button class="btn btn-outline-secondary btn-sm" id="btnRefresh">Atualizar</button>
-      <button class="btn btn-outline-dark btn-sm" id="btnExportCSV">Exportar CSV</button>
-      <button class="btn btn-outline-primary btn-sm" id="btnExportPDF">Exportar PDF</button>
+      <button class="btn btn-primary btn-sm" id="btnRefresh">Atualizar</button>
+      <button class="btn btn-primary btn-sm" id="btnExportCSV">Exportar CSV</button>
+      <button class="btn btn-primary btn-sm" id="btnExportPDF">Exportar PDF</button>
     </div>
   </div>
 
   <div class="row g-3">
     <div class="col-12">
-      <div class="card">
+      <div class="card theme-card">
         <div class="card-body">
           <div class="row text-center">
             <div class="col-6 col-md-3">
@@ -40,25 +41,25 @@
       <div id="tabBreakfast" class="tab-panel">
         <div class="row g-3">
           <div class="col-md-4">
-            <div class="card"><div class="card-body">
+            <div class="card theme-card"><div class="card-body">
               <div class="fw-bold mb-2">Pedidos no Período</div>
               <div class="h3" id="bfTotalPedidos">0</div>
             </div></div>
           </div>
           <div class="col-md-4">
-            <div class="card"><div class="card-body">
+            <div class="card theme-card"><div class="card-body">
               <div class="fw-bold mb-2">Top 5 Itens</div>
               <canvas id="bfTopItems"></canvas>
             </div></div>
           </div>
           <div class="col-md-4">
-            <div class="card"><div class="card-body">
+            <div class="card theme-card"><div class="card-body">
               <div class="fw-bold mb-2">Movimentação por Hora</div>
               <canvas id="bfHourly"></canvas>
             </div></div>
           </div>
           <div class="col-12">
-            <div class="card"><div class="card-body">
+            <div class="card theme-card"><div class="card-body">
               <div class="fw-bold mb-2">Lançamentos por Atendente</div>
               <canvas id="bfAttendants"></canvas>
             </div></div>
@@ -69,7 +70,7 @@
       <div id="tabLunch" class="tab-panel d-none">
         <div class="row g-3">
           <div class="col-md-4">
-            <div class="card"><div class="card-body">
+            <div class="card theme-card"><div class="card-body">
               <div class="fw-bold mb-2">Atendimentos</div>
               <div class="d-flex gap-4">
                 <div><div class="small text-muted">Hóspedes</div><div class="h4" id="lnHospedes">0</div></div>
@@ -78,32 +79,32 @@
             </div></div>
           </div>
           <div class="col-md-4">
-            <div class="card"><div class="card-body">
+            <div class="card theme-card"><div class="card-body">
               <div class="fw-bold mb-2">Movimentação por Hora (Geral)</div>
               <canvas id="lnHourly"></canvas>
             </div></div>
           </div>
           <div class="col-md-4">
-            <div class="card"><div class="card-body">
+            <div class="card theme-card"><div class="card-body">
               <div class="fw-bold mb-2">Movimentação por Hora (Cozinha/Bar)</div>
               <canvas id="lnSegmented"></canvas>
             </div></div>
           </div>
 
           <div class="col-md-6">
-            <div class="card"><div class="card-body">
+            <div class="card theme-card"><div class="card-body">
               <div class="fw-bold mb-2">Top 6 — Cozinha</div>
               <canvas id="lnTopKitchen"></canvas>
             </div></div>
           </div>
           <div class="col-md-6">
-            <div class="card"><div class="card-body">
+            <div class="card theme-card"><div class="card-body">
               <div class="fw-bold mb-2">Top 6 — Bar</div>
               <canvas id="lnTopBar"></canvas>
             </div></div>
           </div>
           <div class="col-12">
-            <div class="card"><div class="card-body">
+            <div class="card theme-card"><div class="card-body">
               <div class="fw-bold mb-2">Lançamentos por Atendente</div>
               <canvas id="lnAttendants"></canvas>
             </div></div>
@@ -114,7 +115,7 @@
       <div id="tabDinner" class="tab-panel d-none">
         <div class="row g-3">
           <div class="col-md-4">
-            <div class="card"><div class="card-body">
+            <div class="card theme-card"><div class="card-body">
               <div class="fw-bold mb-2">Atendimentos</div>
               <div class="d-flex gap-4">
                 <div><div class="small text-muted">Hóspedes</div><div class="h4" id="dnHospedes">0</div></div>
@@ -123,32 +124,32 @@
             </div></div>
           </div>
           <div class="col-md-4">
-            <div class="card"><div class="card-body">
+            <div class="card theme-card"><div class="card-body">
               <div class="fw-bold mb-2">Movimentação por Hora (Geral)</div>
               <canvas id="dnHourly"></canvas>
             </div></div>
           </div>
           <div class="col-md-4">
-            <div class="card"><div class="card-body">
+            <div class="card theme-card"><div class="card-body">
               <div class="fw-bold mb-2">Movimentação por Hora (Cozinha/Bar)</div>
               <canvas id="dnSegmented"></canvas>
             </div></div>
           </div>
 
           <div class="col-md-6">
-            <div class="card"><div class="card-body">
+            <div class="card theme-card"><div class="card-body">
               <div class="fw-bold mb-2">Top 4 — Cozinha</div>
               <canvas id="dnTopKitchen"></canvas>
             </div></div>
           </div>
           <div class="col-md-6">
-            <div class="card"><div class="card-body">
+            <div class="card theme-card"><div class="card-body">
               <div class="fw-bold mb-2">Top 4 — Bar</div>
               <canvas id="dnTopBar"></canvas>
             </div></div>
           </div>
           <div class="col-12">
-            <div class="card"><div class="card-body">
+            <div class="card theme-card"><div class="card-body">
               <div class="fw-bold mb-2">Lançamentos por Atendente</div>
               <canvas id="dnAttendants"></canvas>
             </div></div>
@@ -157,6 +158,7 @@
       </div>
     </div>
   </div>
+</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

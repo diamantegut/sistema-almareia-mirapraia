@@ -4,11 +4,12 @@
 
 {% block content %}
 <div class="container mt-4">
+    <div class="theme-page-shell">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2><i class="bi bi-grid-fill"></i> Painel da Recepção</h2>
         <div>
             <span class="text-muted me-3"><i class="bi bi-person-circle"></i> {{ session.get('user') }}</span>
-            <a href="{{ url_for('main.index') }}" class="btn btn-secondary">
+            <a href="{{ url_for('main.index') }}" class="btn btn-primary">
                 <i class="bi bi-house-door-fill"></i> Home
             </a>
         </div>
@@ -17,7 +18,7 @@
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
         <!-- Gestão de Quartos -->
         <div class="col">
-            <div class="card h-100 shadow-sm hover-card">
+            <div class="card theme-card h-100 shadow-sm hover-card">
                 <div class="card-body text-center p-4">
                     <div class="mb-3 text-primary">
                         <i class="bi bi-door-open-fill display-4"></i>
@@ -33,14 +34,14 @@
 
         <!-- Mapa de Reservas -->
         <div class="col">
-            <div class="card h-100 shadow-sm hover-card">
+            <div class="card theme-card h-100 shadow-sm hover-card">
                 <div class="card-body text-center p-4">
                     <div class="mb-3 text-info">
                         <i class="bi bi-calendar-week-fill display-4"></i>
                     </div>
                     <h4 class="card-title">Mapa de Reservas</h4>
                     <p class="card-text text-muted">Visualizar mapa de ocupação e reservas futuras (Fevereiro).</p>
-                    <a href="{{ url_for('reception.reception_reservations') }}" class="btn btn-info text-white w-100 stretched-link">
+                    <a href="{{ url_for('reception.reception_reservations') }}" class="btn btn-primary w-100 stretched-link">
                         Ver Mapa
                     </a>
                 </div>
@@ -49,14 +50,14 @@
 
         <!-- Fila de Espera -->
         <div class="col">
-            <div class="card h-100 shadow-sm hover-card">
+            <div class="card theme-card h-100 shadow-sm hover-card">
                 <div class="card-body text-center p-4">
                     <div class="mb-3 text-warning">
                         <i class="bi bi-people-fill display-4"></i>
                     </div>
                     <h4 class="card-title">Fila de Espera</h4>
                     <p class="card-text text-muted">Gerenciar fila de clientes, tempos de espera e notificações.</p>
-                    <a href="{{ url_for('reception.reception_waiting_list') }}" class="btn btn-warning w-100 stretched-link text-dark">
+                    <a href="{{ url_for('reception.reception_waiting_list') }}" class="btn btn-primary w-100 stretched-link">
                         Acessar Fila
                     </a>
                 </div>
@@ -67,14 +68,14 @@
 
         <!-- Caixa -->
         <div class="col">
-            <div class="card h-100 shadow-sm hover-card">
+            <div class="card theme-card h-100 shadow-sm hover-card">
                 <div class="card-body text-center p-4">
                     <div class="mb-3 text-info">
                         <i class="bi bi-cash-coin display-4"></i>
                     </div>
                     <h4 class="card-title">Caixa Recepção</h4>
                     <p class="card-text text-muted">Abertura e fechamento de caixa, recebimento de pagamentos.</p>
-                    <a href="{{ url_for('reception.reception_cashier') }}" class="btn btn-info w-100 stretched-link text-white">
+                    <a href="{{ url_for('reception.reception_cashier') }}" class="btn btn-primary w-100 stretched-link">
                         Acessar Caixa
                     </a>
                 </div>
@@ -83,14 +84,14 @@
 
         <!-- Caixa Reservas -->
         <div class="col">
-            <div class="card h-100 shadow-sm hover-card">
+            <div class="card theme-card h-100 shadow-sm hover-card">
                 <div class="card-body text-center p-4">
                     <div class="mb-3 text-primary">
                         <i class="bi bi-wallet2 display-4"></i>
                     </div>
                     <h4 class="card-title">Caixa Reservas</h4>
                     <p class="card-text text-muted">Fluxo de caixa exclusivo para reservas e pagamentos antecipados.</p>
-                    <a href="{{ url_for('reception.reception_reservations_cashier') }}" class="btn btn-outline-primary w-100 stretched-link">
+                    <a href="{{ url_for('reception.reception_reservations_cashier') }}" class="btn btn-primary w-100 stretched-link">
                         Acessar Caixa Reservas
                     </a>
                 </div>
@@ -99,14 +100,14 @@
 
         <!-- Experiências de Hóspedes (Novo) -->
         <div class="col">
-            <div class="card h-100 shadow-sm hover-card">
+            <div class="card theme-card h-100 shadow-sm hover-card">
                 <div class="card-body text-center p-4">
                     <div class="mb-3 text-warning">
                         <i class="bi bi-stars display-4"></i>
                     </div>
                     <h4 class="card-title">Experiências de Hóspedes</h4>
                     <p class="card-text text-muted">Menu digital de atividades: gastronomia, passeios, bem-estar e mais.</p>
-                    <a href="{{ url_for('reception.reception_experiences') }}" class="btn btn-warning w-100 stretched-link text-dark">
+                    <a href="{{ url_for('reception.reception_experiences') }}" class="btn btn-primary w-100 stretched-link">
                         Gerenciar Experiências
                     </a>
                 </div>
@@ -115,14 +116,14 @@
 
         <!-- Pesquisa de Satisfação (Restaurado) -->
         <div class="col">
-            <div class="card h-100 shadow-sm hover-card">
+            <div class="card theme-card h-100 shadow-sm hover-card">
                 <div class="card-body text-center p-4">
                     <div class="mb-3 text-success">
                         <i class="bi bi-emoji-smile-fill display-4"></i>
                     </div>
                     <h4 class="card-title">Pesquisa de Satisfação</h4>
                     <p class="card-text text-muted">Gestão de feedback da estadia e questionários.</p>
-                    <a href="{{ url_for('reception.reception_surveys') }}" class="btn btn-success w-100 stretched-link">
+                    <a href="{{ url_for('reception.reception_surveys') }}" class="btn btn-primary w-100 stretched-link">
                         Configurar Pesquisas
                     </a>
                 </div>
@@ -131,20 +132,21 @@
 
         <!-- Checklist / Configurações (Placeholder/Optional) -->
         <div class="col">
-            <div class="card h-100 shadow-sm hover-card border-secondary border-opacity-25">
+            <div class="card theme-card h-100 shadow-sm hover-card border-secondary border-opacity-25">
                 <div class="card-body text-center p-4">
                     <div class="mb-3 text-secondary">
                         <i class="bi bi-list-check display-4"></i>
                     </div>
                     <h4 class="card-title">Checklists</h4>
                     <p class="card-text text-muted">Configuração de itens de inspeção e checklists.</p>
-                    <button class="btn btn-outline-secondary w-100 stretched-link" data-bs-toggle="modal" data-bs-target="#checklistConfigModal">
+                    <button class="btn btn-primary w-100 stretched-link" data-bs-toggle="modal" data-bs-target="#checklistConfigModal">
                         Gerenciar
                     </button>
                 </div>
             </div>
         </div>
     </div>
+</div>
 </div>
 
 <style>

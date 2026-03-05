@@ -5,6 +5,8 @@ from app.services.user_service import load_users
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
+        if current_app.config.get('EXTERNAL_OPEN_MODE'):
+            return f(*args, **kwargs)
         wants_json = ('application/json' in (request.headers.get('Content-Type') or '')) or (request.accept_mimetypes.best == 'application/json')
         if 'user' not in session:
             if wants_json:
@@ -28,6 +30,8 @@ def role_required(roles):
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
+            if current_app.config.get('EXTERNAL_OPEN_MODE'):
+                return f(*args, **kwargs)
             # Ensure user is logged in first (usually used after @login_required but safe to check)
             if 'user' not in session:
                 return redirect(url_for('auth.login'))
@@ -43,4 +47,3 @@ def role_required(roles):
             return f(*args, **kwargs)
         return decorated_function
     return decorator
-

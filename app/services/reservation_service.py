@@ -964,6 +964,7 @@ class ReservationService:
                         'category': res.get('category'),
                         'payment_status': res.get('status'),
                         'channel': res.get('channel'),
+                        'num_adults': res.get('num_adults'),
                         'amount': res.get('amount'),
                         'paid_amount': res.get('paid_amount'),
                         'to_receive': res.get('to_receive')

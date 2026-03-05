@@ -11,6 +11,351 @@
             align-items: center;
             justify-content: center;
         }
+        .room-card {
+            border-width: 2px;
+            min-height: 390px;
+        }
+        .room-card-checkout-today {
+            border-color: #dc3545 !important;
+            box-shadow: 0 0 0 0.15rem rgba(220, 53, 69, 0.12);
+        }
+        .room-summary-card {
+            border: 1px solid #dee2e6;
+            border-radius: 0.75rem;
+            background: #fff;
+            padding: 0.85rem 1rem;
+        }
+        .room-summary-label {
+            font-size: 0.78rem;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            font-weight: 700;
+        }
+        .room-summary-value {
+            font-size: 1.55rem;
+            line-height: 1;
+            font-weight: 800;
+            margin-top: 0.25rem;
+        }
+        .room-filter-chip {
+            min-height: 36px;
+            border-radius: 999px;
+            font-size: 0.84rem;
+            font-weight: 700;
+            padding: 0.35rem 0.85rem;
+        }
+        .room-filter-chip.active {
+            color: #fff;
+            background: #0d6efd;
+            border-color: #0d6efd;
+        }
+        .room-card-header {
+            padding: 0.7rem 0.9rem;
+            background: #f8f9fa;
+        }
+        .room-category {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            font-weight: 700;
+            color: #6c757d;
+        }
+        .room-card-status--ready {
+            border-color: #198754;
+        }
+        .room-card-status--occupied {
+            border-color: #0d6efd;
+        }
+        .room-card-status--cleaning {
+            border-color: #f1c40f;
+        }
+        .room-card-status--maintenance {
+            border-color: #fd7e14;
+        }
+        .room-card-status--blocked {
+            border-color: #6c757d;
+        }
+        .room-status-badge {
+            font-size: 0.84rem;
+            font-weight: 700;
+            padding: 0.45rem 0.7rem;
+            border-radius: 999px;
+        }
+        .room-center-item {
+            border-bottom: 1px dashed #e9ecef;
+            padding: 0.25rem 0;
+        }
+        .room-center-label {
+            font-size: 0.72rem;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            font-weight: 700;
+        }
+        .room-center-value {
+            font-size: 0.95rem;
+            color: #212529;
+            font-weight: 600;
+        }
+        .room-guest-name {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.25rem;
+            min-height: 2.5rem;
+        }
+        .room-actions {
+            border-top: 1px solid #e9ecef;
+            margin-top: 0.7rem;
+            padding-top: 0.8rem;
+            margin-top: auto;
+        }
+        .room-action-primary {
+            min-height: 42px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            padding-left: 0.45rem;
+            padding-right: 0.45rem;
+        }
+        .room-action-secondary {
+            min-height: 38px;
+            font-size: 0.8rem;
+            padding-left: 0.4rem;
+            padding-right: 0.4rem;
+        }
+        .room-actions form {
+            height: 100%;
+            margin: 0;
+        }
+        .room-actions form .btn {
+            height: 100%;
+        }
+        #roomsEmptyState {
+            display: none;
+        }
+        .consumption-guest-header {
+            border: 1px solid #dee2e6;
+            border-radius: 0.75rem;
+            background: #f8f9fa;
+            padding: 0.8rem;
+            margin-bottom: 0.9rem;
+        }
+        .consumption-meta-label {
+            font-size: 0.72rem;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            font-weight: 700;
+        }
+        .consumption-meta-value {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #212529;
+        }
+        .consumption-date-group {
+            margin-bottom: 1rem;
+        }
+        .consumption-date-title {
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: #495057;
+            margin-bottom: 0.55rem;
+        }
+        .consumption-item-card {
+            border: 1px solid #e9ecef;
+            border-radius: 0.75rem;
+            background: #fff;
+            box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+            padding: 0.75rem;
+            margin-bottom: 0.6rem;
+        }
+        .consumption-item-title {
+            font-size: 0.96rem;
+            font-weight: 700;
+            color: #1f2d3d;
+            margin-bottom: 0.3rem;
+        }
+        .consumption-origin-badge {
+            font-size: 0.7rem;
+            font-weight: 700;
+            border-radius: 999px;
+            padding: 0.25rem 0.55rem;
+        }
+        .consumption-origin-restaurante {
+            background: #0d6efd;
+            color: #fff;
+        }
+        .consumption-origin-frigobar {
+            background: #0dcaf0;
+            color: #1f2d3d;
+        }
+        .consumption-origin-servico {
+            background: #6f42c1;
+            color: #fff;
+        }
+        .consumption-origin-experiencia {
+            background: #198754;
+            color: #fff;
+        }
+        .consumption-item-actions-title {
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #6c757d;
+            font-weight: 700;
+            margin-bottom: 0.35rem;
+        }
+        .consumption-total-sticky {
+            border-top: 1px solid #dee2e6;
+            padding-top: 0.65rem;
+            margin-top: 0.2rem;
+        }
+        .consumption-total-box {
+            border: 1px solid #ced4da;
+            border-radius: 0.75rem;
+            background: #f8f9fa;
+            padding: 0.6rem 0.9rem;
+            min-width: 200px;
+        }
+        .consumption-total-label {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #6c757d;
+            font-weight: 700;
+        }
+        .consumption-total-value {
+            font-size: 1.35rem;
+            line-height: 1.1;
+            font-weight: 800;
+            color: #1f2d3d;
+        }
+        .consumption-account-actions-title {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #6c757d;
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+        }
+        .consumption-modal-body {
+            max-height: 62vh;
+            overflow-y: auto;
+        }
+        .consumption-financial-summary {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            background: #ffffff;
+            border: 1px solid #dee2e6;
+            border-radius: 0.75rem;
+            padding: 0.65rem;
+            margin-bottom: 0.85rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        .consumption-financial-item {
+            border-radius: 0.6rem;
+            background: #f8f9fa;
+            padding: 0.45rem 0.55rem;
+        }
+        .consumption-financial-item .label {
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            color: #6c757d;
+            font-weight: 700;
+        }
+        .consumption-financial-item .value {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: #1f2d3d;
+            line-height: 1.1;
+        }
+        .consumption-financial-total {
+            border: 1px solid #ced4da;
+            border-radius: 0.6rem;
+            background: #eef5ff;
+            padding: 0.45rem 0.55rem;
+        }
+        .consumption-financial-total .label {
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            color: #4b5f7a;
+            font-weight: 700;
+        }
+        .consumption-financial-total .value {
+            font-size: 1.02rem;
+            font-weight: 900;
+            color: #0b4ea2;
+            line-height: 1.1;
+        }
+        .consumption-agg-row {
+            width: 100%;
+            border: 1px solid #e9ecef;
+            border-radius: 0.5rem;
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            padding: 0.24rem 0.45rem;
+            display: grid;
+            grid-template-columns: minmax(0, 2.4fr) auto auto;
+            gap: 0.25rem;
+            align-items: center;
+            text-align: left;
+            margin-bottom: 0.12rem;
+            cursor: pointer;
+        }
+        .consumption-agg-row:hover {
+            background: #f8fbff;
+        }
+        .consumption-agg-product {
+            min-width: 0;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            font-size: 0.84rem;
+            font-weight: 700;
+            color: #1f2d3d;
+        }
+        .consumption-agg-qty {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #495057;
+        }
+        .consumption-agg-value {
+            font-size: 0.82rem;
+            font-weight: 800;
+            color: #1f2d3d;
+        }
+        .consumption-charge-origin {
+            margin: 0.2rem 0 0.15rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        .consumption-charge-origin-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            color: #6c757d;
+            font-weight: 700;
+        }
+        .consumption-occurrences {
+            margin: 0.06rem 0 0.2rem 0;
+            border-left: 2px solid #dee2e6;
+            padding-left: 0.45rem;
+        }
+        .consumption-occurrence-line {
+            border-bottom: 1px dashed #e9ecef;
+            padding: 0.18rem 0;
+            font-size: 0.78rem;
+        }
+        .consumption-occurrence-line:last-child {
+            border-bottom: none;
+        }
     </style>
     
     <!-- Header -->
@@ -38,128 +383,251 @@
         </div>
     </div>
 
-    <!-- Room Grid -->
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-        {% set excluded_rooms = [4, 5, 6, 7, 8, 9, 10, 13, 18, 19, 20, 27, 28, 29, 30] %}
+    {% set excluded_rooms = [4, 5, 6, 7, 8, 9, 10, 13, 18, 19, 20, 27, 28, 29, 30] %}
+    {% set stats = namespace(occupied=0, free=0, cleaning=0, maintenance=0) %}
+    {% for i in range(1, 36) %}
+        {% if i not in excluded_rooms %}
+            {% set room_num = i|format_room %}
+            {% set occ_data = occupancy.get(room_num) %}
+            {% set clean_data = cleaning_status.get(room_num, {}) %}
+            {% set status = clean_data.get('status', 'dirty') %}
+            {% if occ_data %}
+                {% set stats.occupied = stats.occupied + 1 %}
+            {% elif status == 'maintenance' %}
+                {% set stats.maintenance = stats.maintenance + 1 %}
+            {% elif status == 'inspected' %}
+                {% set stats.free = stats.free + 1 %}
+            {% elif status in ['dirty', 'dirty_checkout', 'cleaning', 'clean', 'rejected', 'in_progress'] %}
+                {% set stats.cleaning = stats.cleaning + 1 %}
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3">
+            <div class="room-summary-card">
+                <div class="room-summary-label">Ocupados</div>
+                <div class="room-summary-value text-primary">{{ stats.occupied }}</div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="room-summary-card">
+                <div class="room-summary-label">Livres</div>
+                <div class="room-summary-value text-success">{{ stats.free }}</div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="room-summary-card">
+                <div class="room-summary-label">Limpeza</div>
+                <div class="room-summary-value" style="color:#b8860b;">{{ stats.cleaning }}</div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="room-summary-card">
+                <div class="room-summary-label">Manutenção</div>
+                <div class="room-summary-value" style="color:#fd7e14;">{{ stats.maintenance }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2 mb-3" id="roomQuickFilters">
+        <button type="button" class="btn btn-outline-primary room-filter-chip active" data-filter="all">Todos</button>
+        <button type="button" class="btn btn-outline-primary room-filter-chip" data-filter="occupied">Ocupados</button>
+        <button type="button" class="btn btn-outline-primary room-filter-chip" data-filter="free">Livres</button>
+        <button type="button" class="btn btn-outline-primary room-filter-chip" data-filter="cleaning">Limpeza</button>
+        <button type="button" class="btn btn-outline-danger room-filter-chip" data-filter="checkout_today">Check-out hoje</button>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-3" id="roomsGrid">
         {% for i in range(1, 36) %}
             {% if i not in excluded_rooms %}
                 {% set room_num = i|format_room %}
                 {% set occ_data = occupancy.get(room_num) %}
                 {% set clean_data = cleaning_status.get(room_num, {}) %}
                 {% set status = clean_data.get('status', 'dirty') %}
+                {% set checkout_iso = '' %}
+                {% if occ_data and occ_data.checkout %}
+                    {% if '/' in occ_data.checkout %}
+                        {% set checkout_parts = occ_data.checkout.split('/') %}
+                        {% if checkout_parts|length == 3 %}
+                            {% set checkout_iso = checkout_parts[2] ~ '-' ~ checkout_parts[1] ~ '-' ~ checkout_parts[0] %}
+                        {% endif %}
+                    {% else %}
+                        {% set checkout_iso = occ_data.checkout %}
+                    {% endif %}
+                {% endif %}
+                {% set is_checkout_today = occ_data and checkout_iso == today %}
+                {% set badge_style = '' %}
+                {% set is_blocked = status == 'blocked' %}
+                {% set is_maintenance = status == 'maintenance' %}
+                {% set is_cleaning_state = status in ['dirty', 'dirty_checkout', 'cleaning', 'clean', 'rejected', 'in_progress'] %}
+                {% if room_num in ['01', '02', '03'] %}
+                    {% set suite_category = 'Suíte Areia' %}
+                {% elif room_num == '11' %}
+                    {% set suite_category = 'Suíte Mar Família' %}
+                {% elif room_num in ['12', '14', '15', '16', '17', '21', '22', '23', '24', '25', '26'] %}
+                    {% set suite_category = 'Suíte Mar' %}
+                {% elif room_num in ['31', '35'] %}
+                    {% set suite_category = 'Suíte Alma c/ Banheira' %}
+                {% elif room_num in ['32', '34'] %}
+                    {% set suite_category = 'Suíte Alma' %}
+                {% elif room_num == '33' %}
+                    {% set suite_category = 'Suíte Master Diamante' %}
+                {% else %}
+                    {% set suite_category = 'Suíte' %}
+                {% endif %}
+                {% if occ_data %}
+                    {% set card_theme = 'occupied' %}
+                    {% set badge_class = 'bg-primary text-white' %}
+                    {% set badge_label = 'Ocupado' %}
+                {% elif is_maintenance %}
+                    {% set card_theme = 'maintenance' %}
+                    {% set badge_class = 'text-white' %}
+                    {% set badge_style = 'background-color:#fd7e14;' %}
+                    {% set badge_label = 'Manutenção' %}
+                {% elif is_blocked %}
+                    {% set card_theme = 'blocked' %}
+                    {% set badge_class = 'bg-secondary text-white' %}
+                    {% set badge_label = 'Bloqueado' %}
+                {% elif status == 'inspected' %}
+                    {% set card_theme = 'ready' %}
+                    {% set badge_class = 'bg-success text-white' %}
+                    {% set badge_label = 'Livre' %}
+                {% elif is_cleaning_state %}
+                    {% set card_theme = 'cleaning' %}
+                    {% set badge_class = 'text-dark' %}
+                    {% set badge_style = 'background-color:#f1c40f;' %}
+                    {% set badge_label = 'Limpeza' %}
+                {% else %}
+                    {% set card_theme = 'blocked' %}
+                    {% set badge_class = 'bg-secondary text-white' %}
+                    {% set badge_label = 'Bloqueado' %}
+                {% endif %}
                 
-                <div class="col">
-                    <div class="card h-100 {{ 'border-primary' if occ_data else 'border-secondary' }}">
-                        <!-- Card Header -->
-                        <div class="card-header d-flex justify-content-between align-items-center {{ 'bg-primary text-white' if occ_data else 'bg-light' }}">
-                            <h5 class="mb-0">Quarto {{ room_num }}</h5>
-                            {% if occ_data %}
-                                <span class="badge bg-white text-primary">Ocupado</span>
-                            {% else %}
-                                <span class="badge bg-secondary">Livre</span>
-                            {% endif %}
+                <div class="col room-card-item"
+                     data-room-filter="{{ 'occupied' if occ_data else ('free' if status == 'inspected' else ('cleaning' if is_cleaning_state else ('maintenance' if status == 'maintenance' else 'other'))) }}"
+                     data-checkout-today="{{ '1' if is_checkout_today else '0' }}">
+                    <div class="card h-100 room-card room-card-status--{{ card_theme }} {{ 'room-card-checkout-today' if is_checkout_today else '' }}">
+                        <div class="card-header room-card-header d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="fw-bold fs-5">Quarto {{ room_num }}</div>
+                                <div class="room-category">{{ suite_category }}</div>
+                            </div>
+                            <div class="d-flex flex-column align-items-end gap-1">
+                                <span class="badge room-status-badge {{ badge_class }}" {% if badge_style %}style="{{ badge_style }}"{% endif %}>
+                                    {{ badge_label }}
+                                </span>
+                                {% if is_checkout_today %}
+                                <span class="badge bg-danger">CHECK-OUT HOJE</span>
+                                {% endif %}
+                            </div>
                         </div>
                         
-                        <!-- Card Body -->
-                        <div class="card-body">
-                            {% if occ_data %}
-                                <h5 class="card-title">
+                        <div class="card-body py-2 d-flex flex-column">
+                            <div class="room-center-item">
+                                <div class="room-center-label">Hóspede</div>
+                                <div class="room-center-value room-guest-name">
+                                {% if occ_data %}
                                     {% if occ_data.reservation_id %}
-                                    <a href="#" class="text-decoration-none text-dark"
+                                    <a href="#" class="text-decoration-none text-dark d-inline-block w-100"
                                        data-reservation-id="{{ occ_data.reservation_id }}"
                                        data-guest-name="{{ occ_data.guest_name }}"
                                        data-room-num="{{ room_num }}"
                                        onclick="openViewGuestModalFromElement(this); return false;"
                                        title="Ver Ficha do Hóspede">
-                                        {{ occ_data.guest_name }} <i class="bi bi-person-badge text-primary small ms-1"></i>
+                                        {{ occ_data.guest_name }}
                                     </a>
                                     {% else %}
-                                    <span class="text-dark" title="Hóspede sem reserva vinculada">
-                                        {{ occ_data.guest_name }} <i class="bi bi-person text-secondary small ms-1"></i>
-                                    </span>
+                                        {{ occ_data.guest_name }}
                                     {% endif %}
-                                </h5>
-                                <p class="card-text small text-muted">
-                                    <i class="bi bi-calendar-check"></i> Check-in: {{ occ_data.checkin }}<br>
-                                    <i class="bi bi-calendar-x"></i> Check-out: {{ occ_data.checkout }}
-                                </p>
-
-                                <div class="d-flex gap-2 mb-2">
-                                    <button class="btn btn-outline-primary btn-sm w-50"
-                                            data-room-num="{{ room_num }}"
-                                            data-guest-name="{{ occ_data.guest_name }}"
-                                            onclick="openTransferModalFromElement(this)">
-                                        <i class="bi bi-arrow-left-right"></i> Trocar
-                                    </button>
-                                    <button class="btn btn-outline-secondary btn-sm w-50"
-                                            data-room-num="{{ room_num }}"
-                                            data-guest-name="{{ occ_data.guest_name }}"
-                                            onclick="openEditGuestModalFromElement(this)">
-                                        <i class="bi bi-pencil-square"></i> Editar
-                                    </button>
-                                </div>
-                                
-                                <button class="btn btn-outline-info btn-sm w-100 mb-2" onclick="openConsumptionModal('{{ room_num }}')">
-                                    <i class="bi bi-receipt"></i> Ver Consumo
-                                </button>
-
-                                <a href="{{ url_for('restaurant.restaurant_table_order', table_id=room_num, mode='reception') }}" class="btn btn-outline-success btn-sm w-100 mb-2">
-                                    <i class="bi bi-cart-plus"></i> Lançar Consumo
-                                </a>
-
-                                {% if occ_data.reservation_id %}
-                                <button class="btn btn-outline-warning btn-sm w-100 mb-2"
-                                        data-res-id="{{ occ_data.reservation_id }}"
-                                        data-guest-name="{{ occ_data.guest_name }}"
-                                        data-room-label="Quarto {{ room_num }}"
-                                        onclick="openReservationPaymentModalFromElement(this)">
-                                    <i class="bi bi-cash-stack"></i> Receber Reserva
-                                </button>
+                                {% else %}
+                                    -
                                 {% endif %}
+                                </div>
+                            </div>
+                            <div class="room-center-item">
+                                <div class="room-center-label">Check-in</div>
+                                <div class="room-center-value">{{ occ_data.checkin if occ_data and occ_data.checkin else '-' }}</div>
+                            </div>
+                            <div class="room-center-item">
+                                <div class="room-center-label">Check-out</div>
+                                <div class="room-center-value">{{ occ_data.checkout if occ_data and occ_data.checkout else '-' }}</div>
+                            </div>
 
-                                <form method="POST" action="{{ url_for('reception.reception_rooms') }}" onsubmit="return confirm('Confirmar check-out do quarto {{ room_num }}?');">
-                                    <input type="hidden" name="action" value="checkout">
-                                    <input type="hidden" name="room_number" value="{{ room_num }}">
-                                    <button type="submit" class="btn btn-outline-danger btn-sm w-100">
-                                        <i class="bi bi-box-arrow-right"></i> Realizar Check-out
-                                    </button>
-                                </form>
-
-                            {% else %}
-                                <!-- Free Room Logic -->
-                                {% if status == 'inspected' %}
-                                    <div class="alert alert-success py-2 small mb-2 text-center">
-                                        <i class="bi bi-check-circle-fill"></i> Pronto para Hóspede
+                            <div class="room-actions">
+                                {% if occ_data %}
+                                    <div class="row g-2">
+                                        <div class="col-4">
+                                            <button class="btn btn-info text-white room-action-primary w-100" onclick="openConsumptionModal('{{ room_num }}')">
+                                                Ver Consumo
+                                            </button>
+                                        </div>
+                                        <div class="col-4">
+                                            <a href="{{ url_for('restaurant.restaurant_table_order', table_id=room_num, mode='reception') }}" class="btn btn-success room-action-primary w-100">
+                                                Lançar Consumo
+                                            </a>
+                                        </div>
+                                        <div class="col-4">
+                                            <form method="POST" action="{{ url_for('reception.reception_rooms') }}" onsubmit="return confirm('Confirmar check-out do quarto {{ room_num }}?');">
+                                                <input type="hidden" name="action" value="checkout">
+                                                <input type="hidden" name="room_number" value="{{ room_num }}">
+                                                <button type="submit" class="btn btn-danger room-action-primary w-100">
+                                                    Check-out
+                                                </button>
+                                            </form>
+                                        </div>
                                     </div>
-                                    <button class="btn btn-primary btn-sm w-100" 
-                                            onclick="openCheckinModal('{{ room_num }}')">
-                                        <i class="bi bi-person-plus"></i> Fazer Check-in
+                                    <div class="row g-2 mt-1">
+                                        <div class="col-6">
+                                            <button class="btn btn-outline-secondary room-action-secondary w-100"
+                                                    data-room-num="{{ room_num }}"
+                                                    data-guest-name="{{ occ_data.guest_name }}"
+                                                    onclick="openEditGuestModalFromElement(this)">
+                                                Editar
+                                            </button>
+                                        </div>
+                                        <div class="col-6">
+                                            <button class="btn btn-outline-primary room-action-secondary w-100"
+                                                    data-room-num="{{ room_num }}"
+                                                    data-guest-name="{{ occ_data.guest_name }}"
+                                                    onclick="openTransferModalFromElement(this)">
+                                                Trocar Quarto
+                                            </button>
+                                        </div>
+                                    </div>
+                                {% elif status == 'inspected' %}
+                                    <button class="btn btn-primary room-action-primary w-100" onclick="openCheckinModal('{{ room_num }}')">
+                                        Fazer Check-in
                                     </button>
                                 {% elif status == 'clean' %}
-                                    <div class="alert alert-info py-2 small mb-2 text-center">
-                                        <i class="bi bi-stars"></i> Limpo - Aguardando Inspeção
-                                    </div>
-                                    <button class="btn btn-info text-white btn-sm w-100 mb-2" 
-                                            onclick="openInspectModal('{{ room_num }}')">
-                                        <i class="bi bi-clipboard-check"></i> Realizar Inspeção
+                                    <button class="btn btn-info text-white room-action-primary w-100 mb-2" onclick="openInspectModal('{{ room_num }}')">
+                                        Realizar Inspeção
                                     </button>
-                                    <button class="btn btn-outline-secondary btn-sm w-100" disabled>
-                                        <i class="bi bi-person-plus"></i> Check-in Bloqueado
+                                    <button class="btn btn-outline-secondary room-action-secondary w-100" disabled>
+                                        Check-in Bloqueado
+                                    </button>
+                                {% elif status == 'maintenance' %}
+                                    <button class="btn btn-outline-secondary room-action-primary w-100" disabled>
+                                        Em Manutenção
+                                    </button>
+                                {% elif status == 'blocked' %}
+                                    <button class="btn btn-outline-secondary room-action-primary w-100" disabled>
+                                        Quarto Bloqueado
                                     </button>
                                 {% else %}
-                                    <div class="alert alert-warning py-2 small mb-2 text-center">
-                                        <i class="bi bi-clock-history"></i> Aguardando Limpeza
-                                    </div>
-                                    <button class="btn btn-outline-secondary btn-sm w-100" disabled>
-                                        <i class="bi bi-person-plus"></i> Check-in Bloqueado
+                                    <button class="btn btn-outline-secondary room-action-primary w-100" disabled>
+                                        Aguardando Limpeza
                                     </button>
                                 {% endif %}
-                            {% endif %}
+                            </div>
                         </div>
                     </div>
                 </div>
             {% endif %}
         {% endfor %}
+    </div>
+    <div class="alert alert-secondary text-center mt-3 mb-0" id="roomsEmptyState">
+        Nenhum quarto encontrado para este filtro.
     </div>
 </div>
 
@@ -748,6 +1216,42 @@
         if (roomSelect) roomSelect.addEventListener('change', validateCapacity);
         if (adultsInput) adultsInput.addEventListener('change', validateCapacity);
 
+        const filterButtons = Array.from(document.querySelectorAll('#roomQuickFilters .room-filter-chip'));
+        const roomCards = Array.from(document.querySelectorAll('.room-card-item'));
+        const emptyState = document.getElementById('roomsEmptyState');
+
+        function applyRoomFilter(filterKey) {
+            let visible = 0;
+            roomCards.forEach(card => {
+                const cardType = card.getAttribute('data-room-filter') || '';
+                const isCheckoutToday = card.getAttribute('data-checkout-today') === '1';
+                let show = false;
+                if (filterKey === 'all') {
+                    show = true;
+                } else if (filterKey === 'checkout_today') {
+                    show = isCheckoutToday;
+                } else {
+                    show = cardType === filterKey;
+                }
+                card.style.display = show ? '' : 'none';
+                if (show) visible += 1;
+            });
+            if (emptyState) {
+                emptyState.style.display = visible ? 'none' : 'block';
+            }
+        }
+
+        filterButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const filterKey = btn.getAttribute('data-filter') || 'all';
+                filterButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                applyRoomFilter(filterKey);
+            });
+        });
+
+        applyRoomFilter('all');
+
         if (openCheckinFromUrl && requestedReservationId) {
             const loader = document.getElementById('reservation_loader');
             if (loader) {
@@ -1050,40 +1554,91 @@
                 <h5 class="modal-title"><i class="bi bi-receipt"></i> Consumo do Quarto <span id="consumptionRoomNum"></span></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover">
-                        <thead>
-                            <tr>
-                                <th>Data</th>
-                                <th>Origem</th>
-                                <th>Itens</th>
-                                <th class="text-end">Valor</th>
-                                <th class="text-end">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="consumptionTableBody">
-                        </tbody>
-                        <tfoot>
-                            <tr class="table-info">
-                                <td colspan="4" class="text-end fw-bold">Total:</td>
-                                <td class="text-end fw-bold" id="consumptionTotal">R$ 0,00</td>
-                            </tr>
-                        </tfoot>
-                    </table>
+            <div class="modal-body consumption-modal-body">
+                <div class="consumption-guest-header">
+                    <div class="row g-2">
+                        <div class="col-6 col-md-2">
+                            <div class="consumption-meta-label">Quarto</div>
+                            <div class="consumption-meta-value" id="consumptionHeaderRoom">-</div>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <div class="consumption-meta-label">Hóspede</div>
+                            <div class="consumption-meta-value" id="consumptionHeaderGuest">-</div>
+                        </div>
+                        <div class="col-6 col-md-2">
+                            <div class="consumption-meta-label">Check-in</div>
+                            <div class="consumption-meta-value" id="consumptionHeaderCheckin">-</div>
+                        </div>
+                        <div class="col-6 col-md-2">
+                            <div class="consumption-meta-label">Check-out</div>
+                            <div class="consumption-meta-value" id="consumptionHeaderCheckout">-</div>
+                        </div>
+                        <div class="col-12 col-md-2">
+                            <div class="consumption-meta-label">Total Atual</div>
+                            <div class="consumption-meta-value" id="consumptionHeaderTotal">R$ 0,00</div>
+                        </div>
+                    </div>
                 </div>
+
+                <div class="consumption-financial-summary">
+                    <div class="row g-2 align-items-stretch">
+                        <div class="col-6 col-md-2">
+                            <div class="consumption-financial-item">
+                                <div class="label">Restaurante</div>
+                                <div class="value" id="consumptionSummaryRestaurant">R$ 0,00</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-2">
+                            <div class="consumption-financial-item">
+                                <div class="label">Frigobar</div>
+                                <div class="value" id="consumptionSummaryMinibar">R$ 0,00</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-2">
+                            <div class="consumption-financial-item">
+                                <div class="label">Serviços</div>
+                                <div class="value" id="consumptionSummaryServices">R$ 0,00</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="consumption-financial-item">
+                                <div class="label">Pagamentos Realizados</div>
+                                <div class="value text-success" id="consumptionSummaryPaid">R$ 0,00</div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <div class="consumption-financial-total h-100">
+                                <div class="label">Total da Conta</div>
+                                <div class="value" id="consumptionSummaryTotal">R$ 0,00</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="consumptionItemsContainer"></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                <button type="button" class="btn btn-dark" onclick="printCurrentRoomConsumption()">
-                    <i class="bi bi-printer"></i> Imprimir Consumo
-                </button>
-                <button type="button" class="btn btn-primary" onclick="openCloseRoomAccountModal()">
-                    <i class="bi bi-check2-circle"></i> Dar Baixa da Conta
-                </button>
-                <a href="{{ url_for('reception.reception_cashier') }}" class="btn btn-success">
-                    <i class="bi bi-cash-coin"></i> Ir para Caixa
-                </a>
+                <div class="d-flex flex-column flex-md-row align-items-stretch align-items-md-center justify-content-between w-100 gap-2 consumption-total-sticky">
+                    <div class="consumption-total-box">
+                        <div class="consumption-total-label">Total da Conta</div>
+                        <div class="consumption-total-value" id="consumptionTotal">R$ 0,00</div>
+                    </div>
+                    <div>
+                        <div class="consumption-account-actions-title">Ações da Conta</div>
+                        <div class="d-flex flex-wrap gap-2 justify-content-md-end">
+                            <button type="button" class="btn btn-success" onclick="openCloseRoomAccountModal()">
+                                <i class="bi bi-cash-coin"></i> Registrar Pagamento
+                            </button>
+                            <a href="#" class="btn text-white" style="background-color:#fd7e14;" id="consumptionLaunchLink">
+                                <i class="bi bi-cart-plus"></i> Lançar Consumo
+                            </a>
+                            <button type="button" class="btn btn-outline-dark" onclick="printCurrentRoomConsumption()">
+                                <i class="bi bi-printer"></i> Imprimir Conta
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1299,13 +1854,37 @@
     </div>
 </div>
 
-<script id="consumptionConfigData" type="application/json">{{ {'grouped_charges': grouped_charges, 'occupancy': occupancy, 'printer_settings': printer_settings, 'can_delete_consumption': session.get('role') == 'admin', 'products': products} | tojson | safe }}</script>
+<div class="modal fade" id="returnToRestaurantModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title"><i class="bi bi-exclamation-triangle-fill"></i> Mesa Ocupada</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>A mesa original está ocupada. Selecione uma mesa livre para devolver os itens:</p>
+                <input type="hidden" id="returnChargeId">
+                <div class="mb-3">
+                    <label for="returnTargetTable" class="form-label">Mesa Destino</label>
+                    <select class="form-select" id="returnTargetTable"></select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="submitReturnToRestaurant()">Confirmar Devolução</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script id="consumptionConfigData" type="application/json">{{ {'grouped_charges': grouped_charges, 'occupancy': occupancy, 'printer_settings': printer_settings, 'can_delete_consumption': session.get('role') == 'admin', 'can_return_consumption': session.get('role') in ['admin', 'gerente', 'supervisor'] or 'recepcao' in (session.get('permissions') or []), 'products': products} | tojson | safe }}</script>
 <script>
     const consumptionConfigData = JSON.parse(document.getElementById('consumptionConfigData').textContent || '{}');
     const groupedCharges = consumptionConfigData.grouped_charges || {};
     const occupancyData = consumptionConfigData.occupancy || {};
     const printerSettings = consumptionConfigData.printer_settings || {};
     const canDeleteConsumption = Boolean(consumptionConfigData.can_delete_consumption);
+    const canReturnConsumption = Boolean(consumptionConfigData.can_return_consumption);
     const availableProducts = consumptionConfigData.products || [];
     const defaultReceptionPrinter = printerSettings.reception_printer_id || printerSettings.default_reception_report_printer_id || '';
     let currentConsumptionRoom = null;
@@ -1339,8 +1918,22 @@
             .replace(/'/g, '&#39;');
     }
 
+    function escapeJsSingleQuote(value) {
+        return String(value || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    }
+
     function getRoomGuestName(roomNum) {
         return (occupancyData[roomNum] && occupancyData[roomNum].guest_name) ? occupancyData[roomNum].guest_name : 'Hóspede';
+    }
+
+    function getRoomGuestData(roomNum) {
+        const roomData = occupancyData[roomNum] || {};
+        return {
+            room: roomNum || '-',
+            guest: roomData.guest_name || 'Hóspede',
+            checkin: roomData.checkin || '-',
+            checkout: roomData.checkout || '-'
+        };
     }
 
     function getRoomChargeIds(roomNum) {
@@ -1351,6 +1944,34 @@
     function findCharge(roomNum, chargeId) {
         const charges = groupedCharges[roomNum] || [];
         return charges.find(c => c.id === chargeId);
+    }
+
+    function toDateWeight(dateLabel) {
+        const parts = String(dateLabel || '').split('/');
+        if (parts.length === 3) {
+            const day = Number(parts[0]) || 0;
+            const month = Number(parts[1]) || 0;
+            const year = Number(parts[2]) || 0;
+            return (year * 10000) + (month * 100) + day;
+        }
+        return 0;
+    }
+
+    function getConsumptionOriginMeta(charge, item) {
+        const source = String(charge && charge.source ? charge.source : '').toLowerCase();
+        const category = String(item && item.category ? item.category : '').toLowerCase();
+        const name = String(item && item.name ? item.name : '').toLowerCase();
+
+        if (source.includes('experience') || source.includes('experiencia') || category.includes('experi') || name.includes('experi')) {
+            return { label: 'Experiência', className: 'consumption-origin-experiencia' };
+        }
+        if (source.includes('service') || source.includes('servico') || source.includes('serviço') || category.includes('servi')) {
+            return { label: 'Serviço', className: 'consumption-origin-servico' };
+        }
+        if (source.includes('minibar') || category.includes('frigobar')) {
+            return { label: 'Frigobar', className: 'consumption-origin-frigobar' };
+        }
+        return { label: 'Restaurante', className: 'consumption-origin-restaurante' };
     }
 
     function openConsumptionPaymentModal(roomNum, chargeId, chargeTotal) {
@@ -1395,6 +2016,77 @@
         document.getElementById('deleteConsumptionLabel').textContent = `${dateLabel} - ${totalLabel}`;
         const modal = new bootstrap.Modal(document.getElementById('deleteConsumptionModal'));
         modal.show();
+    }
+
+    function returnChargeToRestaurant(chargeId) {
+        if (!chargeId) {
+            alert('Conta inválida para devolução.');
+            return;
+        }
+        if (!confirm('Tem certeza que deseja devolver este consumo para o restaurante?')) {
+            return;
+        }
+        performReturnToRestaurant(chargeId);
+    }
+
+    function performReturnToRestaurant(chargeId, targetTableId = null) {
+        const payload = { charge_id: chargeId };
+        if (targetTableId) {
+            payload.target_table_id = targetTableId;
+        }
+
+        fetch('/api/reception/return_to_restaurant', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json().then(data => ({ status: response.status, body: data })))
+        .then(({ status, body }) => {
+            if (status === 200 && body.success) {
+                alert(body.message || 'Consumo devolvido ao restaurante com sucesso.');
+                window.location.reload();
+                return;
+            }
+            if (status === 409 && body.error_code === 'TABLE_OCCUPIED') {
+                showReturnTableModal(chargeId, body.free_tables || []);
+                return;
+            }
+            alert('Erro ao devolver consumo: ' + (body.error || 'Erro desconhecido'));
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Erro de conexão ao tentar devolver o consumo.');
+        });
+    }
+
+    function showReturnTableModal(chargeId, freeTables) {
+        const modalEl = document.getElementById('returnToRestaurantModal');
+        const select = document.getElementById('returnTargetTable');
+        document.getElementById('returnChargeId').value = chargeId;
+        select.innerHTML = '';
+        freeTables.forEach(tableId => {
+            const option = document.createElement('option');
+            option.value = tableId;
+            option.text = `Mesa ${tableId}`;
+            select.appendChild(option);
+        });
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+    }
+
+    function submitReturnToRestaurant() {
+        const chargeId = document.getElementById('returnChargeId').value;
+        const targetTable = document.getElementById('returnTargetTable').value;
+        if (!targetTable) {
+            alert('Selecione uma mesa de destino.');
+            return;
+        }
+        const modalEl = document.getElementById('returnToRestaurantModal');
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) {
+            modal.hide();
+        }
+        performReturnToRestaurant(chargeId, targetTable);
     }
 
     function openCloseRoomAccountModal() {
@@ -1606,63 +2298,195 @@
 
     function openConsumptionModal(roomNum) {
         const charges = groupedCharges[roomNum] || [];
-        const tbody = document.getElementById('consumptionTableBody');
+        const itemsContainer = document.getElementById('consumptionItemsContainer');
         const totalEl = document.getElementById('consumptionTotal');
         const roomNumEl = document.getElementById('consumptionRoomNum');
+        const headerRoomEl = document.getElementById('consumptionHeaderRoom');
+        const headerGuestEl = document.getElementById('consumptionHeaderGuest');
+        const headerCheckinEl = document.getElementById('consumptionHeaderCheckin');
+        const headerCheckoutEl = document.getElementById('consumptionHeaderCheckout');
+        const headerTotalEl = document.getElementById('consumptionHeaderTotal');
+        const summaryRestaurantEl = document.getElementById('consumptionSummaryRestaurant');
+        const summaryMinibarEl = document.getElementById('consumptionSummaryMinibar');
+        const summaryServicesEl = document.getElementById('consumptionSummaryServices');
+        const summaryPaidEl = document.getElementById('consumptionSummaryPaid');
+        const summaryTotalEl = document.getElementById('consumptionSummaryTotal');
+        const launchLinkEl = document.getElementById('consumptionLaunchLink');
         currentConsumptionRoom = roomNum;
         roomNumEl.textContent = roomNum;
-        tbody.innerHTML = '';
+        itemsContainer.innerHTML = '';
+        const guestData = getRoomGuestData(roomNum);
+        headerRoomEl.textContent = guestData.room;
+        headerGuestEl.textContent = guestData.guest;
+        headerCheckinEl.textContent = guestData.checkin;
+        headerCheckoutEl.textContent = guestData.checkout;
+        if (launchLinkEl) {
+            launchLinkEl.href = `/restaurant/table/${encodeURIComponent(roomNum)}?mode=reception`;
+        }
         let total = 0;
 
         if (charges.length === 0) {
             currentConsumptionTotal = 0;
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Nenhum consumo registrado.</td></tr>';
+            itemsContainer.innerHTML = '<div class="text-center text-muted py-3">Nenhum consumo registrado.</div>';
             totalEl.textContent = formatMoney(0);
+            headerTotalEl.textContent = formatMoney(0);
+            summaryRestaurantEl.textContent = formatMoney(0);
+            summaryMinibarEl.textContent = formatMoney(0);
+            summaryServicesEl.textContent = formatMoney(0);
+            summaryPaidEl.textContent = formatMoney(0);
+            summaryTotalEl.textContent = formatMoney(0);
             const modal = new bootstrap.Modal(document.getElementById('consumptionModal'));
             modal.show();
             return;
         }
 
+        const groupedByDate = {};
+        const originTotals = { restaurante: 0, frigobar: 0, servicos: 0 };
+        let paidTotal = 0;
         charges.forEach(charge => {
+            const date = String(charge.date || 'Sem data');
+            if (!groupedByDate[date]) {
+                groupedByDate[date] = {};
+            }
             const chargeTotal = parseFloat(charge.total || 0);
             total += chargeTotal;
-            
-            let itemsHtml = '';
-            const items = charge.items || [];
-            if (items.length > 0) {
-                itemsHtml = items.map(item => `<div><small>${item.qty}x ${item.name}</small></div>`).join('');
-            } else {
-                itemsHtml = '<span class="text-muted small">Sem itens detalhados</span>';
+
+            if (String(charge.status || '').toLowerCase() === 'paid') {
+                paidTotal += chargeTotal;
             }
-            
-            const date = charge.date || '-';
-            let sourceBadge = '<span class="badge bg-secondary">Restaurante</span>';
-            if (charge.source === 'minibar' || (charge.items && charge.items.some(i => i.category === 'Frigobar'))) {
-                sourceBadge = '<span class="badge bg-info text-dark">Frigobar</span>';
-            }
-            const actionButtons = [];
-            actionButtons.push(`<button type="button" class="btn btn-sm btn-success me-1" onclick="openConsumptionPaymentModal('${roomNum}', '${charge.id}', ${chargeTotal})">Pagar</button>`);
-            actionButtons.push(`<button type="button" class="btn btn-sm btn-secondary me-1" onclick="openConsumptionEditModal('${roomNum}', '${charge.id}')">Editar</button>`);
-            if (charge.table_id) {
-                actionButtons.push(`<a class="btn btn-sm btn-outline-primary me-1" href="/restaurant/table/${encodeURIComponent(charge.table_id)}?mode=reception">Lançamento</a>`);
-            }
-            actionButtons.push(`<button type="button" class="btn btn-sm btn-dark me-1" onclick="previewConsumption('${roomNum}', ['${charge.id}'])">Imprimir</button>`);
-            if (canDeleteConsumption) {
-                actionButtons.push(`<button type="button" class="btn btn-sm btn-danger" onclick="openConsumptionDeleteModal('${charge.id}', '${escapeHtml(date)}', '${chargeTotal.toFixed(2)}')">Apagar</button>`);
-            }
-            const row = `
-                <tr>
-                    <td>${escapeHtml(date)}</td>
-                    <td>${sourceBadge}</td>
-                    <td>${itemsHtml}</td>
-                    <td class="text-end fw-bold">R$ ${chargeTotal.toFixed(2)}</td>
-                    <td class="text-end">${actionButtons.join('')}</td>
-                </tr>
-            `;
-            tbody.innerHTML += row;
+
+            const chargeItems = (Array.isArray(charge.items) && charge.items.length > 0)
+                ? charge.items
+                : [{ name: 'Lançamento sem itens detalhados', qty: 1, price: chargeTotal }];
+
+            chargeItems.forEach(item => {
+                const qty = Number(item.qty || 1);
+                let lineTotal = Number(item.price || 0) * qty;
+                if (!lineTotal && chargeItems.length === 1) {
+                    lineTotal = chargeTotal;
+                }
+                const originMeta = getConsumptionOriginMeta(charge, item);
+                const originKey = originMeta.label.toLowerCase();
+                if (originKey === 'restaurante') {
+                    originTotals.restaurante += lineTotal;
+                } else if (originKey === 'frigobar') {
+                    originTotals.frigobar += lineTotal;
+                } else {
+                    originTotals.servicos += lineTotal;
+                }
+
+                const productName = String(item.name || 'Item');
+                const aggKey = `${originMeta.label}||${productName.toLowerCase().trim()}`;
+                if (!groupedByDate[date][aggKey]) {
+                    groupedByDate[date][aggKey] = {
+                        name: productName,
+                        originLabel: originMeta.label,
+                        originClass: originMeta.className,
+                        qty: 0,
+                        total: 0,
+                        occurrences: []
+                    };
+                }
+                groupedByDate[date][aggKey].qty += qty;
+                groupedByDate[date][aggKey].total += lineTotal;
+                groupedByDate[date][aggKey].occurrences.push({
+                    chargeId: charge.id || '',
+                    date: date,
+                    qty: qty,
+                    value: lineTotal,
+                    status: charge.status || 'pending'
+                });
+            });
         });
+
+        const orderedDates = Object.keys(groupedByDate).sort((a, b) => toDateWeight(b) - toDateWeight(a));
+        let itemSequence = 0;
+        const groupsHtml = orderedDates.map(dateLabel => {
+            const groupedItems = Object.values(groupedByDate[dateLabel]).sort((a, b) => b.total - a.total);
+            const itemsByOrigin = groupedItems.reduce((acc, item) => {
+                const key = `${item.originLabel}||${item.originClass}`;
+                if (!acc[key]) {
+                    acc[key] = {
+                        originLabel: item.originLabel,
+                        originClass: item.originClass,
+                        items: []
+                    };
+                }
+                acc[key].items.push(item);
+                return acc;
+            }, {});
+
+            const rowsHtml = Object.values(itemsByOrigin).map(originGroup => {
+                const originRows = originGroup.items.map(groupedItem => {
+                    itemSequence += 1;
+                    const collapseId = `consumptionOccurrences${itemSequence}`;
+                    const hoverText = `${groupedItem.name} | ${originGroup.originLabel} | ${groupedItem.qty}x | ${formatMoney(groupedItem.total)}`;
+                    const occurrencesHtml = groupedItem.occurrences.map(occ => {
+                        const chargeId = escapeJsSingleQuote(occ.chargeId);
+                        const dateSafe = escapeJsSingleQuote(occ.date);
+                        const totalLabel = escapeJsSingleQuote(Number(occ.value || 0).toFixed(2));
+                        const actions = [`<button type="button" class="btn btn-sm btn-primary" onclick="openConsumptionEditModal('${roomNum}', '${chargeId}')">Editar</button>`];
+                        const chargeData = findCharge(roomNum, occ.chargeId);
+                        const canReturnCurrentCharge = canReturnConsumption
+                            && chargeData
+                            && String(chargeData.status || '').toLowerCase() === 'pending'
+                            && String(chargeData.table_id || '').trim() !== '';
+                        if (canReturnCurrentCharge) {
+                            actions.push(`<button type="button" class="btn btn-sm btn-outline-info" onclick="returnChargeToRestaurant('${chargeId}')">Devolver</button>`);
+                        }
+                        if (canDeleteConsumption) {
+                            actions.push(`<button type="button" class="btn btn-sm btn-danger" onclick="openConsumptionDeleteModal('${chargeId}', '${dateSafe}', '${totalLabel}')">Apagar</button>`);
+                        }
+                        return `
+                            <div class="consumption-occurrence-line d-flex justify-content-between align-items-start gap-2">
+                                <div class="small text-muted">
+                                    Ocorrência: ${escapeHtml(occ.date)} · ${escapeHtml(String(occ.status || 'pendente'))} · ${occ.qty}x
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="fw-bold">${formatMoney(occ.value)}</span>
+                                    ${actions.join('')}
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                    return `
+                        <button type="button" class="consumption-agg-row" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="false" title="${escapeHtml(hoverText)}">
+                            <span class="consumption-agg-product">${escapeHtml(groupedItem.name)}</span>
+                            <span class="consumption-agg-qty">${groupedItem.qty}x</span>
+                            <span class="consumption-agg-value">${formatMoney(groupedItem.total)}</span>
+                        </button>
+                        <div class="collapse consumption-occurrences" id="${collapseId}">
+                            ${occurrencesHtml}
+                        </div>
+                    `;
+                }).join('');
+
+                return `
+                    <div class="consumption-charge-origin">
+                        <span class="consumption-charge-origin-label">Origem</span>
+                        <span class="consumption-origin-badge ${originGroup.originClass}">${originGroup.originLabel}</span>
+                    </div>
+                    ${originRows}
+                `;
+            }).join('');
+
+            return `
+                <div class="consumption-date-group">
+                    <div class="consumption-date-title">${escapeHtml(dateLabel)}</div>
+                    ${rowsHtml}
+                </div>
+            `;
+        }).join('');
+
+        itemsContainer.innerHTML = groupsHtml;
         currentConsumptionTotal = total;
         totalEl.textContent = formatMoney(total);
+        headerTotalEl.textContent = formatMoney(total);
+        summaryRestaurantEl.textContent = formatMoney(originTotals.restaurante);
+        summaryMinibarEl.textContent = formatMoney(originTotals.frigobar);
+        summaryServicesEl.textContent = formatMoney(originTotals.servicos);
+        summaryPaidEl.textContent = formatMoney(paidTotal);
+        summaryTotalEl.textContent = formatMoney(total);
         const modal = new bootstrap.Modal(document.getElementById('consumptionModal'));
         modal.show();
     }
@@ -1758,6 +2582,7 @@
     window.addEditConsumptionItem = addEditConsumptionItem;
     window.addConsumptionPayment = addConsumptionPayment;
     window.addCloseRoomPayment = addCloseRoomPayment;
+    window.submitReturnToRestaurant = submitReturnToRestaurant;
 
     document.getElementById('consumptionPaymentForm').addEventListener('submit', function(event) {
         const totalPaid = individualPayments.reduce((sum, p) => sum + Number(p.amount || 0), 0);

@@ -67,6 +67,363 @@
         padding: 0.2rem 0.5rem;
         box-shadow: 0 0 0 2px #fff, 0 2px 6px rgba(0,0,0,0.2);
     }
+
+    .mobile-order-tabs {
+        top: 0;
+        z-index: 1040;
+        background: #fff;
+        padding: 0.5rem 0;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+    }
+
+    .mobile-order-tabs .btn {
+        min-height: 44px;
+    }
+
+    .category-chips {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 0.5rem;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 0.25rem;
+    }
+
+    .category-chips .category-btn {
+        flex: 0 0 auto;
+        border-radius: 999px;
+    }
+
+    .product-grid .product-btn {
+        min-height: 96px;
+        border-radius: 0.75rem;
+    }
+
+    .mobile-cart-footer {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #fff;
+        border-top: 1px solid #dee2e6;
+        padding: 0.75rem;
+        box-shadow: 0 -6px 18px rgba(0,0,0,0.12);
+        z-index: 1050;
+        display: none;
+    }
+
+    .pending-mobile-item {
+        border: 1px solid #dee2e6;
+        border-radius: 0.6rem;
+        padding: 0.45rem 0.5rem;
+        margin-bottom: 0.4rem;
+    }
+
+    .pending-mobile-main {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.4rem;
+    }
+
+    .pending-mobile-title {
+        min-width: 0;
+        font-size: 0.78rem;
+        line-height: 1.1;
+    }
+
+    .pending-mobile-price {
+        font-size: 0.72rem;
+        white-space: nowrap;
+    }
+
+    .pending-mobile-controls .btn {
+        min-width: 34px;
+        min-height: 34px;
+        padding: 0.2rem 0.35rem;
+    }
+
+    .mobile-actions-trigger {
+        min-height: 44px;
+    }
+
+    .mobile-actions-sheet .list-group-item {
+        min-height: 52px;
+        display: flex;
+        align-items: center;
+        font-weight: 600;
+    }
+
+    .mobile-cart-summary {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem 0.75rem;
+        font-size: 0.82rem;
+        margin-bottom: 0.55rem;
+        line-height: 1.2;
+    }
+
+    @media (max-width: 767.98px) {
+        #order-layout-row {
+            margin-bottom: 130px;
+        }
+
+        .mobile-pane {
+            display: none;
+        }
+
+        .mobile-pane.active {
+            display: block;
+        }
+
+        .mobile-sticky-search {
+            position: sticky;
+            top: 54px;
+            z-index: 1035;
+            background: #fff;
+            padding-top: 0.35rem;
+        }
+
+        .pending-desktop-table {
+            display: none;
+        }
+
+        .mobile-cart-footer.show {
+            display: block;
+        }
+
+        .table-action-row {
+            display: none !important;
+        }
+
+        .category-chips {
+            display: grid !important;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.3rem;
+            overflow: visible;
+            padding-bottom: 0;
+        }
+
+        .category-chips .category-btn {
+            min-width: 0 !important;
+            width: 100%;
+            min-height: 44px !important;
+            padding: 0.32rem 0.28rem !important;
+            font-size: 0.72rem;
+            line-height: 1.08;
+            border-radius: 0.55rem;
+        }
+
+        .category-chips .category-btn .badge {
+            display: none;
+        }
+
+        @media (min-width: 420px) and (max-width: 767.98px) {
+            .category-chips {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .category-chips .category-btn {
+                font-size: 0.74rem;
+                padding: 0.34rem 0.3rem !important;
+            }
+        }
+
+        #cart-pane,
+        #pending-items-container,
+        #pending-items-mobile {
+            overflow-x: hidden;
+        }
+
+        #standard-view table {
+            table-layout: fixed;
+            font-size: 0.64rem;
+            margin-bottom: 0;
+        }
+
+        #standard-view th,
+        #standard-view td {
+            padding: 0.1rem 0.06rem;
+            vertical-align: middle;
+            line-height: 1.02;
+        }
+
+        #standard-view th:nth-child(3),
+        #standard-view td:nth-child(3) {
+            display: none;
+        }
+
+        #standard-view th:nth-child(2),
+        #standard-view td:nth-child(2) {
+            width: 31px;
+        }
+
+        #standard-view th:nth-child(4),
+        #standard-view td:nth-child(4) {
+            width: 49px;
+        }
+
+        #standard-view th:nth-child(5),
+        #standard-view td:nth-child(5) {
+            width: 58px;
+        }
+
+        #standard-view td:first-child,
+        #standard-view th:first-child {
+            word-break: break-word;
+        }
+
+        #standard-view .compact-product-name {
+            display: block;
+            font-size: 0.63rem;
+            line-height: 1;
+            max-width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        #standard-view td:first-child .d-flex {
+            min-width: 0;
+        }
+
+        #standard-view td:first-child .min-w-0 {
+            min-width: 0;
+            flex: 1 1 auto;
+        }
+
+        #standard-view .cancel-group .cancel-reason {
+            width: 47px !important;
+            min-width: 47px !important;
+            font-size: 0.6rem;
+            padding: 0.1rem 0.14rem;
+        }
+
+        #standard-view .btn.btn-sm {
+            min-width: 27px;
+            min-height: 27px;
+            padding: 0.11rem 0.16rem;
+        }
+
+        #standard-view .me-2 {
+            margin-right: 0.08rem !important;
+        }
+
+        #standard-view td:first-child i.bi {
+            font-size: 0.8rem !important;
+        }
+
+        #standard-view td:last-child {
+            white-space: nowrap;
+            padding-right: 0.05rem;
+            padding-left: 0.05rem;
+        }
+
+        #standard-view .cancel-group {
+            margin-bottom: 0 !important;
+            gap: 0.08rem;
+            align-items: center;
+            flex-wrap: nowrap;
+        }
+
+        #standard-view .cancel-group .cancel-reason::placeholder {
+            font-size: 0.56rem;
+        }
+
+        #standard-view .btn.btn-link.btn-sm {
+            font-size: 0.58rem;
+            line-height: 1;
+        }
+
+        #standard-view .item-total,
+        #standard-view .item-qty {
+            white-space: nowrap;
+        }
+    }
+
+    @media (min-width: 768px) {
+        .category-chips {
+            display: grid !important;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.4rem;
+            overflow: visible;
+            padding-bottom: 0;
+        }
+
+        .category-chips .category-btn {
+            width: 100%;
+            min-width: 0 !important;
+            min-height: 42px !important;
+            padding: 0.36rem 0.46rem !important;
+            border-radius: 0.6rem;
+            font-size: 0.8rem;
+            line-height: 1.1;
+            justify-content: space-between;
+        }
+
+        #standard-view table {
+            table-layout: fixed;
+            font-size: 0.84rem;
+        }
+
+        #standard-view th,
+        #standard-view td {
+            padding: 0.28rem 0.24rem;
+            vertical-align: middle;
+            line-height: 1.12;
+        }
+
+        #standard-view th:nth-child(2),
+        #standard-view td:nth-child(2) {
+            width: 52px;
+        }
+
+        #standard-view th:nth-child(3),
+        #standard-view td:nth-child(3) {
+            width: 88px;
+        }
+
+        #standard-view th:nth-child(4),
+        #standard-view td:nth-child(4) {
+            width: 92px;
+        }
+
+        #standard-view th:nth-child(5),
+        #standard-view td:nth-child(5) {
+            width: 132px;
+        }
+
+        #standard-view td:first-child .d-flex {
+            min-width: 0;
+        }
+
+        #standard-view td:first-child .min-w-0 {
+            min-width: 0;
+            flex: 1 1 auto;
+        }
+
+        #standard-view .compact-product-name {
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        #standard-view .cancel-group .cancel-reason {
+            width: 64px !important;
+            min-width: 64px !important;
+            font-size: 0.72rem;
+            padding: 0.14rem 0.2rem;
+        }
+
+        #standard-view .btn.btn-sm {
+            min-width: 30px;
+            min-height: 30px;
+            padding: 0.15rem 0.2rem;
+        }
+    }
 </style>
 <div class="container mt-4">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 gap-3">
@@ -101,7 +458,12 @@
         </h2>
         
         {% if order %}
-        <div class="d-flex gap-2 align-items-center flex-wrap justify-content-center justify-content-md-end">
+        <div class="w-100 d-flex d-md-none justify-content-end">
+            <button type="button" class="btn btn-outline-primary mobile-actions-trigger" data-bs-toggle="offcanvas" data-bs-target="#mobileActionsSheet">
+                AÇÕES <i class="bi bi-three-dots"></i>
+            </button>
+        </div>
+        <div class="d-flex gap-2 align-items-center flex-wrap justify-content-center justify-content-md-end table-action-row">
             <div class="text-center text-md-end w-100 w-md-auto mb-2 mb-md-0">
                 <div class="text-muted small">
                     Adultos: <strong>{{ order.num_adults }}</strong>
@@ -349,9 +711,13 @@
     </div>
     {% else %}
     <!-- Order Interface -->
-    <div class="row">
+    <div class="mobile-order-tabs d-md-none sticky-top">
+        <button type="button" class="btn btn-primary active" id="tabProductsBtn" onclick="switchMobileTab('products')">Produtos</button>
+        <button type="button" class="btn btn-outline-primary" id="tabCartBtn" onclick="switchMobileTab('cart')">Carrinho <span class="badge bg-light text-dark ms-1" id="mobileDraftCount">0</span></button>
+    </div>
+    <div class="row" id="order-layout-row">
         <!-- Add Item Form -->
-        <div class="col-md-5 mb-4">
+        <div class="col-md-5 mb-4 mobile-pane active" id="products-pane">
             <div class="card shadow-sm">
                 <div class="card-header bg-primary text-white">
                     <h5 class="mb-0">Novo Pedido (Lote)</h5>
@@ -362,7 +728,7 @@
                         <input type="hidden" id="selected_product">
                         
                         <!-- Search -->
-                        <div class="mb-3">
+                        <div class="mb-3 mobile-sticky-search">
                             <label class="form-label fw-bold">Buscar Item:</label>
                             <input type="text" id="productSearch" class="form-control" placeholder="Digite para buscar..." onkeyup="searchProducts()">
                             <div id="searchResults" class="list-group mt-2" style="display:none; max-height: 200px; overflow-y: auto;"></div>
@@ -372,7 +738,7 @@
                         <div class="mb-3">
                             <label class="form-label fw-bold">1. Selecione a Categoria:</label>
                             
-                            <div class="d-flex flex-wrap gap-2" id="category-list" style="display: flex !important;">
+                            <div class="category-chips" id="category-list">
                                 {% if grouped_products|length == 0 %}
                                     <div class="alert alert-danger w-100">
                                         Nenhuma categoria encontrada. Verifique se há produtos ativos no menu.
@@ -422,8 +788,8 @@
 
                                 {% for category, items in grouped_products %}
                                 <div id="group_{{ loop.index }}" class="product-group" data-cat="{{ category if category else 'Outros' }}" style="display: none;">
-                                    <div class="row row-cols-3 row-cols-sm-4 row-cols-md-5 g-2">
-                                {% for p in items %}
+                                    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-2 product-grid">
+                                {% for p in items|sort(attribute='name')|sort(attribute='paused') %}
                                 {% if (p.product_type != 'accompaniment_only' or p.category in ['Doses', 'Drinks', 'Café da Manhã']) %}
                                 <div class="col product-item-container" data-product-id="{{ p.id }}">
                                     <div class="position-relative h-100">
@@ -508,7 +874,7 @@
                     <!-- Pending Items List -->
                     <div id="pending-items-container" style="display: none;" class="border-top pt-3">
                         <h6 class="fw-bold text-primary">Itens Pendentes (Enviar para Cozinha)</h6>
-                        <div class="table-responsive mb-3 border rounded">
+                        <div class="table-responsive mb-3 border rounded pending-desktop-table">
                             <table class="table table-sm table-hover mb-0" style="font-size: 0.9em;">
                                 <thead class="table-light">
                                     <tr>
@@ -522,6 +888,7 @@
                                 </tbody>
                             </table>
                         </div>
+                        <div id="pending-items-mobile" class="d-md-none"></div>
 
                         <!-- Final Batch Submission Form -->
                         <form method="POST" id="batchForm">
@@ -545,7 +912,7 @@
         </div>
 
         <!-- Order Items -->
-        <div class="col-md-7">
+        <div class="col-md-7 mobile-pane" id="cart-pane">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Itens do Pedido</h5>
@@ -617,10 +984,11 @@
                                             {% else %}
                                                 <i class="bi bi-hourglass-split text-secondary me-2 fs-5" title="Aguardando Envio"></i>
                                             {% endif %}
-                                            <div>
-                                                {{ item.name }}
-                                                <button class="btn btn-sm btn-link p-0 ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#group-{{ item.ids[0] }}" aria-expanded="false" aria-controls="group-{{ item.ids[0] }}">
-                                                    Detalhes ({{ item.children|length }})
+                                            <div class="min-w-0">
+                                                <span class="compact-product-name" title="{{ item.name }}">{{ item.name }}</span>
+                                                <button class="btn btn-sm btn-link p-0 ms-1" type="button" data-bs-toggle="collapse" data-bs-target="#group-{{ item.ids[0] }}" aria-expanded="false" aria-controls="group-{{ item.ids[0] }}">
+                                                    <span class="d-none d-sm-inline">Detalhes ({{ item.children|length }})</span>
+                                                    <span class="d-inline d-sm-none"><i class="bi bi-list-ul"></i> {{ item.children|length }}</span>
                                                 </button>
                                                 <div class="collapse mt-1" id="group-{{ item.ids[0] }}">
                                                     <div class="small text-muted" style="font-size: 0.85em;">
@@ -671,8 +1039,8 @@
                                         {% if can_manage_items %}
                                         <!-- Edit button removed -->
                                         {% set unit_price = item.total / item.qty %}
-                                        <div class="input-group input-group-sm mb-1 d-inline-flex w-auto cancel-group">
-                                            <input type="text" class="form-control form-control-sm cancel-reason" placeholder="Motivo" style="width: 100px;">
+                                        <div class="input-group input-group-sm mb-0 d-inline-flex w-auto cancel-group">
+                                            <input type="text" class="form-control form-control-sm cancel-reason" placeholder="Mot." style="width: 52px;">
                                             <button type="button" class="btn btn-outline-danger" title="Remover 1 unidade"
                                                     data-ids='{{ item.ids|tojson }}'
                                                     data-name="{{ item.name }}"
@@ -681,7 +1049,7 @@
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </div>
-                                        <button type="button" class="btn btn-sm btn-outline-info ms-1" title="Transferir Item" 
+                                        <button type="button" class="btn btn-sm btn-outline-info ms-0" title="Transferir Item" 
                                                 data-id="{{ item.ids[-1] }}"
                                                 data-name="{{ item.name }}"
                                                 data-qty="{{ item.last_item_qty }}"
@@ -885,8 +1253,80 @@
             </div>
         </div>
     </div>
+    <div class="mobile-cart-footer d-md-none" id="mobile-cart-footer">
+        <div class="mobile-cart-summary text-muted">
+            <span>Sub: <strong id="mobileSubtotal">R$ 0,00</strong></span>
+            <span>Taxa: <strong id="mobileServiceFee">R$ 0,00</strong></span>
+            <span>Total: <strong id="mobileGrandTotal">R$ 0,00</strong></span>
+        </div>
+        <button type="button" class="btn btn-success w-100 btn-lg" onclick="prepareBatchSubmit()">
+            Confirmar Pedido
+        </button>
+    </div>
     {% endif %}
 </div>
+
+{% if order %}
+<div class="offcanvas offcanvas-bottom mobile-actions-sheet" tabindex="-1" id="mobileActionsSheet" style="height: auto; max-height: 85vh;">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title">Ações da Mesa</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body pt-0">
+        <div class="list-group mb-3">
+            {% if session.get('role') in ['admin', 'gerente', 'supervisor'] %}
+            <button type="button" class="list-group-item list-group-item-action" onclick="openMobileActionModal('transferModal')">Transferir</button>
+            {% else %}
+            <button type="button" class="list-group-item list-group-item-action disabled">Transferir</button>
+            {% endif %}
+
+            {% if mode != 'minibar' %}
+                {% if order.locked is defined and order.locked %}
+                <button type="button" class="list-group-item list-group-item-action disabled">Puxar Conta</button>
+                {% else %}
+                <button type="button" class="list-group-item list-group-item-action" onclick="submitMobileActionForm('mobilePullBillForm')">Puxar Conta</button>
+                {% endif %}
+            {% else %}
+            <button type="button" class="list-group-item list-group-item-action disabled">Puxar Conta</button>
+            {% endif %}
+
+            {% if order.customer_type == 'hospede' and order.room_number %}
+            <button type="button" class="list-group-item list-group-item-action" onclick="submitMobileActionForm('mobileTransferRoomDirectForm')">Enviar p/ Quarto</button>
+            {% elif mode != 'minibar' and session.get('role') in ['admin', 'gerente', 'supervisor'] %}
+            <button type="button" class="list-group-item list-group-item-action" onclick="openMobileActionModal('transferToRoomModal')">Enviar p/ Quarto</button>
+            {% else %}
+            <button type="button" class="list-group-item list-group-item-action disabled">Enviar p/ Quarto</button>
+            {% endif %}
+
+            {% if is_cashier_open and mode != 'minibar' %}
+            <button type="button" class="list-group-item list-group-item-action" onclick="openMobileActionModal('partialPaymentModal')">Pagamento Parcial</button>
+            <button type="button" class="list-group-item list-group-item-action" onclick="openMobileActionModal('checkoutModal')">Fechar Conta</button>
+            {% else %}
+            <button type="button" class="list-group-item list-group-item-action disabled">Pagamento Parcial</button>
+            <button type="button" class="list-group-item list-group-item-action disabled">Fechar Conta</button>
+            {% endif %}
+
+            {% if session.get('role') == 'admin' %}
+            <button type="button" class="list-group-item list-group-item-action text-danger" onclick="openMobileActionModal('cancelTableModal')">Cancelar Mesa</button>
+            {% else %}
+            <button type="button" class="list-group-item list-group-item-action disabled">Cancelar Mesa</button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<form method="POST" id="mobilePullBillForm" class="d-none">
+    <input type="hidden" name="action" value="pull_bill">
+</form>
+
+{% if order.customer_type == 'hospede' and order.room_number %}
+<form method="POST" id="mobileTransferRoomDirectForm" class="d-none">
+    <input type="hidden" name="action" value="transfer_to_room">
+    <input type="hidden" name="mode" value="{{ mode if mode else '' }}">
+    <input type="hidden" name="room_number" value="{{ order.room_number }}">
+</form>
+{% endif %}
+{% endif %}
 
 {% if order and mode != 'minibar' %}
 <!-- Edit Pax Modal -->
@@ -1292,6 +1732,22 @@
 <script type="application/json" id="paid-amount-data">
     {{ order.total_paid|default(0) if order else 0 }}
 </script>
+<form method="POST" id="undoBatchForm" class="d-none">
+    <input type="hidden" name="action" value="undo_last_batch">
+    <input type="hidden" name="batch_id" id="undo_batch_id">
+    <input type="hidden" name="mode" value="{{ mode if mode else '' }}">
+</form>
+<div class="toast-container position-fixed bottom-0 start-50 translate-middle-x p-3" style="z-index: 1080;">
+    <div id="batchSuccessToast" class="toast text-bg-dark border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                Pedido enviado para cozinha
+            </div>
+            <button type="button" class="btn btn-link btn-sm text-warning text-decoration-none me-1" id="undoBatchBtn">DESFAZER</button>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
 
 <!-- Transfer to Room Modal (For manual room selection) -->
 <div class="modal fade" id="transferToRoomModal" tabindex="-1">
@@ -1475,6 +1931,32 @@
             console.warn('Flag paused cards failed:', e);
         }
     })();
+
+    document.addEventListener('DOMContentLoaded', function() {
+        switchMobileTab('products');
+        updateMobileFooter();
+        window.addEventListener('resize', updateMobileFooter);
+
+        const params = new URLSearchParams(window.location.search);
+        const batchSuccess = params.get('batch_success');
+        const batchId = params.get('batch_id');
+        if (batchSuccess === '1' && batchId) {
+            const undoInput = document.getElementById('undo_batch_id');
+            const undoBtn = document.getElementById('undoBatchBtn');
+            const undoForm = document.getElementById('undoBatchForm');
+            if (undoInput && undoBtn && undoForm) {
+                undoInput.value = batchId;
+                undoBtn.addEventListener('click', function() {
+                    undoForm.submit();
+                });
+            }
+            const toastEl = document.getElementById('batchSuccessToast');
+            if (toastEl && window.bootstrap && bootstrap.Toast) {
+                const toast = new bootstrap.Toast(toastEl, { delay: 5000 });
+                toast.show();
+            }
+        }
+    });
     
     // Delete Authorization
     window.openDeleteModal = function(btn) {
@@ -2012,27 +2494,9 @@
                 target.style.setProperty('display', 'block', 'important');
                 target.classList.add('active-group');
                 
-                // Hide paused items defensively on category show
-                try {
-                    const pausedSet = new Set(allProducts.filter(p => p.paused).map(p => String(p.id)));
-                    let visibleCount = 0;
-                    target.querySelectorAll('.product-item-container').forEach(el => {
-                        const id = el.getAttribute('data-product-id');
-                        if (pausedSet.has(String(id))) {
-                            el.style.display = 'none';
-                        } else {
-                            el.style.display = '';
-                            visibleCount++;
-                        }
-                    });
-                    // Show empty message if nothing remains
-                    if (visibleCount === 0 && msg) {
-                        msg.style.display = 'block';
-                        msg.innerHTML = '<div class="alert alert-warning my-2">Esta categoria não possui produtos disponíveis.</div>';
-                    }
-                } catch (e) {
-                    console.warn('Failed to hide paused in category view:', e);
-                }
+                target.querySelectorAll('.product-item-container').forEach(el => {
+                    el.style.display = '';
+                });
                 
                 // Check if group is empty
                 const products = target.querySelectorAll('.product-btn');
@@ -2128,7 +2592,6 @@
 
     window.selectProductFromId = function(id, btn) {
         console.log('Selecting product by ID:', id);
-        // Ensure ID types match (string vs number)
         const product = allProducts.find(p => p.id == id && !p.paused && p.active);
         
         if (!product) {
@@ -2139,6 +2602,10 @@
         }
         
         console.log('Product found:', product.name);
+        if (isMobileOrderMode() && isSimpleQuickAddProduct(product)) {
+            addSimpleProductToPending(product, 1);
+            return;
+        }
         window.currentSelectedProduct = product;
         window.selectProduct(btn, product);
     };
@@ -2459,8 +2926,160 @@
         }
     };
 
-    // --- BATCH ORDER LOGIC ---
     let pendingItems = [];
+
+    window.switchMobileTab = function(tab) {
+        const productsPane = document.getElementById('products-pane');
+        const cartPane = document.getElementById('cart-pane');
+        const btnProducts = document.getElementById('tabProductsBtn');
+        const btnCart = document.getElementById('tabCartBtn');
+        if (!productsPane || !cartPane || !btnProducts || !btnCart) return;
+        const showProducts = tab === 'products';
+        productsPane.classList.toggle('active', showProducts);
+        cartPane.classList.toggle('active', !showProducts);
+        btnProducts.classList.toggle('active', showProducts);
+        btnProducts.classList.toggle('btn-primary', showProducts);
+        btnProducts.classList.toggle('btn-outline-primary', !showProducts);
+        btnCart.classList.toggle('active', !showProducts);
+        btnCart.classList.toggle('btn-primary', !showProducts);
+        btnCart.classList.toggle('btn-outline-primary', showProducts);
+    };
+
+    window.openMobileActionModal = function(modalId) {
+        const sheetEl = document.getElementById('mobileActionsSheet');
+        if (sheetEl && window.bootstrap && bootstrap.Offcanvas) {
+            const sheetInstance = bootstrap.Offcanvas.getOrCreateInstance(sheetEl);
+            sheetInstance.hide();
+        }
+        setTimeout(() => {
+            const modalEl = document.getElementById(modalId);
+            if (!modalEl || !window.bootstrap || !bootstrap.Modal) return;
+            const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modalInstance.show();
+        }, 180);
+    };
+
+    window.submitMobileActionForm = function(formId) {
+        const sheetEl = document.getElementById('mobileActionsSheet');
+        if (sheetEl && window.bootstrap && bootstrap.Offcanvas) {
+            const sheetInstance = bootstrap.Offcanvas.getOrCreateInstance(sheetEl);
+            sheetInstance.hide();
+        }
+        setTimeout(() => {
+            const form = document.getElementById(formId);
+            if (form) {
+                form.submit();
+            }
+        }, 120);
+    };
+
+    function isMobileOrderMode() {
+        return window.matchMedia('(max-width: 767.98px)').matches;
+    }
+
+    function vibrateLight() {
+        if (navigator.vibrate) {
+            navigator.vibrate(15);
+        }
+    }
+
+    function isSimpleQuickAddProduct(product) {
+        if (!product) return false;
+        if (product.flavor_group_id) return false;
+        if (product.has_accompaniments) return false;
+        if (product.mandatory_questions && product.mandatory_questions.length > 0) return false;
+        const category = product.category;
+        const hasComplements = allComplements.some(c => c.category === category);
+        if (hasComplements) return false;
+        return true;
+    }
+
+    function getPendingItemUnitSubtotal(item) {
+        const prod = allProducts.find(p => String(p.id) === String(item.product) || p.name === item.product);
+        const base = prod ? parseFloat(prod.price || 0) : 0;
+        const compSum = (item.complements || []).reduce((sum, id) => {
+            const c = allComplements.find(x => String(x.id) === String(id));
+            return sum + (c ? parseFloat(c.price || 0) : 0);
+        }, 0);
+        return base + compSum;
+    }
+
+    function mergeOrPushPending(itemToAdd) {
+        const key = JSON.stringify({
+            product: String(itemToAdd.product),
+            flavor_id: itemToAdd.flavor_id || null,
+            complements: (itemToAdd.complements || []).map(String).sort(),
+            observations: (itemToAdd.observations || []).map(String).sort(),
+            accompaniments: (itemToAdd.accompaniments || []).map(String).sort(),
+            questions_answers: (itemToAdd.questions_answers || [])
+        });
+        const existingIndex = pendingItems.findIndex(item => {
+            const itemKey = JSON.stringify({
+                product: String(item.product),
+                flavor_id: item.flavor_id || null,
+                complements: (item.complements || []).map(String).sort(),
+                observations: (item.observations || []).map(String).sort(),
+                accompaniments: (item.accompaniments || []).map(String).sort(),
+                questions_answers: (item.questions_answers || [])
+            });
+            return itemKey === key;
+        });
+        if (existingIndex >= 0) {
+            pendingItems[existingIndex].qty += itemToAdd.qty;
+            return existingIndex;
+        }
+        pendingItems.push(itemToAdd);
+        return pendingItems.length - 1;
+    }
+
+    function addSimpleProductToPending(product, qty) {
+        const insertedIndex = mergeOrPushPending({
+            product: String(product.name),
+            flavor_id: null,
+            flavor_name: null,
+            qty: qty,
+            complements: [],
+            observations: [],
+            accompaniments: [],
+            questions_answers: []
+        });
+        vibrateLight();
+        updatePendingUI();
+        if (isMobileOrderMode()) {
+            const btnCart = document.getElementById('tabCartBtn');
+            if (btnCart && insertedIndex >= 0) {
+                btnCart.classList.add('border', 'border-success');
+                setTimeout(() => btnCart.classList.remove('border', 'border-success'), 350);
+            }
+        }
+    }
+
+    function calculatePendingTotals() {
+        const subtotal = pendingItems.reduce((sum, item) => sum + (getPendingItemUnitSubtotal(item) * (parseFloat(item.qty) || 0)), 0);
+        const serviceFee = subtotal * 0.1;
+        return {
+            subtotal,
+            serviceFee,
+            grandTotal: subtotal + serviceFee
+        };
+    }
+
+    function updateMobileFooter() {
+        const footer = document.getElementById('mobile-cart-footer');
+        if (!footer) return;
+        const totals = calculatePendingTotals();
+        const countEl = document.getElementById('mobileDraftCount');
+        if (countEl) {
+            countEl.textContent = String(pendingItems.reduce((sum, item) => sum + (parseFloat(item.qty) || 0), 0));
+        }
+        const subtotalEl = document.getElementById('mobileSubtotal');
+        const feeEl = document.getElementById('mobileServiceFee');
+        const grandEl = document.getElementById('mobileGrandTotal');
+        if (subtotalEl) subtotalEl.textContent = `R$ ${totals.subtotal.toFixed(2)}`;
+        if (feeEl) feeEl.textContent = `R$ ${totals.serviceFee.toFixed(2)}`;
+        if (grandEl) grandEl.textContent = `R$ ${totals.grandTotal.toFixed(2)}`;
+        footer.classList.toggle('show', pendingItems.length > 0 && isMobileOrderMode());
+    }
 
     window.addToPending = function() {
         const product = document.getElementById('selected_product').value;
@@ -2583,8 +3202,7 @@
             }
         }
 
-        // Add Main Item
-        pendingItems.push({
+        mergeOrPushPending({
             product: product,
             flavor_id: selectedFlavorId,
             flavor_name: selectedFlavorName,
@@ -2633,17 +3251,32 @@
         updatePendingUI();
     };
 
+    window.changePendingQty = function(index, delta) {
+        if (!pendingItems[index]) return;
+        const next = (parseFloat(pendingItems[index].qty) || 0) + delta;
+        if (next <= 0) {
+            pendingItems.splice(index, 1);
+        } else {
+            pendingItems[index].qty = next;
+        }
+        updatePendingUI();
+    };
+
     window.updatePendingUI = function() {
         const container = document.getElementById('pending-items-container');
         const tbody = document.getElementById('pending-items-body');
+        const mobileList = document.getElementById('pending-items-mobile');
         
         if (pendingItems.length === 0) {
             container.style.display = 'none';
+            if (mobileList) mobileList.innerHTML = '';
+            updateMobileFooter();
             return;
         }
 
         container.style.display = 'block';
         tbody.innerHTML = '';
+        if (mobileList) mobileList.innerHTML = '';
 
         pendingItems.forEach((item, index) => {
             let flavorText = '';
@@ -2680,7 +3313,13 @@
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td><strong>${item.product}</strong>${flavorText}${compText}${accText}${obsText}${qaText}</td>
-                <td class="text-center">${item.qty}</td>
+                <td class="text-center">
+                    <div class="d-flex align-items-center justify-content-center gap-1">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="changePendingQty(${index}, -1)">-</button>
+                        <span class="fw-bold">${item.qty}</span>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="changePendingQty(${index}, 1)">+</button>
+                    </div>
+                </td>
                 <td class="text-end">
                     <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeFromPending(${index})">
                         <i class="bi bi-x-lg"></i>
@@ -2688,10 +3327,30 @@
                 </td>
             `;
             tbody.appendChild(tr);
+
+            if (mobileList) {
+                const unitSubtotal = getPendingItemUnitSubtotal(item);
+                const card = document.createElement('div');
+                card.className = 'pending-mobile-item';
+                card.innerHTML = `
+                    <div class="pending-mobile-main">
+                        <div class="pending-mobile-title text-truncate fw-bold">${item.product}</div>
+                        <div class="pending-mobile-price text-muted">R$ ${(unitSubtotal * (parseFloat(item.qty) || 0)).toFixed(2)}</div>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between pending-mobile-controls mt-1">
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="changePendingQty(${index}, -1)">-</button>
+                            <button type="button" class="btn btn-light btn-sm" disabled>${item.qty}</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="changePendingQty(${index}, 1)">+</button>
+                        </div>
+                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeFromPending(${index})"><i class="bi bi-trash"></i></button>
+                    </div>
+                `;
+                mobileList.appendChild(card);
+            }
         });
         
-        // Scroll to bottom of list
-        container.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        updateMobileFooter();
     };
 
     let isSubmittingBatch = false;
@@ -2779,8 +3438,7 @@
 
         document.getElementById('productSearch').value = '';
         document.getElementById('searchResults').style.display = 'none';
-        
-        window.selectProduct(null, product);
+        window.selectProductFromId(id, null);
 
         const area = document.getElementById('product-selection-area');
         if (area) {

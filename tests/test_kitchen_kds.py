@@ -53,18 +53,22 @@ class TestKitchenKDS(unittest.TestCase):
         self.assertTrue(data['success'])
         payload = data['data']
         self.assertEqual(payload['station'], 'kitchen')
+        self.assertIn('avg_prep_minutes', payload)
         self.assertEqual(len(payload['orders']), 1)
         order = payload['orders'][0]
         self.assertTrue(order['is_late'])
+        self.assertEqual(order['wait_bucket'], 'critical')
+        self.assertTrue(order['is_over_avg'])
         all_items = []
         for sec in order['sections']:
             all_items.extend(sec['items'])
         self.assertEqual(len(all_items), 1)
         self.assertEqual(all_items[0]['id'], 'item1')
 
+    @patch('app.blueprints.kitchen.LoggerService.log_acao')
     @patch('app.blueprints.kitchen.save_table_orders')
     @patch('app.blueprints.kitchen.load_table_orders')
-    def test_update_status_changes_item_and_sets_timestamps(self, mock_load, mock_save):
+    def test_update_status_changes_item_and_sets_timestamps(self, mock_load, mock_save, mock_log):
         base_time = datetime.now().strftime('%d/%m/%Y %H:%M')
         mock_load.return_value = {
             '10': {
@@ -90,10 +94,12 @@ class TestKitchenKDS(unittest.TestCase):
         item = saved_orders['10']['items'][0]
         self.assertEqual(item['kds_status'], 'preparing')
         self.assertIn('kds_start_time', item)
+        self.assertTrue(mock_log.called)
 
+    @patch('app.blueprints.kitchen.LoggerService.log_acao')
     @patch('app.blueprints.kitchen.save_table_orders')
     @patch('app.blueprints.kitchen.load_table_orders')
-    def test_mark_received_archives_items(self, mock_load, mock_save):
+    def test_mark_received_archives_items(self, mock_load, mock_save, mock_log):
         base_time = datetime.now().strftime('%d/%m/%Y %H:%M')
         mock_load.return_value = {
             '10': {
@@ -119,13 +125,45 @@ class TestKitchenKDS(unittest.TestCase):
         saved_orders = mock_save.call_args[0][0]
         item = saved_orders['10']['items'][0]
         self.assertEqual(item['kds_status'], 'archived')
+        self.assertTrue(mock_log.called)
+
+    @patch('app.blueprints.kitchen._emit_server_done_sound')
+    @patch('app.blueprints.kitchen.LoggerService.log_acao')
+    @patch('app.blueprints.kitchen.save_table_orders')
+    @patch('app.blueprints.kitchen.load_table_orders')
+    def test_update_status_done_emits_server_sound(self, mock_load, mock_save, mock_log, mock_sound):
+        base_time = datetime.now().strftime('%d/%m/%Y %H:%M')
+        mock_load.return_value = {
+            '10': {
+                'status': 'open',
+                'opened_at': base_time,
+                'items': [
+                    {
+                        'id': 'item1',
+                        'name': 'Prato',
+                        'qty': 1,
+                        'category': 'Principal',
+                        'created_at': base_time,
+                        'kds_status': 'preparing',
+                        'kds_start_time': base_time
+                    }
+                ]
+            }
+        }
+        resp = self.client.post(
+            '/kitchen/kds/update_status',
+            json={'table_id': '10', 'item_id': 'item1', 'status': 'done'}
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(mock_sound.called)
+        self.assertTrue(mock_log.called)
 
     @patch('app.blueprints.kitchen.save_table_orders')
     @patch('app.blueprints.kitchen.load_table_orders')
     @patch('app.blueprints.kitchen.load_menu_items')
     def test_auto_archive_after_120_minutes_pending_no_interaction(self, mock_menu, mock_load, mock_save):
         mock_menu.return_value = []
-        old = (datetime.now() - timedelta(minutes=130)).strftime('%d/%m/%Y %H:%M')
+        old = (datetime.now() - timedelta(minutes=160)).strftime('%d/%m/%Y %H:%M')
         mock_load.return_value = {
             '10': {
                 'status': 'open',
