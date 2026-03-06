@@ -1143,6 +1143,20 @@ def restaurant_table_order(table_id):
                 
                 log_action('Item Removido', log_msg, department='Restaurante')
                 
+                # --- FINANCIAL AUDIT LOG ---
+                try:
+                    from app.services.financial_audit_service import FinancialAuditService
+                    FinancialAuditService.log_event(
+                        user=session.get("user"),
+                        action=FinancialAuditService.EVENT_VOID_ITEM,
+                        entity=f"Table {table_id}",
+                        old_data={'removed_items_count': removed_count},
+                        new_data=None,
+                        details={'reason': reason, 'items': target_ids}
+                    )
+                except Exception as e:
+                    current_app.logger.error(f"Failed to log void item audit: {e}")
+                
                 if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                     return jsonify({
                         'success': True, 

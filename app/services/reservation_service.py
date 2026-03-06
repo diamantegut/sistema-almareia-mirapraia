@@ -372,7 +372,29 @@ class ReservationService:
                 raise ValueError(f'Conflito com reserva de {guest} no quarto {room_number}.')
         return True
 
-    def has_availability_for_category(self, category, checkin, checkout):
+    def validate_stay_restrictions(self, category, checkin, checkout, package_id=None):
+        from app.services.stay_restriction_service import StayRestrictionService
+        return StayRestrictionService.validate_stay(
+            category=category,
+            checkin=checkin,
+            checkout=checkout,
+            package_id=package_id,
+        )
+
+    def has_availability_for_category(self, category, checkin, checkout, channel='Recepção'):
+        from app.services.inventory_restriction_service import InventoryRestrictionService
+        from app.services.tariff_priority_engine_service import TariffPriorityEngineService
+        engine = TariffPriorityEngineService.evaluate(
+            category=category,
+            channel=channel,
+            checkin=checkin,
+            checkout=checkout,
+            apply_dynamic=False,
+        )
+        if not engine.get('sellable'):
+            return False
+        if not InventoryRestrictionService.is_open_for_period(category, checkin, checkout):
+            return False
         rooms = self.get_room_mapping().get(category, [])
         for room in rooms:
             try:
@@ -382,10 +404,23 @@ class ReservationService:
                 continue
         return False
 
-    def available_categories_for_period(self, checkin, checkout, exclude_category=None):
+    def available_categories_for_period(self, checkin, checkout, exclude_category=None, channel='Recepção'):
+        from app.services.inventory_restriction_service import InventoryRestrictionService
+        from app.services.tariff_priority_engine_service import TariffPriorityEngineService
         available = []
         for category, rooms in self.get_room_mapping().items():
             if exclude_category and str(category) == str(exclude_category):
+                continue
+            engine = TariffPriorityEngineService.evaluate(
+                category=category,
+                channel=channel,
+                checkin=checkin,
+                checkout=checkout,
+                apply_dynamic=False,
+            )
+            if not engine.get('sellable'):
+                continue
+            if not InventoryRestrictionService.is_open_for_period(category, checkin, checkout):
                 continue
             for room in rooms:
                 try:
@@ -414,6 +449,21 @@ class ReservationService:
         # If manual, update the file directly too for consistency
         if res.get('source_type') == 'manual':
             self.update_manual_reservation_payment(reservation_id, amount)
+
+        try:
+            from app.services.reservation_rateio_service import ReservationRateioService
+            total_package = res.get('amount') or res.get('total_value') or res.get('total')
+            ReservationRateioService.generate(
+                reservation_id=str(reservation_id),
+                total_package=total_package,
+                checkin=res.get('checkin'),
+                checkout=res.get('checkout'),
+                user=payment_details.get('user') if isinstance(payment_details, dict) else 'Sistema',
+                trigger='package_payment',
+                force=False
+            )
+        except Exception:
+            pass
 
     def update_manual_reservation_payment(self, reservation_id, amount):
         import json
@@ -751,6 +801,20 @@ class ReservationService:
             with open(self.MANUAL_RESERVATIONS_FILE, 'w') as f:
                 json.dump(reservations, f, indent=2)
             
+        try:
+            from app.services.reservation_rateio_service import ReservationRateioService
+            ReservationRateioService.generate(
+                reservation_id=str(new_res.get('id')),
+                total_package=new_res.get('amount'),
+                checkin=new_res.get('checkin'),
+                checkout=new_res.get('checkout'),
+                user=str(data.get('user') or 'Sistema'),
+                trigger='reservation_confirmed',
+                force=False
+            )
+        except Exception:
+            pass
+
         return new_res
 
     def get_february_reservations(self):

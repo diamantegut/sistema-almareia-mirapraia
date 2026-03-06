@@ -1053,10 +1053,95 @@ def release_sefaz_lock():
     except Exception as e:
         logger.error(f"Error releasing sefaz lock: {e}")
 
+def recover_missing_notes(start_nsu, end_nsu, settings):
+    """
+    Recupera notas fiscais por NSU específico (consNSU) em um intervalo.
+    Útil para preencher lacunas causadas por saltos de NSU.
+    """
+    service = _get_sefaz_service_instance(settings)
+    if not service:
+        return None, "Certificado não configurado."
+        
+    recovered_docs = []
+    errors = []
+    
+    start_nsu = int(start_nsu)
+    end_nsu = int(end_nsu)
+    
+    # Validação de segurança para não abusar da SEFAZ
+    if (end_nsu - start_nsu) > 50:
+         return None, "Intervalo de recuperação muito grande (> 50). Faça em lotes menores."
+
+    try:
+        with service:
+            cnpj = settings.get('cnpj_emitente')
+            ambiente = 2 if settings.get('environment') == 'homologation' else 1
+            
+            for nsu in range(start_nsu, end_nsu + 1):
+                # Check lock/block
+                if get_sefaz_block_until() and datetime.now() < get_sefaz_block_until():
+                    return recovered_docs, "Bloqueio SEFAZ detectado durante recuperação."
+                
+                # Check last check for 656 prevention (consNSU also counts?)
+                # consNSU is less likely to trigger 656 than distNSU if done slowly
+                time.sleep(2) 
+                
+                logger.info(f"Recuperando NSU específico: {nsu}")
+                result = service.consultar_nsu(nsu, cnpj, ambiente=ambiente)
+                
+                if not result['success']:
+                    if str(result.get('cStat')) == '656':
+                        set_sefaz_block_for_one_hour()
+                        errors.append(f"NSU {nsu}: Bloqueado 656")
+                        break
+                    errors.append(f"NSU {nsu}: Erro {result.get('message')}")
+                    continue
+                
+                # Process documents
+                for doc in result.get('documents', []):
+                    parsed = service.parse_xml_content(doc['content'])
+                    if parsed:
+                         # Normalize and append (simplified version of _list logic)
+                        try:
+                            v_nf = float(parsed.get('vnf', 0) or 0)
+                        except:
+                            v_nf = 0.0
+
+                        normalized = {
+                            'id': parsed.get('access_key'),
+                            'access_key': parsed.get('access_key'),
+                            'chave': parsed.get('access_key'),
+                            'created_at': parsed.get('dhemi') or parsed.get('dh_evento') or datetime.now().isoformat(),
+                            'issued_at': parsed.get('dhemi'),
+                            'amount': v_nf,
+                            'total_amount': v_nf,
+                            'digest_value': parsed.get('digval'),
+                            'schema': doc.get('schema'),
+                            'type': parsed.get('type'),
+                            'nsu': doc.get('nsu'),
+                            'emitente': {
+                                'cpf_cnpj': parsed.get('cnpj_emitente'),
+                                'nome': parsed.get('nome_emitente'),
+                                'ie': parsed.get('ie_emitente')
+                            },
+                            'xml_content': doc.get('content')
+                        }
+                        recovered_docs.append(normalized)
+            
+            return recovered_docs, None
+            
+    except Exception as e:
+        logger.error(f"Erro na recuperação de notas: {e}")
+        return recovered_docs, str(e)
+
 def _list_received_nfes_sefaz(settings):
     # Check lock to prevent race conditions (Consumo Indevido)
     if get_sefaz_lock_status():
         return None, "Sincronização com a SEFAZ já em andamento. Aguarde alguns instantes."
+    
+    # Auto-recovery logic: check for gaps
+    # We don't have a database of NSUs here, but we can check if last_nsu jumped significantly without saving?
+    # Actually, we rely on user triggering recovery or manual check.
     
     set_sefaz_lock()
     try:

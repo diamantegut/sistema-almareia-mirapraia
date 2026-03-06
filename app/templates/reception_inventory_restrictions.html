@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+
+{% block title %}Restrições de Inventário{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="mb-0">Restrições de Inventário por Categoria</h3>
+        <a class="btn btn-outline-secondary" href="{{ url_for('reception.reception_dashboard') }}">Voltar</a>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white"><h5 class="mb-0">Configuração</h5></div>
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label">Categoria</label>
+                    <select id="inv_category" class="form-select">
+                        {% for category in categories %}
+                        <option value="{{ category }}">{{ category }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Status</label>
+                    <select id="inv_status" class="form-select">
+                        <option value="open">Aberto para venda</option>
+                        <option value="closed">Fechado para venda</option>
+                    </select>
+                </div>
+                <div class="col-md-8">
+                    <label class="form-label">Motivo</label>
+                    <input id="inv_reason" type="text" class="form-control" placeholder="Obrigatório">
+                </div>
+            </div>
+            <div class="row g-3 mt-1 align-items-end">
+                <div class="col-md-8">
+                    {% set period_selector_id = 'inv_period_selector' %}
+                    {% set period_selector_label = 'Período e dias da semana' %}
+                    {% set period_selector_start = today_iso %}
+                    {% set period_selector_end = today_iso %}
+                    {% include 'components/revenue_period_selector.html' %}
+                </div>
+                <div class="col-md-4">
+                    <button class="btn btn-primary w-100" onclick="applyInventoryRestriction()">Aplicar configuração</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white"><h5 class="mb-0">Restrições ativas no período</h5></div>
+        <div class="card-body">
+            <div class="row g-3 align-items-end mb-2">
+                <div class="col-md-3">
+                    <label class="form-label">Início</label>
+                    <input id="flt_start" type="date" class="form-control" value="{{ today_iso }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Fim</label>
+                    <input id="flt_end" type="date" class="form-control" value="{{ today_iso }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Categoria</label>
+                    <select id="flt_category" class="form-select">
+                        <option value="">Todas</option>
+                        {% for category in categories %}
+                        <option value="{{ category }}">{{ category }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button class="btn btn-outline-dark w-100" onclick="loadInventoryRestrictions()">Atualizar tabela</button>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm table-hover" id="inv_table">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Categoria</th>
+                            <th>Status</th>
+                            <th>Usuário</th>
+                            <th>Atualizado em</th>
+                            <th>Motivo</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-white"><h5 class="mb-0">Logs de Alterações</h5></div>
+        <div class="card-body">
+            <div class="row g-3 align-items-end mb-2">
+                <div class="col-md-3">
+                    <label class="form-label">Início</label>
+                    <input id="log_start" type="date" class="form-control" value="{{ today_iso }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Fim</label>
+                    <input id="log_end" type="date" class="form-control" value="{{ today_iso }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Usuário</label>
+                    <input id="log_user" type="text" class="form-control" placeholder="Todos">
+                </div>
+                <div class="col-md-3">
+                    <button class="btn btn-outline-dark w-100" onclick="loadInventoryLogs()">Atualizar logs</button>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm table-hover" id="log_table">
+                    <thead>
+                        <tr>
+                            <th>Data/Hora</th>
+                            <th>Usuário</th>
+                            <th>Categoria</th>
+                            <th>Período</th>
+                            <th>Dia afetado</th>
+                            <th>Status anterior</th>
+                            <th>Novo status</th>
+                            <th>Motivo</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/revenue_period_selector.js') }}"></script>
+<script>
+function applyInventoryRestriction() {
+    const category = document.getElementById('inv_category').value;
+    const status = document.getElementById('inv_status').value;
+    const period = RevenuePeriodSelector.getValue('inv_period_selector');
+    const startDate = period.start_date;
+    const endDate = period.end_date || startDate;
+    const reason = document.getElementById('inv_reason').value || '';
+    if (!reason || reason.trim().length < 3) {
+        alert('Informe motivo da alteração.');
+        return;
+    }
+    fetch('/api/reception/inventory-restrictions', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            category,
+            status,
+            start_date: startDate,
+            end_date: endDate,
+            weekdays: period.weekdays || [],
+            reason
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            alert(`Configuração aplicada em ${data.result.dates.length} dia(s).`);
+            loadInventoryRestrictions();
+            loadInventoryLogs();
+        } else {
+            alert('Falha ao aplicar configuração.');
+        }
+    });
+}
+
+function loadInventoryRestrictions() {
+    const startDate = document.getElementById('flt_start').value;
+    const endDate = document.getElementById('flt_end').value;
+    const category = document.getElementById('flt_category').value;
+    const url = `/api/reception/inventory-restrictions?start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}&category=${encodeURIComponent(category)}`;
+    fetch(url)
+        .then(r => r.json())
+        .then(data => {
+            const tbody = document.querySelector('#inv_table tbody');
+            tbody.innerHTML = '';
+            (data.items || []).forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.date || '-'}</td>
+                    <td>${item.category || '-'}</td>
+                    <td>${item.status === 'closed' ? 'Fechado' : 'Aberto'}</td>
+                    <td>${item.updated_by || '-'}</td>
+                    <td>${item.updated_at || '-'}</td>
+                    <td>${item.reason || '-'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        });
+}
+
+function loadInventoryLogs() {
+    const startDate = document.getElementById('log_start').value;
+    const endDate = document.getElementById('log_end').value;
+    const user = document.getElementById('log_user').value || '';
+    const url = `/api/reception/inventory-restrictions/logs?start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}&user=${encodeURIComponent(user)}`;
+    fetch(url)
+        .then(r => r.json())
+        .then(data => {
+            const tbody = document.querySelector('#log_table tbody');
+            tbody.innerHTML = '';
+            (data.items || []).forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.timestamp || '-'}</td>
+                    <td>${item.user || '-'}</td>
+                    <td>${item.category || '-'}</td>
+                    <td>${item.period_start || '-'} até ${item.period_end || '-'}</td>
+                    <td>${item.day_affected || '-'}</td>
+                    <td>${item.previous_status || '-'}</td>
+                    <td>${item.new_status || '-'}</td>
+                    <td>${item.reason || '-'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    RevenuePeriodSelector.init('inv_period_selector', {
+        startDate: '{{ today_iso }}',
+        endDate: '{{ today_iso }}'
+    });
+    loadInventoryRestrictions();
+    loadInventoryLogs();
+});
+</script>
+{% endblock %}

@@ -43,11 +43,28 @@
         <div class="spinner-border text-primary" role="status">
             <span class="visually-hidden">Carregando...</span>
         </div>
-        <p class="mt-2 text-muted">Processando dados de vendas...</p>
+        <p class="mt-2 text-muted">Processando dados...</p>
     </div>
 
+    <!-- Main Tabs -->
+    <ul class="nav nav-tabs mb-4" id="mainDashboardTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="restaurant-tab" data-bs-toggle="tab" data-bs-target="#restaurant-content" type="button" role="tab" aria-selected="true">
+                <i class="bi bi-cup-straw"></i> Restaurante
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="accommodation-tab" data-bs-toggle="tab" data-bs-target="#accommodation-content" type="button" role="tab" aria-selected="false" onclick="loadAccommodationDashboard()">
+                <i class="bi bi-house-door"></i> Hospedagem
+            </button>
+        </li>
+    </ul>
+
     <!-- Dashboard Content -->
-    <div id="dashboardContent" style="display: none;">
+    <div class="tab-content" id="dashboardContent" style="display: none;">
+        
+        <!-- RESTAURANT TAB -->
+        <div class="tab-pane fade show active" id="restaurant-content" role="tabpanel">
         
         <!-- Discrepancy Alert -->
         <div id="discrepancyAlert" class="alert alert-danger shadow-sm mb-4" style="display: none;">
@@ -119,18 +136,9 @@
             <div class="col-md-3">
                 <div class="card shadow-sm border-start border-primary border-5">
                     <div class="card-body">
-                        <h6 class="text-muted text-uppercase mb-2">Faturamento Total</h6>
+                        <h6 class="text-muted text-uppercase mb-2">Faturamento Bruto</h6>
                         <h3 class="mb-0" id="kpi_revenue">R$ 0,00</h3>
-                        <small class="text-muted"><span id="kpi_orders">0</span> pedidos</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card shadow-sm border-start border-danger border-5">
-                    <div class="card-body">
-                        <h6 class="text-muted text-uppercase mb-2">Custo Estimado</h6>
-                        <h3 class="mb-0" id="kpi_cost">R$ 0,00</h3>
-                        <small class="text-muted"><span id="kpi_items">0</span> itens vendidos</small>
+                        <small class="text-muted">Líquido: <span id="kpi_net_revenue">R$ 0,00</span></small>
                     </div>
                 </div>
             </div>
@@ -147,8 +155,126 @@
                 <div class="card shadow-sm border-start border-info border-5">
                     <div class="card-body">
                         <h6 class="text-muted text-uppercase mb-2">Ticket Médio</h6>
-                        <h3 class="mb-0" id="kpi_ticket">R$ 0,00</h3>
-                        <small class="text-muted">por pedido</small>
+                        <h4 class="mb-0" id="kpi_ticket_table">R$ 0,00</h4>
+                        <small class="text-muted">por mesa (<span id="kpi_tables_count">0</span> mesas)</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm border-start border-warning border-5">
+                    <div class="card-body">
+                        <h6 class="text-muted text-uppercase mb-2">Pedidos</h6>
+                        <h3 class="mb-0" id="kpi_orders">0</h3>
+                        <small class="text-muted">Ticket (Pedido): <span id="kpi_ticket_order">R$ 0,00</span></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Operations Section -->
+        <h5 class="mb-3 text-secondary"><i class="bi bi-gear-wide-connected"></i> Operação & Eficiência</h5>
+        <div class="row g-4 mb-4">
+             <div class="col-md-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <h6 class="text-muted text-uppercase">Tempo Médio Mesa</h6>
+                        <h3 class="mb-0 text-primary" id="op_avg_table_time">0 min</h3>
+                        <small class="text-muted">Máx: <span id="op_longest_table">0 min</span></small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <h6 class="text-muted text-uppercase">Tempo Médio KDS</h6>
+                        <h3 class="mb-0 text-info" id="op_avg_kds">0 min</h3>
+                        <div id="op_kds_alert" class="badge bg-danger mt-1" style="display:none;">Atrasados: <span id="op_overdue">0</span></div>
+                    </div>
+                </div>
+            </div>
+             <div class="col-md-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <h6 class="text-muted text-uppercase">Cancelamentos</h6>
+                        <h3 class="mb-0 text-danger" id="op_cancel_count">0</h3>
+                        <small class="text-muted">Perda: <span id="op_cancel_val">R$ 0,00</span></small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <h6 class="text-muted text-uppercase">% Venda Quartos</h6>
+                        <h3 class="mb-0 text-success" id="op_room_pct">0%</h3>
+                        <small class="text-muted">vs Restaurante</small>
+                    </div>
+                </div>
+            </div>
+            
+             <!-- New SLA Card -->
+            <div class="col-md-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <h6 class="text-muted text-uppercase">SLA de Preparo</h6>
+                        <h3 class="mb-0 text-warning" id="op_sla_pct">0%</h3>
+                        <small class="text-muted">itens atrasados (<span id="op_sla_count">0</span>)</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Ranking of the Day & Origin -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-8">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Destaques do Período</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <h6 class="text-primary border-bottom pb-2">Top 5 Produtos</h6>
+                                <ul class="list-group list-group-flush small" id="rank_products"></ul>
+                            </div>
+                             <div class="col-md-4">
+                                <h6 class="text-success border-bottom pb-2">Top 3 Mesas</h6>
+                                <ul class="list-group list-group-flush small" id="rank_tables"></ul>
+                            </div>
+                             <div class="col-md-4">
+                                <h6 class="text-info border-bottom pb-2">Top 3 Garçons</h6>
+                                <ul class="list-group list-group-flush small" id="rank_waiters"></ul>
+                            </div>
+                        </div>
+                         <div class="row mt-3">
+                             <div class="col-md-12">
+                                <h6 class="text-secondary border-bottom pb-2">Top Quartos (Consumo)</h6>
+                                <div class="d-flex flex-wrap gap-2" id="rank_rooms"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+             <div class="col-md-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-white">
+                        <h5 class="card-title mb-0">Origem de Faturamento</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="originChart" height="200"></canvas>
+                        <div class="mt-3 small">
+                            <div class="d-flex justify-content-between">
+                                <span>Restaurante:</span>
+                                <span class="fw-bold" id="orig_rest_val">R$ 0,00</span>
+                            </div>
+                             <div class="d-flex justify-content-between">
+                                <span>Quarto (Hóspede):</span>
+                                <span class="fw-bold" id="orig_room_val">R$ 0,00</span>
+                            </div>
+                             <div class="d-flex justify-content-between text-danger">
+                                <span>Cortesia:</span>
+                                <span class="fw-bold" id="orig_court_val">R$ 0,00</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -157,24 +283,35 @@
         <!-- Charts Row 1 -->
         <div class="row g-4 mb-4">
             <!-- Hourly Sales -->
-            <div class="col-md-8">
+            <div class="col-md-6">
                 <div class="card shadow-sm h-100">
                     <div class="card-header bg-white">
                         <h5 class="card-title mb-0">Vendas por Horário</h5>
                     </div>
                     <div class="card-body">
-                        <canvas id="hourlyChart" height="300"></canvas>
+                        <canvas id="hourlyChart" height="250"></canvas>
+                    </div>
+                </div>
+            </div>
+            <!-- Payment Methods -->
+             <div class="col-md-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-white">
+                        <h5 class="card-title mb-0">Formas de Pagamento</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="paymentChart" height="250"></canvas>
                     </div>
                 </div>
             </div>
             <!-- Attendant Share -->
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="card shadow-sm h-100">
                     <div class="card-header bg-white">
-                        <h5 class="card-title mb-0">Performance por Atendente</h5>
+                        <h5 class="card-title mb-0">Vendas por Atendente</h5>
                     </div>
                     <div class="card-body">
-                        <canvas id="attendantChart" height="300"></canvas>
+                        <canvas id="attendantChart" height="250"></canvas>
                     </div>
                 </div>
             </div>
@@ -200,6 +337,9 @@
                 <ul class="nav nav-tabs card-header-tabs" id="analysisTabs" role="tablist">
                     <li class="nav-item">
                         <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-abc">Curva ABC (Produtos)</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-top10">Top 10 & Categorias</button>
                     </li>
                     <li class="nav-item">
                         <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-attendants">Ranking Atendentes</button>
@@ -240,6 +380,23 @@
                             </table>
                         </div>
                     </div>
+                    
+                    <div class="tab-pane fade" id="tab-top10">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <h6 class="text-primary border-bottom pb-2">Top 10 Quantidade</h6>
+                                <ul class="list-group list-group-flush" id="top10_qty_list"></ul>
+                            </div>
+                            <div class="col-md-4">
+                                <h6 class="text-success border-bottom pb-2">Top 10 Faturamento</h6>
+                                <ul class="list-group list-group-flush" id="top10_rev_list"></ul>
+                            </div>
+                            <div class="col-md-4">
+                                <h6 class="text-info border-bottom pb-2">Categorias</h6>
+                                <ul class="list-group list-group-flush" id="top_cat_list"></ul>
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="tab-pane fade" id="tab-attendants">
                         <div class="d-flex justify-content-end mb-2">
@@ -257,6 +414,7 @@
                                         <th>Itens Vendidos</th>
                                         <th>Total Vendas</th>
                                         <th>Ticket Médio</th>
+                                        <th>Tempo Médio (Mesa)</th>
                                     </tr>
                                 </thead>
                                 <tbody></tbody>
@@ -341,7 +499,308 @@
                 </div>
             </div>
         </div>
+        </div> <!-- End Restaurant Tab -->
 
+        <!-- ACCOMMODATION TAB -->
+        <div class="tab-pane fade" id="accommodation-content" role="tabpanel">
+            <div class="card shadow-sm mb-4 mt-2">
+                <div class="card-body">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-2">
+                            <label class="form-label">Saldo &gt; X</label>
+                            <input type="number" class="form-control" id="hosp_min_balance" value="0" min="0" step="0.01">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Fiscal</label>
+                            <select class="form-select" id="hosp_fiscal_filter">
+                                <option value="">Todos</option>
+                                <option value="fiscal">Somente fiscais</option>
+                                <option value="nao_fiscal">Somente não fiscais</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Check-out hoje</label>
+                            <select class="form-select" id="hosp_checkout_today">
+                                <option value="false">Não</option>
+                                <option value="true">Sim</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Limite não fiscal</label>
+                            <input type="number" class="form-control" id="hosp_non_fiscal_limit" value="500" min="0" step="0.01">
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-primary w-100" type="button" onclick="loadAccommodationDashboard()">Atualizar Hospedagem</button>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-outline-dark w-100" type="button" onclick="window.print()">Gerar Relatório PDF/Imprimir</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Summary Cards -->
+            <div class="row g-4 mb-4 mt-2">
+                <div class="col-md-4">
+                    <div class="card shadow-sm border-start border-primary border-5">
+                        <div class="card-body">
+                            <h6 class="text-muted text-uppercase mb-2">Receita Hospedagem</h6>
+                            <h3 class="mb-0" id="hosp_revenue">R$ 0,00</h3>
+                            <small class="text-muted">Confirmada</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card shadow-sm border-start border-info border-5">
+                        <div class="card-body">
+                            <h6 class="text-muted text-uppercase mb-2">Restaurante -> Quarto</h6>
+                            <h3 class="mb-0" id="hosp_rest_transfer">R$ 0,00</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card shadow-sm border-start border-success border-5">
+                        <div class="card-body">
+                            <h6 class="text-muted text-uppercase mb-2">Recebimentos (Recepção)</h6>
+                            <h3 class="mb-0" id="hosp_receipts">R$ 0,00</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row g-4 mb-4">
+                <div class="col-md-3">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted text-uppercase">Taxa de Ocupação <i class="bi bi-info-circle" title="Ocupação = quartos ocupados / quartos disponíveis"></i></h6>
+                            <h3 class="mb-0 text-primary" id="hosp_occupancy">0%</h3>
+                            <small class="text-muted"><span id="hosp_occupied">0</span> / <span id="hosp_total_rooms">0</span> quartos</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted text-uppercase">Diária Média (ADR) <i class="bi bi-info-circle" title="ADR = receita de hospedagem / quartos vendidos"></i></h6>
+                            <h3 class="mb-0 text-success" id="hosp_adr">R$ 0,00</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted text-uppercase">RevPAR <i class="bi bi-info-circle" title="RevPAR = receita de hospedagem / quartos disponíveis"></i></h6>
+                            <h3 class="mb-0 text-info" id="hosp_revpar">R$ 0,00</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                     <div class="card shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted text-uppercase">Pendências</h6>
+                            <h3 class="mb-0 text-warning" id="hosp_pending">R$ 0,00</h3>
+                            <small>A receber</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4 mb-4">
+                <!-- Cashier Conference -->
+                <div class="col-md-6">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-white">
+                            <h5 class="card-title mb-0">Conferência de Caixa (Recepção)</h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-sm">
+                                <tbody>
+                                    <tr>
+                                        <td>Saldo Inicial</td>
+                                        <td class="text-end fw-bold" id="conf_opening">R$ 0,00</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Entradas (+)</td>
+                                        <td class="text-end text-success" id="conf_entries">R$ 0,00</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Transferências Recebidas (+)</td>
+                                        <td class="text-end text-success" id="conf_transfers_in">R$ 0,00</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Saídas (-)</td>
+                                        <td class="text-end text-danger" id="conf_exits">R$ 0,00</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Transferências Enviadas (-)</td>
+                                        <td class="text-end text-danger" id="conf_transfers_out">R$ 0,00</td>
+                                    </tr>
+                                    <tr class="table-light">
+                                        <td><strong>Saldo Esperado</strong></td>
+                                        <td class="text-end fw-bold" id="conf_expected">R$ 0,00</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Saldo Informado</td>
+                                        <td class="text-end" id="conf_reported">R$ 0,00</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Diferença</td>
+                                        <td class="text-end fw-bold" id="conf_diff">R$ 0,00</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Methods -->
+                <div class="col-md-6">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-white">
+                            <h5 class="card-title mb-0">Formas de Pagamento</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="hospPaymentTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Método</th>
+                                            <th>Total</th>
+                                            <th>%</th>
+                                            <th>Fiscal</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reservations List -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">Financeiro por Reserva</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="hospResTable">
+                            <thead>
+                                <tr>
+                                    <th>Reserva / Ref</th>
+                                    <th>Hóspede</th>
+                                    <th>Última Atividade</th>
+                                    <th>Transações</th>
+                                    <th>Total Previsto</th>
+                                    <th>Total Pago</th>
+                                    <th>Saldo</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Audit Events -->
+             <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white text-danger">
+                    <h5 class="card-title mb-0"><i class="bi bi-shield-exclamation"></i> Auditoria & Riscos</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm" id="hospAuditTable">
+                            <thead>
+                                <tr>
+                                    <th>Data/Hora</th>
+                                    <th>Usuário</th>
+                                    <th>Tipo</th>
+                                    <th>Valor</th>
+                                    <th>Ref</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">Fechamento do Dia</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <div class="border rounded p-3">
+                                <div class="small text-muted">Fiscal</div>
+                                <div class="fw-bold fs-5" id="close_fiscal">R$ 0,00</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="border rounded p-3">
+                                <div class="small text-muted">Não Fiscal</div>
+                                <div class="fw-bold fs-5" id="close_non_fiscal">R$ 0,00</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="border rounded p-3">
+                                <div class="small text-muted">Validações com alerta</div>
+                                <div class="fw-bold fs-5" id="close_alert_count">0</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm" id="closeValidationTable">
+                            <thead>
+                                <tr>
+                                    <th>Validação</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div> <!-- End Accommodation Tab -->
+
+    </div>
+</div>
+
+<div class="modal fade" id="reservationTimelineModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Timeline Financeira da Reserva</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-3">
+                    <div class="col-md-4"><strong>Total Reserva:</strong> <span id="timeline_total_reserva">R$ 0,00</span></div>
+                    <div class="col-md-4"><strong>Total Pago:</strong> <span id="timeline_total_pago">R$ 0,00</span></div>
+                    <div class="col-md-4"><strong>Saldo Pendente:</strong> <span id="timeline_saldo">R$ 0,00</span></div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm" id="timelineTable">
+                        <thead>
+                            <tr>
+                                <th>Data/Hora</th>
+                                <th>Evento</th>
+                                <th>Forma</th>
+                                <th>Fiscal</th>
+                                <th>Valor</th>
+                                <th>Referência</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -445,6 +904,12 @@
         const startDate = document.getElementById('start_date').value;
         const endDate = document.getElementById('end_date').value;
         
+        // If Accommodation Tab is active, load its data
+        const accTab = document.getElementById('accommodation-tab');
+        if (accTab && accTab.classList.contains('active')) {
+            loadAccommodationDashboard();
+        }
+
         document.getElementById('loading').style.display = 'block';
         document.getElementById('dashboardContent').style.display = 'none';
 
@@ -474,17 +939,35 @@
         currentRoomTransferItems = (data.room_transfers && data.room_transfers.items) ? data.room_transfers.items : [];
 
         // 1. KPIs
-        document.getElementById('kpi_revenue').textContent = formatCurrency(data.summary.revenue);
-        document.getElementById('kpi_cost').textContent = formatCurrency(data.summary.cost);
+        document.getElementById('kpi_revenue').textContent = formatCurrency(data.summary.gross_revenue);
+        document.getElementById('kpi_net_revenue').textContent = formatCurrency(data.summary.net_revenue);
         document.getElementById('kpi_profit').textContent = formatCurrency(data.summary.profit);
         document.getElementById('kpi_margin').textContent = data.summary.margin_pct.toFixed(1) + '%';
         document.getElementById('kpi_orders').textContent = formatNumber(data.summary.orders_count);
-        document.getElementById('kpi_items').textContent = formatNumber(data.summary.items_sold);
+        document.getElementById('kpi_ticket_order').textContent = formatCurrency(data.summary.avg_ticket_order);
+        document.getElementById('kpi_ticket_table').textContent = formatCurrency(data.summary.avg_ticket_table);
+        document.getElementById('kpi_tables_count').textContent = formatNumber(data.summary.tables_count);
         
-        const ticket = data.summary.orders_count > 0 ? data.summary.revenue / data.summary.orders_count : 0;
-        document.getElementById('kpi_ticket').textContent = formatCurrency(ticket);
+        // 2. Operations
+        if (data.operations) {
+            const op = data.operations;
+            document.getElementById('op_avg_table_time').textContent = op.avg_table_time.toFixed(0) + ' min';
+            document.getElementById('op_longest_table').textContent = op.longest_table_time.toFixed(0) + ' min';
+            document.getElementById('op_avg_kds').textContent = op.avg_kds_time.toFixed(0) + ' min';
+            
+            if (op.overdue_orders > 0) {
+                document.getElementById('op_kds_alert').style.display = 'inline-block';
+                document.getElementById('op_overdue').textContent = op.overdue_orders;
+            } else {
+                document.getElementById('op_kds_alert').style.display = 'none';
+            }
+            
+            document.getElementById('op_cancel_count').textContent = op.cancellations.count;
+            document.getElementById('op_cancel_val').textContent = formatCurrency(op.cancellations.value);
+            document.getElementById('op_room_pct').textContent = data.summary.room_sales_pct.toFixed(1) + '%';
+        }
 
-        // 2. Guest vs Passenger Analysis
+        // 3. Guest vs Passenger Analysis
         if (data.guest_analysis) {
             const ga = data.guest_analysis;
             
@@ -518,18 +1001,136 @@
             }
         }
 
-        // 3. Charts
+        // 4. Charts
         renderHourlyChart(data.hourly);
         renderAttendantChart(data.attendants);
         renderTrendChart(data.daily_trend);
+        if (data.operations && data.operations.payment_methods) {
+            renderPaymentChart(data.operations.payment_methods);
+        }
 
-        // 3. Tables
+        // 5. Tables & Lists
         renderAbcTable(currentAbcProducts);
         renderAttendantTable(currentAttendants);
         renderOrdersTable(currentOrders);
         if (data.room_transfers) {
             renderRoomTransferSection(data.room_transfers);
         }
+        if (data.products_stats) {
+            renderTop10(data.products_stats);
+        }
+        
+        // 6. Rankings & Origin
+        if (data.rankings) {
+            renderRankings(data.rankings);
+        }
+        if (data.origin_stats) {
+            renderOriginChart(data.origin_stats);
+            // SLA
+            if (data.operations && data.operations.sla_stats) {
+                document.getElementById('op_sla_pct').textContent = data.operations.sla_stats.late_pct.toFixed(1) + '%';
+                document.getElementById('op_sla_count').textContent = data.operations.sla_stats.late_count;
+            }
+        }
+    }
+    
+    function renderRankings(ranks) {
+        // Products
+        const prodList = document.getElementById('rank_products');
+        prodList.innerHTML = '';
+        (ranks.top_products || []).forEach((p, i) => {
+            prodList.innerHTML += `<li class="list-group-item d-flex justify-content-between px-0">
+                <span>${i+1}. ${p.name.substring(0,18)}</span>
+                <span class="badge bg-light text-dark">${formatNumber(p.qty)}</span>
+            </li>`;
+        });
+
+        // Tables
+        const tableList = document.getElementById('rank_tables');
+        tableList.innerHTML = '';
+        (ranks.top_tables || []).forEach((t, i) => {
+            tableList.innerHTML += `<li class="list-group-item d-flex justify-content-between px-0">
+                <span>Mesa ${t.table}</span>
+                <span class="badge bg-light text-success">${formatCurrency(t.value)}</span>
+            </li>`;
+        });
+        
+        // Waiters
+        const waiterList = document.getElementById('rank_waiters');
+        waiterList.innerHTML = '';
+        (ranks.top_waiters || []).forEach((w, i) => {
+            waiterList.innerHTML += `<li class="list-group-item d-flex justify-content-between px-0">
+                <span>${w.name}</span>
+                <span class="badge bg-light text-info">${formatCurrency(w.revenue)}</span>
+            </li>`;
+        });
+        
+        // Rooms
+        const roomDiv = document.getElementById('rank_rooms');
+        roomDiv.innerHTML = '';
+        (ranks.top_rooms || []).forEach(r => {
+            roomDiv.innerHTML += `<span class="badge bg-light text-dark border">Q${r.room}: ${formatCurrency(r.value)}</span>`;
+        });
+    }
+    
+    function renderOriginChart(stats) {
+        const ctx = document.getElementById('originChart').getContext('2d');
+        if (charts.origin) charts.origin.destroy();
+        
+        // Update Values text
+        document.getElementById('orig_rest_val').textContent = formatCurrency(stats.restaurant.value);
+        document.getElementById('orig_room_val').textContent = formatCurrency(stats.room.value);
+        document.getElementById('orig_court_val').textContent = formatCurrency(stats.courtesy.value);
+
+        charts.origin = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Restaurante', 'Quarto', 'Cortesia'],
+                datasets: [{
+                    data: [stats.restaurant.value, stats.room.value, stats.courtesy.value],
+                    backgroundColor: ['#36A2EB', '#4BC0C0', '#FF6384']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+    }
+
+    function renderTop10(stats) {
+        // Qty
+        const listQty = document.getElementById('top10_qty_list');
+        listQty.innerHTML = '';
+        (stats.top_10_qty || []).forEach((p, idx) => {
+            listQty.innerHTML += `<li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>${idx+1}. ${p.name}</span>
+                <span class="badge bg-primary rounded-pill">${formatNumber(p.qty)}</span>
+            </li>`;
+        });
+
+        // Revenue
+        const listRev = document.getElementById('top10_rev_list');
+        listRev.innerHTML = '';
+        (stats.top_10_revenue || []).forEach((p, idx) => {
+            listRev.innerHTML += `<li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>${idx+1}. ${p.name}</span>
+                <span class="badge bg-success rounded-pill">${formatCurrency(p.revenue)}</span>
+            </li>`;
+        });
+        
+        // Categories
+        const listCat = document.getElementById('top_cat_list');
+        listCat.innerHTML = '';
+        (stats.top_categories || []).forEach((c, idx) => {
+             listCat.innerHTML += `<li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>${c.name}</span>
+                <span class="badge bg-info text-dark rounded-pill">${formatCurrency(c.value)}</span>
+            </li>`;
+        });
     }
 
     function renderOrdersTable(orders) {
@@ -608,8 +1209,40 @@
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 scales: {
                     y: { beginAtZero: true }
+                }
+            }
+        });
+    }
+    
+    function renderPaymentChart(data) {
+        const ctx = document.getElementById('paymentChart').getContext('2d');
+        if (charts.payment) charts.payment.destroy();
+        
+        // Sort by value desc
+        data.sort((a, b) => b.value - a.value);
+
+        charts.payment = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: data.map(d => d.method),
+                datasets: [{
+                    data: data.map(d => d.value),
+                    backgroundColor: [
+                        '#4BC0C0', '#36A2EB', '#FFCE56', '#FF6384', '#9966FF', '#C9CBCF'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { boxWidth: 12, font: { size: 10 } }
+                    }
                 }
             }
         });
@@ -627,7 +1260,7 @@
         }
 
         charts.attendant = new Chart(ctx, {
-            type: 'doughnut',
+            type: 'pie',
             data: {
                 labels: chartData.map(d => d.name),
                 datasets: [{
@@ -638,7 +1271,14 @@
                 }]
             },
             options: {
-                responsive: true
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { boxWidth: 12, font: { size: 10 } }
+                    }
+                }
             }
         });
     }
@@ -664,6 +1304,7 @@
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 scales: {
                     y: { beginAtZero: true }
                 }
@@ -709,9 +1350,169 @@
                 <td>${formatNumber(a.items)}</td>
                 <td>${formatCurrency(a.revenue)}</td>
                 <td>${formatCurrency(a.avg_ticket)}</td>
+                <td>${a.avg_table_time ? a.avg_table_time.toFixed(0) + ' min' : '-'}</td>
             `;
             tbody.appendChild(tr);
         });
+    }
+
+    function loadAccommodationDashboard() {
+        const startDate = document.getElementById('start_date').value;
+        const endDate = document.getElementById('end_date').value;
+        const date = startDate;
+        const fiscalFilter = document.getElementById('hosp_fiscal_filter')?.value || '';
+        const checkoutToday = document.getElementById('hosp_checkout_today')?.value || 'false';
+        const minBalance = document.getElementById('hosp_min_balance')?.value || '0';
+        const nonFiscalLimit = document.getElementById('hosp_non_fiscal_limit')?.value || '500';
+
+        fetch(`/admin/api/dashboard/hospedagem/summary?date=${date}`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.error) return;
+                document.getElementById('hosp_revenue').textContent = formatCurrency(data.accommodation_revenue || 0);
+                document.getElementById('hosp_rest_transfer').textContent = formatCurrency(data.restaurant_to_room || 0);
+                document.getElementById('hosp_receipts').textContent = formatCurrency(data.receipts_reception || 0);
+                document.getElementById('hosp_occupancy').textContent = (data.occupancy_rate || 0).toFixed(1) + '%';
+                document.getElementById('hosp_occupied').textContent = data.occupied_rooms || 0;
+                document.getElementById('hosp_total_rooms').textContent = data.total_rooms || 0;
+                document.getElementById('hosp_adr').textContent = formatCurrency(data.adr || 0);
+                document.getElementById('hosp_revpar').textContent = formatCurrency(data.revpar || 0);
+                document.getElementById('hosp_pending').textContent = formatCurrency(data.pending_receivables || 0);
+            });
+
+        fetch(`/admin/api/dashboard/hospedagem/cashier?date=${date}`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.error) return;
+                document.getElementById('conf_opening').textContent = formatCurrency(data.opening_balance || 0);
+                document.getElementById('conf_entries').textContent = formatCurrency(data.entries || 0);
+                document.getElementById('conf_exits').textContent = formatCurrency(data.exits || 0);
+                document.getElementById('conf_transfers_in').textContent = formatCurrency(data.transfers_in || 0);
+                document.getElementById('conf_transfers_out').textContent = formatCurrency(data.transfers_out || 0);
+                document.getElementById('conf_expected').textContent = formatCurrency(data.expected_balance || 0);
+                document.getElementById('conf_reported').textContent = formatCurrency(data.reported_balance || 0);
+                const diff = data.difference || 0;
+                const el = document.getElementById('conf_diff');
+                el.textContent = formatCurrency(diff);
+                el.className = 'text-end fw-bold ' + (diff < -0.01 ? 'text-danger' : (diff > 0.01 ? 'text-success' : 'text-dark'));
+            });
+
+        fetch(`/admin/api/dashboard/hospedagem/payments?start_date=${startDate}&end_date=${endDate}&fiscal_filter=${encodeURIComponent(fiscalFilter)}&non_fiscal_limit=${encodeURIComponent(nonFiscalLimit)}`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.error) return;
+                const tbody = document.querySelector('#hospPaymentTable tbody');
+                tbody.innerHTML = '';
+                (data.methods || []).forEach(p => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${p.method}</td>
+                        <td>${formatCurrency(p.total)}</td>
+                        <td>${p.percentage.toFixed(1)}%</td>
+                        <td><span class="badge ${p.fiscal ? 'bg-success' : 'bg-secondary'}">${p.fiscal ? 'Fiscal' : 'N/F'}</span></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+                const violations = data.non_fiscal_violations || [];
+                if (violations.length > 0) {
+                    alert(`Há ${violations.length} pagamento(s) não fiscal(is) acima do limite sem justificativa.`);
+                }
+            });
+
+        fetch(`/admin/api/dashboard/hospedagem/reservations?start_date=${startDate}&end_date=${endDate}&checkout_today=${encodeURIComponent(checkoutToday)}&min_balance=${encodeURIComponent(minBalance)}&fiscal_filter=${encodeURIComponent(fiscalFilter)}`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.error) return;
+                const tbody = document.querySelector('#hospResTable tbody');
+                tbody.innerHTML = '';
+                data.forEach(r => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${r.reservation_ref}</td>
+                        <td>${r.guest_name || '-'}</td>
+                        <td>${r.last_activity || '-'}</td>
+                        <td>${r.transaction_count || 0}</td>
+                        <td>${formatCurrency(r.total_previsto || 0)}</td>
+                        <td>${formatCurrency(r.total_pago || 0)}</td>
+                        <td>${formatCurrency(r.saldo_pendente || 0)}</td>
+                        <td>${r.status || '-'}</td>
+                        <td><button class="btn btn-sm btn-outline-primary" onclick="openReservationTimeline('${r.reservation_id}')">Timeline</button></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            });
+
+        fetch(`/admin/api/dashboard/hospedagem/audit?start_date=${startDate}&end_date=${endDate}`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.error) return;
+                const tbody = document.querySelector('#hospAuditTable tbody');
+                tbody.innerHTML = '';
+                data.forEach(e => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${e.timestamp || '-'}</td>
+                        <td>${e.user || '-'}</td>
+                        <td>${e.operation_type || '-'}</td>
+                        <td class="text-danger">${formatCurrency(e.value || 0)}</td>
+                        <td><small>${e.reference || ''}</small></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            });
+
+        fetch(`/admin/api/dashboard/hospedagem/day-close?date=${date}&non_fiscal_limit=${encodeURIComponent(nonFiscalLimit)}`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.error) return;
+                document.getElementById('close_fiscal').textContent = formatCurrency((data.fiscal_vs_non_fiscal || {}).fiscal_total || 0);
+                document.getElementById('close_non_fiscal').textContent = formatCurrency((data.fiscal_vs_non_fiscal || {}).non_fiscal_total || 0);
+                const validations = data.validations || {};
+                const alerts = (validations.has_cashier_difference ? 1 : 0) + (validations.has_missing_reference ? 1 : 0) + (validations.all_cashiers_closed ? 0 : 1);
+                document.getElementById('close_alert_count').textContent = alerts;
+                const tbody = document.querySelector('#closeValidationTable tbody');
+                tbody.innerHTML = '';
+                const rows = [
+                    ['Todos os caixas fechados', validations.all_cashiers_closed ? 'OK' : 'Pendente'],
+                    ['Diferença de caixa', validations.has_cashier_difference ? 'Com diferença' : 'Sem diferença'],
+                    ['Lançamentos sem referência', validations.has_missing_reference ? 'Encontrados' : 'Nenhum'],
+                ];
+                rows.forEach(([name, status]) => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td>${name}</td><td>${status}</td>`;
+                    tbody.appendChild(tr);
+                });
+            });
+    }
+
+    function openReservationTimeline(reservationId) {
+        fetch(`/admin/api/dashboard/hospedagem/reservations/${encodeURIComponent(reservationId)}/timeline`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+                document.getElementById('timeline_total_reserva').textContent = formatCurrency(data.total_reserva || 0);
+                document.getElementById('timeline_total_pago').textContent = formatCurrency(data.total_pago || 0);
+                document.getElementById('timeline_saldo').textContent = formatCurrency(data.saldo_pendente || 0);
+                const tbody = document.querySelector('#timelineTable tbody');
+                tbody.innerHTML = '';
+                (data.timeline || []).forEach(item => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${item.timestamp || '-'}</td>
+                        <td>${item.label || '-'}</td>
+                        <td>${item.payment_method || '-'}</td>
+                        <td><span class="badge ${item.is_fiscal ? 'bg-success' : 'bg-secondary'}">${item.is_fiscal ? 'Fiscal' : 'N/F'}</span></td>
+                        <td>${formatCurrency(item.value || 0)}</td>
+                        <td><small>${item.reference || ''}</small></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+                const modal = new bootstrap.Modal(document.getElementById('reservationTimelineModal'));
+                modal.show();
+            });
     }
 
     function exportReport() {

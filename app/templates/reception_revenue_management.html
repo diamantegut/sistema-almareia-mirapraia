@@ -1,0 +1,1293 @@
+{% extends "base.html" %}
+
+{% block title %}Revenue Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="mb-0">Revenue Management</h3>
+        <a class="btn btn-outline-secondary" href="{{ url_for('reception.reception_dashboard') }}">Voltar</a>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-2">
+                    <label class="form-label">Categoria</label>
+                    <select id="rm_category" class="form-select">
+                        <option value="alma">Alma</option>
+                        <option value="mar">Mar</option>
+                        <option value="areia">Areia</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    {% set period_selector_id = 'rm_period_selector' %}
+                    {% set period_selector_label = 'Período de simulação' %}
+                    {% include 'components/revenue_period_selector.html' %}
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Visualização</label>
+                    <select id="rm_view_mode" class="form-select">
+                        <option value="week">Semanal</option>
+                        <option value="month">Mensal</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Modo tarifação</label>
+                    <select id="rm_mode" class="form-select">
+                        <option value="advanced">Avançado (RevPAR-alvo)</option>
+                        <option value="basic">Básico</option>
+                    </select>
+                </div>
+                <div class="col-md-1">
+                    <button class="btn btn-primary w-100" onclick="simulateWeek()">Simular semana</button>
+                </div>
+                <div class="col-md-1">
+                    <button class="btn btn-outline-primary w-100" onclick="simulateByView()">Atualizar calendário</button>
+                </div>
+            </div>
+            <div class="row g-3 mt-1">
+                <div class="col-md-4">
+                    <label class="form-label">Justificativa</label>
+                    <input id="rm_justification" class="form-control" placeholder="Obrigatória para mudanças manuais e reset">
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-success w-100" onclick="applyAllSuggestions()">Aplicar sugestões</button>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-outline-success w-100" onclick="applySelectedSuggestions()">Aplicar somente selecionados</button>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-outline-danger w-100" onclick="resetSelectedToDefault()">Voltar ao padrão</button>
+                </div>
+                <div class="col-md-2">
+                    <span class="badge bg-light text-dark border w-100 p-2 text-wrap" id="criticalSummary">Sem alertas críticos</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Calendário de Tarifação</h5>
+            <div class="d-flex gap-2 align-items-center">
+                <button class="btn btn-sm btn-light border" onclick="shiftPeriod(-1)">◀</button>
+                <span id="periodLabel" class="small text-muted">-</span>
+                <button class="btn btn-sm btn-light border" onclick="shiftPeriod(1)">▶</button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div id="calendarGrid" class="rm-calendar-grid"></div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white">
+            <h5 class="mb-0">Simulador de Impacto (Semana/Mês)</h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <div class="border rounded p-3 bg-light">
+                        <div class="small text-muted">Receita estimada (tarifa atual)</div>
+                        <div class="fw-bold fs-5" id="impact_rev_current">R$ 0,00</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="border rounded p-3 bg-light">
+                        <div class="small text-muted">Receita estimada (tarifa sugerida)</div>
+                        <div class="fw-bold fs-5" id="impact_rev_suggested">R$ 0,00</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="border rounded p-3 bg-light">
+                        <div class="small text-muted">Diferença de receita</div>
+                        <div class="fw-bold fs-5" id="impact_rev_diff">R$ 0,00</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="border rounded p-3 bg-light">
+                        <div class="small text-muted">RevPAR antes → depois</div>
+                        <div class="fw-bold fs-6" id="impact_revpar_transition">R$ 0,00 → R$ 0,00</div>
+                    </div>
+                </div>
+            </div>
+            <div class="row g-3 mt-1">
+                <div class="col-md-4">
+                    <div class="border rounded p-3">
+                        <div class="small text-muted">Ocupação projetada (base)</div>
+                        <div class="fw-bold fs-5" id="impact_occ_base">0,0%</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="border rounded p-3">
+                        <div class="small text-muted">Cenário otimista (+10% ocupados)</div>
+                        <div class="fw-bold fs-6" id="impact_opt">Ocupação 0,0% | Receita R$ 0,00 | RevPAR R$ 0,00</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="border rounded p-3">
+                        <div class="small text-muted">Cenário pessimista (-10% ocupados)</div>
+                        <div class="fw-bold fs-6" id="impact_pess">Ocupação 0,0% | Receita R$ 0,00 | RevPAR R$ 0,00</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white"><h5 class="mb-0">Simulador de Receita (Cenários Tarifários)</h5></div>
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-2">
+                    <label class="form-label">Ocupação esperada (%)</label>
+                    <input id="sim_expected_occupancy" type="number" min="0" max="100" step="0.1" class="form-control" value="72">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Tarifa atual</label>
+                    <input id="sim_rate_current" type="number" min="0" step="0.01" class="form-control" value="520">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Tarifa sugerida</label>
+                    <input id="sim_rate_suggested" type="number" min="0" step="0.01" class="form-control" value="580">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Duração da estadia</label>
+                    <input id="sim_stay_nights" type="number" min="1" step="1" class="form-control" value="2">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Horizonte (dias)</label>
+                    <input id="sim_horizon_days" type="number" min="1" step="1" class="form-control" value="30">
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-outline-primary w-100" onclick="runRevenueScenarioSimulator()">Simular cenário</button>
+                </div>
+            </div>
+            <div class="row g-3 mt-2">
+                <div class="col-md-3">
+                    <div class="border rounded p-3 bg-light">
+                        <div class="small text-muted">Receita estimada atual</div>
+                        <div id="sim_out_revenue_current" class="fw-bold fs-6">R$ 0,00</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="border rounded p-3 bg-light">
+                        <div class="small text-muted">Receita estimada sugerida</div>
+                        <div id="sim_out_revenue_suggested" class="fw-bold fs-6">R$ 0,00</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="border rounded p-3 bg-light">
+                        <div class="small text-muted">Diferença estimada</div>
+                        <div id="sim_out_revenue_diff" class="fw-bold fs-6">R$ 0,00</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="border rounded p-3 bg-light">
+                        <div class="small text-muted">RevPAR estimado (atual → sugerido)</div>
+                        <div id="sim_out_revpar" class="fw-bold fs-6">R$ 0,00 → R$ 0,00</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white"><h5 class="mb-0">Painel de Regras Ativas por Dia</h5></div>
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-2">
+                    <label class="form-label">Categoria</label>
+                    <select id="rules_panel_category" class="form-select">
+                        <option value="mar">Mar</option>
+                        <option value="alma">Alma</option>
+                        <option value="areia">Areia</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Canal</label>
+                    <select id="rules_panel_channel" class="form-select">
+                        <option value="Recepção">Recepção</option>
+                        <option value="Motor de Reservas">Motor de Reservas</option>
+                        <option value="Booking.com">Booking.com</option>
+                        <option value="Expedia">Expedia</option>
+                        <option value="Telefone">Telefone</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    {% set period_selector_id = 'rules_panel_period_selector' %}
+                    {% set period_selector_label = 'Período do painel de regras' %}
+                    {% set period_selector_start = '' %}
+                    {% set period_selector_end = '' %}
+                    {% include 'components/revenue_period_selector.html' %}
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Dinâmico</label>
+                    <select id="rules_panel_dynamic" class="form-select">
+                        <option value="1">Ativo</option>
+                        <option value="0">Desativado</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-outline-dark w-100" onclick="loadActiveRulesPanel()">Atualizar painel</button>
+                </div>
+            </div>
+            <div class="table-responsive mt-3">
+                <table class="table table-sm table-hover" id="activeRulesTable">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Tarifa base</th>
+                            <th>Pacotes</th>
+                            <th>Promoções</th>
+                            <th>CTA</th>
+                            <th>CTD</th>
+                            <th>Blackout</th>
+                            <th>Stop Sell</th>
+                            <th>Ajuste dinâmico</th>
+                            <th>Tarifa final</th>
+                            <th>Status</th>
+                            <th>Regras ativas</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white"><h5 class="mb-0">Previsão de Ocupação Futura</h5></div>
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-2">
+                    <label class="form-label">Categoria</label>
+                    <select id="forecast_category" class="form-select">
+                        <option value="mar">Mar</option>
+                        <option value="alma">Alma</option>
+                        <option value="areia">Areia</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    {% set period_selector_id = 'forecast_period_selector' %}
+                    {% set period_selector_label = 'Período de previsão' %}
+                    {% set period_selector_start = '' %}
+                    {% set period_selector_end = '' %}
+                    {% include 'components/revenue_period_selector.html' %}
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-outline-primary w-100" onclick="loadOccupancyForecast()">Calcular previsão</button>
+                </div>
+                <div class="col-md-4 small text-muted" id="forecastMeta">-</div>
+            </div>
+            <div class="table-responsive mt-3">
+                <table class="table table-sm table-hover" id="forecastTable">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Ocupação atual</th>
+                            <th>Ocupação projetada</th>
+                            <th>Risco baixa ocupação</th>
+                            <th>Risco overbooking</th>
+                            <th>Evento</th>
+                            <th>Temporada</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white"><h5 class="mb-0">Análise de Pickup e Ajuste Automático</h5></div>
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-2">
+                    <label class="form-label">Categoria</label>
+                    <select id="pickup_category" class="form-select">
+                        <option value="mar">Mar</option>
+                        <option value="alma">Alma</option>
+                        <option value="areia">Areia</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">RevPAR alvo</label>
+                    <input id="pickup_revpar_target" type="number" min="0" step="0.01" class="form-control" placeholder="Opcional">
+                </div>
+                <div class="col-md-4">
+                    {% set period_selector_id = 'pickup_period_selector' %}
+                    {% set period_selector_label = 'Período de pickup/ajuste' %}
+                    {% set period_selector_start = '' %}
+                    {% set period_selector_end = '' %}
+                    {% include 'components/revenue_period_selector.html' %}
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-outline-dark w-100" onclick="loadPickupAndAutoAdjustment()">Analisar pickup</button>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-outline-success w-100" onclick="applyAutoSuggestedTariffs()">Aplicar sugeridas</button>
+                </div>
+            </div>
+            <div class="table-responsive mt-3">
+                <table class="table table-sm table-hover" id="pickupTable">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Pickup 1d</th>
+                            <th>Pickup 3d</th>
+                            <th>Pickup 7d</th>
+                            <th>Pickup 14d</th>
+                            <th>Classificação</th>
+                            <th>Tarifa base</th>
+                            <th>Tarifa sugerida</th>
+                            <th>Estratégia</th>
+                            <th>Pacote obrigatório</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white"><h5 class="mb-0">Configurações de Limites</h5></div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <h6>Alma</h6>
+                    <div class="input-group mb-2"><span class="input-group-text">Base</span><input id="rule_alma_base" class="form-control" type="number" step="0.01"></div>
+                    <div class="input-group mb-2"><span class="input-group-text">Min</span><input id="rule_alma_min" class="form-control" type="number" step="0.01"></div>
+                    <div class="input-group"><span class="input-group-text">Max</span><input id="rule_alma_max" class="form-control" type="number" step="0.01"></div>
+                </div>
+                <div class="col-md-4">
+                    <h6>Mar</h6>
+                    <div class="input-group mb-2"><span class="input-group-text">Base</span><input id="rule_mar_base" class="form-control" type="number" step="0.01"></div>
+                    <div class="input-group mb-2"><span class="input-group-text">Min</span><input id="rule_mar_min" class="form-control" type="number" step="0.01"></div>
+                    <div class="input-group"><span class="input-group-text">Max</span><input id="rule_mar_max" class="form-control" type="number" step="0.01"></div>
+                </div>
+                <div class="col-md-4">
+                    <h6>Areia</h6>
+                    <div class="input-group mb-2"><span class="input-group-text">Base</span><input id="rule_areia_base" class="form-control" type="number" step="0.01"></div>
+                    <div class="input-group mb-2"><span class="input-group-text">Min</span><input id="rule_areia_min" class="form-control" type="number" step="0.01"></div>
+                    <div class="input-group"><span class="input-group-text">Max</span><input id="rule_areia_max" class="form-control" type="number" step="0.01"></div>
+                </div>
+            </div>
+            <div class="mt-3">
+                <button class="btn btn-outline-primary" onclick="saveRules()">Salvar limites</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white"><h5 class="mb-0">Tarifa Base por Dia da Semana</h5></div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm align-middle" id="weekdayRatesTable">
+                    <thead>
+                        <tr>
+                            <th>Categoria</th>
+                            <th>Seg</th>
+                            <th>Ter</th>
+                            <th>Qua</th>
+                            <th>Qui</th>
+                            <th>Sex</th>
+                            <th>Sáb</th>
+                            <th>Dom</th>
+                            <th>Úteis</th>
+                            <th>Fim de semana</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr data-category="alma">
+                            <td>Alma</td>
+                            <td><input class="form-control form-control-sm wd-mon" type="number" step="0.01"></td>
+                            <td><input class="form-control form-control-sm wd-tue" type="number" step="0.01"></td>
+                            <td><input class="form-control form-control-sm wd-wed" type="number" step="0.01"></td>
+                            <td><input class="form-control form-control-sm wd-thu" type="number" step="0.01"></td>
+                            <td><input class="form-control form-control-sm wd-fri" type="number" step="0.01"></td>
+                            <td><input class="form-control form-control-sm wd-sat" type="number" step="0.01"></td>
+                            <td><input class="form-control form-control-sm wd-sun" type="number" step="0.01"></td>
+                            <td><input class="form-control form-control-sm wd-weekday" type="number" step="0.01"></td>
+                            <td><input class="form-control form-control-sm wd-weekend" type="number" step="0.01"></td>
+                        </tr>
+                        <tr data-category="mar">
+                            <td>Mar</td>
+                            <td><input class="form-control form-control-sm wd-mon" type="number" step="0.01"></td>
+                            <td><input class="form-control form-control-sm wd-tue" type="number" step="0.01"></td>
+                            <td><input class="form-control form-control-sm wd-wed" type="number" step="0.01"></td>
+                            <td><input class="form-control form-control-sm wd-thu" type="number" step="0.01"></td>
+                            <td><input class="form-control form-control-sm wd-fri" type="number" step="0.01"></td>
+                            <td><input class="form-control form-control-sm wd-sat" type="number" step="0.01"></td>
+                            <td><input class="form-control form-control-sm wd-sun" type="number" step="0.01"></td>
+                            <td><input class="form-control form-control-sm wd-weekday" type="number" step="0.01"></td>
+                            <td><input class="form-control form-control-sm wd-weekend" type="number" step="0.01"></td>
+                        </tr>
+                        <tr data-category="areia">
+                            <td>Areia</td>
+                            <td><input class="form-control form-control-sm wd-mon" type="number" step="0.01"></td>
+                            <td><input class="form-control form-control-sm wd-tue" type="number" step="0.01"></td>
+                            <td><input class="form-control form-control-sm wd-wed" type="number" step="0.01"></td>
+                            <td><input class="form-control form-control-sm wd-thu" type="number" step="0.01"></td>
+                            <td><input class="form-control form-control-sm wd-fri" type="number" step="0.01"></td>
+                            <td><input class="form-control form-control-sm wd-sat" type="number" step="0.01"></td>
+                            <td><input class="form-control form-control-sm wd-sun" type="number" step="0.01"></td>
+                            <td><input class="form-control form-control-sm wd-weekday" type="number" step="0.01"></td>
+                            <td><input class="form-control form-control-sm wd-weekend" type="number" step="0.01"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-2 d-flex gap-2">
+                <button class="btn btn-outline-primary" onclick="saveWeekdayBaseRates()">Salvar tarifas semanais</button>
+                <button class="btn btn-outline-secondary" onclick="loadWeekdayBaseRates()">Recarregar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white"><h5 class="mb-0">Calendário de Eventos Locais</h5></div>
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label">Nome do evento</label>
+                    <input id="evt_name" type="text" class="form-control" placeholder="Ex: Festival Gastronômico">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Cidade</label>
+                    <input id="evt_city" type="text" class="form-control" placeholder="Ex: Ilhéus">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Impacto esperado</label>
+                    <select id="evt_impact" class="form-select">
+                        <option value="baixo">Baixo</option>
+                        <option value="medio">Médio</option>
+                        <option value="alto">Alto</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Data inicial</label>
+                    <input id="evt_start" type="date" class="form-control">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Data final</label>
+                    <input id="evt_end" type="date" class="form-control">
+                </div>
+                <div class="col-md-1">
+                    <button class="btn btn-outline-primary w-100" onclick="saveRevenueEvent()">Salvar</button>
+                </div>
+            </div>
+            <div class="table-responsive mt-3">
+                <table class="table table-sm table-hover" id="eventsTable">
+                    <thead>
+                        <tr>
+                            <th>Evento</th>
+                            <th>Cidade</th>
+                            <th>Período</th>
+                            <th>Impacto</th>
+                            <th>Fator</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white"><h5 class="mb-0">Relatório de Alterações de Tarifa</h5></div>
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label">Data inicial</label>
+                    <input id="audit_start_date" type="date" class="form-control">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Data final</label>
+                    <input id="audit_end_date" type="date" class="form-control">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Usuário</label>
+                    <input id="audit_user" type="text" class="form-control" placeholder="Todos">
+                </div>
+                <div class="col-md-3">
+                    <button class="btn btn-outline-dark w-100" onclick="loadAuditReport()">Gerar relatório</button>
+                </div>
+            </div>
+            <div class="table-responsive mt-3">
+                <table class="table table-sm table-hover" id="auditTable">
+                    <thead>
+                        <tr>
+                            <th>Data/Hora</th>
+                            <th>Usuário</th>
+                            <th>Categoria</th>
+                            <th>Dia afetado</th>
+                            <th>Tarifa anterior</th>
+                            <th>Tarifa nova</th>
+                            <th>Origem</th>
+                            <th>Justificativa</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .rm-calendar-grid {
+        display: grid;
+        gap: 10px;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+    }
+    .rm-day-card {
+        border: 1px solid #d7dee5;
+        border-radius: .6rem;
+        padding: .6rem;
+        background: #f8fafc;
+        min-height: 170px;
+    }
+    .rm-day-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: .35rem;
+    }
+    .rm-day-date {
+        font-size: .85rem;
+        color: #3b4f63;
+        font-weight: 600;
+    }
+    .rm-kv {
+        font-size: .78rem;
+        color: #4a5968;
+        margin-bottom: .2rem;
+    }
+    .rm-alert-high {
+        border-color: #c97a7a;
+        background: #fff7f7;
+    }
+    .rm-alert-low {
+        border-color: #d4c28a;
+        background: #fffdf5;
+    }
+    .rm-tag {
+        font-size: .68rem;
+        border-radius: 999px;
+        padding: .12rem .45rem;
+        border: 1px solid #d7dee5;
+        background: #fff;
+    }
+    .rm-cat-alma { border-left: 3px solid #b58a63; }
+    .rm-cat-mar { border-left: 3px solid #6c98b8; }
+    .rm-cat-areia { border-left: 3px solid #b6a57b; }
+</style>
+
+<script src="{{ url_for('static', filename='js/revenue_period_selector.js') }}"></script>
+<script>
+let calendarRows = [];
+let currentStartDate = null;
+let currentEndDate = null;
+let autoDemandRows = [];
+
+function currency(v) {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0);
+}
+
+function todayISO() {
+    return new Date().toISOString().split('T')[0];
+}
+
+function formatDateLabel(isoDate) {
+    const d = new Date(isoDate + 'T00:00:00');
+    return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+}
+
+function toWeekdayCode(isoDate) {
+    const day = new Date(`${isoDate}T00:00:00`).getDay();
+    return ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][day];
+}
+
+function periodLength(startDate, endDate) {
+    const start = new Date(`${startDate}T00:00:00`);
+    const end = new Date(`${endDate}T00:00:00`);
+    const diffMs = end - start;
+    const raw = Number.isFinite(diffMs) ? Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1 : 1;
+    return Math.max(1, raw);
+}
+
+function applyViewPresetFromSelector() {
+    const viewMode = document.getElementById('rm_view_mode').value;
+    const rangeDays = viewMode === 'month' ? 35 : 7;
+    const period = RevenuePeriodSelector.getValue('rm_period_selector');
+    const anchor = period.start_date || todayISO();
+    const end = new Date(`${anchor}T00:00:00`);
+    end.setDate(end.getDate() + (rangeDays - 1));
+    RevenuePeriodSelector.setValue('rm_period_selector', {
+        start_date: anchor,
+        end_date: end.toISOString().split('T')[0],
+        weekdays: period.weekdays || []
+    });
+}
+
+function collectRulesPayload() {
+    return {
+        alma: {
+            base_bar: parseFloat(document.getElementById('rule_alma_base').value || '0'),
+            min_bar: parseFloat(document.getElementById('rule_alma_min').value || '0'),
+            max_bar: parseFloat(document.getElementById('rule_alma_max').value || '0')
+        },
+        mar: {
+            base_bar: parseFloat(document.getElementById('rule_mar_base').value || '0'),
+            min_bar: parseFloat(document.getElementById('rule_mar_min').value || '0'),
+            max_bar: parseFloat(document.getElementById('rule_mar_max').value || '0')
+        },
+        areia: {
+            base_bar: parseFloat(document.getElementById('rule_areia_base').value || '0'),
+            min_bar: parseFloat(document.getElementById('rule_areia_min').value || '0'),
+            max_bar: parseFloat(document.getElementById('rule_areia_max').value || '0')
+        }
+    };
+}
+
+function setRules(rules) {
+    document.getElementById('rule_alma_base').value = rules.alma.base_bar;
+    document.getElementById('rule_alma_min').value = rules.alma.min_bar;
+    document.getElementById('rule_alma_max').value = rules.alma.max_bar;
+    document.getElementById('rule_mar_base').value = rules.mar.base_bar;
+    document.getElementById('rule_mar_min').value = rules.mar.min_bar;
+    document.getElementById('rule_mar_max').value = rules.mar.max_bar;
+    document.getElementById('rule_areia_base').value = rules.areia.base_bar;
+    document.getElementById('rule_areia_min').value = rules.areia.min_bar;
+    document.getElementById('rule_areia_max').value = rules.areia.max_bar;
+}
+
+function loadRules() {
+    fetch('/api/reception/revenue-management/rules')
+        .then(r => r.json())
+        .then(data => setRules(data));
+}
+
+function saveRules() {
+    fetch('/api/reception/revenue-management/rules', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(collectRulesPayload())
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            setRules(data.rules);
+            alert('Limites salvos.');
+        }
+    });
+}
+
+function setWeekdayRates(rates) {
+    const rows = document.querySelectorAll('#weekdayRatesTable tbody tr[data-category]');
+    rows.forEach(row => {
+        const category = row.dataset.category;
+        const data = (rates && rates[category]) || {};
+        ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].forEach(key => {
+            const el = row.querySelector(`.wd-${key}`);
+            if (el) el.value = Number(data[key] || 0).toFixed(2);
+        });
+        const weekdayVal = Number(data.mon || 0).toFixed(2);
+        const weekendVal = Number(data.sat || 0).toFixed(2);
+        const weekdayInput = row.querySelector('.wd-weekday');
+        const weekendInput = row.querySelector('.wd-weekend');
+        if (weekdayInput) weekdayInput.value = weekdayVal;
+        if (weekendInput) weekendInput.value = weekendVal;
+    });
+}
+
+function collectWeekdayRatesPayload() {
+    const payload = {};
+    const rows = document.querySelectorAll('#weekdayRatesTable tbody tr[data-category]');
+    rows.forEach(row => {
+        const category = row.dataset.category;
+        const weekdayInput = row.querySelector('.wd-weekday');
+        const weekendInput = row.querySelector('.wd-weekend');
+        const weekdayRate = parseFloat((weekdayInput && weekdayInput.value) || '');
+        const weekendRate = parseFloat((weekendInput && weekendInput.value) || '');
+        payload[category] = {
+            mon: parseFloat(row.querySelector('.wd-mon').value || '0'),
+            tue: parseFloat(row.querySelector('.wd-tue').value || '0'),
+            wed: parseFloat(row.querySelector('.wd-wed').value || '0'),
+            thu: parseFloat(row.querySelector('.wd-thu').value || '0'),
+            fri: parseFloat(row.querySelector('.wd-fri').value || '0'),
+            sat: parseFloat(row.querySelector('.wd-sat').value || '0'),
+            sun: parseFloat(row.querySelector('.wd-sun').value || '0'),
+            weekday_rate: Number.isFinite(weekdayRate) ? weekdayRate : undefined,
+            weekend_rate: Number.isFinite(weekendRate) ? weekendRate : undefined
+        };
+    });
+    return payload;
+}
+
+function loadWeekdayBaseRates() {
+    fetch('/api/reception/revenue-management/weekday-base-rates')
+        .then(r => r.json())
+        .then(data => setWeekdayRates(data));
+}
+
+function saveWeekdayBaseRates() {
+    fetch('/api/reception/revenue-management/weekday-base-rates', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(collectWeekdayRatesPayload())
+    })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                setWeekdayRates(data.rates);
+                alert('Tarifas semanais salvas.');
+                simulateByView();
+            }
+        });
+}
+
+function simulateByView() {
+    const period = RevenuePeriodSelector.getValue('rm_period_selector');
+    let startDate = period.start_date || todayISO();
+    let endDate = period.end_date || startDate;
+    if (endDate < startDate) {
+        endDate = startDate;
+        RevenuePeriodSelector.setValue('rm_period_selector', { start_date: startDate, end_date: endDate, weekdays: period.weekdays || [] });
+    }
+    currentStartDate = startDate;
+    currentEndDate = endDate;
+    const mode = document.getElementById('rm_mode').value || 'advanced';
+    const days = Math.min(120, periodLength(startDate, endDate));
+    fetch(`/api/reception/revenue-management/simulate?start_date=${encodeURIComponent(startDate)}&days=${days}&mode=${encodeURIComponent(mode)}`)
+        .then(r => r.json())
+        .then(data => {
+            const category = document.getElementById('rm_category').value;
+            const weekdayFilter = new Set((period.weekdays || []).map(v => String(v || '').toLowerCase()));
+            calendarRows = (data.rows || []).filter(item => {
+                if (String(item.category) !== String(category)) return false;
+                const rowDate = String(item.date || '');
+                if (rowDate < startDate || rowDate > endDate) return false;
+                if (weekdayFilter.size > 0 && !weekdayFilter.has(toWeekdayCode(rowDate))) return false;
+                return true;
+            });
+            renderCalendar(calendarRows);
+        });
+}
+
+function simulateWeek() {
+    document.getElementById('rm_view_mode').value = 'week';
+    applyViewPresetFromSelector();
+    simulateByView();
+}
+
+function shiftPeriod(step) {
+    const startRef = currentStartDate || todayISO();
+    const endRef = currentEndDate || startRef;
+    const blockDays = periodLength(startRef, endRef);
+    const start = new Date(`${startRef}T00:00:00`);
+    const end = new Date(`${endRef}T00:00:00`);
+    start.setDate(start.getDate() + (blockDays * step));
+    end.setDate(end.getDate() + (blockDays * step));
+    RevenuePeriodSelector.setValue('rm_period_selector', {
+        start_date: start.toISOString().split('T')[0],
+        end_date: end.toISOString().split('T')[0],
+        weekdays: RevenuePeriodSelector.getValue('rm_period_selector').weekdays || []
+    });
+    simulateByView();
+}
+
+function renderCalendar(rows) {
+    const grid = document.getElementById('calendarGrid');
+    grid.innerHTML = '';
+    let highCount = 0;
+    let lowCount = 0;
+    rows.forEach((row, idx) => {
+        const div = document.createElement('div');
+        const catClass = `rm-cat-${row.category}`;
+        const alertClass = row.critical_alert === 'high' ? 'rm-alert-high' : (row.critical_alert === 'low' ? 'rm-alert-low' : '');
+        if (row.critical_alert === 'high') highCount += 1;
+        if (row.critical_alert === 'low') lowCount += 1;
+        div.className = `rm-day-card ${catClass} ${alertClass}`;
+        div.title = row.reason || '';
+        const suggestedTag = row.suggested_bar > row.current_bar ? '↑' : (row.suggested_bar < row.current_bar ? '↓' : '→');
+        div.innerHTML = `
+            <div class="rm-day-head">
+                <span class="rm-day-date">${formatDateLabel(row.date)}</span>
+                <input type="checkbox" class="rm-day-check" data-index="${idx}">
+            </div>
+            <div class="rm-kv"><strong>Tarifa atual:</strong> ${currency(row.current_bar)}</div>
+            <div class="rm-kv"><strong>Sugerida:</strong> ${currency(row.suggested_bar)} <span class="rm-tag">${suggestedTag}</span></div>
+            <div class="rm-kv"><strong>Ocupação:</strong> ${(row.projected_occupancy_pct || 0).toFixed(1)}%</div>
+            <div class="rm-kv"><strong>RevPAR:</strong> <small>${currency(row.projected_revpar)}</small></div>
+            <div class="rm-kv"><strong>Alvo:</strong> <small>${currency(row.target_revpar)}</small></div>
+            <div class="rm-kv"><strong>Impacto:</strong> <small>${currency(row.estimated_revpar_impact)}</small></div>
+        `;
+        grid.appendChild(div);
+    });
+    const start = currentStartDate || '-';
+    const end = currentEndDate || start;
+    document.getElementById('periodLabel').textContent = `${start} até ${end} | ${rows.length} dia(s)`;
+    const summary = [];
+    if (highCount > 0) summary.push(`${highCount} alta >90%`);
+    if (lowCount > 0) summary.push(`${lowCount} baixa <30%`);
+    document.getElementById('criticalSummary').textContent = summary.length ? `Críticos: ${summary.join(' | ')}` : 'Sem alertas críticos';
+    updateImpactCards(rows);
+}
+
+function updateImpactCards(rows) {
+    let totalAvailableRoomDays = 0;
+    let totalOccupiedBase = 0;
+    let totalRevenueCurrent = 0;
+    let totalRevenueSuggested = 0;
+    rows.forEach(row => {
+        const available = Number(row.available_rooms || 0);
+        const occupied = Number(row.occupied_rooms || 0);
+        const currentBar = Number(row.current_bar || 0);
+        const suggestedBar = Number(row.suggested_bar || 0);
+        totalAvailableRoomDays += available;
+        totalOccupiedBase += occupied;
+        totalRevenueCurrent += (currentBar * occupied);
+        totalRevenueSuggested += (suggestedBar * occupied);
+    });
+    const occBaseRate = totalAvailableRoomDays > 0 ? (totalOccupiedBase / totalAvailableRoomDays) : 0;
+    const revparBefore = totalAvailableRoomDays > 0 ? (totalRevenueCurrent / totalAvailableRoomDays) : 0;
+    const revparAfter = totalAvailableRoomDays > 0 ? (totalRevenueSuggested / totalAvailableRoomDays) : 0;
+
+    const occupiedOptimistic = Math.min(totalAvailableRoomDays, totalOccupiedBase * 1.10);
+    const occupiedPessimistic = Math.max(0, totalOccupiedBase * 0.90);
+    const revenueOptimistic = rows.reduce((acc, row) => {
+        const available = Number(row.available_rooms || 0);
+        const occupied = Number(row.occupied_rooms || 0);
+        const suggestedBar = Number(row.suggested_bar || 0);
+        const adjustedOcc = Math.min(available, occupied * 1.10);
+        return acc + (suggestedBar * adjustedOcc);
+    }, 0);
+    const revenuePessimistic = rows.reduce((acc, row) => {
+        const occupied = Number(row.occupied_rooms || 0);
+        const suggestedBar = Number(row.suggested_bar || 0);
+        const adjustedOcc = Math.max(0, occupied * 0.90);
+        return acc + (suggestedBar * adjustedOcc);
+    }, 0);
+    const occOptRate = totalAvailableRoomDays > 0 ? (occupiedOptimistic / totalAvailableRoomDays) : 0;
+    const occPessRate = totalAvailableRoomDays > 0 ? (occupiedPessimistic / totalAvailableRoomDays) : 0;
+    const revparOpt = totalAvailableRoomDays > 0 ? (revenueOptimistic / totalAvailableRoomDays) : 0;
+    const revparPess = totalAvailableRoomDays > 0 ? (revenuePessimistic / totalAvailableRoomDays) : 0;
+    const diff = totalRevenueSuggested - totalRevenueCurrent;
+
+    document.getElementById('impact_rev_current').textContent = currency(totalRevenueCurrent);
+    document.getElementById('impact_rev_suggested').textContent = currency(totalRevenueSuggested);
+    const diffEl = document.getElementById('impact_rev_diff');
+    diffEl.textContent = currency(diff);
+    diffEl.className = `fw-bold fs-5 ${diff >= 0 ? 'text-success' : 'text-danger'}`;
+    document.getElementById('impact_revpar_transition').textContent = `${currency(revparBefore)} → ${currency(revparAfter)}`;
+    document.getElementById('impact_occ_base').textContent = `${(occBaseRate * 100).toFixed(1)}%`;
+    document.getElementById('impact_opt').textContent = `Ocupação ${(occOptRate * 100).toFixed(1)}% | Receita ${currency(revenueOptimistic)} | RevPAR ${currency(revparOpt)}`;
+    document.getElementById('impact_pess').textContent = `Ocupação ${(occPessRate * 100).toFixed(1)}% | Receita ${currency(revenuePessimistic)} | RevPAR ${currency(revparPess)}`;
+}
+
+function runRevenueScenarioSimulator() {
+    const payload = {
+        expected_occupancy_pct: parseFloat(document.getElementById('sim_expected_occupancy').value || '0'),
+        average_rate_current: parseFloat(document.getElementById('sim_rate_current').value || '0'),
+        average_rate_suggested: parseFloat(document.getElementById('sim_rate_suggested').value || '0'),
+        average_stay_nights: parseInt(document.getElementById('sim_stay_nights').value || '1', 10),
+        horizon_days: parseInt(document.getElementById('sim_horizon_days').value || '30', 10)
+    };
+    fetch('/api/reception/revenue-management/simulator', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload)
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (!data.success) {
+            alert(data.error || 'Falha ao simular receita.');
+            return;
+        }
+        const out = (data.result || {}).outputs || {};
+        document.getElementById('sim_out_revenue_current').textContent = currency(out.estimated_total_revenue_current || 0);
+        document.getElementById('sim_out_revenue_suggested').textContent = currency(out.estimated_total_revenue_suggested || 0);
+        const diff = Number(out.estimated_revenue_diff || 0);
+        const pct = Number(out.estimated_revenue_diff_pct || 0);
+        const diffEl = document.getElementById('sim_out_revenue_diff');
+        diffEl.textContent = `${currency(diff)} (${pct.toFixed(2)}%)`;
+        diffEl.className = `fw-bold fs-6 ${diff >= 0 ? 'text-success' : 'text-danger'}`;
+        document.getElementById('sim_out_revpar').textContent = `${currency(out.estimated_revpar_current || 0)} → ${currency(out.estimated_revpar_suggested || 0)}`;
+    });
+}
+
+function formatRuleBadge(ruleObj, positiveLabel) {
+    if (!ruleObj || typeof ruleObj !== 'object') return '-';
+    if (String(ruleObj.result || '') === 'blocked') return 'Bloqueado';
+    if (String(ruleObj.applied || '') === 'true' || ruleObj.applied === true) return positiveLabel || 'Ativo';
+    return 'Passou';
+}
+
+function loadActiveRulesPanel() {
+    const period = RevenuePeriodSelector.getValue('rules_panel_period_selector');
+    const category = document.getElementById('rules_panel_category').value;
+    const channel = document.getElementById('rules_panel_channel').value;
+    const applyDynamic = document.getElementById('rules_panel_dynamic').value === '1' ? '1' : '0';
+    const params = new URLSearchParams({
+        category,
+        channel,
+        start_date: period.start_date || todayISO(),
+        end_date: period.end_date || period.start_date || todayISO(),
+        apply_dynamic: applyDynamic
+    });
+    fetch(`/api/reception/revenue-management/active-rules-panel?${params.toString()}`)
+        .then(r => r.json())
+        .then(data => {
+            const tbody = document.querySelector('#activeRulesTable tbody');
+            tbody.innerHTML = '';
+            (data.items || []).forEach(item => {
+                const rulesActive = Array.isArray(item.active_effects) ? item.active_effects.join(' | ') : '-';
+                const promo = ((item.promotion || {}).promotion || {}).name || (((item.promotion || {}).applied) ? 'Aplicada' : '-');
+                const pack = ((item.package || {}).package || {}).name || (((item.package || {}).applied) ? 'Aplicado' : '-');
+                const dynamicFactor = Number(((item.dynamic || {}).factor) || 1).toFixed(2);
+                const ctaRule = item.cta_ctd || {};
+                const ctaState = (ctaRule.details && ctaRule.details.restriction && ctaRule.details.restriction.restriction_type === 'cta' && ctaRule.result === 'blocked') ? 'Bloqueado' : 'Passou';
+                const ctdState = (ctaRule.details && ctaRule.details.restriction && ctaRule.details.restriction.restriction_type === 'ctd' && ctaRule.result === 'blocked') ? 'Bloqueado' : 'Passou';
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.date || '-'}</td>
+                    <td>${currency(item.tariff_base || 0)}</td>
+                    <td>${pack}</td>
+                    <td>${promo}</td>
+                    <td>${ctaState}</td>
+                    <td>${ctdState}</td>
+                    <td>${formatRuleBadge(item.blackout, 'Ativo')}</td>
+                    <td>${formatRuleBadge(item.stop_sell, 'Ativo')}</td>
+                    <td>x${dynamicFactor}</td>
+                    <td>${currency(item.final_total || 0)}</td>
+                    <td>${item.sellable ? 'Vendável' : `Bloqueado: ${item.message || '-'}`}</td>
+                    <td>${rulesActive}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        });
+}
+
+function loadOccupancyForecast() {
+    const period = RevenuePeriodSelector.getValue('forecast_period_selector');
+    const start = period.start_date || todayISO();
+    const end = period.end_date || start;
+    const days = Math.max(1, periodLength(start, end));
+    const category = document.getElementById('forecast_category').value;
+    const params = new URLSearchParams({
+        start_date: start,
+        days: String(days),
+        category
+    });
+    fetch(`/api/reception/revenue-management/occupancy-forecast?${params.toString()}`)
+        .then(r => r.json())
+        .then(data => {
+            const tbody = document.querySelector('#forecastTable tbody');
+            tbody.innerHTML = '';
+            const rows = data.rows || [];
+            rows.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.date || '-'}</td>
+                    <td>${Number(item.occupancy_current_pct || 0).toFixed(1)}%</td>
+                    <td>${Number(item.occupancy_projected_pct || 0).toFixed(1)}%</td>
+                    <td>${item.risk_low_occupancy ? 'Sim' : 'Não'}</td>
+                    <td>${item.risk_overbooking ? 'Sim' : 'Não'}</td>
+                    <td>${(item.event && item.event.name) ? item.event.name : '-'}</td>
+                    <td>${item.season || '-'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+            document.getElementById('forecastMeta').textContent = `Lead time médio: ${Number(data.lead_time_avg_days || 0).toFixed(1)} dia(s) | Cancelamento médio: ${(Number(data.cancel_rate_avg || 0) * 100).toFixed(1)}%`;
+        });
+}
+
+function loadPickupAndAutoAdjustment() {
+    const period = RevenuePeriodSelector.getValue('pickup_period_selector');
+    const start = period.start_date || todayISO();
+    const end = period.end_date || start;
+    const days = Math.max(1, periodLength(start, end));
+    const category = document.getElementById('pickup_category').value;
+    const revparTargetRaw = document.getElementById('pickup_revpar_target').value || '';
+    const params = new URLSearchParams({
+        start_date: start,
+        days: String(days),
+        category
+    });
+    if (revparTargetRaw) params.set('revpar_target', revparTargetRaw);
+    fetch(`/api/reception/revenue-management/auto-demand-adjustment?${params.toString()}`)
+        .then(r => r.json())
+        .then(data => {
+            autoDemandRows = data.rows || [];
+            const pickupIndex = {};
+            ((data.pickup || {}).rows || []).forEach(item => {
+                pickupIndex[item.date] = item;
+            });
+            const tbody = document.querySelector('#pickupTable tbody');
+            tbody.innerHTML = '';
+            autoDemandRows.forEach(item => {
+                const pickup = pickupIndex[item.date] || {};
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.date || '-'}</td>
+                    <td>${pickup.pickup_1d || 0}</td>
+                    <td>${pickup.pickup_3d || 0}</td>
+                    <td>${pickup.pickup_7d || 0}</td>
+                    <td>${pickup.pickup_14d || 0}</td>
+                    <td>${pickup.pickup_level || '-'}</td>
+                    <td>${currency(item.base_bar || 0)}</td>
+                    <td>${currency(item.suggested_bar || 0)}</td>
+                    <td>${item.strategy || '-'}</td>
+                    <td>${item.package_required ? 'Sim' : 'Não'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        });
+}
+
+function applyAutoSuggestedTariffs() {
+    if (!Array.isArray(autoDemandRows) || autoDemandRows.length === 0) {
+        alert('Nenhuma sugestão automática carregada.');
+        return;
+    }
+    const items = autoDemandRows.map(row => ({
+        date: row.date,
+        category: row.category,
+        before_bar: row.base_bar,
+        suggested_bar: row.suggested_bar,
+        reason: `Auto demanda | Ocupação ${Number(row.occupancy_projected_pct || 0).toFixed(1)}% | Pickup ${row.pickup_level || '-'}`,
+        target_revpar: row.revpar_target
+    }));
+    postApply(items, 'auto_demand');
+}
+
+function getSelectedRows() {
+    const checks = Array.from(document.querySelectorAll('.rm-day-check:checked'));
+    return checks.map(c => calendarRows[parseInt(c.dataset.index, 10)]).filter(Boolean);
+}
+
+function requireConfirmation(text) {
+    return window.confirm(text);
+}
+
+function postApply(items, origin) {
+    const justification = document.getElementById('rm_justification').value || '';
+    if (!justification || justification.trim().length < 5) {
+        alert('Informe justificativa com pelo menos 5 caracteres.');
+        return;
+    }
+    fetch('/api/reception/revenue-management/apply', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({items, justification, origin})
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            alert(`Alterações registradas: ${data.result.applied_count}`);
+            simulateByView();
+            loadAuditReport();
+        } else {
+            alert('Falha ao aplicar alterações.');
+        }
+    });
+}
+
+function applyAllSuggestions() {
+    if (calendarRows.length === 0) {
+        alert('Nenhum dia carregado.');
+        return;
+    }
+    if (!requireConfirmation(`Aplicar sugestões para ${calendarRows.length} dia(s)?`)) return;
+    const items = calendarRows.map(row => ({
+        date: row.date,
+        category: row.category,
+        before_bar: row.current_bar,
+        suggested_bar: row.suggested_bar,
+        reason: row.reason,
+        target_revpar: row.target_revpar,
+        estimated_revpar_after: row.estimated_revpar_after,
+        estimated_revpar_impact: row.estimated_revpar_impact
+    }));
+    postApply(items, 'suggestion');
+}
+
+function applySelectedSuggestions() {
+    const selected = getSelectedRows();
+    if (selected.length === 0) {
+        alert('Selecione ao menos um dia no calendário.');
+        return;
+    }
+    if (!requireConfirmation(`Aplicar sugestões para ${selected.length} dia(s) selecionado(s)?`)) return;
+    const items = selected.map(row => ({
+        date: row.date,
+        category: row.category,
+        before_bar: row.current_bar,
+        suggested_bar: row.suggested_bar,
+        reason: row.reason,
+        target_revpar: row.target_revpar,
+        estimated_revpar_after: row.estimated_revpar_after,
+        estimated_revpar_impact: row.estimated_revpar_impact
+    }));
+    postApply(items, 'suggestion');
+}
+
+function resetSelectedToDefault() {
+    const selected = getSelectedRows();
+    if (selected.length === 0) {
+        alert('Selecione ao menos um dia para voltar ao padrão.');
+        return;
+    }
+    const justification = document.getElementById('rm_justification').value || '';
+    if (!justification || justification.trim().length < 5) {
+        alert('Justificativa obrigatória para voltar ao padrão.');
+        return;
+    }
+    if (!requireConfirmation(`Voltar ao padrão para ${selected.length} dia(s)?`)) return;
+    fetch('/api/reception/revenue-management/reset-default', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({items: selected, justification})
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            alert(`Reset aplicado: ${data.result.applied_count}`);
+            simulateByView();
+            loadAuditReport();
+        } else {
+            alert('Falha ao voltar ao padrão.');
+        }
+    });
+}
+
+function loadAuditReport() {
+    const start = document.getElementById('audit_start_date').value || '';
+    const end = document.getElementById('audit_end_date').value || '';
+    const user = document.getElementById('audit_user').value || '';
+    const url = `/api/reception/revenue-management/audit-report?start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}&user=${encodeURIComponent(user)}`;
+    fetch(url)
+        .then(r => r.json())
+        .then(data => {
+            const tbody = document.querySelector('#auditTable tbody');
+            tbody.innerHTML = '';
+            (data.items || []).forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.applied_at || '-'}</td>
+                    <td>${item.user || '-'}</td>
+                    <td class="text-uppercase">${item.category || '-'}</td>
+                    <td>${item.date || '-'}</td>
+                    <td>${currency(item.before_bar)}</td>
+                    <td>${currency(item.after_bar)}</td>
+                    <td>${item.origin || '-'}</td>
+                    <td>${item.justification || '-'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        });
+}
+
+function saveRevenueEvent() {
+    const payload = {
+        name: document.getElementById('evt_name').value || '',
+        city: document.getElementById('evt_city').value || '',
+        impact: document.getElementById('evt_impact').value || 'baixo',
+        start_date: document.getElementById('evt_start').value || '',
+        end_date: document.getElementById('evt_end').value || ''
+    };
+    fetch('/api/reception/revenue-management/events', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload)
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            loadRevenueEvents();
+            simulateByView();
+        } else {
+            alert(data.error || 'Falha ao salvar evento.');
+        }
+    });
+}
+
+function deleteRevenueEvent(eventId) {
+    if (!window.confirm('Remover evento?')) return;
+    fetch('/api/reception/revenue-management/events', {
+        method: 'DELETE',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({id: eventId})
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            loadRevenueEvents();
+            simulateByView();
+        } else {
+            alert(data.error || 'Falha ao remover evento.');
+        }
+    });
+}
+
+function loadRevenueEvents() {
+    fetch('/api/reception/revenue-management/events')
+        .then(r => r.json())
+        .then(data => {
+            const tbody = document.querySelector('#eventsTable tbody');
+            tbody.innerHTML = '';
+            (data.items || []).forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.name || '-'}</td>
+                    <td>${item.city || '-'}</td>
+                    <td>${item.start_date || '-'} até ${item.end_date || '-'}</td>
+                    <td>${item.impact || '-'}</td>
+                    <td>${Number(item.factor || 1).toFixed(2)}</td>
+                    <td><button class="btn btn-sm btn-outline-danger" onclick="deleteRevenueEvent('${item.id || ''}')">Excluir</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const today = todayISO();
+    RevenuePeriodSelector.init('rm_period_selector', {
+        startDate: today,
+        endDate: today
+    });
+    RevenuePeriodSelector.init('rules_panel_period_selector', {
+        startDate: today,
+        endDate: today
+    });
+    RevenuePeriodSelector.init('forecast_period_selector', {
+        startDate: today,
+        endDate: today
+    });
+    RevenuePeriodSelector.init('pickup_period_selector', {
+        startDate: today,
+        endDate: today
+    });
+    applyViewPresetFromSelector();
+    document.getElementById('audit_start_date').value = today;
+    document.getElementById('audit_end_date').value = today;
+    document.getElementById('evt_start').value = today;
+    document.getElementById('evt_end').value = today;
+    document.getElementById('rm_view_mode').addEventListener('change', applyViewPresetFromSelector);
+    loadRules();
+    loadWeekdayBaseRates();
+    loadRevenueEvents();
+    simulateByView();
+    runRevenueScenarioSimulator();
+    loadActiveRulesPanel();
+    loadOccupancyForecast();
+    loadPickupAndAutoAdjustment();
+    loadAuditReport();
+});
+</script>
+{% endblock %}

@@ -471,7 +471,7 @@
                     </div>
                     <div class="small text-muted" id="summaryDateRef">Referência: {{ today_br }}</div>
                     <div class="progress mt-1" style="height: 6px;">
-                        <div class="progress-bar bg-info" id="summaryRateBar" role="progressbar" style="width: {{ occupancy_rate }}%;"></div>
+                        <div class="progress-bar bg-info" id="summaryRateBar" role="progressbar" style="width: 0%;"></div>
                     </div>
                 </div>
             </div>
@@ -526,9 +526,12 @@
                         {% elif 'Diamante' in group.category %} {% set cat_class = 'cat-master' %}
                         {% endif %}
                         
-                        <tr class="{{ cat_class }} category-row">
+                        <tr class="{{ cat_class }} category-row {{ 'table-warning' if group.closed_for_sale else '' }}">
                             <td colspan="{{ (days|length * 2) + 1 }}" class="fw-bold px-1 py-0 text-uppercase small text-muted" style="font-size: 0.7rem; background: inherit;">
                                 {{ group.category }}
+                                {% if group.closed_for_sale %}
+                                <span class="badge bg-warning text-dark ms-2">Fechado para venda (data inicial)</span>
+                                {% endif %}
                             </td>
                         </tr>
                         
@@ -3051,6 +3054,11 @@
                         </div>
                     </div>
                     <div class="row mb-3">
+                        <div class="col-md-12">
+                            <div id="nrPackagePricingHint" class="small text-muted border rounded p-2">Sem pacote aplicado para os dados atuais.</div>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Forma de Pagamento</label>
                             <select class="form-select" name="payment_method_id" id="nrPaymentMethod">
@@ -3130,6 +3138,52 @@
     //    modal.show();
     // }
     
+    function previewPromotionalPackage() {
+        var form = document.getElementById('newResForm');
+        if (!form) return;
+        var categoryEl = form.querySelector('[name="category"]');
+        var checkinEl = form.querySelector('[name="checkin"]');
+        var checkoutEl = form.querySelector('[name="checkout"]');
+        var amountEl = form.querySelector('[name="amount"]');
+        var hintEl = document.getElementById('nrPackagePricingHint');
+        if (!categoryEl || !checkinEl || !checkoutEl || !amountEl || !hintEl) return;
+        var category = categoryEl.value || '';
+        var checkin = checkinEl.value || '';
+        var checkout = checkoutEl.value || '';
+        var channelEl = form.querySelector('[name="channel"]');
+        var channel = (channelEl && channelEl.value) ? channelEl.value : 'Recepção';
+        if (!category || !checkin || !checkout) {
+            hintEl.textContent = 'Sem pacote aplicado para os dados atuais.';
+            return;
+        }
+        fetch(`/api/reception/tariff-engine/preview?category=${encodeURIComponent(category)}&channel=${encodeURIComponent(channel)}&checkin=${encodeURIComponent(checkin)}&checkout=${encodeURIComponent(checkout)}&apply_dynamic=false`)
+            .then(r => r.json())
+            .then(engine => {
+                if (!engine || engine.sellable === false) {
+                    hintEl.textContent = (engine && engine.message) ? engine.message : 'Período indisponível para venda.';
+                    return;
+                }
+                const pricing = engine.pricing || {};
+                const finalTotal = Number(pricing.final_total || amountEl.value || 0);
+                amountEl.value = finalTotal.toFixed(2);
+                const paidEl = form.querySelector('[name="paid_amount"]');
+                const toReceiveEl = form.querySelector('[name="to_receive"]');
+                const paid = parseFloat((paidEl && paidEl.value) || '0') || 0;
+                if (toReceiveEl) toReceiveEl.value = Math.max(0, (finalTotal - paid)).toFixed(2);
+                const packageData = pricing.package || {};
+                const promoData = pricing.promotion || {};
+                const parts = [];
+                if (packageData.applied && packageData.package) {
+                    parts.push(`Pacote: ${packageData.package.name}`);
+                }
+                if (promoData.applied && promoData.promotion) {
+                    parts.push(`Promoção: ${promoData.promotion.name} (P${promoData.promotion.priority})`);
+                }
+                parts.push(`Total final: ${finalTotal.toFixed(2)}`);
+                hintEl.textContent = parts.join(' | ');
+            });
+    }
+
     function submitNewReservation() {
         var form = document.getElementById('newResForm');
         var formData = new FormData(form);
@@ -3195,6 +3249,15 @@
             btn.innerHTML = 'Salvar Reserva';
         });
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var form = document.getElementById('newResForm');
+        if (!form) return;
+        ['category', 'checkin', 'checkout'].forEach(function(name){
+            var el = form.querySelector(`[name="${name}"]`);
+            if (el) el.addEventListener('change', previewPromotionalPackage);
+        });
+    });
     
     // --- Pre-Allocation ---
     function runPreAllocation() {
@@ -3339,6 +3402,7 @@
                 <div class="fw-bold">Dados da Reserva</div>
                 <div>
                     <button type="button" id="modalPayBtn" class="btn btn-sm btn-success me-2" onclick="openReservationPaymentModal(document.getElementById('guestResId').value, document.getElementById('modalGuestName').textContent, document.getElementById('modalCategory').textContent)"><i class="bi bi-currency-dollar"></i> Receber</button>
+                    <button type="button" class="btn btn-sm btn-outline-dark me-2" onclick="openFinancialTimelineFromModal()"><i class="bi bi-clock-history"></i> Timeline Financeira</button>
                     <button type="button" id="modalCheckinActionBtn" class="btn btn-sm btn-primary me-2" style="display:none;"><i class="bi bi-box-arrow-in-right"></i> Fazer Check-in</button>
                     <button type="button" id="resEditToggle" class="btn btn-sm btn-outline-secondary">Editar</button>
                     <button type="button" id="resSaveBtn" class="btn btn-sm btn-primary d-none">Salvar</button>
@@ -3563,6 +3627,9 @@
         <button type="button" class="btn btn-success" onclick="openReservationPaymentModal(document.getElementById('guestResId').value, document.getElementById('modalGuestName').textContent, document.getElementById('modalCategory').textContent)">
             <i class="bi bi-currency-dollar"></i> Receber
         </button>
+        <button type="button" class="btn btn-outline-dark" onclick="openFinancialTimelineFromModal()">
+            <i class="bi bi-clock-history"></i> Timeline Financeira
+        </button>
         <button type="button" class="btn btn-primary" onclick="saveGuestData()">Salvar Alterações</button>
         <button type="button" class="btn btn-outline-success" onclick="generatePreCheckinLink()">Gerar Pré-Check-in</button>
       </div>
@@ -3570,7 +3637,81 @@
   </div>
 </div>
 
+<div class="modal fade" id="financialTimelineModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Timeline Financeira da Reserva</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row mb-3">
+          <div class="col-md-4"><strong>Total Reserva:</strong> <span id="ftTotalReserva">R$ 0,00</span></div>
+          <div class="col-md-4"><strong>Total Pago:</strong> <span id="ftTotalPago">R$ 0,00</span></div>
+          <div class="col-md-4"><strong>Saldo Pendente:</strong> <span id="ftSaldoPendente">R$ 0,00</span></div>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-sm table-hover" id="financialTimelineTable">
+            <thead>
+              <tr>
+                <th>Data/Hora</th>
+                <th>Evento</th>
+                <th>Forma</th>
+                <th>Fiscal</th>
+                <th>Valor</th>
+                <th>Referência</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
+    function openFinancialTimelineFromModal() {
+        var reservationId = document.getElementById('guestResId').value;
+        if (!reservationId) {
+            alert('Reserva sem ID válido.');
+            return;
+        }
+        var money = function(value) {
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0);
+        };
+        fetch('/api/reception/reservations/' + encodeURIComponent(reservationId) + '/timeline')
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+                document.getElementById('ftTotalReserva').textContent = money(data.total_reserva || 0);
+                document.getElementById('ftTotalPago').textContent = money(data.total_pago || 0);
+                document.getElementById('ftSaldoPendente').textContent = money(data.saldo_pendente || 0);
+                var tbody = document.querySelector('#financialTimelineTable tbody');
+                tbody.innerHTML = '';
+                (data.timeline || []).forEach(function(item) {
+                    var tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${item.timestamp || '-'}</td>
+                        <td>${item.label || '-'}</td>
+                        <td>${item.payment_method || '-'}</td>
+                        <td><span class="badge ${item.is_fiscal ? 'bg-success' : 'bg-secondary'}">${item.is_fiscal ? 'Fiscal' : 'N/F'}</span></td>
+                        <td>${money(item.value || 0)}</td>
+                        <td><small>${item.reference || ''}</small></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+                var modal = new bootstrap.Modal(document.getElementById('financialTimelineModal'));
+                modal.show();
+            })
+            .catch(function() {
+                alert('Falha ao carregar timeline financeira.');
+            });
+    }
+
     function generatePreCheckinLink() {
         var resId = document.getElementById('guestResId').value;
         var guestName = document.getElementById('modalGuestName').textContent;
@@ -3711,7 +3852,9 @@
             <select id="nrCategory" class="form-select">
               <option value="">Selecione a categoria</option>
               {% for group in grouped_rooms %}
+                {% if not group.closed_for_sale %}
                 <option value="{{ group.category }}">{{ group.category }}</option>
+                {% endif %}
               {% endfor %}
             </select>
           </div>
@@ -4523,6 +4666,48 @@ async function openReservationPaymentModal(guestId, guestName, roomInfo) {
         // modal.hide();
     }
 }
+
+function refreshManualReservationCategories() {
+    const checkin = document.getElementById('nrCheckin') ? document.getElementById('nrCheckin').value : '';
+    const checkout = document.getElementById('nrCheckout') ? document.getElementById('nrCheckout').value : '';
+    const form = document.getElementById('newResForm');
+    const channelEl = form ? form.querySelector('[name="channel"]') : null;
+    const channel = (channelEl && channelEl.value) ? channelEl.value : 'Recepção';
+    const select = document.getElementById('nrCategory');
+    if (!select || !checkin || !checkout) return;
+    const current = select.value;
+    fetch(`/api/reception/available-categories?checkin=${encodeURIComponent(checkin)}&checkout=${encodeURIComponent(checkout)}&channel=${encodeURIComponent(channel)}`)
+        .then(res => res.json())
+        .then(data => {
+            const available = data.available_categories || [];
+            const options = Array.from(select.options);
+            options.forEach(option => {
+                if (!option.value) return;
+                option.disabled = !available.includes(option.value);
+                option.hidden = !available.includes(option.value);
+            });
+            if (current && available.includes(current)) {
+                select.value = current;
+            } else if (available.length > 0) {
+                select.value = available[0];
+            } else {
+                select.value = '';
+            }
+        });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const inEl = document.getElementById('nrCheckin');
+    const outEl = document.getElementById('nrCheckout');
+    const chEl = document.querySelector('#newResForm [name="channel"]');
+    if (inEl) inEl.addEventListener('change', refreshManualReservationCategories);
+    if (outEl) outEl.addEventListener('change', refreshManualReservationCategories);
+    if (chEl) chEl.addEventListener('change', refreshManualReservationCategories);
+    const modalEl = document.getElementById('newReservationModal');
+    if (modalEl) {
+        modalEl.addEventListener('shown.bs.modal', refreshManualReservationCategories);
+    }
+});
 
 async function submitReservationPayment() {
     const btn = document.getElementById('btnConfirmResPayment');

@@ -98,6 +98,111 @@
             </div>
         </div>
 
+        <div class="col">
+            <div class="card theme-card h-100 shadow-sm hover-card">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3 text-danger">
+                        <i class="bi bi-graph-up-arrow display-4"></i>
+                    </div>
+                    <h4 class="card-title">Revenue Management</h4>
+                    <p class="card-text text-muted">Simulação de ocupação, ADR, RevPAR e tarifação BAR por categoria.</p>
+                    <a href="{{ url_for('reception.reception_revenue_management') }}" class="btn btn-primary w-100 stretched-link">
+                        Abrir Revenue
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card theme-card h-100 shadow-sm hover-card">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3 text-warning">
+                        <i class="bi bi-slash-circle display-4"></i>
+                    </div>
+                    <h4 class="card-title">Restrições de Inventário</h4>
+                    <p class="card-text text-muted">Abrir e fechar categorias por dia, período e dias da semana.</p>
+                    <a href="{{ url_for('reception.reception_inventory_restrictions') }}" class="btn btn-primary w-100 stretched-link">
+                        Configurar Inventário
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card theme-card h-100 shadow-sm hover-card">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3 text-secondary">
+                        <i class="bi bi-calendar-x-fill display-4"></i>
+                    </div>
+                    <h4 class="card-title">Restrições CTA/CTD</h4>
+                    <p class="card-text text-muted">Bloqueie check-in (CTA) e check-out (CTD) por período e categoria.</p>
+                    <a href="{{ url_for('reception.reception_arrival_departure_restrictions') }}" class="btn btn-primary w-100 stretched-link">
+                        Configurar CTA/CTD
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card theme-card h-100 shadow-sm hover-card">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3 text-dark">
+                        <i class="bi bi-diagram-3-fill display-4"></i>
+                    </div>
+                    <h4 class="card-title">Canais, Blackout, Allotment e Proteção</h4>
+                    <p class="card-text text-muted">Feche canais, defina blackout, allotment e proteção mínima de quartos.</p>
+                    <a href="{{ url_for('reception.reception_channel_inventory_controls') }}" class="btn btn-primary w-100 stretched-link">
+                        Configurar Canais
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card theme-card h-100 shadow-sm hover-card">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3 text-primary">
+                        <i class="bi bi-gift-fill display-4"></i>
+                    </div>
+                    <h4 class="card-title">Pacotes Promocionais</h4>
+                    <p class="card-text text-muted">Criar pacotes com preço fixo, desconto percentual ou diária fixa.</p>
+                    <a href="{{ url_for('reception.reception_revenue_packages') }}" class="btn btn-primary w-100 stretched-link">
+                        Configurar Pacotes
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card theme-card h-100 shadow-sm hover-card">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3 text-danger">
+                        <i class="bi bi-moon-stars-fill display-4"></i>
+                    </div>
+                    <h4 class="card-title">Restrições de Estadia</h4>
+                    <p class="card-text text-muted">Defina mínimo e máximo de noites por categoria ou pacote.</p>
+                    <a href="{{ url_for('reception.reception_stay_restrictions') }}" class="btn btn-primary w-100 stretched-link">
+                        Configurar Restrições
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card theme-card h-100 shadow-sm hover-card">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3 text-success">
+                        <i class="bi bi-percent display-4"></i>
+                    </div>
+                    <h4 class="card-title">Promoções por Período</h4>
+                    <p class="card-text text-muted">Configure descontos por período, categoria e prioridade de aplicação.</p>
+                    <a href="{{ url_for('reception.reception_revenue_promotions') }}" class="btn btn-primary w-100 stretched-link">
+                        Configurar Promoções
+                    </a>
+                </div>
+            </div>
+        </div>
+
         <!-- Experiências de Hóspedes (Novo) -->
         <div class="col">
             <div class="card theme-card h-100 shadow-sm hover-card">

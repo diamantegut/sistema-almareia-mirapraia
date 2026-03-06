@@ -33,6 +33,17 @@ from app.services.fiscal_pool_service import FiscalPoolService
 from app.services import waiting_list_service
 from app.services.reservation_service import ReservationService
 from app.services import checklist_service
+from app.services.revenue_management_service import RevenueManagementService
+from app.services.finance_dashboard_service import FinanceDashboardService
+from app.services.inventory_restriction_service import InventoryRestrictionService
+from app.services.arrival_departure_restriction_service import ArrivalDepartureRestrictionService
+from app.services.channel_inventory_control_service import ChannelInventoryControlService
+from app.services.inventory_protection_service import InventoryProtectionService
+from app.services.promotional_package_service import PromotionalPackageService
+from app.services.stay_restriction_service import StayRestrictionService
+from app.services.revenue_promotion_service import RevenuePromotionService
+from app.services.weekday_base_rate_service import WeekdayBaseRateService
+from app.services.tariff_priority_engine_service import TariffPriorityEngineService
 from app.utils.validators import (
     validate_required, validate_phone, validate_cpf, validate_email, 
     sanitize_input, validate_date, validate_room_number
@@ -100,6 +111,786 @@ def reception_dashboard():
         flash('Acesso restrito.')
         return redirect(url_for('main.index'))
     return render_template('reception_dashboard.html')
+
+
+@reception_bp.route('/reception/revenue-management')
+@login_required
+def reception_revenue_management():
+    user_role = normalize_text(str(session.get('role') or ''))
+    user_perms = session.get('permissions') or []
+    if user_role not in ['admin', 'gerente', 'recepcao', 'supervisor'] and 'recepcao' not in [normalize_text(str(p)) for p in user_perms]:
+        flash('Acesso restrito.')
+        return redirect(url_for('main.index'))
+    return render_template('reception_revenue_management.html')
+
+
+@reception_bp.route('/api/reception/revenue-management/simulate')
+@login_required
+def api_reception_revenue_simulate():
+    start_date = request.args.get('start_date', datetime.now().strftime('%Y-%m-%d'))
+    days = request.args.get('days', 30, type=int)
+    mode = str(request.args.get('mode', 'basic')).strip().lower()
+    advanced_mode = mode == 'advanced'
+    payload = RevenueManagementService.simulate_projection(start_date=start_date, days=days, advanced_mode=advanced_mode)
+    LoggerService.log_acao(
+        acao='Simulação Revenue',
+        entidade='Revenue Management',
+        detalhes={'start_date': start_date, 'days': days, 'mode': mode},
+        nivel_severidade='INFO',
+        departamento_id='Recepção',
+        colaborador_id=session.get('user'),
+    )
+    return jsonify(payload)
+
+
+@reception_bp.route('/api/reception/revenue-management/rules', methods=['GET', 'POST'])
+@login_required
+def api_reception_revenue_rules():
+    if request.method == 'GET':
+        return jsonify(RevenueManagementService._load_rules())
+    payload = request.json or {}
+    rules = RevenueManagementService.save_rules(payload, user=session.get('user') or 'Sistema')
+    return jsonify({'success': True, 'rules': rules})
+
+
+@reception_bp.route('/api/reception/revenue-management/weekday-base-rates', methods=['GET', 'POST'])
+@login_required
+def api_reception_revenue_weekday_base_rates():
+    if request.method == 'GET':
+        return jsonify(WeekdayBaseRateService.get_rates())
+    payload = request.json or {}
+    saved = WeekdayBaseRateService.save_rates(payload, user=session.get('user') or 'Sistema')
+    return jsonify({'success': True, 'rates': saved})
+
+
+@reception_bp.route('/api/reception/revenue-management/advanced-config', methods=['GET', 'POST'])
+@login_required
+def api_reception_revenue_advanced_config():
+    if request.method == 'GET':
+        return jsonify(RevenueManagementService._load_advanced_config())
+    payload = request.json or {}
+    config = RevenueManagementService.save_advanced_config(payload, user=session.get('user') or 'Sistema')
+    return jsonify({'success': True, 'config': config})
+
+
+@reception_bp.route('/api/reception/revenue-management/events', methods=['GET', 'POST', 'DELETE'])
+@login_required
+def api_reception_revenue_events():
+    if request.method == 'GET':
+        start_date = request.args.get('start_date')
+        end_date = request.args.get('end_date')
+        city = request.args.get('city')
+        impact = request.args.get('impact')
+        rows = RevenueManagementService.list_events(start_date=start_date, end_date=end_date, city=city, impact=impact)
+        return jsonify({'items': rows, 'count': len(rows)})
+    if request.method == 'DELETE':
+        payload = request.json or {}
+        event_id = payload.get('id')
+        try:
+            result = RevenueManagementService.delete_event(event_id, user=session.get('user') or 'Sistema')
+            return jsonify({'success': True, 'result': result})
+        except ValueError as e:
+            return jsonify({'success': False, 'error': str(e)}), 400
+    payload = request.json or {}
+    try:
+        saved = RevenueManagementService.save_event(payload, user=session.get('user') or 'Sistema')
+        return jsonify({'success': True, 'event': saved})
+    except ValueError as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+
+@reception_bp.route('/api/reception/revenue-management/inventory-protection', methods=['GET', 'POST'])
+@login_required
+def api_reception_inventory_protection():
+    if request.method == 'GET':
+        rows = InventoryProtectionService.list_rules(
+            start_date=request.args.get('start_date'),
+            end_date=request.args.get('end_date'),
+            category=request.args.get('category'),
+        )
+        return jsonify({'items': rows, 'count': len(rows)})
+    payload = request.json or {}
+    try:
+        result = InventoryProtectionService.apply_rule(
+            category=payload.get('category'),
+            protected_rooms=payload.get('protected_rooms'),
+            start_date=payload.get('start_date'),
+            end_date=payload.get('end_date') or payload.get('start_date'),
+            status=payload.get('status'),
+            user=session.get('user') or 'Sistema',
+            origin='manual',
+        )
+        return jsonify({'success': True, 'result': result})
+    except ValueError as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+
+@reception_bp.route('/api/reception/revenue-management/inventory-protection/logs')
+@login_required
+def api_reception_inventory_protection_logs():
+    rows = InventoryProtectionService.list_logs(
+        start_date=request.args.get('start_date'),
+        end_date=request.args.get('end_date'),
+        category=request.args.get('category'),
+        user=request.args.get('user'),
+    )
+    return jsonify({'items': rows, 'count': len(rows)})
+
+
+@reception_bp.route('/api/reception/revenue-management/simulator', methods=['POST'])
+@login_required
+def api_reception_revenue_simulator():
+    payload = request.json or {}
+    try:
+        result = RevenueManagementService.revenue_scenario_simulator(
+            expected_occupancy_pct=float(payload.get('expected_occupancy_pct') or 0),
+            average_rate_current=float(payload.get('average_rate_current') or 0),
+            average_rate_suggested=float(payload.get('average_rate_suggested') or 0),
+            average_stay_nights=int(payload.get('average_stay_nights') or 1),
+            horizon_days=int(payload.get('horizon_days') or 30),
+        )
+        return jsonify({'success': True, 'result': result})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+
+@reception_bp.route('/api/reception/revenue-management/active-rules-panel')
+@login_required
+def api_reception_active_rules_panel():
+    category = request.args.get('category') or 'mar'
+    channel = request.args.get('channel') or 'Recepção'
+    start_date = request.args.get('start_date') or datetime.now().strftime('%Y-%m-%d')
+    end_date = request.args.get('end_date') or start_date
+    apply_dynamic = str(request.args.get('apply_dynamic') or 'true').lower() in ('1', 'true', 'yes')
+    try:
+        start = datetime.strptime(start_date, '%Y-%m-%d').date()
+        end = datetime.strptime(end_date, '%Y-%m-%d').date()
+    except ValueError:
+        return jsonify({'items': [], 'count': 0, 'error': 'Período inválido'}), 400
+    if end < start:
+        start, end = end, start
+    items = []
+    day = start
+    while day <= end:
+        checkin = day.isoformat()
+        checkout = (day + timedelta(days=1)).isoformat()
+        result = TariffPriorityEngineService.evaluate(
+            category=category,
+            channel=channel,
+            checkin=checkin,
+            checkout=checkout,
+            sale_date=datetime.now().strftime('%Y-%m-%d'),
+            apply_dynamic=apply_dynamic,
+        )
+        pricing = result.get('pricing') or {}
+        rules = result.get('rules_applied') or []
+        by_rule = {str(rule.get('rule')): rule for rule in rules if isinstance(rule, dict)}
+        active_effects = []
+        for rule in rules:
+            if not isinstance(rule, dict):
+                continue
+            name = str(rule.get('rule') or '')
+            if not name:
+                continue
+            if str(rule.get('result')) == 'blocked':
+                active_effects.append(name)
+                continue
+            details = rule.get('details')
+            if isinstance(details, dict) and details.get('applied'):
+                active_effects.append(name)
+            elif name in ('weekday_base_rate', 'dynamic_revenue'):
+                active_effects.append(name)
+        items.append({
+            'date': checkin,
+            'category': category,
+            'channel': channel,
+            'sellable': bool(result.get('sellable')),
+            'message': str(result.get('message') or ''),
+            'final_total': float(pricing.get('final_total') or 0),
+            'tariff_base': float(pricing.get('base_weekday_total') or 0),
+            'package': (pricing.get('package') or {}),
+            'promotion': (pricing.get('promotion') or {}),
+            'dynamic': (pricing.get('dynamic') or {}),
+            'cta_ctd': by_rule.get('cta_ctd'),
+            'blackout': by_rule.get('blackout'),
+            'stop_sell': by_rule.get('channel_closed'),
+            'inventory': by_rule.get('inventory_closed'),
+            'active_effects': active_effects,
+            'rules_applied': rules,
+        })
+        day = day + timedelta(days=1)
+    return jsonify({'items': items, 'count': len(items)})
+
+
+@reception_bp.route('/api/reception/revenue-management/occupancy-forecast')
+@login_required
+def api_reception_occupancy_forecast():
+    start_date = request.args.get('start_date', datetime.now().strftime('%Y-%m-%d'))
+    days = request.args.get('days', 30, type=int)
+    category = request.args.get('category')
+    payload = RevenueManagementService.occupancy_forecast(start_date=start_date, days=days, category=category)
+    return jsonify(payload)
+
+
+@reception_bp.route('/api/reception/revenue-management/pickup-analysis')
+@login_required
+def api_reception_pickup_analysis():
+    start_date = request.args.get('start_date', datetime.now().strftime('%Y-%m-%d'))
+    days = request.args.get('days', 30, type=int)
+    category = request.args.get('category')
+    payload = RevenueManagementService.pickup_analysis(start_date=start_date, days=days, category=category)
+    return jsonify(payload)
+
+
+@reception_bp.route('/api/reception/revenue-management/auto-demand-adjustment')
+@login_required
+def api_reception_auto_demand_adjustment():
+    start_date = request.args.get('start_date', datetime.now().strftime('%Y-%m-%d'))
+    days = request.args.get('days', 30, type=int)
+    category = request.args.get('category')
+    revpar_target = request.args.get('revpar_target', type=float)
+    payload = RevenueManagementService.auto_demand_tariff_adjustment(
+        start_date=start_date,
+        days=days,
+        category=category,
+        revpar_target=revpar_target,
+    )
+    return jsonify(payload)
+
+
+@reception_bp.route('/api/reception/revenue-management/apply', methods=['POST'])
+@login_required
+def api_reception_revenue_apply():
+    payload = request.json or {}
+    items = payload.get('items') or []
+    justification = str(payload.get('justification') or '').strip()
+    origin = str(payload.get('origin') or 'suggestion').strip().lower()
+    result = RevenueManagementService.apply_suggestions(
+        payload_rows=items,
+        justification=justification,
+        user=session.get('user') or 'Sistema',
+        origin=origin,
+    )
+    return jsonify({'success': True, 'result': result})
+
+
+@reception_bp.route('/api/reception/revenue-management/reset-default', methods=['POST'])
+@login_required
+def api_reception_revenue_reset_default():
+    payload = request.json or {}
+    items = payload.get('items') or []
+    justification = str(payload.get('justification') or '').strip()
+    result = RevenueManagementService.reset_to_default(
+        payload_rows=items,
+        justification=justification,
+        user=session.get('user') or 'Sistema',
+    )
+    return jsonify({'success': True, 'result': result})
+
+
+@reception_bp.route('/api/reception/revenue-management/audit-report')
+@login_required
+def api_reception_revenue_audit_report():
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    user_filter = request.args.get('user')
+    report = RevenueManagementService.get_audit_report(start_date, end_date, user_filter)
+    return jsonify({'items': report, 'count': len(report)})
+
+
+@reception_bp.route('/reception/revenue-packages')
+@login_required
+def reception_revenue_packages():
+    user_role = normalize_text(str(session.get('role') or ''))
+    user_perms = session.get('permissions') or []
+    if user_role not in ['admin', 'gerente', 'recepcao', 'supervisor'] and 'recepcao' not in [normalize_text(str(p)) for p in user_perms]:
+        flash('Acesso restrito.')
+        return redirect(url_for('main.index'))
+    categories = list(ReservationService().get_room_mapping().keys())
+    today_iso = datetime.now().strftime('%Y-%m-%d')
+    return render_template('reception_revenue_packages.html', categories=categories, today_iso=today_iso)
+
+
+@reception_bp.route('/api/reception/revenue-packages', methods=['GET', 'POST'])
+@login_required
+def api_reception_revenue_packages():
+    if request.method == 'GET':
+        status = request.args.get('status')
+        rows = PromotionalPackageService.list_packages(status=status)
+        return jsonify({'items': rows, 'count': len(rows)})
+    payload = request.json or {}
+    try:
+        created = PromotionalPackageService.create_package(payload=payload, user=session.get('user') or 'Sistema')
+        return jsonify({'success': True, 'item': created})
+    except ValueError as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+
+@reception_bp.route('/api/reception/revenue-packages/<package_id>', methods=['PUT', 'DELETE'])
+@login_required
+def api_reception_revenue_package_item(package_id):
+    try:
+        if request.method == 'DELETE':
+            result = PromotionalPackageService.delete_package(package_id=package_id, user=session.get('user') or 'Sistema')
+            return jsonify({'success': True, 'result': result})
+        payload = request.json or {}
+        updated = PromotionalPackageService.update_package(package_id=package_id, payload=payload, user=session.get('user') or 'Sistema')
+        return jsonify({'success': True, 'item': updated})
+    except ValueError as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+
+@reception_bp.route('/api/reception/revenue-packages/logs')
+@login_required
+def api_reception_revenue_packages_logs():
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    user = request.args.get('user')
+    rows = PromotionalPackageService.list_logs(start_date=start_date, end_date=end_date, user=user)
+    return jsonify({'items': rows, 'count': len(rows)})
+
+
+@reception_bp.route('/api/reception/revenue-packages/preview-price')
+@login_required
+def api_reception_revenue_packages_preview_price():
+    category = request.args.get('category')
+    checkin = request.args.get('checkin')
+    checkout = request.args.get('checkout')
+    base_total = request.args.get('base_total', type=float)
+    if not category or not checkin or not checkout:
+        return jsonify({'applied': False, 'normal_total': 0.0, 'final_total': 0.0, 'package': None, 'nights': 0})
+    preview = PromotionalPackageService.preview_price(
+        category=category,
+        checkin=checkin,
+        checkout=checkout,
+        sale_date=datetime.now().strftime('%Y-%m-%d'),
+        base_total=base_total,
+    )
+    return jsonify(preview)
+
+
+@reception_bp.route('/reception/stay-restrictions')
+@login_required
+def reception_stay_restrictions():
+    user_role = normalize_text(str(session.get('role') or ''))
+    user_perms = session.get('permissions') or []
+    if user_role not in ['admin', 'gerente', 'recepcao', 'supervisor'] and 'recepcao' not in [normalize_text(str(p)) for p in user_perms]:
+        flash('Acesso restrito.')
+        return redirect(url_for('main.index'))
+    categories = list(ReservationService().get_room_mapping().keys())
+    packages = PromotionalPackageService.list_packages()
+    today_iso = datetime.now().strftime('%Y-%m-%d')
+    return render_template('reception_stay_restrictions.html', categories=categories, packages=packages, today_iso=today_iso)
+
+
+@reception_bp.route('/api/reception/stay-restrictions', methods=['GET', 'POST'])
+@login_required
+def api_reception_stay_restrictions():
+    if request.method == 'GET':
+        status = request.args.get('status')
+        rows = StayRestrictionService.list_rules(status=status)
+        return jsonify({'items': rows, 'count': len(rows)})
+    payload = request.json or {}
+    try:
+        created = StayRestrictionService.create_rule(payload=payload, user=session.get('user') or 'Sistema')
+        return jsonify({'success': True, 'item': created})
+    except ValueError as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+
+@reception_bp.route('/api/reception/stay-restrictions/<rule_id>', methods=['PUT', 'DELETE'])
+@login_required
+def api_reception_stay_restriction_item(rule_id):
+    try:
+        if request.method == 'DELETE':
+            result = StayRestrictionService.delete_rule(rule_id=rule_id, user=session.get('user') or 'Sistema')
+            return jsonify({'success': True, 'result': result})
+        payload = request.json or {}
+        updated = StayRestrictionService.update_rule(rule_id=rule_id, payload=payload, user=session.get('user') or 'Sistema')
+        return jsonify({'success': True, 'item': updated})
+    except ValueError as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+
+@reception_bp.route('/api/reception/stay-restrictions/logs')
+@login_required
+def api_reception_stay_restrictions_logs():
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    user = request.args.get('user')
+    rows = StayRestrictionService.list_logs(start_date=start_date, end_date=end_date, user=user)
+    return jsonify({'items': rows, 'count': len(rows)})
+
+
+@reception_bp.route('/reception/revenue-promotions')
+@login_required
+def reception_revenue_promotions():
+    user_role = normalize_text(str(session.get('role') or ''))
+    user_perms = session.get('permissions') or []
+    if user_role not in ['admin', 'gerente', 'recepcao', 'supervisor'] and 'recepcao' not in [normalize_text(str(p)) for p in user_perms]:
+        flash('Acesso restrito.')
+        return redirect(url_for('main.index'))
+    categories = list(ReservationService().get_room_mapping().keys())
+    today_iso = datetime.now().strftime('%Y-%m-%d')
+    return render_template('reception_revenue_promotions.html', categories=categories, today_iso=today_iso)
+
+
+@reception_bp.route('/api/reception/revenue-promotions', methods=['GET', 'POST'])
+@login_required
+def api_reception_revenue_promotions():
+    if request.method == 'GET':
+        status = request.args.get('status')
+        rows = RevenuePromotionService.list_promotions(status=status)
+        return jsonify({'items': rows, 'count': len(rows)})
+    payload = request.json or {}
+    try:
+        created = RevenuePromotionService.create_promotion(payload=payload, user=session.get('user') or 'Sistema')
+        return jsonify({'success': True, 'item': created})
+    except ValueError as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+
+@reception_bp.route('/api/reception/revenue-promotions/<promotion_id>', methods=['PUT', 'DELETE'])
+@login_required
+def api_reception_revenue_promotion_item(promotion_id):
+    try:
+        if request.method == 'DELETE':
+            result = RevenuePromotionService.delete_promotion(promotion_id=promotion_id, user=session.get('user') or 'Sistema')
+            return jsonify({'success': True, 'result': result})
+        payload = request.json or {}
+        updated = RevenuePromotionService.update_promotion(promotion_id=promotion_id, payload=payload, user=session.get('user') or 'Sistema')
+        return jsonify({'success': True, 'item': updated})
+    except ValueError as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+
+@reception_bp.route('/api/reception/revenue-promotions/logs')
+@login_required
+def api_reception_revenue_promotions_logs():
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    user = request.args.get('user')
+    rows = RevenuePromotionService.list_logs(start_date=start_date, end_date=end_date, user=user)
+    return jsonify({'items': rows, 'count': len(rows)})
+
+
+@reception_bp.route('/api/reception/revenue-promotions/preview-price')
+@login_required
+def api_reception_revenue_promotions_preview_price():
+    category = request.args.get('category')
+    checkin = request.args.get('checkin')
+    checkout = request.args.get('checkout')
+    base_total = request.args.get('base_total', type=float)
+    package_applied = str(request.args.get('package_applied') or '').lower() in ('1', 'true', 'yes')
+    if not category or not checkin or not checkout:
+        return jsonify({'applied': False, 'base_total': 0.0, 'final_total': 0.0, 'promotion': None})
+    preview = RevenuePromotionService.preview_price(
+        category=category,
+        checkin=checkin,
+        checkout=checkout,
+        base_total=base_total or 0.0,
+        package_applied=package_applied,
+    )
+    return jsonify(preview)
+
+
+@reception_bp.route('/api/reception/tariff-engine/preview')
+@login_required
+def api_reception_tariff_engine_preview():
+    category = request.args.get('category')
+    channel = request.args.get('channel') or 'Recepção'
+    checkin = request.args.get('checkin')
+    checkout = request.args.get('checkout')
+    apply_dynamic = str(request.args.get('apply_dynamic') or 'false').lower() in ('1', 'true', 'yes')
+    if not category or not checkin or not checkout:
+        return jsonify({'sellable': False, 'message': 'Dados insuficientes para cálculo.'}), 400
+    result = TariffPriorityEngineService.evaluate(
+        category=category,
+        channel=channel,
+        checkin=checkin,
+        checkout=checkout,
+        sale_date=datetime.now().strftime('%Y-%m-%d'),
+        apply_dynamic=apply_dynamic,
+    )
+    return jsonify(result)
+
+
+@reception_bp.route('/api/reception/reservations/<reservation_id>/timeline')
+@login_required
+def api_reception_reservation_timeline(reservation_id):
+    user_role = normalize_text(str(session.get('role') or ''))
+    user_perms = session.get('permissions') or []
+    has_reception_permission = 'recepcao' in [normalize_text(str(p)) for p in user_perms]
+    if user_role not in ['admin', 'gerente', 'recepcao', 'supervisor'] and not has_reception_permission:
+        return jsonify({'error': 'Acesso negado'}), 403
+
+    return jsonify(FinanceDashboardService.get_reservation_timeline(reservation_id))
+
+
+@reception_bp.route('/reception/inventory-restrictions')
+@login_required
+def reception_inventory_restrictions():
+    user_role = normalize_text(str(session.get('role') or ''))
+    user_perms = session.get('permissions') or []
+    has_reception_permission = 'recepcao' in [normalize_text(str(p)) for p in user_perms]
+    if user_role not in ['admin', 'gerente', 'recepcao', 'supervisor'] and not has_reception_permission:
+        flash('Acesso restrito.')
+        return redirect(url_for('main.index'))
+    categories = list(ReservationService().get_room_mapping().keys())
+    today_iso = datetime.now().strftime('%Y-%m-%d')
+    return render_template('reception_inventory_restrictions.html', categories=categories, today_iso=today_iso)
+
+
+@reception_bp.route('/api/reception/inventory-restrictions', methods=['GET', 'POST'])
+@login_required
+def api_reception_inventory_restrictions():
+    if request.method == 'GET':
+        start_date = request.args.get('start_date')
+        end_date = request.args.get('end_date')
+        category = request.args.get('category')
+        rows = InventoryRestrictionService.list_restrictions(start_date=start_date, end_date=end_date, category=category)
+        return jsonify({'items': rows, 'count': len(rows)})
+    payload = request.json or {}
+    try:
+        result = InventoryRestrictionService.apply_restriction(
+            category=payload.get('category'),
+            start_date=payload.get('start_date'),
+            end_date=payload.get('end_date') or payload.get('start_date'),
+            status=payload.get('status'),
+            user=session.get('user') or 'Sistema',
+            reason=str(payload.get('reason') or '').strip(),
+            weekdays=payload.get('weekdays') or [],
+            origin='manual',
+        )
+        return jsonify({'success': True, 'result': result})
+    except ValueError as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+
+@reception_bp.route('/api/reception/inventory-restrictions/logs')
+@login_required
+def api_reception_inventory_restrictions_logs():
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    category = request.args.get('category')
+    user = request.args.get('user')
+    rows = InventoryRestrictionService.list_logs(start_date=start_date, end_date=end_date, user=user, category=category)
+    return jsonify({'items': rows, 'count': len(rows)})
+
+
+@reception_bp.route('/reception/arrival-departure-restrictions')
+@login_required
+def reception_arrival_departure_restrictions():
+    user_role = normalize_text(str(session.get('role') or ''))
+    user_perms = session.get('permissions') or []
+    has_reception_permission = 'recepcao' in [normalize_text(str(p)) for p in user_perms]
+    if user_role not in ['admin', 'gerente', 'recepcao', 'supervisor'] and not has_reception_permission:
+        flash('Acesso restrito.')
+        return redirect(url_for('main.index'))
+    categories = list(ReservationService().get_room_mapping().keys())
+    today_iso = datetime.now().strftime('%Y-%m-%d')
+    return render_template('reception_arrival_departure_restrictions.html', categories=categories, today_iso=today_iso)
+
+
+@reception_bp.route('/api/reception/arrival-departure-restrictions', methods=['GET', 'POST'])
+@login_required
+def api_reception_arrival_departure_restrictions():
+    if request.method == 'GET':
+        start_date = request.args.get('start_date')
+        end_date = request.args.get('end_date')
+        category = request.args.get('category')
+        restriction_type = request.args.get('restriction_type')
+        status = request.args.get('status')
+        rows = ArrivalDepartureRestrictionService.list_restrictions(
+            start_date=start_date,
+            end_date=end_date,
+            category=category,
+            restriction_type=restriction_type,
+            status=status,
+        )
+        return jsonify({'items': rows, 'count': len(rows)})
+    payload = request.json or {}
+    try:
+        result = ArrivalDepartureRestrictionService.apply_restriction(
+            restriction_type=payload.get('restriction_type'),
+            category=payload.get('category'),
+            start_date=payload.get('start_date'),
+            end_date=payload.get('end_date') or payload.get('start_date'),
+            status=payload.get('status'),
+            user=session.get('user') or 'Sistema',
+            reason=str(payload.get('reason') or '').strip(),
+            weekdays=payload.get('weekdays') or [],
+            origin='manual',
+        )
+        return jsonify({'success': True, 'result': result})
+    except ValueError as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+
+@reception_bp.route('/api/reception/arrival-departure-restrictions/logs')
+@login_required
+def api_reception_arrival_departure_restrictions_logs():
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    category = request.args.get('category')
+    restriction_type = request.args.get('restriction_type')
+    user = request.args.get('user')
+    rows = ArrivalDepartureRestrictionService.list_logs(
+        start_date=start_date,
+        end_date=end_date,
+        user=user,
+        category=category,
+        restriction_type=restriction_type,
+    )
+    return jsonify({'items': rows, 'count': len(rows)})
+
+
+@reception_bp.route('/reception/channel-inventory-controls')
+@login_required
+def reception_channel_inventory_controls():
+    user_role = normalize_text(str(session.get('role') or ''))
+    user_perms = session.get('permissions') or []
+    has_reception_permission = 'recepcao' in [normalize_text(str(p)) for p in user_perms]
+    if user_role not in ['admin', 'gerente', 'recepcao', 'supervisor'] and not has_reception_permission:
+        flash('Acesso restrito.')
+        return redirect(url_for('main.index'))
+    categories = list(ReservationService().get_room_mapping().keys())
+    channels = ['Booking.com', 'Expedia', 'Motor de Reservas', 'Recepção', 'Telefone', 'WhatsApp', 'Airbnb']
+    today_iso = datetime.now().strftime('%Y-%m-%d')
+    return render_template('reception_channel_inventory_controls.html', categories=categories, channels=channels, today_iso=today_iso)
+
+
+@reception_bp.route('/api/reception/channel-restrictions', methods=['GET', 'POST'])
+@login_required
+def api_reception_channel_restrictions():
+    if request.method == 'GET':
+        rows = ChannelInventoryControlService.list_channel_restrictions(
+            start_date=request.args.get('start_date'),
+            end_date=request.args.get('end_date'),
+            category=request.args.get('category'),
+            channel=request.args.get('channel'),
+        )
+        return jsonify({'items': rows, 'count': len(rows)})
+    payload = request.json or {}
+    try:
+        result = ChannelInventoryControlService.apply_channel_restriction(
+            category=payload.get('category'),
+            channel=payload.get('channel'),
+            start_date=payload.get('start_date'),
+            end_date=payload.get('end_date') or payload.get('start_date'),
+            status=payload.get('status'),
+            user=session.get('user') or 'Sistema',
+            weekdays=payload.get('weekdays') or [],
+            origin='manual',
+        )
+        return jsonify({'success': True, 'result': result})
+    except ValueError as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+
+@reception_bp.route('/api/reception/channel-restrictions/logs')
+@login_required
+def api_reception_channel_restrictions_logs():
+    rows = ChannelInventoryControlService.list_channel_logs(
+        start_date=request.args.get('start_date'),
+        end_date=request.args.get('end_date'),
+        user=request.args.get('user'),
+        category=request.args.get('category'),
+        channel=request.args.get('channel'),
+    )
+    return jsonify({'items': rows, 'count': len(rows)})
+
+
+@reception_bp.route('/api/reception/blackout-dates', methods=['GET', 'POST'])
+@login_required
+def api_reception_blackout_dates():
+    if request.method == 'GET':
+        rows = ChannelInventoryControlService.list_blackouts(
+            start_date=request.args.get('start_date'),
+            end_date=request.args.get('end_date'),
+            category=request.args.get('category'),
+        )
+        return jsonify({'items': rows, 'count': len(rows)})
+    payload = request.json or {}
+    try:
+        result = ChannelInventoryControlService.apply_blackout(
+            category=payload.get('category'),
+            start_date=payload.get('start_date'),
+            end_date=payload.get('end_date') or payload.get('start_date'),
+            status=payload.get('status'),
+            reason=str(payload.get('reason') or '').strip(),
+            user=session.get('user') or 'Sistema',
+            origin='manual',
+        )
+        return jsonify({'success': True, 'result': result})
+    except ValueError as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+
+@reception_bp.route('/api/reception/blackout-dates/logs')
+@login_required
+def api_reception_blackout_dates_logs():
+    rows = ChannelInventoryControlService.list_blackout_logs(
+        start_date=request.args.get('start_date'),
+        end_date=request.args.get('end_date'),
+        user=request.args.get('user'),
+        category=request.args.get('category'),
+    )
+    return jsonify({'items': rows, 'count': len(rows)})
+
+
+@reception_bp.route('/api/reception/channel-allotments', methods=['GET', 'POST'])
+@login_required
+def api_reception_channel_allotments():
+    if request.method == 'GET':
+        rows = ChannelInventoryControlService.list_allotments(
+            start_date=request.args.get('start_date'),
+            end_date=request.args.get('end_date'),
+            category=request.args.get('category'),
+            channel=request.args.get('channel'),
+        )
+        return jsonify({'items': rows, 'count': len(rows)})
+    payload = request.json or {}
+    try:
+        result = ChannelInventoryControlService.apply_allotment(
+            category=payload.get('category'),
+            channel=payload.get('channel'),
+            rooms=payload.get('rooms'),
+            start_date=payload.get('start_date'),
+            end_date=payload.get('end_date') or payload.get('start_date'),
+            user=session.get('user') or 'Sistema',
+            weekdays=payload.get('weekdays') or [],
+            origin='manual',
+        )
+        return jsonify({'success': True, 'result': result})
+    except ValueError as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+
+@reception_bp.route('/api/reception/channel-allotments/logs')
+@login_required
+def api_reception_channel_allotments_logs():
+    rows = ChannelInventoryControlService.list_allotment_logs(
+        start_date=request.args.get('start_date'),
+        end_date=request.args.get('end_date'),
+        user=request.args.get('user'),
+        category=request.args.get('category'),
+        channel=request.args.get('channel'),
+    )
+    return jsonify({'items': rows, 'count': len(rows)})
+
+
+@reception_bp.route('/api/reception/available-categories')
+@login_required
+def api_reception_available_categories():
+    checkin = request.args.get('checkin')
+    checkout = request.args.get('checkout')
+    channel = request.args.get('channel') or 'Recepção'
+    if not checkin or not checkout:
+        return jsonify({'available_categories': []})
+    service = ReservationService()
+    categories = service.available_categories_for_period(checkin, checkout, channel=channel)
+    return jsonify({'available_categories': categories, 'count': len(categories)})
 
 @reception_bp.route('/reception/rooms', methods=['GET', 'POST'])
 @login_required
@@ -477,6 +1268,20 @@ def reception_rooms():
                 charge['status'] = 'cancelled'
                 charge['cancelled_at'] = datetime.now().strftime('%d/%m/%Y %H:%M')
                 charge['cancelled_by'] = session.get('user')
+                
+                # --- FINANCIAL AUDIT LOG ---
+                try:
+                    from app.services.financial_audit_service import FinancialAuditService
+                    FinancialAuditService.log_event(
+                        user=session.get("user"),
+                        action=FinancialAuditService.EVENT_CANCEL,
+                        entity=f"Room Charge {charge_id}",
+                        old_data={'status': old_status},
+                        new_data={'status': 'cancelled'},
+                        details={'reason': reason, 'charge_total': charge.get('total')}
+                    )
+                except Exception as e:
+                    current_app.logger.error(f"Failed to log cancel charge audit: {e}")
                 charge['cancellation_reason'] = reason
                 
                 save_room_charges(room_charges)
@@ -1509,6 +2314,43 @@ def api_create_manual_reservation():
         if cin < today:
             return jsonify({'success': False, 'error': 'Check-in não pode ser anterior a hoje.'}), 400
         
+        tariff_engine = None
+        if data.get('category') and data.get('checkin') and data.get('checkout'):
+            try:
+                tariff_engine = TariffPriorityEngineService.evaluate(
+                    category=data.get('category'),
+                    channel=data.get('channel') or 'Recepção',
+                    checkin=data.get('checkin'),
+                    checkout=data.get('checkout'),
+                    sale_date=datetime.now().strftime('%Y-%m-%d'),
+                    apply_dynamic=False,
+                )
+            except Exception:
+                tariff_engine = None
+            if tariff_engine and not tariff_engine.get('sellable'):
+                return jsonify({'success': False, 'error': tariff_engine.get('message') or 'Período indisponível para venda.'}), 200
+            if tariff_engine and tariff_engine.get('pricing'):
+                final_total = float((tariff_engine.get('pricing') or {}).get('final_total') or 0.0)
+                if final_total > 0:
+                    data['amount'] = f"{final_total:.2f}"
+                    data['total_value'] = data['amount']
+                package_preview = ((tariff_engine.get('pricing') or {}).get('package') or {})
+                promotion_preview = ((tariff_engine.get('pricing') or {}).get('promotion') or {})
+                if package_preview.get('applied'):
+                    data['pricing_package_id'] = (package_preview.get('package') or {}).get('id')
+                    data['pricing_package_name'] = (package_preview.get('package') or {}).get('name')
+                if promotion_preview.get('applied'):
+                    data['pricing_promotion_id'] = (promotion_preview.get('promotion') or {}).get('id')
+                    data['pricing_promotion_name'] = (promotion_preview.get('promotion') or {}).get('name')
+                if package_preview.get('applied') and promotion_preview.get('applied'):
+                    data['pricing_source'] = 'package+promotion'
+                elif package_preview.get('applied'):
+                    data['pricing_source'] = 'package'
+                elif promotion_preview.get('applied'):
+                    data['pricing_source'] = 'promotion'
+                else:
+                    data['pricing_source'] = 'weekday_base'
+
         # Payment Validation
         try:
             paid_amount = float(data.get('paid_amount', 0))
@@ -1517,7 +2359,7 @@ def api_create_manual_reservation():
             
         print(f"DEBUG: api_create_manual_reservation paid_amount={paid_amount}")
             
-        total_value = float(data.get('total_value', 0))
+        total_value = parse_br_currency(data.get('total_value', data.get('amount', 0)))
         payment_method_id = data.get('payment_method')
         
         if paid_amount > 0:
@@ -1544,8 +2386,22 @@ def api_create_manual_reservation():
         else:
             req_category = (data.get('category') or '').strip()
             if req_category:
-                if not service.has_availability_for_category(req_category, data.get('checkin'), data.get('checkout')):
-                    alts = service.available_categories_for_period(data.get('checkin'), data.get('checkout'), exclude_category=req_category)
+                if tariff_engine and not tariff_engine.get('sellable'):
+                    return jsonify({'success': False, 'error': tariff_engine.get('message') or 'Período indisponível para venda.'}), 200
+                if not InventoryRestrictionService.is_open_for_period(req_category, data.get('checkin'), data.get('checkout')):
+                    return jsonify({'success': False, 'error': f'Categoria "{req_category}" fechada para venda no período informado.'}), 200
+                if not service.has_availability_for_category(
+                    req_category,
+                    data.get('checkin'),
+                    data.get('checkout'),
+                    channel=data.get('channel') or 'Recepção',
+                ):
+                    alts = service.available_categories_for_period(
+                        data.get('checkin'),
+                        data.get('checkout'),
+                        exclude_category=req_category,
+                        channel=data.get('channel') or 'Recepção',
+                    )
                     if alts:
                         bullet = "\n".join([f" - {c}" for c in alts])
                         msg = f'Indisponível na categoria "{req_category}" para o período {data.get("checkin")}–{data.get("checkout")}. Disponível nas categorias:\n{bullet}'
@@ -1610,7 +2466,11 @@ def api_create_manual_reservation():
             except ValueError as e:
                  return jsonify({'success': False, 'error': f"Reserva criada, mas falha na alocação: {str(e)}"}), 400
         
-        return jsonify({'success': True, 'reservation': new_res})
+        return jsonify({
+            'success': True,
+            'reservation': new_res,
+            'pricing': tariff_engine,
+        })
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
@@ -1682,9 +2542,15 @@ def reception_reservations():
         curr += timedelta(days=1)
         
     mapping = service.get_room_mapping()
+    reference_day = start_date.strftime('%Y-%m-%d')
+    closed_categories_reference = InventoryRestrictionService.closed_categories_for_day(reference_day)
     grouped_rooms = []
     for cat, rooms in mapping.items():
-        grouped_rooms.append({'category': cat, 'rooms': rooms})
+        grouped_rooms.append({
+            'category': cat,
+            'rooms': rooms,
+            'closed_for_sale': cat in closed_categories_reference
+        })
 
     occupied_room_numbers = set()
     for room_key, room_data in (occupancy or {}).items():
@@ -1706,6 +2572,7 @@ def reception_reservations():
                           occupied_room_numbers=sorted(occupied_room_numbers),
                           today_iso=today_date.strftime('%Y-%m-%d'),
                           today_br=today_date.strftime('%d/%m/%Y'),
+                          closed_categories_reference=closed_categories_reference,
                           year=start_date.year,
                           month=start_date.month)
 
@@ -2834,6 +3701,20 @@ def reception_edit_charge():
         charge['service_fee'] = service_fee
 
     if changes:
+        # --- FINANCIAL AUDIT LOG ---
+        try:
+            from app.services.financial_audit_service import FinancialAuditService
+            FinancialAuditService.log_event(
+                user=session.get("user"),
+                action='EDICAO_CONTA',
+                entity=f"Room Charge {charge_id}",
+                old_data={'total': current_total, 'status': old_status},
+                new_data={'total': grand_total, 'status': new_status},
+                details={'changes': changes, 'justification': justification}
+            )
+        except Exception as e:
+            current_app.logger.error(f"Failed to log edit charge audit: {e}")
+
         audit_entry = {
             'timestamp': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
             'user': session.get('user'),

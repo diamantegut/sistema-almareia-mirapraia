@@ -1,0 +1,252 @@
+{% extends "base.html" %}
+
+{% block title %}Restrições de Estadia{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="mb-0">Restrições de Estadia</h3>
+        <a class="btn btn-outline-secondary" href="{{ url_for('reception.reception_dashboard') }}">Voltar</a>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white"><h5 class="mb-0">Nova Regra</h5></div>
+        <div class="card-body">
+            <input type="hidden" id="stay_rule_id">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Nome da regra</label>
+                    <input id="stay_name" class="form-control" placeholder="Ex.: Ano Novo mínimo 7 noites">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Mínimo de noites</label>
+                    <input id="stay_min_nights" type="number" class="form-control" min="1" value="1">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Máximo de noites</label>
+                    <input id="stay_max_nights" type="number" class="form-control" min="1" placeholder="Opcional">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Status</label>
+                    <select id="stay_status" class="form-select">
+                        <option value="active">Ativo</option>
+                        <option value="inactive">Inativo</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row g-3 mt-1">
+                <div class="col-md-6">
+                    <label class="form-label">Categorias afetadas</label>
+                    <div class="d-flex flex-wrap gap-3 border rounded p-2">
+                        {% for category in categories %}
+                        <div class="form-check">
+                            <input class="form-check-input stay-category" type="checkbox" value="{{ category }}" id="stay_cat_{{ loop.index }}">
+                            <label class="form-check-label" for="stay_cat_{{ loop.index }}">{{ category }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Pacotes afetados (opcional)</label>
+                    <div class="d-flex flex-wrap gap-3 border rounded p-2">
+                        {% for package in packages %}
+                        <div class="form-check">
+                            <input class="form-check-input stay-package" type="checkbox" value="{{ package.id }}" id="stay_pkg_{{ loop.index }}">
+                            <label class="form-check-label" for="stay_pkg_{{ loop.index }}">{{ package.name }}</label>
+                        </div>
+                        {% else %}
+                        <span class="text-muted small">Nenhum pacote cadastrado.</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="row g-3 mt-1">
+                <div class="col-md-8">
+                    {% set period_selector_id = 'stay_period_selector' %}
+                    {% set period_selector_label = 'Período e dias da semana aplicáveis' %}
+                    {% set period_selector_start = today_iso %}
+                    {% set period_selector_end = today_iso %}
+                    {% include 'components/revenue_period_selector.html' %}
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button class="btn btn-primary w-100" onclick="saveStayRule()">Salvar regra</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white"><h5 class="mb-0">Regras Cadastradas</h5></div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover" id="stayRulesTable">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Status</th>
+                            <th>Categorias</th>
+                            <th>Mín</th>
+                            <th>Máx</th>
+                            <th>Período</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-white"><h5 class="mb-0">Auditoria</h5></div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover" id="stayLogsTable">
+                    <thead>
+                        <tr>
+                            <th>Data/Hora</th>
+                            <th>Usuário</th>
+                            <th>Ação</th>
+                            <th>Regra</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/revenue_period_selector.js') }}"></script>
+<script>
+let stayRulesCache = [];
+
+function stayCategoriesSelected() {
+    return Array.from(document.querySelectorAll('.stay-category:checked')).map(el => el.value);
+}
+
+function stayPackagesSelected() {
+    return Array.from(document.querySelectorAll('.stay-package:checked')).map(el => el.value);
+}
+
+function resetStayForm() {
+    document.getElementById('stay_rule_id').value = '';
+    document.getElementById('stay_name').value = '';
+    document.getElementById('stay_min_nights').value = '1';
+    document.getElementById('stay_max_nights').value = '';
+    document.getElementById('stay_status').value = 'active';
+    document.querySelectorAll('.stay-category,.stay-package').forEach(el => { el.checked = false; });
+}
+
+function collectStayPayload() {
+    return {
+        name: document.getElementById('stay_name').value || '',
+        categories: stayCategoriesSelected(),
+        package_ids: stayPackagesSelected(),
+        min_nights: parseInt(document.getElementById('stay_min_nights').value || '1', 10),
+        max_nights: document.getElementById('stay_max_nights').value || '',
+        status: document.getElementById('stay_status').value || 'active',
+        period: RevenuePeriodSelector.getValue('stay_period_selector')
+    };
+}
+
+function saveStayRule() {
+    const id = document.getElementById('stay_rule_id').value || '';
+    const method = id ? 'PUT' : 'POST';
+    const url = id ? `/api/reception/stay-restrictions/${encodeURIComponent(id)}` : '/api/reception/stay-restrictions';
+    fetch(url, {method, headers: {'Content-Type': 'application/json'}, body: JSON.stringify(collectStayPayload())})
+        .then(r => r.json())
+        .then(data => {
+            if (!data.success) {
+                alert(data.error || 'Falha ao salvar regra.');
+                return;
+            }
+            alert('Regra salva com sucesso.');
+            resetStayForm();
+            loadStayRules();
+            loadStayLogs();
+        });
+}
+
+function editStayRule(ruleId) {
+    const item = stayRulesCache.find(row => String(row.id) === String(ruleId));
+    if (!item) return;
+    document.getElementById('stay_rule_id').value = item.id || '';
+    document.getElementById('stay_name').value = item.name || '';
+    document.getElementById('stay_min_nights').value = item.min_nights || 1;
+    document.getElementById('stay_max_nights').value = item.max_nights || '';
+    document.getElementById('stay_status').value = item.status || 'active';
+    const cats = new Set((item.categories || []).map(v => String(v || '').toLowerCase()));
+    const pkgs = new Set((item.package_ids || []).map(v => String(v || '')));
+    document.querySelectorAll('.stay-category').forEach(el => { el.checked = cats.has(String(el.value || '').toLowerCase()); });
+    document.querySelectorAll('.stay-package').forEach(el => { el.checked = pkgs.has(String(el.value || '')); });
+    RevenuePeriodSelector.setValue('stay_period_selector', item.period || {});
+}
+
+function deleteStayRule(ruleId) {
+    if (!confirm('Deseja remover esta regra?')) return;
+    fetch(`/api/reception/stay-restrictions/${encodeURIComponent(ruleId)}`, {method: 'DELETE'})
+        .then(r => r.json())
+        .then(data => {
+            if (!data.success) {
+                alert(data.error || 'Falha ao remover regra.');
+                return;
+            }
+            loadStayRules();
+            loadStayLogs();
+        });
+}
+
+function loadStayRules() {
+    fetch('/api/reception/stay-restrictions')
+        .then(r => r.json())
+        .then(data => {
+            stayRulesCache = data.items || [];
+            const tbody = document.querySelector('#stayRulesTable tbody');
+            tbody.innerHTML = '';
+            stayRulesCache.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.name || '-'}</td>
+                    <td>${item.status === 'active' ? 'Ativo' : 'Inativo'}</td>
+                    <td>${(item.categories || []).join(', ') || '-'}</td>
+                    <td>${item.min_nights || '-'}</td>
+                    <td>${item.max_nights || '-'}</td>
+                    <td>${(item.period || {}).start_date || '-'} até ${(item.period || {}).end_date || '-'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary me-1" onclick="editStayRule('${item.id}')">Editar</button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteStayRule('${item.id}')">Remover</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        });
+}
+
+function loadStayLogs() {
+    fetch('/api/reception/stay-restrictions/logs')
+        .then(r => r.json())
+        .then(data => {
+            const tbody = document.querySelector('#stayLogsTable tbody');
+            tbody.innerHTML = '';
+            (data.items || []).forEach(item => {
+                const name = (item.after && item.after.name) || (item.before && item.before.name) || '-';
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.timestamp || '-'}</td>
+                    <td>${item.user || '-'}</td>
+                    <td>${item.action || '-'}</td>
+                    <td>${name}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    RevenuePeriodSelector.init('stay_period_selector', {startDate: '{{ today_iso }}', endDate: '{{ today_iso }}'});
+    loadStayRules();
+    loadStayLogs();
+});
+</script>
+{% endblock %}

@@ -14,6 +14,75 @@
         </div>
     </div>
 
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="bi bi-person-exclamation"></i> Operadores de Risco</h5>
+                </div>
+                <div class="card-body">
+                    {% if high_risk_operators %}
+                    <ul class="list-group list-group-flush">
+                        {% for op in high_risk_operators %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ op.user }}
+                            <span class="badge bg-danger rounded-pill">Score: {{ op.score }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-success text-center my-3"><i class="bi bi-check-circle"></i> Nenhum operador de alto risco.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="bi bi-cash-coin"></i> Diferenças de Caixa</h5>
+                </div>
+                <div class="card-body">
+                    {% if cashier_diffs %}
+                    <ul class="list-group list-group-flush">
+                        {% for diff in cashier_diffs %}
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <strong>{{ diff.box }}</strong>
+                                <span class="text-danger">R$ {{ "%.2f"|format(diff.difference) }}</span>
+                            </div>
+                            <small class="text-muted">{{ diff.user }} em {{ diff.closed_at }}</small>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-success text-center my-3"><i class="bi bi-check-circle"></i> Caixas recentes sem divergências.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="bi bi-activity"></i> Eventos Críticos Hoje</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Cancelamentos:</span>
+                        <span class="fw-bold">{{ recent_cancellations|length }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Estornos:</span>
+                        <span class="fw-bold">{{ recent_reversals|length }}</span>
+                    </div>
+                    <hr>
+                    <a href="{{ url_for('admin.view_logs') }}" class="btn btn-sm btn-outline-secondary w-100">Ver Logs Completos</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="card shadow-sm">
         <div class="card-header bg-white py-3">
             <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Alertas de Segurança</h5>

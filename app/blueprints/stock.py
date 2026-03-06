@@ -28,7 +28,8 @@ from app.services.system_config_manager import (
 )
 from app.services.logger_service import LoggerService, log_system_action
 from app.services.fiscal_service import (
-    load_fiscal_settings, list_received_nfes, consult_nfe_sefaz, sync_received_nfes
+    load_fiscal_settings, list_received_nfes, consult_nfe_sefaz, sync_received_nfes,
+    recover_missing_notes
 )
 from app.services.import_sales import process_sales_files
 
@@ -1088,6 +1089,93 @@ def parse_stock_xml_content():
         return jsonify(data)
     except Exception as e:
         return jsonify({'error': f'Erro ao processar conteúdo XML: {str(e)}'}), 500
+
+@stock_bp.route('/recover-nfe-dfe', methods=['GET'])
+@login_required
+def recover_nfe_dfe_route():
+    try:
+        start_nsu = request.args.get('start')
+        end_nsu = request.args.get('end')
+        single_nsu = request.args.get('nsu')
+        
+        if single_nsu:
+            start_nsu = single_nsu
+            end_nsu = single_nsu
+        
+        if not start_nsu or not end_nsu:
+            return jsonify({'error': 'Parâmetros start e end (ou nsu) são obrigatórios.'}), 400
+            
+        settings = load_fiscal_settings()
+        
+        # Select best integration
+        integrations = settings.get('integrations', [])
+        if not integrations and settings.get('provider'): # Legacy fallback
+            integrations = [settings]
+            
+        target_integration = None
+        for integ in integrations:
+            if integ.get('provider') == 'sefaz_direto':
+                target_integration = integ
+                break
+                    
+        if not target_integration:
+             return jsonify({'error': 'Nenhuma integração SEFAZ Direto configurada.'}), 400
+             
+        documents, error = recover_missing_notes(start_nsu, end_nsu, target_integration)
+        
+        if error:
+            return jsonify({'error': error, 'recovered_count': len(documents)}), 200
+            
+        # Salvar XMLs recuperados para persistência
+        from app.services.system_config_manager import get_data_path
+        base_storage_path = get_data_path(os.path.join('fiscal', 'xmls'))
+        
+        if not os.path.exists(base_storage_path):
+            try:
+                os.makedirs(base_storage_path)
+            except:
+                pass
+                
+        saved_count = 0
+        for doc in documents:
+            key = doc.get('access_key') or doc.get('chave')
+            xml_content = doc.get('xml_content')
+            if key and xml_content:
+                try:
+                    # Organize by Year/Month based on emission date
+                    date_str = doc.get('created_at') or doc.get('issued_at') or datetime.now().isoformat()
+                    try:
+                        dt = datetime.fromisoformat(date_str)
+                        year_month = dt.strftime('%Y-%m')
+                    except:
+                        year_month = datetime.now().strftime('%Y-%m')
+                        
+                    folder_path = os.path.join(base_storage_path, year_month)
+                    if not os.path.exists(folder_path):
+                        os.makedirs(folder_path)
+                        
+                    file_path = os.path.join(folder_path, f"{key}.xml")
+                    
+                    # Ensure xml_content is bytes
+                    if isinstance(xml_content, str):
+                        xml_content = xml_content.encode('utf-8')
+                        
+                    with open(file_path, 'wb') as f:
+                        f.write(xml_content)
+                    saved_count += 1
+                except Exception as e:
+                    print(f"Error saving XML for {key}: {e}")
+
+        return jsonify({
+            'success': True, 
+            'recovered_count': len(documents),
+            'saved_count': saved_count,
+            'documents': documents, # Return documents so frontend can use them immediately
+            'message': f'{len(documents)} notas recuperadas com sucesso no intervalo {start_nsu}-{end_nsu}.'
+        })
+        
+    except Exception as e:
+        return jsonify({'error': f'Erro interno: {str(e)}'}), 500
 
 @stock_bp.route('/list-nfe-dfe', methods=['GET'])
 def list_nfe_dfe_route():

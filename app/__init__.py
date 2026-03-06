@@ -56,6 +56,8 @@ def create_app(config_name=None):
     app.register_blueprint(assets_bp)
     from app.blueprints.guest_portal import guest_portal_bp
     app.register_blueprint(guest_portal_bp)
+    from app.blueprints.financial_audit import financial_audit_bp
+    app.register_blueprint(financial_audit_bp)
     from app.services.logger_service import LoggerService
     LoggerService.init_app(app)
     

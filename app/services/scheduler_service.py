@@ -11,6 +11,7 @@ from app.services.system_config_manager import (
 )
 from app.services.stock_security_service import StockSecurityService
 from app.services.menu_security_service import MenuSecurityService
+from app.services.financial_risk_service import FinancialRiskService
 STATUS_FILE = SYSTEM_STATUS_FILE
 # SETTINGS_FILE already imported
 
@@ -26,6 +27,18 @@ def load_status():
 def save_status(status):
     with open(STATUS_FILE, 'w', encoding='utf-8') as f:
         json.dump(status, f, indent=4, ensure_ascii=False)
+
+def run_risk_scan():
+    """
+    Executa a verificação periódica de riscos financeiros.
+    """
+    print(f"[{datetime.now()}] Iniciando verificação de riscos financeiros...")
+    try:
+        FinancialRiskService.analyze_audit_log() # Placeholder para scan profundo
+        FinancialRiskService.perform_periodic_scan()
+        print(f"[{datetime.now()}] Verificação de riscos finalizada.")
+    except Exception as e:
+        print(f"[{datetime.now()}] Erro na verificação de riscos: {e}")
 
 def get_sync_status():
     status = load_status()
@@ -186,6 +199,9 @@ def start_scheduler():
     # scheduler.add_job(create_backup, 'interval', hours=12)
     # scheduler.add_job(backup_table_orders_only, 'interval', minutes=10)
     # scheduler.add_job(backup_reception_data, 'interval', minutes=30)
+    
+    # Financial Risk Scan (Every 15 minutes)
+    scheduler.add_job(run_risk_scan, 'interval', minutes=15)
 
     # Also run NFe sync and Cleaning Update immediately on startup (threaded to not block)
     import threading

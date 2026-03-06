@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Configuração de SLA - KDS{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-stopwatch"></i> Configuração de SLA por Categoria (KDS)</h2>
+        <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <p class="text-muted mb-4">
+                Defina o tempo máximo de preparo (em minutos) para cada categoria. 
+                Pedidos que excederem este tempo serão destacados como ATRASADOS no KDS.
+            </p>
+
+            <form method="POST">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Categoria</th>
+                                <th style="width: 150px;">SLA (minutos)</th>
+                                <th>Exemplo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in sla_list %}
+                            <tr>
+                                <td>
+                                    <input type="hidden" name="sla_category[]" value="{{ item.category }}">
+                                    <strong>{{ item.category }}</strong>
+                                </td>
+                                <td>
+                                    <input type="number" name="sla_minutes[]" class="form-control" value="{{ item.minutes }}" min="1" required>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ item.minutes }} min</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-end mt-3">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Salvar Configurações
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -182,6 +182,36 @@ class SefazService:
         
         return self._enviar_soap_distribuicao(envelope, url)
 
+    def consultar_nsu(self, nsu, cnpj, ambiente=1):
+        """
+        Consulta um NSU específico (consNSU).
+        """
+        cnpj = ''.join(filter(str.isdigit, str(cnpj)))
+        nsu = str(nsu).zfill(15)
+        
+        url = "https://www1.nfe.fazenda.gov.br/NFeDistribuicaoDFe/NFeDistribuicaoDFe.asmx"
+        if int(ambiente) == 2:
+            url = "https://hom1.nfe.fazenda.gov.br/NFeDistribuicaoDFe/NFeDistribuicaoDFe.asmx"
+        
+        xml_body = (
+            '<distDFeInt xmlns="http://www.portalfiscal.inf.br/nfe" versao="1.01">'
+            f'<tpAmb>{ambiente}</tpAmb>'
+            '<cUFAutor>26</cUFAutor>'
+            f'<CNPJ>{cnpj}</CNPJ>'
+            '<consNSU>'
+            f'<NSU>{nsu}</NSU>'
+            '</consNSU>'
+            '</distDFeInt>'
+        )
+
+        envelope = self._build_soap_envelope(
+            xml_body, 
+            None, 
+            None
+        )
+        
+        return self._enviar_soap_distribuicao(envelope, url)
+
     def _enviar_soap_distribuicao(self, envelope, url=None):
         if url is None:
             url = URL_DISTRIBUICAO # Fallback

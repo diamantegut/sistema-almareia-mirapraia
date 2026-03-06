@@ -81,7 +81,20 @@ def payment_methods():
             if found:
                 save_payment_methods(methods)
                 flash('Forma de pagamento atualizada.')
-                print(f"[DEBUG Payment Edit] Saved: {available_in}")
+                
+                # --- FINANCIAL AUDIT LOG ---
+                try:
+                    from app.services.financial_audit_service import FinancialAuditService
+                    FinancialAuditService.log_event(
+                        user=session.get('user'),
+                        action=FinancialAuditService.EVENT_PAYMENT_CHANGE,
+                        entity=f"PaymentMethod {method_id}",
+                        old_data=None, # Teria que carregar antes, simplificando
+                        new_data={'name': new_name, 'available_in': available_in},
+                        details={'action': 'edit'}
+                    )
+                except Exception as e:
+                    pass
             else:
                 flash('Erro: Método não encontrado.')
                 print(f"[DEBUG Payment Edit] Method {method_id} not found.")

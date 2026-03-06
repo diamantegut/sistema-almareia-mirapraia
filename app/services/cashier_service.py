@@ -695,9 +695,70 @@ class CashierService:
             
             sessions[session_idx]['transactions'].append(transaction)
             CashierService._save_sessions(sessions)
+
+            # --- LEDGER INTEGRATION ---
+            try:
+                from app.services.ledger_service import LedgerService
+                
+                # Determine Source/Dest based on amount sign
+                # Use mapped name or raw type
+                box_name = CashierService.TYPES.get(cashier_type, cashier_type)
+                
+                # Default direction
+                if parsed_amount >= 0:
+                    src = "EXTERNO"
+                    dst = box_name
+                    # Try to extract more info
+                    if details and details.get('source'):
+                         src = str(details.get('source'))
+                    elif 'Mesa' in description:
+                         src = description
+                else:
+                    src = box_name
+                    dst = "EXTERNO"
+                    if details and details.get('destination'):
+                         dst = str(details.get('destination'))
+
+                LedgerService.record_transaction(
+                    user=user,
+                    source_box=src,
+                    dest_box=dst,
+                    operation_type=tx_type,
+                    value=abs(parsed_amount),
+                    payment_method=payment_method or "N/A",
+                    reference=f"{description} (Ref: {transaction['id']})"
+                )
+            except Exception as e:
+                logger.error(f"CRITICAL: Failed to record transaction in Immutable Ledger: {e}")
             
             # Trigger Backup
             CashierService._perform_backup(sessions)
+
+            # --- FINANCIAL AUDIT LOG ---
+            try:
+                from app.services.financial_audit_service import FinancialAuditService
+                
+                audit_action = None
+                if tx_type in ['out', 'withdrawal', 'sangria']:
+                    audit_action = FinancialAuditService.EVENT_BLEEDING
+                elif tx_type in ['supply', 'suprimento']:
+                    audit_action = FinancialAuditService.EVENT_SUPPLY
+                elif tx_type == 'refund' or (parsed_amount < 0 and 'refund' in str(description).lower()):
+                    audit_action = FinancialAuditService.EVENT_REVERSAL
+                elif 'cancel' in str(description).lower():
+                    audit_action = FinancialAuditService.EVENT_CANCEL
+                
+                if audit_action:
+                    FinancialAuditService.log_event(
+                        user=user,
+                        action=audit_action,
+                        entity=f"Transaction {transaction['id']}",
+                        old_data=None, # New transaction
+                        new_data=transaction,
+                        details={'session_id': session.get('id')}
+                    )
+            except Exception as e:
+                logger.error(f"Failed to log financial audit: {e}")
             
             return transaction
 
@@ -953,9 +1014,10 @@ class CashierService:
             # Filter by Type
             if cashier_type:
                 match = False
-                if cashier_type == 'guest_consumption' and s['type'] in ['guest_consumption', 'reception_room_billing']:
+                s_type = s.get('type')
+                if cashier_type == 'guest_consumption' and s_type in ['guest_consumption', 'reception_room_billing']:
                     match = True
-                elif s['type'] == cashier_type:
+                elif s_type == cashier_type:
                     match = True
                 
                 if not match:
@@ -1166,6 +1228,39 @@ class CashierService:
 
             CashierService._save_sessions(sessions)
             CashierService._perform_backup(sessions)
+            
+            # --- LEDGER INTEGRATION ---
+            try:
+                from app.services.ledger_service import LedgerService
+                LedgerService.record_transaction(
+                    user=user,
+                    source_box=CashierService.TYPES.get(source_type, source_type),
+                    dest_box=CashierService.TYPES.get(target_type, target_type),
+                    operation_type='TRANSFERENCIA',
+                    value=float(amount),
+                    payment_method='Transferência Interna',
+                    reference=f"{description} (Ref: {trans_id_base})"
+                )
+            except Exception as e:
+                logger.error(f"CRITICAL: Failed to record transfer in Immutable Ledger: {e}")
+
+            # --- FINANCIAL AUDIT LOG ---
+            try:
+                from app.services.financial_audit_service import FinancialAuditService
+                FinancialAuditService.log_event(
+                    user=user,
+                    action=FinancialAuditService.EVENT_TRANSFER,
+                    entity=f"Transfer {trans_id_base}",
+                    old_data=None,
+                    new_data={
+                        'source': source_type,
+                        'target': target_type,
+                        'amount': float(amount),
+                        'description': description
+                    }
+                )
+            except Exception as e:
+                logger.error(f"Failed to log transfer audit: {e}")
             
             return True
 

@@ -92,6 +92,11 @@ def _build_kds_payload(station, now=None):
     orders = load_table_orders()
     menu_items = load_menu_items()
     menu_map = {str(p.get('id')): p for p in menu_items}
+    
+    # Load SLA Settings
+    settings = load_settings()
+    kds_sla = settings.get('kds_sla', {})
+    
     printers = load_printers()
     printers_map = {str(p.get('id')): p for p in printers}
     default_kitchen = get_default_printer('kitchen')
@@ -110,6 +115,11 @@ def _build_kds_payload(station, now=None):
             opened_at = datetime.strptime(opened_raw, '%d/%m/%Y %H:%M') if opened_raw else now
         except Exception:
             opened_at = now
+            
+        # Order-level SLA tracking
+        order_max_wait_minutes = 0
+        order_has_late_item = False
+        
         for item in items:
             cat = item.get('category') or ''
             cat_norm = unicodedata.normalize('NFKD', str(cat)).encode('ASCII', 'ignore').decode('utf-8').strip().lower()
@@ -123,68 +133,93 @@ def _build_kds_payload(station, now=None):
                 'cervejas',
                 'cerveja',
                 'frigobar',
+                'doses',
                 'bebidas',
-                'bebida',
+                'bebida'
             ]
-            if station == 'bar' and not is_beverage:
-                continue
-            if station == 'kitchen' and is_beverage:
-                continue
-            item_id = item.get('id')
-            if not item_id:
-                continue
-            prod = None
-            prod_id = item.get('product_id')
-            if prod_id:
-                prod = menu_map.get(str(prod_id))
-            printer_id = None
-            if prod and prod.get('printer_id'):
-                printer_id = str(prod.get('printer_id'))
-            if not printer_id and default_kitchen and default_kitchen.get('id') is not None:
-                printer_id = str(default_kitchen.get('id'))
-            printer_name = None
-            if printer_id and printer_id in printers_map:
-                printer_name = printers_map[printer_id].get('name') or ''
-            if not printer_name:
-                if station == 'kitchen':
-                    printer_name = 'Cozinha'
-                else:
+            
+            # Filter by station
+            item_printer_id = item.get('printer_id')
+            should_show = False
+            
+            # Determine Section (Printer Name or Category)
+            printer_name = 'Cozinha'
+            if item_printer_id:
+                p_obj = printers_map.get(str(item_printer_id))
+                if p_obj:
+                    printer_name = p_obj.get('name', 'Cozinha')
+            
+            # If item has no printer, fallback logic
+            if not item_printer_id:
+                if is_beverage:
                     printer_name = 'Bar'
-            # Separação rígida por estação baseada no nome da impressora
-            p_lower = (printer_name or '').strip().lower()
-            if station == 'kitchen' and 'bar' in p_lower:
+                else:
+                    printer_name = 'Cozinha'
+
+            section_name = printer_name
+
+            # Station Filtering Logic
+            if station == 'kitchen':
+                # Show everything NOT bar (unless mixed)
+                if not is_beverage:
+                    should_show = True
+                # If explicit kitchen printer
+                if item_printer_id and 'bar' not in printer_name.lower():
+                    should_show = True
+            elif station == 'bar':
+                if is_beverage or (item_printer_id and 'bar' in printer_name.lower()):
+                    should_show = True
+            elif station == 'all':
+                should_show = True
+            else:
+                # Custom station logic (by printer ID match?)
+                # For simplicity, if station name is in printer name
+                if station.lower() in printer_name.lower():
+                    should_show = True
+
+            if not should_show:
                 continue
-            if station == 'bar' and 'bar' not in p_lower:
-                continue
+            
             kds_status = item.get('kds_status') or 'pending'
-            if kds_status not in ['pending', 'preparing', 'done', 'archived']:
-                kds_status = 'pending'
-            # Auto-arquivamento após 120 minutos sem interação (somente se pendente e sem start/done)
-            created_raw = item.get('created_at')
-            try:
-                created_at = datetime.strptime(created_raw, '%d/%m/%Y %H:%M') if created_raw else opened_at
-            except Exception:
-                created_at = opened_at
-            age_minutes = (now - created_at).total_seconds() / 60.0
-            if kds_status == 'pending' and not item.get('kds_start_time') and not item.get('kds_done_time') and age_minutes >= 150:
-                item['kds_status'] = 'archived'
-                item['kds_no_interaction'] = True
-                item['kds_archived_time'] = now.strftime('%d/%m/%Y %H:%M')
-                kds_status = 'archived'
-                changed = True
-            # Não incluir arquivados na tela ativa
             if kds_status == 'archived':
                 continue
-            section_name = printer_name
+
+            # Calculate Wait Time
+            # If pending: time since created_at
+            # If preparing: time since kds_start_time + pending time? No, usually total time since order.
+            
+            item_created_at = None
+            try:
+                item_created_at = datetime.strptime(item.get('created_at'), '%d/%m/%Y %H:%M')
+            except:
+                item_created_at = opened_at
+            
+            wait_seconds = (now - item_created_at).total_seconds()
+            wait_minutes = int(wait_seconds / 60)
+            
+            # Check SLA
+            # Default SLA 20 min if not found
+            sla_minutes = kds_sla.get(item.get('category'), 20)
+            is_late = wait_minutes > sla_minutes
+            
+            if is_late:
+                order_has_late_item = True
+            
+            if wait_minutes > order_max_wait_minutes:
+                order_max_wait_minutes = wait_minutes
+
             if section_name not in sections_counter:
                 sections_counter[section_name] = 0
-            if kds_status in ['pending', 'preparing']:
+            if kds_status == 'pending':
                 sections_counter[section_name] += 1
-            order_age = (now - created_at).total_seconds() / 60.0
-            is_late = order_age >= 40
-            wait_minutes = max(0, int(order_age))
-            wait_bucket = _compute_order_wait_bucket(wait_minutes)
-            is_over_avg = (wait_minutes * 60) > avg_prep_seconds
+            
+            # Prepare Item Display
+            item['wait_minutes'] = wait_minutes
+            item['sla_minutes'] = sla_minutes
+            item['is_late'] = is_late
+            item['section'] = section_name
+            
+            # Format Notes
             observations = item.get('observations') or []
             if isinstance(observations, list):
                 notes_parts = [str(o) for o in observations if o]
@@ -217,42 +252,57 @@ def _build_kds_payload(station, now=None):
                         notes = f"Sabor: {flavor_str} / {notes}"
                     else:
                         notes = f"Sabor: {flavor_str}"
+            
+            item['display_notes'] = notes
+            
             start_time = item.get('kds_start_time')
             done_time = item.get('kds_done_time')
+            
             table_items.append({
-                'id': item_id,
+                'id': item.get('id'),
                 'name': item.get('name'),
                 'qty': item.get('qty', 1),
                 'category': cat,
                 'section': section_name,
                 'status': kds_status,
-                'order_time': created_at.isoformat(),
+                'order_time': item_created_at.isoformat(),
                 'start_time': start_time,
                 'done_time': done_time,
                 'notes': notes,
                 'is_late': is_late,
                 'wait_minutes': wait_minutes,
-                'wait_bucket': wait_bucket,
-                'is_over_avg': is_over_avg
+                'sla_minutes': sla_minutes, # Pass SLA to frontend
+                'wait_bucket': _compute_order_wait_bucket(wait_minutes),
+                'is_over_avg': is_late # Override generic avg with SLA logic
             })
-        # Se houve auto-archive, persistir após processar esta mesa
+
         if not table_items:
             continue
-        pending_count = sum(1 for i in table_items if i['status'] == 'pending')
-        preparing_count = sum(1 for i in table_items if i['status'] == 'preparing')
-        done_count = sum(1 for i in table_items if i['status'] == 'done')
-        if pending_count > 0:
-            overall_status = 'pending'
-        elif preparing_count > 0:
-            overall_status = 'preparing'
-        else:
+
+        # Sort items by status priority: pending > preparing > done
+        status_priority = {'pending': 0, 'preparing': 1, 'done': 2}
+        table_items.sort(key=lambda x: (status_priority.get(x.get('status', 'pending'), 0), x.get('name')))
+
+        # Determine overall order status
+        pending_count = sum(1 for i in table_items if i.get('status') == 'pending')
+        preparing_count = sum(1 for i in table_items if i.get('status') == 'preparing')
+        done_count = sum(1 for i in table_items if i.get('status') == 'done')
+        
+        overall_status = 'pending'
+        if done_count == len(table_items):
             overall_status = 'done'
-        order_late = any(i['is_late'] for i in table_items)
-        active_items = [i for i in table_items if i['status'] in ['pending', 'preparing']]
+        elif preparing_count > 0 or done_count > 0:
+            overall_status = 'preparing'
+        
+        # New "Late" logic for order card
+        order_late = order_has_late_item
+        
+        active_items = [i for i in table_items if i.get('status') != 'done']
         basis_items = active_items if active_items else table_items
-        order_wait_minutes = max((i.get('wait_minutes') or 0) for i in basis_items) if basis_items else 0
-        wait_bucket = _compute_order_wait_bucket(order_wait_minutes)
-        is_over_avg = (order_wait_minutes * 60) > avg_prep_seconds
+        
+        wait_bucket = _compute_order_wait_bucket(order_max_wait_minutes)
+        is_over_avg = order_late # Use late flag for order highlighting too
+        
         sections = {}
         for i in table_items:
             key = i['section']

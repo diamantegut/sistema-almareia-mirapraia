@@ -24,6 +24,7 @@
                 <ul class="dropdown-menu dropdown-menu-end">
                     <li><a class="dropdown-item" href="#" onclick="document.getElementById('xmlFile').click()"><i class="bi bi-filetype-xml me-2"></i>XML da NF-e (Automático)</a></li>
                     <li><a class="dropdown-item" href="#" onclick="openNfeList()"><i class="bi bi-cloud-download me-2"></i>Buscar na Sefaz</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="openNsuSearchModal()"><i class="bi bi-search me-2"></i>Buscar por NSU</a></li>
                 </ul>
             </div>
         </div>
@@ -356,6 +357,29 @@
                 <hr>
                 <h6>4. Financeiro</h6>
                 <p>Cadastre os boletos para integração automática com o Contas a Pagar.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- NSU Search Modal -->
+<div class="modal fade" id="nsuSearchModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-search me-2"></i>Buscar Nota por NSU</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="nsuInput" class="form-label">Número do NSU (Sequencial Único)</label>
+                    <input type="number" class="form-control" id="nsuInput" placeholder="Ex: 12345">
+                    <div class="form-text">Digite o número do NSU para recuperar uma nota específica da SEFAZ.</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="searchNsu()">Buscar</button>
             </div>
         </div>
     </div>
@@ -903,6 +927,77 @@
                 button.disabled = false;
             }
         });
+    }
+
+    function openNsuSearchModal() {
+        const modal = new bootstrap.Modal(document.getElementById('nsuSearchModal'));
+        modal.show();
+        // Focus input after modal is shown
+        document.getElementById('nsuSearchModal').addEventListener('shown.bs.modal', function () {
+            document.getElementById('nsuInput').focus();
+        }, { once: true });
+    }
+
+    function searchNsu() {
+        const nsuInput = document.getElementById('nsuInput');
+        const nsu = nsuInput.value.trim();
+        
+        if (!nsu) {
+            showToast('Digite um número de NSU.', 'warning');
+            nsuInput.focus();
+            return;
+        }
+
+        // Close modal
+        const modalEl = document.getElementById('nsuSearchModal');
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) modal.hide();
+
+        showToast(`Buscando NSU ${nsu}...`, 'info');
+
+        fetch(`/recover-nfe-dfe?nsu=${nsu}`)
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) {
+                showToast(`Erro: ${data.error}`, 'danger');
+                return;
+            }
+            
+            if (!data.documents || data.documents.length === 0) {
+                showToast('Nenhuma nota encontrada para este NSU.', 'warning');
+                return;
+            }
+
+            const doc = data.documents[0];
+            if (!doc.xml_content) {
+                showToast('Nota encontrada mas sem XML disponível.', 'warning');
+                return;
+            }
+
+            // Use importNfeContent to parse and fill form
+            // importNfeContent expects xml content string
+            // We need to decode if it's base64 or similar, but here it seems to be string
+            // Let's assume it's string. The backend sends xml_content.
+            // But wait, importNfeContent calls parse-xml-content which expects { content: xmlString }
+            // Let's create a helper to avoid circular dependency with importNfeContent's modal closing logic
+            
+            showToast('Processando XML...', 'info');
+            
+            fetch('/stock/entry/parse-xml-content', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ content: doc.xml_content })
+            })
+            .then(r => r.json())
+            .then(parsedData => {
+                if (parsedData.error) throw new Error(parsedData.error);
+                fillFormWithNfeData(parsedData);
+                showToast(`Nota ${parsedData.invoice || ''} recuperada com sucesso!`, 'success');
+            })
+            .catch(err => showToast('Erro ao processar XML: ' + err.message, 'danger'));
+
+        })
+        .catch(err => showToast('Erro na busca: ' + err.message, 'danger'));
     }
 
     function fillFormWithNfeData(data) {

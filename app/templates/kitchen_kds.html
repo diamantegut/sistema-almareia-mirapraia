@@ -315,6 +315,13 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
             if (order.is_late) {
                 card.classList.add("kds-order-late");
             }
+            
+            // Check if any item in this card section is late based on SLA
+            const anyItemLate = items.some(i => i.is_late);
+            if (anyItemLate) {
+                card.style.border = "4px solid #dc3545"; // Red border for late
+            }
+
             const header = document.createElement("div");
             header.className = "kds-order-header";
             const titleWrap = document.createElement("div");
@@ -322,6 +329,14 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
             const title = document.createElement("div");
             title.className = "kds-order-title";
             title.textContent = order.label || ("Mesa " + (order.table_id || ""));
+            
+            if (anyItemLate) {
+                const lateBadge = document.createElement("span");
+                lateBadge.className = "badge bg-danger ms-2";
+                lateBadge.textContent = "ATRASADO";
+                title.appendChild(lateBadge);
+            }
+
             const titleRow = document.createElement("div");
             titleRow.className = "kds-order-title-row";
             titleRow.appendChild(title);
@@ -340,10 +355,19 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
                 .map(i => Number.parseInt(i.wait_minutes, 10))
                 .filter(v => Number.isFinite(v));
             const cardWaitMinutes = itemWait.length ? Math.max.apply(null, itemWait) : 0;
-            const isOverAvg = items.some(i => Boolean(i.is_over_avg));
+            
+            // Use SLA logic for wait class if available, else generic
+            // Actually, we should check against item.sla_minutes
+            // For card color, we use the max wait time logic but we can override if any item is late
             card.classList.add("kds-order-state-" + cardStatus);
-            card.classList.add(getWaitClass(cardWaitMinutes));
-            if (isOverAvg) {
+            
+            if (anyItemLate) {
+                 card.classList.add("kds-wait-critical");
+            } else {
+                 card.classList.add(getWaitClass(cardWaitMinutes));
+            }
+
+            if (anyItemLate) {
                 card.classList.add("kds-order-overdue");
             }
             const actionBtn = document.createElement("button");
