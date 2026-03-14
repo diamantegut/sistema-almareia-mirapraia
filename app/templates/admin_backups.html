@@ -1,0 +1,879 @@
+{% extends 'base.html' %}
+{% block title %}Central de Backups - Back of the House{% endblock %}
+{% block content %}
+<div class="container mt-4 mb-5">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h2 class="mb-1"><i class="bi bi-hdd-stack"></i> {{ central_model.title }}</h2>
+            <div class="text-muted small">URL: /admin/backups · raiz atual: {{ central_model.backup_root }}</div>
+        </div>
+        <div class="d-flex gap-2">
+            <button id="btnQuickCreateBackup" class="btn btn-success">
+                <i class="bi bi-plus-circle"></i> Criar backup agora
+            </button>
+            <button id="btnQuickHealth" class="btn btn-outline-primary">
+                <i class="bi bi-heart-pulse"></i> Verificar health
+            </button>
+            <button id="btnQuickRefresh" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-clockwise"></i> Atualizar
+            </button>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4" id="statusCards">
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Produção</div>
+                    <div class="fs-4 fw-bold" id="statusProduction">-</div>
+                    <div class="small text-muted">Health atual</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">DEV</div>
+                    <div class="fs-4 fw-bold" id="statusDev">-</div>
+                    <div class="small text-muted">Health atual</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Último full backup</div>
+                    <div class="small fw-semibold text-break" id="statusLastFull">{{ central_model.latest_full_backup }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Último restore testado</div>
+                    <div class="small fw-semibold text-break" id="statusLastRestore">{{ central_model.latest_restore_tested }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <ul class="nav nav-tabs" id="backupTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-overview" type="button">Visão Geral</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-backups" type="button">Backups</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-health" type="button">Health</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-restore" type="button">Restore e Testes</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-config" type="button">Configuração</button>
+        </li>
+    </ul>
+
+    <div class="tab-content border border-top-0 rounded-bottom p-3 bg-white shadow-sm">
+        <div class="tab-pane fade show active" id="tab-overview">
+            <div class="row g-3">
+                <div class="col-lg-7">
+                    <div class="card h-100">
+                        <div class="card-header"><strong>Resumo Executivo</strong></div>
+                        <div class="card-body">
+                            <div id="overviewEnvironment"></div>
+                            <hr>
+                            <div class="small text-muted">Últimos fulls: <span id="overviewLastFullsCount"></span></div>
+                            <div class="small text-muted">Últimos manifestos válidos: monitorados via health por ambiente.</div>
+                            <div class="small text-muted">Últimos healths válidos: <span id="overviewHealthValidCount"></span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div class="card h-100">
+                        <div class="card-header"><strong>Alertas Ativos</strong></div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush" id="overviewAlerts"></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="tab-backups">
+            <div class="row g-2 mb-3">
+                <div class="col-md-3">
+                    <label class="form-label mb-1">Ambiente</label>
+                    <select class="form-select form-select-sm" id="filterEnvironment">
+                        <option value="">Todos</option>
+                        <option value="production">Produção</option>
+                        <option value="dev">DEV</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label mb-1">Tipo</label>
+                    <select class="form-select form-select-sm" id="filterType">
+                        <option value="">Todos</option>
+                        <option value="full">Full</option>
+                        <option value="operational">Operacional</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label mb-1">Período (texto)</label>
+                    <input class="form-control form-control-sm" id="filterPeriod" placeholder="ex: 2026-03 ou nome do arquivo">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button class="btn btn-sm btn-outline-secondary w-100" id="btnApplyFilters">Aplicar</button>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm table-striped align-middle" id="tableBackups">
+                    <thead>
+                        <tr>
+                            <th>Ambiente</th>
+                            <th>Tipo</th>
+                            <th>Arquivo</th>
+                            <th>Data/Hora</th>
+                            <th>Tamanho</th>
+                            <th class="text-end">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBackupsBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="tab-health">
+            <div class="row g-3 mb-3">
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-header"><strong>Produção</strong></div>
+                        <div class="card-body" id="healthProduction"></div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-header"><strong>DEV</strong></div>
+                        <div class="card-body" id="healthDev"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header"><strong>Histórico Recente de Health</strong></div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Ambiente</th>
+                                    <th>Timestamp</th>
+                                    <th>Status</th>
+                                    <th>Hash válido</th>
+                                    <th>Manifesto</th>
+                                    <th>Backup</th>
+                                    <th class="text-end">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="healthHistoryBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="card mt-3">
+                <div class="card-header"><strong>Detalhes do Health Selecionado</strong></div>
+                <div class="card-body">
+                    <pre class="mb-0 small" id="healthDetailsContent">Selecione um registro no histórico para ver os detalhes completos.</pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="tab-restore">
+            <div class="row g-3">
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-header"><strong>DEV · Restore em Pasta de Teste</strong></div>
+                        <div class="card-body">
+                            <div class="small mb-2">Fluxo DEV controlado com restore e smoke pós-restore em área isolada.</div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-12">
+                                    <label class="form-label mb-1">Backup full apto para restore (DEV)</label>
+                                    <select class="form-select form-select-sm" id="restoreDevBackupSelect"></select>
+                                </div>
+                                <div class="col-8">
+                                    <label class="form-label mb-1">Diretório de teste</label>
+                                    <input class="form-control form-control-sm" id="restoreDevTargetDir" placeholder="ui_restore_manual_YYYYMMDD_HHMMSS">
+                                </div>
+                                <div class="col-4">
+                                    <label class="form-label mb-1">Porta smoke</label>
+                                    <input class="form-control form-control-sm" id="restoreDevSmokePort" value="5601">
+                                </div>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-outline-primary" id="btnRestorePrepare">Preparar restore</button>
+                                <button class="btn btn-outline-secondary" id="btnRestoreExecute">Executar restore (com smoke)</button>
+                                <button class="btn btn-outline-success" id="btnRestoreSmoke">Rodar smoke pós-restore</button>
+                            </div>
+                            <div class="form-text mt-3">Nenhum restore destrutivo é executado em produção nesta etapa.</div>
+                            <hr>
+                            <div class="small mb-1">Último restore testado: <span id="restoreLastRun" class="font-monospace">-</span></div>
+                            <div class="small">Último smoke pós-restore: <span id="restoreLastSmoke" class="font-monospace">-</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card h-100 border-danger">
+                        <div class="card-header bg-danger-subtle"><strong>Produção · Restore Points</strong></div>
+                        <div class="card-body">
+                            <div class="small mb-2">Ações sensíveis em produção devem exigir confirmação forte e processo operacional controlado.</div>
+                            <ul class="list-group list-group-flush small" id="productionRestorePoints"></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card mt-3">
+                <div class="card-header"><strong>Histórico de Restore e Testes (DEV)</strong></div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>Ação</th>
+                                    <th>Status</th>
+                                    <th>Backup</th>
+                                    <th>Destino</th>
+                                    <th class="text-end">Detalhes</th>
+                                </tr>
+                            </thead>
+                            <tbody id="restoreRunsBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="card mt-3">
+                <div class="card-header"><strong>Detalhes da Validação (Restore/Smoke)</strong></div>
+                <div class="card-body">
+                    <pre class="mb-0 small" id="restoreDetailsContent">Selecione uma execução para ver detalhes estruturados.</pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="tab-config">
+            <div class="row g-3">
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-header"><strong>Parâmetros de Configuração</strong></div>
+                        <div class="card-body">
+                            <dl class="row mb-0 small">
+                                <dt class="col-sm-4">Raiz de Backup</dt>
+                                <dd class="col-sm-8" id="configBackupRoot"></dd>
+                                <dt class="col-sm-4">Raiz Configurada</dt>
+                                <dd class="col-sm-8" id="configConfiguredRoot"></dd>
+                                <dt class="col-sm-4">Ambiente Atual</dt>
+                                <dd class="col-sm-8" id="configCurrentEnvironment"></dd>
+                                <dt class="col-sm-4">Ambientes</dt>
+                                <dd class="col-sm-8">production / dev</dd>
+                                <dt class="col-sm-4">Retenção</dt>
+                                <dd class="col-sm-8" id="configRetention"></dd>
+                                <dt class="col-sm-4">Limite por tamanho</dt>
+                                <dd class="col-sm-8" id="configSizeLimit"></dd>
+                                <dt class="col-sm-4">Frequência</dt>
+                                <dd class="col-sm-8" id="configFrequency"></dd>
+                                <dt class="col-sm-4">Scheduler</dt>
+                                <dd class="col-sm-8" id="configSchedulerStatus"></dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-header"><strong>Mecanismos Ativos e Estrutura</strong></div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush small" id="activeMechanisms"></ul>
+                            <hr>
+                            <div class="small fw-semibold mb-1">Estrutura esperada · DEV</div>
+                            <pre class="small border rounded p-2 mb-2 bg-light" id="configStructureDev">-</pre>
+                            <div class="small fw-semibold mb-1">Estrutura esperada · Produção</div>
+                            <pre class="small border rounded p-2 bg-light" id="configStructureProd">-</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="detailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detalhes do Backup</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <pre class="mb-0 small" id="detailsModalContent"></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1080">
+    <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <strong class="me-auto" id="toastTitle">Backups</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+        </div>
+        <div class="toast-body" id="toastBody"></div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let model = {{ central_model|tojson }};
+    let backupsRows = model.backups || [];
+    let healthModel = model.health_tab || {environments: {}, history: []};
+    let restoreModel = model.restore_tab || {dev_restore_candidates: [], production_restore_points: [], recent_runs: []};
+    let configModel = model.config_tab || {};
+    let lastRestoreTargetDir = '';
+    const detailsModal = new bootstrap.Modal(document.getElementById('detailsModal'));
+    const detailsModalContent = document.getElementById('detailsModalContent');
+
+    function badgeByStatus(status) {
+        const value = String(status || 'CRÍTICO').toUpperCase();
+        if (value === 'OK') return '<span class="badge text-bg-success">OK</span>';
+        if (value === 'ALERTA') return '<span class="badge text-bg-warning">ALERTA</span>';
+        return '<span class="badge text-bg-danger">CRÍTICO</span>';
+    }
+
+    function showToast(title, message, type) {
+        const toastEl = document.getElementById('liveToast');
+        document.getElementById('toastTitle').textContent = title;
+        document.getElementById('toastBody').textContent = message;
+        toastEl.className = 'toast';
+        if (type === 'danger') toastEl.classList.add('bg-danger', 'text-white');
+        if (type === 'success') toastEl.classList.add('bg-success', 'text-white');
+        if (type === 'warning') toastEl.classList.add('bg-warning');
+        new bootstrap.Toast(toastEl).show();
+    }
+
+    function renderStatusCards() {
+        const productionStatus = model.status_cards?.production?.status || 'CRÍTICO';
+        const devStatus = model.status_cards?.dev?.status || 'CRÍTICO';
+        document.getElementById('statusProduction').innerHTML = badgeByStatus(productionStatus);
+        document.getElementById('statusDev').innerHTML = badgeByStatus(devStatus);
+        document.getElementById('statusLastFull').textContent = model.latest_full_backup || 'Não encontrado';
+        document.getElementById('statusLastRestore').textContent = model.latest_restore_tested || 'Não testado';
+    }
+
+    function renderOverview() {
+        const container = document.getElementById('overviewEnvironment');
+        const production = model.status_cards?.production || {};
+        const dev = model.status_cards?.dev || {};
+        container.innerHTML = `
+            <div class="small mb-1">Produção: ${badgeByStatus(production.status)} · Último full: ${production.last_full_backup || '-'}</div>
+            <div class="small mb-1">DEV: ${badgeByStatus(dev.status)} · Último full: ${dev.last_full_backup || '-'}</div>
+            <div class="small">Últimos fulls catalogados: ${model.full_backups?.length || 0}</div>
+        `;
+        document.getElementById('overviewLastFullsCount').textContent = model.full_backups?.length || 0;
+        const validHealths = ['production', 'dev'].filter(env => (model.status_cards?.[env]?.status || '') === 'OK').length;
+        document.getElementById('overviewHealthValidCount').textContent = validHealths;
+
+        const alerts = document.getElementById('overviewAlerts');
+        const items = model.alerts || [];
+        if (!items.length) {
+            alerts.innerHTML = '<li class="list-group-item small text-success">Sem alertas ativos.</li>';
+            return;
+        }
+        alerts.innerHTML = items.map(item => `
+            <li class="list-group-item small">
+                <div class="fw-semibold">${item.environment.toUpperCase()} · ${item.status}</div>
+                <div class="text-muted">${item.message}</div>
+            </li>
+        `).join('');
+    }
+
+    function renderBackupsTable() {
+        const tbody = document.getElementById('tableBackupsBody');
+        if (!backupsRows.length) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">Nenhum backup no filtro aplicado.</td></tr>';
+            return;
+        }
+        tbody.innerHTML = backupsRows.map((row, idx) => `
+            <tr>
+                <td>${row.environment}</td>
+                <td>${row.backup_type}${row.category && row.category !== row.backup_type ? ` · ${row.category}` : ''}</td>
+                <td class="font-monospace small">${row.name}</td>
+                <td>${row.updated_at}</td>
+                <td>${row.size}</td>
+                <td class="text-end">
+                    <button class="btn btn-sm btn-outline-primary btn-detail" data-index="${idx}">Ver detalhes</button>
+                    <button class="btn btn-sm btn-outline-secondary btn-download" data-index="${idx}" ${row.can_download ? '' : 'disabled'}>Baixar</button>
+                    <button class="btn btn-sm btn-outline-warning btn-integrity" data-index="${idx}" ${row.can_verify_integrity ? '' : 'disabled'}>Verificar integridade</button>
+                    <button class="btn btn-sm btn-outline-success btn-prepare-restore" data-index="${idx}" ${row.can_prepare_restore ? '' : 'disabled'}>Preparar restore</button>
+                </td>
+            </tr>
+        `).join('');
+        document.querySelectorAll('.btn-detail').forEach(btn => {
+            btn.addEventListener('click', function() {
+                handleDetails(backupsRows[Number(this.dataset.index)]);
+            });
+        });
+        document.querySelectorAll('.btn-download').forEach(btn => {
+            btn.addEventListener('click', function() {
+                handleDownload(backupsRows[Number(this.dataset.index)]);
+            });
+        });
+        document.querySelectorAll('.btn-integrity').forEach(btn => {
+            btn.addEventListener('click', function() {
+                handleIntegrity(backupsRows[Number(this.dataset.index)]);
+            });
+        });
+        document.querySelectorAll('.btn-prepare-restore').forEach(btn => {
+            btn.addEventListener('click', function() {
+                handlePrepareRestore(backupsRows[Number(this.dataset.index)]);
+            });
+        });
+    }
+
+    function renderHealth() {
+        const production = healthModel.environments?.production || {};
+        const dev = healthModel.environments?.dev || {};
+        document.getElementById('healthProduction').innerHTML = `
+            <div>Status atual: ${badgeByStatus(production.status || 'CRÍTICO')}</div>
+            <div class="small">Hash válido: ${String(!!production.hash_valid)}</div>
+            <div class="small">Manifesto encontrado: ${String(!!production.manifest_present)}</div>
+            <div class="small">Backup legível: ${String(!!production.backup_readable)}</div>
+            <div class="small">Idade do último full: ${production.last_full_age_hours != null ? production.last_full_age_hours + 'h' : '-'}</div>
+            <div class="small">Último full: <span class="font-monospace">${production.backup_file || '-'}</span></div>
+            <div class="small">Manifesto: <span class="font-monospace">${production.manifest_file || '-'}</span></div>
+        `;
+        document.getElementById('healthDev').innerHTML = `
+            <div>Status atual: ${badgeByStatus(dev.status || 'CRÍTICO')}</div>
+            <div class="small">Hash válido: ${String(!!dev.hash_valid)}</div>
+            <div class="small">Manifesto encontrado: ${String(!!dev.manifest_present)}</div>
+            <div class="small">Backup legível: ${String(!!dev.backup_readable)}</div>
+            <div class="small">Idade do último full: ${dev.last_full_age_hours != null ? dev.last_full_age_hours + 'h' : '-'}</div>
+            <div class="small">Último full: <span class="font-monospace">${dev.backup_file || '-'}</span></div>
+            <div class="small">Manifesto: <span class="font-monospace">${dev.manifest_file || '-'}</span></div>
+        `;
+
+        const tbody = document.getElementById('healthHistoryBody');
+        const rows = healthModel.history || [];
+        if (!rows.length) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">Sem histórico de health.</td></tr>';
+            return;
+        }
+        tbody.innerHTML = rows.map((item, idx) => `
+            <tr>
+                <td>${item.environment}</td>
+                <td>${item.timestamp || '-'}</td>
+                <td>${badgeByStatus(item.status)}</td>
+                <td>${String(!!item.hash_valid)}</td>
+                <td>${String(!!item.manifest_present)}</td>
+                <td class="small font-monospace">${item.backup_file || '-'}</td>
+                <td class="text-end">
+                    <button class="btn btn-sm btn-outline-primary btn-health-detail" data-index="${idx}">Ver detalhes</button>
+                </td>
+            </tr>
+        `).join('');
+        document.querySelectorAll('.btn-health-detail').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const item = rows[Number(this.dataset.index)];
+                loadHealthDetails(item);
+            });
+        });
+    }
+
+    function renderRestoreTab() {
+        const points = document.getElementById('productionRestorePoints');
+        const rows = restoreModel.production_restore_points || [];
+        if (!rows.length) {
+            points.innerHTML = '<li class="list-group-item small text-muted">Sem restore points catalogados.</li>';
+        } else {
+            points.innerHTML = rows.map(item => `
+                <li class="list-group-item small">
+                    <div class="fw-semibold">${item.name}</div>
+                    <div class="text-muted">${item.updated_at} · ${item.size}</div>
+                </li>
+            `).join('');
+        }
+
+        const select = document.getElementById('restoreDevBackupSelect');
+        const candidates = restoreModel.dev_restore_candidates || [];
+        if (!candidates.length) {
+            select.innerHTML = '<option value="">Sem backups DEV disponíveis</option>';
+        } else {
+            select.innerHTML = candidates.map(item => `<option value="${item.key}">${item.name} · ${item.updated_at}</option>`).join('');
+        }
+
+        const latestRestore = restoreModel.latest_restore_tested || null;
+        const latestSmoke = restoreModel.latest_smoke_post_restore || null;
+        if (latestRestore && latestRestore.restore_target_dir) {
+            lastRestoreTargetDir = latestRestore.restore_target_dir;
+        }
+        document.getElementById('restoreLastRun').textContent = latestRestore ? `${latestRestore.status} · ${latestRestore.backup_name || '-'} · ${latestRestore.restore_target_dir || '-'}` : 'Não testado';
+        document.getElementById('restoreLastSmoke').textContent = latestSmoke ? `${latestSmoke.status} · ${latestSmoke.restore_target_dir || '-'}` : 'Não testado';
+
+        const tbody = document.getElementById('restoreRunsBody');
+        const runs = restoreModel.recent_runs || [];
+        if (!runs.length) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">Sem execuções recentes.</td></tr>';
+            return;
+        }
+        tbody.innerHTML = runs.map((item, idx) => `
+            <tr>
+                <td>${(item.timestamp || '').replace('T', ' ').slice(0, 19) || '-'}</td>
+                <td>${item.action || '-'}</td>
+                <td>${badgeByStatus(item.status || 'CRÍTICO')}</td>
+                <td class="small font-monospace">${item.backup_name || '-'}</td>
+                <td class="small font-monospace">${item.restore_target_dir || '-'}</td>
+                <td class="text-end"><button class="btn btn-sm btn-outline-primary btn-restore-run-detail" data-index="${idx}">Ver</button></td>
+            </tr>
+        `).join('');
+        document.querySelectorAll('.btn-restore-run-detail').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const run = runs[Number(this.dataset.index)];
+                loadRestoreRunDetails(run);
+            });
+        });
+    }
+
+    function renderConfig() {
+        const retention = configModel.retention_time || {};
+        const sizePolicy = configModel.retention_size || {};
+        const frequency = configModel.frequency_expected || {};
+        const active = configModel.active_mechanisms || [];
+        const scheduler = configModel.scheduler_status || {};
+        const envStructure = configModel.environment_structure || {};
+        document.getElementById('configRetention').textContent = `${retention.full_production_expected || '-'} / ${retention.full_dev_expected || '-'}`;
+        document.getElementById('configSizeLimit').textContent = `${sizePolicy.production_full_limit_human || '-'} (${sizePolicy.production_full_limit_bytes || 0} bytes)`;
+        document.getElementById('configFrequency').textContent = `prod full ${frequency.full_production || '-'}, dev full ${frequency.full_dev || '-'}, stock ${frequency.stock_security_backup || '-'}, menu ${frequency.menu_security_backup || '-'}, cashier ${frequency.cashier_backup_recovery || '-'}`;
+        document.getElementById('configBackupRoot').textContent = configModel.backup_root || model.backup_root || '-';
+        document.getElementById('configConfiguredRoot').textContent = configModel.configured_root || '-';
+        document.getElementById('configCurrentEnvironment').textContent = configModel.current_environment || '-';
+        document.getElementById('configSchedulerStatus').textContent = `available=${String(!!scheduler.available)} running=${String(scheduler.running)} paused=${String(scheduler.paused)} state=${scheduler.state || '-'}`;
+        document.getElementById('activeMechanisms').innerHTML = active.map(item => `<li class="list-group-item">${item}</li>`).join('');
+        document.getElementById('configStructureDev').textContent = JSON.stringify(envStructure.dev || {}, null, 2);
+        document.getElementById('configStructureProd').textContent = JSON.stringify(envStructure.production || {}, null, 2);
+    }
+
+    function renderAll() {
+        renderStatusCards();
+        renderOverview();
+        renderBackupsTable();
+        renderHealth();
+        renderRestoreTab();
+        renderConfig();
+    }
+
+    async function refreshOverview() {
+        try {
+            const res = await fetch('/admin/api/backups/central/overview');
+            const data = await res.json();
+            if (data.error) {
+                showToast('Erro', data.error, 'danger');
+                return;
+            }
+            model = data;
+            backupsRows = model.backups || [];
+            healthModel = model.health_tab || healthModel;
+            restoreModel = model.restore_tab || restoreModel;
+            configModel = model.config_tab || configModel;
+            renderAll();
+            showToast('Atualizado', 'Dados de backup e health atualizados.', 'success');
+        } catch (error) {
+            showToast('Erro', 'Falha ao atualizar dados da central.', 'danger');
+        }
+    }
+
+    async function loadBackupsFromApi() {
+        const envFilter = document.getElementById('filterEnvironment').value;
+        const typeFilter = document.getElementById('filterType').value;
+        const periodFilter = document.getElementById('filterPeriod').value.trim();
+        const query = new URLSearchParams();
+        if (envFilter) query.set('environment', envFilter);
+        if (typeFilter) query.set('backup_type', typeFilter);
+        if (periodFilter) query.set('period', periodFilter);
+        try {
+            const res = await fetch(`/admin/api/backups/central/backups?${query.toString()}`);
+            const data = await res.json();
+            if (data.error) {
+                showToast('Erro', data.error, 'danger');
+                return;
+            }
+            backupsRows = data.items || [];
+            renderBackupsTable();
+        } catch (error) {
+            showToast('Erro', 'Falha ao carregar backups.', 'danger');
+        }
+    }
+
+    async function postJson(url, payload) {
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload || {}),
+        });
+        return res.json();
+    }
+
+    async function handleDetails(item) {
+        if (!item || !item.key) return;
+        try {
+            const data = await postJson('/admin/api/backups/central/details', {key: item.key});
+            if (data.error) {
+                showToast('Erro', data.error, 'danger');
+                return;
+            }
+            detailsModalContent.textContent = JSON.stringify(data.item || {}, null, 2);
+            detailsModal.show();
+        } catch (error) {
+            showToast('Erro', 'Falha ao carregar detalhes.', 'danger');
+        }
+    }
+
+    async function handleIntegrity(item) {
+        if (!item || !item.key) return;
+        try {
+            const data = await postJson('/admin/api/backups/central/integrity', {key: item.key});
+            const tone = data.status === 'OK' ? 'success' : (data.status === 'ALERTA' ? 'warning' : 'danger');
+            showToast('Integridade', `${data.status || 'CRÍTICO'}: ${(data.details || []).join(' | ')}`, tone);
+        } catch (error) {
+            showToast('Erro', 'Falha ao verificar integridade.', 'danger');
+        }
+    }
+
+    async function loadHealthFromApi() {
+        try {
+            const res = await fetch('/admin/api/backups/central/health?limit=30');
+            const data = await res.json();
+            if (data.error) {
+                showToast('Erro', data.error, 'danger');
+                return;
+            }
+            healthModel = data;
+            renderHealth();
+        } catch (error) {
+            showToast('Erro', 'Falha ao carregar health em tempo real.', 'danger');
+        }
+    }
+
+    async function loadHealthDetails(item) {
+        if (!item || !item.key) return;
+        try {
+            const data = await postJson('/admin/api/backups/central/health/details', {key: item.key});
+            if (data.error) {
+                showToast('Erro', data.error, 'danger');
+                return;
+            }
+            document.getElementById('healthDetailsContent').textContent = JSON.stringify(data.payload || {}, null, 2);
+        } catch (error) {
+            showToast('Erro', 'Falha ao carregar detalhe de health.', 'danger');
+        }
+    }
+
+    async function loadRestoreFromApi() {
+        try {
+            const res = await fetch('/admin/api/backups/central/restore?limit=30');
+            const data = await res.json();
+            if (data.error) {
+                showToast('Erro', data.error, 'danger');
+                return;
+            }
+            restoreModel = data;
+            renderRestoreTab();
+        } catch (error) {
+            showToast('Erro', 'Falha ao carregar dados de restore/testes.', 'danger');
+        }
+    }
+
+    async function loadRestoreRunDetails(run) {
+        if (!run || !run.run_id) return;
+        try {
+            const data = await postJson('/admin/api/backups/central/restore/details', {run_id: run.run_id});
+            if (data.error) {
+                showToast('Erro', data.error, 'danger');
+                return;
+            }
+            document.getElementById('restoreDetailsContent').textContent = JSON.stringify(data.run || {}, null, 2);
+        } catch (error) {
+            showToast('Erro', 'Falha ao carregar detalhes da execução.', 'danger');
+        }
+    }
+
+    function selectedRestoreKey() {
+        return document.getElementById('restoreDevBackupSelect').value;
+    }
+
+    function selectedRestoreTarget(generateIfEmpty = true) {
+        const value = document.getElementById('restoreDevTargetDir').value.trim();
+        if (value) return value;
+        if (!generateIfEmpty) return '';
+        return `ui_restore_manual_${new Date().toISOString().replace(/[-:T]/g, '').slice(0, 15)}`;
+    }
+
+    function selectedSmokePort() {
+        const raw = Number(document.getElementById('restoreDevSmokePort').value || 5601);
+        return Number.isFinite(raw) && raw > 0 ? raw : 5601;
+    }
+
+    async function actionRestorePrepare() {
+        const key = selectedRestoreKey();
+        if (!key) {
+            showToast('Atenção', 'Selecione um backup DEV.', 'warning');
+            return;
+        }
+        const payload = {
+            key: key,
+            restore_target_dir: selectedRestoreTarget(),
+            overwrite_confirmed: false,
+        };
+        const data = await postJson('/admin/api/backups/central/restore/prepare', payload);
+        if (data.error || data.success === false) {
+            showToast('Restore DEV', data.error || 'Falha ao preparar restore.', 'danger');
+        } else {
+            showToast('Restore DEV', `Prepare concluído: ${data.result?.restore_target_dir || '-'}`, 'success');
+            document.getElementById('restoreDetailsContent').textContent = JSON.stringify(data.run || data.result || {}, null, 2);
+            if (data.result?.restore_target_dir) {
+                lastRestoreTargetDir = data.result.restore_target_dir;
+                document.getElementById('restoreDevTargetDir').value = lastRestoreTargetDir;
+            }
+            await loadRestoreFromApi();
+        }
+    }
+
+    async function actionRestoreExecute() {
+        const key = selectedRestoreKey();
+        if (!key) {
+            showToast('Atenção', 'Selecione um backup DEV.', 'warning');
+            return;
+        }
+        if (!confirm('Executar restore DEV em diretório controlado com smoke pós-restore?')) return;
+        const payload = {
+            key: key,
+            restore_target_dir: selectedRestoreTarget(),
+            overwrite_confirmed: false,
+            smoke_port: selectedSmokePort(),
+            enforce_app_boot: false,
+        };
+        const data = await postJson('/admin/api/backups/central/restore/execute', payload);
+        if (data.error || data.success === false) {
+            showToast('Restore DEV', data.error || 'Falha ao executar restore.', 'danger');
+        } else {
+            showToast('Restore DEV', `Execução concluída: ${data.result?.status || 'OK'}`, 'success');
+            document.getElementById('restoreDetailsContent').textContent = JSON.stringify(data.run || data.result || {}, null, 2);
+            if (data.result?.restore_target_dir) {
+                lastRestoreTargetDir = data.result.restore_target_dir;
+                document.getElementById('restoreDevTargetDir').value = lastRestoreTargetDir;
+            }
+            await loadRestoreFromApi();
+        }
+    }
+
+    async function actionRestoreSmoke() {
+        const typedTarget = selectedRestoreTarget(false);
+        const target = typedTarget || lastRestoreTargetDir;
+        if (!target) {
+            showToast('Atenção', 'Informe o diretório restaurado ou execute um restore antes do smoke.', 'warning');
+            return;
+        }
+        const payload = {
+            restore_target_dir: target,
+            smoke_port: selectedSmokePort(),
+            enforce_app_boot: false,
+        };
+        const data = await postJson('/admin/api/backups/central/restore/smoke', payload);
+        if (data.error || data.success === false) {
+            showToast('Smoke DEV', data.error || 'Falha ao executar smoke.', 'danger');
+        } else {
+            showToast('Smoke DEV', `Smoke concluído: ${data.result?.status || 'OK'}`, 'success');
+            document.getElementById('restoreDetailsContent').textContent = JSON.stringify(data.run || data.result || {}, null, 2);
+            await loadRestoreFromApi();
+        }
+    }
+
+    async function loadConfigFromApi() {
+        try {
+            const res = await fetch('/admin/api/backups/central/config');
+            const data = await res.json();
+            if (data.error) {
+                showToast('Erro', data.error, 'danger');
+                return;
+            }
+            configModel = data || {};
+            renderConfig();
+        } catch (error) {
+            showToast('Erro', 'Falha ao carregar configuração da central.', 'danger');
+        }
+    }
+
+    async function handlePrepareRestore(item) {
+        if (!item || !item.key) return;
+        if (!confirm('Preparar restore em diretório controlado DEV?')) return;
+        try {
+            const data = await postJson('/admin/api/backups/central/restore/prepare', {key: item.key});
+            if (data.error || data.success === false) {
+                const msg = data.error || (data.result?.details || []).join(' | ') || 'Falha ao preparar restore.';
+                showToast('Restore DEV', msg, 'danger');
+                return;
+            }
+            showToast('Restore DEV', `Preparado em: ${data.result?.restore_target_dir || '-'}`, 'success');
+            detailsModalContent.textContent = JSON.stringify(data, null, 2);
+            if (data.result?.restore_target_dir) {
+                lastRestoreTargetDir = data.result.restore_target_dir;
+                document.getElementById('restoreDevTargetDir').value = lastRestoreTargetDir;
+            }
+            detailsModal.show();
+            await loadRestoreFromApi();
+        } catch (error) {
+            showToast('Erro', 'Falha ao preparar restore.', 'danger');
+        }
+    }
+
+    function handleDownload(item) {
+        if (!item || !item.key) return;
+        const url = `/admin/api/backups/central/download?key=${encodeURIComponent(item.key)}`;
+        window.open(url, '_blank');
+    }
+
+    document.getElementById('btnApplyFilters').addEventListener('click', loadBackupsFromApi);
+    document.getElementById('btnQuickRefresh').addEventListener('click', async function() {
+        await refreshOverview();
+        await loadHealthFromApi();
+        await loadRestoreFromApi();
+        await loadConfigFromApi();
+    });
+    document.getElementById('btnQuickHealth').addEventListener('click', async function() {
+        await loadHealthFromApi();
+    });
+    document.getElementById('btnQuickCreateBackup').addEventListener('click', async function() {
+        if (!confirm('Deseja iniciar um backup agora?')) return;
+        try {
+            const res = await fetch('/admin/api/backups/trigger', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({type: 'full_system'})
+            });
+            const data = await res.json();
+            if (data.success) {
+                showToast('Sucesso', data.message || 'Backup solicitado.', 'success');
+            } else {
+                showToast('Atenção', data.error || 'Não foi possível iniciar backup neste momento.', 'warning');
+            }
+        } catch (error) {
+            showToast('Erro', 'Falha ao comunicar com o backend.', 'danger');
+        }
+    });
+    document.getElementById('btnRestorePrepare').addEventListener('click', actionRestorePrepare);
+    document.getElementById('btnRestoreExecute').addEventListener('click', actionRestoreExecute);
+    document.getElementById('btnRestoreSmoke').addEventListener('click', actionRestoreSmoke);
+
+    renderAll();
+    loadConfigFromApi();
+    loadHealthFromApi();
+    loadBackupsFromApi();
+    loadRestoreFromApi();
+});
+</script>
+{% endblock %}
