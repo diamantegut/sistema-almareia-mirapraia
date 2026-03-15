@@ -3,8 +3,8 @@ import json
 import time
 from datetime import datetime, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
-from import_sales import process_sales_files
-from fiscal_service import sync_received_nfes, get_last_nsu
+from app.services.import_sales import process_sales_files
+from app.services.fiscal_service import sync_received_nfes, get_last_nsu
 from app.services.system_config_manager import (
     get_data_path, SYSTEM_STATUS_FILE, SETTINGS_FILE, FISCAL_SETTINGS_FILE,
     CLEANING_STATUS_FILE, ROOM_OCCUPANCY_FILE
