@@ -1,0 +1,359 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-link-45deg"></i> Integração OTA · Booking.com</h2>
+        <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-outline-secondary">Voltar</a>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0">Tabela de Integrações OTA</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>OTA</th>
+                            <th>Nome integração</th>
+                            <th>Status</th>
+                            <th>Status atual</th>
+                            <th>Ambiente</th>
+                            <th>Machine Account</th>
+                            <th>Property ID</th>
+                            <th>Hotel Code</th>
+                            <th>URL Supply</th>
+                            <th>URL Secure Supply</th>
+                            <th>Última autenticação</th>
+                            <th>Último teste</th>
+                            <th>Última sincronização</th>
+                            <th>Conexão</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in integrations %}
+                        <tr>
+                            <td>{{ item.nome_ota }}</td>
+                            <td>{{ item.nome_ota }}</td>
+                            <td>
+                                <span class="badge {{ 'bg-success' if item.status == 'active' else 'bg-secondary' }}">
+                                    {{ item.status_label }}
+                                </span>
+                            </td>
+                            <td>{{ item.status_atual_label or '-' }}</td>
+                            <td>{{ item.ambiente }}</td>
+                            <td>{{ item.machine_account_name or '-' }}</td>
+                            <td>{{ item.property_id_booking or '-' }}</td>
+                            <td>{{ item.hotel_code_booking or '-' }}</td>
+                            <td class="small">{{ item.base_url_supply or '-' }}</td>
+                            <td class="small">{{ item.base_url_secure_supply or '-' }}</td>
+                            <td>{{ item.ultima_autenticacao or '-' }}</td>
+                            <td>{{ item.ultimo_teste_conexao or '-' }}</td>
+                            <td>{{ item.ultima_sincronizacao or '-' }}</td>
+                            <td>{{ item.connection_status_label }}</td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="editIntegration('{{ item.id }}')">Editar</button>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="15" class="text-center text-muted">Nenhuma integração cadastrada.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-white">
+            <h5 class="mb-0">Formulário de Cadastro</h5>
+        </div>
+        <div class="card-body">
+            <form method="POST" id="bookingIntegrationForm">
+                <input type="hidden" name="integration_id" id="integration_id">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Nome da integração</label>
+                        <input type="text" class="form-control" name="nome_ota" id="nome_ota" value="Booking.com" required>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Status</label>
+                        <select class="form-select" name="status" id="status" required>
+                            <option value="active">Ativo</option>
+                            <option value="inactive">Inativo</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Ambiente</label>
+                        <select class="form-select" name="ambiente" id="ambiente" required>
+                            <option value="teste">Teste</option>
+                            <option value="producao">Produção</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Status atual integração</label>
+                        <input type="text" class="form-control" id="status_atual_integracao" readonly value="Aguardando teste">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Tipo de autenticação</label>
+                        <input type="text" class="form-control" value="token" readonly>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Machine Account Name</label>
+                        <input type="text" class="form-control" name="machine_account_name" id="machine_account_name">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Client ID</label>
+                        <input type="text" class="form-control" name="client_id" id="client_id" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Client Secret</label>
+                        <input type="password" class="form-control" name="client_secret" id="client_secret" autocomplete="new-password">
+                        <div class="form-text">Ao editar, deixe em branco para manter o segredo atual.</div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Property ID Booking</label>
+                        <input type="text" class="form-control" name="property_id_booking" id="property_id_booking">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Hotel Code Booking</label>
+                        <input type="text" class="form-control" name="hotel_code_booking" id="hotel_code_booking">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Base URL Supply</label>
+                        <input type="url" class="form-control" name="base_url_supply" id="base_url_supply" placeholder="https://...">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Base URL Secure Supply</label>
+                        <input type="url" class="form-control" name="base_url_secure_supply" id="base_url_secure_supply" placeholder="https://...">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Última autenticação</label>
+                        <input type="text" class="form-control" id="ultima_autenticacao" readonly>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Último teste conexão</label>
+                        <input type="text" class="form-control" id="ultimo_teste_conexao" readonly>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Última sincronização</label>
+                        <input type="text" class="form-control" name="ultima_sincronizacao" id="ultima_sincronizacao">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Observações</label>
+                        <textarea class="form-control" rows="2" name="observacoes" id="observacoes"></textarea>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Disponibilidade início</label>
+                        <input type="date" class="form-control" id="availability_start_date">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Disponibilidade fim</label>
+                        <input type="date" class="form-control" id="availability_end_date">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Room Type ID</label>
+                        <input type="text" class="form-control" id="availability_room_type_id" placeholder="Opcional">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Preview resposta disponibilidade</label>
+                        <textarea class="form-control" rows="2" id="availabilityPreview" readonly></textarea>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-4">
+                    <div id="testResult" class="small text-muted">Status da integração: aguardando teste.</div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-outline-primary" onclick="fetchAvailability()">Consultar disponibilidade</button>
+                        <button type="button" class="btn btn-outline-dark" onclick="testAuth()">Testar autenticação</button>
+                        <button type="button" class="btn btn-outline-success" onclick="healthCheck()">Health check</button>
+                        <button type="button" class="btn btn-outline-info" onclick="testConnection()">Testar conexão</button>
+                        <button type="button" class="btn btn-outline-secondary" onclick="resetForm()">Novo cadastro</button>
+                        <button type="submit" class="btn btn-primary">Salvar integração</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script id="integrations-data" type="application/json">{{ integrations | tojson }}</script>
+<script>
+    const integrationsData = JSON.parse(document.getElementById('integrations-data').textContent || '[]');
+
+    function setTestStatus(ok, text) {
+        const el = document.getElementById('testResult');
+        el.className = `small ${ok ? 'text-success' : 'text-danger'}`;
+        el.textContent = text;
+    }
+
+    function editIntegration(id) {
+        const row = integrationsData.find(item => item.id === id);
+        if (!row) return;
+        document.getElementById('integration_id').value = row.id || '';
+        document.getElementById('nome_ota').value = row.nome_ota || 'Booking.com';
+        document.getElementById('status').value = row.status || 'inactive';
+        document.getElementById('ambiente').value = row.ambiente || 'teste';
+        document.getElementById('status_atual_integracao').value = row.status_atual_label || 'Aguardando teste';
+        document.getElementById('machine_account_name').value = row.machine_account_name || '';
+        document.getElementById('client_id').value = row.client_id || '';
+        document.getElementById('client_secret').value = '';
+        document.getElementById('property_id_booking').value = row.property_id_booking || '';
+        document.getElementById('hotel_code_booking').value = row.hotel_code_booking || '';
+        document.getElementById('base_url_supply').value = row.base_url_supply || '';
+        document.getElementById('base_url_secure_supply').value = row.base_url_secure_supply || '';
+        document.getElementById('ultima_autenticacao').value = row.ultima_autenticacao || '';
+        document.getElementById('ultimo_teste_conexao').value = row.ultimo_teste_conexao || '';
+        document.getElementById('ultima_sincronizacao').value = row.ultima_sincronizacao || '';
+        document.getElementById('observacoes').value = row.observacoes || '';
+        setTestStatus(row.ultimo_teste_status === 'success', `Status da integração: ${row.connection_status_label || 'Não testada'}.`);
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+
+    function resetForm() {
+        document.getElementById('bookingIntegrationForm').reset();
+        document.getElementById('integration_id').value = '';
+        document.getElementById('nome_ota').value = 'Booking.com';
+        document.getElementById('status_atual_integracao').value = 'Aguardando teste';
+        document.getElementById('ultima_autenticacao').value = '';
+        document.getElementById('ultimo_teste_conexao').value = '';
+        document.getElementById('availabilityPreview').value = '';
+        setTestStatus(true, 'Status da integração: aguardando teste.');
+    }
+
+    function selectedIntegrationId() {
+        return document.getElementById('integration_id').value || '';
+    }
+
+    function requireSavedIntegration() {
+        const integrationId = selectedIntegrationId();
+        if (integrationId) return integrationId;
+        setTestStatus(false, 'Salve a integração antes de testar autenticação/health check.');
+        return '';
+    }
+
+    async function testAuth() {
+        const integrationId = requireSavedIntegration();
+        if (!integrationId) return;
+        const btn = event.target.closest('button');
+        const original = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Testando auth...';
+        try {
+            const response = await fetch('{{ url_for("admin.ota_booking_test_auth") }}', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ integration_id: integrationId })
+            });
+            const data = await response.json();
+            const ok = !!data.success;
+            const expiresAt = data.expires_at ? ` Token válido até ${data.expires_at}.` : '';
+            setTestStatus(ok, `${data.message || (ok ? 'Autenticação OK.' : 'Falha de autenticação.')}${expiresAt}`);
+            if (ok) {
+                document.getElementById('status_atual_integracao').value = 'Operacional';
+                document.getElementById('ultima_autenticacao').value = new Date().toISOString().slice(0, 19).replace('T', ' ');
+                document.getElementById('ultimo_teste_conexao').value = new Date().toISOString().slice(0, 19).replace('T', ' ');
+            } else {
+                document.getElementById('status_atual_integracao').value = 'Com falha';
+            }
+        } catch (error) {
+            setTestStatus(false, `Erro ao testar autenticação: ${error}`);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = original;
+        }
+    }
+
+    async function healthCheck() {
+        const integrationId = requireSavedIntegration();
+        if (!integrationId) return;
+        const btn = event.target.closest('button');
+        const original = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Health...';
+        try {
+            const response = await fetch(`{{ url_for("admin.ota_booking_health_check") }}?integration_id=${encodeURIComponent(integrationId)}`);
+            const data = await response.json();
+            const ok = !!data.success;
+            setTestStatus(ok, data.message || (ok ? 'Health check OK.' : 'Health check com falha.'));
+            document.getElementById('status_atual_integracao').value = ok ? 'Operacional' : 'Com falha';
+        } catch (error) {
+            setTestStatus(false, `Erro no health check: ${error}`);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = original;
+        }
+    }
+
+    async function testConnection() {
+        const integrationId = requireSavedIntegration();
+        if (!integrationId) return;
+        const btn = event.target.closest('button');
+        const original = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Testando...';
+        const payload = {
+            integration_id: integrationId
+        };
+        try {
+            const response = await fetch('{{ url_for("admin.ota_booking_test_connection") }}', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json();
+            const ok = !!data.success;
+            setTestStatus(ok, data.message || (ok ? 'Conexão OK.' : 'Falha de conexão.'));
+            if (ok) {
+                document.getElementById('status_atual_integracao').value = 'Operacional';
+                document.getElementById('ultimo_teste_conexao').value = new Date().toISOString().slice(0, 19).replace('T', ' ');
+            } else {
+                document.getElementById('status_atual_integracao').value = 'Com falha';
+            }
+        } catch (error) {
+            setTestStatus(false, `Erro ao testar conexão: ${error}`);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = original;
+        }
+    }
+
+    async function fetchAvailability() {
+        const integrationId = requireSavedIntegration();
+        if (!integrationId) return;
+        const btn = event.target.closest('button');
+        const original = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Consultando...';
+        const startDate = document.getElementById('availability_start_date').value;
+        const endDate = document.getElementById('availability_end_date').value || startDate;
+        const roomTypeId = document.getElementById('availability_room_type_id').value || '';
+        try {
+            const params = new URLSearchParams({
+                integration_id: integrationId,
+                start_date: startDate,
+                end_date: endDate
+            });
+            if (roomTypeId) params.set('room_type_id', roomTypeId);
+            const response = await fetch(`{{ url_for("admin.ota_booking_connectivity_availability") }}?${params.toString()}`);
+            const data = await response.json();
+            const ok = !!data.success;
+            setTestStatus(ok, data.message || (ok ? 'Disponibilidade consultada.' : 'Falha na consulta de disponibilidade.'));
+            document.getElementById('availabilityPreview').value = String(data.response_preview || '');
+        } catch (error) {
+            setTestStatus(false, `Erro na consulta de disponibilidade: ${error}`);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = original;
+        }
+    }
+</script>
+{% endblock %}

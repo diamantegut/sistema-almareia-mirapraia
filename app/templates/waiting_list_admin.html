@@ -1,0 +1,555 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <h2 class="mb-0"><i class="bi bi-people-fill"></i> Painel da Fila de Passantes</h2>
+        <div class="d-flex flex-wrap gap-2">
+            <span class="badge bg-{{ 'success' if settings.is_open else 'danger' }} px-3 py-2">{{ 'FILA ABERTA' if settings.is_open else 'FILA FECHADA' }}</span>
+            <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#manualEntryModal"><i class="bi bi-person-plus"></i> Entrada manual</button>
+            <a href="{{ url_for('reception.toggle_queue_status') }}" class="btn btn-outline-secondary"><i class="bi bi-power"></i> {{ 'Fechar' if settings.is_open else 'Abrir' }}</a>
+            <form action="{{ url_for('reception.process_call_sla_timeout') }}" method="POST">
+                <button class="btn btn-outline-dark"><i class="bi bi-alarm"></i> Processar SLA vencido</button>
+            </form>
+            <a href="{{ queue_public_url }}" target="_blank" class="btn btn-outline-primary"><i class="bi bi-box-arrow-up-right"></i> Link Público</a>
+            <a href="{{ url_for('reception.reception_dashboard') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Voltar</a>
+        </div>
+    </div>
+
+    <div class="row g-2 mb-3">
+        <div class="col-6 col-md-3 col-lg-2"><div class="card shadow-sm"><div class="card-body text-center"><div class="text-muted small">Na fila agora</div><div class="fs-4 fw-bold">{{ metrics.active_count }}</div></div></div></div>
+        <div class="col-6 col-md-3 col-lg-2"><div class="card shadow-sm"><div class="card-body text-center"><div class="text-muted small">Média de espera hoje</div><div class="fs-4 fw-bold">{{ metrics.avg_wait_today }}<small class="fs-6">m</small></div></div></div></div>
+        <div class="col-6 col-md-3 col-lg-2"><div class="card shadow-sm"><div class="card-body text-center"><div class="text-muted small">Chamados hoje</div><div class="fs-4 fw-bold">{{ metrics.called_today }}</div></div></div></div>
+        <div class="col-6 col-md-3 col-lg-2"><div class="card shadow-sm"><div class="card-body text-center"><div class="text-muted small">Sentados hoje</div><div class="fs-4 fw-bold">{{ metrics.seated_today }}</div></div></div></div>
+        <div class="col-6 col-md-3 col-lg-2"><div class="card shadow-sm"><div class="card-body text-center"><div class="text-muted small">Desistências hoje</div><div class="fs-4 fw-bold">{{ metrics.desist_today }}</div></div></div></div>
+        <div class="col-6 col-md-3 col-lg-2"><div class="card shadow-sm"><div class="card-body text-center"><div class="text-muted small">Cancelados hoje</div><div class="fs-4 fw-bold">{{ metrics.cancelled_today }}</div></div></div></div>
+        <div class="col-6 col-md-3 col-lg-2"><div class="card shadow-sm"><div class="card-body text-center"><div class="text-muted small">Média chamado → sentado</div><div class="fs-4 fw-bold">{{ metrics.avg_called_to_seated_today }}<small class="fs-6">m</small></div></div></div></div>
+        <div class="col-6 col-md-3 col-lg-2"><div class="card shadow-sm"><div class="card-body text-center"><div class="text-muted small">Conversão para sentado</div><div class="fs-4 fw-bold">{{ metrics.conversion_to_seated_pct }}<small class="fs-6">%</small></div></div></div></div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">1) Fila ativa</h5>
+            <span class="small text-muted">Aguardando + chamados</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Posição</th>
+                        <th>Cliente</th>
+                        <th>Contato</th>
+                        <th>Pessoas</th>
+                        <th>Entrada</th>
+                        <th>Espera</th>
+                        <th>Status</th>
+                        <th>Observações internas</th>
+                        <th style="min-width: 320px;">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in queue %}
+                    <tr class="{{ 'table-warning' if item.wait_minutes > 45 else '' }}">
+                        <td class="fw-bold">#{{ item.position }}</td>
+                        <td>
+                            <div class="fw-semibold">{{ item.name }}</div>
+                            <div class="small text-muted">{{ item.country_code }} / {{ item.phone_normalized or item.phone }}</div>
+                            {% if item.is_recurring %}
+                            <div class="small text-primary">Recorrente · visita #{{ item.visit_number }}</div>
+                            <div class="small text-muted">Últimas: {% for v in item.recent_visits %}{{ (v.entry_time or '')[:10] }} ({{ v.status }}){% if not loop.last %}, {% endif %}{% endfor %}</div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div>{{ item.phone }}</div>
+                            <div class="small text-muted">Canal padrão: WhatsApp</div>
+                        </td>
+                        <td><span class="badge bg-secondary">{{ item.party_size }}</span></td>
+                        <td>{{ item.entry_time_fmt }}</td>
+                        <td><span class="fw-bold {{ 'text-danger' if item.wait_minutes > 45 else 'text-success' }}">{{ item.wait_minutes }} min</span></td>
+                        <td>
+                            <span class="badge {{ 'bg-info text-dark' if item.status == 'chamado' else 'bg-warning text-dark' }}">{{ item.status }}</span>
+                            {% if item.call_expires_at %}
+                            <div class="small text-muted mt-1">Limite: {{ item.call_expires_at[:19].replace('T', ' ') }}</div>
+                            {% if item.call_remaining_minutes is not none %}
+                            <div class="small {{ 'text-danger' if item.call_sla_expired else 'text-muted' }}">
+                                {% if item.call_sla_expired %}SLA expirado{% else %}Restante: {{ item.call_remaining_minutes }} min{% endif %}
+                            </div>
+                            {% endif %}
+                            {% endif %}
+                        </td>
+                        <td>
+                            <form action="{{ url_for('reception.update_queue_customer_notes', id=item.id) }}" method="POST" class="d-flex gap-1">
+                                <textarea name="internal_notes" class="form-control form-control-sm" rows="2" placeholder="Anotações internas">{{ item.internal_notes or '' }}</textarea>
+                                <button class="btn btn-outline-secondary btn-sm" type="submit">Salvar</button>
+                            </form>
+                            {% if item.internal_notes_history %}
+                            <div class="small text-muted mt-1">
+                                Últimas edições:
+                                {% for h in item.internal_notes_history[-2:] %}
+                                    <span class="badge bg-light text-dark border">{{ h.edited_by }} {{ (h.edited_at or '')[:16].replace('T',' ') }}</span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="d-flex flex-wrap gap-1 mb-1">
+                                <button type="button" class="btn btn-success btn-sm" onclick='openCallModal({{ {"id": item.id, "name": item.name, "wa_phone": item.wa_phone, "call_message": item.call_message, "call_timeout_minutes": (item.call_timeout_minutes or settings.call_response_timeout_minutes or 15)}|tojson|safe }})'><i class="bi bi-whatsapp"></i> Chamar</button>
+                                <form action="{{ url_for('reception.call_queue_customer', id=item.id) }}" method="POST">
+                                    <input type="hidden" name="channel" value="whatsapp">
+                                    <input type="hidden" name="reason" value="Reenvio de chamada">
+                                    <input type="hidden" name="timeout_minutes" value="{{ item.call_timeout_minutes or settings.call_response_timeout_minutes or 15 }}">
+                                    <input type="hidden" name="resend" value="1">
+                                    <button type="submit" class="btn btn-outline-success btn-sm">Reenviar</button>
+                                </form>
+                                <button type="button" class="btn btn-primary btn-sm" onclick="openSeatModal('{{ item.id }}','{{ item.name|e }}')">Marcar sentado</button>
+                            </div>
+                            <div class="d-flex flex-wrap gap-1">
+                                <button type="button" class="btn btn-outline-danger btn-sm" onclick="statusAction('{{ url_for('reception.update_queue_status', id=item.id, status='cancelado_pela_equipe') }}', 'Motivo do cancelamento pela equipe (opcional):')">Cancelar</button>
+                                <button type="button" class="btn btn-outline-warning btn-sm" onclick="statusAction('{{ url_for('reception.update_queue_status', id=item.id, status='desistiu') }}', 'Motivo da desistência (opcional):')">Desistiu</button>
+                                <button type="button" class="btn btn-outline-dark btn-sm" onclick="statusAction('{{ url_for('reception.update_queue_status', id=item.id, status='nao_compareceu') }}', 'Observação de não comparecimento (opcional):')">Não compareceu</button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="9" class="text-center py-4 text-muted">Nenhum cliente ativo na fila.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-white">
+            <h5 class="mb-0">2) Histórico completo da fila</h5>
+        </div>
+        <div class="card-body border-bottom">
+            <form method="GET" action="{{ url_for('reception.reception_waiting_list') }}" class="row g-2">
+                <div class="col-6 col-md-2"><input type="date" class="form-control form-control-sm" name="start_date" value="{{ history_filters.start_date }}"></div>
+                <div class="col-6 col-md-2"><input type="date" class="form-control form-control-sm" name="end_date" value="{{ history_filters.end_date }}"></div>
+                <div class="col-6 col-md-2">
+                    <select class="form-select form-select-sm" name="status">
+                        <option value="">Status</option>
+                        {% for st in ['aguardando','chamado','sentado','desistiu','cancelado_pela_equipe','nao_compareceu','expirado'] %}
+                        <option value="{{ st }}" {{ 'selected' if history_filters.status == st else '' }}>{{ st }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-6 col-md-2"><input type="text" class="form-control form-control-sm" name="phone" placeholder="Telefone" value="{{ history_filters.phone }}"></div>
+                <div class="col-6 col-md-2"><input type="text" class="form-control form-control-sm" name="name" placeholder="Nome" value="{{ history_filters.name }}"></div>
+                <div class="col-6 col-md-1"><input type="number" class="form-control form-control-sm" name="party_size" placeholder="Pax" min="1" max="60" value="{{ history_filters.party_size }}"></div>
+                <div class="col-6 col-md-2"><input type="text" class="form-control form-control-sm" name="collaborator" placeholder="Colaborador" value="{{ history_filters.collaborator }}"></div>
+                <div class="col-6 col-md-1"><input type="text" class="form-control form-control-sm" name="table_id" placeholder="Mesa" value="{{ history_filters.table_id }}"></div>
+                <div class="col-6 col-md-1"><input type="number" class="form-control form-control-sm" name="wait_min" placeholder="Espera mín" min="0" value="{{ history_filters.wait_min }}"></div>
+                <div class="col-6 col-md-1"><input type="number" class="form-control form-control-sm" name="wait_max" placeholder="Espera máx" min="0" value="{{ history_filters.wait_max }}"></div>
+                <div class="col-6 col-md-2">
+                    <select class="form-select form-select-sm" name="consent_mode">
+                        <option value="">Consentimento</option>
+                        <option value="survey_only" {{ 'selected' if history_filters.consent_mode == 'survey_only' else '' }}>Apenas pesquisa</option>
+                        <option value="marketing_only" {{ 'selected' if history_filters.consent_mode == 'marketing_only' else '' }}>Apenas marketing</option>
+                        <option value="both" {{ 'selected' if history_filters.consent_mode == 'both' else '' }}>Pesquisa + marketing</option>
+                        <option value="none" {{ 'selected' if history_filters.consent_mode == 'none' else '' }}>Nenhum</option>
+                    </select>
+                </div>
+                <div class="col-6 col-md-2">
+                    <select class="form-select form-select-sm" name="country_code">
+                        <option value="">País</option>
+                        {% for c in countries %}
+                        <option value="{{ c.code }}" {{ 'selected' if history_filters.country_code == c.code else '' }}>{{ c.code }} (+{{ c.dial_code }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12 col-md-2 d-grid"><button type="submit" class="btn btn-sm btn-primary">Filtrar</button></div>
+                <div class="col-12 col-md-2 d-grid"><a href="{{ url_for('reception.reception_waiting_list') }}" class="btn btn-sm btn-outline-secondary">Limpar</a></div>
+                <div class="col-12 col-md-2 d-grid"><a href="{{ url_for('reception.export_waiting_list_history', format='csv', start_date=history_filters.start_date, end_date=history_filters.end_date, status=history_filters.status, phone=history_filters.phone, name=history_filters.name, party_size=history_filters.party_size, collaborator=history_filters.collaborator, table_id=history_filters.table_id, country_code=history_filters.country_code, wait_min=history_filters.wait_min, wait_max=history_filters.wait_max, consent_mode=history_filters.consent_mode) }}" class="btn btn-sm btn-outline-success">Exportar CSV</a></div>
+                <div class="col-12 col-md-2 d-grid"><a href="{{ url_for('reception.export_waiting_list_history', format='xlsx', start_date=history_filters.start_date, end_date=history_filters.end_date, status=history_filters.status, phone=history_filters.phone, name=history_filters.name, party_size=history_filters.party_size, collaborator=history_filters.collaborator, table_id=history_filters.table_id, country_code=history_filters.country_code, wait_min=history_filters.wait_min, wait_max=history_filters.wait_max, consent_mode=history_filters.consent_mode) }}" class="btn btn-sm btn-outline-success">Exportar Excel</a></div>
+            </form>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Entrada</th>
+                        <th>Cliente</th>
+                        <th>Telefone</th>
+                        <th>País</th>
+                        <th>Pessoas</th>
+                        <th>Status final</th>
+                        <th>Mesa</th>
+                        <th>Espera até chamado</th>
+                        <th>Chamado → sentado</th>
+                        <th>Total até encerramento</th>
+                        <th>Motivo</th>
+                        <th>Pesquisa</th>
+                        <th>Marketing</th>
+                        <th>Colaborador</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in queue_history %}
+                    <tr>
+                        <td class="small">{{ item.entry_time[:19].replace('T', ' ') if item.entry_time else '-' }}</td>
+                        <td>{{ item.name }}</td>
+                        <td>{{ item.phone_raw or item.phone }}</td>
+                        <td>{{ item.country_code or '-' }}</td>
+                        <td>{{ item.party_size }}</td>
+                        <td><span class="badge bg-light text-dark border">{{ item.status }}</span></td>
+                        <td>
+                            {% if item.table_history and item.table_history|length > 0 %}
+                                {% for th in item.table_history %}
+                                    <span class="badge bg-light text-dark border">{{ th.table_name or ('Mesa ' ~ th.table_id) }}</span>
+                                {% endfor %}
+                            {% else %}
+                                {{ item.current_table_id or '-' }}
+                            {% endif %}
+                        </td>
+                        <td>{{ item.wait_to_called_minutes if item.wait_to_called_minutes is not none else '-' }} min</td>
+                        <td>{{ item.called_to_seated_minutes if item.called_to_seated_minutes is not none else '-' }} min</td>
+                        <td>{{ item.total_to_finish_minutes if item.total_to_finish_minutes is not none else '-' }} min</td>
+                        <td>{{ item.status_reason or '-' }}</td>
+                        <td>{% if item.received_survey %}<span class="badge bg-success">Recebeu</span>{% else %}<span class="badge bg-secondary">Não</span>{% endif %}</td>
+                        <td>{% if item.accepted_marketing %}<span class="badge bg-primary">Aceitou</span>{% else %}<span class="badge bg-light text-dark border">Não</span>{% endif %}</td>
+                        <td>{{ item.updated_by or item.created_by or '-' }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="14" class="text-center text-muted py-4">Sem registros para os filtros selecionados.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="row g-3 mt-3">
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white"><h6 class="mb-0">Configurações administrativas</h6></div>
+                <div class="card-body">
+                    <form action="{{ url_for('reception.update_queue_settings') }}" method="POST" class="row g-2">
+                        <div class="col-6"><label class="form-label small">Tempo médio por grupo</label><input type="number" name="avg_wait" class="form-control form-control-sm" value="{{ settings.average_wait_per_party }}" min="1" max="180" required></div>
+                        <div class="col-6"><label class="form-label small">Capacidade máxima</label><input type="number" name="max_size" class="form-control form-control-sm" value="{{ settings.max_queue_size }}" min="1" max="500" required></div>
+                        <div class="col-6"><label class="form-label small">Hora de encerramento</label><input type="number" name="cutoff_hour" class="form-control form-control-sm" value="{{ settings.cutoff_hour }}" min="0" max="23" required></div>
+                        <div class="col-6"><label class="form-label small">Máx. pessoas por grupo</label><input type="number" name="max_party_size" class="form-control form-control-sm" value="{{ settings.max_party_size }}" min="1" max="60" required></div>
+                        <div class="col-6"><label class="form-label small">Bloqueio duplicidade (min)</label><input type="number" name="duplicate_block_minutes" class="form-control form-control-sm" value="{{ settings.duplicate_block_minutes or 5 }}" min="0" max="120" required></div>
+                        <div class="col-6"><label class="form-label small">Tempo limite resposta (min)</label><input type="number" name="call_response_timeout_minutes" class="form-control form-control-sm" value="{{ settings.call_response_timeout_minutes or 15 }}" min="1" max="180" required></div>
+                        <div class="col-6"><label class="form-label small">SLA comparecimento (min)</label><input type="number" name="call_presence_sla_minutes" class="form-control form-control-sm" value="{{ settings.call_presence_sla_minutes or settings.call_response_timeout_minutes or 15 }}" min="1" max="180" required></div>
+                        <div class="col-6"><label class="form-label small">Ação após SLA</label><select name="call_timeout_action" class="form-select form-select-sm"><option value="manual" {{ 'selected' if settings.call_timeout_action != 'automatico' else '' }}>Manual</option><option value="automatico" {{ 'selected' if settings.call_timeout_action == 'automatico' else '' }}>Automática</option></select></div>
+                        <div class="col-6"><label class="form-label small">Capacidade referência chamada inteligente</label><input type="number" name="smart_call_target_capacity" class="form-control form-control-sm" value="{{ settings.smart_call_target_capacity or 4 }}" min="1" max="20"></div>
+                        <div class="col-6 d-flex align-items-end"><div class="form-check"><input class="form-check-input" type="checkbox" name="smart_call_enabled" id="smartCallEnabled" {{ 'checked' if settings.smart_call_enabled else '' }}><label class="form-check-label small" for="smartCallEnabled">Preparar chamada inteligente por capacidade</label></div></div>
+                        <div class="col-12"><label class="form-label small">Link público customizado</label><input type="url" name="public_queue_url" class="form-control form-control-sm" value="{{ settings.public_queue_url or '' }}"></div>
+                        <div class="col-12"><label class="form-label small">Regras da casa</label><textarea name="house_rules" rows="3" class="form-control form-control-sm">{{ settings.house_rules|join('\n') }}</textarea></div>
+                        <div class="col-12 d-grid"><button type="submit" class="btn btn-secondary btn-sm">Salvar configurações</button></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h6 class="mb-0">Eventos recentes</h6>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Data/Hora</th>
+                                <th>Ação</th>
+                                <th>Usuário</th>
+                                <th>Detalhes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ev in queue_events[:80] %}
+                            <tr>
+                                <td class="small">{{ ev.timestamp[:19].replace('T', ' ') if ev.timestamp else '-' }}</td>
+                                <td>{{ ev.event_type }}</td>
+                                <td>{{ ev.user or 'sistema' }}</td>
+                                <td class="small">{{ ev.details if ev.details else '-' }}</td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="4" class="text-center py-3 text-muted">Sem eventos recentes.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="seatModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="seatModalForm" method="POST">
+                <div class="modal-header">
+                    <h5 class="modal-title">Marcar como sentado</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-2 text-muted small" id="seatModalCustomer"></div>
+                    <div class="mb-2">
+                        <label class="form-label">Buscar mesa</label>
+                        <input type="text" id="tableSearchInput" class="form-control" placeholder="Digite número da mesa">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Mesa do restaurante</label>
+                        <select name="table_id" id="seatTableSelect" class="form-select" required>
+                            <option value="">Selecione a mesa</option>
+                            {% for table_id in available_tables %}
+                            <option value="{{ table_id }}" data-table-status="available">
+                                Mesa {{ table_id }} - Disponível
+                            </option>
+                            {% endfor %}
+                        </select>
+                        {% if not available_tables %}
+                        <div class="small text-danger mt-1">Nenhuma mesa disponível agora. Atualize a página e tente novamente.</div>
+                        {% endif %}
+                    </div>
+                    <div class="small d-flex flex-wrap gap-2 mb-2">
+                        <span class="badge bg-success">Disponível</span>
+                        <span class="badge bg-danger">Ocupada</span>
+                        <span class="badge bg-warning text-dark">Reservada</span>
+                        <span class="badge bg-secondary">Indisponível</span>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Observação</label>
+                        <input type="text" name="reason" class="form-control" value="Cliente sentado na recepção">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Confirmar e sentar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="callModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="callModalForm" method="POST">
+                <div class="modal-header">
+                    <h5 class="modal-title">Chamar cliente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-2 text-muted small" id="callModalCustomer"></div>
+                    <div class="mb-2 text-muted small" id="callModalPhone"></div>
+                    <input type="hidden" name="channel" value="whatsapp">
+                    <div class="mb-2">
+                        <label class="form-label">Tempo limite (min)</label>
+                        <input type="number" class="form-control" id="callTimeoutInput" name="timeout_minutes" min="1" max="180" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Motivo</label>
+                        <input type="text" class="form-control" name="reason" value="Cliente chamado">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Mensagem WhatsApp</label>
+                        <textarea class="form-control" id="callMessageInput" rows="4"></textarea>
+                    </div>
+                    <a id="callWhatsappLink" href="#" class="btn btn-outline-success btn-sm" target="_blank" rel="noopener noreferrer"><i class="bi bi-whatsapp"></i> Abrir WhatsApp com mensagem</a>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Registrar chamada</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="manualEntryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{{ url_for('reception.reception_waiting_list_manual_entry') }}" method="POST">
+                <div class="modal-header">
+                    <h5 class="modal-title">Entrada manual na fila</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-2">
+                        <label class="form-label">Nome</label>
+                        <input type="text" class="form-control" name="name" maxlength="80" required>
+                    </div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-5">
+                            <label class="form-label">País</label>
+                            <select class="form-select" name="country_code" id="manualCountryCode">
+                                {% for c in countries %}
+                                <option value="{{ c.code }}" data-dial="{{ c.dial_code }}" {% if c.code == 'BR' %}selected{% endif %}>{{ c.code }} (+{{ c.dial_code }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-7">
+                            <label class="form-label">Telefone</label>
+                            <input type="text" class="form-control" name="phone" required>
+                            <input type="hidden" name="country_dial_code" id="manualCountryDialCode" value="">
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Pessoas</label>
+                        <input type="number" class="form-control" name="party_size" min="1" max="60" required>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="consent_survey" id="manualConsentSurvey">
+                        <label class="form-check-label" for="manualConsentSurvey">Aceita receber pesquisa de satisfação</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="consent_marketing" id="manualConsentMarketing">
+                        <label class="form-check-label" for="manualConsentMarketing">Aceita receber campanhas</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Adicionar à fila</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function statusAction(baseUrl, promptText) {
+        const reason = prompt(promptText, '');
+        if (reason === null) return;
+        const sep = baseUrl.includes('?') ? '&' : '?';
+        window.location.href = baseUrl + sep + 'reason=' + encodeURIComponent(reason || '');
+    }
+
+    const seatModalEl = document.getElementById('seatModal');
+    const callModalEl = document.getElementById('callModal');
+    let seatModal = null;
+    let callModal = null;
+
+    function initBootstrapModals() {
+        if (!window.bootstrap || !window.bootstrap.Modal) return;
+        if (!seatModal && seatModalEl) {
+            seatModal = window.bootstrap.Modal.getOrCreateInstance(seatModalEl);
+        }
+        if (!callModal && callModalEl) {
+            callModal = window.bootstrap.Modal.getOrCreateInstance(callModalEl);
+        }
+    }
+
+    function submitCallAndOpenWhatsapp(payload) {
+        if (!payload) return;
+        const entryId = String(payload.id || '');
+        const waPhone = String(payload.wa_phone || '').replace(/\D/g, '');
+        const timeout = Number(payload.call_timeout_minutes || 15);
+        const reason = 'Cliente chamado';
+        const message = String(payload.call_message || '');
+        if (waPhone) {
+            const waUrl = 'https://wa.me/' + encodeURIComponent(waPhone) + '?text=' + encodeURIComponent(message);
+            window.open(waUrl, '_blank', 'noopener,noreferrer');
+        }
+        if (!entryId) return;
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = "{{ url_for('reception.call_queue_customer', id='__ENTRY__') }}".replace('__ENTRY__', entryId);
+        const fields = {
+            channel: 'whatsapp',
+            reason: reason,
+            timeout_minutes: timeout
+        };
+        Object.keys(fields).forEach(function (key) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = key;
+            input.value = String(fields[key]);
+            form.appendChild(input);
+        });
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+    function openSeatModal(entryId, customerName) {
+        initBootstrapModals();
+        if (!seatModal) return;
+        const form = document.getElementById('seatModalForm');
+        const customer = document.getElementById('seatModalCustomer');
+        const searchInput = document.getElementById('tableSearchInput');
+        const select = document.getElementById('seatTableSelect');
+        form.action = "{{ url_for('reception.seat_queue_customer', id='__ENTRY__') }}".replace('__ENTRY__', entryId);
+        customer.textContent = 'Cliente: ' + customerName;
+        searchInput.value = '';
+        select.value = '';
+        seatModal.show();
+    }
+
+    function updateCallWhatsappLink() {
+        const phone = String(document.getElementById('callModalPhone').getAttribute('data-phone') || '').replace(/\D/g, '');
+        const message = document.getElementById('callMessageInput').value || '';
+        const link = document.getElementById('callWhatsappLink');
+        if (!link) return;
+        if (!phone) {
+            link.href = '#';
+            link.classList.add('disabled');
+            return;
+        }
+        link.classList.remove('disabled');
+        link.href = 'https://wa.me/' + encodeURIComponent(phone) + '?text=' + encodeURIComponent(message);
+    }
+
+    function openCallModal(payload) {
+        if (!payload) return;
+        initBootstrapModals();
+        if (!callModal) {
+            submitCallAndOpenWhatsapp(payload);
+            return;
+        }
+        const entryId = String(payload.id || '');
+        const name = String(payload.name || '');
+        const waPhone = String(payload.wa_phone || '');
+        const callMessage = String(payload.call_message || '');
+        const timeout = Number(payload.call_timeout_minutes || 15);
+        const form = document.getElementById('callModalForm');
+        form.action = "{{ url_for('reception.call_queue_customer', id='__ENTRY__') }}".replace('__ENTRY__', entryId);
+        document.getElementById('callModalCustomer').textContent = 'Cliente: ' + name;
+        const phoneLabel = document.getElementById('callModalPhone');
+        phoneLabel.textContent = 'WhatsApp: ' + (waPhone || 'não informado');
+        phoneLabel.setAttribute('data-phone', waPhone);
+        document.getElementById('callTimeoutInput').value = timeout;
+        document.getElementById('callMessageInput').value = callMessage;
+        updateCallWhatsappLink();
+        callModal.show();
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        initBootstrapModals();
+        const searchInput = document.getElementById('tableSearchInput');
+        const select = document.getElementById('seatTableSelect');
+        const callMessageInput = document.getElementById('callMessageInput');
+        const countrySelect = document.getElementById('manualCountryCode');
+        const dialCodeInput = document.getElementById('manualCountryDialCode');
+
+        if (callMessageInput) {
+            callMessageInput.addEventListener('input', updateCallWhatsappLink);
+        }
+
+        if (countrySelect && dialCodeInput) {
+            const syncDialCode = function () {
+                const selected = countrySelect.options[countrySelect.selectedIndex];
+                dialCodeInput.value = selected ? String(selected.getAttribute('data-dial') || '') : '';
+            };
+            countrySelect.addEventListener('change', syncDialCode);
+            syncDialCode();
+        }
+
+        if (searchInput && select) {
+            searchInput.addEventListener('input', function () {
+                const q = String(searchInput.value || '').trim();
+                if (!q) return;
+                for (let i = 0; i < select.options.length; i++) {
+                    const opt = select.options[i];
+                    if (opt.disabled) continue;
+                    if (String(opt.value).includes(q)) {
+                        select.selectedIndex = i;
+                        break;
+                    }
+                }
+            });
+        }
+    });
+    setTimeout(function () { location.reload(); }, 30000);
+</script>
+{% endblock %}

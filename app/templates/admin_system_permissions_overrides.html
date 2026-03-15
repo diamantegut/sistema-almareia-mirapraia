@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Overrides</h2>
+        <a href="{{ url_for('admin.admin_system_permissions') }}" class="btn btn-outline-secondary">Voltar</a>
+    </div>
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr><th>override_id</th><th>usuario</th><th>ação</th><th>área</th><th>status</th><th>ttl</th><th>created_at</th><th>Ações</th></tr>
+                </thead>
+                <tbody>
+                    {% for row in items %}
+                    <tr>
+                        <td>{{ row.override_id }}</td>
+                        <td>{{ row.usuario }}</td>
+                        <td>{{ row.acao }}</td>
+                        <td>{{ row.area }}</td>
+                        <td>{{ row.status }}</td>
+                        <td>{{ row.ttl }}</td>
+                        <td>{{ row.created_at }}</td>
+                        <td>
+                            <div class="d-flex gap-1">
+                                <form method="POST"><input type="hidden" name="override_id" value="{{ row.override_id }}"><input type="hidden" name="action" value="approve"><button class="btn btn-sm btn-success">Aprovar</button></form>
+                                <form method="POST"><input type="hidden" name="override_id" value="{{ row.override_id }}"><input type="hidden" name="action" value="revoke"><button class="btn btn-sm btn-warning">Revogar</button></form>
+                                <form method="POST"><input type="hidden" name="override_id" value="{{ row.override_id }}"><input type="hidden" name="action" value="expire"><button class="btn btn-sm btn-danger">Expirar</button></form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

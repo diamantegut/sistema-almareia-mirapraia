@@ -1,0 +1,873 @@
+{% extends 'base.html' %}
+
+{% block title %}Porcionar Item - Cozinha{% endblock %}
+
+{% block content %}
+<div class="service-page">
+    <div class="service-header">
+        <span class="service-icon">🥩</span>
+        <h2>Porcionar Item</h2>
+    </div>
+    
+    <div style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+        <a href="{{ url_for('main.index') }}" class="action-btn" style="background-color: #95a5a6; text-decoration: none;">← Voltar</a>
+        {% if session.get('role') in ['admin', 'gerente', 'supervisor'] %}
+        <a href="{{ url_for('kitchen.kitchen_portion_settings') }}" class="action-btn" style="background-color: #34495e; text-decoration: none;">
+            ⚙ Configurações de Porcionamento
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <p class="description">Siga as etapas abaixo para registrar o porcionamento e calcular o rendimento.</p>
+        <div class="workflow-dashboard">
+            <div class="workflow-steps">
+                <div class="workflow-title">Progresso do Procedimento</div>
+                <div id="step-indicator-1" class="workflow-step-item">1. Selecionar origem <span class="status-tag">Pendente</span></div>
+                <div id="step-indicator-2" class="workflow-step-item">2. Itens de origem (kit) <span class="status-tag">Opcional</span></div>
+                <div id="step-indicator-3" class="workflow-step-item">3. Informar peso congelado <span class="status-tag">Pendente</span></div>
+                <div id="step-indicator-4" class="workflow-step-item">4. Informar peso descongelado <span class="status-tag">Pendente</span></div>
+                <div id="step-indicator-5" class="workflow-step-item">5. Informar aparas e descarte <span class="status-tag">Pendente</span></div>
+                <div id="step-indicator-6" class="workflow-step-item">6. Informar cocção <span class="status-tag">Opcional</span></div>
+                <div id="step-indicator-7" class="workflow-step-item">7. Definir porções destino <span class="status-tag">Pendente</span></div>
+            </div>
+            <div class="workflow-metrics">
+                <div class="metric-card">
+                    <div class="metric-label">Peso útil estimado</div>
+                    <div id="metric-useful" class="metric-value">- g</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Rendimento global</div>
+                    <div id="metric-yield" class="metric-value">- %</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Diferença porcionada</div>
+                    <div id="metric-diff" class="metric-value">- g</div>
+                </div>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('kitchen.kitchen_portion') }}" onsubmit="return validateForm()">
+            <!-- Passo 1: Seleção do Item -->
+            <div class="step-section" id="step-section-1">
+                <h3>1. Selecionar Item (Origem)</h3>
+                <div class="row g-3">
+                    <div class="col-md-7">
+                        <div class="form-group mb-0">
+                            <label for="origin_product">Produto a Porcionar:</label>
+                            <input type="text" id="origin_product" name="origin_product" list="originProductsList" required placeholder="Digite para buscar..." style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ddd;" autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="form-group mb-0">
+                            <label for="origin_supplier">Fornecedor de Origem:</label>
+                            <select id="origin_supplier" name="origin_supplier" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
+                                <option value="">Não informado</option>
+                                {% for supplier in suppliers %}
+                                <option value="{{ supplier }}">{{ supplier }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Passo 2: Itens de Origem (Kits) -->
+            <div class="step-section" id="step-section-2">
+                <h3>2. Itens de Origem (Opcional - Kits)</h3>
+                <p style="font-size: 0.9rem; color: #555;">
+                    Use esta seção quando estiver montando um kit com vários itens de origem.
+                </p>
+                
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle" style="background: white; border-radius: 5px; overflow: hidden;">
+                        <thead style="background: #ecf0f1;">
+                            <tr>
+                                <th style="width: 60%; padding: 10px;">Produto de Origem</th>
+                                <th style="width: 30%; padding: 10px;">Peso (g)</th>
+                                <th style="width: 10%; padding: 10px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="origin-components-rows">
+                            <!-- Rows will be added here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <button type="button" id="add-origin-row-btn" style="background: #1e3a8a; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; margin-top: 10px;">
+                    <i class="bi bi-plus-circle-fill"></i> Adicionar Item
+                </button>
+                <small style="display:block; margin-top:8px; color:#7f8c8d;">
+                    Se não estiver montando um kit, ignore esta seção.
+                </small>
+            </div>
+
+            <!-- Datalist for Origin Products -->
+            <datalist id="originProductsList">
+                {% for p in origin_products %}
+                <option value="{{ p.name }}">{{ p.unit | abbreviate_unit }}</option>
+                {% endfor %}
+            </datalist>
+
+            <!-- Passo 3: Peso Congelado -->
+            <div class="step-section" id="step-section-3">
+                <h3>3. Peso Congelado (Saída do Estoque)</h3>
+                <div class="form-group">
+                    <label for="frozen_weight">Peso Bruto / Congelado (g):</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="number" id="frozen_weight" name="frozen_weight" step="1" min="0" required placeholder="0" style="flex: 1; padding: 10px; border-radius: 5px; border: 1px solid #ddd;" onchange="updateCalculations()">
+                        <span class="unit-display" style="font-weight: bold; color: #7f8c8d;">g</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Passo 4: Peso Descongelado -->
+            <div class="step-section" id="step-section-4">
+                <h3>4. Peso Descongelado</h3>
+                <div class="form-group">
+                    <label for="thawed_weight">Peso após descongelamento (g):</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="number" id="thawed_weight" name="thawed_weight" step="1" min="0" required placeholder="0" style="flex: 1; padding: 10px; border-radius: 5px; border: 1px solid #ddd;" onchange="updateCalculations()">
+                        <span class="unit-display" style="font-weight: bold; color: #7f8c8d;">g</span>
+                    </div>
+                    <small id="thaw_loss_display" style="color: #e74c3c;"></small>
+                </div>
+            </div>
+
+            <!-- Passo 5: Aparas e Descartes -->
+            <div class="step-section" id="step-section-5">
+                <h3>5. Aparas e Descartes</h3>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-group mb-0">
+                            <label for="trim_weight">Peso de Aparas (retorna ao estoque bruto) (g):</label>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <input type="number" id="trim_weight" name="trim_weight" step="1" min="0" required placeholder="0" style="flex: 1; padding: 10px; border-radius: 5px; border: 1px solid #ddd;" onchange="updateCalculations()">
+                                <span class="unit-display" style="font-weight: bold; color: #7f8c8d;">g</span>
+                            </div>
+                            <small id="trim_return_display" style="color: #16a34a;"></small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-0">
+                            <label for="discard_weight">Peso de Descarte (desperdício) (g):</label>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <input type="number" id="discard_weight" name="discard_weight" step="1" min="0" required placeholder="0" style="flex: 1; padding: 10px; border-radius: 5px; border: 1px solid #ddd;" onchange="updateCalculations()">
+                                <span class="unit-display" style="font-weight: bold; color: #7f8c8d;">g</span>
+                            </div>
+                            <small id="discard_loss_display" style="color: #dc2626;"></small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Passo 6: Peso Cozido -->
+            <div class="step-section" id="step-section-6">
+                <h3>6. Peso Cozido (Após Cocção)</h3>
+                <div class="form-group">
+                    <label for="cooked_weight">Peso Final Cozido (g):</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="number" id="cooked_weight" name="cooked_weight" step="1" min="0" placeholder="Opcional (0 se não houver cocção)" style="flex: 1; padding: 10px; border-radius: 5px; border: 1px solid #ddd;" onchange="updateCalculations()">
+                        <span class="unit-display" style="font-weight: bold; color: #7f8c8d;">g</span>
+                    </div>
+                    <small id="cooking_loss_display" style="color: #e74c3c;"></small>
+                    <div id="net_weight_display" style="color: #27ae60; font-weight: bold; margin-top: 5px;"></div>
+                </div>
+            </div>
+
+            <!-- Passo 7: Seleção da Porção Gerada -->
+            <div class="step-section" id="step-section-7">
+                <h3>7. Itens Gerados (Porções)</h3>
+                <div id="destination-rows">
+                    <div class="destination-row form-row" style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed #ddd; display: flex; gap: 15px; align-items: flex-start;">
+                        <div class="form-group" style="flex: 2;">
+                            <label>Tipo de Porção:</label>
+                            <input type="text" name="dest_product[]" class="dest-product-input" list="destinationProductsList" placeholder="Digite para buscar..." required style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>Nº Porções:</label>
+                            <input type="number" name="dest_count[]" class="dest-count-input" step="1" min="1" required placeholder="0" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>Peso Total (g):</label>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <input type="number" name="final_qty[]" class="final-qty-input" step="1" min="0" required placeholder="0" style="flex: 1; padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
+                                <span class="dest-unit-display unit-display" style="font-weight: bold; color: #7f8c8d;">g</span>
+                            </div>
+                            <small class="avg-weight-display" style="color: #1e3a8a; font-weight: bold; display: block; margin-top: 5px; font-size: 0.9em;">Média: - g</small>
+                        </div>
+                        <div class="form-group" style="flex: 0 0 auto; display: flex; align-items: flex-end;">
+                            <button type="button" class="remove-row-btn" style="background: #e74c3c; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; display: none; height: 42px;">✖</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="button" id="add-row-btn" style="background: #1e3a8a; color: white; border: none; padding: 12px 15px; border-radius: 5px; cursor: pointer; margin-top: 10px; width: 100%;">
+                    <i class="bi bi-plus-circle-fill"></i> Adicionar Outra Porção
+                </button>
+            </div>
+
+            <!-- Datalist for Destination Products (Populated dynamically via JS) -->
+            <datalist id="destinationProductsList"></datalist>
+
+            <div class="form-actions" style="margin-top: 30px; justify-content: flex-end;">
+                <button type="submit" class="action-btn" style="background-color: #d35400;"><i class="bi bi-arrow-repeat"></i> Confirmar Porcionamento</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .workflow-dashboard {
+        display: grid;
+        grid-template-columns: minmax(260px, 1.2fr) minmax(220px, 1fr);
+        gap: 14px;
+        margin-bottom: 18px;
+    }
+    .workflow-steps,
+    .workflow-metrics {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 12px;
+    }
+    .workflow-title {
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 8px;
+        font-size: 0.98rem;
+    }
+    .workflow-step-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 7px 9px;
+        margin-bottom: 6px;
+        font-size: 0.88rem;
+        color: #374151;
+    }
+    .workflow-step-item.done {
+        border-color: #34d399;
+        background: #ecfdf5;
+    }
+    .status-tag {
+        background: #f3f4f6;
+        color: #374151;
+        border-radius: 999px;
+        padding: 2px 8px;
+        font-size: 0.75rem;
+        white-space: nowrap;
+    }
+    .workflow-step-item.done .status-tag {
+        background: #10b981;
+        color: #ffffff;
+    }
+    .workflow-step-item.warning .status-tag {
+        background: #f59e0b;
+        color: #ffffff;
+    }
+    .metric-card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 10px;
+        margin-bottom: 8px;
+    }
+    .metric-label {
+        color: #6b7280;
+        font-size: 0.78rem;
+        margin-bottom: 3px;
+    }
+    .metric-value {
+        color: #111827;
+        font-weight: 700;
+        font-size: 1.02rem;
+    }
+    .step-section {
+        background: #f9f9f9;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        border-left: 5px solid #d35400;
+    }
+    .step-section h3 {
+        margin-top: 0;
+        color: #d35400;
+        font-size: 1.1rem;
+        margin-bottom: 15px;
+    }
+    .destination-row {
+        display: grid !important;
+        grid-template-columns: 2fr 1fr 1fr auto;
+        gap: 12px;
+        align-items: start;
+    }
+    .destination-row .form-group {
+        margin-bottom: 0;
+    }
+    
+    /* Mobile Optimization */
+    @media (max-width: 1024px) {
+        .service-page {
+            padding: 12px;
+        }
+        .workflow-dashboard {
+            grid-template-columns: 1fr;
+        }
+        .step-section {
+            padding: 12px;
+        }
+        .destination-row {
+            grid-template-columns: 1fr 1fr;
+        }
+        .form-actions {
+            position: sticky;
+            bottom: 0;
+            background: #ffffff;
+            padding-top: 10px;
+            z-index: 5;
+        }
+    }
+    @media (max-width: 768px) {
+        .workflow-dashboard {
+            grid-template-columns: 1fr;
+        }
+        .service-page {
+            padding: 10px;
+        }
+        .form-row {
+            flex-direction: column;
+            gap: 10px;
+        }
+        .form-group {
+            width: 100%;
+            margin-right: 0 !important;
+        }
+        .form-group label {
+            font-size: 0.95rem;
+            margin-bottom: 5px;
+            display: block;
+        }
+        input, select, .form-control {
+            font-size: 16px !important; /* Prevent zoom on iOS */
+            padding: 12px !important;
+        }
+        .action-btn, button {
+            width: 100%;
+            padding: 12px !important;
+            margin-bottom: 5px;
+        }
+        .unit-display {
+            display: none; /* Save space on mobile */
+        }
+        .destination-row {
+            background: #fff;
+            padding: 15px !important;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            grid-template-columns: 1fr;
+        }
+        .remove-row-btn {
+            margin-top: 10px !important;
+            width: 100% !important;
+            padding: 10px !important;
+        }
+        /* Adjust table for mobile */
+        .table-responsive {
+            border: 0;
+        }
+    }
+</style>
+
+<script type="application/json" id="rules-map-data">
+    {{ rules_map | default({}) | tojson }}
+</script>
+<script type="application/json" id="product-rules-map-data">
+    {{ product_rules_map | default({}) | tojson }}
+</script>
+<script type="application/json" id="usage-ranking-data">
+    {{ usage_ranking | default({}) | tojson }}
+</script>
+
+<script type="application/json" id="all-dest-products-data">
+    [
+    {% for p in destination_products %}
+        {"name": "{{ p.name }}", "unit": "{{ p.unit }}", "category": "{{ p.category }}", "status": "{{ p.status | default('Ativo') }}"}{% if not loop.last %},{% endif %}
+    {% endfor %}
+    ]
+</script>
+
+<script type="application/json" id="all-origin-products-data">
+    [
+    {% for p in origin_products %}
+        {"name": "{{ p.name }}", "unit": "{{ p.unit }}", "category": "{{ p.category }}", "price": {{ p.price | default(0) }} }{% if not loop.last %},{% endif %}
+    {% endfor %}
+    ]
+</script>
+
+<script>
+    const originInput = document.getElementById('origin_product');
+    const rulesMap = JSON.parse(document.getElementById('rules-map-data').textContent);
+    const productRulesMap = JSON.parse(document.getElementById('product-rules-map-data').textContent);
+    const allDestProducts = JSON.parse(document.getElementById('all-dest-products-data').textContent);
+    const allOriginProducts = JSON.parse(document.getElementById('all-origin-products-data').textContent);
+    const rowsContainer = document.getElementById('destination-rows');
+    const addRowBtn = document.getElementById('add-row-btn');
+    const originRowsContainer = document.getElementById('origin-components-rows');
+    const addOriginRowBtn = document.getElementById('add-origin-row-btn');
+    const destDatalist = document.getElementById('destinationProductsList');
+    const usefulMetric = document.getElementById('metric-useful');
+    const yieldMetric = document.getElementById('metric-yield');
+    const diffMetric = document.getElementById('metric-diff');
+
+    function setStepStatus(stepNumber, done, text) {
+        const row = document.getElementById(`step-indicator-${stepNumber}`);
+        if (!row) return;
+        row.classList.remove('done', 'warning');
+        if (done) row.classList.add('done');
+        const tag = row.querySelector('.status-tag');
+        if (tag) {
+            tag.textContent = text;
+        }
+    }
+
+    function updateWorkflowStatus() {
+        const originFilled = originInput.value.trim().length > 0;
+        setStepStatus(1, originFilled, originFilled ? 'Concluído' : 'Pendente');
+
+        const hasComponent = Array.from(originRowsContainer.querySelectorAll('.origin-component-input')).some(i => i.value.trim().length > 0);
+        setStepStatus(2, hasComponent, hasComponent ? 'Preenchido' : 'Opcional');
+
+        const frozen = (parseFloat(document.getElementById('frozen_weight').value) || 0) > 0;
+        setStepStatus(3, frozen, frozen ? 'Concluído' : 'Pendente');
+
+        const thawed = (parseFloat(document.getElementById('thawed_weight').value) || 0) > 0;
+        setStepStatus(4, thawed, thawed ? 'Concluído' : 'Pendente');
+
+        const trimRaw = document.getElementById('trim_weight').value;
+        const discardRaw = document.getElementById('discard_weight').value;
+        const trim = (parseFloat(trimRaw) || 0) >= 0 && trimRaw !== '';
+        const discard = (parseFloat(discardRaw) || 0) >= 0 && discardRaw !== '';
+        setStepStatus(5, trim && discard, (trim && discard) ? 'Concluído' : 'Pendente');
+
+        const cookedRaw = document.getElementById('cooked_weight').value;
+        const cooked = parseFloat(cookedRaw) || 0;
+        const cookedStatus = cookedRaw === '' || cooked <= 0 ? 'Opcional' : 'Concluído';
+        setStepStatus(6, cooked > 0, cookedStatus);
+
+        let hasDest = false;
+        document.querySelectorAll('#destination-rows .destination-row').forEach(row => {
+            const prod = row.querySelector('.dest-product-input');
+            const qty = row.querySelector('.final-qty-input');
+            const count = row.querySelector('.dest-count-input');
+            const isOk = prod && qty && count && prod.value.trim() && (parseFloat(qty.value) || 0) > 0 && (parseFloat(count.value) || 0) > 0;
+            if (isOk) hasDest = true;
+        });
+        setStepStatus(7, hasDest, hasDest ? 'Concluído' : 'Pendente');
+    }
+
+    // Initialize TomSelect for an element and store instance
+    function initTomSelect(el) {
+        // TomSelect is no longer used for destination products in this version
+        // Kept empty to avoid breaking existing calls if any
+    }
+
+    // Init existing
+    // document.querySelectorAll('.dest-product-select').forEach(initTomSelect); // Removed
+    // document.querySelectorAll('.origin-component-select').forEach(initTomSelect); // Removed as we use input list now
+
+    function addOriginRow() {
+        const tr = document.createElement('tr');
+        tr.className = 'origin-component-row';
+        tr.innerHTML = `
+            <td>
+                <input type="text" name="component_product[]" class="form-control origin-component-input" list="originProductsList" placeholder="Digite para buscar..." style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ced4da;">
+            </td>
+            <td>
+                <input type="number" name="component_weight[]" class="form-control origin-component-weight-input" step="1" min="0" placeholder="0" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ced4da;">
+            </td>
+            <td class="text-center">
+                <button type="button" class="remove-origin-row-btn" style="background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </td>
+        `;
+        originRowsContainer.appendChild(tr);
+        updateWorkflowStatus();
+    }
+    
+    // Add first row by default
+    if (originRowsContainer.children.length === 0) {
+        addOriginRow();
+    }
+
+    addOriginRowBtn.addEventListener('click', addOriginRow);
+
+    // Origin components dynamic rows removal
+    originRowsContainer.addEventListener('click', function(e) {
+        if (e.target.closest('.remove-origin-row-btn')) {
+            const row = e.target.closest('tr');
+            if (originRowsContainer.children.length > 1) {
+                row.remove();
+            } else {
+                // If it's the last row, just clear values
+                row.querySelectorAll('input').forEach(input => input.value = '');
+            }
+            updateWorkflowStatus();
+        }
+    });
+    originRowsContainer.addEventListener('input', function() {
+        updateWorkflowStatus();
+    });
+
+    function checkUnitCompatibility(originUnit, destUnit) {
+        if (!originUnit || !destUnit) return true;
+        
+        const mass = ['kg', 'g', 'mg', 'kilo', 'grama', 'gramas', 'kilograma'];
+        const vol = ['l', 'ml', 'litro', 'mililitro'];
+        
+        const isMass = (u) => mass.some(m => u.toLowerCase().includes(m));
+        const isVol = (u) => vol.some(v => u.toLowerCase().includes(v));
+        
+        // If Origin is Mass, Dest should not be Volume (unless user overrides)
+        // If Origin is Volume, Dest should not be Mass
+        if (isMass(originUnit) && isVol(destUnit)) return false;
+        if (isVol(originUnit) && isMass(destUnit)) return false;
+        
+        return true;
+    }
+
+    function updateDestinationDatalist(allowedCategories, allowedProducts) {
+        // Clear existing options
+        destDatalist.innerHTML = '';
+        
+        // Decide logic: Product Rules > Category Rules > Show All (if no rules)
+        const useProductFilter = allowedProducts && allowedProducts.length > 0;
+        const useCategoryFilter = !useProductFilter && allowedCategories && allowedCategories.length > 0;
+        
+        // Get unit from current selection
+        const originName = originInput.value;
+        const product = allOriginProducts.find(p => p.name === originName);
+        const originUnit = product ? product.unit : '';
+
+        allDestProducts.forEach(prod => {
+            if (prod.status !== 'Ativo') return; // Skip inactive
+
+            let allowed = true;
+            if (useProductFilter) {
+                allowed = allowedProducts.includes(prod.name);
+            } else if (useCategoryFilter) {
+                allowed = allowedCategories.includes(prod.category);
+            }
+            
+            // Unit check
+            if (allowed && !checkUnitCompatibility(originUnit, prod.unit)) {
+                 // allowed = false; // Optional: Enforce or just warn? Let's just filter for better UX
+            }
+
+            if (allowed) {
+                const option = document.createElement('option');
+                option.value = prod.name;
+                option.innerText = prod.unit ? `${prod.unit}` : '';
+                destDatalist.appendChild(option);
+            }
+        });
+    }
+
+    function getFilters() {
+        const originName = originInput.value;
+        const product = allOriginProducts.find(p => p.name === originName);
+        
+        if (!product) return { cats: [], prods: [], unit: '' };
+        
+        return {
+            cats: rulesMap[product.category] || [],
+            prods: productRulesMap[product.name] || [],
+            unit: product.unit
+        };
+    }
+
+    function updateAllDestRows() {
+        const filters = getFilters();
+        updateDestinationDatalist(filters.cats, filters.prods);
+        
+        // Clear invalid inputs? Maybe not, just let user see they are invalid if they don't match list?
+        // HTML5 validation will complain if we use strict matching, but we use text input so it allows anything.
+        // Backend validation is the safety net.
+    }
+
+    originInput.addEventListener('change', function() {
+        updateAllDestRows();
+        
+        // Reset destination inputs if they are no longer valid?
+        // Better to clear them to force re-selection
+        document.querySelectorAll('.dest-product-input').forEach(input => {
+            input.value = '';
+        });
+        updateWorkflowStatus();
+    });
+
+    // Event delegation for dynamic rows
+    rowsContainer.addEventListener('click', function(e) {
+        if (e.target.closest('.remove-row-btn')) {
+            e.target.closest('.destination-row').remove();
+            updateRemoveButtons();
+            updateCalculations();
+            updateWorkflowStatus();
+        }
+    });
+
+    addRowBtn.addEventListener('click', function() {
+        const div = document.createElement('div');
+        div.className = 'destination-row form-row';
+        div.style.cssText = 'margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed #ddd; display: flex; gap: 15px; align-items: flex-start;';
+        div.innerHTML = `
+            <div class="form-group" style="flex: 2;">
+                <label>Tipo de Porção:</label>
+                <input type="text" name="dest_product[]" class="dest-product-input" list="destinationProductsList" placeholder="Digite para buscar..." required style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label>Nº Porções:</label>
+                <input type="number" name="dest_count[]" class="dest-count-input" step="1" min="1" required placeholder="0" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label>Peso Total (g):</label>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <input type="number" name="final_qty[]" class="final-qty-input" step="1" min="0" required placeholder="0" style="flex: 1; padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
+                    <span class="dest-unit-display unit-display" style="font-weight: bold; color: #7f8c8d;">g</span>
+                </div>
+                <small class="avg-weight-display" style="color: #1e3a8a; font-weight: bold; display: block; margin-top: 5px; font-size: 0.9em;">Média: - g</small>
+            </div>
+            <div class="form-group" style="flex: 0 0 auto; display: flex; align-items: flex-end;">
+                <button type="button" class="remove-row-btn" style="background: #e74c3c; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; height: 42px;">✖</button>
+            </div>
+        `;
+        rowsContainer.appendChild(div);
+        updateRemoveButtons();
+        updateWorkflowStatus();
+    });
+
+    function updateAverageWeight(row) {
+        const countInput = row.querySelector('.dest-count-input');
+        const weightInput = row.querySelector('.final-qty-input');
+        const display = row.querySelector('.avg-weight-display');
+        
+        const count = parseFloat(countInput.value);
+        const weight = parseFloat(weightInput.value);
+        
+        if (count > 0 && weight > 0) {
+            const avg = weight / count;
+            display.innerText = `Média: ${avg.toFixed(1)} g`;
+        } else {
+            display.innerText = 'Média: - g';
+        }
+    }
+
+    // Event delegation for input changes
+    rowsContainer.addEventListener('input', function(e) {
+        if (e.target.classList.contains('dest-count-input') || e.target.classList.contains('final-qty-input')) {
+            updateAverageWeight(e.target.closest('.destination-row'));
+            updateCalculations();
+        }
+        if (e.target.classList.contains('dest-product-input')) {
+            updateWorkflowStatus();
+        }
+    });
+
+    function updateRemoveButtons() {
+        const rows = rowsContainer.querySelectorAll('.destination-row');
+        rows.forEach(row => {
+            const btn = row.querySelector('.remove-row-btn');
+            if (rows.length > 1) {
+                btn.style.display = 'flex'; // Changed to flex for alignment
+            } else {
+                btn.style.display = 'none';
+            }
+        });
+    }
+
+    function updateOriginRemoveButtons() {
+        const rows = originRowsContainer.querySelectorAll('.origin-component-row');
+        rows.forEach(row => {
+            const btn = row.querySelector('.remove-origin-row-btn');
+            if (rows.length > 1) {
+                btn.style.display = 'block';
+            } else {
+                btn.style.display = 'none';
+            }
+        });
+    }
+
+    function updateCalculations() {
+        const frozen = parseFloat(document.getElementById('frozen_weight').value) || 0;
+        const thawed = parseFloat(document.getElementById('thawed_weight').value) || 0;
+        const trim = parseFloat(document.getElementById('trim_weight').value) || 0;
+        const discard = parseFloat(document.getElementById('discard_weight').value) || 0;
+        const cooked = parseFloat(document.getElementById('cooked_weight').value) || 0;
+
+        // Perda descongelamento
+        if (frozen > 0 && thawed > 0) {
+            const loss = frozen - thawed;
+            const lossPct = (loss / frozen) * 100;
+            document.getElementById('thaw_loss_display').innerText = `Perda Degelo: ${loss.toFixed(3)} (${lossPct.toFixed(1)}%)`;
+        } else {
+            document.getElementById('thaw_loss_display').innerText = '';
+        }
+
+        // Peso Líquido Teórico
+        // Fluxo: Congelado -> Descongelado -> Limpo (Sem aparas) -> Cozido
+        let usefulWeight = 0;
+        let cleanWeight = 0;
+
+        if (thawed > 0) {
+            cleanWeight = thawed - trim - discard;
+            if (cleanWeight < 0) {
+                document.getElementById('net_weight_display').innerHTML = '<span style="color:#dc2626;">A soma de aparas e descarte está maior que o peso descongelado.</span>';
+                document.getElementById('cooking_loss_display').innerText = '';
+                document.getElementById('trim_return_display').innerText = `Aparas para retorno: ${trim.toFixed(3)}g`;
+                document.getElementById('discard_loss_display').innerText = `Descarte (desperdício): ${discard.toFixed(3)}g`;
+                usefulMetric.innerText = '- g';
+                yieldMetric.innerText = '- %';
+                diffMetric.innerText = '- g';
+                updateWorkflowStatus();
+                return;
+            }
+            
+            // Se houve cocção, o peso útil é o peso cozido
+            // Se não houve (cooked == 0 ou vazio), assumimos que o peso útil é o limpo
+            if (cooked > 0) {
+                usefulWeight = cooked;
+                const cookingLoss = cleanWeight - cooked;
+                const cookingLossPct = cleanWeight > 0 ? (cookingLoss / cleanWeight) * 100 : 0;
+                document.getElementById('cooking_loss_display').innerText = `Perda Cocção: ${cookingLoss.toFixed(3)} (${cookingLossPct.toFixed(1)}%)`;
+            } else {
+                usefulWeight = cleanWeight;
+                document.getElementById('cooking_loss_display').innerText = '';
+            }
+
+            const yieldPct = frozen > 0 ? (usefulWeight / frozen) * 100 : 0;
+            let displayText = `Peso Útil Estimado: ${usefulWeight.toFixed(3)} (${yieldPct.toFixed(1)}% rendimento global)`;
+            document.getElementById('trim_return_display').innerText = `Aparas para retorno: ${trim.toFixed(3)}g`;
+            document.getElementById('discard_loss_display').innerText = `Descarte (desperdício): ${discard.toFixed(3)}g`;
+            
+            // Calculate current total portioned
+            let totalPortioned = 0;
+            document.querySelectorAll('#destination-rows .final-qty-input').forEach(input => {
+                totalPortioned += parseFloat(input.value) || 0;
+            });
+            
+            if (totalPortioned > 0) {
+                const diff = usefulWeight - totalPortioned;
+                const diffPct = (Math.abs(diff) / usefulWeight) * 100;
+                const color = diffPct > 5 ? '#e74c3c' : '#27ae60'; // Red if > 5%, Green otherwise
+                displayText += `<br><span style="color:${color}; font-size:0.9em;">Total Porcionado: ${totalPortioned.toFixed(3)}g (Dif: ${diff.toFixed(3)}g)</span>`;
+                diffMetric.innerText = `${diff.toFixed(2)} g`;
+            } else {
+                diffMetric.innerText = '- g';
+            }
+            
+            document.getElementById('net_weight_display').innerHTML = displayText;
+            usefulMetric.innerText = `${usefulWeight.toFixed(2)} g`;
+            yieldMetric.innerText = `${yieldPct.toFixed(1)} %`;
+        } else {
+            document.getElementById('net_weight_display').innerText = '';
+            document.getElementById('cooking_loss_display').innerText = '';
+            document.getElementById('trim_return_display').innerText = '';
+            document.getElementById('discard_loss_display').innerText = '';
+            usefulMetric.innerText = '- g';
+            yieldMetric.innerText = '- %';
+            diffMetric.innerText = '- g';
+        }
+        updateWorkflowStatus();
+    }
+    
+    function validateForm() {
+        const frozen = parseFloat(document.getElementById('frozen_weight').value);
+        const thawed = parseFloat(document.getElementById('thawed_weight').value);
+        const trim = parseFloat(document.getElementById('trim_weight').value);
+        const discard = parseFloat(document.getElementById('discard_weight').value);
+        const cooked = parseFloat(document.getElementById('cooked_weight').value) || 0;
+        
+        if (thawed > frozen) {
+            alert('Erro: Peso descongelado não pode ser maior que o peso congelado.');
+            return false;
+        }
+        
+        if (discard > thawed) {
+            alert('Erro: Peso de descarte não pode ser maior que o peso descongelado.');
+            return false;
+        }
+
+        const cleanWeight = thawed - trim - discard;
+        if (cleanWeight < 0) {
+            alert('Erro: A soma de aparas e descarte não pode ser maior que o peso descongelado.');
+            return false;
+        }
+
+        let usefulWeight = cleanWeight;
+        if (cooked > 0) {
+            if (cooked > cleanWeight) {
+                alert('Erro: Peso cozido não pode ser maior que o peso limpo (antes da cocção).');
+                return false;
+            }
+            usefulWeight = cooked;
+        }
+        
+        // Validate destination rows
+        // Use scoped selector to avoid template elements
+        const rows = document.querySelectorAll('#destination-rows .destination-row');
+        let hasDest = false;
+        let totalPortioned = 0;
+
+        for (let row of rows) {
+            const input = row.querySelector('.dest-product-input');
+            const qtyInput = row.querySelector('.final-qty-input');
+            const qty = parseFloat(qtyInput.value) || 0;
+            const val = input.value;
+
+            // Check for partial fill
+            // If one is filled and the other is not
+            if ((val && qty <= 0) || (!val && qty > 0)) {
+                alert('Preencha o tipo de porção e a quantidade para todas as linhas adicionadas.');
+                row.style.backgroundColor = "#fff0f0"; // Highlight error
+                setTimeout(() => row.style.backgroundColor = "", 2000);
+                return false;
+            }
+
+            if (val && qty > 0) {
+                hasDest = true;
+                totalPortioned += qty;
+            }
+        }
+        
+        if (!hasDest) {
+            alert('Adicione pelo menos uma porção de destino.');
+            return false;
+        }
+        
+        // Weight Mismatch Warning (5% tolerance)
+        if (usefulWeight > 0) {
+            const diff = Math.abs(usefulWeight - totalPortioned);
+            const tolerance = usefulWeight * 0.05;
+
+            if (diff > tolerance) {
+                const msg = `AVISO DE DIVERGÊNCIA:\n\nPeso Útil Estimado: ${usefulWeight.toFixed(3)}g\nTotal Porcionado: ${totalPortioned.toFixed(3)}g\nDiferença: ${(usefulWeight - totalPortioned).toFixed(3)}g\n\nDeseja confirmar mesmo assim?`;
+                if (!confirm(msg)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    // Ensure rules are applied on page load
+    updateAllDestRows();
+    updateWorkflowStatus();
+</script>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}Erro - Sistema Almareia{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <div class="alert alert-danger">
+        <h4 class="alert-heading">Ocorreu um Erro</h4>
+        <p>{{ error }}</p>
+        <hr>
+        <p class="mb-0"><a href="{{ url_for('main.index') }}" class="alert-link">Voltar ao Início</a></p>
+    </div>
+</div>
+{% endblock %}

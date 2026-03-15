@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+
+{% block title %}Painel Recepção - Almareia Mirapraia{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="theme-page-shell">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-grid-fill"></i> Painel da Recepção</h2>
+        <div>
+            <span class="text-muted me-3"><i class="bi bi-person-circle"></i> {{ session.get('user') }}</span>
+            <a href="{{ url_for('main.index') }}" class="btn btn-primary">
+                <i class="bi bi-house-door-fill"></i> Home
+            </a>
+        </div>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        <!-- Gestão de Quartos -->
+        <div class="col">
+            <div class="card theme-card h-100 shadow-sm hover-card">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3 text-primary">
+                        <i class="bi bi-door-open-fill display-4"></i>
+                    </div>
+                    <h4 class="card-title">Gestão de Quartos</h4>
+                    <p class="card-text text-muted">Controle de ocupação, check-in, check-out e status de limpeza.</p>
+                    <a href="{{ url_for('reception.reception_rooms') }}" class="btn btn-primary w-100 stretched-link">
+                        Acessar Quartos
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mapa de Reservas -->
+        <div class="col">
+            <div class="card theme-card h-100 shadow-sm hover-card">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3 text-info">
+                        <i class="bi bi-calendar-week-fill display-4"></i>
+                    </div>
+                    <h4 class="card-title">Mapa de Reservas</h4>
+                    <p class="card-text text-muted">Visualizar mapa de ocupação e reservas futuras (Fevereiro).</p>
+                    <a href="{{ url_for('reception.reception_reservations') }}" class="btn btn-primary w-100 stretched-link">
+                        Ver Mapa
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fila de Espera -->
+        <div class="col">
+            <div class="card theme-card h-100 shadow-sm hover-card">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3 text-warning">
+                        <i class="bi bi-people-fill display-4"></i>
+                    </div>
+                    <h4 class="card-title">Fila de Espera</h4>
+                    <p class="card-text text-muted">Gerenciar fila de clientes, tempos de espera e notificações.</p>
+                    <a href="{{ url_for('reception.reception_waiting_list') }}" class="btn btn-primary w-100 stretched-link">
+                        Acessar Fila
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat WhatsApp (removido: chat interno descontinuado) -->
+
+        <!-- Caixa -->
+        <div class="col">
+            <div class="card theme-card h-100 shadow-sm hover-card">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3 text-info">
+                        <i class="bi bi-cash-coin display-4"></i>
+                    </div>
+                    <h4 class="card-title">Caixa Recepção</h4>
+                    <p class="card-text text-muted">Abertura e fechamento de caixa, recebimento de pagamentos.</p>
+                    <a href="{{ url_for('reception.reception_cashier') }}" class="btn btn-primary w-100 stretched-link">
+                        Acessar Caixa
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Caixa Reservas -->
+        <div class="col">
+            <div class="card theme-card h-100 shadow-sm hover-card">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3 text-primary">
+                        <i class="bi bi-wallet2 display-4"></i>
+                    </div>
+                    <h4 class="card-title">Caixa Reservas</h4>
+                    <p class="card-text text-muted">Fluxo de caixa exclusivo para reservas e pagamentos antecipados.</p>
+                    <a href="{{ url_for('reception.reception_reservations_cashier') }}" class="btn btn-primary w-100 stretched-link">
+                        Acessar Caixa Reservas
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card theme-card h-100 shadow-sm hover-card">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3 text-danger">
+                        <i class="bi bi-graph-up-arrow display-4"></i>
+                    </div>
+                    <h4 class="card-title">Revenue Management</h4>
+                    <p class="card-text text-muted">Simulação de ocupação, ADR, RevPAR e tarifação BAR por categoria.</p>
+                    <a href="{{ url_for('reception.reception_revenue_management') }}" class="btn btn-primary w-100 stretched-link">
+                        Abrir Revenue
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card theme-card h-100 shadow-sm hover-card">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3 text-warning">
+                        <i class="bi bi-slash-circle display-4"></i>
+                    </div>
+                    <h4 class="card-title">Restrições de Inventário</h4>
+                    <p class="card-text text-muted">Abrir e fechar categorias por dia, período e dias da semana.</p>
+                    <a href="{{ url_for('reception.reception_inventory_restrictions') }}" class="btn btn-primary w-100 stretched-link">
+                        Configurar Inventário
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card theme-card h-100 shadow-sm hover-card">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3 text-secondary">
+                        <i class="bi bi-calendar-x-fill display-4"></i>
+                    </div>
+                    <h4 class="card-title">Restrições CTA/CTD</h4>
+                    <p class="card-text text-muted">Bloqueie check-in (CTA) e check-out (CTD) por período e categoria.</p>
+                    <a href="{{ url_for('reception.reception_arrival_departure_restrictions') }}" class="btn btn-primary w-100 stretched-link">
+                        Configurar CTA/CTD
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card theme-card h-100 shadow-sm hover-card">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3 text-dark">
+                        <i class="bi bi-diagram-3-fill display-4"></i>
+                    </div>
+                    <h4 class="card-title">Canais, Blackout, Allotment e Proteção</h4>
+                    <p class="card-text text-muted">Feche canais, defina blackout, allotment e proteção mínima de quartos.</p>
+                    <a href="{{ url_for('reception.reception_channel_inventory_controls') }}" class="btn btn-primary w-100 stretched-link">
+                        Configurar Canais
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card theme-card h-100 shadow-sm hover-card">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3 text-primary">
+                        <i class="bi bi-gift-fill display-4"></i>
+                    </div>
+                    <h4 class="card-title">Pacotes Promocionais</h4>
+                    <p class="card-text text-muted">Criar pacotes com preço fixo, desconto percentual ou diária fixa.</p>
+                    <a href="{{ url_for('reception.reception_revenue_packages') }}" class="btn btn-primary w-100 stretched-link">
+                        Configurar Pacotes
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card theme-card h-100 shadow-sm hover-card">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3 text-danger">
+                        <i class="bi bi-moon-stars-fill display-4"></i>
+                    </div>
+                    <h4 class="card-title">Restrições de Estadia</h4>
+                    <p class="card-text text-muted">Defina mínimo e máximo de noites por categoria ou pacote.</p>
+                    <a href="{{ url_for('reception.reception_stay_restrictions') }}" class="btn btn-primary w-100 stretched-link">
+                        Configurar Restrições
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card theme-card h-100 shadow-sm hover-card">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3 text-success">
+                        <i class="bi bi-percent display-4"></i>
+                    </div>
+                    <h4 class="card-title">Promoções por Período</h4>
+                    <p class="card-text text-muted">Configure descontos por período, categoria e prioridade de aplicação.</p>
+                    <a href="{{ url_for('reception.reception_revenue_promotions') }}" class="btn btn-primary w-100 stretched-link">
+                        Configurar Promoções
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Experiências de Hóspedes (Novo) -->
+        <div class="col">
+            <div class="card theme-card h-100 shadow-sm hover-card">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3 text-warning">
+                        <i class="bi bi-stars display-4"></i>
+                    </div>
+                    <h4 class="card-title">Experiências de Hóspedes</h4>
+                    <p class="card-text text-muted">Menu digital de atividades: gastronomia, passeios, bem-estar e mais.</p>
+                    <a href="{{ url_for('reception.reception_experiences') }}" class="btn btn-primary w-100 stretched-link">
+                        Gerenciar Experiências
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pesquisa de Satisfação (Restaurado) -->
+        <div class="col">
+            <div class="card theme-card h-100 shadow-sm hover-card">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3 text-success">
+                        <i class="bi bi-emoji-smile-fill display-4"></i>
+                    </div>
+                    <h4 class="card-title">Pesquisa de Satisfação</h4>
+                    <p class="card-text text-muted">Gestão de feedback da estadia e questionários.</p>
+                    <a href="{{ url_for('reception.reception_surveys') }}" class="btn btn-primary w-100 stretched-link">
+                        Configurar Pesquisas
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Checklist / Configurações (Placeholder/Optional) -->
+        <div class="col">
+            <div class="card theme-card h-100 shadow-sm hover-card border-secondary border-opacity-25">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3 text-secondary">
+                        <i class="bi bi-list-check display-4"></i>
+                    </div>
+                    <h4 class="card-title">Checklists</h4>
+                    <p class="card-text text-muted">Configuração de itens de inspeção e checklists.</p>
+                    <button class="btn btn-primary w-100 stretched-link" data-bs-toggle="modal" data-bs-target="#checklistConfigModal">
+                        Gerenciar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<style>
+    .hover-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .hover-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+    }
+</style>
+
+<!-- Reuse Checklist Modal from rooms page if possible, or include it -->
+<!-- Since this is a dashboard, maybe we don't need the modal here, but keeping it simple -->
+
+<!-- Script de notificações de chat removido: chat interno descontinuado -->
+
+{% endblock %}

@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>📝 Contratar Funcionário</h2>
+    <form method="POST" class="card p-4 shadow-sm">
+        <h4 class="mb-3">Dados de Acesso</h4>
+        <div class="row g-3 mb-4">
+            <div class="col-md-6">
+                <label class="form-label">Usuário (Sistema)</label>
+                <input type="text" class="form-control" name="username" required placeholder="Ex: Angelo">
+                <div class="form-text">Este será o login do funcionário.</div>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Senha Inicial</label>
+                <input type="text" class="form-control" name="password" required value="1234">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Função/Cargo</label>
+                <select class="form-select" name="role">
+                    <option value="colaborador">Colaborador</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+        </div>
+
+        <h4 class="mb-3">Dados Contratuais</h4>
+        <div class="row g-3 mb-4">
+             <div class="col-md-6">
+                <label class="form-label">Empresa Contratante</label>
+                <select class="form-select" name="company" required>
+                    <option value="">Selecione...</option>
+                    {% for c in companies %}
+                    <option value="{{ c }}">{{ c }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Tipo de Contrato</label>
+                <select class="form-select" name="contract_type" required>
+                    <option value="">Selecione...</option>
+                    {% for t in contract_types %}
+                    <option value="{{ t }}">{{ t }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <h4 class="mb-3">Dados Pessoais</h4>
+        <div class="row g-3">
+            <div class="col-md-12">
+                <label class="form-label">Nome Completo</label>
+                <input type="text" class="form-control" name="full_name" required>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">CPF</label>
+                <input type="text" class="form-control" name="cpf">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">RG</label>
+                <input type="text" class="form-control" name="rg">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Data Nascimento</label>
+                <input type="date" class="form-control" name="birthday">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Data Admissão</label>
+                <input type="date" class="form-control" name="admission_date">
+            </div>
+            <div class="col-md-8">
+                <label class="form-label">Endereço</label>
+                <input type="text" class="form-control" name="address">
+            </div>
+            
+            <h5 class="mt-4">Medidas</h5>
+            <div class="col-md-4">
+                <label class="form-label">Camisa</label>
+                <select class="form-select" name="shirt_size">
+                    <option value="">Selecione...</option>
+                    {% for s in ['PP', 'P', 'M', 'G', 'GG', 'XG'] %}
+                    <option value="{{ s }}">{{ s }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Calça (Num)</label>
+                <input type="text" class="form-control" name="pants_size">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Calçado (Num)</label>
+                <input type="number" class="form-control" name="shoe_size">
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-success btn-lg">Finalizar Contratação</button>
+            <a href="{{ url_for('hr.hr_dashboard') }}" class="btn btn-secondary btn-lg">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

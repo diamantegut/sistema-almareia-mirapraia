@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Gerenciar Fornecedores</h2>
+        <div>
+            <form action="{{ url_for('suppliers.import_from_products') }}" method="POST" class="d-inline" onsubmit="return confirm('Isso importará fornecedores cadastrados nos produtos. Deseja continuar?');">
+                <button type="submit" class="btn btn-outline-info me-2">
+                    <i class="bi bi-cloud-download"></i> Importar de Produtos
+                </button>
+            </form>
+            <a href="{{ url_for('suppliers.create') }}" class="btn btn-primary">
+                <i class="bi bi-plus-lg"></i> Novo Fornecedor
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>
+                                <a href="?sort=name&order={{ 'desc' if request.args.get('sort') == 'name' and request.args.get('order') == 'asc' else 'asc' }}" class="text-decoration-none text-dark">
+                                    Razão Social / Nome <i class="bi bi-arrow-down-up small"></i>
+                                </a>
+                            </th>
+                            <th>CNPJ</th>
+                            <th>Categoria</th>
+                            <th>Contatos</th>
+                            <th>Status</th>
+                            <th class="text-end">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in suppliers %}
+                        <tr>
+                            <td>
+                                <div class="fw-bold">{{ s.name }}</div>
+                                {% if s.trade_name %}
+                                <small class="text-muted">{{ s.trade_name }}</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if s.cnpj %}
+                                <span class="font-monospace">{{ s.cnpj }}</span>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border">{{ s.category }}</span>
+                            </td>
+                            <td>
+                                {% if s.contacts and s.contacts|length > 0 %}
+                                    <div class="d-flex flex-column">
+                                        {% set main_contact = s.contacts[0] %}
+                                        <span>{{ main_contact.name }}</span>
+                                        <small class="text-muted">{{ main_contact.email or main_contact.phone }}</small>
+                                        {% if s.contacts|length > 1 %}
+                                        <small class="text-primary">+{{ s.contacts|length - 1 }} outros</small>
+                                        {% endif %}
+                                    </div>
+                                {% else %}
+                                    <span class="text-muted small">Sem contatos</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if s.active %}
+                                <span class="badge bg-success">Ativo</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Inativo</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <a href="{{ url_for('suppliers.edit', supplier_id=s.id) }}" class="btn btn-sm btn-outline-primary" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                {% if s.active %}
+                                <a href="{{ url_for('suppliers.toggle_status', supplier_id=s.id) }}" class="btn btn-sm btn-outline-danger" title="Desativar" onclick="return confirm('Tem certeza que deseja desativar este fornecedor?');">
+                                    <i class="bi bi-slash-circle"></i>
+                                </a>
+                                {% else %}
+                                <a href="{{ url_for('suppliers.toggle_status', supplier_id=s.id) }}" class="btn btn-sm btn-outline-success" title="Reativar">
+                                    <i class="bi bi-check-circle"></i>
+                                </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-muted">
+                                Nenhum fornecedor cadastrado.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

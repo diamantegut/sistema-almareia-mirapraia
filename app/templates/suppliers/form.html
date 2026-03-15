@@ -1,0 +1,248 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>{{ 'Editar' if supplier else 'Novo' }} Fornecedor</h2>
+        <a href="{{ url_for('suppliers.index') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+    </div>
+
+    <form action="{{ url_for('suppliers.save') }}" method="POST">
+        {% if supplier %}
+        <input type="hidden" name="id" value="{{ supplier.id }}">
+        {% endif %}
+
+        <div class="row">
+            <!-- Dados Básicos -->
+            <div class="col-md-8">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Dados Básicos</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label">CNPJ</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="cnpj" id="cnpj" value="{{ supplier.cnpj if supplier else '' }}" placeholder="00.000.000/0000-00">
+                                    <button class="btn btn-outline-primary" type="button" id="btnConsultarCNPJ" onclick="consultarCNPJ()">
+                                        <i class="bi bi-search"></i>
+                                    </button>
+                                </div>
+                                <small class="text-muted">Apenas números</small>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Inscrição Estadual</label>
+                                <input type="text" class="form-control" name="ie" value="{{ supplier.ie if supplier else '' }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Categoria</label>
+                                <select class="form-select" name="category">
+                                    <option value="Geral" {{ 'selected' if not supplier or supplier.category == 'Geral' else '' }}>Geral</option>
+                                    <option value="Alimentos" {{ 'selected' if supplier and supplier.category == 'Alimentos' else '' }}>Alimentos</option>
+                                    <option value="Bebidas" {{ 'selected' if supplier and supplier.category == 'Bebidas' else '' }}>Bebidas</option>
+                                    <option value="Limpeza" {{ 'selected' if supplier and supplier.category == 'Limpeza' else '' }}>Limpeza</option>
+                                    <option value="Serviços" {{ 'selected' if supplier and supplier.category == 'Serviços' else '' }}>Serviços</option>
+                                    <option value="Manutenção" {{ 'selected' if supplier and supplier.category == 'Manutenção' else '' }}>Manutenção</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Razão Social *</label>
+                            <input type="text" class="form-control" name="name" id="razao_social" value="{{ supplier.name if supplier else '' }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Nome Fantasia</label>
+                            <input type="text" class="form-control" name="trade_name" id="nome_fantasia" value="{{ supplier.trade_name if supplier else '' }}">
+                        </div>
+
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="active" id="active" {{ 'checked' if not supplier or supplier.active else '' }}>
+                            <label class="form-check-label" for="active">Fornecedor Ativo</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Endereço -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Endereço</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <label class="form-label">CEP</label>
+                                <input type="text" class="form-control" name="addr_zip" id="cep" value="{{ supplier.address.zip if supplier and supplier.address else '' }}">
+                            </div>
+                            <div class="col-md-7">
+                                <label class="form-label">Logradouro</label>
+                                <input type="text" class="form-control" name="addr_street" id="logradouro" value="{{ supplier.address.street if supplier and supplier.address else '' }}">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Número</label>
+                                <input type="text" class="form-control" name="addr_number" id="numero" value="{{ supplier.address.number if supplier and supplier.address else '' }}">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Bairro</label>
+                                <input type="text" class="form-control" name="addr_neighborhood" id="bairro" value="{{ supplier.address.neighborhood if supplier and supplier.address else '' }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Cidade</label>
+                                <input type="text" class="form-control" name="addr_city" id="cidade" value="{{ supplier.address.city if supplier and supplier.address else '' }}">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">UF</label>
+                                <input type="text" class="form-control" name="addr_state" id="uf" value="{{ supplier.address.state if supplier and supplier.address else '' }}">
+                            </div>
+                             <div class="col-md-2">
+                                <label class="form-label">Comp.</label>
+                                <input type="text" class="form-control" name="addr_comp" id="complemento" value="{{ supplier.address.comp if supplier and supplier.address else '' }}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contatos e Outros -->
+            <div class="col-md-4">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Contatos</h5>
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="addContact()">
+                            <i class="bi bi-plus"></i> Adicionar
+                        </button>
+                    </div>
+                    <div class="card-body" id="contactsContainer">
+                        {% if supplier and supplier.contacts %}
+                            {% for contact in supplier.contacts %}
+                            <div class="contact-item border-bottom pb-3 mb-3 position-relative">
+                                <button type="button" class="btn-close position-absolute top-0 end-0 small" onclick="this.parentElement.remove()" style="font-size: 0.7rem;"></button>
+                                <div class="mb-2">
+                                    <input type="text" class="form-control form-control-sm mb-1" name="contact_name[]" placeholder="Nome" value="{{ contact.name }}" required>
+                                    <input type="text" class="form-control form-control-sm mb-1" name="contact_role[]" placeholder="Cargo/Função" value="{{ contact.role }}">
+                                    <input type="email" class="form-control form-control-sm mb-1" name="contact_email[]" placeholder="Email" value="{{ contact.email }}">
+                                    <input type="text" class="form-control form-control-sm" name="contact_phone[]" placeholder="Telefone" value="{{ contact.phone }}">
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                             <!-- Empty template if no contacts -->
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Observações</h5>
+                    </div>
+                    <div class="card-body">
+                        <textarea class="form-control" name="notes" rows="4">{{ supplier.notes if supplier else '' }}</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end mb-5">
+            <button type="submit" class="btn btn-primary btn-lg px-5">Salvar Fornecedor</button>
+        </div>
+    </form>
+</div>
+
+<!-- Template for new contact -->
+<template id="contactTemplate">
+    <div class="contact-item border-bottom pb-3 mb-3 position-relative">
+        <button type="button" class="btn-close position-absolute top-0 end-0 small" onclick="this.parentElement.remove()" style="font-size: 0.7rem;"></button>
+        <div class="mb-2">
+            <input type="text" class="form-control form-control-sm mb-1" name="contact_name[]" placeholder="Nome" required>
+            <input type="text" class="form-control form-control-sm mb-1" name="contact_role[]" placeholder="Cargo/Função">
+            <input type="email" class="form-control form-control-sm mb-1" name="contact_email[]" placeholder="Email">
+            <input type="text" class="form-control form-control-sm" name="contact_phone[]" placeholder="Telefone">
+        </div>
+    </div>
+</template>
+
+<script src="{{ url_for('static', filename='js/cep-service.js') }}"></script>
+<script>
+    // Initialize CEP Service
+    document.addEventListener('DOMContentLoaded', function() {
+        // IDs match form inputs
+        CepService.bind('cep', 'logradouro', 'bairro', 'cidade', 'uf', 'numero');
+    });
+
+    $(document).ready(function() {
+        $('#cnpj').inputmask('99.999.999/9999-99');
+        $('#cep').inputmask('99999-999');
+    });
+
+function addContact() {
+    const template = document.getElementById('contactTemplate');
+    const clone = template.content.cloneNode(true);
+    document.getElementById('contactsContainer').appendChild(clone);
+}
+
+function consultarCNPJ() {
+    const cnpj = document.getElementById('cnpj').value.replace(/\D/g, '');
+    if (cnpj.length !== 14) {
+        alert('Por favor, digite um CNPJ válido com 14 números.');
+        return;
+    }
+
+    const btn = document.getElementById('btnConsultarCNPJ');
+    const icon = btn.querySelector('i');
+    
+    // Loading state
+    icon.className = 'spinner-border spinner-border-sm';
+    btn.disabled = true;
+
+    fetch(`{{ url_for('suppliers.validate_cnpj', cnpj='') }}${cnpj}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.valid) {
+                const info = data.data;
+                document.getElementById('razao_social').value = info.name || '';
+                document.getElementById('nome_fantasia').value = info.trade_name || '';
+                document.getElementById('cep').value = info.zip || '';
+                document.getElementById('logradouro').value = info.street || '';
+                document.getElementById('numero').value = info.number || '';
+                document.getElementById('complemento').value = info.comp || '';
+                document.getElementById('bairro').value = info.neighborhood || '';
+                document.getElementById('cidade').value = info.city || '';
+                document.getElementById('uf').value = info.state || '';
+                
+                // Add contact if empty
+                if (info.email || info.phone) {
+                    addContact(); // Add one
+                    const container = document.getElementById('contactsContainer');
+                    const inputs = container.lastElementChild.querySelectorAll('input');
+                    inputs[0].value = "Principal"; // Name
+                    inputs[2].value = info.email || '';
+                    inputs[3].value = info.phone || '';
+                }
+            } else {
+                alert(data.message || 'Erro ao consultar CNPJ');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Erro ao consultar API.');
+        })
+        .finally(() => {
+            icon.className = 'bi bi-search';
+            btn.disabled = false;
+        });
+}
+
+// Add empty contact if none exists on load
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('contactsContainer');
+    if (container.children.length === 0) {
+        addContact();
+    }
+});
+</script>
+{% endblock %}

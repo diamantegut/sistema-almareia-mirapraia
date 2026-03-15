@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Simulador de Permissão</h2>
+        <a href="{{ url_for('admin.admin_system_permissions') }}" class="btn btn-outline-secondary">Voltar</a>
+    </div>
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+            <form method="POST" class="row g-2">
+                <div class="col-md-4"><label class="form-label">user_id</label><input class="form-control" name="user_id" value="{{ form_data.user_id }}"></div>
+                <div class="col-md-4"><label class="form-label">roles (csv)</label><input class="form-control" name="roles" value="{{ form_data.roles }}"></div>
+                <div class="col-md-4"><label class="form-label">scopes (csv)</label><input class="form-control" name="scopes" value="{{ form_data.scopes }}"></div>
+                <div class="col-md-6"><label class="form-label">endpoint</label><input class="form-control" name="endpoint" value="{{ form_data.endpoint }}"></div>
+                <div class="col-md-2"><label class="form-label">action</label><input class="form-control" name="action" value="{{ form_data.action }}"></div>
+                <div class="col-md-4"><label class="form-label">area</label><input class="form-control" name="area" value="{{ form_data.area }}"></div>
+                <div class="col-12"><button class="btn btn-primary">Executar</button></div>
+            </form>
+        </div>
+    </div>
+    {% if result %}
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div><strong>decision:</strong> {{ result.decision }}</div>
+            <div><strong>reason_code:</strong> {{ result.reason_code }}</div>
+            <div><strong>policy_version:</strong> {{ result.policy_version }}</div>
+            <div><strong>policy_hash:</strong> {{ result.policy_hash }}</div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Roles e Permissões</h2>
+        <a href="{{ url_for('admin.admin_system_permissions') }}" class="btn btn-outline-secondary">Voltar</a>
+    </div>
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr><th>Role</th><th>Nível</th><th>Permissões Associadas</th><th>Áreas Permitidas</th></tr>
+                </thead>
+                <tbody>
+                    {% for row in roles_data %}
+                    <tr>
+                        <td>{{ row.role }}</td>
+                        <td>{{ row.level }}</td>
+                        <td>{{ row.permissions|join(', ') }}</td>
+                        <td>{{ row.areas|join(', ') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

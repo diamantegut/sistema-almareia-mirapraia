@@ -1,0 +1,325 @@
+{% extends "base.html" %}
+
+{% block title %}Pacotes Promocionais{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="mb-0">Pacotes Promocionais</h3>
+        <a class="btn btn-outline-secondary" href="{{ url_for('reception.reception_dashboard') }}">Voltar</a>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white">
+            <h5 class="mb-0">Cadastro de Pacote</h5>
+        </div>
+        <div class="card-body">
+            <input type="hidden" id="pkg_id">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Nome do pacote</label>
+                    <input id="pkg_name" class="form-control" placeholder="Ex.: Pacote Romântico">
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label">Descrição</label>
+                    <input id="pkg_description" class="form-control" placeholder="Descrição interna e regras comerciais">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Status</label>
+                    <select id="pkg_status" class="form-select">
+                        <option value="active">Ativo</option>
+                        <option value="inactive">Inativo</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row g-3 mt-1">
+                <div class="col-md-8">
+                    <label class="form-label">Categorias participantes</label>
+                    <div class="d-flex flex-wrap gap-3 border rounded p-2">
+                        {% for category in categories %}
+                        <div class="form-check">
+                            <input class="form-check-input pkg-category" type="checkbox" value="{{ category }}" id="pkg_cat_{{ loop.index }}">
+                            <label class="form-check-label" for="pkg_cat_{{ loop.index }}">{{ category }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Tipo de preço</label>
+                    <select id="pkg_price_type" class="form-select">
+                        <option value="package_fixed">Valor fixo do pacote</option>
+                        <option value="percent_discount">Desconto percentual</option>
+                        <option value="daily_fixed">Valor fixo por diária</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Preço especial</label>
+                    <input id="pkg_special_price" type="number" step="0.01" class="form-control" value="0.00">
+                </div>
+            </div>
+            <div class="row g-3 mt-1">
+                <div class="col-md-6">
+                    {% set period_selector_id = 'pkg_sale_period' %}
+                    {% set period_selector_label = 'Período de venda' %}
+                    {% set period_selector_start = today_iso %}
+                    {% set period_selector_end = today_iso %}
+                    {% include 'components/revenue_period_selector.html' %}
+                </div>
+                <div class="col-md-6">
+                    {% set period_selector_id = 'pkg_stay_period' %}
+                    {% set period_selector_label = 'Período de hospedagem' %}
+                    {% set period_selector_start = today_iso %}
+                    {% set period_selector_end = today_iso %}
+                    {% include 'components/revenue_period_selector.html' %}
+                </div>
+            </div>
+            <div class="row g-3 mt-2">
+                <div class="col-md-3">
+                    <button class="btn btn-primary w-100" onclick="savePackage()">Salvar pacote</button>
+                </div>
+                <div class="col-md-3">
+                    <button class="btn btn-outline-secondary w-100" onclick="resetPackageForm()">Limpar formulário</button>
+                </div>
+                <div class="col-md-6 d-flex align-items-center">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="pkg_required_for_sale">
+                        <label class="form-check-label" for="pkg_required_for_sale">Pacote obrigatório para venda no período</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white"><h5 class="mb-0">Pacotes Cadastrados</h5></div>
+        <div class="card-body">
+            <div class="row g-3 align-items-end mb-2">
+                <div class="col-md-3">
+                    <label class="form-label">Status</label>
+                    <select id="pkg_filter_status" class="form-select">
+                        <option value="">Todos</option>
+                        <option value="active">Ativos</option>
+                        <option value="inactive">Inativos</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button class="btn btn-outline-dark w-100" onclick="loadPackages()">Atualizar lista</button>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm table-hover" id="packagesTable">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Status</th>
+                            <th>Categorias</th>
+                            <th>Tipo</th>
+                            <th>Preço especial</th>
+                            <th>Obrigatório</th>
+                            <th>Venda</th>
+                            <th>Hospedagem</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-white"><h5 class="mb-0">Auditoria de Pacotes</h5></div>
+        <div class="card-body">
+            <div class="row g-3 align-items-end mb-2">
+                <div class="col-md-3">
+                    <label class="form-label">Data inicial</label>
+                    <input id="pkg_log_start" type="date" class="form-control" value="{{ today_iso }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Data final</label>
+                    <input id="pkg_log_end" type="date" class="form-control" value="{{ today_iso }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Usuário</label>
+                    <input id="pkg_log_user" class="form-control" placeholder="Todos">
+                </div>
+                <div class="col-md-3">
+                    <button class="btn btn-outline-dark w-100" onclick="loadPackageLogs()">Atualizar logs</button>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm table-hover" id="packageLogsTable">
+                    <thead>
+                        <tr>
+                            <th>Data/Hora</th>
+                            <th>Usuário</th>
+                            <th>Ação</th>
+                            <th>Pacote</th>
+                            <th>Resumo</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/revenue_period_selector.js') }}"></script>
+<script>
+let packagesCache = [];
+
+function currency(value) {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(value || 0));
+}
+
+function selectedCategories() {
+    return Array.from(document.querySelectorAll('.pkg-category:checked')).map(el => el.value);
+}
+
+function collectPackagePayload() {
+    return {
+        name: document.getElementById('pkg_name').value || '',
+        description: document.getElementById('pkg_description').value || '',
+        status: document.getElementById('pkg_status').value || 'active',
+        categories: selectedCategories(),
+        price_type: document.getElementById('pkg_price_type').value || 'package_fixed',
+        special_price: parseFloat(document.getElementById('pkg_special_price').value || '0'),
+        required_for_sale: document.getElementById('pkg_required_for_sale').checked,
+        sale_period: RevenuePeriodSelector.getValue('pkg_sale_period'),
+        stay_period: RevenuePeriodSelector.getValue('pkg_stay_period')
+    };
+}
+
+function resetPackageForm() {
+    document.getElementById('pkg_id').value = '';
+    document.getElementById('pkg_name').value = '';
+    document.getElementById('pkg_description').value = '';
+    document.getElementById('pkg_status').value = 'active';
+    document.getElementById('pkg_price_type').value = 'package_fixed';
+    document.getElementById('pkg_special_price').value = '0.00';
+    document.getElementById('pkg_required_for_sale').checked = false;
+    document.querySelectorAll('.pkg-category').forEach(el => { el.checked = false; });
+}
+
+function fillPackageForm(item) {
+    document.getElementById('pkg_id').value = item.id || '';
+    document.getElementById('pkg_name').value = item.name || '';
+    document.getElementById('pkg_description').value = item.description || '';
+    document.getElementById('pkg_status').value = item.status || 'inactive';
+    document.getElementById('pkg_price_type').value = item.price_type || 'package_fixed';
+    document.getElementById('pkg_special_price').value = Number(item.special_price || 0).toFixed(2);
+    document.getElementById('pkg_required_for_sale').checked = Boolean(item.required_for_sale);
+    const selected = new Set((item.categories || []).map(v => String(v || '').toLowerCase()));
+    document.querySelectorAll('.pkg-category').forEach(el => {
+        el.checked = selected.has(String(el.value || '').toLowerCase());
+    });
+    RevenuePeriodSelector.setValue('pkg_sale_period', item.sale_period || {});
+    RevenuePeriodSelector.setValue('pkg_stay_period', item.stay_period || {});
+}
+
+function savePackage() {
+    const packageId = document.getElementById('pkg_id').value || '';
+    const payload = collectPackagePayload();
+    const method = packageId ? 'PUT' : 'POST';
+    const url = packageId ? `/api/reception/revenue-packages/${encodeURIComponent(packageId)}` : '/api/reception/revenue-packages';
+    fetch(url, {
+        method,
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload)
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (!data.success) {
+            alert(data.error || 'Falha ao salvar pacote.');
+            return;
+        }
+        alert('Pacote salvo com sucesso.');
+        resetPackageForm();
+        loadPackages();
+        loadPackageLogs();
+    });
+}
+
+function deletePackage(packageId) {
+    if (!window.confirm('Deseja remover este pacote?')) return;
+    fetch(`/api/reception/revenue-packages/${encodeURIComponent(packageId)}`, {method: 'DELETE'})
+        .then(r => r.json())
+        .then(data => {
+            if (!data.success) {
+                alert(data.error || 'Falha ao remover pacote.');
+                return;
+            }
+            loadPackages();
+            loadPackageLogs();
+        });
+}
+
+function loadPackages() {
+    const status = document.getElementById('pkg_filter_status').value || '';
+    fetch(`/api/reception/revenue-packages?status=${encodeURIComponent(status)}`)
+        .then(r => r.json())
+        .then(data => {
+            packagesCache = data.items || [];
+            const tbody = document.querySelector('#packagesTable tbody');
+            tbody.innerHTML = '';
+            packagesCache.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.name || '-'}</td>
+                    <td>${item.status === 'active' ? 'Ativo' : 'Inativo'}</td>
+                    <td>${(item.categories || []).join(', ') || '-'}</td>
+                    <td>${item.price_type || '-'}</td>
+                    <td>${currency(item.special_price)}</td>
+                    <td>${item.required_for_sale ? 'Sim' : 'Não'}</td>
+                    <td>${(item.sale_period || {}).start_date || '-'} até ${(item.sale_period || {}).end_date || '-'}</td>
+                    <td>${(item.stay_period || {}).start_date || '-'} até ${(item.stay_period || {}).end_date || '-'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary me-1" onclick="editPackage('${item.id}')">Editar</button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deletePackage('${item.id}')">Remover</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        });
+}
+
+function editPackage(packageId) {
+    const found = packagesCache.find(item => String(item.id) === String(packageId));
+    if (!found) return;
+    fillPackageForm(found);
+}
+
+function loadPackageLogs() {
+    const start = document.getElementById('pkg_log_start').value || '';
+    const end = document.getElementById('pkg_log_end').value || '';
+    const user = document.getElementById('pkg_log_user').value || '';
+    fetch(`/api/reception/revenue-packages/logs?start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}&user=${encodeURIComponent(user)}`)
+        .then(r => r.json())
+        .then(data => {
+            const tbody = document.querySelector('#packageLogsTable tbody');
+            tbody.innerHTML = '';
+            (data.items || []).forEach(item => {
+                const packageName = (item.after && item.after.name) || (item.before && item.before.name) || '-';
+                const summary = item.action === 'delete' ? 'Pacote removido' : `Status: ${((item.after || {}).status || '-')}`;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.timestamp || '-'}</td>
+                    <td>${item.user || '-'}</td>
+                    <td>${item.action || '-'}</td>
+                    <td>${packageName}</td>
+                    <td>${summary}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    RevenuePeriodSelector.init('pkg_sale_period', {startDate: '{{ today_iso }}', endDate: '{{ today_iso }}'});
+    RevenuePeriodSelector.init('pkg_stay_period', {startDate: '{{ today_iso }}', endDate: '{{ today_iso }}'});
+    loadPackages();
+    loadPackageLogs();
+});
+</script>
+{% endblock %}

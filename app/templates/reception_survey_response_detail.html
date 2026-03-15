@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Resposta da Pesquisa{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <div>
+      <h2 class="mb-1"><i class="bi bi-chat-text"></i> Resposta da Pesquisa</h2>
+      <div class="text-muted small">{{ survey.title }}</div>
+      <div class="text-muted small mt-1">Protocolo: <span class="font-monospace">{{ ref or response.id }}</span></div>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('reception.reception_survey_dashboard', survey_id=survey.id) }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Voltar ao dashboard
+      </a>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-white">
+          <strong>Informações</strong>
+        </div>
+        <div class="card-body">
+          <div class="mb-2">
+            <div class="text-muted small">Data/Hora</div>
+            <div>{{ response.submitted_at.strftime('%d/%m/%Y %H:%M') if response.submitted_at else '—' }}</div>
+          </div>
+          <div class="mb-2">
+            <div class="text-muted small">IP</div>
+            <div>{{ meta.ip or '—' }}</div>
+          </div>
+          <div class="mb-2">
+            <div class="text-muted small">User agent</div>
+            <div class="small text-muted">{{ meta.user_agent or '—' }}</div>
+          </div>
+          {% if score is not none %}
+          <div class="mb-2">
+            <div class="text-muted small">Nota</div>
+            <div class="fs-5 fw-semibold">{{ score }}</div>
+          </div>
+          <div class="mb-2">
+            <div class="text-muted small">Classificação</div>
+            {% if category == 'promotor' %}
+              <span class="badge bg-success">Promotor</span>
+            {% elif category == 'neutro' %}
+              <span class="badge bg-warning text-dark">Neutro</span>
+            {% elif category == 'detrator' %}
+              <span class="badge bg-danger">Detrator</span>
+            {% else %}
+              <span class="badge bg-secondary">Sem nota</span>
+            {% endif %}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="col-md-8">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-white">
+          <strong>Respostas</strong>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th style="width: 40px;">#</th>
+                  <th>Pergunta</th>
+                  <th>Resposta</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in answers %}
+                <tr>
+                  <td class="text-muted small">{{ item.position }}</td>
+                  <td class="fw-semibold">{{ item.question }}</td>
+                  <td>
+                    {% if item.type == 'text' %}
+                      <pre class="mb-0 small" style="white-space: pre-wrap;">{{ item.answer or '' }}</pre>
+                    {% else %}
+                      <span class="small">{{ item.answer or '—' }}</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% else %}
+                <tr>
+                  <td colspan="3" class="text-center text-muted py-4">Nenhuma resposta encontrada.</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

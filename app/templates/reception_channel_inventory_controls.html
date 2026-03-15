@@ -1,0 +1,464 @@
+{% extends "base.html" %}
+
+{% block title %}Canais, Blackout, Allotment e Proteção{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="mb-0">Canais, Blackout, Allotment e Proteção</h3>
+        <a class="btn btn-outline-secondary" href="{{ url_for('reception.reception_dashboard') }}">Voltar</a>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white"><h5 class="mb-0">Fechamento de Venda por Canal</h5></div>
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label">Categoria</label>
+                    <select id="ch_category" class="form-select">
+                        {% for category in categories %}
+                        <option value="{{ category }}">{{ category }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Canal</label>
+                    <select id="ch_channel" class="form-select">
+                        {% for channel in channels %}
+                        <option value="{{ channel }}">{{ channel }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Status</label>
+                    <select id="ch_status" class="form-select">
+                        <option value="active">Ativo (fechado)</option>
+                        <option value="inactive">Inativo (aberto)</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <button class="btn btn-primary w-100" onclick="applyChannelRestriction()">Aplicar configuração</button>
+                </div>
+            </div>
+            <div class="row g-3 mt-1 align-items-end">
+                <div class="col-md-8">
+                    {% set period_selector_id = 'ch_period_selector' %}
+                    {% set period_selector_label = 'Período e dias da semana' %}
+                    {% set period_selector_start = today_iso %}
+                    {% set period_selector_end = today_iso %}
+                    {% include 'components/revenue_period_selector.html' %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white"><h5 class="mb-0">Blackout Dates</h5></div>
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label">Categoria</label>
+                    <select id="bo_category" class="form-select">
+                        <option value="Todas">Todas</option>
+                        {% for category in categories %}
+                        <option value="{{ category }}">{{ category }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Status</label>
+                    <select id="bo_status" class="form-select">
+                        <option value="active">Ativo</option>
+                        <option value="inactive">Inativo</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Motivo</label>
+                    <input id="bo_reason" class="form-control" type="text" placeholder="Obrigatório">
+                </div>
+                <div class="col-md-3">
+                    <button class="btn btn-primary w-100" onclick="applyBlackout()">Aplicar blackout</button>
+                </div>
+            </div>
+            <div class="row g-3 mt-1 align-items-end">
+                <div class="col-md-8">
+                    {% set period_selector_id = 'bo_period_selector' %}
+                    {% set period_selector_label = 'Período de blackout' %}
+                    {% set period_selector_start = today_iso %}
+                    {% set period_selector_end = today_iso %}
+                    {% include 'components/revenue_period_selector.html' %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white"><h5 class="mb-0">Allotment por Canal</h5></div>
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label">Categoria</label>
+                    <select id="al_category" class="form-select">
+                        {% for category in categories %}
+                        <option value="{{ category }}">{{ category }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Canal</label>
+                    <select id="al_channel" class="form-select">
+                        {% for channel in channels %}
+                        <option value="{{ channel }}">{{ channel }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Quartos</label>
+                    <input id="al_rooms" type="number" min="0" step="1" class="form-control" value="0">
+                </div>
+                <div class="col-md-4">
+                    <button class="btn btn-primary w-100" onclick="applyAllotment()">Aplicar allotment</button>
+                </div>
+            </div>
+            <div class="row g-3 mt-1 align-items-end">
+                <div class="col-md-8">
+                    {% set period_selector_id = 'al_period_selector' %}
+                    {% set period_selector_label = 'Período e dias da semana' %}
+                    {% set period_selector_start = today_iso %}
+                    {% set period_selector_end = today_iso %}
+                    {% include 'components/revenue_period_selector.html' %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white"><h5 class="mb-0">Proteção de Inventário</h5></div>
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label">Categoria</label>
+                    <select id="ip_category" class="form-select">
+                        {% for category in categories %}
+                        <option value="{{ category }}">{{ category }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Quartos protegidos</label>
+                    <input id="ip_rooms" type="number" min="0" step="1" class="form-control" value="0">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Status</label>
+                    <select id="ip_status" class="form-select">
+                        <option value="active">Ativo</option>
+                        <option value="inactive">Inativo</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <button class="btn btn-primary w-100" onclick="applyInventoryProtection()">Aplicar proteção</button>
+                </div>
+            </div>
+            <div class="row g-3 mt-1 align-items-end">
+                <div class="col-md-8">
+                    {% set period_selector_id = 'ip_period_selector' %}
+                    {% set period_selector_label = 'Período de proteção' %}
+                    {% set period_selector_start = today_iso %}
+                    {% set period_selector_end = today_iso %}
+                    {% include 'components/revenue_period_selector.html' %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white"><h5 class="mb-0">Visão Consolidada</h5></div>
+        <div class="card-body">
+            <div class="row g-3 align-items-end mb-2">
+                <div class="col-md-2">
+                    <label class="form-label">Início</label>
+                    <input id="flt_start" type="date" class="form-control" value="{{ today_iso }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Fim</label>
+                    <input id="flt_end" type="date" class="form-control" value="{{ today_iso }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Categoria</label>
+                    <select id="flt_category" class="form-select">
+                        <option value="">Todas</option>
+                        {% for category in categories %}
+                        <option value="{{ category }}">{{ category }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Canal</label>
+                    <select id="flt_channel" class="form-select">
+                        <option value="">Todos</option>
+                        {% for channel in channels %}
+                        <option value="{{ channel }}">{{ channel }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-outline-dark w-100" onclick="loadControlTables()">Atualizar</button>
+                </div>
+            </div>
+
+            <div class="table-responsive mb-3">
+                <table class="table table-sm table-hover" id="ch_table">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Categoria</th>
+                            <th>Canal</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div class="table-responsive mb-3">
+                <table class="table table-sm table-hover" id="bo_table">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Categoria</th>
+                            <th>Status</th>
+                            <th>Motivo</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-sm table-hover" id="al_table">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Categoria</th>
+                            <th>Canal</th>
+                            <th>Quartos</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div class="table-responsive mt-3">
+                <table class="table table-sm table-hover" id="ip_table">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Categoria</th>
+                            <th>Protegidos</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/revenue_period_selector.js') }}"></script>
+<script>
+function applyChannelRestriction() {
+    const period = RevenuePeriodSelector.getValue('ch_period_selector');
+    fetch('/api/reception/channel-restrictions', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            category: document.getElementById('ch_category').value,
+            channel: document.getElementById('ch_channel').value,
+            status: document.getElementById('ch_status').value,
+            start_date: period.start_date,
+            end_date: period.end_date || period.start_date,
+            weekdays: period.weekdays || []
+        })
+    }).then(r => r.json()).then(data => {
+        if (data.success) {
+            alert(`Configuração aplicada em ${data.result.dates.length} dia(s).`);
+            loadControlTables();
+        } else {
+            alert(data.error || 'Falha ao salvar fechamento por canal.');
+        }
+    });
+}
+
+function applyBlackout() {
+    const reason = document.getElementById('bo_reason').value || '';
+    if (!reason || reason.trim().length < 3) {
+        alert('Informe motivo do blackout.');
+        return;
+    }
+    const period = RevenuePeriodSelector.getValue('bo_period_selector');
+    fetch('/api/reception/blackout-dates', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            category: document.getElementById('bo_category').value,
+            status: document.getElementById('bo_status').value,
+            reason,
+            start_date: period.start_date,
+            end_date: period.end_date || period.start_date
+        })
+    }).then(r => r.json()).then(data => {
+        if (data.success) {
+            alert(`Blackout aplicado em ${data.result.dates.length} dia(s).`);
+            loadControlTables();
+        } else {
+            alert(data.error || 'Falha ao salvar blackout.');
+        }
+    });
+}
+
+function applyAllotment() {
+    const period = RevenuePeriodSelector.getValue('al_period_selector');
+    fetch('/api/reception/channel-allotments', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            category: document.getElementById('al_category').value,
+            channel: document.getElementById('al_channel').value,
+            rooms: parseInt(document.getElementById('al_rooms').value || '0', 10),
+            start_date: period.start_date,
+            end_date: period.end_date || period.start_date,
+            weekdays: period.weekdays || []
+        })
+    }).then(r => r.json()).then(data => {
+        if (data.success) {
+            alert(`Allotment aplicado em ${data.result.dates.length} dia(s).`);
+            loadControlTables();
+        } else {
+            alert(data.error || 'Falha ao salvar allotment.');
+        }
+    });
+}
+
+function applyInventoryProtection() {
+    const period = RevenuePeriodSelector.getValue('ip_period_selector');
+    fetch('/api/reception/revenue-management/inventory-protection', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            category: document.getElementById('ip_category').value,
+            protected_rooms: parseInt(document.getElementById('ip_rooms').value || '0', 10),
+            status: document.getElementById('ip_status').value,
+            start_date: period.start_date,
+            end_date: period.end_date || period.start_date
+        })
+    }).then(r => r.json()).then(data => {
+        if (data.success) {
+            alert(`Proteção aplicada em ${data.result.dates.length} dia(s).`);
+            loadControlTables();
+        } else {
+            alert(data.error || 'Falha ao salvar proteção de inventário.');
+        }
+    });
+}
+
+function loadChannelRestrictionRows(startDate, endDate, category, channel) {
+    const params = new URLSearchParams({start_date: startDate, end_date: endDate, category, channel});
+    fetch(`/api/reception/channel-restrictions?${params.toString()}`)
+        .then(r => r.json())
+        .then(data => {
+            const tbody = document.querySelector('#ch_table tbody');
+            tbody.innerHTML = '';
+            (data.items || []).forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.date || '-'}</td>
+                    <td>${item.category || '-'}</td>
+                    <td>${item.channel || '-'}</td>
+                    <td>${item.status === 'active' ? 'Fechado' : 'Aberto'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        });
+}
+
+function loadBlackoutRows(startDate, endDate, category) {
+    const params = new URLSearchParams({start_date: startDate, end_date: endDate, category});
+    fetch(`/api/reception/blackout-dates?${params.toString()}`)
+        .then(r => r.json())
+        .then(data => {
+            const tbody = document.querySelector('#bo_table tbody');
+            tbody.innerHTML = '';
+            (data.items || []).forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.date || '-'}</td>
+                    <td>${item.category === '__ALL__' ? 'Todas' : (item.category || '-')}</td>
+                    <td>${item.status === 'active' ? 'Ativo' : 'Inativo'}</td>
+                    <td>${item.reason || '-'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        });
+}
+
+function loadAllotmentRows(startDate, endDate, category, channel) {
+    const params = new URLSearchParams({start_date: startDate, end_date: endDate, category, channel});
+    fetch(`/api/reception/channel-allotments?${params.toString()}`)
+        .then(r => r.json())
+        .then(data => {
+            const tbody = document.querySelector('#al_table tbody');
+            tbody.innerHTML = '';
+            (data.items || []).forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.date || '-'}</td>
+                    <td>${item.category || '-'}</td>
+                    <td>${item.channel || '-'}</td>
+                    <td>${item.rooms || 0}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        });
+}
+
+function loadInventoryProtectionRows(startDate, endDate, category) {
+    const params = new URLSearchParams({start_date: startDate, end_date: endDate, category});
+    fetch(`/api/reception/revenue-management/inventory-protection?${params.toString()}`)
+        .then(r => r.json())
+        .then(data => {
+            const tbody = document.querySelector('#ip_table tbody');
+            tbody.innerHTML = '';
+            (data.items || []).forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.date || '-'}</td>
+                    <td>${item.category || '-'}</td>
+                    <td>${item.protected_rooms || 0}</td>
+                    <td>${item.status === 'active' ? 'Ativo' : 'Inativo'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        });
+}
+
+function loadControlTables() {
+    const startDate = document.getElementById('flt_start').value;
+    const endDate = document.getElementById('flt_end').value;
+    const category = document.getElementById('flt_category').value;
+    const channel = document.getElementById('flt_channel').value;
+    loadChannelRestrictionRows(startDate, endDate, category, channel);
+    loadBlackoutRows(startDate, endDate, category);
+    loadAllotmentRows(startDate, endDate, category, channel);
+    loadInventoryProtectionRows(startDate, endDate, category);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    RevenuePeriodSelector.init('ch_period_selector', {startDate: '{{ today_iso }}', endDate: '{{ today_iso }}'});
+    RevenuePeriodSelector.init('bo_period_selector', {startDate: '{{ today_iso }}', endDate: '{{ today_iso }}'});
+    RevenuePeriodSelector.init('al_period_selector', {startDate: '{{ today_iso }}', endDate: '{{ today_iso }}'});
+    RevenuePeriodSelector.init('ip_period_selector', {startDate: '{{ today_iso }}', endDate: '{{ today_iso }}'});
+    loadControlTables();
+});
+</script>
+{% endblock %}

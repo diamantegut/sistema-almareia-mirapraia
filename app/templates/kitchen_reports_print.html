@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório de Porcionamento - {{ date }}</title>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 10mm;
+        }
+        body { font-family: sans-serif; font-size: 11px; margin: 0; background: #f3f4f6; color: #111827; }
+        .no-print { margin: 0 auto 14px auto; max-width: 1600px; padding: 12px 12px 0 12px; display: flex; gap: 10px; flex-wrap: wrap; }
+        .no-print button { border: 0; border-radius: 8px; background: #1f2937; color: #fff; padding: 10px 14px; font-size: 14px; font-weight: 600; cursor: pointer; min-height: 42px; }
+        .print-shell { margin: 0 auto; max-width: 1600px; padding: 12px; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+        .header { text-align: center; margin-bottom: 12px; }
+        .header h2 { margin: 0 0 6px 0; font-size: 1.25rem; }
+        .header p { margin: 0; color: #4b5563; }
+        .table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table { width: 100%; border-collapse: collapse; min-width: 1280px; table-layout: auto; }
+        th, td { border: 1px solid #ddd; padding: 6px; text-align: left; white-space: nowrap; }
+        th { background-color: #f2f2f2; }
+        body.compact-mode { font-size: 9.5px; }
+        body.compact-mode .header h2 { font-size: 1.05rem; margin-bottom: 4px; }
+        body.compact-mode .header p { font-size: 0.82rem; }
+        body.compact-mode .print-shell { padding: 8px; }
+        body.compact-mode table { min-width: 1100px; }
+        body.compact-mode th, body.compact-mode td { padding: 3px 4px; }
+        body.compact-mode .no-print button#compact-toggle-btn { background: #1d4ed8; }
+        @media (max-width: 1024px) {
+            body { font-size: 10px; }
+            .no-print { padding: 10px 10px 0 10px; margin-bottom: 10px; }
+            .no-print button { flex: 1 1 180px; }
+            .print-shell { padding: 10px; border-radius: 8px; }
+            th, td { padding: 5px; }
+            body.compact-mode th, body.compact-mode td { padding: 3px; }
+        }
+        @media print {
+            .no-print { display: none; }
+            body { font-size: 10px; background: #fff; }
+            .print-shell { margin: 0; max-width: none; padding: 0; border: 0; box-shadow: none; border-radius: 0; }
+            table { min-width: auto; }
+            body.compact-mode { font-size: 9px; }
+            body.compact-mode th, body.compact-mode td { padding: 2px 3px; }
+        }
+    </style>
+</head>
+<body class="{% if request.args.get('compact') == '1' %}compact-mode{% endif %}" onload="window.print()">
+    <div class="no-print">
+        <button onclick="window.print()">Imprimir / Salvar PDF</button>
+        <button id="compact-toggle-btn" type="button">Ativar modo compacto</button>
+        <button onclick="window.close()">Fechar</button>
+    </div>
+    <div class="print-shell">
+        <div class="header">
+            <h2>Relatório de Porcionamento - Cozinha</h2>
+            <p>Gerado em: {{ date }}</p>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data/Hora</th>
+                        <th>Produto (Origem)</th>
+                        <th>Qtd Bruta (Kg)</th>
+                        <th>Kg Degelo</th>
+                        <th>Kg Aparas</th>
+                        <th>Kg Descarte</th>
+                        <th>Kg Cocção</th>
+                        <th>Kg Útil</th>
+                        <th>Funcionário</th>
+                        <th>Fornecedor</th>
+                        <th>Preço/Kg Bruto</th>
+                        <th>Rendimento %</th>
+                        <th>Perda Total %</th>
+                        <th>Custo/Kg Útil</th>
+                        <th>Custo Total Líquido</th>
+                        <th>Preço Final Unitário (Porcionados)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in data %}
+                    <tr>
+                        <td>{{ item.date }}</td>
+                        <td>{{ item.product }}</td>
+                        <td>{{ "%.3f"|format(item.qty_kg) }}</td>
+                        <td>{{ "%.3f"|format(item.degelo_kg) }}</td>
+                        <td>{{ "%.3f"|format(item.aparas_kg) }}</td>
+                        <td>{{ "%.3f"|format(item.descarte_kg) }}</td>
+                        <td>{{ "%.3f"|format(item.cooking_loss_kg) }}</td>
+                        <td>{{ "%.3f"|format(item.useful_kg) }}</td>
+                        <td>{{ item.staff }}</td>
+                        <td>{{ item.supplier }}</td>
+                        <td>R$ {{ "%.2f"|format(item.price_gross) }}</td>
+                        <td>{{ "%.1f"|format(item.yield_pct) }}%</td>
+                        <td>{{ "%.1f"|format(item.waste_pct) }}%</td>
+                        <td>R$ {{ "%.2f"|format(item.cost_per_useful_kg) }}</td>
+                        <td>R$ {{ "%.2f"|format(item.total_cost) }}</td>
+                        <td>{{ item.portioned_items_unit_prices }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        const compactBtn = document.getElementById('compact-toggle-btn');
+        const updateCompactLabel = () => {
+            const enabled = document.body.classList.contains('compact-mode');
+            compactBtn.textContent = enabled ? 'Desativar modo compacto' : 'Ativar modo compacto';
+        };
+        compactBtn.addEventListener('click', () => {
+            document.body.classList.toggle('compact-mode');
+            updateCompactLabel();
+        });
+        updateCompactLabel();
+    </script>
+</body>
+</html>

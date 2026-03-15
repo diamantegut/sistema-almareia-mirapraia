@@ -1,0 +1,252 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2><i class="bi bi-grid-1x2-fill"></i> Authorization Heatmap</h2>
+        <div>
+            <a href="{{ url_for('admin.admin_authorization_trace') }}" class="btn btn-outline-primary me-2">Simulator</a>
+            <a href="{{ url_for('admin.admin_security_dashboard') }}" class="btn btn-outline-secondary">Voltar</a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white"><strong>Filtros</strong></div>
+        <div class="card-body">
+            <form method="GET" class="row g-2 align-items-end">
+                <div class="col-md-2">
+                    <label class="form-label">Início</label>
+                    <input type="date" class="form-control" name="start_date" value="{{ filter_start_date }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Fim</label>
+                    <input type="date" class="form-control" name="end_date" value="{{ filter_end_date }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Agrupar</label>
+                    <select class="form-select" name="group_by">
+                        <option value="endpoint" {% if group_by == 'endpoint' %}selected{% endif %}>Endpoint</option>
+                        <option value="area" {% if group_by == 'area' %}selected{% endif %}>Área</option>
+                        <option value="user" {% if group_by == 'user' %}selected{% endif %}>Usuário</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Área</label>
+                    <select class="form-select" name="area">
+                        <option value="">Todas</option>
+                        {% for item in filter_options.areas %}
+                        <option value="{{ item }}" {% if filter_area == item %}selected{% endif %}>{{ item }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Endpoint</label>
+                    <select class="form-select" name="endpoint">
+                        <option value="">Todos</option>
+                        {% for item in filter_options.endpoints %}
+                        <option value="{{ item }}" {% if filter_endpoint == item %}selected{% endif %}>{{ item }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Usuário</label>
+                    <select class="form-select" name="user">
+                        <option value="">Todos</option>
+                        {% for item in filter_options.users %}
+                        <option value="{{ item }}" {% if filter_user == item %}selected{% endif %}>{{ item }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Reason Code</label>
+                    <select class="form-select" name="reason_code">
+                        <option value="">Todos</option>
+                        {% for item in filter_options.reason_codes %}
+                        <option value="{{ item }}" {% if filter_reason_code == item %}selected{% endif %}>{{ item }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-9 d-flex gap-2">
+                    <button class="btn btn-primary">Aplicar</button>
+                    <a class="btn btn-outline-secondary" href="{{ url_for('admin.admin_authorization_heatmap') }}">Limpar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-3"><div class="card"><div class="card-body"><small>Total Requests</small><div class="h4">{{ summary.total_requests or 0 }}</div></div></div></div>
+        <div class="col-md-3"><div class="card"><div class="card-body"><small>ALLOW</small><div class="h4 text-success">{{ summary.allow_count or 0 }}</div></div></div></div>
+        <div class="col-md-3"><div class="card"><div class="card-body"><small>DENY</small><div class="h4 text-danger">{{ summary.deny_count or 0 }}</div></div></div></div>
+        <div class="col-md-3"><div class="card"><div class="card-body"><small>REQUIRE_OVERRIDE</small><div class="h4 text-warning">{{ summary.override_count or 0 }}</div></div></div></div>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white"><strong>Insights Automáticos</strong></div>
+        <div class="card-body">
+            {% if insights %}
+            <ul class="mb-0">
+                {% for insight in insights %}
+                <li><strong>{{ insight.type }}</strong> — {{ insight.message }} ({{ insight.area }} / {{ insight.endpoint }})</li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <span class="text-muted">Sem alertas relevantes no período selecionado.</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-lg-7">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white"><strong>Matriz de Risco (Endpoint)</strong></div>
+                <div class="card-body">
+                    <div id="heatmap-matrix-container" class="table-responsive">
+                        <span class="text-muted">Carregando matriz...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white"><strong>Série Temporal (DENY/OVERRIDE)</strong></div>
+                <div class="card-body">
+                    <div id="heatmap-timeseries-container">
+                        <span class="text-muted">Carregando série temporal...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-white"><strong>Heatmap</strong></div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Área</th>
+                            <th>Endpoint</th>
+                            <th>Usuário</th>
+                            <th>Total</th>
+                            <th>ALLOW</th>
+                            <th>DENY</th>
+                            <th>OVERRIDE</th>
+                            <th>Deny Ratio</th>
+                            <th>Override Ratio</th>
+                            <th>Risco</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in rows %}
+                        <tr class="{% if row.risk_level == 'red' %}table-danger{% elif row.risk_level == 'yellow' %}table-warning{% else %}table-success{% endif %}">
+                            <td>{{ row.area }}</td>
+                            <td>{{ row.endpoint }}</td>
+                            <td>{{ row.user_id }}</td>
+                            <td>{{ row.total_requests }}</td>
+                            <td>{{ row.allow_count }}</td>
+                            <td>{{ row.deny_count }}</td>
+                            <td>{{ row.override_count }}</td>
+                            <td>{{ "%.2f"|format((row.deny_ratio or 0.0) * 100) }}%</td>
+                            <td>{{ "%.2f"|format((row.override_ratio or 0.0) * 100) }}%{% if row.override_alert %} ⚠{% endif %}</td>
+                            <td>{{ row.risk_level }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function _riskClass(riskLevel) {
+    const risk = String(riskLevel || '').toLowerCase();
+    if (risk === 'red') return 'table-danger';
+    if (risk === 'yellow') return 'table-warning';
+    return 'table-success';
+}
+
+function renderMatrix(matrix) {
+    const container = document.getElementById('heatmap-matrix-container');
+    if (!Array.isArray(matrix) || matrix.length === 0) {
+        container.innerHTML = '<span class="text-muted">Sem dados para matriz no período.</span>';
+        return;
+    }
+    const top = matrix.slice(0, 12);
+    const rows = top.map(item => {
+        const denyPct = ((Number(item.deny_ratio || 0) * 100).toFixed(2)) + '%';
+        const overridePct = ((Number(item.override_ratio || 0) * 100).toFixed(2)) + '%';
+        return `
+            <tr class="${_riskClass(item.risk_level)}">
+                <td>${item.area || ''}</td>
+                <td>${item.endpoint || ''}</td>
+                <td>${item.total_requests || 0}</td>
+                <td>${denyPct}</td>
+                <td>${overridePct}${item.override_alert ? ' ⚠' : ''}</td>
+            </tr>
+        `;
+    }).join('');
+    container.innerHTML = `
+        <table class="table table-sm table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Área</th>
+                    <th>Endpoint</th>
+                    <th>Total</th>
+                    <th>Deny Ratio</th>
+                    <th>Override Ratio</th>
+                </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+        </table>
+    `;
+}
+
+function renderTimeseries(series) {
+    const container = document.getElementById('heatmap-timeseries-container');
+    if (!Array.isArray(series) || series.length === 0) {
+        container.innerHTML = '<span class="text-muted">Sem dados para série temporal no período.</span>';
+        return;
+    }
+    const bars = series.map(item => {
+        const day = String(item.day || 'unknown');
+        const denyPct = Number(item.deny_ratio || 0) * 100;
+        const overridePct = Number(item.override_ratio || 0) * 100;
+        return `
+            <div class="mb-3">
+                <div class="d-flex justify-content-between">
+                    <small class="fw-semibold">${day}</small>
+                    <small class="text-muted">T:${item.total || 0} D:${item.deny || 0} O:${item.override || 0}</small>
+                </div>
+                <div class="progress mb-1" style="height: 8px;">
+                    <div class="progress-bar bg-danger" style="width:${Math.min(100, denyPct).toFixed(2)}%"></div>
+                </div>
+                <div class="progress" style="height: 8px;">
+                    <div class="progress-bar bg-warning" style="width:${Math.min(100, overridePct).toFixed(2)}%"></div>
+                </div>
+            </div>
+        `;
+    }).join('');
+    container.innerHTML = bars;
+}
+
+async function loadHeatmapCharts() {
+    const params = new URLSearchParams(window.location.search);
+    const url = `{{ url_for('admin.admin_authorization_heatmap_data') }}?${params.toString()}`;
+    try {
+        const response = await fetch(url, { method: 'GET', headers: { 'Accept': 'application/json' } });
+        const payload = await response.json();
+        const charts = payload.charts || {};
+        renderMatrix(charts.matrix || []);
+        renderTimeseries(charts.timeseries || []);
+    } catch (error) {
+        document.getElementById('heatmap-matrix-container').innerHTML = '<span class="text-danger">Falha ao carregar matriz.</span>';
+        document.getElementById('heatmap-timeseries-container').innerHTML = '<span class="text-danger">Falha ao carregar série temporal.</span>';
+    }
+}
+
+loadHeatmapCharts();
+</script>
+{% endblock %}

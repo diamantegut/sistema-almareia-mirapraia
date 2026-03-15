@@ -1,0 +1,478 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Conciliação de Cartões</h2>
+        <a href="{{ url_for('main.index') }}" class="btn btn-secondary" style="min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" aria-label="Voltar"><i class="bi bi-arrow-left"></i> Voltar</a>
+    </div>
+
+    <div class="row mb-4">
+        <!-- Synchronization Section -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Sincronização</h5>
+                    <button class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#configModal" style="min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" aria-label="Configurar"><i class="bi bi-gear-fill"></i> Configurar</button>
+                </div>
+                <div class="card-body">
+                    <!-- API Sync -->
+                    <form action="{{ url_for('finance.finance_reconciliation_sync') }}" method="POST" class="mb-4">
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Data Inicial</label>
+                                <input type="date" class="form-control" name="start_date" value="{{ start_date or today_date }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Data Final</label>
+                                <input type="date" class="form-control" name="end_date" value="{{ end_date or today_date }}" required>
+                            </div>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" name="provider" value="pagseguro" class="btn btn-outline-primary"><i class="bi bi-arrow-repeat"></i> Sincronizar PagSeguro</button>
+                            <button type="submit" name="provider" value="rede" class="btn btn-outline-danger"><i class="bi bi-arrow-repeat"></i> Sincronizar Rede</button>
+                        </div>
+                    </form>
+
+                    <hr>
+
+                    <!-- File Upload Fallback -->
+                    <h6 class="text-muted mb-3">Ou Importar Arquivo</h6>
+                    <form action="{{ url_for('finance.finance_reconciliation_upload') }}" method="POST" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <select class="form-select form-select-sm" name="provider" id="provider" required>
+                                <option value="pagseguro">PagSeguro (CSV)</option>
+                                <option value="rede">Rede (CSV)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <input type="file" class="form-control form-control-sm" name="file" id="file" required accept=".csv,.txt">
+                        </div>
+                        <button type="submit" class="btn btn-sm btn-secondary w-100">Processar Arquivo</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="col-md-8">
+            <div class="card h-100">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Resumo da Conciliação</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <h3 class="text-success">{{ summary.matched_count }}</h3>
+                            <p class="text-muted">Conciliados</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h3 class="text-warning">{{ summary.unmatched_system_count }}</h3>
+                            <p class="text-muted">Faltando na Maquininha</p>
+                            <small class="text-danger">Verifique se foi dinheiro ou erro</small>
+                        </div>
+                        <div class="col-md-3">
+                            <h3 class="text-danger">{{ summary.unmatched_card_count }}</h3>
+                            <p class="text-muted">Sobrando na Maquininha</p>
+                            <small class="text-danger">Venda não lançada no sistema?</small>
+                        </div>
+                        <div class="col-md-3">
+                            <h3 class="text-primary">{{ summary.suspected_count or 0 }}</h3>
+                            <p class="text-muted">Suspeitas (aprovar)</p>
+                            <small class="text-primary">Mesmo valor com horário distante</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Details Table -->
+    <div class="card">
+        <div class="card-header">
+            <ul class="nav nav-tabs card-header-tabs" id="myTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="unmatched-sys-tab" data-bs-toggle="tab" data-bs-target="#unmatched-sys" type="button" role="tab">No Sistema (Sem Par)</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="unmatched-card-tab" data-bs-toggle="tab" data-bs-target="#unmatched-card" type="button" role="tab">Na Maquininha (Sem Par)</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="matched-tab" data-bs-toggle="tab" data-bs-target="#matched" type="button" role="tab">Conciliados (OK)</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="suspected-tab" data-bs-toggle="tab" data-bs-target="#suspected" type="button" role="tab">Suspeitas (ADM)</button>
+                </li>
+            </ul>
+        </div>
+        <div class="card-body">
+            <div class="tab-content" id="myTabContent">
+                
+                <!-- System Unmatched -->
+                <div class="tab-pane fade show active" id="unmatched-sys" role="tabpanel">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Data/Hora</th>
+                                    <th>Usuário</th>
+                                    <th>Quarto</th>
+                                    <th>Descrição</th>
+                                    <th>Valor</th>
+                                    <th>Método</th>
+                                    <th>Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in results.unmatched_system %}
+                                <tr>
+                                    <td>{{ item.timestamp.strftime('%d/%m/%Y %H:%M') }}</td>
+                                    <td>{{ item.user or '-' }}</td>
+                                    <td>{{ item.room_number or '-' }}</td>
+                                    <td>{{ item.description }}</td>
+                                    <td>R$ {{ "%.2f"|format(item.amount) }}</td>
+                                    <td>{{ item.payment_method }}</td>
+                                    <td>
+                                        <button
+                                            type="button"
+                                            class="btn btn-sm btn-outline-primary me-1 js-open-account-summary"
+                                            data-system-id="{{ item.id }}"
+                                            data-room-number="{{ item.room_number or '' }}"
+                                            data-guest-name="{{ item.guest_name or '' }}"
+                                            data-user="{{ item.user or '' }}"
+                                            data-description="{{ item.description or '' }}"
+                                            data-payment-method="{{ item.payment_method or '' }}"
+                                            data-system-amount="{{ '%.2f'|format(item.amount) }}"
+                                            data-system-date="{{ item.timestamp.strftime('%d/%m/%Y %H:%M') }}"
+                                            style="min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;"
+                                            aria-label="Resumo da Conta"
+                                        ><i class="bi bi-eye"></i></button>
+                                        <button class="btn btn-sm btn-outline-secondary" style="min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" aria-label="Ignorar">Ignorar</button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Card Unmatched -->
+                <div class="tab-pane fade" id="unmatched-card" role="tabpanel">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Adquirente</th>
+                                    <th>Valor</th>
+                                    <th>Detalhes</th>
+                                    <th>Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in results.unmatched_card %}
+                                <tr>
+                                    <td>{{ item.date.strftime('%d/%m/%Y %H:%M') }}</td>
+                                    <td>{{ item.provider }}</td>
+                                    <td>R$ {{ "%.2f"|format(item.amount) }}</td>
+                                    <td>{{ item.original_row }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" style="min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" aria-label="Lançar no Sistema">Lançar no Sistema</button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Matched -->
+                <div class="tab-pane fade" id="matched" role="tabpanel">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Data Sistema</th>
+                                    <th>Usuário</th>
+                                    <th>Quarto</th>
+                                    <th>Valor</th>
+                                    <th>Data Maquininha</th>
+                                    <th>Conta/Token</th>
+                                    <th>Tag</th>
+                                    <th>Diff</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in results.matched %}
+                                <tr class="table-success">
+                                    <td>{{ item.system.timestamp.strftime('%d/%m/%Y %H:%M') }}</td>
+                                    <td>{{ item.system.user or '-' }}</td>
+                                    <td>{{ item.system.room_number or '-' }}</td>
+                                    <td>R$ {{ "%.2f"|format(item.system.amount) }}</td>
+                                    <td>{{ item.card.date.strftime('%d/%m/%Y %H:%M') }}</td>
+                                    <td>{{ item.card.provider }}</td>
+                                    <td>
+                                        {% if item.confirmation_tag %}
+                                        <span class="badge bg-warning text-dark">{{ item.confirmation_tag }}</span>
+                                        {% else %}
+                                        <span class="badge bg-success">Conciliado</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ "%.2f"|format(item.system.amount - item.card.amount) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="suspected" role="tabpanel">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Data Sistema</th>
+                                    <th>Usuário</th>
+                                    <th>Quarto</th>
+                                    <th>Valor</th>
+                                    <th>Data Maquininha</th>
+                                    <th>Adquirente</th>
+                                    <th>Gap (min)</th>
+                                    <th>Dif. Valor</th>
+                                    <th>Motivo</th>
+                                    <th>Ação ADM</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in suspected_matches %}
+                                <tr class="table-warning">
+                                    <td>{{ item.system.timestamp.strftime('%d/%m/%Y %H:%M') }}</td>
+                                    <td>{{ item.system.user or '-' }}</td>
+                                    <td>{{ item.system.room_number or '-' }}</td>
+                                    <td>R$ {{ "%.2f"|format(item.system.amount) }}</td>
+                                    <td>{{ item.card.date.strftime('%d/%m/%Y %H:%M') }}</td>
+                                    <td>{{ item.card.provider }}</td>
+                                    <td>{{ item.time_gap_minutes }}</td>
+                                    <td>R$ {{ "%.2f"|format(item.amount_diff or 0) }} ({{ "%.2f"|format(item.amount_diff_percent or 0) }}%)</td>
+                                    <td><span class="badge bg-info text-dark">{{ item.reason or 'Revisão ADM' }}</span></td>
+                                    <td>
+                                        <form action="{{ url_for('finance.finance_reconciliation_approve') }}" method="POST" class="d-inline">
+                                            <input type="hidden" name="provider" value="pagseguro">
+                                            <input type="hidden" name="start_date" value="{{ start_date or today_date }}">
+                                            <input type="hidden" name="end_date" value="{{ end_date or today_date }}">
+                                            <input type="hidden" name="system_id" value="{{ item.system.id }}">
+                                            <input type="hidden" name="room_number" value="{{ item.system.room_number or '' }}">
+                                            <input type="hidden" name="card_provider" value="{{ item.card.provider }}">
+                                            <input type="hidden" name="card_amount" value="{{ item.card.amount }}">
+                                            <input type="hidden" name="card_date" value="{{ item.card.date.strftime('%Y-%m-%d %H:%M') }}">
+                                            <input type="hidden" name="approval_signature" value="{{ item.approval_signature }}">
+                                            <button type="submit" class="btn btn-sm btn-warning">Aprovar ADM</button>
+                                        </form>
+                                        <button
+                                            type="button"
+                                            class="btn btn-sm btn-outline-primary js-open-account-summary"
+                                            data-system-id="{{ item.system.id }}"
+                                            data-room-number="{{ item.system.room_number or '' }}"
+                                            data-guest-name="{{ item.system.guest_name or '' }}"
+                                            data-user="{{ item.system.user or '' }}"
+                                            data-description="{{ item.system.description or '' }}"
+                                            data-payment-method="{{ item.system.payment_method or '' }}"
+                                            data-system-amount="{{ '%.2f'|format(item.system.amount) }}"
+                                            data-system-date="{{ item.system.timestamp.strftime('%d/%m/%Y %H:%M') }}"
+                                            data-card-provider="{{ item.card.provider or '' }}"
+                                            data-card-amount="{{ '%.2f'|format(item.card.amount) }}"
+                                            data-card-date="{{ item.card.date.strftime('%d/%m/%Y %H:%M') }}"
+                                        >Resumo Conta</button>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="10" class="text-center text-muted">Sem suspeitas de falso negativo por horário ou diferença de valor.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="accountSummaryModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Resumo da Conta Paga</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="small text-muted mb-2">Informações para conferência administrativa.</div>
+                <table class="table table-sm">
+                    <tbody>
+                        <tr><th>ID Sistema</th><td id="sumSystemId">-</td></tr>
+                        <tr><th>Quarto</th><td id="sumRoom">-</td></tr>
+                        <tr><th>Hóspede</th><td id="sumGuest">-</td></tr>
+                        <tr><th>Usuário fechamento</th><td id="sumUser">-</td></tr>
+                        <tr><th>Descrição</th><td id="sumDesc">-</td></tr>
+                        <tr><th>Método</th><td id="sumMethod">-</td></tr>
+                        <tr><th>Data/Hora sistema</th><td id="sumSystemDate">-</td></tr>
+                        <tr><th>Valor sistema</th><td id="sumSystemAmount">-</td></tr>
+                        <tr><th>Conta maquininha</th><td id="sumCardProvider">-</td></tr>
+                        <tr><th>Data/Hora maquininha</th><td id="sumCardDate">-</td></tr>
+                        <tr><th>Valor maquininha</th><td id="sumCardAmount">-</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Config Modal -->
+<div class="modal fade" id="configModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Configurar Integrações (Múltiplos CNPJs)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="nav nav-tabs" id="configTabs" role="tablist">
+                    <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#cfg-pagseguro">PagSeguro</a></li>
+                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#cfg-rede">Rede</a></li>
+                </ul>
+
+                <div class="tab-content pt-3">
+                    <!-- PagSeguro Tab -->
+                    <div class="tab-pane fade show active" id="cfg-pagseguro">
+                        <!-- List Existing -->
+                        <h6>Contas Conectadas</h6>
+                        <ul class="list-group mb-3">
+                            {% for acc in settings.get('pagseguro', []) %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ acc.alias }}</strong><br>
+                                    <small class="text-muted">{{ acc.email }}</small>
+                                </div>
+                                <form action="{{ url_for('finance.finance_reconciliation_remove_account') }}" method="POST" onsubmit="return confirm('Remover esta conta?');">
+                                    <input type="hidden" name="provider" value="pagseguro">
+                                    <input type="hidden" name="index" value="{{ loop.index0 }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" style="min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" aria-label="Remover"><i class="bi bi-x-lg"></i></button>
+                                </form>
+                            </li>
+                            {% else %}
+                            <li class="list-group-item text-muted">Nenhuma conta configurada.</li>
+                            {% endfor %}
+                        </ul>
+
+                        <hr>
+
+                        <!-- Add New -->
+                        <h6>Adicionar Nova Conta</h6>
+                        <form action="{{ url_for('finance.finance_reconciliation_add_account') }}" method="POST">
+                            <input type="hidden" name="provider" value="pagseguro">
+                            <div class="mb-2">
+                                <label class="form-label">Apelido (ex: CNPJ Matriz)</label>
+                                <input type="text" class="form-control form-control-sm" name="alias" required placeholder="Identificação da conta">
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">E-mail da Conta</label>
+                                <input type="email" class="form-control form-control-sm" name="ps_email" required>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Token (V3)</label>
+                                <input type="password" class="form-control form-control-sm" name="ps_token" required>
+                                <div class="form-text">Gere o token no painel do PagSeguro em Integrações > Token.</div>
+                            </div>
+                            <button type="submit" class="btn btn-sm btn-success w-100">Adicionar PagSeguro</button>
+                        </form>
+                    </div>
+
+                    <!-- Rede Tab -->
+                    <div class="tab-pane fade" id="cfg-rede">
+                        <!-- List Existing -->
+                         <h6>Contas Conectadas</h6>
+                        <ul class="list-group mb-3">
+                            {% for acc in settings.get('rede', []) %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ acc.alias }}</strong><br>
+                                    <small class="text-muted">ID: {{ acc.client_id }}</small>
+                                </div>
+                                <form action="{{ url_for('finance.finance_reconciliation_remove_account') }}" method="POST" onsubmit="return confirm('Remover esta conta?');">
+                                    <input type="hidden" name="provider" value="rede">
+                                    <input type="hidden" name="index" value="{{ loop.index0 }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" style="min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" aria-label="Remover"><i class="bi bi-x-circle"></i></button>
+                                </form>
+                            </li>
+                            {% else %}
+                            <li class="list-group-item text-muted">Nenhuma conta configurada.</li>
+                            {% endfor %}
+                        </ul>
+
+                        <hr>
+
+                        <!-- Add New -->
+                        <h6>Adicionar Nova Conta</h6>
+                         <form action="{{ url_for('finance.finance_reconciliation_add_account') }}" method="POST">
+                            <input type="hidden" name="provider" value="rede">
+                            <div class="mb-2">
+                                <label class="form-label">Apelido (ex: CNPJ Filial)</label>
+                                <input type="text" class="form-control form-control-sm" name="alias" required placeholder="Identificação da conta">
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Client ID</label>
+                                <input type="text" class="form-control form-control-sm" name="rede_client_id" required>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Client Secret</label>
+                                <input type="password" class="form-control form-control-sm" name="rede_client_secret" required>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Usuário (API)</label>
+                                <input type="text" class="form-control form-control-sm" name="rede_username" required>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Senha (API)</label>
+                                <input type="password" class="form-control form-control-sm" name="rede_password" required>
+                            </div>
+                            <button type="submit" class="btn btn-sm btn-success w-100">Adicionar Rede</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const modalEl = document.getElementById('accountSummaryModal');
+    if (!modalEl) return;
+    const modal = new bootstrap.Modal(modalEl);
+    document.querySelectorAll('.js-open-account-summary').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.getElementById('sumSystemId').textContent = this.dataset.systemId || '-';
+            document.getElementById('sumRoom').textContent = this.dataset.roomNumber || '-';
+            document.getElementById('sumGuest').textContent = this.dataset.guestName || '-';
+            document.getElementById('sumUser').textContent = this.dataset.user || '-';
+            document.getElementById('sumDesc').textContent = this.dataset.description || '-';
+            document.getElementById('sumMethod').textContent = this.dataset.paymentMethod || '-';
+            document.getElementById('sumSystemDate').textContent = this.dataset.systemDate || '-';
+            document.getElementById('sumSystemAmount').textContent = this.dataset.systemAmount ? `R$ ${this.dataset.systemAmount}` : '-';
+            document.getElementById('sumCardProvider').textContent = this.dataset.cardProvider || '-';
+            document.getElementById('sumCardDate').textContent = this.dataset.cardDate || '-';
+            document.getElementById('sumCardAmount').textContent = this.dataset.cardAmount ? `R$ ${this.dataset.cardAmount}` : '-';
+            modal.show();
+        });
+    });
+});
+</script>
+{% endblock %}

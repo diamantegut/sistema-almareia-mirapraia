@@ -1,0 +1,230 @@
+{
+    "Estoque": {
+        "version": 2,
+        "areas": {
+            "conferencia": {
+                "all": true,
+                "pages": {}
+            },
+            "cozinha": {
+                "all": false,
+                "pages": {}
+            },
+            "estoque_principal": {
+                "all": true,
+                "pages": {}
+            },
+            "financeiro": {
+                "all": false,
+                "pages": {}
+            },
+            "governanca": {
+                "all": false,
+                "pages": {}
+            },
+            "recepcao": {
+                "all": false,
+                "pages": {}
+            },
+            "recursos_humanos": {
+                "all": false,
+                "pages": {}
+            },
+            "restaurante_mirapraia": {
+                "all": true,
+                "pages": {}
+            }
+        },
+        "level_pages": []
+    },
+    "Recepção": {
+        "version": 2,
+        "areas": {
+            "conferencia": {
+                "all": false,
+                "pages": {}
+            },
+            "cozinha": {
+                "all": false,
+                "pages": {}
+            },
+            "estoque_principal": {
+                "all": false,
+                "pages": {}
+            },
+            "financeiro": {
+                "all": false,
+                "pages": {}
+            },
+            "governanca": {
+                "all": true,
+                "pages": {}
+            },
+            "recepcao": {
+                "all": true,
+                "pages": {}
+            },
+            "recursos_humanos": {
+                "all": false,
+                "pages": {}
+            },
+            "restaurante_mirapraia": {
+                "all": true,
+                "pages": {}
+            }
+        },
+        "level_pages": []
+    },
+    "Admin": {
+        "version": 2,
+        "areas": {
+            "cozinha": {
+                "all": true,
+                "pages": {}
+            },
+            "estoque_principal": {
+                "all": true,
+                "pages": {}
+            },
+            "restaurante_mirapraia": {
+                "all": true,
+                "pages": {}
+            },
+            "recepcao": {
+                "all": true,
+                "pages": {}
+            },
+            "governanca": {
+                "all": true,
+                "pages": {}
+            },
+            "conferencia": {
+                "all": true,
+                "pages": {}
+            },
+            "financeiro": {
+                "all": true,
+                "pages": {}
+            },
+            "recursos_humanos": {
+                "all": true,
+                "pages": {}
+            }
+        },
+        "level_pages": []
+    },
+    "Governança": {
+        "version": 2,
+        "areas": {
+            "cozinha": {
+                "all": false,
+                "pages": {}
+            },
+            "estoque_principal": {
+                "all": false,
+                "pages": {}
+            },
+            "restaurante_mirapraia": {
+                "all": false,
+                "pages": {}
+            },
+            "recepcao": {
+                "all": false,
+                "pages": {}
+            },
+            "governanca": {
+                "all": true,
+                "pages": {}
+            },
+            "conferencia": {
+                "all": false,
+                "pages": {}
+            },
+            "financeiro": {
+                "all": false,
+                "pages": {}
+            },
+            "recursos_humanos": {
+                "all": false,
+                "pages": {}
+            }
+        },
+        "level_pages": []
+    },
+    "Cozinha": {
+        "version": 2,
+        "areas": {
+            "conferencia": {
+                "all": false,
+                "pages": {}
+            },
+            "cozinha": {
+                "all": true,
+                "pages": {}
+            },
+            "estoque_principal": {
+                "all": false,
+                "pages": {}
+            },
+            "financeiro": {
+                "all": false,
+                "pages": {}
+            },
+            "governanca": {
+                "all": false,
+                "pages": {}
+            },
+            "recepcao": {
+                "all": false,
+                "pages": {}
+            },
+            "recursos_humanos": {
+                "all": false,
+                "pages": {}
+            },
+            "restaurante_mirapraia": {
+                "all": true,
+                "pages": {}
+            }
+        },
+        "level_pages": []
+    },
+    "Lavanderia": {
+        "version": 2,
+        "areas": {
+            "cozinha": {
+                "all": false,
+                "pages": {}
+            },
+            "estoque_principal": {
+                "all": false,
+                "pages": {}
+            },
+            "restaurante_mirapraia": {
+                "all": false,
+                "pages": {}
+            },
+            "recepcao": {
+                "all": false,
+                "pages": {}
+            },
+            "governanca": {
+                "all": true,
+                "pages": {}
+            },
+            "conferencia": {
+                "all": false,
+                "pages": {}
+            },
+            "financeiro": {
+                "all": false,
+                "pages": {}
+            },
+            "recursos_humanos": {
+                "all": false,
+                "pages": {}
+            }
+        },
+        "level_pages": []
+    }
+}

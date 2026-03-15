@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+
+{% block title %}Promoções por Período{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="mb-0">Promoções por Período</h3>
+        <a class="btn btn-outline-secondary" href="{{ url_for('reception.reception_dashboard') }}">Voltar</a>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white"><h5 class="mb-0">Nova Promoção</h5></div>
+        <div class="card-body">
+            <input type="hidden" id="promo_id">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Nome da promoção</label>
+                    <input id="promo_name" class="form-control" placeholder="Ex.: 15% dias de semana">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Tipo de desconto</label>
+                    <select id="promo_discount_type" class="form-select">
+                        <option value="percent">Percentual</option>
+                        <option value="daily_fixed">Valor fixo por diária</option>
+                        <option value="closed_rate">Tarifa fechada</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Valor</label>
+                    <input id="promo_discount_value" type="number" step="0.01" class="form-control" value="0.00">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Prioridade</label>
+                    <input id="promo_priority" type="number" class="form-control" value="100">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Status</label>
+                    <select id="promo_status" class="form-select">
+                        <option value="active">Ativo</option>
+                        <option value="inactive">Inativo</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row g-3 mt-1">
+                <div class="col-md-8">
+                    <label class="form-label">Categorias</label>
+                    <div class="d-flex flex-wrap gap-3 border rounded p-2">
+                        {% for category in categories %}
+                        <div class="form-check">
+                            <input class="form-check-input promo-category" type="checkbox" value="{{ category }}" id="promo_cat_{{ loop.index }}">
+                            <label class="form-check-label" for="promo_cat_{{ loop.index }}">{{ category }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <div class="d-flex flex-column gap-2">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="promo_combinable">
+                            <label class="form-check-label" for="promo_combinable">
+                                Combinável com pacotes
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="promo_apply_before_dynamic" checked>
+                            <label class="form-check-label" for="promo_apply_before_dynamic">
+                                Aplicar antes do ajuste dinâmico
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row g-3 mt-1">
+                <div class="col-md-8">
+                    {% set period_selector_id = 'promo_period_selector' %}
+                    {% set period_selector_label = 'Período e dias aplicáveis' %}
+                    {% set period_selector_start = today_iso %}
+                    {% set period_selector_end = today_iso %}
+                    {% include 'components/revenue_period_selector.html' %}
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button class="btn btn-primary w-100" onclick="savePromotion()">Salvar promoção</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white"><h5 class="mb-0">Promoções Cadastradas</h5></div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover" id="promotionsTable">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Status</th>
+                            <th>Prioridade</th>
+                            <th>Categorias</th>
+                            <th>Tipo</th>
+                            <th>Valor</th>
+                            <th>Combinável</th>
+                            <th>Antes do dinâmico</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-white"><h5 class="mb-0">Auditoria</h5></div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover" id="promotionsLogsTable">
+                    <thead>
+                        <tr>
+                            <th>Data/Hora</th>
+                            <th>Usuário</th>
+                            <th>Ação</th>
+                            <th>Promoção</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/revenue_period_selector.js') }}"></script>
+<script>
+let promotionsCache = [];
+
+function promotionCategoriesSelected() {
+    return Array.from(document.querySelectorAll('.promo-category:checked')).map(el => el.value);
+}
+
+function resetPromotionForm() {
+    document.getElementById('promo_id').value = '';
+    document.getElementById('promo_name').value = '';
+    document.getElementById('promo_discount_type').value = 'percent';
+    document.getElementById('promo_discount_value').value = '0.00';
+    document.getElementById('promo_priority').value = '100';
+    document.getElementById('promo_status').value = 'active';
+    document.getElementById('promo_combinable').checked = false;
+    document.getElementById('promo_apply_before_dynamic').checked = true;
+    document.querySelectorAll('.promo-category').forEach(el => { el.checked = false; });
+}
+
+function collectPromotionPayload() {
+    return {
+        name: document.getElementById('promo_name').value || '',
+        categories: promotionCategoriesSelected(),
+        discount_type: document.getElementById('promo_discount_type').value || 'percent',
+        discount_value: parseFloat(document.getElementById('promo_discount_value').value || '0'),
+        priority: parseInt(document.getElementById('promo_priority').value || '100', 10),
+        status: document.getElementById('promo_status').value || 'active',
+        combinable_with_packages: document.getElementById('promo_combinable').checked,
+        apply_before_dynamic: document.getElementById('promo_apply_before_dynamic').checked,
+        period: RevenuePeriodSelector.getValue('promo_period_selector')
+    };
+}
+
+function savePromotion() {
+    const id = document.getElementById('promo_id').value || '';
+    const method = id ? 'PUT' : 'POST';
+    const url = id ? `/api/reception/revenue-promotions/${encodeURIComponent(id)}` : '/api/reception/revenue-promotions';
+    fetch(url, {method, headers: {'Content-Type': 'application/json'}, body: JSON.stringify(collectPromotionPayload())})
+        .then(r => r.json())
+        .then(data => {
+            if (!data.success) {
+                alert(data.error || 'Falha ao salvar promoção.');
+                return;
+            }
+            alert('Promoção salva com sucesso.');
+            resetPromotionForm();
+            loadPromotions();
+            loadPromotionLogs();
+        });
+}
+
+function editPromotion(id) {
+    const item = promotionsCache.find(row => String(row.id) === String(id));
+    if (!item) return;
+    document.getElementById('promo_id').value = item.id || '';
+    document.getElementById('promo_name').value = item.name || '';
+    document.getElementById('promo_discount_type').value = item.discount_type || 'percent';
+    document.getElementById('promo_discount_value').value = Number(item.discount_value || 0).toFixed(2);
+    document.getElementById('promo_priority').value = item.priority || 100;
+    document.getElementById('promo_status').value = item.status || 'active';
+    document.getElementById('promo_combinable').checked = Boolean(item.combinable_with_packages);
+    document.getElementById('promo_apply_before_dynamic').checked = Boolean(item.apply_before_dynamic !== false);
+    const selected = new Set((item.categories || []).map(v => String(v || '').toLowerCase()));
+    document.querySelectorAll('.promo-category').forEach(el => { el.checked = selected.has(String(el.value || '').toLowerCase()); });
+    RevenuePeriodSelector.setValue('promo_period_selector', item.period || {});
+}
+
+function deletePromotion(id) {
+    if (!confirm('Deseja remover esta promoção?')) return;
+    fetch(`/api/reception/revenue-promotions/${encodeURIComponent(id)}`, {method: 'DELETE'})
+        .then(r => r.json())
+        .then(data => {
+            if (!data.success) {
+                alert(data.error || 'Falha ao remover promoção.');
+                return;
+            }
+            loadPromotions();
+            loadPromotionLogs();
+        });
+}
+
+function loadPromotions() {
+    fetch('/api/reception/revenue-promotions')
+        .then(r => r.json())
+        .then(data => {
+            promotionsCache = data.items || [];
+            const tbody = document.querySelector('#promotionsTable tbody');
+            tbody.innerHTML = '';
+            promotionsCache.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.name || '-'}</td>
+                    <td>${item.status === 'active' ? 'Ativo' : 'Inativo'}</td>
+                    <td>${item.priority || 100}</td>
+                    <td>${(item.categories || []).join(', ') || '-'}</td>
+                    <td>${item.discount_type || '-'}</td>
+                    <td>${Number(item.discount_value || 0).toFixed(2)}</td>
+                    <td>${item.combinable_with_packages ? 'Sim' : 'Não'}</td>
+                    <td>${item.apply_before_dynamic === false ? 'Não' : 'Sim'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary me-1" onclick="editPromotion('${item.id}')">Editar</button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deletePromotion('${item.id}')">Remover</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        });
+}
+
+function loadPromotionLogs() {
+    fetch('/api/reception/revenue-promotions/logs')
+        .then(r => r.json())
+        .then(data => {
+            const tbody = document.querySelector('#promotionsLogsTable tbody');
+            tbody.innerHTML = '';
+            (data.items || []).forEach(item => {
+                const name = (item.after && item.after.name) || (item.before && item.before.name) || '-';
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.timestamp || '-'}</td>
+                    <td>${item.user || '-'}</td>
+                    <td>${item.action || '-'}</td>
+                    <td>${name}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    RevenuePeriodSelector.init('promo_period_selector', {startDate: '{{ today_iso }}', endDate: '{{ today_iso }}'});
+    loadPromotions();
+    loadPromotionLogs();
+});
+</script>
+{% endblock %}

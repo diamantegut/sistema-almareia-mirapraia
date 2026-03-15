@@ -1,0 +1,59 @@
+:root {
+  --alma-100: #F5E9DD;
+  --alma-300: #E8B89D;
+  --alma-500: #C96A3D;
+  --alma-700: #A5522E;
+  --mar-100: #D6E6F2;
+  --mar-300: #5F8FB5;
+  --mar-500: #00587A;
+  --mar-700: #0F3057;
+  --areia-100: #F4F1EC;
+  --areia-300: #E8D8C3;
+  --areia-500: #D4BFAA;
+  --areia-700: #A89F91;
+  --success-500: #4CAF50;
+  --warning-500: #FFB703;
+  --error-500: #D9534F;
+  --info-500: #2196F3;
+  --gray-100: #F8F8F8;
+  --gray-300: #E0E0E0;
+  --gray-500: #9E9E9E;
+  --gray-700: #424242;
+  --gray-900: #1E1E1E;
+  --color-bg-page: var(--areia-100);
+  --color-bg-card: #ffffff;
+  --color-bg-header: var(--mar-700);
+  --color-text-primary: var(--gray-900);
+  --color-text-secondary: var(--gray-700);
+  --color-text-inverse: #ffffff;
+  --color-button-primary: var(--alma-500);
+  --color-button-primary-hover: var(--alma-700);
+  --color-button-secondary: var(--mar-500);
+  --color-button-secondary-hover: var(--mar-700);
+  --color-button-neutral: var(--gray-300);
+  --color-border-default: var(--gray-300);
+  --shadow-soft: 0 2px 6px rgba(0, 0, 0, 0.05);
+  --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --color-bg-primary: var(--color-bg-page);
+  --color-bg-secondary: var(--gray-100);
+  --color-border: var(--color-border-default);
+  --color-alma-primary: var(--alma-500);
+  --color-alma-accent: var(--alma-700);
+  --color-mar-primary: var(--mar-700);
+  --color-mar-secondary: var(--mar-500);
+  --color-areia-primary: var(--areia-300);
+  --color-areia-secondary: var(--areia-500);
+  --color-success: var(--success-500);
+  --color-warning: var(--warning-500);
+  --color-error: var(--error-500);
+  --color-info: var(--info-500);
+}
+
+.dark-mode {
+  --color-bg-page: #1C1F24;
+  --color-bg-card: #2A2F38;
+  --color-bg-header: #0B1F36;
+  --color-text-primary: #F1F1F1;
+  --color-text-secondary: #B0B0B0;
+  --color-border-default: #3A3F47;
+}

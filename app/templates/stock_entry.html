@@ -1,0 +1,1046 @@
+{% extends 'base.html' %}
+
+{% block title %}Nova Entrada de Mercadoria - Otimizada{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4" style="max-width: 1600px;">
+    <!-- Header / Actions -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0 text-dark"><i class="bi bi-box-seam me-2"></i>Entrada de Mercadoria</h2>
+            <p class="text-muted mb-0">Recebimento de Nota Fiscal e Integração Financeira</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline-secondary" onclick="openHelpModal()">
+                <i class="bi bi-question-circle"></i> Ajuda
+            </button>
+            <button type="button" class="btn btn-outline-primary" onclick="saveDraft()">
+                <i class="bi bi-save"></i> Salvar Rascunho
+            </button>
+            <div class="dropdown">
+                <button class="btn btn-primary dropdown-toggle" type="button" id="importDropdown" data-bs-toggle="dropdown">
+                    <i class="bi bi-cloud-upload"></i> Importar
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="#" onclick="document.getElementById('xmlFile').click()"><i class="bi bi-filetype-xml me-2"></i>XML da NF-e (Automático)</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="openNfeList()"><i class="bi bi-cloud-download me-2"></i>Buscar na Sefaz</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="openNsuSearchModal()"><i class="bi bi-search me-2"></i>Buscar por NSU</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <input type="file" id="xmlFile" accept=".xml" style="display: none;" onchange="handleXmlUpload(this)">
+
+    <!-- Main Form Grid -->
+    <form id="entryForm" onsubmit="event.preventDefault(); submitEntry();">
+        <div class="row g-4">
+            
+            <!-- Left Column: Header & Items -->
+            <div class="col-lg-9">
+                
+                <!-- Invoice Header Card -->
+                <div class="card shadow-sm mb-4 border-0">
+                    <div class="card-header bg-white border-bottom py-3">
+                        <h5 class="card-title mb-0 text-primary"><i class="bi bi-receipt me-2"></i>Dados da Nota Fiscal</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-2">
+                                <label class="form-label small text-muted">Número</label>
+                                <input type="text" class="form-control fw-bold" id="invoiceNumber" required>
+                            </div>
+                            <div class="col-md-1">
+                                <label class="form-label small text-muted">Série</label>
+                                <input type="text" class="form-control" id="invoiceSerial">
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label small text-muted">Fornecedor</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="supplierName" required list="supplierList" autocomplete="off">
+                                    <button class="btn btn-outline-secondary" type="button"><i class="bi bi-search"></i></button>
+                                </div>
+                                <datalist id="supplierList">
+                                    <!-- Populated by JS -->
+                                </datalist>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small text-muted">Data Emissão</label>
+                                <input type="date" class="form-control" id="issueDate" required>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small text-muted">Data Entrada</label>
+                                <input type="date" class="form-control" id="entryDate" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small text-muted">Chave de Acesso (44 dígitos)</label>
+                                <input type="text" class="form-control font-monospace form-control-sm bg-light" id="accessKey" maxlength="44" placeholder="Escaneie ou digite a chave...">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Item Entry & Grid -->
+                <div class="card shadow-sm mb-4 border-0">
+                    <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0 text-primary"><i class="bi bi-box me-2"></i>Itens da Nota</h5>
+                        <span class="badge bg-light text-dark border" id="itemCountBadge">0 itens</span>
+                    </div>
+                    <div class="card-body p-0">
+                        <!-- Quick Entry Bar -->
+                        <div class="p-3 bg-light border-bottom">
+                            <div class="row g-2 align-items-end">
+                                <div class="col-md-1">
+                                    <label class="small text-muted mb-1">Cód.</label>
+                                    <input type="text" id="quickCode" class="form-control form-control-sm" placeholder="Ref.">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="small text-muted mb-1">Produto (Busca Inteligente)</label>
+                                    <input type="text" id="quickProduct" class="form-control form-control-sm" placeholder="Digite para buscar..." list="productList" autocomplete="off">
+                                    <datalist id="productList"></datalist>
+                                </div>
+                                <div class="col-md-1">
+                                    <label class="small text-muted mb-1">Qtd</label>
+                                    <input type="number" id="quickQty" class="form-control form-control-sm" step="0.001">
+                                </div>
+                                <div class="col-md-1">
+                                    <label class="small text-muted mb-1">Un.</label>
+                                    <input type="text" id="quickUnit" class="form-control form-control-sm" placeholder="UN">
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="small text-muted mb-1">Preço Unit.</label>
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text">R$</span>
+                                        <input type="number" id="quickPrice" class="form-control" step="0.01">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="small text-muted mb-1">Validade</label>
+                                    <input type="date" id="quickExpiry" class="form-control form-control-sm">
+                                </div>
+                                <div class="col-md-1">
+                                    <button type="button" class="btn btn-success btn-sm w-100" onclick="addQuickItem()">
+                                        <i class="bi bi-plus-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Items Table -->
+                        <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                            <table class="table table-hover align-middle mb-0" id="itemsTable">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th style="width: 5%">#</th>
+                                        <th style="width: 10%">Código</th>
+                                        <th style="width: 35%">Produto / Descrição</th>
+                                        <th style="width: 10%" class="text-center">Qtd.</th>
+                                        <th style="width: 10%" class="text-center">Un.</th>
+                                        <th style="width: 10%" class="text-end">V. Unit</th>
+                                        <th style="width: 10%" class="text-end">Total</th>
+                                        <th style="width: 10%" class="text-center">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="itemsTableBody">
+                                    <!-- Items will be injected here -->
+                                    <tr id="emptyState">
+                                        <td colspan="8" class="text-center py-5 text-muted">
+                                            <i class="bi bi-basket3 fs-1 d-block mb-3 opacity-50"></i>
+                                            Nenhum item adicionado.<br>
+                                            Use a barra acima ou importe um XML.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Totals Footer -->
+                        <div class="card-footer bg-white border-top">
+                            <div class="row align-items-center">
+                                <div class="col-md-6 text-muted small">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Dica: Use TAB para navegar entre campos rapidamente.
+                                </div>
+                                <div class="col-md-6 text-end">
+                                    <span class="me-3 text-muted">Total Itens: <span id="totalItemsQty" class="fw-bold text-dark">0</span></span>
+                                    <span class="fs-5 fw-bold text-primary">Total Nota: <span id="totalValueDisplay">R$ 0,00</span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+
+            <!-- Right Column: Financials & Review -->
+            <div class="col-lg-3">
+                
+                <!-- Financials Card -->
+                <div class="card shadow-sm mb-4 border-0 border-top border-4 border-success">
+                    <div class="card-header bg-white">
+                        <h6 class="card-title mb-0 fw-bold text-success"><i class="bi bi-cash-coin me-2"></i>Financeiro</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label small text-muted">Classificação de Custos</label>
+                            <div class="input-group input-group-sm mb-2">
+                                <span class="input-group-text bg-white">Produtos</span>
+                                <input type="text" class="form-control text-end" id="costProducts" readonly>
+                            </div>
+                            <div class="input-group input-group-sm mb-2">
+                                <span class="input-group-text bg-white">Impostos</span>
+                                <input type="number" class="form-control text-end" id="costTaxes" step="0.01" value="0.00" onchange="updateTotals()">
+                            </div>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-white">Frete</span>
+                                <input type="number" class="form-control text-end" id="costFreight" step="0.01" value="0.00" onchange="updateTotals()">
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="form-label small text-muted mb-0">Contas a Pagar / Boletos</label>
+                                <button type="button" class="btn btn-sm btn-link p-0 text-decoration-none" onclick="addBill()">+ Adicionar</button>
+                            </div>
+                            <div id="billsContainer">
+                                <!-- Bill Items -->
+                            </div>
+                            <div class="alert alert-warning small p-2 mt-2 d-none" id="financialMismatchAlert">
+                                <i class="bi bi-exclamation-triangle me-1"></i>
+                                Soma das parcelas difere do total da nota.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Attachments Card -->
+                <div class="card shadow-sm mb-4 border-0">
+                    <div class="card-header bg-white">
+                        <h6 class="card-title mb-0 fw-bold text-secondary"><i class="bi bi-paperclip me-2"></i>Anexos</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid">
+                            <label class="btn btn-outline-secondary btn-sm border-dashed">
+                                <i class="bi bi-cloud-arrow-up me-2"></i>Anexar Boleto/Comprovante
+                                <input type="file" hidden multiple onchange="handleAttachment(this)">
+                            </label>
+                        </div>
+                        <ul class="list-group list-group-flush small mt-2" id="attachmentList">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="d-grid gap-2">
+                    <button type="button" class="btn btn-outline-primary shadow-sm" onclick="openLocalXmlModal()">
+                        <i class="bi bi-folder2-open me-2"></i>Notas já baixadas
+                    </button>
+                    <button type="submit" class="btn btn-success btn-lg shadow-sm">
+                        <i class="bi bi-check-lg me-2"></i>Confirmar Entrada
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- NFe List Modal -->
+<div class="modal fade" id="nfeListModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-cloud-download me-2"></i>Buscar na SEFAZ (DF-e)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info small">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Exibe as notas fiscais emitidas contra o seu CNPJ nos últimos dias.
+                </div>
+                
+                <div id="nfeLoading" class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2 text-muted">Consultando SEFAZ...</p>
+                </div>
+                
+                <div id="nfeError" class="alert alert-danger d-none"></div>
+
+                <div class="table-responsive d-none" id="nfeTableContainer">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Data</th>
+                                <th>Fornecedor</th>
+                                <th>Valor</th>
+                                <th>Chave de Acesso</th>
+                                <th>Status</th>
+                                <!-- <th class="text-end">Ação</th> -->
+                            </tr>
+                        </thead>
+                        <tbody id="nfeTableBody">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" onclick="syncNfeXmls(this)">
+                    <i class="bi bi-download me-1"></i>Baixar XMLs para pasta
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Local XML Modal -->
+<div class="modal fade" id="localXmlModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-folder2-open me-2"></i>Notas fiscais já baixadas</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info small">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Lista os arquivos XML que já foram baixados para a pasta fiscal configurada. Selecione um para preencher a entrada.
+                </div>
+                <div id="localXmlLoading" class="text-center py-5 d-none">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2 text-muted">Carregando XMLs locais...</p>
+                </div>
+                <div id="localXmlError" class="alert alert-danger d-none"></div>
+                <div class="table-responsive" id="localXmlTableContainer">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="text-center">Ação</th>
+                                <th>Arquivo</th>
+                                <th>Status</th>
+                                <th>Caminho</th>
+                                <th>Modificado em</th>
+                            </tr>
+                        </thead>
+                        <tbody id="localXmlTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Help Modal -->
+<div class="modal fade" id="helpModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Manual de Entrada de Mercadoria</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6>1. Importação Automática</h6>
+                <p>Arraste o XML da nota fiscal para a tela ou use o botão "Importar". O sistema preencherá fornecedor, itens e financeiro automaticamente.</p>
+                <hr>
+                <h6>2. Conferência Cega</h6>
+                <p>Verifique se a quantidade física corresponde à nota. Itens com divergência ficarão destacados em amarelo.</p>
+                <hr>
+                <h6>3. Cadastro Rápido</h6>
+                <p>Para itens novos, o sistema sugerirá o cadastro com base no nome da nota. Vincule a produtos existentes para manter o histórico.</p>
+                <hr>
+                <h6>4. Financeiro</h6>
+                <p>Cadastre os boletos para integração automática com o Contas a Pagar.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- NSU Search Modal -->
+<div class="modal fade" id="nsuSearchModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-search me-2"></i>Buscar Nota por NSU</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="nsuInput" class="form-label">Número do NSU (Sequencial Único)</label>
+                    <input type="number" class="form-control" id="nsuInput" placeholder="Ex: 12345">
+                    <div class="form-text">Digite o número do NSU para recuperar uma nota específica da SEFAZ.</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="searchNsu()">Buscar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Data Injection -->
+<script type="application/json" id="products-data">
+    {{ products | tojson | safe }}
+</script>
+
+<style>
+    .border-dashed { border-style: dashed !important; }
+    .form-control:focus { box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1); border-color: #86b7fe; }
+    .table-hover tbody tr:hover { background-color: rgba(0,0,0,0.02); }
+    /* Minimalist scrollbar for table */
+    .table-responsive::-webkit-scrollbar { width: 6px; height: 6px; }
+    .table-responsive::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+</style>
+
+<script>
+    // --- State Management ---
+    let items = [];
+    let bills = [];
+    let attachments = [];
+    const productsDB = JSON.parse(document.getElementById('products-data').textContent || '[]');
+
+    // --- Initialization ---
+    document.addEventListener('DOMContentLoaded', () => {
+        // Set Default Dates
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('entryDate').value = today;
+        document.getElementById('issueDate').value = today;
+
+        // Auto-Save Timer (30s)
+        setInterval(saveDraft, 30000);
+        
+        // Restore Draft if exists
+        restoreDraft();
+
+        // Populate Datalist
+        const datalist = document.getElementById('productList');
+        productsDB.forEach(p => {
+            const option = document.createElement('option');
+            option.value = p.name;
+            datalist.appendChild(option);
+        });
+        
+        // Supplier Datalist (From suppliers variable)
+        const suppliers = JSON.parse('{{ (suppliers | default([])) | tojson | safe }}');
+        const supplierList = document.getElementById('supplierList');
+        suppliers.forEach(s => {
+            const option = document.createElement('option');
+            option.value = s.name; // Assuming s is an object now
+            supplierList.appendChild(option);
+        });
+
+        // Initialize one bill row
+        if(bills.length === 0) addBill();
+    });
+
+    // --- Item Management ---
+    function addQuickItem() {
+        const productInput = document.getElementById('quickProduct');
+        const qtyInput = document.getElementById('quickQty');
+        const priceInput = document.getElementById('quickPrice');
+        const unitInput = document.getElementById('quickUnit');
+        const codeInput = document.getElementById('quickCode');
+        const expiryInput = document.getElementById('quickExpiry');
+
+        const name = productInput.value.trim();
+        const qty = parseFloat(qtyInput.value);
+        const price = parseFloat(priceInput.value);
+
+        if (!name || isNaN(qty) || isNaN(price)) {
+            showToast('Preencha Produto, Quantidade e Preço.', 'warning');
+            return;
+        }
+
+        const item = {
+            id: Date.now(),
+            code: codeInput.value,
+            name: name,
+            qty: qty,
+            unit: unitInput.value || 'UN',
+            price: price,
+            total: qty * price,
+            expiry: expiryInput.value,
+            batch: ''
+        };
+
+        items.push(item);
+        renderItems();
+        
+        // Clear inputs & Focus product
+        productInput.value = '';
+        qtyInput.value = '';
+        priceInput.value = '';
+        codeInput.value = '';
+        productInput.focus();
+        
+        showToast('Item adicionado!', 'success');
+    }
+
+    function renderItems() {
+        const tbody = document.getElementById('itemsTableBody');
+        const emptyState = document.getElementById('emptyState');
+        const badge = document.getElementById('itemCountBadge');
+        
+        tbody.innerHTML = '';
+        
+        if (items.length === 0) {
+            tbody.appendChild(emptyState);
+            badge.textContent = '0 itens';
+            updateTotals();
+            return;
+        }
+
+        items.forEach((item, index) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${index + 1}</td>
+                <td><small class="text-muted">${item.code || '-'}</small></td>
+                <td>
+                    <div class="fw-bold">${item.name}</div>
+                    ${item.expiry ? `<small class="text-danger"><i class="bi bi-calendar-event me-1"></i>Val: ${formatDateBR(item.expiry)}</small>` : ''}
+                </td>
+                <td class="text-center">${item.qty}</td>
+                <td class="text-center small text-muted">${item.unit}</td>
+                <td class="text-end">R$ ${item.price.toFixed(2)}</td>
+                <td class="text-end fw-bold">R$ ${item.total.toFixed(2)}</td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="removeItem(${index})"><i class="bi bi-trash"></i></button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+        
+        badge.textContent = `${items.length} itens`;
+        updateTotals();
+    }
+
+    function removeItem(index) {
+        items.splice(index, 1);
+        renderItems();
+    }
+
+    // --- Financials ---
+    function addBill() {
+        const container = document.getElementById('billsContainer');
+        const index = bills.length;
+        
+        const div = document.createElement('div');
+        div.className = 'bill-row mb-2 p-2 bg-light rounded border';
+        div.innerHTML = `
+            <div class="row g-2">
+                <div class="col-6">
+                    <label class="small text-muted mb-0">Vencimento</label>
+                    <input type="date" class="form-control form-control-sm bill-date" onchange="updateBills()">
+                </div>
+                <div class="col-6">
+                    <label class="small text-muted mb-0">Valor</label>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">R$</span>
+                        <input type="number" class="form-control bill-value" step="0.01" onchange="updateBills()">
+                    </div>
+                </div>
+                <div class="col-12 d-flex justify-content-between align-items-center">
+                    <input type="text" class="form-control form-control-sm me-2" placeholder="Número do Boleto / Obs">
+                    <button type="button" class="btn btn-sm text-danger" onclick="this.closest('.bill-row').remove(); updateBills();"><i class="bi bi-x"></i></button>
+                </div>
+            </div>
+        `;
+        container.appendChild(div);
+        updateBills();
+    }
+
+    function updateBills() {
+        // Recalculate bills array from DOM
+        const rows = document.querySelectorAll('.bill-row');
+        bills = [];
+        let totalBills = 0;
+        
+        rows.forEach(row => {
+            const date = row.querySelector('.bill-date').value;
+            const value = parseFloat(row.querySelector('.bill-value').value) || 0;
+            bills.push({ date, value });
+            totalBills += value;
+        });
+
+        // Validate against Total
+        const totalNote = parseFloat(document.getElementById('totalValueDisplay').innerText.replace('R$', '').replace('.', '').replace(',', '.')) || 0;
+        const alert = document.getElementById('financialMismatchAlert');
+        
+        if (Math.abs(totalBills - totalNote) > 0.05 && totalBills > 0) {
+            alert.classList.remove('d-none');
+            alert.innerHTML = `<i class="bi bi-exclamation-triangle me-1"></i> Diferença: R$ ${(totalNote - totalBills).toFixed(2)}`;
+        } else {
+            alert.classList.add('d-none');
+        }
+    }
+
+    // --- Totals ---
+    function updateTotals() {
+        const productsTotal = items.reduce((acc, item) => acc + item.total, 0);
+        const taxes = parseFloat(document.getElementById('costTaxes').value) || 0;
+        const freight = parseFloat(document.getElementById('costFreight').value) || 0;
+        
+        const grandTotal = productsTotal + taxes + freight;
+        
+        document.getElementById('totalValueDisplay').innerText = formatMoney(grandTotal);
+        document.getElementById('costProducts').value = formatMoney(productsTotal);
+        
+        updateBills(); // Re-validate financials
+    }
+
+    // --- Actions ---
+    function submitEntry() {
+        if (items.length === 0) {
+            showToast('Adicione pelo menos um item.', 'danger');
+            return;
+        }
+
+        const data = {
+            header: {
+                number: document.getElementById('invoiceNumber').value,
+                serial: document.getElementById('invoiceSerial').value,
+                supplier: document.getElementById('supplierName').value,
+                issue_date: document.getElementById('issueDate').value,
+                entry_date: document.getElementById('entryDate').value,
+                access_key: document.getElementById('accessKey').value,
+                total: parseFloat(document.getElementById('totalValueDisplay').innerText.replace('R$','').replace('.','').replace(',','.'))
+            },
+            items: items,
+            financials: {
+                taxes: parseFloat(document.getElementById('costTaxes').value),
+                freight: parseFloat(document.getElementById('costFreight').value),
+                bills: bills
+            }
+        };
+
+        // Submit via Fetch
+        fetch('/stock/entry', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'data=' + encodeURIComponent(JSON.stringify(data))
+        })
+        .then(response => {
+            if (response.redirected) {
+                window.location.href = response.url;
+            } else {
+                showToast('Entrada registrada com sucesso!', 'success');
+                // Clear Form
+                localStorage.removeItem('stock_entry_draft');
+                setTimeout(() => window.location.reload(), 1000);
+            }
+        })
+        .catch(err => showToast('Erro ao salvar: ' + err, 'danger'));
+    }
+
+    // --- Helpers ---
+    function saveDraft() {
+        const data = {
+            header: {
+                number: document.getElementById('invoiceNumber').value,
+                supplier: document.getElementById('supplierName').value
+            },
+            items: items
+        };
+        localStorage.setItem('stock_entry_draft', JSON.stringify(data));
+        showToast('Rascunho salvo.', 'info');
+    }
+
+    function restoreDraft() {
+        const draft = localStorage.getItem('stock_entry_draft');
+        if (draft) {
+            try {
+                const data = JSON.parse(draft);
+                if (confirm('Rascunho encontrado. Deseja restaurar?')) {
+                    document.getElementById('invoiceNumber').value = data.header.number || '';
+                    document.getElementById('supplierName').value = data.header.supplier || '';
+                    items = data.items || [];
+                    renderItems();
+                } else {
+                    localStorage.removeItem('stock_entry_draft');
+                }
+            } catch(e) {}
+        }
+    }
+
+    function handleXmlUpload(input) {
+        const file = input.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        showToast('Processando XML...', 'info');
+
+        fetch('/stock/entry/upload-xml', {
+            method: 'POST',
+            body: formData
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) throw new Error(data.error);
+            
+            // Fill Header
+            document.getElementById('supplierName').value = data.supplier;
+            document.getElementById('invoiceNumber').value = data.invoice;
+            document.getElementById('issueDate').value = data.date; // Ensure format YYYY-MM-DD
+            if (data.access_key) document.getElementById('accessKey').value = data.access_key;
+
+            // Fill Items
+            items = [];
+            data.items.forEach(i => {
+                items.push({
+                    id: Date.now() + Math.random(),
+                    code: i.code || '',
+                    name: i.name,
+                    qty: parseFloat(i.qty),
+                    unit: i.unit || 'UN',
+                    price: parseFloat(i.price),
+                    total: parseFloat(i.qty) * parseFloat(i.price),
+                    expiry: '',
+                    batch: ''
+                });
+            });
+            renderItems();
+            showToast('XML Importado com sucesso!', 'success');
+        })
+        .catch(err => showToast('Erro no XML: ' + err.message, 'danger'));
+    }
+
+    function showToast(msg, type='info') {
+        // Simple alert for now, can be replaced with Bootstrap Toast
+        // Creating a temporary toast element
+        const toastContainer = document.getElementById('toast-container') || createToastContainer();
+        const toastEl = document.createElement('div');
+        toastEl.className = `toast align-items-center text-white bg-${type} border-0 show`;
+        toastEl.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">${msg}</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        `;
+        toastContainer.appendChild(toastEl);
+        setTimeout(() => toastEl.remove(), 3000);
+    }
+
+    function createToastContainer() {
+        const div = document.createElement('div');
+        div.id = 'toast-container';
+        div.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+        div.style.zIndex = 1100;
+        document.body.appendChild(div);
+        return div;
+    }
+
+    function openHelpModal() {
+        new bootstrap.Modal(document.getElementById('helpModal')).show();
+    }
+
+    function openLocalXmlModal() {
+        const modal = new bootstrap.Modal(document.getElementById('localXmlModal'));
+        modal.show();
+        const loading = document.getElementById('localXmlLoading');
+        const table = document.getElementById('localXmlTableContainer');
+        const errorDiv = document.getElementById('localXmlError');
+        const tbody = document.getElementById('localXmlTableBody');
+        loading.classList.remove('d-none');
+        table.classList.add('d-none');
+        errorDiv.classList.add('d-none');
+        tbody.innerHTML = '';
+        fetch('/stock/entry/list-local-xml')
+        .then(r => r.json())
+        .then(data => {
+            loading.classList.add('d-none');
+            if (data.error) {
+                errorDiv.textContent = data.error;
+                errorDiv.classList.remove('d-none');
+                return;
+            }
+            if (!data.documents || data.documents.length === 0) {
+                errorDiv.textContent = 'Nenhum XML encontrado na pasta configurada.';
+                errorDiv.classList.remove('d-none');
+                errorDiv.classList.replace('alert-danger', 'alert-warning');
+                return;
+            }
+            table.classList.remove('d-none');
+            data.documents.forEach(doc => {
+                const tr = document.createElement('tr');
+                const modified = doc.modified ? formatDateTimeBR(doc.modified) : '';
+                const statusLabel = doc.used ? 'Conferida' : 'Pendente';
+                const statusClass = doc.used ? 'success' : 'secondary';
+                tr.innerHTML = `
+                    <td class="text-center">
+                        <button class="btn btn-sm btn-primary" onclick="loadLocalXml('${doc.path.replace(/'/g, "\\'")}')">
+                            <i class="bi bi-box-arrow-in-down me-1"></i>Usar
+                        </button>
+                    </td>
+                    <td>${doc.name}</td>
+                    <td><span class="badge bg-${statusClass}">${statusLabel}</span></td>
+                    <td><small class="text-muted font-monospace">${doc.path}</small></td>
+                    <td>${modified}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        })
+        .catch(err => {
+            loading.classList.add('d-none');
+            errorDiv.textContent = 'Erro ao carregar XMLs locais: ' + err.message;
+            errorDiv.classList.remove('d-none');
+        });
+    }
+
+    function loadLocalXml(path) {
+        const modalEl = document.getElementById('localXmlModal');
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) modal.hide();
+        showToast('Carregando XML local...', 'info');
+        fetch('/stock/entry/load-local-xml', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ path })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) throw new Error(data.error);
+            fillFormWithNfeData(data);
+            showToast('Nota carregada do XML local com sucesso!', 'success');
+        })
+        .catch(err => showToast('Erro ao carregar XML local: ' + err.message, 'danger'));
+    }
+
+    function openNfeList() {
+        const modalEl = document.getElementById('nfeListModal');
+        // Ensure aria-hidden is removed when modal opens
+        modalEl.removeAttribute('aria-hidden');
+        
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+        
+        // Restore aria-hidden when modal closes
+        modalEl.addEventListener('hidden.bs.modal', function () {
+            modalEl.setAttribute('aria-hidden', 'true');
+        }, { once: true });
+        
+        const loading = document.getElementById('nfeLoading');
+        const table = document.getElementById('nfeTableContainer');
+        const errorDiv = document.getElementById('nfeError');
+        const tbody = document.getElementById('nfeTableBody');
+        
+        loading.classList.remove('d-none');
+        table.classList.add('d-none');
+        errorDiv.classList.add('d-none');
+        tbody.innerHTML = '';
+        
+        fetch('/list-nfe-dfe')
+        .then(r => r.json())
+        .then(data => {
+            loading.classList.add('d-none');
+            
+            if (data.error) {
+                errorDiv.textContent = data.error;
+                errorDiv.classList.remove('d-none');
+                return;
+            }
+            
+            if (!data.documents || data.documents.length === 0) {
+                errorDiv.textContent = 'Nenhuma nota encontrada nos últimos dias.';
+                errorDiv.classList.remove('d-none');
+                errorDiv.classList.replace('alert-danger', 'alert-warning');
+                return;
+            }
+            
+            table.classList.remove('d-none');
+            data.documents.forEach(doc => {
+                const tr = document.createElement('tr');
+                const date = formatDateBR(doc.date ? doc.date.split('T')[0] : '');
+                const amount = formatMoney(doc.amount || 0);
+                const status = doc.status || '';
+                const badgeClass = (status === 'recebida' || status === 'importada') ? 'success' : 'secondary';
+                tr.innerHTML = `
+                    <td>${date}</td>
+                    <td>${doc.issuer}</td>
+                    <td>${amount}</td>
+                    <td><small class="text-muted font-monospace">${doc.key}</small></td>
+                    <td><span class="badge bg-${badgeClass}">${status}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        })
+        .catch(err => {
+            loading.classList.add('d-none');
+            // Check for 500 or network errors
+            console.error('NFe List Error:', err);
+            errorDiv.textContent = 'Erro ao consultar notas: ' + (err.message || 'Erro desconhecido');
+            errorDiv.classList.remove('d-none');
+        });
+    }
+
+    function importNfeContent(xmlContent) {
+        // Close modal
+        const modalEl = document.getElementById('nfeListModal');
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        if(modal) modal.hide();
+        
+        showToast('Processando XML...', 'info');
+        
+        fetch('/stock/entry/parse-xml-content', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ content: xmlContent })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) throw new Error(data.error);
+            fillFormWithNfeData(data);
+            showToast('Nota importada com sucesso!', 'success');
+        })
+        .catch(err => showToast('Erro ao importar: ' + err.message, 'danger'));
+    }
+
+    function syncNfeXmls(button) {
+        if (button) {
+            button.disabled = true;
+        }
+        showToast('Sincronizando XMLs com a SEFAZ...', 'info');
+        fetch('/stock/nfe/sync', {
+            method: 'POST'
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) throw new Error(data.error);
+            const count = data.synced_count || 0;
+            if (count > 0) {
+                showToast('Foram baixados ' + count + ' XML(s).', 'success');
+            } else {
+                showToast('Nenhum novo XML para baixar.', 'info');
+            }
+        })
+        .catch(err => showToast('Erro ao sincronizar XMLs: ' + err.message, 'danger'))
+        .finally(() => {
+            if (button) {
+                button.disabled = false;
+            }
+        });
+    }
+
+    function openNsuSearchModal() {
+        const modal = new bootstrap.Modal(document.getElementById('nsuSearchModal'));
+        modal.show();
+        // Focus input after modal is shown
+        document.getElementById('nsuSearchModal').addEventListener('shown.bs.modal', function () {
+            document.getElementById('nsuInput').focus();
+        }, { once: true });
+    }
+
+    function searchNsu() {
+        const nsuInput = document.getElementById('nsuInput');
+        const nsu = nsuInput.value.trim();
+        
+        if (!nsu) {
+            showToast('Digite um número de NSU.', 'warning');
+            nsuInput.focus();
+            return;
+        }
+
+        // Close modal
+        const modalEl = document.getElementById('nsuSearchModal');
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) modal.hide();
+
+        showToast(`Buscando NSU ${nsu}...`, 'info');
+
+        fetch(`/recover-nfe-dfe?nsu=${nsu}`)
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) {
+                showToast(`Erro: ${data.error}`, 'danger');
+                return;
+            }
+            
+            if (!data.documents || data.documents.length === 0) {
+                showToast('Nenhuma nota encontrada para este NSU.', 'warning');
+                return;
+            }
+
+            const doc = data.documents[0];
+            if (!doc.xml_content) {
+                showToast('Nota encontrada mas sem XML disponível.', 'warning');
+                return;
+            }
+
+            // Use importNfeContent to parse and fill form
+            // importNfeContent expects xml content string
+            // We need to decode if it's base64 or similar, but here it seems to be string
+            // Let's assume it's string. The backend sends xml_content.
+            // But wait, importNfeContent calls parse-xml-content which expects { content: xmlString }
+            // Let's create a helper to avoid circular dependency with importNfeContent's modal closing logic
+            
+            showToast('Processando XML...', 'info');
+            
+            fetch('/stock/entry/parse-xml-content', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ content: doc.xml_content })
+            })
+            .then(r => r.json())
+            .then(parsedData => {
+                if (parsedData.error) throw new Error(parsedData.error);
+                fillFormWithNfeData(parsedData);
+                showToast(`Nota ${parsedData.invoice || ''} recuperada com sucesso!`, 'success');
+            })
+            .catch(err => showToast('Erro ao processar XML: ' + err.message, 'danger'));
+
+        })
+        .catch(err => showToast('Erro na busca: ' + err.message, 'danger'));
+    }
+
+    function fillFormWithNfeData(data) {
+        // Reuse logic from handleXmlUpload
+        document.getElementById('supplierName').value = data.supplier;
+        document.getElementById('invoiceNumber').value = data.invoice;
+        document.getElementById('issueDate').value = data.date;
+        if (data.access_key) document.getElementById('accessKey').value = data.access_key;
+
+        items = [];
+        data.items.forEach(i => {
+            items.push({
+                id: Date.now() + Math.random(),
+                code: i.code || '',
+                name: i.name,
+                qty: parseFloat(i.qty),
+                unit: i.unit || 'UN',
+                price: parseFloat(i.price),
+                total: parseFloat(i.qty) * parseFloat(i.price),
+                expiry: '',
+                batch: ''
+            });
+        });
+        renderItems();
+    }
+
+    function formatMoney(val) {
+        return val.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
+    }
+
+    function formatDateBR(dateStr) {
+        if (!dateStr) return '';
+        const [y, m, d] = dateStr.split('-');
+        return `${d}/${m}/${y}`;
+    }
+
+    function formatDateTimeBR(isoStr) {
+        if (!isoStr) return '';
+        const parts = isoStr.split('T');
+        const datePart = parts[0];
+        const timePart = parts[1] ? parts[1].split('.')[0] : '';
+        const [y, m, d] = datePart.split('-');
+        return timePart ? `${d}/${m}/${y} ${timePart}` : `${d}/${m}/${y}`;
+    }
+</script>
+{% endblock %}

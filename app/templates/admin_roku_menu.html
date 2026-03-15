@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Configuração do Menu Roku</h2>
+            <p class="text-muted">Personalize os botões do menu principal da TV Roku.</p>
+        </div>
+    </div>
+
+    <div class="row">
+        {% for btn in config.buttons %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">{{ btn.title }}</h5>
+                    <span class="badge bg-secondary">{{ btn.id }}</span>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="action" value="update_button">
+                        <input type="hidden" name="id" value="{{ btn.id }}">
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Título do Botão</label>
+                            <input type="text" class="form-control" name="title" value="{{ btn.title }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Mídia Atual</label>
+                            {% if btn.media_url %}
+                                {% if btn.media_type == 'video' %}
+                                    <video src="{{ btn.media_url }}" class="img-fluid rounded mb-2" controls style="max-height: 150px; width: 100%; object-fit: cover;"></video>
+                                    <div class="small text-muted"><i class="bi bi-camera-video"></i> Vídeo configurado</div>
+                                {% else %}
+                                    <img src="{{ btn.media_url }}" class="img-fluid rounded mb-2" style="max-height: 150px; width: 100%; object-fit: cover;">
+                                    <div class="small text-muted"><i class="bi bi-image"></i> Imagem configurada</div>
+                                {% endif %}
+                            {% else %}
+                                <div class="bg-light rounded p-4 text-center text-muted mb-2">
+                                    Sem mídia
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Alterar Imagem/Vídeo</label>
+                            <input type="file" class="form-control" name="media_file" accept="image/*,video/*">
+                            <div class="form-text">Suporta JPG, PNG, MP4. Recomendado: 16:9.</div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-save"></i> Salvar Alterações
+                        </button>
+                    </form>
+                </div>
+                <div class="card-footer text-muted small">
+                    Ação: {{ btn.action }} | Tipo: {{ btn.type }}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

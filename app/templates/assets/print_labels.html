@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Etiquetas de Patrimônio</title>
+    <style>
+        @page {
+            size: 80mm auto;
+            margin: 0;
+        }
+        body {
+            font-family: 'Courier New', Courier, monospace; /* Monospace is good for thermal */
+            margin: 0;
+            padding: 0;
+            width: 80mm;
+        }
+        .label-container {
+            width: 100%;
+            padding: 2mm 0;
+            page-break-after: always;
+            text-align: center;
+        }
+        .header {
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-bottom: 1px solid #000;
+            padding-bottom: 2px;
+            margin-bottom: 5px;
+        }
+        .patrimony {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 5px 0;
+            border: 2px solid #000;
+            display: inline-block;
+            padding: 2px 5px;
+        }
+        .description {
+            font-size: 12px;
+            margin: 5px 0;
+            font-weight: bold;
+            word-wrap: break-word;
+        }
+        .details {
+            font-size: 10px;
+            margin-top: 5px;
+            text-align: left;
+            padding-left: 5mm;
+        }
+        .footer {
+            font-size: 9px;
+            margin-top: 8px;
+            border-top: 1px dashed #000;
+            padding-top: 2px;
+        }
+        
+        @media print {
+            .no-print { display: none !important; }
+        }
+        
+        .no-print {
+            padding: 10px;
+            background: #f0f0f0;
+            border-bottom: 1px solid #ccc;
+            text-align: center;
+            position: sticky;
+            top: 0;
+        }
+        button {
+            padding: 5px 15px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print">
+        <button onclick="window.print()">IMPRIMIR</button>
+        <button onclick="window.close()">FECHAR</button>
+    </div>
+
+    {% for asset in assets %}
+    <div class="label-container">
+        <div class="header">ALMAREIA MIRAPRAIA</div>
+        
+        <div class="patrimony">{{ asset.patrimony_number }}</div>
+        
+        <div class="description">
+            {{ asset.description }}
+        </div>
+        
+        <div class="details">
+            <div><strong>Data:</strong> {{ asset.purchase_date | replace('-', '/') }}</div>
+            <div><strong>Forn:</strong> {{ asset.supplier }}</div>
+            <div><strong>Local:</strong> {{ asset.location }}</div>
+        </div>
+        
+        <div class="footer">
+            CONTROLE PATRIMONIAL
+        </div>
+    </div>
+    {% endfor %}
+    
+    <script>
+        // Auto print if opened in popup? Maybe better let user click.
+        // window.print();
+    </script>
+</body>
+</html>

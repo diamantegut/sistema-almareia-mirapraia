@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Bar - Análise Comparativa{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h2 class="mb-0"><i class="bi bi-graph-up"></i> Análise Comparativa — Vendas × Reabastecimento</h2>
+      <small class="text-muted">Destaque automático para divergências ≥ {{ threshold_pct }}% em expedientes encerrados.</small>
+    </div>
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-secondary" href="{{ url_for('restaurant.bar_dashboard') }}"><i class="bi bi-arrow-left"></i> Voltar</a>
+      <a class="btn btn-outline-success" href="{{ url_for('restaurant.bar_comparative_export', session_id=selected_session_id, start=start_str, end=end_str, format='xlsx') }}"><i class="bi bi-file-earmark-excel"></i> Exportar Excel</a>
+      <a class="btn btn-outline-danger" href="{{ url_for('restaurant.bar_comparative_export', session_id=selected_session_id, start=start_str, end=end_str, format='pdf') }}"><i class="bi bi-file-earmark-pdf"></i> Exportar PDF</a>
+    </div>
+  </div>
+
+  <form class="card mb-3" method="get" action="{{ url_for('restaurant.bar_comparative_dashboard') }}">
+    <div class="card-body row g-3 align-items-end">
+      <div class="col-md-5">
+        <label class="form-label">Expediente Fechado</label>
+        <select class="form-select" name="session_id" onchange="this.form.submit()">
+          {% for s in session_options %}
+            <option value="{{ s.id }}" {{ 'selected' if s.id == selected_session_id else '' }}>{{ s.label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Início (dd/mm/aaaa hh:mm)</label>
+        <input type="text" class="form-control" name="start" value="{{ start_str }}">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Fim (dd/mm/aaaa hh:mm)</label>
+        <input type="text" class="form-control" name="end" value="{{ end_str }}">
+      </div>
+      <div class="col-md-1 d-grid">
+        <button class="btn btn-primary"><i class="bi bi-funnel"></i></button>
+      </div>
+    </div>
+  </form>
+
+  <div class="card">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <div>
+          <span class="badge bg-info text-dark me-2">Total Vendido: <strong>{{ '%.3f'|format(total_sold) }}</strong></span>
+          <span class="badge bg-secondary me-2">Total Reposto: <strong>{{ '%.3f'|format(total_restocked) }}</strong></span>
+          <span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle"></i> Itens com divergência ≥ {{ threshold_pct }}% destacados</span>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-sm table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Produto</th>
+              <th class="text-end">Vendido</th>
+              <th class="text-end">Reposto</th>
+              <th class="text-end">Diferença</th>
+              <th class="text-end">Diferença %</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in rows %}
+            <tr class="{{ 'table-warning' if r.flag and r.difference >= 0 else ('table-danger' if r.flag else '') }}">
+              <td>{{ r.product }}</td>
+              <td class="text-end">{{ '%.3f'|format(r.sold) }}</td>
+              <td class="text-end">{{ '%.3f'|format(r.restocked) }}</td>
+              <td class="text-end">{{ '%.3f'|format(r.difference) }}</td>
+              <td class="text-end">
+                <span class="badge {{ 'bg-danger' if r.flag and r.difference < 0 else ('bg-warning text-dark' if r.flag else 'bg-secondary') }}">
+                  {{ '%.2f'|format(r.pct) }}%
+                </span>
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="5" class="text-center text-muted">Nenhum movimento encontrado no período.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

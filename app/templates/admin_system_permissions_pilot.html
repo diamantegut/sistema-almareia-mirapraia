@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Monitoramento do Piloto</h2>
+        <a href="{{ url_for('admin.admin_system_permissions') }}" class="btn btn-outline-secondary">Voltar</a>
+    </div>
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+            <form method="GET" class="row g-2 align-items-end">
+                <div class="col-md-3"><label class="form-label">Período Inicial</label><input type="date" class="form-control" name="start_date" value="{{ filter_start_date }}"></div>
+                <div class="col-md-3"><label class="form-label">Período Final</label><input type="date" class="form-control" name="end_date" value="{{ filter_end_date }}"></div>
+                <div class="col-md-6"><button class="btn btn-primary">Filtrar</button></div>
+            </form>
+        </div>
+    </div>
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-sm table-hover mb-0">
+                <thead class="table-light"><tr><th>area</th><th>stage</th><th>mode</th><th>decision</th><th>reason</th></tr></thead>
+                <tbody>
+                    {% for row in rows %}
+                    <tr><td>{{ row.area }}</td><td>{{ row.stage }}</td><td>{{ row.mode }}</td><td>{{ row.decision }}</td><td>{{ row.reason }}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

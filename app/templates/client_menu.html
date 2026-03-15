@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cardápio | Mirapraia</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #c0392b;
+            --bg-color: #fdfbf7;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --text-light: #7f8c8d;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            letter-spacing: 1px;
+            margin: 0;
+        }
+
+        .category-nav {
+            display: flex;
+            overflow-x: auto;
+            gap: 15px;
+            padding: 15px 20px;
+            background: white;
+            margin-bottom: 20px;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none;  /* IE 10+ */
+            border-bottom: 1px solid #eee;
+        }
+
+        .category-nav::-webkit-scrollbar {
+            display: none; /* Chrome/Safari/Webkit */
+        }
+
+        .category-link {
+            white-space: nowrap;
+            text-decoration: none;
+            color: var(--text-light);
+            font-weight: 500;
+            padding: 5px 15px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .category-link.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px 40px;
+        }
+
+        .category-section {
+            margin-bottom: 40px;
+        }
+
+        .category-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            display: inline-block;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .product-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background-color: #f0f0f0;
+        }
+
+        .product-info {
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .product-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0;
+            color: var(--primary-color);
+        }
+
+        .product-price {
+            font-weight: 600;
+            color: var(--accent-color);
+            font-size: 1.1rem;
+            white-space: nowrap;
+            margin-left: 10px;
+        }
+
+        .product-description {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 15px;
+            flex-grow: 1;
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 768px) {
+            .products-grid {
+                grid-template-columns: 1fr; /* Single column on mobile */
+                gap: 20px;
+            }
+
+            .product-card {
+                flex-direction: row; /* Horizontal layout on mobile */
+                height: auto;
+                min-height: 120px;
+            }
+
+            .product-image {
+                width: 120px;
+                height: auto;
+                min-height: 100%;
+            }
+
+            .product-info {
+                padding: 15px;
+            }
+
+            .product-header {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .product-price {
+                margin-left: 0;
+                font-size: 1rem;
+            }
+            
+            .product-description {
+                font-size: 0.85rem;
+                display: -webkit-box;
+                -webkit-line-clamp: 3;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1 class="logo">Restaurante Mirapraia</h1>
+</header>
+
+<nav class="category-nav">
+    {% for category in categories %}
+    <a href="#cat-{{ category|replace(' ', '-')|lower }}" class="category-link">{{ category }}</a>
+    {% endfor %}
+</nav>
+
+<div class="container">
+    {% for category, items in menu_items_grouped.items() %}
+    <div id="cat-{{ category|replace(' ', '-')|lower }}" class="category-section">
+        <h2 class="category-title">{{ category }}</h2>
+        <div class="products-grid">
+            {% for item in items %}
+            <div class="product-card">
+                {% if item.image %}
+                <img src="{{ url_for('static', filename='uploads/products/' + item.image) }}" alt="{{ item.name }}" class="product-image">
+                {% else %}
+                <!-- Placeholder if no image -->
+                <div class="product-image" style="display: flex; align-items: center; justify-content: center; background-color: #eee; color: #ccc;">
+                    <span>Sem Foto</span>
+                </div>
+                {% endif %}
+                
+                <div class="product-info">
+                    <div class="product-header">
+                        <h3 class="product-name">{{ item.name }}</h3>
+                        <span class="product-price">R$ {{ "%.2f"|format(item.price)|replace('.', ',') }}</span>
+                    </div>
+                    <p class="product-description">{{ item.description }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+    // Smooth scrolling for category links
+    document.querySelectorAll('.category-link').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            
+            document.querySelectorAll('.category-link').forEach(l => l.classList.remove('active'));
+            this.classList.add('active');
+
+            const targetId = this.getAttribute('href');
+            const targetElement = document.querySelector(targetId);
+            const headerOffset = 140; // Height of header + nav
+            const elementPosition = targetElement.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: "smooth"
+            });
+        });
+    });
+
+    // Highlight active category on scroll
+    window.addEventListener('scroll', () => {
+        let current = '';
+        const sections = document.querySelectorAll('.category-section');
+        const navLinks = document.querySelectorAll('.category-link');
+        
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            const sectionHeight = section.clientHeight;
+            if (pageYOffset >= (sectionTop - 200)) {
+                current = '#' + section.id;
+            }
+        });
+
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === current) {
+                link.classList.add('active');
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

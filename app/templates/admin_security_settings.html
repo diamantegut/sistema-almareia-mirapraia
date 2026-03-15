@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-shield-gear"></i> Configurações de Segurança</h2>
+        <a href="{{ url_for('admin.admin_security_dashboard') }}" class="btn btn-outline-secondary">Voltar</a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form method="POST">
+                <div class="mb-3">
+                    <label for="max_discount_percent" class="form-label">Limite de Desconto (%) para Alerta</label>
+                    <input type="number" step="0.1" class="form-control" id="max_discount_percent" name="max_discount_percent" value="{{ settings.max_discount_percent }}">
+                    <div class="form-text">Descontos acima deste percentual gerarão um alerta.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="max_table_duration_minutes" class="form-label">Tempo Máximo de Mesa Aberta (minutos)</label>
+                    <input type="number" class="form-control" id="max_table_duration_minutes" name="max_table_duration_minutes" value="{{ settings.max_table_duration_minutes }}">
+                    <div class="form-text">Mesas abertas por mais tempo que isso gerarão alerta no fechamento.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="min_closing_value" class="form-label">Valor Mínimo de Fechamento (R$)</label>
+                    <input type="number" step="0.1" class="form-control" id="min_closing_value" name="min_closing_value" value="{{ settings.min_closing_value }}">
+                    <div class="form-text">Contas fechadas abaixo deste valor gerarão alerta se o tempo de permanência for alto.</div>
+                </div>
+
+                <hr>
+
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="enable_email_alerts" name="enable_email_alerts" {% if settings.enable_email_alerts %}checked{% endif %}>
+                    <label class="form-check-label" for="enable_email_alerts">Habilitar Alertas por E-mail (Futuro)</label>
+                </div>
+
+                <div class="mb-3">
+                    <label for="alert_email_recipient" class="form-label">E-mail para Notificações</label>
+                    <input type="email" class="form-control" id="alert_email_recipient" name="alert_email_recipient" value="{{ settings.alert_email_recipient }}">
+                </div>
+
+                <button type="submit" class="btn btn-primary">Salvar Configurações</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

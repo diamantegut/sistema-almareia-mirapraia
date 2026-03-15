@@ -1,0 +1,848 @@
+{% extends "base.html" %}
+
+{% block title %}Checklist da Cozinha{% endblock %}
+
+{% block content %}
+<div class="service-page">
+    <div class="service-header">
+        <span class="service-icon"><i class="bi bi-card-checklist"></i></span>
+        <h2>Checklist da Cozinha</h2>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <small class="text-muted">Pendentes hoje</small>
+                    <div class="fs-4 fw-bold">{{ dashboard.pending_today|length }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <small class="text-muted">Concluídas hoje</small>
+                    <div class="fs-4 fw-bold">{{ dashboard.completed_today|length }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <small class="text-muted">Itens faltando</small>
+                    <div class="fs-4 fw-bold">{{ dashboard.top_missing|length }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <small class="text-muted">Perdas por vencimento</small>
+                    <div class="fs-4 fw-bold">{{ dashboard.expired_losses|length }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <ul class="nav nav-tabs mb-3" id="kitchenTabs" role="tablist">
+        <li class="nav-item"><button class="nav-link {% if active_tab == 'minhas-listas' %}active{% endif %}" data-bs-toggle="tab" data-bs-target="#tab-minhas-listas" type="button">Minhas listas</button></li>
+        <li class="nav-item"><button class="nav-link {% if active_tab == 'modelos' %}active{% endif %}" data-bs-toggle="tab" data-bs-target="#tab-modelos" type="button">Modelos</button></li>
+        <li class="nav-item"><button class="nav-link {% if active_tab == 'compras' %}active{% endif %}" data-bs-toggle="tab" data-bs-target="#tab-compras" type="button">Compras</button></li>
+        <li class="nav-item"><button class="nav-link {% if active_tab == 'historico' %}active{% endif %}" data-bs-toggle="tab" data-bs-target="#tab-historico" type="button">Histórico</button></li>
+        <li class="nav-item"><button class="nav-link {% if active_tab == 'pendentes-hoje' %}active{% endif %}" data-bs-toggle="tab" data-bs-target="#tab-pendentes-hoje" type="button">Pendentes de hoje</button></li>
+    </ul>
+
+    <div class="tab-content">
+        <div class="tab-pane fade {% if active_tab == 'minhas-listas' %}show active{% endif %}" id="tab-minhas-listas">
+            <div class="card shadow-sm mb-3">
+                <div class="card-body">
+                    <h5 class="mb-3">Criar lista</h5>
+                    <form id="createListForm" class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Nome da lista</label>
+                            <input class="form-control" id="listName" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Tipo da lista <i class="bi bi-info-circle" data-bs-toggle="tooltip" title="Conferência para checar estoque, Compras para pedido, Limpeza para rotina sanitária."></i></label>
+                            <select class="form-select" id="listType">
+                                <option value="conferencia">Conferência</option>
+                                <option value="compras">Compras</option>
+                                <option value="limpeza">Limpeza</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Modelo base <i class="bi bi-info-circle" data-bs-toggle="tooltip" title="Carrega os itens prontos de um modelo para evitar retrabalho."></i></label>
+                            <select class="form-select" id="baseTemplateId">
+                                <option value="">Sem modelo</option>
+                                {% for t in templates %}
+                                <option value="{{ t.id }}">{{ t.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Responsável</label>
+                            <input class="form-control" id="responsibleName" value="{{ session.get('user', '') }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Periodicidade <i class="bi bi-info-circle" data-bs-toggle="tooltip" title="Define a frequência recomendada para executar a lista."></i></label>
+                            <select class="form-select" id="periodicity">
+                                <option value="diaria">Diária</option>
+                                <option value="semanal">Semanal</option>
+                                <option value="quinzenal">Quinzenal</option>
+                                <option value="mensal">Mensal</option>
+                                <option value="sob_demanda" selected>Sob demanda</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Itens da lista</label>
+                            <button type="button" class="btn btn-outline-primary w-100" id="addItemBtn"><i class="bi bi-plus-lg"></i> Adicionar item</button>
+                        </div>
+                        <div class="col-12">
+                            <div id="itemsContainer" class="d-grid gap-2"></div>
+                        </div>
+                        <div class="col-12 text-end">
+                            <button class="btn btn-primary" type="submit">Salvar lista</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                {% for list in lists %}
+                <div class="col-12 col-lg-6">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h5 class="mb-0">{{ list.name }}</h5>
+                                <span class="badge bg-secondary text-uppercase">{{ list.list_type }}</span>
+                            </div>
+                            <div class="small text-muted mb-2">{{ list['items']|length }} itens • Responsável: {{ list.responsible or 'Não definido' }}</div>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-success btn-sm flex-grow-1 start-execution-btn" data-list-id="{{ list.id }}">Executar</button>
+                                <button class="btn btn-outline-primary btn-sm edit-list-btn" data-list-id="{{ list.id }}">Editar</button>
+                                <button class="btn btn-outline-danger btn-sm delete-list-btn" data-list-id="{{ list.id }}">Excluir</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="col-12">
+                    <div class="alert alert-info mb-0">Nenhuma lista cadastrada.</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="tab-pane fade {% if active_tab == 'modelos' %}show active{% endif %}" id="tab-modelos">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="mb-3">Modelos prontos</h5>
+                    <div class="row g-3 mb-4">
+                        {% for template in templates %}
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="border rounded p-3 h-100">
+                                <div class="fw-semibold">{{ template.name }}</div>
+                                <div class="small text-muted">{{ template.list_type }} • {{ template['items']|length }} itens</div>
+                                <div class="d-flex gap-2 mt-2">
+                                    <button class="btn btn-outline-primary btn-sm edit-template-btn" data-template-id="{{ template.id }}">Editar</button>
+                                    <button class="btn btn-outline-danger btn-sm delete-template-btn" data-template-id="{{ template.id }}">Excluir</button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <form id="createTemplateForm" class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Novo modelo</label>
+                            <input class="form-control" id="templateName" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Tipo</label>
+                            <select class="form-select" id="templateType">
+                                <option value="conferencia">Conferência</option>
+                                <option value="compras">Compras</option>
+                                <option value="limpeza">Limpeza</option>
+                            </select>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label">Itens</label>
+                            <input class="form-control" id="templateItemsRaw" placeholder="Ex: Tomate, Cebola, Leite">
+                        </div>
+                        <div class="col-12 text-end">
+                            <button class="btn btn-primary" type="submit">Salvar modelo</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade {% if active_tab == 'compras' %}show active{% endif %}" id="tab-compras">
+            <div class="card shadow-sm mb-3">
+                <div class="card-body">
+                    <h5 class="mb-3">Nova lista de compras</h5>
+                    <form id="shoppingForm" class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Nome</label>
+                            <input class="form-control" id="shoppingName" value="Lista de compras da cozinha" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Modelo base</label>
+                            <select class="form-select" id="shoppingTemplateId">
+                                <option value="">Sem modelo</option>
+                                {% for t in templates %}
+                                {% if t.list_type == 'compras' %}
+                                <option value="{{ t.id }}">{{ t.name }}</option>
+                                {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Ações</label>
+                            <div class="d-grid gap-2">
+                                <button type="button" class="btn btn-outline-secondary" id="duplicateShoppingBtn">Duplicar lista anterior</button>
+                                <button type="button" class="btn btn-outline-primary" id="addShoppingItemBtn">Adicionar item</button>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div id="shoppingItemsContainer" class="d-grid gap-2"></div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Observação</label>
+                            <textarea class="form-control" id="shoppingObservation" rows="2"></textarea>
+                        </div>
+                        <div class="col-12 text-end">
+                            <button class="btn btn-success" type="submit">Finalizar lista e gerar mensagem</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="row g-3">
+                {% for row in shopping_lists %}
+                <div class="col-12 col-lg-6">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h6 class="mb-1">{{ row.name }}</h6>
+                            <div class="small text-muted">{{ row['items']|length }} itens • {{ row.created_at }}</div>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="col-12">
+                    <div class="alert alert-light border mb-0">Nenhuma lista de compras concluída.</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="tab-pane fade {% if active_tab == 'historico' %}show active{% endif %}" id="tab-historico">
+            <div class="card shadow-sm mb-3">
+                <div class="card-body">
+                    <h5 class="mb-3">Histórico e rastreabilidade</h5>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-3">
+                            <label class="form-label">Data inicial</label>
+                            <input type="date" class="form-control" id="historyStartDate">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Data final</label>
+                            <input type="date" class="form-control" id="historyEndDate">
+                        </div>
+                        <div class="col-md-6 d-flex align-items-end gap-2">
+                            <button class="btn btn-outline-primary" id="applyHistoryFilterBtn">Filtrar período</button>
+                            <button class="btn btn-outline-secondary" id="clearHistoryFilterBtn">Limpar</button>
+                            <button class="btn btn-outline-success" id="exportSummaryCsvBtn">Exportar CSV</button>
+                            <button class="btn btn-success" id="sendSummaryWhatsBtn"><i class="bi bi-whatsapp"></i> Enviar resumo</button>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Tipo</th>
+                                    <th>Data</th>
+                                    <th>Criador</th>
+                                    <th>Executor</th>
+                                    <th>Início</th>
+                                    <th>Conclusão</th>
+                                    <th>Faltantes</th>
+                                    <th>Vencidos</th>
+                                    <th>Para compra</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in history %}
+                                <tr>
+                                    <td>{{ row.name }}</td>
+                                    <td>{{ row.list_type }}</td>
+                                    <td>{{ row.date }}</td>
+                                    <td>{{ row.creator }}</td>
+                                    <td>{{ row.executor }}</td>
+                                    <td>{{ row.started_at }}</td>
+                                    <td>{{ row.completed_at }}</td>
+                                    <td>{{ row.missing_items|length }}</td>
+                                    <td>{{ row.expired_items|length }}</td>
+                                    <td>{{ row.sent_to_purchase|length }}</td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="10" class="text-center text-muted">Sem histórico ainda.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body">
+                            <h6>Itens mais faltando</h6>
+                            <ul class="mb-0">
+                                {% for row in dashboard.top_missing %}
+                                <li>{{ row.name }} ({{ row.count }})</li>
+                                {% else %}
+                                <li class="text-muted">Sem dados</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body">
+                            <h6>Itens mais comprados</h6>
+                            <ul class="mb-0">
+                                {% for row in dashboard.top_purchased %}
+                                <li>{{ row.name }} ({{ row.count }})</li>
+                                {% else %}
+                                <li class="text-muted">Sem dados</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body">
+                            <h6>Perdas por vencimento</h6>
+                            <ul class="mb-0">
+                                {% for row in dashboard.expired_losses %}
+                                <li>{{ row.name }} ({{ row.count }})</li>
+                                {% else %}
+                                <li class="text-muted">Sem dados</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade {% if active_tab == 'pendentes-hoje' %}show active{% endif %}" id="tab-pendentes-hoje">
+            <div class="card shadow-sm mb-3">
+                <div class="card-body">
+                    <h5 class="mb-3">Execução simples</h5>
+                    <div class="small text-muted mb-3">Status dos itens <i class="bi bi-info-circle" data-bs-toggle="tooltip" title="Ok: tudo certo, Faltando: não encontrado, Baixo estoque: quase acabando, Vencido: fora de validade, Comprar: incluir no pedido."></i></div>
+                    <div id="executionArea" class="d-grid gap-3"></div>
+                    <div class="text-end mt-3">
+                        <button class="btn btn-success" id="finishExecutionBtn" disabled>Finalizar checklist</button>
+                    </div>
+                </div>
+            </div>
+            <div class="row g-3">
+                {% for row in executions %}
+                {% if row.status != 'concluida' %}
+                <div class="col-12 col-lg-6">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h6 class="mb-1">{{ row.name }}</h6>
+                            <div class="small text-muted">Início: {{ row.started_at }} • Executor: {{ row.executor }}</div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% else %}
+                <div class="col-12">
+                    <div class="alert alert-light border mb-0">Nenhuma execução iniciada hoje.</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="whatsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Prévia para WhatsApp <i class="bi bi-info-circle" data-bs-toggle="tooltip" title="Você pode copiar ou abrir no WhatsApp com o texto pronto."></i></h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <textarea class="form-control" id="whatsText" rows="12"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline-secondary" id="copyWhatsBtn">Copiar texto</button>
+                <button class="btn btn-success" id="openWhatsBtn"><i class="bi bi-whatsapp"></i> Abrir WhatsApp</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editListModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Editar lista</h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editListId">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Nome</label>
+                        <input class="form-control" id="editListName">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Tipo</label>
+                        <select class="form-select" id="editListType">
+                            <option value="conferencia">Conferência</option>
+                            <option value="compras">Compras</option>
+                            <option value="limpeza">Limpeza</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Periodicidade</label>
+                        <select class="form-select" id="editListPeriodicity">
+                            <option value="diaria">Diária</option>
+                            <option value="semanal">Semanal</option>
+                            <option value="quinzenal">Quinzenal</option>
+                            <option value="mensal">Mensal</option>
+                            <option value="sob_demanda">Sob demanda</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Responsável</label>
+                        <input class="form-control" id="editListResponsible">
+                    </div>
+                    <div class="col-md-8">
+                        <label class="form-label">Itens</label>
+                        <input class="form-control" id="editListItemsRaw" placeholder="Ex: Tomate, Cebola, Leite">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="saveEditListBtn">Salvar alterações</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editTemplateModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Editar modelo</h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editTemplateId">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Nome</label>
+                        <input class="form-control" id="editTemplateName">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Tipo</label>
+                        <select class="form-select" id="editTemplateType">
+                            <option value="conferencia">Conferência</option>
+                            <option value="compras">Compras</option>
+                            <option value="limpeza">Limpeza</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Itens</label>
+                        <input class="form-control" id="editTemplateItemsRaw" placeholder="Ex: Tomate, Cebola, Leite">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="saveEditTemplateBtn">Salvar alterações</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script id="kitchenChecklistListsData" type="application/json">{{ lists|tojson }}</script>
+<script id="kitchenChecklistTemplatesData" type="application/json">{{ templates|tojson }}</script>
+<script id="kitchenChecklistInsumosData" type="application/json">{{ insumos|tojson }}</script>
+<script>
+const overviewLists = JSON.parse(document.getElementById('kitchenChecklistListsData').textContent || '[]');
+const overviewTemplates = JSON.parse(document.getElementById('kitchenChecklistTemplatesData').textContent || '[]');
+const insumos = JSON.parse(document.getElementById('kitchenChecklistInsumosData').textContent || '[]');
+let activeExecution = null;
+
+function createTooltip() {
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    [...tooltipTriggerList].forEach(el => new bootstrap.Tooltip(el));
+}
+
+function createItemRow(targetId, item = {}) {
+    const el = document.createElement('div');
+    el.className = 'row g-2';
+    el.innerHTML = `
+        <div class="col-md-5"><input class="form-control item-name" placeholder="Item" value="${item.name || ''}"></div>
+        <div class="col-md-2"><input class="form-control item-unit" placeholder="Unidade" value="${item.unit || ''}"></div>
+        <div class="col-md-2"><input class="form-control item-qty" placeholder="Qtd padrão" value="${item.default_qty || ''}"></div>
+        <div class="col-md-2"><input class="form-control item-note" placeholder="Observação" value="${item.note || ''}"></div>
+        <div class="col-md-1 d-grid"><button type="button" class="btn btn-outline-danger remove-item-btn">X</button></div>
+    `;
+    el.querySelector('.remove-item-btn').addEventListener('click', () => el.remove());
+    document.getElementById(targetId).appendChild(el);
+}
+
+function parseItems(containerId) {
+    return [...document.querySelectorAll(`#${containerId} .row`)].map(row => ({
+        name: row.querySelector('.item-name').value.trim(),
+        unit: row.querySelector('.item-unit').value.trim(),
+        default_qty: row.querySelector('.item-qty') ? row.querySelector('.item-qty').value.trim() : '',
+        note: row.querySelector('.item-note') ? row.querySelector('.item-note').value.trim() : '',
+        quantity: row.querySelector('.item-qty') ? row.querySelector('.item-qty').value.trim() : '',
+        observation: row.querySelector('.item-note') ? row.querySelector('.item-note').value.trim() : ''
+    })).filter(item => item.name);
+}
+
+function openWhatsModal(text) {
+    const modal = new bootstrap.Modal(document.getElementById('whatsModal'));
+    document.getElementById('whatsText').value = text;
+    modal.show();
+}
+
+async function postJson(url, payload) {
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload || {})
+    });
+    return response.json();
+}
+
+async function putJson(url, payload) {
+    const response = await fetch(url, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload || {})
+    });
+    return response.json();
+}
+
+function renderExecution(execution) {
+    activeExecution = execution;
+    const area = document.getElementById('executionArea');
+    area.innerHTML = '';
+    (execution.items || []).forEach(item => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'border rounded p-3';
+        wrapper.dataset.itemId = item.id;
+        wrapper.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="fw-semibold fs-5">${item.name}</div>
+                <span class="badge bg-light text-dark">${item.unit || 'un'}</span>
+            </div>
+            <div class="row g-2">
+                <div class="col-12 col-md-8">
+                    <div class="btn-group w-100" role="group">
+                        <input type="radio" class="btn-check" name="status_${item.id}" id="ok_${item.id}" value="ok" checked>
+                        <label class="btn btn-outline-success btn-lg" for="ok_${item.id}">Ok</label>
+                        <input type="radio" class="btn-check" name="status_${item.id}" id="faltando_${item.id}" value="faltando">
+                        <label class="btn btn-outline-danger btn-lg" for="faltando_${item.id}">Faltando</label>
+                        <input type="radio" class="btn-check" name="status_${item.id}" id="baixo_${item.id}" value="baixo_estoque">
+                        <label class="btn btn-outline-warning btn-lg" for="baixo_${item.id}">Baixo estoque</label>
+                        <input type="radio" class="btn-check" name="status_${item.id}" id="vencido_${item.id}" value="vencido">
+                        <label class="btn btn-outline-dark btn-lg" for="vencido_${item.id}">Vencido</label>
+                        <input type="radio" class="btn-check" name="status_${item.id}" id="comprar_${item.id}" value="comprar">
+                        <label class="btn btn-outline-primary btn-lg" for="comprar_${item.id}">Comprar</label>
+                    </div>
+                </div>
+                <div class="col-12 col-md-4">
+                    <input class="form-control form-control-lg item-observation" placeholder="Observação opcional">
+                </div>
+            </div>
+        `;
+        area.appendChild(wrapper);
+    });
+    document.getElementById('finishExecutionBtn').disabled = !execution.items || !execution.items.length;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    createTooltip();
+    createItemRow('itemsContainer');
+    createItemRow('shoppingItemsContainer');
+
+    document.getElementById('addItemBtn').addEventListener('click', () => createItemRow('itemsContainer'));
+    document.getElementById('addShoppingItemBtn').addEventListener('click', () => createItemRow('shoppingItemsContainer'));
+
+    document.getElementById('baseTemplateId').addEventListener('change', (e) => {
+        const template = overviewTemplates.find(t => t.id === e.target.value);
+        const container = document.getElementById('itemsContainer');
+        container.innerHTML = '';
+        (template?.items || []).forEach(item => createItemRow('itemsContainer', item));
+        if (!container.children.length) createItemRow('itemsContainer');
+    });
+
+    document.getElementById('shoppingTemplateId').addEventListener('change', (e) => {
+        const template = overviewTemplates.find(t => t.id === e.target.value);
+        const container = document.getElementById('shoppingItemsContainer');
+        container.innerHTML = '';
+        (template?.items || []).forEach(item => createItemRow('shoppingItemsContainer', item));
+        if (!container.children.length) createItemRow('shoppingItemsContainer');
+    });
+
+    document.getElementById('createListForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const result = await postJson('/api/kitchen/checklist/list', {
+            name: document.getElementById('listName').value.trim(),
+            list_type: document.getElementById('listType').value,
+            base_template_id: document.getElementById('baseTemplateId').value || null,
+            responsible: document.getElementById('responsibleName').value.trim(),
+            periodicity: document.getElementById('periodicity').value,
+            items: parseItems('itemsContainer')
+        });
+        if (!result.success) return alert(result.error || 'Erro ao salvar lista');
+        window.location.reload();
+    });
+
+    document.getElementById('createTemplateForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const raw = document.getElementById('templateItemsRaw').value;
+        const items = raw.split(',').map(v => v.trim()).filter(Boolean).map(name => ({name, unit: '', default_qty: '', note: ''}));
+        const result = await postJson('/api/kitchen/checklist/template', {
+            name: document.getElementById('templateName').value.trim(),
+            list_type: document.getElementById('templateType').value,
+            items
+        });
+        if (!result.success) return alert(result.error || 'Erro ao salvar modelo');
+        window.location.reload();
+    });
+
+    document.querySelectorAll('.start-execution-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const result = await postJson('/api/kitchen/checklist/execute/start', {list_id: btn.dataset.listId});
+            if (!result.success) return alert(result.error || 'Erro ao iniciar execução');
+            const tabs = new bootstrap.Tab(document.querySelector('button[data-bs-target="#tab-pendentes-hoje"]'));
+            tabs.show();
+            renderExecution(result.data);
+        });
+    });
+
+    document.querySelectorAll('.delete-list-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            if (!confirm('Confirma excluir a lista?')) return;
+            const response = await fetch(`/api/kitchen/checklist/list/${btn.dataset.listId}`, {method: 'DELETE'});
+            const result = await response.json();
+            if (!result.success) return alert(result.error || 'Erro ao excluir');
+            window.location.reload();
+        });
+    });
+
+    document.querySelectorAll('.edit-list-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const list = overviewLists.find(l => l.id === btn.dataset.listId);
+            if (!list) return;
+            document.getElementById('editListId').value = list.id;
+            document.getElementById('editListName').value = list.name || '';
+            document.getElementById('editListType').value = list.list_type || 'conferencia';
+            document.getElementById('editListPeriodicity').value = list.periodicity || 'sob_demanda';
+            document.getElementById('editListResponsible').value = list.responsible || '';
+            document.getElementById('editListItemsRaw').value = (list.items || []).map(i => i.name).join(', ');
+            new bootstrap.Modal(document.getElementById('editListModal')).show();
+        });
+    });
+
+    document.getElementById('saveEditListBtn').addEventListener('click', async () => {
+        const listId = document.getElementById('editListId').value;
+        const items = (document.getElementById('editListItemsRaw').value || '')
+            .split(',')
+            .map(v => v.trim())
+            .filter(Boolean)
+            .map(name => ({name, unit: '', default_qty: '', note: ''}));
+        const result = await putJson(`/api/kitchen/checklist/list/${listId}`, {
+            name: document.getElementById('editListName').value.trim(),
+            list_type: document.getElementById('editListType').value,
+            periodicity: document.getElementById('editListPeriodicity').value,
+            responsible: document.getElementById('editListResponsible').value.trim(),
+            items
+        });
+        if (!result.success) return alert(result.error || 'Erro ao editar lista');
+        window.location.reload();
+    });
+
+    document.querySelectorAll('.edit-template-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const template = overviewTemplates.find(t => t.id === btn.dataset.templateId);
+            if (!template) return;
+            document.getElementById('editTemplateId').value = template.id;
+            document.getElementById('editTemplateName').value = template.name || '';
+            document.getElementById('editTemplateType').value = template.list_type || 'conferencia';
+            document.getElementById('editTemplateItemsRaw').value = (template.items || []).map(i => i.name).join(', ');
+            new bootstrap.Modal(document.getElementById('editTemplateModal')).show();
+        });
+    });
+
+    document.getElementById('saveEditTemplateBtn').addEventListener('click', async () => {
+        const templateId = document.getElementById('editTemplateId').value;
+        const items = (document.getElementById('editTemplateItemsRaw').value || '')
+            .split(',')
+            .map(v => v.trim())
+            .filter(Boolean)
+            .map(name => ({name, unit: '', default_qty: '', note: ''}));
+        const result = await putJson(`/api/kitchen/checklist/template/${templateId}`, {
+            name: document.getElementById('editTemplateName').value.trim(),
+            list_type: document.getElementById('editTemplateType').value,
+            items
+        });
+        if (!result.success) return alert(result.error || 'Erro ao editar modelo');
+        window.location.reload();
+    });
+
+    document.querySelectorAll('.delete-template-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            if (!confirm('Confirma excluir o modelo?')) return;
+            const response = await fetch(`/api/kitchen/checklist/template/${btn.dataset.templateId}`, {method: 'DELETE'});
+            const result = await response.json();
+            if (!result.success) return alert(result.error || 'Erro ao excluir modelo');
+            window.location.reload();
+        });
+    });
+
+    document.getElementById('finishExecutionBtn').addEventListener('click', async () => {
+        if (!activeExecution) return;
+        const itemResults = [...document.querySelectorAll('#executionArea .border')].map(block => ({
+            id: block.dataset.itemId,
+            status: block.querySelector(`input[name="status_${block.dataset.itemId}"]:checked`)?.value || 'ok',
+            observation: block.querySelector('.item-observation')?.value || ''
+        }));
+        const triggerCount = itemResults.filter(i => ['faltando', 'baixo_estoque', 'comprar'].includes(i.status)).length;
+        const addToTodayPurchase = triggerCount > 0 && confirm('Deseja adicionar os itens marcados para a lista de compras de hoje?');
+        const result = await postJson('/api/kitchen/checklist/execute/finish', {
+            execution_id: activeExecution.id,
+            item_results: itemResults,
+            add_to_today_purchase: addToTodayPurchase
+        });
+        if (!result.success) return alert(result.error || 'Erro ao finalizar checklist');
+        const msg = await postJson('/api/kitchen/checklist/send', {
+            list_name: `Checklist da cozinha - ${activeExecution.name}`,
+            items: itemResults.map(i => ({
+                name: activeExecution.items.find(item => item.id === i.id)?.name || '',
+                status: i.status
+            })),
+            observation: addToTodayPurchase ? 'Itens críticos enviados para compra.' : ''
+        });
+        if (msg.success) openWhatsModal(msg.text);
+        window.setTimeout(() => window.location.reload(), 500);
+    });
+
+    document.getElementById('shoppingForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const items = parseItems('shoppingItemsContainer');
+        const result = await postJson('/api/kitchen/checklist/shopping', {
+            name: document.getElementById('shoppingName').value.trim(),
+            items: items.map(i => ({name: i.name, quantity: i.quantity, unit: i.unit, observation: i.observation})),
+            observation: document.getElementById('shoppingObservation').value.trim(),
+            source: 'manual',
+            base_template_id: document.getElementById('shoppingTemplateId').value || null
+        });
+        if (!result.success) return alert(result.error || 'Erro ao finalizar compras');
+        const msg = await postJson('/api/kitchen/checklist/send', {
+            list_name: document.getElementById('shoppingName').value.trim(),
+            items: result.data.items.map(i => ({name: i.name, qty: i.quantity, unit: i.unit})),
+            observation: document.getElementById('shoppingObservation').value.trim()
+        });
+        if (msg.success) openWhatsModal(msg.text);
+        window.setTimeout(() => window.location.reload(), 500);
+    });
+
+    document.getElementById('duplicateShoppingBtn').addEventListener('click', async () => {
+        const result = await postJson('/api/kitchen/checklist/shopping/duplicate', {});
+        if (!result.success) return alert(result.error || 'Sem lista anterior para duplicar');
+        window.location.reload();
+    });
+
+    document.getElementById('copyWhatsBtn').addEventListener('click', async () => {
+        const text = document.getElementById('whatsText').value;
+        await navigator.clipboard.writeText(text);
+        alert('Texto copiado.');
+    });
+
+    document.getElementById('openWhatsBtn').addEventListener('click', () => {
+        const text = encodeURIComponent(document.getElementById('whatsText').value || '');
+        window.open(`https://wa.me/?text=${text}`, '_blank');
+    });
+
+    document.getElementById('applyHistoryFilterBtn').addEventListener('click', async () => {
+        const start = document.getElementById('historyStartDate').value || '';
+        const end = document.getElementById('historyEndDate').value || '';
+        const response = await fetch(`/api/kitchen/checklist/history/summary?start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}`);
+        const result = await response.json();
+        if (!result.success) return alert(result.error || 'Erro ao filtrar histórico');
+        const params = new URLSearchParams(window.location.search);
+        params.set('tab', 'historico');
+        params.set('start_date', start);
+        params.set('end_date', end);
+        window.location.search = params.toString();
+    });
+
+    document.getElementById('clearHistoryFilterBtn').addEventListener('click', () => {
+        const params = new URLSearchParams(window.location.search);
+        params.set('tab', 'historico');
+        params.delete('start_date');
+        params.delete('end_date');
+        window.location.search = params.toString();
+    });
+
+    document.getElementById('exportSummaryCsvBtn').addEventListener('click', async () => {
+        const params = new URLSearchParams(window.location.search);
+        const start = params.get('start_date') || '';
+        const end = params.get('end_date') || '';
+        const response = await fetch(`/api/kitchen/checklist/history/summary?format=csv&start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}`);
+        const result = await response.json();
+        if (!result.success) return alert(result.error || 'Erro ao exportar CSV');
+        const blob = new Blob([result.csv || ''], {type: 'text/csv;charset=utf-8;'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `resumo_checklist_cozinha_${new Date().toISOString().slice(0, 10)}.csv`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+    });
+
+    document.getElementById('sendSummaryWhatsBtn').addEventListener('click', async () => {
+        const params = new URLSearchParams(window.location.search);
+        const start = params.get('start_date') || '';
+        const end = params.get('end_date') || '';
+        const response = await fetch(`/api/kitchen/checklist/history/summary?start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}`);
+        const result = await response.json();
+        if (!result.success) return alert(result.error || 'Erro ao montar resumo');
+        const data = result.data || {};
+        const items = [
+            {name: 'Listas concluídas', qty: data.completed_count || 0, unit: ''},
+            {name: 'Listas pendentes', qty: data.pending_count || 0, unit: ''},
+            ...((data.top_missing || []).slice(0, 3).map(i => ({name: `Faltando: ${i.name}`, qty: i.count, unit: 'ocorrências'}))),
+            ...((data.expired_losses || []).slice(0, 3).map(i => ({name: `Vencido: ${i.name}`, qty: i.count, unit: 'ocorrências'}))),
+        ];
+        const messageResult = await postJson('/api/kitchen/checklist/send', {
+            list_name: 'Resumo checklist cozinha',
+            items,
+            observation: `Período: ${start || 'início'} até ${end || 'hoje'}`
+        });
+        if (!messageResult.success) return alert(messageResult.error || 'Erro ao gerar mensagem');
+        openWhatsModal(messageResult.text);
+    });
+
+    const queryParams = new URLSearchParams(window.location.search);
+    const qStart = queryParams.get('start_date') || '';
+    const qEnd = queryParams.get('end_date') || '';
+    if (qStart) document.getElementById('historyStartDate').value = qStart;
+    if (qEnd) document.getElementById('historyEndDate').value = qEnd;
+});
+</script>
+{% endblock %}

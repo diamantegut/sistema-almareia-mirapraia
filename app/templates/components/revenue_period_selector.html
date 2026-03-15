@@ -1,0 +1,33 @@
+{% set _selector_id = period_selector_id if period_selector_id is defined else 'revenue_period_selector' %}
+{% set _label = period_selector_label if period_selector_label is defined else 'Período' %}
+{% set _start = period_selector_start if period_selector_start is defined else '' %}
+{% set _end = period_selector_end if period_selector_end is defined else '' %}
+{% set _show_weekdays = period_selector_show_weekdays if period_selector_show_weekdays is defined else true %}
+
+<div id="{{ _selector_id }}" class="revenue-period-selector border rounded p-3 bg-light">
+    <div class="small fw-semibold text-muted mb-2">{{ _label }}</div>
+    <div class="row g-2 align-items-end">
+        <div class="col-md-6">
+            <label class="form-label mb-1">Data inicial</label>
+            <input type="date" class="form-control rps-start" value="{{ _start }}">
+        </div>
+        <div class="col-md-6">
+            <label class="form-label mb-1">Data final</label>
+            <input type="date" class="form-control rps-end" value="{{ _end }}">
+        </div>
+    </div>
+    {% if _show_weekdays %}
+    <div class="mt-2">
+        <label class="form-label mb-1">Dias da semana (opcional)</label>
+        <div class="d-flex flex-wrap gap-3">
+            <div class="form-check"><input class="form-check-input rps-weekday" type="checkbox" value="sun" id="{{ _selector_id }}_sun"><label class="form-check-label" for="{{ _selector_id }}_sun">Domingo</label></div>
+            <div class="form-check"><input class="form-check-input rps-weekday" type="checkbox" value="mon" id="{{ _selector_id }}_mon"><label class="form-check-label" for="{{ _selector_id }}_mon">Segunda</label></div>
+            <div class="form-check"><input class="form-check-input rps-weekday" type="checkbox" value="tue" id="{{ _selector_id }}_tue"><label class="form-check-label" for="{{ _selector_id }}_tue">Terça</label></div>
+            <div class="form-check"><input class="form-check-input rps-weekday" type="checkbox" value="wed" id="{{ _selector_id }}_wed"><label class="form-check-label" for="{{ _selector_id }}_wed">Quarta</label></div>
+            <div class="form-check"><input class="form-check-input rps-weekday" type="checkbox" value="thu" id="{{ _selector_id }}_thu"><label class="form-check-label" for="{{ _selector_id }}_thu">Quinta</label></div>
+            <div class="form-check"><input class="form-check-input rps-weekday" type="checkbox" value="fri" id="{{ _selector_id }}_fri"><label class="form-check-label" for="{{ _selector_id }}_fri">Sexta</label></div>
+            <div class="form-check"><input class="form-check-input rps-weekday" type="checkbox" value="sat" id="{{ _selector_id }}_sat"><label class="form-check-label" for="{{ _selector_id }}_sat">Sábado</label></div>
+        </div>
+    </div>
+    {% endif %}
+</div>

@@ -1,0 +1,21 @@
+body {
+  background: var(--color-bg-page) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-default);
+  box-shadow: var(--shadow-soft);
+}
+
+.navbar {
+  background: var(--color-bg-header);
+}
+
+.theme-page-shell {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-default);
+  border-radius: 16px;
+  box-shadow: var(--shadow-medium);
+}

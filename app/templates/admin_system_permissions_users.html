@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Permissões por Usuário</h2>
+        <a href="{{ url_for('admin.admin_system_permissions') }}" class="btn btn-outline-secondary">Voltar</a>
+    </div>
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+            <form method="GET" class="row g-2 align-items-end">
+                <div class="col-md-8">
+                    <label class="form-label">Usuário</label>
+                    <select class="form-select" name="user_id">
+                        <option value="">Selecione</option>
+                        {% for username, user in users.items() %}
+                        <option value="{{ username }}" {% if selected_user == username %}selected{% endif %}>{{ username }}{% if user.full_name %} - {{ user.full_name }}{% endif %}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4"><button class="btn btn-primary w-100">Carregar</button></div>
+            </form>
+        </div>
+    </div>
+    {% if profile %}
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+            <div><strong>Roles:</strong> {{ profile.roles|join(', ') if profile.roles else '-' }}</div>
+            <div><strong>Scopes:</strong> {{ profile.scopes|join(', ') if profile.scopes else '-' }}</div>
+        </div>
+    </div>
+    <div class="card shadow-sm">
+        <div class="card-header bg-white"><strong>Acesso por Endpoint</strong></div>
+        <div class="table-responsive">
+            <table class="table table-sm mb-0">
+                <thead class="table-light"><tr><th>Endpoint</th><th>Resultado</th></tr></thead>
+                <tbody>
+                    {% for row in endpoint_results %}
+                    <tr><td>{{ row.endpoint }}</td><td>{{ row.access }}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

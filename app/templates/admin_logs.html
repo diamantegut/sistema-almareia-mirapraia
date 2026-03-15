@@ -1,0 +1,393 @@
+{% extends "base.html" %}
+
+{% block title %}Auditoria do Sistema{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-6">
+            <h2 class="mb-0"><i class="bi bi-shield-check me-2"></i>Auditoria e Logs do Sistema</h2>
+            <p class="text-muted mb-0">Visualize e monitore todas as atividades do sistema.</p>
+        </div>
+        <div class="col-md-6 text-end">
+            <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#filterModal">
+                <i class="bi bi-funnel me-1"></i> Filtros Avançados
+            </button>
+            <div class="btn-group">
+                <button type="button" class="btn btn-outline-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-download me-1"></i> Exportar
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="#" id="btnExportCSV"><i class="bi bi-file-earmark-spreadsheet me-2"></i>CSV (Excel)</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="window.print()"><i class="bi bi-printer me-2"></i>Imprimir / PDF</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Filters Summary -->
+    <div id="activeFilters" class="mb-3 d-none">
+        <span class="badge bg-secondary me-1" id="filterDeptBadge"></span>
+        <span class="badge bg-secondary me-1" id="filterDateBadge"></span>
+        <span class="badge bg-secondary me-1" id="filterSeverityBadge"></span>
+        <span class="badge bg-secondary me-1" id="filterSearchBadge"></span>
+        <button class="btn btn-sm btn-link text-danger p-0 ms-2" onclick="clearFilters()">Limpar Filtros</button>
+    </div>
+
+    <!-- Logs Table -->
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 150px;">Data/Hora</th>
+                            <th style="width: 100px;">Nível</th>
+                            <th style="width: 150px;">Departamento</th>
+                            <th style="width: 150px;">Usuário</th>
+                            <th>Ação</th>
+                            <th>Entidade</th>
+                            <th style="width: 100px;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logsTableBody">
+                        <!-- Populated via JS -->
+                        <tr>
+                            <td colspan="7" class="text-center py-5">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Carregando...</span>
+                                </div>
+                                <p class="mt-2 text-muted">Carregando registros...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer d-flex justify-content-between align-items-center">
+            <span class="text-muted small" id="paginationInfo">Mostrando 0-0 de 0 registros</span>
+            <nav aria-label="Navegação">
+                <ul class="pagination pagination-sm mb-0" id="paginationControls">
+                    <!-- Populated via JS -->
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- Filter Modal -->
+<div class="modal fade" id="filterModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-funnel me-2"></i>Filtrar Logs</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="filterForm">
+                    <div class="mb-3">
+                        <label class="form-label">Departamento</label>
+                        <select class="form-select no-search" id="filterDepartment">
+                            <option value="all" selected>Todos os Departamentos</option>
+                            {% for dept in departments %}
+                            <option value="{{ dept }}">{{ dept }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Período</label>
+                        <div class="input-group">
+                            <input type="date" class="form-control" id="filterStartDate" value="{{ today }}">
+                            <span class="input-group-text">até</span>
+                            <input type="date" class="form-control" id="filterEndDate" value="{{ today }}">
+                        </div>
+                        <div class="mt-2 btn-group w-100" role="group">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setPresetDate('today')">Hoje</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setPresetDate('7days')">7 Dias</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setPresetDate('30days')">30 Dias</button>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nível de Severidade</label>
+                        <select class="form-select no-search" id="filterSeverity">
+                            <option value="">Todos</option>
+                            <option value="INFO">Informação (INFO)</option>
+                            <option value="WARNING">Aviso (WARNING)</option>
+                            <option value="ERROR">Erro (ERROR)</option>
+                            <option value="CRITICAL">Crítico (CRITICAL)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Usuário</label>
+                        <input type="text" class="form-control" id="filterUser" placeholder="Nome do usuário...">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Busca Textual</label>
+                        <input type="text" class="form-control" id="filterSearch" placeholder="Buscar em ação ou detalhes...">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="applyFilters()">Aplicar Filtros</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detail Modal -->
+<div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detalhes do Log</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <tbody>
+                            <tr>
+                                <th class="bg-light" style="width: 150px;">ID</th>
+                                <td id="detailId"></td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light">Timestamp</th>
+                                <td id="detailTimestamp"></td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light">Usuário</th>
+                                <td id="detailUser"></td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light">Departamento</th>
+                                <td id="detailDept"></td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light">Ação</th>
+                                <td id="detailAction"></td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light">Severidade</th>
+                                <td id="detailSeverity"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <h6 class="mt-3">Conteúdo JSON Detalhado:</h6>
+                <pre class="bg-light p-3 border rounded" id="detailJSON" style="max-height: 300px; overflow-y: auto;"></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentPage = 1;
+    const perPage = 50;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        loadLogs();
+        
+        document.getElementById('btnExportCSV').addEventListener('click', function(e) {
+            e.preventDefault();
+            exportLogs();
+        });
+    });
+
+    function setPresetDate(preset) {
+        const end = new Date();
+        const start = new Date();
+        
+        if (preset === '7days') {
+            start.setDate(end.getDate() - 7);
+        } else if (preset === '30days') {
+            start.setDate(end.getDate() - 30);
+        }
+        // if today, start is today
+        
+        document.getElementById('filterEndDate').valueAsDate = end;
+        document.getElementById('filterStartDate').valueAsDate = start;
+    }
+
+    function applyFilters() {
+        currentPage = 1;
+        loadLogs();
+        
+        // Update badges
+        const dept = document.getElementById('filterDepartment').value;
+        const severity = document.getElementById('filterSeverity').value;
+        const search = document.getElementById('filterSearch').value;
+        
+        const activeContainer = document.getElementById('activeFilters');
+        let hasFilter = false;
+        
+        if (dept && dept !== 'all') {
+            document.getElementById('filterDeptBadge').textContent = dept;
+            hasFilter = true;
+        } else document.getElementById('filterDeptBadge').textContent = '';
+        
+        if (severity) {
+            document.getElementById('filterSeverityBadge').textContent = severity;
+            hasFilter = true;
+        } else document.getElementById('filterSeverityBadge').textContent = '';
+        
+        if (search) {
+            document.getElementById('filterSearchBadge').textContent = `Busca: "${search}"`;
+            hasFilter = true;
+        } else document.getElementById('filterSearchBadge').textContent = '';
+        
+        activeContainer.classList.toggle('d-none', !hasFilter);
+        
+        // Close modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('filterModal'));
+        modal.hide();
+    }
+    
+    function clearFilters() {
+        document.getElementById('filterForm').reset();
+        document.getElementById('filterDepartment').value = 'all';
+        setPresetDate('today');
+        applyFilters();
+    }
+
+    function loadLogs() {
+        const tbody = document.getElementById('logsTableBody');
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2 text-muted">Carregando...</p>
+                </td>
+            </tr>
+        `;
+
+        const params = new URLSearchParams({
+            page: currentPage,
+            per_page: perPage,
+            department: document.getElementById('filterDepartment').value,
+            start_date: document.getElementById('filterStartDate').value,
+            end_date: document.getElementById('filterEndDate').value,
+            severity: document.getElementById('filterSeverity').value,
+            search: document.getElementById('filterSearch').value,
+            user: document.getElementById('filterUser').value
+        });
+
+        fetch(`/api/admin/logs/search?${params.toString()}`)
+            .then(response => response.json())
+            .then(data => {
+                renderTable(data.items);
+                renderPagination(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center text-danger">Erro ao carregar logs: ${error}</td></tr>`;
+            });
+    }
+
+    function renderTable(logs) {
+        const tbody = document.getElementById('logsTableBody');
+        tbody.innerHTML = '';
+
+        if (!logs || logs.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">Nenhum registro encontrado.</td></tr>`;
+            return;
+        }
+
+        logs.forEach(log => {
+            let severityClass = 'bg-secondary';
+            if (log.nivel_severidade === 'INFO') severityClass = 'bg-info text-dark';
+            if (log.nivel_severidade === 'WARNING') severityClass = 'bg-warning text-dark';
+            if (log.nivel_severidade === 'ERROR') severityClass = 'bg-danger';
+            if (log.nivel_severidade === 'CRITICAL') severityClass = 'bg-dark border border-danger';
+
+            // Safe date formatting
+            let dateStr = log.timestamp;
+            try {
+                const d = new Date(log.timestamp);
+                dateStr = d.toLocaleString('pt-BR');
+            } catch(e) {}
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><small>${dateStr}</small></td>
+                <td><span class="badge ${severityClass}">${log.nivel_severidade}</span></td>
+                <td>${log.departamento_id || '-'}</td>
+                <td><span class="fw-bold">${log.colaborador_id || 'Sistema'}</span></td>
+                <td>${log.acao}</td>
+                <td><small class="text-muted">${log.entidade}</small></td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary" onclick='showDetails(${JSON.stringify(log).replace(/'/g, "&apos;")})'>
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderPagination(data) {
+        const info = document.getElementById('paginationInfo');
+        const controls = document.getElementById('paginationControls');
+        
+        const start = (data.current_page - 1) * perPage + 1;
+        const end = Math.min(start + data.items.length - 1, data.total);
+        info.textContent = `Mostrando ${data.total > 0 ? start : 0}-${end} de ${data.total} registros`;
+
+        let html = '';
+        
+        // Prev
+        html += `<li class="page-item ${!data.has_prev ? 'disabled' : ''}">
+            <button class="page-link" onclick="changePage(${data.current_page - 1})">Anterior</button>
+        </li>`;
+        
+        // Simple pagination: Current page only for now to save complexity
+        html += `<li class="page-item active">
+            <span class="page-link">${data.current_page} / ${data.pages}</span>
+        </li>`;
+
+        // Next
+        html += `<li class="page-item ${!data.has_next ? 'disabled' : ''}">
+            <button class="page-link" onclick="changePage(${data.current_page + 1})">Próxima</button>
+        </li>`;
+
+        controls.innerHTML = html;
+    }
+
+    function changePage(page) {
+        if (page < 1) return;
+        currentPage = page;
+        loadLogs();
+    }
+
+    function showDetails(log) {
+        document.getElementById('detailId').textContent = log.id;
+        document.getElementById('detailTimestamp').textContent = log.timestamp;
+        document.getElementById('detailUser').textContent = log.colaborador_id;
+        document.getElementById('detailDept').textContent = log.departamento_id;
+        document.getElementById('detailAction').textContent = log.acao;
+        document.getElementById('detailSeverity').textContent = log.nivel_severidade;
+        
+        const jsonPre = document.getElementById('detailJSON');
+        try {
+            jsonPre.textContent = JSON.stringify(log.detalhes, null, 2);
+        } catch (e) {
+            jsonPre.textContent = log.detalhes;
+        }
+        
+        new bootstrap.Modal(document.getElementById('detailModal')).show();
+    }
+
+    function exportLogs() {
+        const params = new URLSearchParams({
+            department: document.getElementById('filterDepartment').value,
+            start_date: document.getElementById('filterStartDate').value,
+            end_date: document.getElementById('filterEndDate').value,
+            search: document.getElementById('filterSearch').value,
+            severity: document.getElementById('filterSeverity').value,
+            user: document.getElementById('filterUser').value
+        });
+        
+        window.location.href = `/api/admin/logs/export?${params.toString()}`;
+    }
+</script>
+{% endblock %}

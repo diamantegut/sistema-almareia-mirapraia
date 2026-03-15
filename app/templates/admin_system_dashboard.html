@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-hdd-rack"></i> Monitoramento do Sistema</h2>
+        <div>
+            <button id="btnManualBackup" class="btn btn-primary" onclick="triggerBackup()">
+                <i class="bi bi-shield-lock-fill"></i> Backup de Segurança
+            </button>
+        </div>
+    </div>
+
+    <!-- Backup Health Status -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-arrow-clockwise"></i> Status dos Backups Automáticos</h5>
+            <small class="text-muted" id="backupLastUpdate">Atualizando...</small>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Tipo</th>
+                            <th>Status</th>
+                            <th>Última Execução</th>
+                            <th>Mensagem</th>
+                        </tr>
+                    </thead>
+                    <tbody id="backupStatusBody">
+                        <tr><td colspan="4" class="text-center py-3">Carregando status dos backups...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">Alertas e Logs do Sistema</h5>
+        </div>
+        <div class="card-body">
+            {% if alerts %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Data</th>
+                            <th>Tipo</th>
+                            <th>Prioridade</th>
+                            <th>Mensagem</th>
+                            <th>Detalhes</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for alert in alerts %}
+                        <tr class="{% if alert.status == 'New' %}table-warning{% endif %}">
+                            <td style="white-space: nowrap;">{{ alert.timestamp }}</td>
+                            <td>{{ alert.type }}</td>
+                            <td>
+                                {% if alert.severity == 'Critical' %}
+                                <span class="badge bg-danger">Crítico</span>
+                                {% elif alert.severity == 'High' %}
+                                <span class="badge bg-warning text-dark">Alto</span>
+                                {% elif alert.severity == 'Medium' %}
+                                <span class="badge bg-info text-dark">Médio</span>
+                                {% elif alert.severity == 'Info' %}
+                                <span class="badge bg-light text-dark border">Info</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Baixo</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ alert.message }}</td>
+                            <td class="text-muted small">{{ alert.details }}</td>
+                            <td>
+                                {% if alert.status == 'New' %}
+                                <span class="badge bg-primary">Novo</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Visto</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <p class="text-muted">Nenhum alerta do sistema registrado.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    // Backup Status Polling
+    function updateBackupStatus() {
+        fetch('/admin/api/backups/status')
+            .then(response => response.json())
+            .then(data => {
+                const tbody = document.getElementById('backupStatusBody');
+                if (!tbody) return;
+                
+                tbody.innerHTML = '';
+                
+                const typeMap = {
+                    'products': 'Produtos (Hora em Hora)',
+                    'tables': 'Mesas (Minuto a Minuto)',
+                    'reception': 'Recepção (20min)',
+                    'full_system': 'Sistema Completo (12h - G:)'
+                };
+
+                for (const [type, info] of Object.entries(data)) {
+                    const row = document.createElement('tr');
+                    
+                    let statusBadge = '<span class="badge bg-secondary">Pendente</span>';
+                    if (info.status === 'success') statusBadge = '<span class="badge bg-success">Sucesso</span>';
+                    if (info.status === 'error') statusBadge = '<span class="badge bg-danger">Erro</span>';
+                    if (info.status === 'warning') statusBadge = '<span class="badge bg-warning text-dark">Aviso</span>';
+                    
+                    // Format date nicely
+                    let lastRun = 'Nunca';
+                    if (info.last_run) {
+                        const date = new Date(info.last_run);
+                        lastRun = date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR');
+                    }
+                    
+                    row.innerHTML = `
+                        <td><strong>${typeMap[type] || type}</strong></td>
+                        <td>${statusBadge}</td>
+                        <td>${lastRun}</td>
+                        <td class="small text-muted">${info.message || '-'}</td>
+                    `;
+                    tbody.appendChild(row);
+                }
+                
+                const updateEl = document.getElementById('backupLastUpdate');
+                if (updateEl) updateEl.textContent = 'Atualizado: ' + new Date().toLocaleTimeString('pt-BR');
+            })
+            .catch(err => console.error('Failed to fetch backup status:', err));
+    }
+
+    // Initial load and polling
+    document.addEventListener('DOMContentLoaded', function() {
+        updateBackupStatus();
+        setInterval(updateBackupStatus, 10000); // Poll every 10s
+    });
+
+    function triggerBackup() {
+        if (!confirm('ATENÇÃO: Deseja iniciar o Backup Completo do Sistema (G:) agora?\n\nIsso pode levar alguns minutos.')) {
+            return;
+        }
+
+        const btn = document.getElementById('btnManualBackup');
+        const originalHtml = btn.innerHTML;
+        
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Iniciando...';
+        
+        fetch('/admin/api/backups/trigger', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ type: 'full_system' })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Backup iniciado com sucesso! Acompanhe o status na tabela.');
+                updateBackupStatus();
+            } else {
+                alert('Erro ao iniciar backup: ' + (data.error || data.message));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Erro de comunicação com o servidor.');
+        })
+        .finally(() => {
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+        });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Cobertura de Policies</h2>
+        <a href="{{ url_for('admin.admin_system_permissions') }}" class="btn btn-outline-secondary">Voltar</a>
+    </div>
+    {% for row in coverage_rows %}
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white d-flex justify-content-between">
+            <strong>Área: {{ row.area }}</strong>
+            <span>{{ "%.2f"|format((row.coverage_ratio or 0.0) * 100) }}%</span>
+        </div>
+        <div class="card-body">
+            <div class="row g-2 mb-2">
+                <div class="col-md-3"><div class="border rounded p-2">total_endpoints: {{ row.total_endpoints }}</div></div>
+                <div class="col-md-3"><div class="border rounded p-2">policies_covered: {{ row.policies_covered }}</div></div>
+                <div class="col-md-3"><div class="border rounded p-2">policies_missing: {{ row.policies_missing }}</div></div>
+                <div class="col-md-3"><div class="border rounded p-2">coverage_ratio: {{ "%.4f"|format(row.coverage_ratio or 0.0) }}</div></div>
+            </div>
+            <div>
+                <strong>Endpoints sem policy:</strong>
+                {% if row.missing_endpoints %}
+                <ul class="mb-0">
+                    {% for endpoint in row.missing_endpoints %}
+                    <li>{{ endpoint }}</li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <span class="text-success">Nenhum endpoint faltante.</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

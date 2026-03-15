@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Gerenciar Fornecedores</h2>
+        <a href="{{ url_for('finance.accounts_payable') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>PIX</th>
+                        <th>CNPJ</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in suppliers %}
+                    {% set name = s.name if s is mapping else s %}
+                    {% set pix = s.pix if s is mapping else '' %}
+                    {% set cnpj = s.cnpj if s is mapping else '' %}
+                    <tr>
+                        <td>{{ name }}</td>
+                        <td>{{ pix }}</td>
+                        <td>{{ cnpj }}</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary" onclick="editSupplier('{{ name }}', '{{ pix }}', '{{ cnpj }}')">
+                                <i class="bi bi-pencil"></i> Editar
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="editSupplierModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{{ url_for('finance.manage_suppliers') }}" method="POST">
+                <input type="hidden" name="action" value="update">
+                <input type="hidden" name="original_name" id="editOriginalName">
+                
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Fornecedor</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Nome</label>
+                        <input type="text" name="name" id="editName" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Chave PIX</label>
+                        <input type="text" name="pix" id="editPix" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">CNPJ</label>
+                        <input type="text" name="cnpj" id="editCnpj" class="form-control">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function editSupplier(name, pix, cnpj) {
+    document.getElementById('editOriginalName').value = name;
+    document.getElementById('editName').value = name;
+    document.getElementById('editPix').value = pix;
+    document.getElementById('editCnpj').value = cnpj;
+    
+    var modal = new bootstrap.Modal(document.getElementById('editSupplierModal'));
+    modal.show();
+}
+</script>
+{% endblock %}

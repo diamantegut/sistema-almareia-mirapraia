@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2><i class="bi bi-diagram-3"></i> Authorization Trace</h2>
+        <a href="{{ url_for('admin.admin_security_dashboard') }}" class="btn btn-outline-secondary">Voltar</a>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white">
+            <strong>Simulação de Request</strong>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Endpoint</label>
+                    <select id="trace-endpoint" class="form-select">
+                        {% for row in finance_endpoints %}
+                        <option value="{{ row.endpoint }}">{{ row.endpoint }} ({{ row.methods|join(',') }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Método</label>
+                    <select id="trace-method" class="form-select">
+                        <option>GET</option>
+                        <option>POST</option>
+                        <option>PUT</option>
+                        <option>PATCH</option>
+                        <option>DELETE</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Role</label>
+                    <select id="trace-role" class="form-select">
+                        <option>colaborador</option>
+                        <option>supervisor</option>
+                        <option selected>gerente</option>
+                        <option>admin</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Auth</label>
+                    <select id="trace-authenticated" class="form-select">
+                        <option value="true" selected>true</option>
+                        <option value="false">false</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Scopes (csv)</label>
+                    <input id="trace-scopes" class="form-control" value="scope.department,scope.finance.read,scope.finance.write">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Override aprovado</label>
+                    <select id="trace-override-approved" class="form-select">
+                        <option value="false" selected>false</option>
+                        <option value="true">true</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Policy missing sensível</label>
+                    <select id="trace-policy-missing-sensitive" class="form-select">
+                        <option value="false" selected>false</option>
+                        <option value="true">true</option>
+                    </select>
+                </div>
+                <div class="col-12">
+                    <button id="trace-run" class="btn btn-primary">Executar Trace</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <strong>Árvore de Decisão</strong>
+            <span id="trace-summary" class="badge bg-secondary">Aguardando</span>
+        </div>
+        <div class="card-body">
+            <pre id="trace-tree" style="white-space: pre-wrap; margin: 0;"></pre>
+        </div>
+    </div>
+</div>
+
+<script>
+const treeNode = (label, depth = 0) => `${'  '.repeat(depth)}${label}`;
+
+function buildTree(payload) {
+    const trace = Array.isArray(payload.trace) ? payload.trace : [];
+    const lines = [];
+    lines.push(treeNode(`Request (${payload.decision} / ${payload.reason_code})`, 0));
+    for (const step of trace) {
+        const stepName = String(step.step || 'unknown');
+        const stepResult = JSON.stringify(step.result || {});
+        lines.push(treeNode(`├ ${stepName}`, 1));
+        lines.push(treeNode(`result: ${stepResult}`, 2));
+    }
+    return lines.join('\n');
+}
+
+async function runTrace() {
+    const endpoint = document.getElementById('trace-endpoint').value;
+    const method = document.getElementById('trace-method').value;
+    const role = document.getElementById('trace-role').value;
+    const authenticated = document.getElementById('trace-authenticated').value === 'true';
+    const overrideApproved = document.getElementById('trace-override-approved').value === 'true';
+    const policyMissingSensitive = document.getElementById('trace-policy-missing-sensitive').value === 'true';
+    const scopesRaw = document.getElementById('trace-scopes').value;
+    const scopes = scopesRaw.split(',').map(item => item.trim()).filter(Boolean);
+
+    const response = await fetch('{{ url_for("admin.admin_authorization_trace_simulate") }}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            endpoint,
+            method,
+            role,
+            authenticated,
+            scopes,
+            trace_enabled: true,
+            override_approved: overrideApproved,
+            policy_missing_sensitive: policyMissingSensitive
+        })
+    });
+    const payload = await response.json();
+    const tree = buildTree(payload);
+    document.getElementById('trace-tree').textContent = tree;
+    document.getElementById('trace-summary').textContent = `${payload.decision} · ${payload.reason_code}`;
+    document.getElementById('trace-summary').className = payload.decision === 'ALLOW' ? 'badge bg-success' : (payload.decision === 'REQUIRE_OVERRIDE' ? 'badge bg-warning text-dark' : 'badge bg-danger');
+}
+
+document.getElementById('trace-run').addEventListener('click', runTrace);
+</script>
+{% endblock %}

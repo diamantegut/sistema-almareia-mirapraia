@@ -1,0 +1,619 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-file-invoice"></i> Emissão de Notas Fiscais</h2>
+        <a href="{{ url_for('finance.accounting_dashboard') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Voltar
+        </a>
+    </div>
+
+    <!-- Batch Emission Card -->
+    <div class="card shadow-sm mb-4 border-info">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0"><i class="fas fa-magic me-2"></i>Emissão em Massa (NFC-e)</h5>
+        </div>
+        <div class="card-body">
+            <div class="row align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label">Valor Alvo para Emissão (R$)</label>
+                    <div class="input-group">
+                        <span class="input-group-text">R$</span>
+                        <input type="number" id="batchTargetAmount" class="form-control" placeholder="0.00" step="0.01">
+                    </div>
+                    <div class="form-text">O sistema selecionará contas pendentes até atingir este valor.</div>
+                </div>
+                <div class="col-md-3">
+                    <button class="btn btn-primary w-100" id="btnStartBatch" onclick="startBatchEmission()">
+                        <i class="fas fa-play me-2"></i> Iniciar Emissão
+                    </button>
+                </div>
+                <div class="col-md-5">
+                    <div id="batchProgress" class="d-none">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span id="batchStatusText">Processando...</span>
+                            <span id="batchCountText">0/0</span>
+                        </div>
+                        <div class="progress" style="height: 20px;">
+                            <div id="batchProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs mb-3" id="fiscalTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="nfce-tab" data-bs-toggle="tab" data-bs-target="#nfce" type="button" role="tab">NFC-e (Consumo)</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="nfse-tab" data-bs-toggle="tab" data-bs-target="#nfse" type="button" role="tab">NFS-e (Serviços)</button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="fiscalTabsContent">
+        <!-- NFC-e Tab -->
+        <div class="tab-pane fade show active" id="nfce" role="tabpanel">
+            
+            <!-- Filters -->
+            <div class="card mb-3 bg-light">
+                <div class="card-body py-2">
+                    <form class="row g-2 align-items-center" id="filterForm">
+                        <div class="col-auto">
+                            <label class="col-form-label fw-bold">Filtros:</label>
+                        </div>
+                        <div class="col-auto">
+                            <select class="form-select form-select-sm" id="filterStatus" onchange="applyFilters()">
+                                <option value="pending" selected>Pendentes</option>
+                                <option value="emitted">Emitidas</option>
+                                <option value="failed">Com Erro / Rejeitadas</option>
+                                <option value="all">Todas</option>
+                            </select>
+                        </div>
+                        <div class="col-auto">
+                            <input type="date" class="form-control form-control-sm" id="filterDateStart" onchange="applyFilters()">
+                        </div>
+                        <div class="col-auto">
+                            <input type="date" class="form-control form-control-sm" id="filterDateEnd" onchange="applyFilters()">
+                        </div>
+                        <div class="col-auto border-start ps-3">
+                             <div class="fw-bold text-secondary" style="font-size: 0.85rem;">
+                                 Total: <span id="totalDisplay" class="text-dark">R$ 0.00</span>
+                             </div>
+                        </div>
+                        <div class="col-auto ms-auto">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="reloadPool()">
+                                <i class="fas fa-sync-alt"></i> Atualizar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover table-striped align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Data</th>
+                            <th>Origem / ID</th>
+                            <th>Cliente</th>
+                            <th>Total Conta</th>
+                            <th>Valor Fiscal</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="nfceTableBody">
+                        <!-- Rows injected by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- NFS-e Tab -->
+        <div class="tab-pane fade" id="nfse" role="tabpanel">
+            <div class="alert alert-info text-center py-5">
+                <h4><i class="fas fa-hard-hat me-2"></i>Em Desenvolvimento</h4>
+                <p>O módulo de emissão de Nota Fiscal de Serviço (NFS-e) será implementado futuramente.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Details Modal -->
+<div class="modal fade" id="detailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detalhes da Conta</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Origem:</strong> <span id="detailOrigin"></span><br>
+                        <strong>ID Original:</strong> <span id="detailOriginalId"></span><br>
+                        <strong>Data Fechamento:</strong> <span id="detailDate"></span>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <strong>Total Conta:</strong> <span id="detailTotal"></span><br>
+                        <strong>Valor Fiscal:</strong> <span id="detailFiscal" class="text-primary fw-bold"></span>
+                    </div>
+                </div>
+                
+                <h6>Itens</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Item</th>
+                                <th class="text-center">Qtd</th>
+                                <th class="text-end">Preço Unit.</th>
+                                <th class="text-end">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="detailItemsBody"></tbody>
+                    </table>
+                </div>
+
+                <h6 class="mt-3">Pagamentos</h6>
+                <ul class="list-group" id="detailPaymentsList"></ul>
+                
+                <div id="detailNotes" class="alert alert-secondary mt-3 d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- AI Analysis Modal -->
+<div class="modal fade" id="aiAnalysisModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title"><i class="fas fa-robot me-2"></i>Análise Inteligente de Erro</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="aiLoading" class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2 text-muted">A IA está analisando o erro com a SEFAZ...</p>
+                </div>
+                
+                <div id="aiResult" class="d-none">
+                    <div class="alert alert-danger">
+                        <strong>Erro Original:</strong>
+                        <div id="aiOriginalError" class="small mt-1"></div>
+                    </div>
+                    
+                    <h6 class="text-primary"><i class="fas fa-search me-2"></i>Causa Provável</h6>
+                    <p id="aiCause" class="bg-light p-2 rounded"></p>
+                    
+                    <h6 class="text-success"><i class="fas fa-tools me-2"></i>Ação Corretiva</h6>
+                    <div id="aiAction" class="bg-light p-2 rounded border-start border-4 border-success"></div>
+                    
+                    <div id="aiTechnicalBox" class="mt-3 d-none">
+                        <h6 class="text-muted small"><i class="fas fa-code me-2"></i>Nota Técnica</h6>
+                        <small id="aiTechnical" class="text-muted d-block"></small>
+                    </div>
+                </div>
+
+                <div id="aiErrorState" class="alert alert-warning d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ... existing scripts ...
+
+function analyzeError(id) {
+    // Show Modal
+    const modal = new bootstrap.Modal(document.getElementById('aiAnalysisModal'));
+    modal.show();
+    
+    // Reset State
+    document.getElementById('aiLoading').classList.remove('d-none');
+    document.getElementById('aiResult').classList.add('d-none');
+    document.getElementById('aiErrorState').classList.add('d-none');
+    
+    // Call API
+    fetch('/api/fiscal/analyze_error', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ entry_id: id })
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById('aiLoading').classList.add('d-none');
+        
+        if (data.success) {
+            const analysis = data.data;
+            document.getElementById('aiOriginalError').innerText = data.original_error || "Verifique o histórico"; // We might need to pass this back or grab from UI
+            // Actually, the API returns the analysis object.
+            
+            document.getElementById('aiCause').innerText = analysis.cause;
+            document.getElementById('aiAction').innerHTML = analysis.action.replace(/\n/g, '<br>'); // Simple formatting
+            
+            if (analysis.technical_note) {
+                document.getElementById('aiTechnical').innerText = analysis.technical_note;
+                document.getElementById('aiTechnicalBox').classList.remove('d-none');
+            } else {
+                document.getElementById('aiTechnicalBox').classList.add('d-none');
+            }
+            
+            document.getElementById('aiResult').classList.remove('d-none');
+        } else {
+            document.getElementById('aiErrorState').innerText = data.message || "Erro ao conectar com serviço de IA.";
+            document.getElementById('aiErrorState').classList.remove('d-none');
+        }
+    })
+    .catch(err => {
+        document.getElementById('aiLoading').classList.add('d-none');
+        document.getElementById('aiErrorState').innerText = "Erro de comunicação: " + err;
+        document.getElementById('aiErrorState').classList.remove('d-none');
+    });
+}
+
+let currentPool = [];
+
+document.addEventListener('DOMContentLoaded', function() {
+    reloadPool();
+});
+
+function reloadPool() {
+    let status = document.getElementById('filterStatus').value;
+    const dateStart = document.getElementById('filterDateStart').value;
+    const dateEnd = document.getElementById('filterDateEnd').value;
+    
+    // Fix: If status is 'all', send empty or handle in backend. 
+    // Let's send empty to be cleaner.
+    if (status === 'all') status = '';
+
+    // Construct query
+    let url = `/api/fiscal/pool/list?type=nfce`;
+    if (status) url += `&status=${status}`;
+    if (dateStart) url += `&date_start=${dateStart}`;
+    if (dateEnd) url += `&date_end=${dateEnd}`;
+
+    const tbody = document.getElementById('nfceTableBody');
+    tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4"><i class="fas fa-spinner fa-spin me-2"></i>Carregando...</td></tr>';
+
+    fetch(url)
+        .then(res => res.json())
+        .then(data => {
+            currentPool = data;
+            renderTable(data);
+        })
+        .catch(err => {
+            console.error(err);
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger py-4">Erro ao carregar dados.</td></tr>';
+        });
+}
+
+function applyFilters() {
+    reloadPool();
+}
+
+function renderTable(data) {
+    const tbody = document.getElementById('nfceTableBody');
+    tbody.innerHTML = '';
+    
+    let totalFiscal = 0;
+
+    if (!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">Nenhum registro encontrado.</td></tr>';
+        document.getElementById('totalDisplay').innerText = 'R$ 0.00';
+        return;
+    }
+
+    data.forEach(item => {
+        // Accumulate Total
+        totalFiscal += parseFloat(item.fiscal_amount || 0);
+        
+        const tr = document.createElement('tr');
+        tr.style.cursor = 'pointer';
+        tr.onclick = (e) => {
+            // Prevent opening modal if clicking on buttons
+            if (e.target.closest('button')) return;
+            openDetailsModal(item.id);
+        };
+        
+        // Status Badge
+        let statusBadge = '';
+        if (item.status === 'pending') statusBadge = '<span class="badge bg-warning text-dark">Pendente</span>';
+        else if (item.status === 'emitted') statusBadge = '<span class="badge bg-success">Emitida</span>';
+        else if (item.status === 'failed') statusBadge = '<span class="badge bg-danger">Erro</span>';
+        else statusBadge = `<span class="badge bg-secondary">${item.status}</span>`;
+
+        // Actions
+        let actions = '';
+        if (item.status !== 'emitted') {
+            actions = `
+                <button class="btn btn-sm btn-primary" onclick="openEmissionModal('${item.id}', ${item.fiscal_amount})">
+                    <i class="fas fa-paper-plane"></i> Emitir
+                </button>
+            `;
+        } else {
+            actions = `
+                <button class="btn btn-sm btn-outline-dark" onclick="printNote('${item.id}')" title="Imprimir Nota">
+                    <i class="fas fa-print"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-success" disabled title="Já Emitida">
+                    <i class="fas fa-check"></i>
+                </button>
+            `;
+        }
+        
+        // Show Error if any
+        let errorRow = '';
+        if (item.last_error && item.status === 'failed') {
+            errorRow = `
+                <div class="text-danger small mt-1">
+                    <i class="fas fa-exclamation-circle"></i> ${item.last_error}
+                    <br>
+                    <button class="btn btn-sm btn-link text-danger p-0 mt-1" onclick="analyzeError('${item.id}')" style="text-decoration: none;">
+                        <i class="fas fa-robot"></i> Analisar com IA
+                    </button>
+                </div>`;
+        }
+
+        tr.innerHTML = `
+            <td>${item.closed_at}</td>
+            <td>
+                <span class="fw-bold">${item.origin.toUpperCase()}</span><br>
+                <small class="text-muted">${item.original_id}</small>
+            </td>
+            <td>${item.customer.name || 'Consumidor'}</td>
+            <td>R$ ${item.total_amount.toFixed(2)}</td>
+            <td class="fw-bold text-primary">R$ ${item.fiscal_amount.toFixed(2)}</td>
+            <td>
+                ${statusBadge}
+                ${errorRow}
+            </td>
+            <td>${actions}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+    
+    // Update Total Display
+    document.getElementById('totalDisplay').innerText = 'R$ ' + totalFiscal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function openDetailsModal(id) {
+    const item = currentPool.find(p => p.id === id);
+    if (!item) return;
+
+    document.getElementById('detailOrigin').innerText = item.origin;
+    document.getElementById('detailOriginalId').innerText = item.original_id;
+    document.getElementById('detailDate').innerText = item.closed_at;
+    document.getElementById('detailTotal').innerText = 'R$ ' + item.total_amount.toFixed(2);
+    document.getElementById('detailFiscal').innerText = 'R$ ' + item.fiscal_amount.toFixed(2);
+    
+    // Notes
+    const notesDiv = document.getElementById('detailNotes');
+    if (item.notes) {
+        notesDiv.innerText = item.notes;
+        notesDiv.classList.remove('d-none');
+    } else {
+        notesDiv.classList.add('d-none');
+    }
+
+    // Items
+    const itemsBody = document.getElementById('detailItemsBody');
+    itemsBody.innerHTML = '';
+    (item.items || []).forEach(i => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${i.name || i.description || '-'}</td>
+            <td class="text-center">${i.qty}</td>
+            <td class="text-end">R$ ${(i.price || i.unit_price || 0).toFixed(2)}</td>
+            <td class="text-end">R$ ${(i.total || i.amount || 0).toFixed(2)}</td>
+        `;
+        itemsBody.appendChild(row);
+    });
+
+    // Payments
+    const payList = document.getElementById('detailPaymentsList');
+    payList.innerHTML = '';
+    (item.payment_methods || []).forEach(p => {
+        const li = document.createElement('li');
+        li.className = 'list-group-item d-flex justify-content-between align-items-center';
+        li.innerHTML = `
+            <span>${p.method} ${p.is_fiscal ? '<span class="badge bg-success ms-2">Fiscal</span>' : ''}</span>
+            <span>R$ ${(p.amount || 0).toFixed(2)}</span>
+        `;
+        payList.appendChild(li);
+    });
+
+    new bootstrap.Modal(document.getElementById('detailsModal')).show();
+}
+
+function printNote(id) {
+    const btn = event.target.closest('button');
+    const originalContent = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+    fetch('/api/fiscal/print', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ entry_id: id })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            alert('Enviado para impressão!');
+        } else {
+            alert('Erro ao imprimir: ' + (data.message || 'Desconhecido'));
+        }
+    })
+    .catch(err => alert('Erro de comunicação: ' + err))
+    .finally(() => {
+        btn.disabled = false;
+        btn.innerHTML = originalContent;
+    });
+}
+
+
+// --- Single Emission ---
+
+function openEmissionModal(id, amount) {
+    document.getElementById('emissionEntryId').value = id;
+    document.getElementById('emissionAmount').innerText = amount.toFixed(2);
+    document.getElementById('emissionCpfCnpj').value = '';
+    document.getElementById('emissionError').classList.add('d-none');
+    
+    const modal = new bootstrap.Modal(document.getElementById('emissionModal'));
+    modal.show();
+}
+
+function confirmEmission() {
+    const id = document.getElementById('emissionEntryId').value;
+    const cpfCnpj = document.getElementById('emissionCpfCnpj').value;
+    const btn = event.target;
+    
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Emitindo...';
+    document.getElementById('emissionError').classList.add('d-none');
+
+    fetch('/api/fiscal/pool/emit', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            entry_id: id,
+            cpf_cnpj: cpfCnpj
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            bootstrap.Modal.getInstance(document.getElementById('emissionModal')).hide();
+            reloadPool(); // Refresh list
+            alert('Nota emitida com sucesso!');
+        } else {
+            document.getElementById('emissionError').innerText = data.message || 'Erro desconhecido';
+            document.getElementById('emissionError').classList.remove('d-none');
+        }
+    })
+    .catch(err => {
+        document.getElementById('emissionError').innerText = 'Erro de comunicação: ' + err;
+        document.getElementById('emissionError').classList.remove('d-none');
+    })
+    .finally(() => {
+        btn.disabled = false;
+        btn.innerHTML = 'Emitir Nota';
+    });
+}
+
+// --- Batch Emission ---
+
+let isBatchRunning = false;
+let batchQueue = [];
+let batchTarget = 0;
+let batchCurrentSum = 0;
+let batchSuccessCount = 0;
+let batchFailCount = 0;
+
+async function startBatchEmission() {
+    if (isBatchRunning) return;
+    
+    const targetInput = document.getElementById('batchTargetAmount');
+    batchTarget = parseFloat(targetInput.value);
+    
+    if (!batchTarget || batchTarget <= 0) {
+        alert('Por favor, informe um valor alvo válido.');
+        return;
+    }
+    
+    // Select items
+    // We only take 'pending' or 'failed' items from current loaded list (which should be filtered by user if needed)
+    // Ideally we should fetch fresh list or use currentPool if it's "pending" filter
+    const candidates = currentPool.filter(i => (i.status === 'pending' || i.status === 'failed') && i.fiscal_amount > 0);
+    
+    if (candidates.length === 0) {
+        alert('Não há itens pendentes na lista atual para emitir.');
+        return;
+    }
+    
+    // Greedy selection until target is reached
+    batchQueue = [];
+    batchCurrentSum = 0;
+    
+    for (const item of candidates) {
+        if (batchCurrentSum >= batchTarget) break;
+        batchQueue.push(item);
+        batchCurrentSum += item.fiscal_amount;
+    }
+    
+    if (batchQueue.length === 0) return;
+    
+    if (!confirm(`Serão emitidas ${batchQueue.length} notas totalizando R$ ${batchCurrentSum.toFixed(2)}. Confirmar?`)) {
+        return;
+    }
+    
+    // UI Setup
+    isBatchRunning = true;
+    document.getElementById('btnStartBatch').disabled = true;
+    document.getElementById('batchProgress').classList.remove('d-none');
+    batchSuccessCount = 0;
+    batchFailCount = 0;
+    updateBatchProgress(0);
+    
+    // Process Loop
+    for (let i = 0; i < batchQueue.length; i++) {
+        const item = batchQueue[i];
+        updateBatchProgress(i, `Emitindo ${i+1}/${batchQueue.length}...`);
+        
+        try {
+            const res = await fetch('/api/fiscal/pool/emit', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ entry_id: item.id }) // No CPF for batch usually, or uses stored customer info
+            });
+            const data = await res.json();
+            
+            if (data.success) {
+                batchSuccessCount++;
+            } else {
+                batchFailCount++;
+                console.error(`Falha item ${item.id}: ${data.message}`);
+            }
+        } catch (e) {
+            batchFailCount++;
+            console.error(`Erro rede item ${item.id}: ${e}`);
+        }
+        
+        // Wait a bit just to be safe/nice to UI
+        await new Promise(r => setTimeout(r, 500));
+    }
+    
+    // Finish
+    isBatchRunning = false;
+    document.getElementById('btnStartBatch').disabled = false;
+    updateBatchProgress(batchQueue.length, `Concluído! Sucesso: ${batchSuccessCount}, Falhas: ${batchFailCount}`);
+    
+    setTimeout(() => {
+        reloadPool(); // Refresh UI
+        alert(`Processo finalizado.\nEmitidas: ${batchSuccessCount}\nFalhas: ${batchFailCount}`);
+    }, 1000);
+}
+
+function updateBatchProgress(current, text) {
+    const total = batchQueue.length;
+    const pct = Math.round((current / total) * 100);
+    document.getElementById('batchProgressBar').style.width = `${pct}%`;
+    if (text) document.getElementById('batchStatusText').innerText = text;
+    document.getElementById('batchCountText').innerText = `${current}/${total}`;
+}
+
+</script>
+{% endblock %}

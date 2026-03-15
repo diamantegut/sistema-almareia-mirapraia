@@ -1,0 +1,310 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>📅 Caixa de Reservas</h2>
+            <p class="text-muted">Gestão financeira de adiantamentos e pagamentos de reservas</p>
+        </div>
+        <div>
+            <a href="{{ url_for('reception.reception_dashboard') }}" class="btn btn-outline-secondary me-2">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+            {% if cashier %}
+            <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#closeCashierModal">
+                <i class="bi bi-lock-fill"></i> Fechar Caixa
+            </button>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if not cashier %}
+    <!-- STATE: CLOSED -->
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-secondary text-white text-center py-3">
+                    <h4 class="mb-0"><i class="bi bi-lock-fill"></i> Caixa Fechado</h4>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-center text-muted mb-4">O caixa de reservas está fechado. Informe o saldo inicial para abrir.</p>
+                    
+                    <form method="POST">
+                        <input type="hidden" name="action" value="open_cashier">
+                        <div class="mb-4">
+                            <label class="form-label">Fundo de Caixa (R$)</label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text">R$</span>
+                                <input type="tel" class="form-control" name="opening_balance" value="0.00" required onfocus="this.select()" oninput="formatCurrency(this)">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100 btn-lg">
+                            <i class="bi bi-unlock-fill"></i> Abrir Caixa
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <!-- STATE: OPEN -->
+    <div class="row g-3 mb-4">
+        <!-- Balance Card -->
+        <div class="col-md-4">
+            <div class="card bg-primary text-white h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="card-title opacity-75">Saldo Atual</h6>
+                    <h2 class="display-6 fw-bold">R$ {{ "%.2f"|format(balance) }}</h2>
+                    <div class="small mt-2 opacity-75">
+                        Abertura: R$ {{ "%.2f"|format(cashier.opening_balance|float) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- In/Out Summary -->
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="text-muted mb-0">Movimentação do Turno</h6>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-success"><i class="bi bi-arrow-down-circle"></i> Entradas</span>
+                        <span class="fw-bold text-success">R$ {{ "%.2f"|format(total_in) }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-danger"><i class="bi bi-arrow-up-circle"></i> Saídas</span>
+                        <span class="fw-bold text-danger">R$ {{ "%.2f"|format(total_out) }}</span>
+                    </div>
+                    <hr>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#depositModal">
+                            <i class="bi bi-plus-circle"></i> Suprimento
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#withdrawalModal">
+                            <i class="bi bi-dash-circle"></i> Sangria
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Methods Breakdown -->
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-light py-2">
+                    <h6 class="mb-0 small text-uppercase text-muted">Por Forma de Pagamento</h6>
+                </div>
+                <div class="card-body p-2">
+                    <div class="row row-cols-2 g-2">
+                        {% for method, amount in current_totals.items() %}
+                        <div class="col">
+                            <div class="border rounded p-2 text-center bg-white">
+                                <div class="small text-muted text-truncate" title="{{ method }}">{{ method }}</div>
+                                <div class="fw-bold text-dark">R$ {{ "%.2f"|format(amount) }}</div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="col-12 text-center text-muted py-3 small">
+                            Nenhum recebimento.
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transactions Table -->
+    <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Histórico de Transações</h5>
+            <span class="badge bg-secondary">{{ displayed_transactions|length }} listados</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Hora</th>
+                        <th>Descrição</th>
+                        <th>Tipo</th>
+                        <th>Método</th>
+                        <th class="text-end">Valor</th>
+                        <th>Usuário</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in displayed_transactions %}
+                    <tr>
+                        <td class="text-nowrap">{{ t.timestamp.split(' ')[1][:5] }}</td>
+                        <td>
+                            {{ t.description }}
+                            {% if t.details and t.details.room_number %}
+                            <span class="badge bg-light text-dark border ms-1">Qto {{ t.details.room_number }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if t.type == 'sale' or t.type == 'in' %}
+                            <span class="badge bg-success-subtle text-success">Venda</span>
+                            {% elif t.type == 'deposit' or t.type == 'suprimento' %}
+                            <span class="badge bg-info-subtle text-info">Suprimento</span>
+                            {% elif t.type == 'withdrawal' or t.type == 'sangria' or t.type == 'out' %}
+                            <span class="badge bg-danger-subtle text-danger">Sangria</span>
+                            {% else %}
+                            <span class="badge bg-secondary-subtle text-secondary">{{ t.type }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ t.payment_method }}</td>
+                        <td class="text-end fw-bold {{ 'text-danger' if t.amount < 0 or t.type in ['out', 'withdrawal', 'sangria'] else 'text-success' }}">
+                            R$ {{ "%.2f"|format(t.amount) }}
+                        </td>
+                        <td class="small text-muted">{{ t.user }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-muted">
+                            Nenhuma transação registrada nesta sessão.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if has_more or current_page > 1 %}
+        <div class="card-footer d-flex justify-content-between">
+            {% if current_page > 1 %}
+            <a href="?page={{ current_page - 1 }}" class="btn btn-sm btn-outline-secondary">Anterior</a>
+            {% else %}
+            <div></div>
+            {% endif %}
+            
+            {% if has_more %}
+            <a href="?page={{ current_page + 1 }}" class="btn btn-sm btn-outline-primary">Próximo</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Modals -->
+    <!-- Close Cashier Modal -->
+    <div class="modal fade" id="closeCashierModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Fechar Caixa de Reservas</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST">
+                    <div class="modal-body">
+                        <input type="hidden" name="action" value="close_cashier">
+                        <p>Confirme o fechamento do caixa. O saldo atual será registrado.</p>
+                        
+                        <div class="alert alert-warning">
+                            <div class="d-flex justify-content-between">
+                                <span>Saldo Calculado:</span>
+                                <strong>R$ {{ "%.2f"|format(balance) }}</strong>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Valor em Dinheiro (Conferido)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">R$</span>
+                                <input type="tel" class="form-control" name="closing_cash" placeholder="0.00" oninput="formatCurrency(this)">
+                            </div>
+                            <div class="form-text">Opcional. Para conferência de quebra de caixa.</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger">Confirmar Fechamento</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Deposit Modal -->
+    <div class="modal fade" id="depositModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Registrar Suprimento</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST">
+                    <div class="modal-body">
+                        <input type="hidden" name="action" value="add_transaction">
+                        <input type="hidden" name="type" value="deposit">
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Valor</label>
+                            <div class="input-group">
+                                <span class="input-group-text">R$</span>
+                                <input type="tel" class="form-control" name="amount" required oninput="formatCurrency(this)">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Descrição / Motivo</label>
+                            <input type="text" class="form-control" name="description" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Confirmar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Withdrawal Modal -->
+    <div class="modal fade" id="withdrawalModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Registrar Sangria</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST">
+                    <div class="modal-body">
+                        <input type="hidden" name="action" value="add_transaction">
+                        <input type="hidden" name="type" value="withdrawal">
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Valor</label>
+                            <div class="input-group">
+                                <span class="input-group-text">R$</span>
+                                <input type="tel" class="form-control" name="amount" required oninput="formatCurrency(this)">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Descrição / Motivo</label>
+                            <input type="text" class="form-control" name="description" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger">Confirmar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% endif %}
+</div>
+
+<script>
+function formatCurrency(input) {
+    let value = input.value.replace(/\D/g, '');
+    value = (value / 100).toFixed(2) + '';
+    value = value.replace('.', ',');
+    value = value.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
+    input.value = value;
+}
+</script>
+{% endblock %}
