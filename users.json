@@ -95,7 +95,7 @@
         "weekly_day_off": 2
     },
     "alan": {
-        "password": "1234",
+        "password": "4401",
         "department": "Recepção",
         "role": "colaborador",
         "score": 3,
@@ -209,7 +209,7 @@
     },
     "daniel": {
         "password": "1234",
-        "department": "Governança",
+        "department": "Manutenção",
         "role": "colaborador",
         "score": 2,
         "permissions": [],
@@ -262,21 +262,6 @@
         "birthday": "1983-09-08",
         "daily_target_hours": 8,
         "weekly_day_off": 0
-    },
-    "erique": {
-        "password": "1234",
-        "department": "Serviço",
-        "role": "colaborador",
-        "score": 3,
-        "permissions": [
-            "restaurante_mirapraia",
-            "restaurante_full_access"
-        ],
-        "full_name": "Erique Neves Cavalcanti",
-        "admission_date": "2025-10-01",
-        "birthday": "1981-02-28",
-        "daily_target_hours": 8,
-        "weekly_day_off": 2
     },
     "filipe": {
         "password": "1406",
@@ -391,23 +376,8 @@
         "daily_target_hours": 8,
         "weekly_day_off": 1
     },
-    "josenice": {
-        "password": "1234",
-        "department": "Cozinha",
-        "role": "colaborador",
-        "score": 3,
-        "permissions": [
-            "cozinha",
-            "principal"
-        ],
-        "full_name": "Josenice Maria De Oliveira",
-        "admission_date": "2021-08-01",
-        "birthday": "1976-10-09",
-        "daily_target_hours": 8,
-        "weekly_day_off": 1
-    },
     "kayke": {
-        "password": "1234",
+        "password": "2115",
         "department": "Serviço",
         "role": "colaborador",
         "score": 2,
@@ -452,7 +422,45 @@
         "admission_date": "2022-06-01",
         "birthday": "2003-05-20",
         "daily_target_hours": 8,
-        "weekly_day_off": 0
+        "weekly_day_off": 0,
+        "permissions_v2": {
+            "version": 2,
+            "areas": {
+                "conferencia": {
+                    "all": false,
+                    "pages": {}
+                },
+                "cozinha": {
+                    "all": true,
+                    "pages": {}
+                },
+                "estoque_principal": {
+                    "all": true,
+                    "pages": {}
+                },
+                "financeiro": {
+                    "all": true,
+                    "pages": {}
+                },
+                "governanca": {
+                    "all": true,
+                    "pages": {}
+                },
+                "recepcao": {
+                    "all": true,
+                    "pages": {}
+                },
+                "recursos_humanos": {
+                    "all": false,
+                    "pages": {}
+                },
+                "restaurante_mirapraia": {
+                    "all": true,
+                    "pages": {}
+                }
+            },
+            "level_pages": []
+        }
     },
     "maria": {
         "password": "1234",
@@ -475,14 +483,58 @@
         "role": "colaborador",
         "score": 2,
         "permissions": [
-            "principal",
-            "conferencias"
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
         ],
         "full_name": "Pedro Lucas Silva Dos Santos",
         "admission_date": "2025-08-15",
         "birthday": "2004-03-01",
         "daily_target_hours": 8,
-        "weekly_day_off": 5
+        "weekly_day_off": 5,
+        "permissions_v2": {
+            "version": 2,
+            "areas": {
+                "conferencia": {
+                    "all": false,
+                    "pages": {}
+                },
+                "cozinha": {
+                    "all": false,
+                    "pages": {}
+                },
+                "estoque_principal": {
+                    "all": true,
+                    "pages": {}
+                },
+                "financeiro": {
+                    "all": false,
+                    "pages": {}
+                },
+                "governanca": {
+                    "all": false,
+                    "pages": {}
+                },
+                "recepcao": {
+                    "all": false,
+                    "pages": {}
+                },
+                "recursos_humanos": {
+                    "all": false,
+                    "pages": {}
+                },
+                "restaurante_mirapraia": {
+                    "all": true,
+                    "pages": {}
+                }
+            },
+            "level_pages": []
+        }
     },
     "priscila": {
         "password": "2509",
@@ -573,7 +625,45 @@
         "admission_date": "2025-07-18",
         "birthday": "1962-04-20",
         "daily_target_hours": 8,
-        "weekly_day_off": 0
+        "weekly_day_off": 0,
+        "permissions_v2": {
+            "version": 2,
+            "areas": {
+                "conferencia": {
+                    "all": false,
+                    "pages": {}
+                },
+                "cozinha": {
+                    "all": false,
+                    "pages": {}
+                },
+                "estoque_principal": {
+                    "all": false,
+                    "pages": {}
+                },
+                "financeiro": {
+                    "all": false,
+                    "pages": {}
+                },
+                "governanca": {
+                    "all": true,
+                    "pages": {}
+                },
+                "recepcao": {
+                    "all": false,
+                    "pages": {}
+                },
+                "recursos_humanos": {
+                    "all": false,
+                    "pages": {}
+                },
+                "restaurante_mirapraia": {
+                    "all": false,
+                    "pages": {}
+                }
+            },
+            "level_pages": []
+        }
     },
     "danilof": {
         "password": "1234",
@@ -587,21 +677,6 @@
         "full_name": "Danilo Ferreira de Lima",
         "admission_date": "2026-01-16",
         "birthday": "2001-01-05",
-        "daily_target_hours": 8,
-        "weekly_day_off": 3
-    },
-    "antonio": {
-        "password": "1234",
-        "department": "Recepção",
-        "role": "colaborador",
-        "score": 2,
-        "permissions": [
-            "recepcao",
-            "governanca"
-        ],
-        "full_name": "Antonio Carlos Da Silva",
-        "admission_date": "2026-01-11",
-        "birthday": "1993-06-13",
         "daily_target_hours": 8,
         "weekly_day_off": 3
     },
@@ -631,21 +706,6 @@
         "birthday": "1991-12-18",
         "daily_target_hours": 8,
         "weekly_day_off": 2
-    },
-    "orlando": {
-        "password": "1234",
-        "department": "Serviço",
-        "role": "colaborador",
-        "score": 2,
-        "permissions": [
-            "restaurante_mirapraia",
-            "restaurante_full_access"
-        ],
-        "full_name": "Orlando Severino de Gouveia",
-        "admission_date": "2024-12-09",
-        "birthday": "1979-08-02",
-        "daily_target_hours": 8,
-        "weekly_day_off": 1
     },
     "josiane": {
         "password": "1234",
@@ -728,5 +788,61 @@
         "birthday": "1998-09-21",
         "daily_target_hours": 8,
         "weekly_day_off": 6
+    },
+    "kelly": {
+        "password": "1234",
+        "department": "Cozinha",
+        "role": "colaborador",
+        "score": 2,
+        "permissions": [
+            "",
+            "",
+            ""
+        ],
+        "full_name": "Kelly Cristina Soares Da Silva",
+        "admission_date": "2026-02-13",
+        "birthday": "1981-10-01",
+        "daily_target_hours": 8,
+        "weekly_day_off": 0
+    },
+    "luana": {
+        "password": "1234",
+        "department": "Governança",
+        "role": "colaborador",
+        "score": 2,
+        "permissions": [
+            "",
+            "",
+            ""
+        ],
+        "full_name": "Luana Cris De Lira",
+        "admission_date": "2026-02-06",
+        "birthday": "1987-01-22",
+        "daily_target_hours": 8,
+        "weekly_day_off": 2
+    },
+    "luziane": {
+        "password": "1234",
+        "department": "Recepção",
+        "role": "colaborador",
+        "score": 2,
+        "permissions": [],
+        "full_name": "Luziane Patricia De Lima Barbosa",
+        "admission_date": "2026-03-16",
+        "birthday": "1985-12-13",
+        "daily_target_hours": 8,
+        "weekly_day_off": 2
+    },
+    "carlos": {
+        "password": "1234",
+        "department": "Serviço",
+        "role": "gerente",
+        "score": 5,
+        "permissions": [],
+        "full_name": "Carlos Eduardo Viana Gomes",
+        "admission_date": "2026-03-06",
+        "birthday": "1971-08-26",
+        "daily_target_hours": 8,
+        "weekly_day_off": 2
     }
 }
