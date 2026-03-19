@@ -1,14 +1,19 @@
 import json
 import os
 import uuid
+import shutil
+import logging
 from datetime import datetime, timedelta
 import unicodedata
 from copy import deepcopy
 from flask import current_app
 from app.models.database import db
 from app.models.models import WaitingListEntry, WaitingListEvent, WaitingListTableAllocation
+from app.services.system_config_manager import WAITING_LIST_FILE as SYSTEM_WAITING_LIST_FILE
+from app.utils.lock import file_lock
 
-WAITING_LIST_FILE = os.path.join('data', 'waiting_list.json')
+logger = logging.getLogger(__name__)
+WAITING_LIST_FILE = SYSTEM_WAITING_LIST_FILE
 _WAITING_LIST_DB_SYNC_DONE = False
 STATUS_ALIASES = {
     'waiting': 'aguardando',
@@ -550,6 +555,35 @@ def _apply_daily_policy(data, now=None):
 
     return data
 
+def _waiting_default_payload(default_settings):
+    return {
+        "queue": [],
+        "history": [],
+        "events": [],
+        "marketing_contacts": {},
+        "settings": default_settings,
+        "last_reset_date": _today_key()
+    }
+
+def _store_corrupted_waiting_list_snapshot():
+    if not os.path.exists(WAITING_LIST_FILE):
+        return
+    try:
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_%f')
+        target = f"{WAITING_LIST_FILE}.corrupt_{timestamp}.json"
+        shutil.copy2(WAITING_LIST_FILE, target)
+        logger.error(f"waiting_list corrupt snapshot created at {target}")
+    except Exception as exc:
+        logger.error(f"waiting_list corrupt snapshot failed: {exc}")
+
+def _write_waiting_data_atomic(payload):
+    temp_file = WAITING_LIST_FILE + ".tmp"
+    with open(temp_file, 'w', encoding='utf-8') as f:
+        json.dump(payload, f, indent=4, ensure_ascii=False)
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(temp_file, WAITING_LIST_FILE)
+
 def load_waiting_data():
     default_settings = {
         "is_open": True,
@@ -572,17 +606,11 @@ def load_waiting_data():
     }
     
     if not os.path.exists(WAITING_LIST_FILE):
-        return {
-            "queue": [],
-            "history": [],
-            "events": [],
-            "marketing_contacts": {},
-            "settings": default_settings,
-            "last_reset_date": _today_key()
-        }
+        return _waiting_default_payload(default_settings)
     try:
-        with open(WAITING_LIST_FILE, 'r', encoding='utf-8') as f:
-            data = json.load(f)
+        with file_lock(WAITING_LIST_FILE):
+            with open(WAITING_LIST_FILE, 'r', encoding='utf-8') as f:
+                data = json.load(f)
             # Ensure settings exist and have defaults
             if "settings" not in data:
                 data["settings"] = default_settings
@@ -596,21 +624,27 @@ def load_waiting_data():
             _apply_call_timeout_policy(data)
             _sync_waiting_list_to_db(data)
             return data
-    except json.JSONDecodeError:
-        return {
-            "queue": [],
-            "history": [],
-            "events": [],
-            "marketing_contacts": {},
-            "settings": default_settings,
-            "last_reset_date": _today_key()
-        }
+    except json.JSONDecodeError as exc:
+        logger.error(f"waiting_list json inválido: {exc}")
+        _store_corrupted_waiting_list_snapshot()
+        payload = _waiting_default_payload(default_settings)
+        payload["_integrity_error"] = "json_invalid"
+        return payload
+    except TimeoutError as exc:
+        logger.error(f"waiting_list lock timeout em leitura: {exc}")
+        payload = _waiting_default_payload(default_settings)
+        payload["_integrity_error"] = "read_lock_timeout"
+        return payload
+    except Exception as exc:
+        logger.error(f"waiting_list erro de leitura: {exc}")
+        payload = _waiting_default_payload(default_settings)
+        payload["_integrity_error"] = "read_error"
+        return payload
 
 def save_waiting_data(data):
-    # Ensure directory exists
     os.makedirs(os.path.dirname(WAITING_LIST_FILE), exist_ok=True)
-    with open(WAITING_LIST_FILE, 'w', encoding='utf-8') as f:
-        json.dump(data, f, indent=4, ensure_ascii=False)
+    with file_lock(WAITING_LIST_FILE):
+        _write_waiting_data_atomic(data)
 
 def get_waiting_list():
     data = load_waiting_data()
@@ -1391,7 +1425,15 @@ def _bind_restaurant_table_for_passant(entry, table_id, user=None):
             'customer_name': str(entry.get('name') or '')[:80],
             'room_number': None,
             'waiter': user or 'Recepção',
-            'created_via': 'waiting_list_seat'
+            'opened_by': user or 'Recepção',
+            'created_via': 'waiting_list_seat',
+            'waiting_list_entry_id': entry.get('id'),
+            'waiting_list_phone': str(entry.get('phone') or ''),
+            'waiting_list_phone_wa': str(entry.get('phone_wa') or ''),
+            'waiting_list_country': str(entry.get('country_code') or ''),
+            'waiting_list_source': str(entry.get('source') or ''),
+            'waiting_list_seated_at': datetime.now().isoformat(),
+            'waiting_list_internal_notes': str(entry.get('internal_notes') or '')[:400],
         }
         return bool(save_table_orders(orders))
     except Exception:

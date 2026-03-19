@@ -517,10 +517,7 @@
                 <form method="POST" onsubmit="return confirm('ATENÇÃO: Você está prestes a fechar o caixa. Esta ação é irreversível e bloqueará novas operações até a reabertura.\n\nTem certeza que conferiu todos os valores e deseja continuar?');">
                     <div class="modal-body">
                         <input type="hidden" name="action" value="close_cashier">
-                        <p>Confira os valores antes de fechar.</p>
-                        <div class="alert alert-info">
-                            Saldo Calculado em Dinheiro pelo Sistema: <strong>R$ {{ "%.2f"|format(total_balance) }}</strong>
-                        </div>
+                        <p>Informe os valores conferidos manualmente antes de fechar.</p>
                         <div class="mb-3">
                             <label class="form-label">Saldo Final em Dinheiro (Gaveta)</label>
                             <input type="tel" class="form-control" name="closing_cash" required placeholder="0,00" onfocus="this.select()" oninput="formatCurrency(this)">

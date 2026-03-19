@@ -3,59 +3,82 @@ import os
 import json
 import uuid
 from datetime import datetime
+from pathlib import Path
 from PIL import Image
 from werkzeug.utils import secure_filename
 
 from . import governance_bp
 from app.utils.decorators import login_required
-from app.services.stock_service import get_product_balances, calculate_inventory
 from app.services.data_service import (
-    load_products, load_stock_entries, load_stock_requests, 
-    load_stock_transfers, save_stock_entry, 
+    load_products,
     load_room_charges, save_room_charges, 
     load_room_occupancy, load_menu_items,
-    load_settings
+    load_settings, load_cleaning_status, save_cleaning_status
 )
 from app.services.logger_service import LoggerService
 from app.services.system_config_manager import (
     LAUNDRY_DATA_DIR, CLEANING_STATUS_FILE, CLEANING_LOGS_FILE
 )
+from app.services.governance_auto_deduct_service import (
+    EVENT_TYPES,
+    load_auto_deduct_config,
+    load_auto_deduct_audit,
+    upsert_auto_rule,
+    remove_auto_rule,
+    list_governance_candidate_products,
+    low_stock_alerts_for_auto_deduct,
+    apply_auto_deduction,
+    apply_manual_stock_movement
+)
 
 # --- Helpers ---
 
 def get_laundry_db_path():
-    # Ensure directory exists
-    if not os.path.exists(LAUNDRY_DATA_DIR):
-        os.makedirs(LAUNDRY_DATA_DIR)
+    os.makedirs(LAUNDRY_DATA_DIR, exist_ok=True)
     return os.path.join(LAUNDRY_DATA_DIR, "laundry.json")
 
-def load_cleaning_status():
-    if not os.path.exists(CLEANING_STATUS_FILE):
-        return {}
+def _read_json_file(path, default):
+    file_path = Path(path)
+    if not file_path.exists():
+        return default
     try:
-        with open(CLEANING_STATUS_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except json.JSONDecodeError:
-        return {}
+        raw = file_path.read_text(encoding='utf-8')
+        return json.loads(raw)
+    except Exception:
+        return default
 
-def save_cleaning_status(data):
-    with open(CLEANING_STATUS_FILE, 'w', encoding='utf-8') as f:
-        json.dump(data, f, indent=4, ensure_ascii=False)
+def _write_json_file_atomic(path, payload):
+    file_path = Path(path)
+    file_path.parent.mkdir(parents=True, exist_ok=True)
+    temp_path = file_path.with_name(f"{file_path.name}.tmp.{uuid.uuid4().hex}")
+    raw = json.dumps(payload, indent=4, ensure_ascii=False)
+    temp_path.write_text(raw, encoding='utf-8')
+    os.replace(str(temp_path), str(file_path))
+    return True
 
 def load_cleaning_logs():
-    if not os.path.exists(CLEANING_LOGS_FILE):
-        return []
-    try:
-        with open(CLEANING_LOGS_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except json.JSONDecodeError:
-        return []
+    logs = _read_json_file(CLEANING_LOGS_FILE, [])
+    if isinstance(logs, list):
+        return logs
+    return []
 
 def save_cleaning_log(log_entry):
     logs = load_cleaning_logs()
     logs.append(log_entry)
-    with open(CLEANING_LOGS_FILE, 'w', encoding='utf-8') as f:
-        json.dump(logs, f, indent=4, ensure_ascii=False)
+    return _write_json_file_atomic(CLEANING_LOGS_FILE, logs)
+
+
+def _ensure_governance_access(json_mode=False):
+    if session.get('role') in ['admin', 'gerente', 'supervisor'] or session.get('department') == 'Governança':
+        return None
+    if json_mode:
+        return jsonify({'success': False, 'error': 'Acesso negado.'}), 403
+    flash('Acesso restrito à Governança.')
+    return redirect(url_for('main.index'))
+
+
+def _can_manage_auto_deduct_rules():
+    return session.get('role') in ['admin', 'gerente', 'supervisor']
 
 # --- Routes ---
 
@@ -63,16 +86,10 @@ def save_cleaning_log(log_entry):
 @login_required
 def get_laundry_data():
     path = get_laundry_db_path()
-    
-    if os.path.exists(path):
-        with open(path, 'r', encoding='utf-8') as f:
-            try:
-                data = json.load(f)
-                return jsonify(data)
-            except json.JSONDecodeError:
-                return jsonify(None)
-    else:
+    data = _read_json_file(path, None)
+    if data is None:
         return jsonify(None)
+    return jsonify(data)
 
 @governance_bp.route('/api/laundry/data', methods=['POST'])
 @login_required
@@ -81,8 +98,7 @@ def save_laundry_data():
     
     try:
         data = request.json
-        with open(path, 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
+        _write_json_file_atomic(path, data)
         return jsonify({"status": "ok"})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -117,44 +133,29 @@ def governance_deduct_coffee():
         if not target_product:
              return jsonify({'success': False, 'error': 'Produto "Café Capsula (GOVERNANÇA)" não encontrado.'}), 404
 
-        # Validate Stock Availability
-        entries = load_stock_entries()
-        stock_reqs = load_stock_requests()
-        transfers = load_stock_transfers()
-        
-        # Calculate Global Inventory to get current balance
-        inventory_data = calculate_inventory(products, entries, stock_reqs, transfers, target_dept='Geral')
-        
-        product_name = target_product['name']
-        current_balance = 0.0
-        
-        if product_name in inventory_data:
-             current_balance = inventory_data[product_name].get('balance', 0.0)
-             
-        if current_balance < 2:
-             # Log the failed attempt
-             LoggerService.log_acao(
-                 acao='Erro Dedução Estoque', 
-                 entidade='Governança',
-                 detalhes={'error': f"Estoque insuficiente ({current_balance})", 'room': room_num},
-                 departamento_id='Governança',
-                 colaborador_id=session.get('user')
-             )
-             return jsonify({'success': False, 'error': f'Estoque insuficiente. Disponível: {current_balance}'}), 400
-             
-        # Create Stock Deduction
-        entry = {
-            'id': f"DEDUCT_{room_num}_{datetime.now().strftime('%Y%m%d%H%M%S')}",
-            'user': session.get('user', 'Governança'),
-            'product': target_product['name'],
-            'supplier': f"Consumo: Quarto {room_num}",
-            'qty': -2,
-            'price': target_product.get('price', 0),
-            'date': datetime.now().strftime('%d/%m/%Y'),
-            'invoice': 'Consumo Hóspede'
-        }
-        
-        save_stock_entry(entry)
+        movement = apply_manual_stock_movement(
+            room_number=room_num,
+            triggered_by=session.get('user', 'Governança'),
+            source='governance_deduct_coffee',
+            movement_type='coffee_capsule_deduction',
+            items=[{
+                'product_id': target_product.get('id'),
+                'product_name': target_product.get('name'),
+                'qty': -2
+            }],
+            metadata={'invoice': 'Consumo Hóspede'}
+        )
+        if movement.get('applied_count', 0) <= 0:
+            first = (movement.get('insufficient') or [{}])[0]
+            current_balance = first.get('balance')
+            LoggerService.log_acao(
+                acao='Erro Dedução Estoque',
+                entidade='Governança',
+                detalhes={'error': f"Estoque insuficiente ({current_balance})", 'room': room_num},
+                departamento_id='Governança',
+                colaborador_id=session.get('user')
+            )
+            return jsonify({'success': False, 'error': f"Estoque insuficiente. Disponível: {current_balance if current_balance is not None else 0}"}), 400
         
         # Log Action
         LoggerService.log_acao(
@@ -204,19 +205,20 @@ def governance_undo_deduct_coffee():
         if not target_product:
              return jsonify({'success': False, 'error': 'Produto não encontrado.'}), 404
 
-        # Create Stock Entry (Reversal)
-        entry = {
-            'id': f"UNDO_DEDUCT_{room_num}_{datetime.now().strftime('%Y%m%d%H%M%S')}",
-            'user': session.get('user', 'Governança'),
-            'product': target_product['name'],
-            'supplier': f"Estorno Consumo: Quarto {room_num}",
-            'qty': 2, # Positive to add back
-            'price': target_product.get('price', 0),
-            'date': datetime.now().strftime('%d/%m/%Y'),
-            'invoice': 'Estorno Consumo'
-        }
-        
-        save_stock_entry(entry)
+        movement = apply_manual_stock_movement(
+            room_number=room_num,
+            triggered_by=session.get('user', 'Governança'),
+            source='governance_undo_deduct_coffee',
+            movement_type='coffee_capsule_reversal',
+            items=[{
+                'product_id': target_product.get('id'),
+                'product_name': target_product.get('name'),
+                'qty': 2
+            }],
+            metadata={'invoice': 'Estorno Consumo'}
+        )
+        if movement.get('applied_count', 0) <= 0:
+            return jsonify({'success': False, 'error': 'Falha ao registrar estorno no estoque.'}), 500
         
         LoggerService.log_acao(
             acao='Estorno Dedução', 
@@ -235,14 +237,41 @@ def governance_undo_deduct_coffee():
 @login_required
 def governance_rooms():
     try:
+        denied = _ensure_governance_access()
+        if denied is not None:
+            return denied
         occupancy = load_room_occupancy()
         cleaning_status = load_cleaning_status()
+        auto_deduct_config = load_auto_deduct_config()
+        governance_products = list_governance_candidate_products()
+        low_stock_alerts = low_stock_alerts_for_auto_deduct()
+        auto_deduct_audit = load_auto_deduct_audit()
         
         if not isinstance(cleaning_status, dict):
             cleaning_status = {}
         
         if request.method == 'POST':
             action = request.form.get('action')
+            if action in ['auto_rule_add', 'auto_rule_remove']:
+                if not _can_manage_auto_deduct_rules():
+                    flash('Apenas supervisão/gerência pode alterar regras de baixa automática.')
+                    return redirect(url_for('governance.governance_rooms'))
+                event_type = str(request.form.get('event_type') or '').strip()
+                product_id = str(request.form.get('product_id') or '').strip()
+                qty_raw = request.form.get('qty')
+                if action == 'auto_rule_add':
+                    ok, msg = upsert_auto_rule(event_type, product_id, qty_raw, active=True)
+                    if ok:
+                        flash('Regra automática salva com sucesso.')
+                    else:
+                        flash(msg or 'Falha ao salvar regra automática.')
+                else:
+                    ok, msg = remove_auto_rule(event_type, product_id)
+                    if ok:
+                        flash('Regra automática removida.')
+                    else:
+                        flash(msg or 'Falha ao remover regra automática.')
+                return redirect(url_for('governance.governance_rooms'))
             room_num = request.form.get('room_number')
             
             if not room_num:
@@ -263,7 +292,9 @@ def governance_rooms():
                     'previous_status': previous_status,
                     'maid': session.get('user', 'Desconhecido'),
                     'start_time': current_time.strftime('%d/%m/%Y %H:%M:%S'),
-                    'last_update': current_time.strftime('%d/%m/%Y %H:%M')
+                    'cleaning_cycle_ref': current_time.strftime('%Y%m%d%H%M%S%f'),
+                    'last_update': current_time.strftime('%d/%m/%Y %H:%M'),
+                    'pending_note': current_data.get('pending_note')
                 }
                 save_cleaning_status(cleaning_status)
                 flash(f"Limpeza iniciada no Quarto {room_num}")
@@ -306,10 +337,26 @@ def governance_rooms():
                     cleaning_status[room_num] = {
                         'status': new_status,
                         'last_cleaned_by': status.get('maid'),
-                        'last_cleaned_at': current_time.strftime('%d/%m/%Y %H:%M')
+                        'last_cleaned_at': current_time.strftime('%d/%m/%Y %H:%M'),
+                        'pending_note': status.get('pending_note')
                     }
                     save_cleaning_status(cleaning_status)
                     flash(f"Limpeza finalizada no Quarto {room_num}. Tempo: {duration_minutes} min")
+                    auto_event_type = 'checkout_cleaning' if prev_status == 'dirty_checkout' else 'daily_cleaning'
+                    deduction = apply_auto_deduction(
+                        event_type=auto_event_type,
+                        room_number=room_num,
+                        triggered_by=session.get('user') or 'Governança',
+                        source='governance_rooms.finish_cleaning',
+                        event_ref=current_time.strftime('%Y-%m-%d'),
+                        event_context={'cleaning_cycle_ref': status.get('cleaning_cycle_ref')}
+                    )
+                    if deduction.get('duplicate'):
+                        flash(f"Baixa automática já registrada para este ciclo de limpeza ({auto_event_type}).")
+                    if deduction.get('applied_count', 0) > 0:
+                        flash(f"Baixa automática aplicada: {deduction.get('applied_count')} item(ns) ({auto_event_type}).")
+                    for warning in (deduction.get('warnings') or []):
+                        flash(f"Aviso de estoque automático: {warning}")
                     
                     if request.form.get('redirect_minibar') == 'true':
                         return redirect(url_for('restaurant.restaurant_table_order', table_id=int(room_num), mode='minibar'))
@@ -320,7 +367,8 @@ def governance_rooms():
                 cleaning_status[room_num] = {
                     'status': 'inspected',
                     'inspected_by': session.get('user'),
-                    'inspected_at': current_time.strftime('%d/%m/%Y %H:%M')
+                    'inspected_at': current_time.strftime('%d/%m/%Y %H:%M'),
+                    'pending_note': (cleaning_status.get(room_num, {}) or {}).get('pending_note')
                 }
                 save_cleaning_status(cleaning_status)
                 flash(f"Quarto {room_num} inspecionado e liberado.")
@@ -330,10 +378,32 @@ def governance_rooms():
                     'status': 'rejected',
                     'rejected_by': session.get('user'),
                     'rejected_at': current_time.strftime('%d/%m/%Y %H:%M'),
-                    'reason': request.form.get('reason', 'Retorno de inspeção')
+                    'reason': request.form.get('reason', 'Retorno de inspeção'),
+                    'rejection_reason': request.form.get('reason', 'Retorno de inspeção'),
+                    'pending_note': (cleaning_status.get(room_num, {}) or {}).get('pending_note')
                 }
                 save_cleaning_status(cleaning_status)
                 flash(f"Quarto {room_num} rejeitado na inspeção.")
+            elif action == 'mark_dirty':
+                current_data = cleaning_status.get(room_num, {}) if isinstance(cleaning_status.get(room_num, {}), dict) else {}
+                cleaning_status[room_num] = {
+                    'status': 'dirty',
+                    'marked_by': session.get('user'),
+                    'marked_at': current_time.strftime('%d/%m/%Y %H:%M'),
+                    'pending_note': current_data.get('pending_note')
+                }
+                save_cleaning_status(cleaning_status)
+                flash(f"Quarto {room_num} marcado como sujo.")
+            elif action == 'add_note':
+                note = str(request.form.get('note') or '').strip()
+                current_data = cleaning_status.get(room_num, {}) if isinstance(cleaning_status.get(room_num, {}), dict) else {}
+                current_data['status'] = current_data.get('status', 'dirty')
+                current_data['pending_note'] = note
+                current_data['note_updated_by'] = session.get('user')
+                current_data['note_updated_at'] = current_time.strftime('%d/%m/%Y %H:%M')
+                cleaning_status[room_num] = current_data
+                save_cleaning_status(cleaning_status)
+                flash(f"Pendência atualizada no quarto {room_num}.")
                 
             return redirect(url_for('governance.governance_rooms'))
             
@@ -351,7 +421,23 @@ def governance_rooms():
             'total_cleaned': 0
         }
         
-        return render_template('governance_rooms.html', occupancy=occupancy, cleaning_status=cleaning_status, month_stats=month_stats, year_stats=year_stats)
+        auto_deduct_config = load_auto_deduct_config()
+        governance_products = list_governance_candidate_products()
+        low_stock_alerts = low_stock_alerts_for_auto_deduct()
+        auto_deduct_audit = load_auto_deduct_audit()
+        return render_template(
+            'governance_rooms.html',
+            occupancy=occupancy,
+            cleaning_status=cleaning_status,
+            month_stats=month_stats,
+            year_stats=year_stats,
+            auto_deduct_config=auto_deduct_config,
+            governance_products=governance_products,
+            auto_event_types=EVENT_TYPES,
+            low_stock_alerts=low_stock_alerts,
+            can_manage_auto_rules=_can_manage_auto_deduct_rules(),
+            auto_deduct_audit=list(reversed(auto_deduct_audit[-20:]))
+        )
         
     except Exception as e:
         print(f"Error in governance_rooms: {e}")
@@ -361,6 +447,9 @@ def governance_rooms():
 @login_required
 def api_frigobar_items():
     try:
+        denied = _ensure_governance_access(json_mode=True)
+        if denied is not None:
+            return denied
         items = load_menu_items()
         frigobar_items = [p for p in items if p.get('category') == 'Frigobar']
         simplified = []
@@ -381,12 +470,33 @@ def api_frigobar_items():
 @login_required
 def governance_launch_frigobar():
     try:
-        data = request.get_json()
-        room_num = str(data.get('room_number'))
-        items = data.get('items', []) # List of {id, qty}
+        denied = _ensure_governance_access(json_mode=True)
+        if denied is not None:
+            return denied
+        data = request.get_json() or {}
+        room_num = str(data.get('room_number') or '').strip()
+        items = data.get('items', [])
         
-        if not room_num or not items:
+        if not room_num or not isinstance(items, list) or not items:
             return jsonify({'success': False, 'error': 'Dados inválidos.'}), 400
+
+        occupancy = load_room_occupancy()
+        cleaning_status = load_cleaning_status()
+        room_status = ''
+        if isinstance(cleaning_status, dict):
+            room_status = str((cleaning_status.get(room_num, {}) or {}).get('status') or '').strip()
+        room_is_occupied = room_num in occupancy
+        allowed_unoccupied_statuses = {'dirty_checkout', 'in_progress'}
+        if not room_is_occupied and room_status not in allowed_unoccupied_statuses:
+            return jsonify({
+                'success': False,
+                'error': 'Quarto fora de contexto operacional para lançamento de frigobar.',
+                'details': {
+                    'room_number': room_num,
+                    'occupied': room_is_occupied,
+                    'cleaning_status': room_status
+                }
+            }), 400
             
         menu_items = load_menu_items()
         product_map = {str(p['id']): p for p in menu_items}
@@ -396,81 +506,129 @@ def governance_launch_frigobar():
         room_charges = load_room_charges()
         
         items_to_charge = []
+        stock_movements = []
         total = 0
+        missing_recipe = []
+        missing_ingredients = []
+        invalid_items = []
+        invalid_category = []
         
         items_added_names = []
         for item in items:
-            p_id = str(item['id'])
-            qty = float(item['qty'])
+            p_id = str(item.get('id') or '').strip()
+            try:
+                qty = float(item.get('qty') or 0)
+            except (TypeError, ValueError):
+                qty = 0
+            if qty <= 0:
+                continue
+            product = product_map.get(p_id)
+            if not product:
+                invalid_items.append(p_id)
+                continue
+            if str(product.get('category') or '') != 'Frigobar':
+                invalid_category.append(str(product.get('name') or p_id))
+                continue
+            recipe = product.get('recipe')
+            if not isinstance(recipe, list) or not recipe:
+                missing_recipe.append(str(product.get('name') or p_id))
+                continue
             
-            if qty > 0 and p_id in product_map:
-                product = product_map[p_id]
-                price = float(product['price'])
-                item_total = qty * price
-                
-                if product.get('recipe'):
-                    try:
-                        for ingred in product['recipe']:
-                            raw_ing_id = ingred.get('ingredient_id')
-                            insumo_data = None
-                            ing_key = None
+            price = float(product['price'])
+            item_total = qty * price
 
-                            if raw_ing_id is not None:
-                                ing_key = str(raw_ing_id)
-                                insumo_data = insumo_map.get(ing_key)
+            try:
+                for ingred in recipe:
+                    raw_ing_id = ingred.get('ingredient_id')
+                    insumo_data = None
+                    ing_key = None
+
+                    if raw_ing_id is not None:
+                        ing_key = str(raw_ing_id)
+                        insumo_data = insumo_map.get(ing_key)
+                    else:
+                        ing_name = ingred.get('ingredient')
+                        if ing_name:
+                            insumo_data = next((i for i in products_insumos if i.get('name') == ing_name), None)
+                            if insumo_data and insumo_data.get('id') is not None:
+                                ing_key = str(insumo_data.get('id'))
                             else:
-                                ing_name = ingred.get('ingredient')
-                                if ing_name:
-                                    insumo_data = next((i for i in products_insumos if i.get('name') == ing_name), None)
-                                    if insumo_data and insumo_data.get('id') is not None:
-                                        ing_key = str(insumo_data.get('id'))
-                                    else:
-                                        ing_key = ing_name
+                                ing_key = ing_name
 
-                            if not insumo_data:
-                                continue
+                    if not insumo_data:
+                        missing_ingredients.append(f"{product.get('name')}::{ing_key or ingred.get('ingredient') or 'ingrediente'}")
+                        continue
 
-                            try:
-                                ing_qty = float(ingred.get('qty', 0))
-                            except (TypeError, ValueError):
-                                continue
+                    try:
+                        ing_qty = float(ingred.get('qty', 0))
+                    except (TypeError, ValueError):
+                        ing_qty = 0
+                    if ing_qty <= 0:
+                        missing_ingredients.append(f"{product.get('name')}::{insumo_data.get('name')} (quantidade inválida)")
+                        continue
 
-                            total_needed = ing_qty * qty
+                    total_needed = ing_qty * qty
 
-                            entry_data = {
-                                'id': f"SALE_GOV_{room_num}_{datetime.now().strftime('%Y%m%d%H%M%S')}_{ing_key}",
-                                'user': session.get('user', 'Governança'),
-                                'product': insumo_data['name'],
-                                'supplier': f"VENDA: Frigobar Quarto {room_num}",
-                                'qty': -total_needed,
-                                'price': insumo_data.get('price', 0),
-                                'invoice': f"Frigobar: {product.get('name')}",
-                                'date': datetime.now().strftime('%d/%m/%Y'),
-                                'entry_date': datetime.now().strftime('%d/%m/%Y %H:%M')
-                            }
-                            save_stock_entry(entry_data)
-                    except Exception as e:
-                        current_app.logger.error(f"Stock deduction error (Governance Frigobar): {e}")
-                
-                order_item = {
-                    'id': p_id,
-                    'name': product['name'],
-                    'price': price,
-                    'qty': qty,
-                    'category': product.get('category', 'Frigobar'),
-                    'added_at': datetime.now().strftime('%H:%M:%S'),
-                    'added_by': session.get('user', 'Governança')
-                }
-                
-                items_to_charge.append(order_item)
-                items_added_names.append(f"{qty}x {product['name']}")
-                total += item_total
+                    entry_data = {
+                        'product_id': insumo_data.get('id'),
+                        'product_name': insumo_data['name'],
+                        'qty': -total_needed
+                    }
+                    stock_movements.append(entry_data)
+            except Exception as e:
+                current_app.logger.error(f"Stock deduction error (Governance Frigobar): {e}")
+                return jsonify({'success': False, 'error': f'Erro ao processar ficha técnica do item {product.get("name")}.'}), 500
 
+            order_item = {
+                'id': p_id,
+                'name': product['name'],
+                'price': price,
+                'qty': qty,
+                'category': product.get('category', 'Frigobar'),
+                'added_at': datetime.now().strftime('%H:%M:%S'),
+                'added_by': session.get('user', 'Governança')
+            }
+            
+            items_to_charge.append(order_item)
+            items_added_names.append(f"{qty}x {product['name']}")
+            total += item_total
+
+        if invalid_items:
+            return jsonify({'success': False, 'error': 'Existem itens inválidos no lançamento.', 'details': {'invalid_items': invalid_items}}), 400
+        if invalid_category:
+            return jsonify({'success': False, 'error': 'Existem itens fora da categoria Frigobar.', 'details': {'invalid_category': invalid_category}}), 400
+        if missing_recipe:
+            return jsonify({'success': False, 'error': 'Existem itens de frigobar sem ficha técnica de estoque.', 'details': {'missing_recipe': missing_recipe}}), 400
+        if missing_ingredients:
+            return jsonify({'success': False, 'error': 'Ficha técnica incompleta ou inválida para itens selecionados.', 'details': {'missing_ingredients': missing_ingredients}}), 400
         if not items_to_charge:
              return jsonify({'success': False, 'error': 'Nenhum item válido encontrado.'}), 400
+        if not stock_movements:
+            return jsonify({'success': False, 'error': 'Não foi possível gerar movimentos de estoque para os itens selecionados.'}), 400
+
+        charge_id = f"CHARGE_GOV_{room_num}_{datetime.now().strftime('%Y%m%d%H%M%S')}_{uuid.uuid4().hex[:6]}"
+        movement = apply_manual_stock_movement(
+            room_number=room_num,
+            triggered_by=session.get('user', 'Governança'),
+            source='governance_launch_frigobar',
+            movement_type='frigobar_sale',
+            items=stock_movements,
+            event_ref=charge_id,
+            metadata={'invoice': 'Frigobar Governança'},
+            allow_negative_stock=True
+        )
+        if not movement.get('success'):
+            return jsonify({
+                'success': False,
+                'error': movement.get('error') or 'Falha ao registrar movimentação de estoque do frigobar.',
+                'details': {
+                    'warnings': movement.get('warnings', []),
+                    'insufficient': movement.get('insufficient', [])
+                }
+            }), 400
 
         charge = {
-            'id': f"CHARGE_GOV_{room_num}_{datetime.now().strftime('%Y%m%d%H%M%S')}_{uuid.uuid4().hex[:6]}",
+            'id': charge_id,
             'room_number': room_num,
             'table_id': 'GOV', 
             'total': total,
@@ -480,11 +638,39 @@ def governance_launch_frigobar():
             'flags': [],
             'date': datetime.now().strftime('%d/%m/%Y %H:%M'),
             'status': 'pending',
-            'type': 'minibar'
+            'type': 'minibar',
+            'source': 'minibar'
         }
-        
-        room_charges.append(charge)
-        save_room_charges(room_charges)
+
+        try:
+            room_charges.append(charge)
+            save_room_charges(room_charges)
+        except Exception as save_error:
+            rollback_items = []
+            for moved in (movement.get('applied_items') or []):
+                try:
+                    rollback_qty = abs(float(moved.get('qty') or 0))
+                except Exception:
+                    rollback_qty = 0
+                if rollback_qty <= 0:
+                    continue
+                rollback_items.append({
+                    'product_id': moved.get('product_id'),
+                    'product_name': moved.get('product_name'),
+                    'qty': rollback_qty
+                })
+            if rollback_items:
+                apply_manual_stock_movement(
+                    room_number=room_num,
+                    triggered_by=session.get('user', 'Governança'),
+                    source='governance_launch_frigobar.rollback',
+                    movement_type='frigobar_sale_rollback',
+                    items=rollback_items,
+                    event_ref=charge_id,
+                    metadata={'invoice': 'Rollback Frigobar Governança'}
+                )
+            current_app.logger.error(f"Erro ao salvar cobrança de frigobar, rollback executado: {save_error}")
+            return jsonify({'success': False, 'error': 'Falha ao registrar cobrança de frigobar.'}), 500
         
         if items_added_names:
             log_msg = f"Lançamento de Frigobar no Quarto {room_num}: {', '.join(items_added_names)}"
@@ -495,8 +681,16 @@ def governance_launch_frigobar():
                 departamento_id='Governança',
                 colaborador_id=session.get('user')
             )
+
+        for warning in (movement.get('warnings') or []):
+            current_app.logger.warning(f"Frigobar warning ({room_num}): {warning}")
             
-        return jsonify({'success': True})
+        return jsonify({
+            'success': True,
+            'charge_id': charge_id,
+            'warnings': movement.get('warnings', []),
+            'stock_warning': bool(movement.get('warnings'))
+        })
         
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500

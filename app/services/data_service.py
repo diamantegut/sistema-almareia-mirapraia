@@ -3,8 +3,12 @@ import json
 import uuid
 import unicodedata
 import logging
+import hashlib
+import threading
+import copy
 from datetime import datetime
 from flask import session
+from app.services.data_cleanup_monitor_service import record_data_cleanup_event
 
 from app.services.system_config_manager import (
     SETTINGS_FILE, SALES_PRODUCTS_FILE, SALES_HISTORY_FILE,
@@ -24,6 +28,13 @@ from app.services.system_config_manager import (
     DEPARTMENTS, # for load/save helpers
     get_backup_path
 )
+
+_CRITICAL_JSON_PATHS = {
+    os.path.abspath(TABLE_ORDERS_FILE),
+    os.path.abspath(SALES_HISTORY_FILE),
+    os.path.abspath(STOCK_ENTRIES_FILE),
+    os.path.abspath(CASHIER_SESSIONS_FILE),
+}
 
 def format_room_number(room_num):
     """
@@ -56,10 +67,15 @@ def normalize_room_simple(r):
     return s
 
 # --- Generic Load/Save Helper ---
-def _load_json(filepath, default=None):
+def _load_json(filepath, default=None, strict=False):
     import time
     if default is None: default = []
     if not os.path.exists(filepath):
+        record_data_cleanup_event(
+            event_type='file_not_found',
+            requested_file=filepath,
+            error_message='Arquivo JSON inexistente durante leitura'
+        )
         return default
     
     max_retries = 20
@@ -69,18 +85,38 @@ def _load_json(filepath, default=None):
                 return json.load(f)
         except (PermissionError, OSError):
             if i == max_retries - 1:
-                # If we can't read due to lock, returning default is risky for read-modify-write cycles.
-                # But _load_json is generic.
-                # We will log warning.
-                print(f"Warning: Could not acquire lock for {filepath} after {max_retries} attempts.")
+                logging.error(f"Could not acquire lock for {filepath} after {max_retries} attempts.")
+                record_data_cleanup_event(
+                    event_type='config_read_failure',
+                    requested_file=filepath,
+                    error_message=f'Falha de leitura/lock após {max_retries} tentativas'
+                )
+                if strict:
+                    raise RuntimeError(f"JSON read lock timeout: {filepath}")
                 return default
             time.sleep(0.1)
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as exc:
+            backup_path = f"{filepath}.corrupt_{datetime.now().strftime('%Y%m%d_%H%M%S_%f')}.json"
+            try:
+                with open(filepath, 'r', encoding='utf-8', errors='replace') as src, open(backup_path, 'w', encoding='utf-8') as dst:
+                    dst.write(src.read())
+            except Exception:
+                pass
+            logging.error(f"Invalid JSON detected in {filepath}: {exc}")
+            record_data_cleanup_event(
+                event_type='json_decode_error',
+                requested_file=filepath,
+                error_message=str(exc)
+            )
+            if strict:
+                raise RuntimeError(f"JSON corrupt: {filepath}") from exc
             return default
             
     return default
 
 def _save_json(filepath, data):
+    if os.path.abspath(filepath) in _CRITICAL_JSON_PATHS:
+        return _save_json_atomic(filepath, data)
     try:
         with open(filepath, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=4, ensure_ascii=False)
@@ -239,11 +275,7 @@ def save_fiscal_settings(settings): return _save_json(FISCAL_SETTINGS_FILE, sett
 def load_menu_items(): return _load_json(MENU_ITEMS_FILE, [])
 
 def save_menu_items(items):
-    """
-    Legacy save function. Should be replaced by secure_save_menu_items where possible.
-    """
-    _backup_before_write(MENU_ITEMS_FILE)
-    return _save_json_atomic(MENU_ITEMS_FILE, items)
+    return secure_save_menu_items(items, user_id='Sistema')
 
 def secure_save_menu_items(new_items, user_id='Sistema'):
     """
@@ -396,6 +428,11 @@ def load_payment_methods():
                  # User said "marcada com o indicador fiscal (sim/não)".
                  # I'll just warn for now or ensure key exists.
                  method['fiscal_cnpj'] = method.get('fiscal_cnpj', '')
+            alias = method.get('pagseguro_alias')
+            if alias is None:
+                method['pagseguro_alias'] = ''
+            else:
+                method['pagseguro_alias'] = str(alias).strip()
 
             valid_methods.append(method)
             
@@ -418,11 +455,10 @@ def _get_cashier_sessions_path():
     except Exception:
         return CASHIER_SESSIONS_FILE
 
-def load_cashier_sessions(): return _load_json(_get_cashier_sessions_path(), [])
+def load_cashier_sessions(): return _load_json(_get_cashier_sessions_path(), [], strict=True)
 def save_cashier_sessions(sessions):
-    path = _get_cashier_sessions_path()
-    _backup_before_write(path)
-    return _save_json_atomic(path, sessions)
+    from app.services.cashier_service import CashierService
+    return CashierService.persist_sessions(sessions, trigger_backup=False)
 
 def get_current_cashier(user=None, cashier_type=None):
     # Delegate to centralized CashierService to ensure consistent logic
@@ -431,7 +467,7 @@ def get_current_cashier(user=None, cashier_type=None):
         return CashierService.get_active_session(cashier_type)
         
     # Fallback for unspecified type (return first open)
-    sessions = CashierService._load_sessions()
+    sessions = CashierService.list_sessions()
     for s in reversed(sessions):
         if str(s.get('status', '')).lower().strip() == 'open':
             return s
@@ -442,14 +478,10 @@ def load_sales_products(): return _load_json(SALES_PRODUCTS_FILE, {})
 def save_sales_products(data): return _save_json(SALES_PRODUCTS_FILE, data)
 
 # --- Sales History ---
-def load_sales_history(): return _load_json(SALES_HISTORY_FILE, [])
+def load_sales_history(): return _load_json(SALES_HISTORY_FILE, [], strict=True)
 
 def save_sales_history(data):
-    """
-    Legacy save function. Use secure_save_sales_history for critical operations.
-    """
-    _backup_before_write(SALES_HISTORY_FILE)
-    return _save_json_atomic(SALES_HISTORY_FILE, data)
+    return secure_save_sales_history(data, user_id='Sistema')
 
 def secure_save_sales_history(new_data, user_id='Sistema'):
     """
@@ -498,13 +530,7 @@ from app.utils.lock import file_lock
 from app.services.system_config_manager import PRODUCTS_FILE
 
 def save_products(data):
-    """
-    Legacy save function. Should be replaced by secure_save_products where possible.
-    Maintains basic backup and atomic write.
-    """
-    with file_lock(PRODUCTS_FILE):
-        _backup_before_write(PRODUCTS_FILE)
-        return _save_json_atomic(PRODUCTS_FILE, data)
+    return secure_save_products(data, user_id='Sistema')
 
 def secure_save_products(new_products, user_id='Sistema'):
     """
@@ -643,7 +669,7 @@ def _get_payables_path():
 def load_payables(): return _load_json(_get_payables_path(), [])
 def save_payables(data): return _save_json(_get_payables_path(), data)
 
-def load_stock_entries(): return _load_json(STOCK_ENTRIES_FILE, [])
+def load_stock_entries(): return _load_json(STOCK_ENTRIES_FILE, [], strict=True)
 def save_stock_entries(data):
     _backup_before_write(STOCK_ENTRIES_FILE)
     return _save_json_atomic(STOCK_ENTRIES_FILE, data)
@@ -697,46 +723,75 @@ def save_asset_conferences(data): return _save_json(ASSET_CONFERENCES_FILE, data
 
 import shutil
 import logging
+_table_orders_context = threading.local()
+
+def _table_orders_hash(data):
+    try:
+        payload = json.dumps(data, ensure_ascii=False, sort_keys=True, separators=(',', ':'))
+    except Exception:
+        payload = json.dumps({}, ensure_ascii=False, sort_keys=True, separators=(',', ':'))
+    return hashlib.sha256(payload.encode('utf-8')).hexdigest()
+
+def _merge_table_orders_data(current_data, incoming_data):
+    if not isinstance(current_data, dict):
+        current_data = {}
+    if not isinstance(incoming_data, dict):
+        return current_data
+    merged = copy.deepcopy(current_data)
+    for key, value in incoming_data.items():
+        if value is None:
+            merged.pop(key, None)
+            continue
+        merged[key] = value
+    return merged
+
 # --- Table Orders ---
-def load_table_orders(): return _load_json(TABLE_ORDERS_FILE, {})
+def load_table_orders():
+    data = _load_json(TABLE_ORDERS_FILE, {}, strict=True)
+    _table_orders_context.last_loaded_hash = _table_orders_hash(data)
+    return data
 
 def save_table_orders(data):
-    # 1. Logging Context
-    try:
-        user = session.get('user') if session else 'system'
-    except:
-        user = 'unknown'
-        
-    current_size = len(data) if data else 0
-    logging.info(f"Attempting to save table_orders. User: {user}. Items count: {current_size}")
-
-    # 2. Backup Logic
-    if os.path.exists(TABLE_ORDERS_FILE):
+    with file_lock(TABLE_ORDERS_FILE):
         try:
-            # Check existing data
-            old_data = _load_json(TABLE_ORDERS_FILE, {})
-            old_size = len(old_data)
-            
-            # Safety Check: Emptying a populated file?
-            if old_size > 0 and current_size == 0:
-                logging.warning(f"CRITICAL: Wipe detected on table_orders.json! User: {user}. Backing up before wipe.")
-                
-            backup_dir = os.path.join(os.path.dirname(TABLE_ORDERS_FILE), 'backups', 'table_orders')
-            os.makedirs(backup_dir, exist_ok=True)
-            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-            backup_path = os.path.join(backup_dir, f"table_orders_{timestamp}_{user}.json")
-            shutil.copy2(TABLE_ORDERS_FILE, backup_path)
-            
-            # Retention: Keep last 50 backups
-            backups = sorted([os.path.join(backup_dir, f) for f in os.listdir(backup_dir)], key=os.path.getmtime)
-            while len(backups) > 50:
-                os.remove(backups.pop(0))
-                
-        except Exception as e:
-            logging.error(f"Failed to create backup for table_orders: {e}")
+            user = session.get('user') if session else 'system'
+        except:
+            user = 'unknown'
 
-    # 3. Save (Atomic)
-    return _save_json_atomic(TABLE_ORDERS_FILE, data)
+        incoming_data = data if isinstance(data, dict) else {}
+        current_data = _load_json(TABLE_ORDERS_FILE, {}) if os.path.exists(TABLE_ORDERS_FILE) else {}
+        current_hash = _table_orders_hash(current_data)
+        expected_hash = getattr(_table_orders_context, 'last_loaded_hash', None)
+        if expected_hash and expected_hash != current_hash:
+            incoming_data = _merge_table_orders_data(current_data, incoming_data)
+            logging.warning(f"Concurrent update detected in table_orders. User: {user}. Applying merge strategy.")
+
+        current_size = len(incoming_data) if incoming_data else 0
+        logging.info(f"Attempting to save table_orders. User: {user}. Items count: {current_size}")
+
+        if os.path.exists(TABLE_ORDERS_FILE):
+            try:
+                old_size = len(current_data)
+                if old_size > 0 and current_size == 0:
+                    logging.warning(f"CRITICAL: Wipe detected on table_orders.json! User: {user}. Backing up before wipe.")
+
+                backup_dir = os.path.join(os.path.dirname(TABLE_ORDERS_FILE), 'backups', 'table_orders')
+                os.makedirs(backup_dir, exist_ok=True)
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_%f')
+                backup_path = os.path.join(backup_dir, f"table_orders_{timestamp}_{user}.json")
+                shutil.copy2(TABLE_ORDERS_FILE, backup_path)
+
+                backups = sorted([os.path.join(backup_dir, f) for f in os.listdir(backup_dir)], key=os.path.getmtime)
+                while len(backups) > 50:
+                    os.remove(backups.pop(0))
+
+            except Exception as e:
+                logging.error(f"Failed to create backup for table_orders: {e}")
+
+        saved = _save_json_atomic(TABLE_ORDERS_FILE, incoming_data)
+        if saved:
+            _table_orders_context.last_loaded_hash = _table_orders_hash(incoming_data)
+        return saved
 
 # --- Restaurant Settings ---
 def load_restaurant_table_settings(): return _load_json(RESTAURANT_TABLE_SETTINGS_FILE, {})

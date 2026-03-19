@@ -443,6 +443,8 @@
             {% if i not in excluded_rooms %}
                 {% set room_num = i|format_room %}
                 {% set occ_data = occupancy.get(room_num) %}
+                {% set upcoming_entry = upcoming_checkins.get(room_num) %}
+                {% set preload_entry = room_preloaded_checkins.get(room_num) %}
                 {% set op_data = room_operational_info.get(room_num, {}) %}
                 {% set clean_data = cleaning_status.get(room_num, {}) %}
                 {% set status = clean_data.get('status', 'dirty') %}
@@ -554,6 +556,43 @@
                                 <div class="room-center-label">Check-out</div>
                                 <div class="room-center-value">{{ occ_data.checkout if occ_data and occ_data.checkout else '-' }}</div>
                             </div>
+                            {% if occ_data and occ_data.reservation_id %}
+                            <div class="room-center-item">
+                                <div class="room-center-label">Diária (Reserva)</div>
+                                <div class="room-center-value">
+                                    {% set pay_state = occ_data.reservation_payment_state or 'none' %}
+                                    {% if pay_state == 'complete' %}
+                                    <span class="badge bg-success">Completo</span>
+                                    {% elif pay_state == 'partial' %}
+                                    <span class="badge bg-warning text-dark">Parcial</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">Nenhum</span>
+                                    {% endif %}
+                                    {% if occ_data.reservation_payment_due_date %}
+                                    <small class="d-block text-muted mt-1">Cobrança até {{ occ_data.reservation_payment_due_date }}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% elif not occ_data and upcoming_entry %}
+                            <div class="room-center-item">
+                                <div class="room-center-label">Próximo Check-in</div>
+                                <div class="room-center-value">
+                                    <div class="small fw-semibold">{{ upcoming_entry.guest_name }}</div>
+                                    <div class="small text-muted">{{ upcoming_entry.checkin }} → {{ upcoming_entry.checkout }}</div>
+                                    {% if preload_entry %}
+                                    <span class="badge bg-primary mt-1">Pré-carregada para check-in</span>
+                                    {% endif %}
+                                    {% set upcoming_state = upcoming_entry.payment_state or 'none' %}
+                                    {% if upcoming_state == 'complete' %}
+                                    <span class="badge bg-success mt-1">Diária completa</span>
+                                    {% elif upcoming_state == 'partial' %}
+                                    <span class="badge bg-warning text-dark mt-1">Diária parcial</span>
+                                    {% else %}
+                                    <span class="badge bg-danger mt-1">Diária pendente</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
                             {% if occ_data and op_data %}
                             <div class="room-center-item">
                                 <div class="room-center-label">Ficha Operacional</div>
@@ -621,9 +660,15 @@
                                         </div>
                                     </div>
                                 {% elif status == 'inspected' %}
+                                    {% if preload_entry %}
+                                    <button class="btn btn-primary room-action-primary w-100" onclick="openCheckinModalWithReservation('{{ room_num }}', '{{ preload_entry.id }}')">
+                                        Check-in (Reserva Sugerida)
+                                    </button>
+                                    {% else %}
                                     <button class="btn btn-primary room-action-primary w-100" onclick="openCheckinModal('{{ room_num }}')">
                                         Fazer Check-in
                                     </button>
+                                    {% endif %}
                                 {% elif status == 'clean' %}
                                     <button class="btn btn-info text-white room-action-primary w-100 mb-2" onclick="openInspectModal('{{ room_num }}')">
                                         Realizar Inspeção
@@ -654,6 +699,11 @@
     <div class="alert alert-secondary text-center mt-3 mb-0" id="roomsEmptyState">
         Nenhum quarto encontrado para este filtro.
     </div>
+    {% if room_preload_conflicts %}
+    <div class="alert alert-warning mt-3 mb-0">
+        Existem conflitos de reservas de check-in hoje em quartos específicos. O pré-carregamento automático foi bloqueado nestes casos para evitar colisões.
+    </div>
+    {% endif %}
 </div>
 
 <!-- Modals -->
@@ -747,6 +797,30 @@
                                 </option>
                             {% endfor %}
                         </select>
+                    </div>
+
+                    <div id="checkinReservationBillingAlert" class="alert alert-warning d-none mb-3">
+                        <div class="fw-semibold">Diária pendente no check-in</div>
+                        <div class="small">Total: <span id="checkinResTotal">R$ 0,00</span> · Pago: <span id="checkinResPaid">R$ 0,00</span> · Pendente: <span id="checkinResRemaining">R$ 0,00</span></div>
+                        <div class="mt-2 d-flex flex-wrap gap-2">
+                            <button type="button" class="btn btn-sm btn-success" id="checkinOpenReservationPayBtn" onclick="openReservationPaymentFromCheckin()">
+                                <i class="bi bi-cash-coin"></i> Receber Diária Agora
+                            </button>
+                        </div>
+                    </div>
+                    <div id="checkinReservationBillingDecisionWrap" class="mb-3 d-none">
+                        <label class="form-label small fw-semibold">Tratativa da Diária no Check-in *</label>
+                        <select class="form-select form-select-sm" name="reservation_payment_decision" id="reservation_payment_decision">
+                            <option value="">Selecione...</option>
+                            <option value="collect_now">Cobrar agora (Caixa Reservas)</option>
+                            <option value="partial">Pagamento parcial</option>
+                            <option value="defer_one_day">Adiar cobrança por 1 dia</option>
+                            <option value="none">Sem cobrança no check-in</option>
+                        </select>
+                        <div class="mt-2 d-none" id="reservationPaymentDeferReasonWrap">
+                            <label class="form-label small">Motivo do adiamento</label>
+                            <input type="text" class="form-control form-control-sm" name="reservation_payment_defer_reason" id="reservation_payment_defer_reason" maxlength="180" placeholder="Ex.: hóspede solicitou cobrança amanhã">
+                        </div>
                     </div>
 
                     <div class="row">
@@ -940,157 +1014,7 @@
     </div>
 </div>
 
-<!-- View Guest Modal -->
-<div class="modal fade" id="viewGuestModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title"><i class="bi bi-person-vcard"></i> Ficha do Hóspede</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <!-- Loading Spinner -->
-                <div id="viewGuestLoading" class="text-center py-4">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Carregando...</span>
-                    </div>
-                    <p class="mt-2 text-muted">Carregando dados do hóspede...</p>
-                </div>
-
-                <!-- Content -->
-                <div id="viewGuestContent" class="d-none">
-                    <ul class="nav nav-tabs mb-3" id="guestTabs" role="tablist">
-                        <li class="nav-item">
-                            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-personal" type="button">Dados Pessoais</button>
-                        </li>
-                        <li class="nav-item">
-                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-stay" type="button">Estadia Atual</button>
-                        </li>
-                        <li class="nav-item">
-                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-history" type="button">Histórico</button>
-                        </li>
-                    </ul>
-
-                    <div class="tab-content">
-                        <!-- Personal Info -->
-                        <div class="tab-pane fade show active" id="tab-personal">
-                            <div class="row g-3">
-                                <div class="col-md-8">
-                                    <h6 class="fw-bold">Nome Completo</h6>
-                                    <p id="vg_name" class="border-bottom pb-1">-</p>
-                                </div>
-                                <div class="col-md-4">
-                                    <h6 class="fw-bold">Ficha Nº</h6>
-                                    <p id="vg_ficha" class="border-bottom pb-1">-</p>
-                                </div>
-                                <div class="col-md-6">
-                                    <h6 class="fw-bold">Documento (CPF/Passaporte)</h6>
-                                    <p id="vg_doc" class="border-bottom pb-1">-</p>
-                                </div>
-                                <div class="col-md-6">
-                                    <h6 class="fw-bold">Data de Nascimento</h6>
-                                    <p id="vg_birth" class="border-bottom pb-1">-</p>
-                                </div>
-                                <div class="col-md-6">
-                                    <h6 class="fw-bold">Email</h6>
-                                    <p id="vg_email" class="border-bottom pb-1">-</p>
-                                </div>
-                                <div class="col-md-6">
-                                    <h6 class="fw-bold">Telefone</h6>
-                                    <p id="vg_phone" class="border-bottom pb-1">-</p>
-                                </div>
-                                <div class="col-12">
-                                    <h6 class="fw-bold">Endereço</h6>
-                                    <p id="vg_address" class="border-bottom pb-1">-</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Stay Info -->
-                        <div class="tab-pane fade" id="tab-stay">
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <h6 class="fw-bold">Quarto Atual</h6>
-                                    <p id="vg_room" class="fs-4 text-primary">-</p>
-                                </div>
-                                <div class="col-md-6">
-                                    <h6 class="fw-bold">Status</h6>
-                                    <p id="vg_status" class="badge bg-success">-</p>
-                                </div>
-                                <div class="col-md-6">
-                                    <h6 class="fw-bold">Check-in</h6>
-                                    <p id="vg_checkin" class="border-bottom pb-1">-</p>
-                                </div>
-                                <div class="col-md-6">
-                                    <h6 class="fw-bold">Check-out (Previsto)</h6>
-                                    <p id="vg_checkout" class="border-bottom pb-1">-</p>
-                                </div>
-                                <div class="col-12 mt-4">
-                                    <h6 class="fw-bold mb-3">Consumo Atual (Resumo)</h6>
-                                    <div class="card bg-light">
-                                        <div class="card-body">
-                                            <div class="d-flex justify-content-between mb-2">
-                                                <span>Total Consumido:</span>
-                                                <span class="fw-bold" id="vg_total_consumed">R$ 0,00</span>
-                                            </div>
-                                            <div class="d-flex justify-content-between mb-2">
-                                                <span>Total Pago:</span>
-                                                <span class="text-success fw-bold" id="vg_total_paid">R$ 0,00</span>
-                                            </div>
-                                            <hr>
-                                            <div class="d-flex justify-content-between">
-                                                <span class="fs-5">Saldo Devedor:</span>
-                                                <span class="fs-5 fw-bold text-danger" id="vg_balance">R$ 0,00</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="mt-2 text-end">
-                                        <button class="btn btn-sm btn-outline-primary" onclick="viewDetailedCharges()">
-                                            <i class="bi bi-receipt"></i> Ver Detalhes da Conta
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- History -->
-                        <div class="tab-pane fade" id="tab-history">
-                            <div class="table-responsive">
-                                <table class="table table-sm table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Data</th>
-                                            <th>Quarto</th>
-                                            <th>Valor</th>
-                                            <th>Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="vg_history_table">
-                                        <!-- Populated via JS -->
-                                    </tbody>
-                                </table>
-                                <p class="text-center text-muted small mt-2">Mostrando as últimas 5 estadias.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Error State -->
-                <div id="viewGuestError" class="d-none text-center py-4">
-                    <i class="bi bi-exclamation-circle text-danger fs-1"></i>
-                    <p class="mt-2 text-danger">Erro ao carregar dados do hóspede.</p>
-                    <p class="small text-muted" id="viewGuestErrorMsg"></p>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                <button type="button" class="btn btn-primary" id="vg_edit_btn" onclick="switchToEdit()">
-                    <i class="bi bi-pencil"></i> Editar Dados
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
+{% include 'partials/guest_unified_modal.html' %}
 
 <!-- Inspect Modal -->
 <div class="modal fade" id="inspectModal" tabindex="-1">
@@ -1204,6 +1128,44 @@
     const reservationPaymentMethods = checkinConfigData.reservation_payment_methods || [];
     const openCheckinFromUrl = Boolean(checkinConfigData.open_checkin);
     const requestedReservationId = String(checkinConfigData.requested_reservation_id || '');
+    let preselectedCheckinRoom = '';
+
+    function moneyBr(value) {
+        const n = Number(value || 0);
+        return `R$ ${n.toFixed(2).replace('.', ',')}`;
+    }
+
+    function resetCheckinBillingDecision() {
+        const alertEl = document.getElementById('checkinReservationBillingAlert');
+        const wrapEl = document.getElementById('checkinReservationBillingDecisionWrap');
+        const decisionEl = document.getElementById('reservation_payment_decision');
+        const deferWrap = document.getElementById('reservationPaymentDeferReasonWrap');
+        const deferInput = document.getElementById('reservation_payment_defer_reason');
+        if (alertEl) alertEl.classList.add('d-none');
+        if (wrapEl) wrapEl.classList.add('d-none');
+        if (decisionEl) {
+            decisionEl.required = false;
+            decisionEl.value = '';
+        }
+        if (deferWrap) deferWrap.classList.add('d-none');
+        if (deferInput) {
+            deferInput.required = false;
+            deferInput.value = '';
+        }
+    }
+
+    function openReservationPaymentFromCheckin() {
+        const reservationId = document.getElementById('checkin_reservation_id').value || '';
+        const guestNameInput = document.querySelector('#checkinModal input[name="guest_name"]');
+        const roomSelect = document.getElementById('checkin_room_select');
+        if (!reservationId) {
+            alert('Reserva não identificada para cobrança.');
+            return;
+        }
+        const guestName = guestNameInput ? guestNameInput.value : '';
+        const roomInfo = roomSelect ? roomSelect.value : '';
+        openReservationPaymentModal(reservationId, guestName, roomInfo);
+    }
 
     function validateCapacity() {
         const roomSelect = document.getElementById('checkin_room_select');
@@ -1225,6 +1187,8 @@
     }
 
     function openCheckinModal(room) {
+        resetCheckinBillingDecision();
+        preselectedCheckinRoom = room || '';
         if (room) {
             document.getElementById('checkin_room_select').value = room;
         } else {
@@ -1232,6 +1196,23 @@
         }
         var modal = new bootstrap.Modal(document.getElementById('checkinModal'));
         modal.show();
+    }
+
+    function openCheckinModalWithReservation(room, reservationId) {
+        openCheckinModal(room || '');
+        if (!reservationId) {
+            return;
+        }
+        const loader = document.getElementById('reservation_loader');
+        if (loader) {
+            const hasOption = Array.from(loader.options).some(opt => String(opt.value) === String(reservationId));
+            if (hasOption) {
+                loader.value = reservationId;
+                loadReservationData(reservationId);
+                return;
+            }
+        }
+        loadReservationData(reservationId);
     }
     
     // Add event listeners for capacity validation
@@ -1370,6 +1351,11 @@
                     console.warn(`Room ${res.room} not available for selection (occupied or excluded).`);
                 }
             }
+        } else if (preselectedCheckinRoom) {
+            const roomSelect = document.getElementById('checkin_room_select');
+            if (roomSelect) {
+                roomSelect.value = preselectedCheckinRoom;
+            }
         }
         
         // Populate Checkout
@@ -1386,6 +1372,27 @@
         
         // Trigger validation after loading
         validateCapacity();
+
+        const total = Number(res.payment_total || 0);
+        const paid = Number(res.payment_paid || 0);
+        const remaining = Number(res.payment_remaining || 0);
+        const alertEl = document.getElementById('checkinReservationBillingAlert');
+        const wrapEl = document.getElementById('checkinReservationBillingDecisionWrap');
+        const decisionEl = document.getElementById('reservation_payment_decision');
+        if (remaining > 0.01) {
+            document.getElementById('checkinResTotal').textContent = moneyBr(total);
+            document.getElementById('checkinResPaid').textContent = moneyBr(paid);
+            document.getElementById('checkinResRemaining').textContent = moneyBr(remaining);
+            if (alertEl) alertEl.classList.remove('d-none');
+            if (wrapEl) wrapEl.classList.remove('d-none');
+            if (decisionEl) {
+                decisionEl.required = true;
+                const followupDecision = String((res.payment_followup || {}).decision || '').trim();
+                decisionEl.value = followupDecision || (paid > 0.01 ? 'partial' : 'collect_now');
+            }
+        } else {
+            resetCheckinBillingDecision();
+        }
     }
 
     function openTransferModal(room, guestName) {
@@ -1430,7 +1437,21 @@
 
             const select = document.getElementById('resPayMethod');
             select.innerHTML = '<option value="">Selecione...</option>';
-            reservationPaymentMethods.forEach(m => {
+            let methodsToUse = Array.isArray(reservationPaymentMethods) ? reservationPaymentMethods.slice() : [];
+            if (!methodsToUse.length) {
+                const methodsResp = await fetch('/api/payment-methods');
+                if (methodsResp.ok) {
+                    const methodsData = await methodsResp.json();
+                    const allMethods = (methodsData || {}).methods || [];
+                    methodsToUse = allMethods.filter(m => {
+                        const availableIn = Array.isArray(m.available_in)
+                            ? m.available_in.map(v => String(v || '').toLowerCase())
+                            : String(m.available_in || '').split(',').map(v => v.trim().toLowerCase());
+                        return ['reservations', 'reservas', 'caixa_reservas', 'reservation', 'reserva'].some(tag => availableIn.includes(tag));
+                    });
+                }
+            }
+            methodsToUse.forEach(m => {
                 const option = document.createElement('option');
                 option.value = m.id;
                 option.textContent = m.name;
@@ -1438,7 +1459,7 @@
                 select.appendChild(option);
             });
 
-            if (!reservationPaymentMethods.length) {
+            if (!methodsToUse.length) {
                 throw new Error('Nenhuma forma de pagamento habilitada para Reservas em /payment-methods.');
             }
 
@@ -1503,6 +1524,22 @@
             btn.innerHTML = '<i class="bi bi-check-circle"></i> Confirmar Pagamento';
         }
     }
+
+    document.addEventListener('change', function(event) {
+        if (event.target && event.target.id === 'reservation_payment_decision') {
+            const wrap = document.getElementById('reservationPaymentDeferReasonWrap');
+            const input = document.getElementById('reservation_payment_defer_reason');
+            if (!wrap || !input) return;
+            if (event.target.value === 'defer_one_day') {
+                wrap.classList.remove('d-none');
+                input.required = true;
+            } else {
+                wrap.classList.add('d-none');
+                input.required = false;
+                input.value = '';
+            }
+        }
+    });
 
     function openViewGuestModalFromElement(element) {
         const reservationId = element.getAttribute('data-reservation-id') || '';
@@ -1652,13 +1689,13 @@
                     <div>
                         <div class="consumption-account-actions-title">Ações da Conta</div>
                         <div class="d-flex flex-wrap gap-2 justify-content-md-end">
-                            <button type="button" class="btn btn-success" onclick="openCloseRoomAccountModal()">
+                            <button type="button" class="btn btn-sm btn-success" onclick="openCloseRoomAccountModal()">
                                 <i class="bi bi-cash-coin"></i> Registrar Pagamento
                             </button>
-                            <a href="#" class="btn text-white" style="background-color:#fd7e14;" id="consumptionLaunchLink">
+                            <a href="#" class="btn btn-sm text-white" style="background-color:#fd7e14;" id="consumptionLaunchLink">
                                 <i class="bi bi-cart-plus"></i> Lançar Consumo
                             </a>
-                            <button type="button" class="btn btn-outline-dark" onclick="printCurrentRoomConsumption()">
+                            <button type="button" class="btn btn-sm btn-outline-dark" onclick="printCurrentRoomConsumption()">
                                 <i class="bi bi-printer"></i> Imprimir Conta
                             </button>
                         </div>
@@ -1701,7 +1738,7 @@
                             </div>
                         </div>
                         <div class="d-grid mt-2">
-                            <button type="button" class="btn btn-outline-success" onclick="addConsumptionPayment()">Adicionar Forma</button>
+                            <button type="button" class="btn btn-sm btn-outline-success" onclick="addConsumptionPayment()">Adicionar Forma</button>
                         </div>
                     </div>
                     <div class="mb-2">
@@ -1714,7 +1751,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-success">Confirmar Pagamento</button>
+                    <button type="submit" class="btn btn-sm btn-success">Confirmar Pagamento</button>
                 </div>
             </form>
         </div>
@@ -1749,7 +1786,7 @@
                         </div>
                     </div>
                     <div class="d-grid mt-2">
-                        <button type="button" class="btn btn-outline-primary" onclick="addCloseRoomPayment()">Adicionar Forma</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="addCloseRoomPayment()">Adicionar Forma</button>
                     </div>
                 </div>
                 <div class="mb-2">
@@ -1766,7 +1803,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" onclick="submitCloseRoomAccount()">Confirmar Baixa</button>
+                <button type="button" class="btn btn-sm btn-primary" onclick="submitCloseRoomAccount()">Confirmar Baixa</button>
             </div>
         </div>
     </div>
@@ -1933,6 +1970,50 @@
     function formatMoney(value) {
         const number = Number(value || 0);
         return `R$ ${number.toFixed(2).replace('.', ',')}`;
+    }
+
+    function isCashPayment(methodId, methodName) {
+        const ref = `${String(methodId || '').toLowerCase()} ${String(methodName || '').toLowerCase()}`;
+        return ref.includes('dinheiro') || ref.includes('espécie') || ref.includes('especie') || ref.includes('cash');
+    }
+
+    function statusLabel(status) {
+        const v = String(status || '').toLowerCase();
+        if (v === 'pending') return 'Pendente';
+        if (v === 'paid') return 'Pago';
+        if (v === 'cancelled' || v === 'canceled') return 'Cancelado';
+        return 'Lançado';
+    }
+
+    function resolveOccurrenceCollaborator(charge, item) {
+        const fromItem = [
+            item && item.added_by,
+            item && item.batch_user,
+            item && item.created_by,
+            item && item.updated_by,
+            item && item.user
+        ];
+        for (const value of fromItem) {
+            const text = String(value || '').trim();
+            if (text) {
+                return text;
+            }
+        }
+        const fromCharge = [
+            charge && charge.waiter,
+            charge && charge.opened_by,
+            charge && charge.created_by,
+            charge && charge.updated_by,
+            charge && charge.user,
+            charge && charge.triggered_by
+        ];
+        for (const value of fromCharge) {
+            const text = String(value || '').trim();
+            if (text) {
+                return text;
+            }
+        }
+        return 'Não informado';
     }
 
     function parseCurrency(value) {
@@ -2277,7 +2358,7 @@
             list.appendChild(li);
         });
         const remaining = currentChargeTotal - total;
-        remainingEl.textContent = formatMoney(remaining);
+        remainingEl.textContent = remaining < 0 ? `Troco: ${formatMoney(Math.abs(remaining))}` : formatMoney(remaining);
         document.getElementById('consumptionPayData').value = JSON.stringify(individualPayments.map(p => ({ id: p.id, name: p.name, amount: Number(p.amount) })));
     }
 
@@ -2295,10 +2376,16 @@
             alert('Informe um valor válido.');
             return;
         }
+        const currentTotal = individualPayments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
+        const nextTotal = currentTotal + amount;
+        if (nextTotal > currentChargeTotal + 0.05 && !isCashPayment(methodId, methodName)) {
+            alert('Pagamento acima do total só é permitido quando houver forma em dinheiro (troco).');
+            return;
+        }
         individualPayments.push({ id: methodId, name: methodName, amount });
         const total = individualPayments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
-        const remaining = Math.max(currentChargeTotal - total, 0);
-        document.getElementById('consumptionPayAmount').value = remaining.toFixed(2).replace('.', ',');
+        const remaining = currentChargeTotal - total;
+        document.getElementById('consumptionPayAmount').value = Math.max(remaining, 0).toFixed(2).replace('.', ',');
         methodSelect.value = '';
         renderIndividualPayments();
     }
@@ -2312,7 +2399,7 @@
             total += Number(p.amount || 0);
             const li = document.createElement('li');
             li.className = 'list-group-item d-flex justify-content-between align-items-center';
-            li.innerHTML = `<span>${escapeHtml(p.name)} - ${formatMoney(p.amount)}</span><button type="button" class="btn btn-sm btn-outline-danger">Remover</button>`;
+            li.innerHTML = `<span>${escapeHtml(p.method_name || p.name || 'Forma não informada')} - ${formatMoney(p.amount)}</span><button type="button" class="btn btn-sm btn-outline-danger">Remover</button>`;
             li.querySelector('button').addEventListener('click', () => {
                 closeRoomPayments.splice(index, 1);
                 renderCloseRoomPayments();
@@ -2320,7 +2407,7 @@
             list.appendChild(li);
         });
         const remaining = currentConsumptionTotal - total;
-        remainingEl.textContent = formatMoney(remaining);
+        remainingEl.textContent = remaining < 0 ? `Troco: ${formatMoney(Math.abs(remaining))}` : formatMoney(remaining);
     }
 
     function addCloseRoomPayment() {
@@ -2337,10 +2424,16 @@
             alert('Informe um valor válido.');
             return;
         }
+        const currentTotal = closeRoomPayments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
+        const nextTotal = currentTotal + amount;
+        if (nextTotal > currentConsumptionTotal + 0.05 && !isCashPayment(methodId, methodName)) {
+            alert('Pagamento acima do total só é permitido quando houver forma em dinheiro (troco).');
+            return;
+        }
         closeRoomPayments.push({ method_id: methodId, method_name: methodName, amount });
         const total = closeRoomPayments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
-        const remaining = Math.max(currentConsumptionTotal - total, 0);
-        document.getElementById('closeRoomPaymentAmount').value = remaining.toFixed(2).replace('.', ',');
+        const remaining = currentConsumptionTotal - total;
+        document.getElementById('closeRoomPaymentAmount').value = Math.max(remaining, 0).toFixed(2).replace('.', ',');
         methodSelect.value = '';
         renderCloseRoomPayments();
     }
@@ -2427,8 +2520,13 @@
             alert('Adicione pelo menos uma forma de pagamento.');
             return;
         }
-        if (Math.abs(totalPaid - currentConsumptionTotal) > 0.05) {
-            alert(`A soma dos pagamentos deve ser igual ao total (${formatMoney(currentConsumptionTotal)}).`);
+        const hasCash = closeRoomPayments.some(p => isCashPayment(p.method_id, p.method_name));
+        if (totalPaid + 0.05 < currentConsumptionTotal) {
+            alert(`A soma dos pagamentos deve cobrir o total (${formatMoney(currentConsumptionTotal)}).`);
+            return;
+        }
+        if (totalPaid > currentConsumptionTotal + 0.05 && !hasCash) {
+            alert('Pagamento acima do total só é permitido quando houver forma em dinheiro (troco).');
             return;
         }
 
@@ -2558,6 +2656,7 @@
                 groupedByDate[date][aggKey].occurrences.push({
                     chargeId: charge.id || '',
                     date: date,
+                    collaborator: resolveOccurrenceCollaborator(charge, item),
                     qty: qty,
                     value: lineTotal,
                     status: charge.status || 'pending'
@@ -2591,7 +2690,7 @@
                 }
                 return `
                     <div class="consumption-occurrence-line d-flex justify-content-between align-items-center gap-2">
-                        <div class="small text-muted">Pedido #${escapeHtml(c.id)} · ${escapeHtml(c.status)}</div>
+                        <div class="small text-muted">Lançamento de consumo · ${escapeHtml(statusLabel(c.status))}</div>
                         <div class="d-flex align-items-center gap-2">
                             <span class="fw-bold">${formatMoney(c.total)}</span>
                             ${actions.join('')}
@@ -2622,7 +2721,7 @@
                         return `
                             <div class="consumption-occurrence-line d-flex justify-content-between align-items-start gap-2">
                                 <div class="small text-muted">
-                                    Ocorrência: ${escapeHtml(occ.date)} · ${escapeHtml(String(occ.status || 'pendente'))} · ${occ.qty}x
+                                    Ocorrência: ${escapeHtml(occ.date)} · ${escapeHtml(occ.collaborator || 'Não informado')} · ${escapeHtml(statusLabel(occ.status))} · ${occ.qty}x
                                 </div>
                                 <div class="d-flex align-items-center gap-2">
                                     <span class="fw-bold">${formatMoney(occ.value)}</span>
@@ -2775,9 +2874,15 @@
             alert('Adicione pelo menos uma forma de pagamento.');
             return;
         }
-        if (Math.abs(totalPaid - currentChargeTotal) > 0.05) {
+        const hasCash = individualPayments.some(p => isCashPayment(p.id, p.name));
+        if (totalPaid + 0.05 < currentChargeTotal) {
             event.preventDefault();
-            alert(`O pagamento individual deve ser igual ao valor da conta (${formatMoney(currentChargeTotal)}).`);
+            alert(`A soma dos pagamentos deve cobrir o valor da conta (${formatMoney(currentChargeTotal)}).`);
+            return;
+        }
+        if (totalPaid > currentChargeTotal + 0.05 && !hasCash) {
+            event.preventDefault();
+            alert('Pagamento acima do total só é permitido quando houver forma em dinheiro (troco).');
             return;
         }
         document.getElementById('consumptionPayData').value = JSON.stringify(individualPayments.map(p => ({ id: p.id, name: p.name, amount: Number(p.amount) })));

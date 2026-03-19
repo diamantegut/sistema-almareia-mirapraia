@@ -4,7 +4,7 @@ from app.utils.decorators import login_required
 from app.services.data_service import (
     load_fixed_assets, save_fixed_assets,
     load_products, save_stock_entry, log_stock_action,
-    load_users, save_products, secure_save_products,
+    load_users, secure_save_products,
     load_asset_conferences, save_asset_conferences
 )
 from app.services.stock_service import get_product_balances

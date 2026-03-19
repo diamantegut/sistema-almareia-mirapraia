@@ -28,11 +28,18 @@ def payment_methods():
             
             is_fiscal = request.form.get('is_fiscal') == 'on'
             fiscal_cnpj = request.form.get('fiscal_cnpj', '').strip()
+            pagseguro_alias = request.form.get('pagseguro_alias', '').strip()
             
             available_in = []
             if av_rest: available_in.append('restaurant')
             if av_rec: available_in.append('reception')
             if av_res: available_in.append('reservations')
+            if not available_in:
+                flash('Selecione ao menos um caixa de disponibilidade.')
+                return redirect(url_for('main.payment_methods'))
+            if is_fiscal and not fiscal_cnpj:
+                flash('Informe o CNPJ emissor para forma fiscal.')
+                return redirect(url_for('main.payment_methods'))
             
             if name:
                 method_id = re.sub(r'[^a-z0-9]', '', name.lower())
@@ -42,7 +49,8 @@ def payment_methods():
                         'name': name,
                         'available_in': available_in,
                         'is_fiscal': is_fiscal,
-                        'fiscal_cnpj': fiscal_cnpj
+                        'fiscal_cnpj': fiscal_cnpj,
+                        'pagseguro_alias': pagseguro_alias
                     })
                     save_payment_methods(methods)
                     flash('Forma de pagamento adicionada.')
@@ -62,11 +70,18 @@ def payment_methods():
             
             is_fiscal = request.form.get('is_fiscal') == 'on'
             fiscal_cnpj = request.form.get('fiscal_cnpj', '').strip()
+            pagseguro_alias = request.form.get('pagseguro_alias', '').strip()
             
             available_in = []
             if av_rest: available_in.append('restaurant')
             if av_rec: available_in.append('reception')
             if av_res: available_in.append('reservations')
+            if not available_in:
+                flash('Selecione ao menos um caixa de disponibilidade.')
+                return redirect(url_for('main.payment_methods'))
+            if is_fiscal and not fiscal_cnpj:
+                flash('Informe o CNPJ emissor para forma fiscal.')
+                return redirect(url_for('main.payment_methods'))
 
             found = False
             for m in methods:
@@ -75,6 +90,7 @@ def payment_methods():
                     m['available_in'] = available_in
                     m['is_fiscal'] = is_fiscal
                     m['fiscal_cnpj'] = fiscal_cnpj
+                    m['pagseguro_alias'] = pagseguro_alias
                     found = True
                     break
             
@@ -90,7 +106,13 @@ def payment_methods():
                         action=FinancialAuditService.EVENT_PAYMENT_CHANGE,
                         entity=f"PaymentMethod {method_id}",
                         old_data=None, # Teria que carregar antes, simplificando
-                        new_data={'name': new_name, 'available_in': available_in},
+                        new_data={
+                            'name': new_name,
+                            'available_in': available_in,
+                            'is_fiscal': is_fiscal,
+                            'fiscal_cnpj': fiscal_cnpj,
+                            'pagseguro_alias': pagseguro_alias
+                        },
                         details={'action': 'edit'}
                     )
                 except Exception as e:

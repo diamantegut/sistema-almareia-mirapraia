@@ -187,7 +187,7 @@
                             <button class="nav-link active" id="pill-all-tab" onclick="filterClosedAccounts('')">Todos</button>
                         </li>
                         <li class="nav-item">
-                            <button class="nav-link" id="pill-reception-tab" onclick="filterClosedAccounts('reception_room')">Recepção</button>
+                            <button class="nav-link" id="pill-reception-tab" onclick="filterClosedAccounts('reception')">Recepção</button>
                         </li>
                         <li class="nav-item">
                             <button class="nav-link" id="pill-restaurant-tab" onclick="filterClosedAccounts('restaurant_table')">Restaurante</button>
@@ -198,11 +198,11 @@
                         <table class="table table-striped table-hover" id="closedAccountsTable">
                             <thead>
                                 <tr>
-                                    <th>ID</th>
+                                    <th>Conta</th>
                                     <th>Data Fechamento</th>
-                                    <th>Origem / ID Original</th>
+                                    <th>Origem / Referência</th>
                                     <th>Valor Total</th>
-                                    <th>Fechado Por</th>
+                                    <th class="d-none d-md-table-cell">Fechado Por</th>
                                     <th>Status</th>
                                     <th>Ações</th>
                                 </tr>
@@ -262,7 +262,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="alert alert-warning">
-                        <i class="bi bi-exclamation-triangle-fill"></i> Atenção: A reabertura de conta irá reverter as operações financeiras e restaurar o pedido/mesa. Esta ação será registrada.
+                        <i class="bi bi-exclamation-triangle-fill"></i> Atenção: esta reabertura é operacional real. Os pagamentos da conta serão removidos do caixa original e a conta voltará para operação. Esta ação será auditada.
                     </div>
                     <form id="reopenForm">
                         <input type="hidden" id="reopenClosedId">
@@ -275,6 +275,48 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button type="button" class="btn btn-warning fw-bold" onclick="confirmReopen()">Confirmar Reabertura</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="closedAccountDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detalhes da Conta Fechada</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="closedAccountDetailsSummary" class="small text-muted mb-3"></div>
+                    <div class="table-responsive mb-3">
+                        <table class="table table-sm table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th class="text-end">Qtd</th>
+                                    <th class="text-end">Unit.</th>
+                                    <th class="text-end">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="closedAccountItemsBody"></tbody>
+                        </table>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Pagamento</th>
+                                    <th class="text-end">Valor</th>
+                                    <th>Ref.</th>
+                                </tr>
+                            </thead>
+                            <tbody id="closedAccountPaymentsBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
                 </div>
             </div>
         </div>
@@ -417,7 +459,7 @@
             const hasContinuity = !!item.has_continuity_issue;
             const cardBorderClass = (item.has_anomaly || hasContinuity) ? 'border-warning border-2' : 'border-0';
             const anomalyBadge = item.has_anomaly
-                ? '<span class="badge bg-warning text-dark ms-2">Divergência pendente</span>'
+                ? `<span class="badge bg-warning text-dark ms-2">${item.type_key === 'card_discrepancy' ? 'Divergência Cartão' : 'Divergência pendente'}</span>`
                 : (item.has_approved_divergence
                     ? '<span class="badge bg-secondary text-light ms-2">Divergência aprovada</span>'
                     : '');
@@ -522,7 +564,7 @@
                 const approved = !!s.difference_approved;
                 const continuityIssue = !!s.continuity_issue;
                 const diffClass = hasDiff ? (approved ? 'text-secondary' : 'text-danger') : 'text-muted';
-                const diffLabel = 'Diferença de caixa (somente dinheiro)';
+                const diffLabel = s.difference_label || item.difference_label || 'Diferença de caixa (somente dinheiro)';
                 const diffText = hasDiff ? `${diffLabel}: ${formatCurrency(s.difference)}` : '';
                 const continuityText = continuityIssue ? 'Abertura diferente do fechamento anterior' : '';
                 const statusBadge = hasDiff ? (approved
@@ -609,7 +651,7 @@
                     const result = await response.json();
                     
                     if (result.success && result.data && result.data.transactions) {
-                        renderSessionTransactions(contentEl, result.data.transactions);
+                        renderSessionTransactions(contentEl, result.data.transactions, result.data.card_comparison || null);
                         contentEl.dataset.loaded = "true";
                     } else {
                         contentEl.innerHTML = '<div class="alert alert-warning m-2 small">Nenhuma transação encontrada.</div>';
@@ -621,7 +663,7 @@
         }
     }
 
-    function renderSessionTransactions(container, transactions) {
+    function renderSessionTransactions(container, transactions, cardComparison) {
         if (!transactions || transactions.length === 0) {
             container.innerHTML = '<div class="text-center text-muted py-2 small">Sem transações registradas.</div>';
             return;
@@ -667,6 +709,79 @@
             `;
         }).join('');
 
+        let comparisonHtml = '';
+        if (cardComparison) {
+            if (cardComparison.status === 'missing_snapshot') {
+                comparisonHtml = `
+                    <div class="alert alert-info small mt-2 mb-0">
+                        Pull PagSeguro diário (${cardComparison.date_ref || '-'}) ainda não disponível para comparação desta sessão.
+                    </div>
+                `;
+            } else if (cardComparison.status === 'ok') {
+                const summary = cardComparison.summary || {};
+                const matchedRows = (cardComparison.matched || []).map(m => `
+                    <tr class="table-success">
+                        <td class="small">${(m.system && m.system.timestamp) || '-'}</td>
+                        <td class="small text-end">${formatCurrency((m.system && m.system.amount) || 0)}</td>
+                        <td class="small">${(m.card && m.card.provider) || '-'}</td>
+                        <td class="small">${(m.card && m.card.date) || '-'}</td>
+                        <td class="small text-end">${formatCurrency((m.card && m.card.amount) || 0)}</td>
+                    </tr>
+                `).join('');
+                const missingRows = (cardComparison.declared_not_found || []).map(m => `
+                    <tr class="table-warning">
+                        <td class="small">${m.timestamp || '-'}</td>
+                        <td class="small text-end">${formatCurrency(m.amount || 0)}</td>
+                        <td class="small">${m.payment_method || '-'}</td>
+                        <td class="small" colspan="2">Declarado no sistema e não encontrado no PagSeguro</td>
+                    </tr>
+                `).join('');
+                const extraRows = (cardComparison.pagseguro_not_declared || []).map(m => `
+                    <tr class="table-danger">
+                        <td class="small">${m.date || '-'}</td>
+                        <td class="small text-end">${formatCurrency(m.amount || 0)}</td>
+                        <td class="small">${m.provider || '-'}</td>
+                        <td class="small" colspan="2">Encontrado no PagSeguro e não lançado no sistema</td>
+                    </tr>
+                `).join('');
+                comparisonHtml = `
+                    <div class="mt-3 p-2 border rounded bg-white">
+                        <h6 class="small fw-bold text-muted mb-2">Conciliação Cartão (PagSeguro diário - ${cardComparison.date_ref || '-'})</h6>
+                        <div class="small mb-2">
+                            <span class="badge bg-success me-2">Conciliados: ${summary.matched_count || 0}</span>
+                            <span class="badge bg-warning text-dark me-2">Declarado e não encontrado: ${summary.declared_not_found_count || 0}</span>
+                            <span class="badge bg-danger me-2">PagSeguro e não lançado: ${summary.pagseguro_not_declared_count || 0}</span>
+                        </div>
+                        <div class="small text-muted mb-2">
+                            Total sistema cartão: ${formatCurrency(summary.total_sistema_cartao || 0)} |
+                            Total PagSeguro: ${formatCurrency(summary.total_pagseguro || 0)} |
+                            Diferença cartão: <strong>${formatCurrency(summary.difference || 0)}</strong>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-sm mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Data/Hora</th>
+                                        <th class="text-end">Valor sistema</th>
+                                        <th>Origem PagSeguro</th>
+                                        <th>Data/Hora PagSeguro</th>
+                                        <th class="text-end">Valor PagSeguro</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${matchedRows || ''}
+                                    ${missingRows || ''}
+                                    ${extraRows || ''}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            } else if (cardComparison.status === 'error') {
+                comparisonHtml = `<div class="alert alert-warning small mt-2 mb-0">Falha ao montar conciliação de cartão: ${cardComparison.message || 'erro desconhecido'}.</div>`;
+            }
+        }
+
         container.innerHTML = `
             <h6 class="small fw-bold text-muted mb-2 ps-2">Transações da Sessão</h6>
             <div class="table-responsive bg-white border rounded">
@@ -694,6 +809,7 @@
                     </tfoot>
                 </table>
             </div>
+            ${comparisonHtml}
         `;
     }
 
@@ -772,7 +888,7 @@
         });
         
         let activeId = 'pill-all-tab';
-        if (origin === 'reception_room') activeId = 'pill-reception-tab';
+        if (origin === 'reception') activeId = 'pill-reception-tab';
         else if (origin === 'restaurant_table') activeId = 'pill-restaurant-tab';
         
         const activeEl = document.getElementById(activeId);
@@ -827,17 +943,33 @@
             
             data.forEach(acc => {
                 const tr = document.createElement('tr');
-                const originLabel = acc.origin === 'restaurant_table' ? 'Mesa' : (acc.origin === 'reception_room' ? 'Quarto' : acc.origin);
+                const originLabel = acc.origin === 'restaurant_table'
+                    ? 'Restaurante'
+                    : ((acc.origin || '').startsWith('reception') ? 'Recepção' : (acc.origin || '-'));
+                const blockReason = acc.reopen_block_reason || '';
+                const canReopen = Boolean(acc.can_reopen) && acc.status !== 'reopened';
+                const statusBadge = acc.status === 'reopened'
+                    ? '<span class="badge bg-success">Reaberta</span>'
+                    : (canReopen ? '<span class="badge bg-warning text-dark">Fechada - elegível</span>' : '<span class="badge bg-secondary">Fechada - bloqueada</span>');
                 
                 tr.innerHTML = `
-                    <td><small title="${acc.id}">${acc.id.substring(0, 15)}...</small></td>
-                    <td>${acc.closed_at}</td>
-                    <td>${originLabel} ${acc.original_id}</td>
-                    <td class="fw-bold">${formatCurrency(acc.total)}</td>
-                    <td>${acc.closed_by}</td>
-                    <td><span class="badge bg-secondary">${acc.status === 'reopened' ? 'Reaberta' : 'Fechada'}</span></td>
                     <td>
-                        <button class="btn btn-sm btn-warning" onclick="openReopenModal('${acc.id}')">
+                        <div class="fw-semibold"><small title="${acc.id}">${acc.id.substring(0, 15)}...</small></div>
+                        <small class="text-muted">${acc.cashier_session_id ? ('Caixa: ' + acc.cashier_session_id) : 'Sem caixa identificado'}</small>
+                    </td>
+                    <td>${acc.closed_at}</td>
+                    <td>${originLabel} ${acc.original_id || '-'}</td>
+                    <td class="fw-bold">${formatCurrency(acc.total)}</td>
+                    <td class="d-none d-md-table-cell">${acc.closed_by}</td>
+                    <td>
+                        ${statusBadge}
+                        ${blockReason ? `<small class="d-block text-muted mt-1">${blockReason}</small>` : ''}
+                    </td>
+                    <td class="text-nowrap">
+                        <button class="btn btn-sm btn-outline-primary" onclick="viewClosedAccountDetails('${acc.id}')">
+                            <i class="bi bi-list-ul"></i> Itens
+                        </button>
+                        <button class="btn btn-sm btn-warning ${canReopen ? '' : 'disabled'}" ${canReopen ? '' : 'disabled'} onclick="openReopenModal('${acc.id}', ${JSON.stringify(blockReason)})">
                             <i class="bi bi-arrow-counterclockwise"></i> Reabrir
                         </button>
                     </td>
@@ -878,7 +1010,71 @@
         container.innerHTML = html;
     }
 
-    function openReopenModal(id) {
+    async function viewClosedAccountDetails(id) {
+        const summaryEl = document.getElementById('closedAccountDetailsSummary');
+        const itemsBody = document.getElementById('closedAccountItemsBody');
+        const paymentsBody = document.getElementById('closedAccountPaymentsBody');
+        summaryEl.textContent = 'Carregando...';
+        itemsBody.innerHTML = '';
+        paymentsBody.innerHTML = '';
+        new bootstrap.Modal(document.getElementById('closedAccountDetailsModal')).show();
+        try {
+            const response = await fetch(`/api/closed_accounts/${id}`);
+            const result = await response.json();
+            if (!result.success) throw new Error(result.error || 'Falha ao carregar detalhes.');
+            const data = result.data || {};
+            summaryEl.innerHTML = `
+                <strong>ID:</strong> ${data.id || '-'} |
+                <strong>Origem:</strong> ${data.origin || '-'} |
+                <strong>Referência:</strong> ${data.original_id || '-'} |
+                <strong>Caixa:</strong> ${data.cashier_session_id || 'N/I'} (${data.cashier_session_status || '-'}) |
+                <strong>Elegível:</strong> ${data.can_reopen ? 'Sim' : 'Não'}
+                ${data.reopen_block_reason ? `<div class="mt-1 text-muted">Motivo de bloqueio: ${data.reopen_block_reason}</div>` : ''}
+            `;
+            const items = Array.isArray(data.items) ? data.items : [];
+            if (items.length === 0) {
+                itemsBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Sem itens registrados.</td></tr>';
+            } else {
+                items.forEach(item => {
+                    const qty = Number(item.quantity || item.qty || 1);
+                    const unit = Number(item.price || item.unit_price || 0);
+                    const total = Number(item.total || (qty * unit) || 0);
+                    itemsBody.innerHTML += `
+                        <tr>
+                            <td>${item.name || item.description || '-'}</td>
+                            <td class="text-end">${qty}</td>
+                            <td class="text-end">${formatCurrency(unit)}</td>
+                            <td class="text-end">${formatCurrency(total)}</td>
+                        </tr>
+                    `;
+                });
+            }
+            const payments = Array.isArray(data.payments) ? data.payments : [];
+            if (payments.length === 0) {
+                paymentsBody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">Sem pagamentos registrados.</td></tr>';
+            } else {
+                payments.forEach(pay => {
+                    paymentsBody.innerHTML += `
+                        <tr>
+                            <td>${pay.method || pay.payment_method || '-'}</td>
+                            <td class="text-end">${formatCurrency(Number(pay.amount || 0))}</td>
+                            <td>${pay.reference || pay.id || '-'}</td>
+                        </tr>
+                    `;
+                });
+            }
+        } catch (e) {
+            summaryEl.innerHTML = `<span class="text-danger">Erro: ${e.message}</span>`;
+            itemsBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Não foi possível carregar os itens.</td></tr>';
+            paymentsBody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">Não foi possível carregar os pagamentos.</td></tr>';
+        }
+    }
+
+    function openReopenModal(id, blockReason = '') {
+        if (blockReason) {
+            alert('Conta não elegível para reabertura: ' + blockReason);
+            return;
+        }
         document.getElementById('reopenClosedId').value = id;
         document.getElementById('reopenReason').value = '';
         new bootstrap.Modal(document.getElementById('reopenModal')).show();

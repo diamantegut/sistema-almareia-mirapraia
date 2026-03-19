@@ -1177,6 +1177,12 @@ class ReservationService:
                 
                 if 'companions' in updates:
                     current_details['companions'] = updates['companions']
+                if 'payment_followup' in updates and isinstance(updates.get('payment_followup'), dict):
+                    current_details['payment_followup'] = updates.get('payment_followup')
+                if 'fiscal_info' in updates and isinstance(updates.get('fiscal_info'), dict):
+                    current_details['fiscal_info'] = updates.get('fiscal_info')
+                if 'operational_info' in updates and isinstance(updates.get('operational_info'), dict):
+                    current_details['operational_info'] = updates.get('operational_info')
 
                 current_details = self._ensure_guest_identity(reservation_id, current_details, all_details=all_details)
                 current_details['recurrence_summary'] = self._build_guest_recurrence_summary(reservation_id, current_details, all_details=all_details)

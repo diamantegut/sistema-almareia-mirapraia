@@ -1,7 +1,7 @@
 import pandas as pd
 import json
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import re
 import itertools
 import requests
@@ -13,6 +13,7 @@ from app.services.system_config_manager import get_data_path
 # Configuration
 SETTINGS_FILE = get_data_path('card_settings.json')
 RECONCILIATION_AUDIT_FILE = get_data_path('card_reconciliation_audit.json')
+CARD_RECONCILIATION_CONSUMED_FILE = get_data_path('card_reconciliation_consumed.json')
 
 def load_card_settings():
     if not os.path.exists(SETTINGS_FILE):
@@ -51,44 +52,112 @@ def append_reconciliation_audit(audit_entry):
         audits = audits[-2000:]
     save_reconciliation_audits(audits)
 
-def fetch_pagseguro_transactions(start_date, end_date):
-    """
-    Fetches transactions from PagSeguro API V3 (XML).
-    Iterates over all configured accounts.
-    Args:
-        start_date (datetime): Start of range.
-        end_date (datetime): End of range.
-    """
+
+def load_card_consumption_map():
+    if not os.path.exists(CARD_RECONCILIATION_CONSUMED_FILE):
+        return {}
+    try:
+        with open(CARD_RECONCILIATION_CONSUMED_FILE, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            if not isinstance(data, dict):
+                return {}
+            return data
+    except Exception:
+        return {}
+
+
+def save_card_consumption_map(consumption_map):
+    payload = consumption_map if isinstance(consumption_map, dict) else {}
+    with open(CARD_RECONCILIATION_CONSUMED_FILE, 'w', encoding='utf-8') as f:
+        json.dump(payload, f, indent=2, ensure_ascii=False)
+
+
+def build_system_transaction_signature(system_tx):
+    tx = system_tx if isinstance(system_tx, dict) else {}
+    grouped = tx.get('grouped_ids')
+    if isinstance(grouped, list) and grouped:
+        grouped_key = '|'.join(sorted(str(x or '') for x in grouped))
+        ts = tx.get('timestamp')
+        if isinstance(ts, datetime):
+            ts_key = ts.strftime('%Y-%m-%d %H:%M:%S')
+        else:
+            ts_key = str(ts or '')
+        amount_key = f"{round(float(tx.get('amount', 0.0) or 0.0), 2):.2f}"
+        return f"group:{grouped_key}:{ts_key}:{amount_key}"
+    tx_id = str(tx.get('id') or '')
+    ts = tx.get('timestamp')
+    if isinstance(ts, datetime):
+        ts_key = ts.strftime('%Y-%m-%d %H:%M:%S')
+    else:
+        ts_key = str(ts or '')
+    amount_key = f"{round(float(tx.get('amount', 0.0) or 0.0), 2):.2f}"
+    return f"single:{tx_id}:{ts_key}:{amount_key}"
+
+
+def build_card_transaction_signature(card_tx):
+    tx = card_tx if isinstance(card_tx, dict) else {}
+    card_id = str(tx.get('id') or (tx.get('original_row') or {}).get('code') or '')
+    provider = str(tx.get('provider') or '')
+    tx_date = tx.get('date')
+    if not isinstance(tx_date, datetime):
+        tx_date = datetime.now()
+    date_key = tx_date.strftime('%Y-%m-%d %H:%M:%S')
+    amount_key = f"{round(float(tx.get('amount', 0.0) or 0.0), 2):.2f}"
+    return f"{provider}|{card_id}|{date_key}|{amount_key}"
+
+
+def register_consumed_card_matches(matches, source='api_sync', period_start='', period_end='', user=''):
+    entries = load_card_consumption_map()
+    now_str = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+    consumed = 0
+    for match in matches or []:
+        card = match.get('card') if isinstance(match, dict) else None
+        system_tx = match.get('system') if isinstance(match, dict) else None
+        if not isinstance(card, dict) or not isinstance(system_tx, dict):
+            continue
+        card_sig = build_card_transaction_signature(card)
+        system_sig = build_system_transaction_signature(system_tx)
+        entries[card_sig] = {
+            'card_signature': card_sig,
+            'system_signature': system_sig,
+            'status': str(match.get('status') or ''),
+            'source': str(source or ''),
+            'period_start': str(period_start or ''),
+            'period_end': str(period_end or ''),
+            'user': str(user or ''),
+            'updated_at': now_str
+        }
+        consumed += 1
+    save_card_consumption_map(entries)
+    return consumed
+
+def fetch_pagseguro_transactions_detailed(start_date, end_date):
     settings = load_card_settings()
     ps_config_list = settings.get('pagseguro', [])
-    
-    # Backward compatibility: handle if it's a dict (old format)
     if isinstance(ps_config_list, dict):
         ps_config_list = [ps_config_list]
-        
     all_transactions = []
+    account_errors = []
+    processed_accounts = 0
 
     for idx, ps_config in enumerate(ps_config_list):
         email = ps_config.get('email')
         token = ps_config.get('token')
         sandbox = ps_config.get('sandbox', False)
         alias = ps_config.get('alias', f'Conta {idx+1}')
-        
-        print(f"Processing PagSeguro account: {alias}")
-        
+        processed_accounts += 1
         if not email or not token:
-            print(f"PagSeguro credentials missing for {alias}.")
+            account_errors.append({
+                'alias': alias,
+                'error': 'Credenciais incompletas (email/token).',
+                'http_status': None
+            })
             continue
-
-        # API Endpoint
         base_url = "https://ws.pagseguro.uol.com.br/v3/transactions"
         if sandbox:
             base_url = "https://ws.sandbox.pagseguro.uol.com.br/v3/transactions"
-            
-        # Format dates: YYYY-MM-DDThh:mm (max range 30 days)
         initial_date = start_date.strftime('%Y-%m-%dT%H:%M')
         final_date = end_date.strftime('%Y-%m-%dT%H:%M')
-        
         params = {
             'email': email,
             'token': token,
@@ -96,42 +165,43 @@ def fetch_pagseguro_transactions(start_date, end_date):
             'finalDate': final_date,
             'maxPageResults': 100
         }
-        
         page = 1
-        
+        account_failed = False
         while True:
             params['page'] = page
             try:
-                response = requests.get(base_url, params=params)
-                
+                response = requests.get(base_url, params=params, timeout=25)
                 if response.status_code != 200:
-                    print(f"PagSeguro API Error ({alias}): {response.status_code} - {response.text}")
+                    account_errors.append({
+                        'alias': alias,
+                        'error': f'HTTP {response.status_code}',
+                        'http_status': int(response.status_code),
+                        'response': str(response.text or '')[:500]
+                    })
+                    account_failed = True
                     break
-                    
-                # Parse XML
                 try:
                     root = ET.fromstring(response.content)
                 except ET.ParseError:
-                    print(f"PagSeguro XML Parse Error ({alias})")
+                    account_errors.append({
+                        'alias': alias,
+                        'error': 'Resposta XML inválida.',
+                        'http_status': 200
+                    })
+                    account_failed = True
                     break
-                
-                # Extract Transactions
                 tx_nodes = root.findall('.//transaction')
                 if not tx_nodes:
                     break
-                    
                 for tx in tx_nodes:
                     try:
-                        status = tx.find('status').text # 1=Aguardando, 3=Paga, 4=Disponível, 7=Cancelada
-                        if status == '7': continue # Skip cancelled
-                        
-                        date_str = tx.find('date').text 
-                        date_str = date_str.split('.')[0]
-                        dt = datetime.strptime(date_str, '%Y-%m-%dT%H:%M:%S')
-                        
+                        status = tx.find('status').text
+                        if status == '7':
+                            continue
+                        date_str = tx.find('date').text
+                        dt = _parse_pagseguro_datetime(date_str)
                         amount = float(tx.find('grossAmount').text)
-                        type_code = tx.find('paymentMethod/type').text 
-                        
+                        type_code = tx.find('paymentMethod/type').text
                         all_transactions.append({
                             'provider': f'PagSeguro ({alias})',
                             'date': dt,
@@ -140,30 +210,65 @@ def fetch_pagseguro_transactions(start_date, end_date):
                             'status': status,
                             'original_row': {'code': tx.find('code').text, 'status': status, 'account': alias}
                         })
-                    except Exception as e:
-                        print(f"Error parsing XML transaction ({alias}): {e}")
+                    except Exception as exc:
+                        account_errors.append({
+                            'alias': alias,
+                            'error': f'Falha ao parsear transação: {exc}',
+                            'http_status': 200
+                        })
+                        account_failed = True
                         continue
-                
-                # Check pagination
                 current_page_node = root.find('currentPage')
                 total_pages_node = root.find('totalPages')
-                
                 if current_page_node is not None and total_pages_node is not None:
                     current_page = int(current_page_node.text)
                     total_pages = int(total_pages_node.text)
-                    
                     if current_page >= total_pages:
                         break
                 else:
                     break
-                    
                 page += 1
-                
-            except Exception as e:
-                print(f"PagSeguro Request Failed ({alias}): {e}")
+            except Exception as exc:
+                account_errors.append({
+                    'alias': alias,
+                    'error': f'Requisição PagSeguro falhou: {exc}',
+                    'http_status': None
+                })
+                account_failed = True
                 break
-            
-    return all_transactions
+        if account_failed:
+            continue
+    return {
+        'transactions': all_transactions,
+        'errors': account_errors,
+        'total_accounts': len(ps_config_list) if isinstance(ps_config_list, list) else 0,
+        'processed_accounts': processed_accounts
+    }
+
+
+def fetch_pagseguro_transactions(start_date, end_date):
+    detail = fetch_pagseguro_transactions_detailed(start_date, end_date)
+    return detail.get('transactions', [])
+
+
+def _parse_pagseguro_datetime(raw_value):
+    text = str(raw_value or '').strip()
+    if not text:
+        return datetime.now()
+    if text.endswith('Z'):
+        text = text[:-1] + '+00:00'
+    try:
+        parsed = datetime.fromisoformat(text)
+        if parsed.tzinfo is not None:
+            local_tz = timezone(timedelta(hours=-3))
+            parsed = parsed.astimezone(local_tz).replace(tzinfo=None)
+        return parsed
+    except Exception:
+        pass
+    text_no_ms = text.split('.')[0]
+    if '+' in text_no_ms[10:] or '-' in text_no_ms[10:]:
+        text_no_ms = text_no_ms[:19]
+    return datetime.strptime(text_no_ms, '%Y-%m-%dT%H:%M:%S')
 
 def fetch_rede_transactions(start_date, end_date):
     """
@@ -360,10 +465,77 @@ def parse_rede_csv(file_path):
         return []
 
 def _is_card_time_match(sys_time, card_time, tolerance_mins):
+    sys_time = _normalize_match_datetime(sys_time)
+    card_time = _normalize_match_datetime(card_time)
     if card_time.hour == 0 and card_time.minute == 0:
         return sys_time.date() == card_time.date()
-    time_diff = abs((sys_time - card_time).total_seconds()) / 60
-    return time_diff <= tolerance_mins
+    time_diff_seconds = abs((sys_time - card_time).total_seconds())
+    return time_diff_seconds <= ((float(tolerance_mins) * 60.0) + 90.0)
+
+
+def _normalize_match_datetime(value):
+    if isinstance(value, datetime):
+        if value.tzinfo is not None:
+            local_tz = timezone(timedelta(hours=-3))
+            return value.astimezone(local_tz).replace(tzinfo=None)
+        return value
+    return datetime.now()
+
+
+def _is_card_allowed_for_system(system_tx, card_tx):
+    lock_signature = str((card_tx or {}).get('_consumed_system_signature') or '')
+    if not lock_signature:
+        return True
+    return build_system_transaction_signature(system_tx) == lock_signature
+
+
+def _filter_consumed_cards(card_transactions, system_transactions, consumption_map):
+    consumption_map = consumption_map if isinstance(consumption_map, dict) else {}
+    system_signatures = {build_system_transaction_signature(tx) for tx in system_transactions}
+    filtered = []
+    skipped = 0
+    for card_tx in card_transactions:
+        sig = build_card_transaction_signature(card_tx)
+        used = consumption_map.get(sig)
+        if not isinstance(used, dict):
+            filtered.append(card_tx)
+            continue
+        consumed_system_signature = str(used.get('system_signature') or '')
+        if consumed_system_signature and consumed_system_signature in system_signatures:
+            unlocked_tx = dict(card_tx)
+            unlocked_tx['_consumed_system_signature'] = consumed_system_signature
+            filtered.append(unlocked_tx)
+            continue
+        skipped += 1
+    return filtered, skipped
+
+
+def _find_extended_unique_time_match(sys_tx, unmatched_system, unmatched_card, tolerance_val, tolerance_mins):
+    sys_amount = float(sys_tx.get('amount', 0.0) or 0.0)
+    sys_amount_peers = [s for s in unmatched_system if abs(float(s.get('amount', 0.0) or 0.0) - sys_amount) <= tolerance_val]
+    if len(sys_amount_peers) != 1:
+        return None
+    sys_time = _normalize_match_datetime(sys_tx.get('timestamp'))
+    candidates = []
+    for idx, card_tx in enumerate(unmatched_card):
+        if not _is_card_allowed_for_system(sys_tx, card_tx):
+            continue
+        card_amount = float(card_tx.get('amount', 0.0) or 0.0)
+        if abs(sys_amount - card_amount) > tolerance_val:
+            continue
+        card_amount_peers = [c for c in unmatched_card if abs(float(c.get('amount', 0.0) or 0.0) - card_amount) <= tolerance_val]
+        if len(card_amount_peers) != 1:
+            continue
+        card_time = _normalize_match_datetime(card_tx.get('date'))
+        diff_minutes = abs((sys_time - card_time).total_seconds()) / 60.0
+        if diff_minutes <= float(tolerance_mins):
+            continue
+        if diff_minutes <= 120.0:
+            candidates.append((idx, card_tx, diff_minutes))
+    if len(candidates) != 1:
+        return None
+    candidates.sort(key=lambda x: x[2])
+    return {'index': candidates[0][0], 'card': candidates[0][1], 'status': 'matched_extended_time'}
 
 
 def _build_grouped_system_transaction(grouped_items):
@@ -398,7 +570,7 @@ def _find_combination_match(system_items, target_amount, card_time, tolerance_mi
     return None
 
 
-def reconcile_transactions(system_transactions, card_transactions, tolerance_mins=60, tolerance_val=0.05):
+def reconcile_transactions(system_transactions, card_transactions, tolerance_mins=60, tolerance_val=0.05, consumption_map=None):
     """
     Matches system transactions with card transactions.
     
@@ -416,7 +588,7 @@ def reconcile_transactions(system_transactions, card_transactions, tolerance_min
     
     matched = []
     unmatched_system = system_transactions[:] # Copy
-    unmatched_card = card_transactions[:] # Copy
+    unmatched_card, skipped_consumed_card_count = _filter_consumed_cards(card_transactions[:], unmatched_system, consumption_map)
     
     for sys_tx in list(unmatched_system):
         best_match = None
@@ -430,6 +602,8 @@ def reconcile_transactions(system_transactions, card_transactions, tolerance_min
             card_amount = card_tx['amount']
             
             if abs(sys_amount - card_amount) <= tolerance_val:
+                if not _is_card_allowed_for_system(sys_tx, card_tx):
+                    continue
                 if _is_card_time_match(sys_time, card_time, tolerance_mins):
                     best_match = card_tx
                     best_match_idx = i
@@ -443,6 +617,24 @@ def reconcile_transactions(system_transactions, card_transactions, tolerance_min
             })
             unmatched_system.remove(sys_tx)
             del unmatched_card[best_match_idx]
+
+    for sys_tx in list(unmatched_system):
+        extended = _find_extended_unique_time_match(
+            sys_tx=sys_tx,
+            unmatched_system=unmatched_system,
+            unmatched_card=unmatched_card,
+            tolerance_val=tolerance_val,
+            tolerance_mins=tolerance_mins
+        )
+        if not extended:
+            continue
+        matched.append({
+            'system': sys_tx,
+            'card': extended['card'],
+            'status': extended['status']
+        })
+        unmatched_system.remove(sys_tx)
+        del unmatched_card[extended['index']]
 
     grouped_by_payment = {}
     for sys_tx in unmatched_system:
@@ -466,6 +658,8 @@ def reconcile_transactions(system_transactions, card_transactions, tolerance_min
         matched_card = None
 
         for i, card_tx in enumerate(unmatched_card):
+            if not _is_card_allowed_for_system(system_group_tx, card_tx):
+                continue
             if abs(group_amount - float(card_tx.get('amount', 0.0) or 0.0)) <= tolerance_val and _is_card_time_match(group_time, card_tx['date'], tolerance_mins):
                 matched_idx = i
                 matched_card = card_tx
@@ -487,6 +681,8 @@ def reconcile_transactions(system_transactions, card_transactions, tolerance_min
         del unmatched_card[matched_idx]
 
     for card_tx in list(unmatched_card):
+        if str(card_tx.get('_consumed_system_signature') or ''):
+            continue
         combo = _find_combination_match(
             system_items=unmatched_system,
             target_amount=float(card_tx.get('amount', 0.0) or 0.0),
@@ -514,5 +710,6 @@ def reconcile_transactions(system_transactions, card_transactions, tolerance_min
     return {
         'matched': matched,
         'unmatched_system': unmatched_system,
-        'unmatched_card': unmatched_card
+        'unmatched_card': unmatched_card,
+        'skipped_consumed_card_count': skipped_consumed_card_count
     }

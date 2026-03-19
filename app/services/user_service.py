@@ -3,6 +3,7 @@ import json
 import hashlib
 import unicodedata
 from werkzeug.utils import secure_filename
+from app.services import data_service
 from app.services.system_config_manager import get_data_path, DEPARTMENTS
 
 USERS_FILE = get_data_path('users.json')
@@ -10,17 +11,10 @@ EX_EMPLOYEES_FILE = get_data_path('ex_employees.json')
 PASSWORD_RESET_REQUESTS_FILE = get_data_path('password_reset_requests.json')
 
 def load_users():
-    if not os.path.exists(USERS_FILE):
-        return {}
-    try:
-        with open(USERS_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except json.JSONDecodeError:
-        return {}
+    return data_service.load_users()
 
 def save_users(users):
-    with open(USERS_FILE, 'w', encoding='utf-8') as f:
-        json.dump(users, f, indent=4, ensure_ascii=False)
+    return data_service.save_users(users)
 
 def load_ex_employees():
     if not os.path.exists(EX_EMPLOYEES_FILE):

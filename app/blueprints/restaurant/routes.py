@@ -9,8 +9,8 @@ from app.services.data_service import (
     load_observations, save_observations, load_table_orders, save_table_orders,
     load_room_occupancy, format_room_number, load_breakfast_history,
     load_payment_methods, save_payment_methods,
-    save_sales_history, load_sales_history, secure_save_sales_history,
-    save_stock_entry, log_stock_action, load_products, add_stock_entries_batch,
+    load_sales_history, secure_save_sales_history, secure_save_menu_items,
+    save_stock_entry, log_stock_action, load_products, add_stock_entries_batch, save_stock_entries,
     load_room_charges, save_room_charges, load_flavor_groups, load_settings,
     load_bar_data, save_bar_data
 )
@@ -47,6 +47,213 @@ import time
 PROCESSED_BATCHES = {}
 
 # --- Helpers ---
+
+def _normalize_str(value):
+    if value is None:
+        return ''
+    return str(value).strip().lower()
+
+def _is_special_table_id(table_id):
+    return str(table_id) in {'36', '68', '69'}
+
+def _build_restaurant_fiscal_context(order_obj, total_amount):
+    order_data = order_obj if isinstance(order_obj, dict) else {}
+    customer_info = {
+        'name': order_data.get('customer_name'),
+        'type': order_data.get('customer_type'),
+        'room_number': order_data.get('room_number'),
+        'cpf_cnpj': order_data.get('customer_cpf_cnpj') or '',
+    }
+    policy = FiscalPoolService.evaluate_fiscal_policy(
+        origin='restaurant',
+        total_amount=float(total_amount or 0),
+        items=order_data.get('items') or [],
+        customer_info=customer_info,
+        notes=f"Mesa {order_data.get('table_id') or ''}",
+        original_id=f"MESA_{order_data.get('table_id') or ''}",
+        fiscal_type='nfce',
+    )
+    return {
+        'can_offer': bool(policy.get('eligible_for_fiscal')),
+        'block_reason': policy.get('non_fiscal_reason'),
+        'doc_required': bool(policy.get('document_required')),
+        'auto_document': policy.get('customer_document') or '',
+    }
+
+def _recalculate_order_total(order):
+    total = 0.0
+    for item in order.get('items', []):
+        try:
+            item_price = float(item.get('price', 0) or 0)
+        except Exception:
+            item_price = 0.0
+        try:
+            item_qty = float(item.get('qty', 1) or 1)
+        except Exception:
+            item_qty = 1.0
+        comps_price = sum(float(c.get('price', 0) or 0) for c in item.get('complements', []))
+        total += item_qty * (item_price + comps_price)
+    order['total'] = total
+    return total
+
+def _is_live_music_cover_item(item):
+    if not isinstance(item, dict):
+        return False
+    source = _normalize_str(item.get('source'))
+    if source == 'auto_cover_activation':
+        return True
+    return bool(item.get('live_music_cover') is True)
+
+def _sync_live_music_cover(order, table_id, cover_product, should_apply, adults, actor, trigger):
+    items = order.setdefault('items', [])
+    existing_indexes = [i for i, item in enumerate(items) if _is_live_music_cover_item(item)]
+    now_str = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+    try:
+        adults_value = float(adults or 0)
+    except Exception:
+        adults_value = 0.0
+    adults_value = max(0.0, adults_value)
+    changed = False
+    action = 'unchanged'
+    if not should_apply or adults_value <= 0:
+        if existing_indexes:
+            for idx in sorted(existing_indexes, reverse=True):
+                items.pop(idx)
+            changed = True
+            action = 'removed'
+        if changed:
+            _recalculate_order_total(order)
+        return {'changed': changed, 'action': action, 'adults': adults_value}
+    if not cover_product:
+        return {'changed': False, 'action': 'no_product', 'adults': adults_value}
+    if existing_indexes:
+        first_idx = existing_indexes[0]
+        base_item = items[first_idx]
+        base_item['printed'] = True
+        base_item['name'] = cover_product.get('name')
+        base_item['product_id'] = cover_product.get('id')
+        base_item['qty'] = adults_value
+        base_item['price'] = float(cover_product.get('price', 0) or 0)
+        base_item['complements'] = []
+        base_item['category'] = cover_product.get('category')
+        base_item['service_fee_exempt'] = False
+        base_item['source'] = 'auto_cover_activation'
+        base_item['waiter'] = 'Sistema'
+        base_item['live_music_cover'] = True
+        base_item['live_music_cover_trace'] = {
+            'table_id': str(table_id),
+            'adults': adults_value,
+            'trigger': trigger,
+            'synced_at': now_str,
+            'user': actor,
+        }
+        if len(existing_indexes) > 1:
+            for idx in sorted(existing_indexes[1:], reverse=True):
+                items.pop(idx)
+        changed = True
+        action = 'updated'
+    else:
+        base_item = {
+            'id': str(uuid.uuid4()),
+            'printed': True,
+            'name': cover_product.get('name'),
+            'product_id': cover_product.get('id'),
+            'qty': adults_value,
+            'price': float(cover_product.get('price', 0) or 0),
+            'complements': [],
+            'category': cover_product.get('category'),
+            'service_fee_exempt': False,
+            'source': 'auto_cover_activation',
+            'waiter': 'Sistema',
+            'live_music_cover': True,
+            'live_music_cover_trace': {
+                'table_id': str(table_id),
+                'adults': adults_value,
+                'trigger': trigger,
+                'synced_at': now_str,
+                'user': actor,
+            },
+        }
+        items.append(base_item)
+        changed = True
+        action = 'created'
+    if changed:
+        _recalculate_order_total(order)
+    return {'changed': changed, 'action': action, 'adults': adults_value}
+
+def _has_restaurant_or_reception_access():
+    user_role = _normalize_str(session.get('role'))
+    user_dept = _normalize_str(session.get('department'))
+    user_perms = session.get('permissions', [])
+    if not isinstance(user_perms, list):
+        user_perms = []
+
+    perms_norm = {_normalize_str(p) for p in user_perms}
+    has_restaurant_perm = any('restaurante' in p for p in perms_norm)
+    has_reception_perm = 'recepcao' in perms_norm or 'recepção' in perms_norm
+    is_reception_or_service_dept = user_dept in {'recepção', 'recepcao', 'serviço', 'servico'}
+    is_privileged_role = user_role in {'admin', 'gerente', 'supervisor', 'recepcao'}
+
+    return is_privileged_role or has_restaurant_perm or has_reception_perm or is_reception_or_service_dept
+
+def _ensure_restaurant_operation_access():
+    if _has_restaurant_or_reception_access():
+        return None
+    flash('Acesso restrito.')
+    return redirect(url_for('main.index'))
+
+def _has_restaurant_cashier_access():
+    return _has_restaurant_or_reception_access()
+
+def _is_restaurant_cashier_supervisor_or_above():
+    return _normalize_str(session.get('role')) in {'admin', 'gerente', 'supervisor'}
+
+def _rollback_cashier_transactions(transaction_ids):
+    tx_ids = {str(tid) for tid in (transaction_ids or []) if tid}
+    if not tx_ids:
+        return
+    sessions = CashierService.list_sessions()
+    changed = False
+    for cash_session in sessions:
+        transactions = cash_session.get('transactions')
+        if not isinstance(transactions, list):
+            continue
+        filtered = [tx for tx in transactions if str(tx.get('id')) not in tx_ids]
+        if len(filtered) != len(transactions):
+            cash_session['transactions'] = filtered
+            changed = True
+    if changed:
+        CashierService.persist_sessions(sessions, trigger_backup=False)
+
+def _rollback_stock_entries_by_ids(entry_ids, user=None):
+    target_ids = {str(entry_id) for entry_id in (entry_ids or []) if entry_id}
+    if not target_ids:
+        return
+    with file_lock(STOCK_ENTRIES_FILE):
+        entries = load_stock_entries()
+        filtered_entries = [entry for entry in entries if str(entry.get('id')) not in target_ids]
+        if len(filtered_entries) != len(entries):
+            save_stock_entries(filtered_entries)
+    log_system_action(
+        action='CLOSE_ORDER_STOCK_ROLLBACK',
+        details={'entry_ids': sorted(list(target_ids))},
+        user=user or session.get('user', 'Sistema'),
+        category='Restaurante'
+    )
+
+def _rollback_sales_history_close_id(close_id, user=None):
+    if not close_id:
+        return
+    with file_lock(SALES_HISTORY_FILE):
+        sales_history = load_sales_history()
+        if not isinstance(sales_history, list):
+            if isinstance(sales_history, dict):
+                sales_history = list(sales_history.values())
+            else:
+                sales_history = []
+        filtered_sales = [entry for entry in sales_history if entry.get('close_id') != close_id]
+        if len(filtered_sales) != len(sales_history):
+            secure_save_sales_history(filtered_sales, user or session.get('user', 'Sistema'))
 
 def get_current_cashier(user=None, cashier_type=None):
     # Use centralized service for robust type handling
@@ -145,9 +352,7 @@ def expand_order_item_stock_components(order_item):
 @restaurant_bp.route('/restaurant/cashier', methods=['GET', 'POST'])
 @login_required
 def restaurant_cashier():
-    user_role = session.get('role')
-    user_perms = session.get('permissions', [])
-    if user_role not in ['admin', 'gerente', 'supervisor'] and 'restaurante' not in user_perms and 'principal' not in user_perms:
+    if not _has_restaurant_cashier_access():
         flash('Acesso não autorizado ao Caixa Restaurante.')
         return redirect(url_for('main.index'))
 
@@ -164,6 +369,9 @@ def restaurant_cashier():
         action = request.form.get('action')
         
         if action == 'open_cashier':
+            if not _is_restaurant_cashier_supervisor_or_above():
+                flash('Permissão negada. Apenas Supervisor+ podem abrir o caixa.')
+                return redirect(url_for('restaurant.restaurant_cashier'))
             try:
                 raw_balance = request.form.get('opening_balance', '0')
                 if isinstance(raw_balance, str):
@@ -188,12 +396,18 @@ def restaurant_cashier():
             return redirect(url_for('restaurant.restaurant_cashier'))
         
         elif action == 'close_cashier':
+            if not _is_restaurant_cashier_supervisor_or_above():
+                flash('Permissão negada. Apenas Supervisor+ podem fechar o caixa.')
+                return redirect(url_for('restaurant.restaurant_cashier'))
             if not current_cashier:
                 flash('Não há caixa aberto para fechar.')
             else:
                 try:
-                    raw_cash = request.form.get('closing_cash', '0')
-                    raw_non_cash = request.form.get('closing_non_cash', '0')
+                    raw_cash = (request.form.get('closing_cash') or '').strip()
+                    raw_non_cash = (request.form.get('closing_non_cash') or '').strip()
+                    if not raw_cash or not raw_non_cash:
+                        flash('Informe manualmente os valores de dinheiro e de outras formas para fechar o caixa.')
+                        return redirect(url_for('restaurant.restaurant_cashier'))
                     def parse_val(raw):
                         if isinstance(raw, str):
                             clean = raw.replace('R$', '').replace(' ', '')
@@ -201,19 +415,12 @@ def restaurant_cashier():
                                 clean = clean.replace('.', '').replace(',', '.')
                             return float(clean)
                         return float(raw)
-                    try:
-                        closing_cash = parse_val(raw_cash)
-                    except ValueError:
-                        closing_cash = 0.0
-                    try:
-                        closing_non_cash = parse_val(raw_non_cash)
-                    except ValueError:
-                        closing_non_cash = 0.0
+                    closing_cash = parse_val(raw_cash)
+                    closing_non_cash = parse_val(raw_non_cash)
                     closing_balance = closing_cash + closing_non_cash
                 except ValueError:
-                    closing_balance = 0.0
-                    closing_cash = 0.0
-                    closing_non_cash = 0.0
+                    flash('Valores inválidos para fechamento. Use formato numérico válido.')
+                    return redirect(url_for('restaurant.restaurant_cashier'))
                 
                 try:
                     # Close via Service
@@ -250,6 +457,9 @@ def restaurant_cashier():
                 flash('O caixa precisa estar aberto para lançar transações.')
             else:
                 trans_type = request.form.get('type', '').strip().lower()
+                if trans_type in {'transfer', 'withdrawal', 'deposit'} and not _is_restaurant_cashier_supervisor_or_above():
+                    flash('Permissão negada. Apenas Supervisor+ podem executar esta operação de caixa.')
+                    return redirect(url_for('restaurant.restaurant_cashier'))
                 description = request.form.get('description')
                 try:
                     raw_amount = request.form.get('amount', '0')
@@ -551,16 +761,9 @@ def restaurant_observations():
 @restaurant_bp.route('/restaurant/tables')
 @login_required
 def restaurant_tables():
-    # Permission Check
-    user_role = session.get('role')
-    user_perms = session.get('permissions', [])
-    user_dept = session.get('department')
-    
-    has_restaurant_access = any('restaurante' in p for p in user_perms)
-    
-    if user_role not in ['admin', 'gerente', 'supervisor'] and not has_restaurant_access and 'recepcao' not in user_perms and user_dept != 'Serviço':
-        flash('Acesso restrito.')
-        return redirect(url_for('main.index'))
+    access_response = _ensure_restaurant_operation_access()
+    if access_response is not None:
+        return access_response
 
     orders = load_table_orders()
     occupancy = load_room_occupancy()
@@ -619,6 +822,10 @@ def breakfast_report():
 @restaurant_bp.route('/restaurant/open_staff_table', methods=['POST'])
 @login_required
 def open_staff_table():
+    access_response = _ensure_restaurant_operation_access()
+    if access_response is not None:
+        return access_response
+
     try:
         raw_staff_name = request.form.get('staff_name')
         staff_name = sanitize_input(raw_staff_name)
@@ -729,6 +936,7 @@ def toggle_live_music():
         couvert = next((p for p in menu_items if str(p['id']) == '32'), None)
         
         updated_count = 0
+        synchronized_count = 0
         
         if couvert:
             for table_id, order in orders.items():
@@ -742,43 +950,35 @@ def toggle_live_music():
                 
                 if is_room:
                     continue
+                if _is_special_table_id(table_id):
+                    continue
                     
                 cust_type = order.get('customer_type')
                 if cust_type in ['funcionario', 'hospede']:
                     continue
-                
-                has_cover = any(item['name'] == couvert['name'] for item in order.get('items', []))
-                
-                if not has_cover:
-                    num_adults = float(order.get('num_adults', 1))
-                    if num_adults > 0:
-                        item_id = str(uuid.uuid4())
-                        new_item = {
-                            'id': item_id,
-                            'printed': True,
-                            'name': couvert['name'],
-                            'qty': num_adults,
-                            'price': float(couvert['price']),
-                            'complements': [],
-                            'category': couvert.get('category'),
-                            'service_fee_exempt': True,
-                            'source': 'auto_cover_activation',
-                            'waiter': 'Sistema'
-                        }
-                        order['items'].append(new_item)
-                        
-                        total = 0
-                        for item in order['items']:
-                            item_price = item['price']
-                            comps_price = sum(c['price'] for c in item.get('complements', []))
-                            total += item['qty'] * (item_price + comps_price)
-                        order['total'] = total
-                        
+                num_adults = order.get('num_adults', 1)
+                result = _sync_live_music_cover(
+                    order=order,
+                    table_id=table_id,
+                    cover_product=couvert,
+                    should_apply=True,
+                    adults=num_adults,
+                    actor=session.get('user'),
+                    trigger='live_music_toggle_on',
+                )
+                if result.get('changed'):
+                    synchronized_count += 1
+                    if result.get('action') == 'created':
                         updated_count += 1
             
-            if updated_count > 0:
+            if synchronized_count > 0:
                 save_table_orders(orders)
-                flash(f'Música ao Vivo {status_msg}. Cover lançado em {updated_count} mesas.')
+                log_action(
+                    'Música ao Vivo',
+                    f'Modo ativado por {session.get("user")}. Covers sincronizados em {synchronized_count} mesa(s), novos lançamentos em {updated_count}.',
+                    department='Restaurante'
+                )
+                flash(f'Música ao Vivo {status_msg}. Cover sincronizado em {synchronized_count} mesa(s).')
             else:
                 flash(f'Música ao Vivo {status_msg}. Nenhuma mesa elegível para lançamento retroativo.')
         else:
@@ -828,6 +1028,10 @@ def close_special_table():
 @restaurant_bp.route('/restaurant/table/<table_id>', methods=['GET', 'POST'])
 @login_required
 def restaurant_table_order(table_id):
+    access_response = _ensure_restaurant_operation_access()
+    if access_response is not None:
+        return access_response
+
     orders = load_table_orders()
     str_table_id = str(table_id)
     room_occupancy = load_room_occupancy()
@@ -940,25 +1144,26 @@ def restaurant_table_order(table_id):
                         orders[str_table_id]['is_breakfast'] = False
                     
                     settings = load_restaurant_settings()
-                    if settings.get('live_music_active', False) and not is_room and customer_type != 'funcionario':
+                    should_apply_live_cover = (
+                        settings.get('live_music_active', False)
+                        and not is_room
+                        and customer_type == 'passante'
+                        and not _is_special_table_id(str_table_id)
+                    )
+                    if should_apply_live_cover:
                         menu_items = load_menu_items()
                         couvert = next((p for p in menu_items if str(p['id']) == '32'), None)
                         if couvert:
-                                item_id = str(uuid.uuid4())
-                                new_item = {
-                                'id': item_id,
-                                'printed': True,
-                                'name': couvert['name'],
-                                'qty': float(num_adults),
-                                'price': float(couvert['price']),
-                                'complements': [],
-                                'category': couvert.get('category'),
-                                'service_fee_exempt': False,
-                                'source': 'auto_cover_activation',
-                                'waiter': 'Sistema'
-                            }
-                                orders[str_table_id]['items'].append(new_item)
-                                orders[str_table_id]['total'] = new_item['price'] * new_item['qty']
+                            cover_result = _sync_live_music_cover(
+                                order=orders[str_table_id],
+                                table_id=str_table_id,
+                                cover_product=couvert,
+                                should_apply=True,
+                                adults=num_adults,
+                                actor=session.get('user'),
+                                trigger='table_open_live_music_active',
+                            )
+                            if cover_result.get('changed'):
                                 flash('Mesa aberta com Cover Artístico incluído.')
                     
                     save_table_orders(orders)
@@ -1002,6 +1207,9 @@ def restaurant_table_order(table_id):
 
                 orders[str_table_id]['num_adults'] = num_adults
                 orders[str_table_id]['customer_type'] = customer_type
+                opened_by_input = sanitize_input(request.form.get('opened_by'))
+                if opened_by_input:
+                    orders[str_table_id]['opened_by'] = opened_by_input
                 
                 if customer_type == 'hospede':
                     room_number = request.form.get('room_number')
@@ -1026,8 +1234,29 @@ def restaurant_table_order(table_id):
                 
                 # If funcionario, we just updated num_adults, kept other info same
                 
+                settings = load_restaurant_settings()
+                should_apply_live_cover = (
+                    settings.get('live_music_active', False)
+                    and customer_type == 'passante'
+                    and not is_room
+                    and not _is_special_table_id(str_table_id)
+                )
+                cover_product = next((p for p in load_menu_items() if str(p.get('id')) == '32'), None)
+                _sync_live_music_cover(
+                    order=orders[str_table_id],
+                    table_id=str_table_id,
+                    cover_product=cover_product,
+                    should_apply=should_apply_live_cover,
+                    adults=num_adults,
+                    actor=session.get('user'),
+                    trigger='update_pax_live_music_sync',
+                )
                 save_table_orders(orders)
-                log_action('Mesa Atualizada', f'Mesa {table_id} atualizada por {session.get("user")}. Pax: {num_adults}, Tipo: {customer_type}', department='Restaurante')
+                log_action(
+                    'Mesa Atualizada',
+                    f'Mesa {table_id} atualizada por {session.get("user")}. Pax: {num_adults}, Tipo: {customer_type}, Aberta por: {orders[str_table_id].get("opened_by")}',
+                    department='Restaurante'
+                )
                 flash('Informações da mesa atualizadas com sucesso.')
                 
             except (ValueError, TypeError):
@@ -1075,30 +1304,11 @@ def restaurant_table_order(table_id):
                 
                 # Permission Check
                 if session.get('role') not in ['admin', 'gerente', 'supervisor']:
-                    auth_pass = request.form.get('auth_password')
-                    if not auth_pass:
-                        msg = 'Autorização necessária.'
-                        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                             return jsonify({'success': False, 'error': msg})
-                        flash(msg)
-                        return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
-                    
-                    users = load_users()
-                    authorized = False
-                    for u, data in users.items():
-                        if isinstance(data, dict):
-                            u_role = data.get('role')
-                            u_pass = data.get('password')
-                            if u_role in ['admin', 'gerente', 'supervisor'] and u_pass == auth_pass:
-                                authorized = True
-                                break
-                    
-                    if not authorized:
-                        msg = 'Senha de autorização inválida.'
-                        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                             return jsonify({'success': False, 'error': msg})
-                        flash(msg)
-                        return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
+                    msg = 'Somente supervisor ou acima pode cancelar item individual.'
+                    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                        return jsonify({'success': False, 'error': msg}), 403
+                    flash(msg)
+                    return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
 
                 try:
                     menu_items = load_menu_items()
@@ -1255,6 +1465,14 @@ def restaurant_table_order(table_id):
 
         elif action == 'add_batch_items':
             try:
+                if str_table_id not in orders:
+                    flash("Erro: Mesa não encontrada ou fechada.")
+                    return redirect(url_for('restaurant.restaurant_tables'))
+
+                if orders[str_table_id].get('locked'):
+                    flash('Conta puxada. Reabertura necessária para lançar novos pedidos.')
+                    return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
+
                 items_json = request.form.get('items_json')
                 if not items_json:
                     raise ValueError("Lista de itens vazia.")
@@ -1281,6 +1499,14 @@ def restaurant_table_order(table_id):
                     if last and (now - last) < 60:
                         current_app.logger.warning(f"Duplicate order batch blocked: {batch_id} for table {table_id}")
                         flash('Pedido já enviado recentemente. Ignorando reenvio duplicado.')
+                        return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
+                    already_persisted_batch = any(
+                        str(existing_item.get('batch_id', '')).strip() == str(batch_id).strip()
+                        for existing_item in orders.get(str_table_id, {}).get('items', [])
+                    )
+                    if already_persisted_batch:
+                        current_app.logger.warning(f"Duplicate persisted batch blocked: {batch_id} for table {table_id}")
+                        flash('Pedido já processado anteriormente. Reenvio duplicado bloqueado.')
                         return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
                     PROCESSED_BATCHES[batch_id] = now
 
@@ -1344,6 +1570,73 @@ def restaurant_table_order(table_id):
                         
                     if qty <= 0: 
                         errors.append(f"Quantidade deve ser positiva para '{product['name']}'.")
+                        continue
+
+                    mandatory_questions = product.get('mandatory_questions', [])
+                    if isinstance(mandatory_questions, str):
+                        try:
+                            mandatory_questions = json.loads(mandatory_questions)
+                        except Exception:
+                            mandatory_questions = []
+                    if not isinstance(mandatory_questions, list):
+                        mandatory_questions = []
+                    submitted_answers = item_data.get('questions_answers', [])
+                    if not isinstance(submitted_answers, list):
+                        submitted_answers = []
+                    normalized_answers = {}
+                    for qa in submitted_answers:
+                        if not isinstance(qa, dict):
+                            continue
+                        q_text = str(qa.get('question', '')).strip()
+                        q_answer = str(qa.get('answer', '')).strip()
+                        if q_text:
+                            normalized_answers[q_text] = q_answer
+                    missing_required_questions = []
+                    for q in mandatory_questions:
+                        if not isinstance(q, dict):
+                            continue
+                        if not q.get('required'):
+                            continue
+                        q_text = str(q.get('question', '')).strip()
+                        if not q_text:
+                            continue
+                        if not normalized_answers.get(q_text):
+                            missing_required_questions.append(q_text)
+                    if missing_required_questions:
+                        errors.append(
+                            f"Pergunta obrigatória não respondida para '{product['name']}': {', '.join(missing_required_questions)}."
+                        )
+                        continue
+
+                    selected_accompaniments = item_data.get('accompaniments') or []
+                    if not isinstance(selected_accompaniments, list):
+                        selected_accompaniments = [selected_accompaniments]
+                    selected_accompaniments = [str(acc).strip() for acc in selected_accompaniments if str(acc).strip()]
+                    item_data['accompaniments'] = selected_accompaniments
+                    allowed_accompaniments = [str(x) for x in (product.get('allowed_accompaniments') or []) if str(x)]
+                    if product.get('has_accompaniments') and allowed_accompaniments and not selected_accompaniments:
+                        errors.append(f"O produto '{product['name']}' exige ao menos um acompanhamento.")
+                        continue
+                    invalid_accompaniments = []
+                    invalid_accompaniments_type = []
+                    for acc_id in selected_accompaniments:
+                        if allowed_accompaniments and acc_id not in allowed_accompaniments:
+                            invalid_accompaniments.append(acc_id)
+                            continue
+                        acc_prod = products_map.get(acc_id)
+                        if acc_prod:
+                            acc_type = acc_prod.get('product_type', 'standard')
+                            if acc_type not in ['accompaniment_only', 'accompaniment_and_order']:
+                                invalid_accompaniments_type.append(acc_prod.get('name', acc_id))
+                    if invalid_accompaniments:
+                        errors.append(
+                            f"Acompanhamento inválido para '{product['name']}': {', '.join(invalid_accompaniments)}."
+                        )
+                        continue
+                    if invalid_accompaniments_type:
+                        errors.append(
+                            f"Acompanhamento com tipo incompatível para '{product['name']}': {', '.join(invalid_accompaniments_type)}."
+                        )
                         continue
 
                     if product.get('recipe'):
@@ -1470,6 +1763,7 @@ def restaurant_table_order(table_id):
                     order_item['batch_user'] = session.get('user')
                     order_item['batch_created_at'] = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
                     order_item['accompaniments_deducted_ids'] = []
+                    order_item['accompaniments_deduction_trace'] = []
                     
                     # Complements (Resolve IDs)
                     if item_data.get('complements'):
@@ -1496,7 +1790,7 @@ def restaurant_table_order(table_id):
                                 order_item['accompaniments'].append({
                                     'id': str(acc_prod.get('id')),
                                     'name': acc_prod['name'],
-                                    'price': float(acc_prod.get('price', 0) or 0)
+                                    'price': 0.0
                                 })
                             else:
                                 order_item['accompaniments'].append({
@@ -1507,6 +1801,8 @@ def restaurant_table_order(table_id):
                         for acc_prod in accompaniment_menu_items:
                             acc_id_str = str(acc_prod.get('id')) if acc_prod.get('id') is not None else None
                             deducted_ok = False
+                            deduction_mode = ''
+                            deduction_reason = 'no_stock_mapping'
                             if acc_prod.get('recipe'):
                                 for ingred in acc_prod.get('recipe', []):
                                     raw_ing_id = ingred.get('ingredient_id')
@@ -1546,6 +1842,8 @@ def restaurant_table_order(table_id):
                                             'entry_date': datetime.now().strftime('%d/%m/%Y %H:%M')
                                         })
                                     deducted_ok = True
+                                    deduction_mode = 'recipe'
+                                    deduction_reason = 'deducted'
                             else:
                                 acc_stock_product = resolve_stock_product_for_order_item(
                                     {'product_id': acc_prod.get('id'), 'name': acc_prod.get('name')},
@@ -1575,8 +1873,17 @@ def restaurant_table_order(table_id):
                                             'entry_date': datetime.now().strftime('%d/%m/%Y %H:%M')
                                         })
                                     deducted_ok = True
+                                    deduction_mode = 'direct_stock'
+                                    deduction_reason = 'deducted'
                             if deducted_ok and acc_id_str:
                                 order_item['accompaniments_deducted_ids'].append(acc_id_str)
+                            order_item['accompaniments_deduction_trace'].append({
+                                'accompaniment_id': acc_id_str,
+                                'accompaniment_name': acc_prod.get('name'),
+                                'deducted': bool(deducted_ok),
+                                'mode': deduction_mode,
+                                'reason': deduction_reason if deducted_ok else 'no_recipe_or_stock_mapping'
+                            })
                                 
                     new_order_items.append(order_item)
                     
@@ -1735,6 +2042,9 @@ def restaurant_table_order(table_id):
 
         elif action == 'close_order':
             try:
+                if str_table_id in ['36', '68', '69']:
+                    flash('Mesa especial deve ser finalizada pelo fluxo dedicado (Fechar Café/Cortesia/Proprietários).')
+                    return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
                 with file_lock(TABLE_ORDERS_FILE):
                     orders = load_table_orders()
                     if str_table_id not in orders:
@@ -1849,7 +2159,36 @@ def restaurant_table_order(table_id):
                         return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
                     
                     payment_group_id = str(uuid.uuid4()) if len(payments) > 1 else None
+                    commission_reference_id = f"TABLE_CLOSE_{str_table_id}_{datetime.now().strftime('%Y%m%d%H%M%S')}_{uuid.uuid4().hex[:6]}"
                     total_payment_group_amount = sum(float(p.get('amount', 0)) for p in payments) if payment_group_id else 0
+                    added_cashier_transaction_ids = []
+                    added_stock_entry_ids = []
+                    close_id = None
+
+                    preclose_waiter_breakdown = {}
+                    try:
+                        wb_totals_pre = {}
+                        wb_total_val_pre = 0.0
+                        for item in order.get('items', []):
+                            name_lower_pre = (item.get('name') or '').lower()
+                            is_auto_cover_pre = item.get('source') == 'auto_cover_activation'
+                            is_cover_name_pre = 'couvert artistico' in name_lower_pre
+                            if is_auto_cover_pre or is_cover_name_pre:
+                                continue
+                            qty_pre = float(item.get('qty', 1) or 1)
+                            price_pre = float(item.get('price', 0) or 0)
+                            comps_pre = sum(float(c.get('price', 0) or 0) for c in item.get('complements', []))
+                            val_pre = qty_pre * (price_pre + comps_pre)
+                            w_pre = item.get('waiter') or order.get('waiter') or 'Garçom'
+                            wb_totals_pre[w_pre] = wb_totals_pre.get(w_pre, 0.0) + val_pre
+                            wb_total_val_pre += val_pre
+                        if wb_total_val_pre > 0:
+                            ratio_pre = grand_total / wb_total_val_pre if wb_total_val_pre else 0.0
+                            preclose_waiter_breakdown = {k: v * ratio_pre for k, v in wb_totals_pre.items()}
+                        else:
+                            preclose_waiter_breakdown = {order.get('waiter') or 'Garçom': grand_total}
+                    except Exception:
+                        preclose_waiter_breakdown = {}
 
                     try:
                         log_system_action(
@@ -1866,30 +2205,45 @@ def restaurant_table_order(table_id):
                     except Exception:
                         pass
 
-                    for p in payments:
-                        method = sanitize_input(p.get('method'))
-                        try:
-                            amount = float(p.get('amount'))
-                        except:
-                            continue
-                        
-                        details = {}
-                        if payment_group_id:
-                            details['payment_group_id'] = payment_group_id
-                            details['total_payment_group_amount'] = total_payment_group_amount
-                            details['payment_method_code'] = method
-                        if service_fee_removed:
-                            details['service_fee_removed'] = True
+                    try:
+                        for p in payments:
+                            method = sanitize_input(p.get('method'))
+                            try:
+                                amount = float(p.get('amount'))
+                            except:
+                                continue
+                            
+                            details = {}
+                            if payment_group_id:
+                                details['payment_group_id'] = payment_group_id
+                                details['total_payment_group_amount'] = total_payment_group_amount
+                                details['payment_method_code'] = method
+                            details['table_id'] = str_table_id
+                            details['close_id'] = commission_reference_id
+                            details['commission_reference_id'] = commission_reference_id
+                            details['waiter_breakdown'] = preclose_waiter_breakdown
+                            details['closed_by'] = session.get('user')
+                            details['category'] = 'Pagamento de Conta'
+                            details['commission_eligible'] = not service_fee_removed
+                            if service_fee_removed:
+                                details['service_fee_removed'] = True
 
-                        CashierService.add_transaction(
-                            cashier_type='restaurant',
-                            amount=amount,
-                            description=f"Venda Mesa {table_id} - {method}",
-                            payment_method=method,
-                            user=session.get('user'),
-                            transaction_type='sale',
-                            details=details
-                        )
+                            transaction = CashierService.add_transaction(
+                                cashier_type='restaurant',
+                                amount=amount,
+                                description=f"Venda Mesa {table_id} - {method}",
+                                payment_method=method,
+                                user=session.get('user'),
+                                transaction_type='sale',
+                                details=details
+                            )
+                            if isinstance(transaction, dict) and transaction.get('id'):
+                                added_cashier_transaction_ids.append(transaction.get('id'))
+                    except Exception as cashier_error:
+                        _rollback_cashier_transactions(added_cashier_transaction_ids)
+                        current_app.logger.error(f'Falha no caixa ao fechar mesa {table_id}: {cashier_error}')
+                        flash('Erro ao registrar pagamento no caixa. Mesa permanece aberta.')
+                        return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
                 
                 # Deduct Stock (Batch Processing with Deduplication)
                 products_db = load_products()
@@ -1984,22 +2338,28 @@ def restaurant_table_order(table_id):
                         })
 
                 # Execute Batch Save with Deduplication
-                if stock_entries_to_add:
-                    with file_lock(STOCK_ENTRIES_FILE):
-                        added_count = add_stock_entries_batch(stock_entries_to_add)
-                        if added_count < len(stock_entries_to_add):
-                            current_app.logger.warning(f"Stock Deduplication: Skipped {len(stock_entries_to_add) - added_count} duplicate entries for Table {table_id}")
-                        
-                        # Check Low Stock
-                        # We need to fetch the balance.
-                        # Since get_product_balances() is expensive, we might skip or pay the price.
-                        # Given "Verifique a lógica... e mecanismos de notificação", we must check.
-                        # Let's assume we can use a helper from stock_service if available, 
-                        # or just import get_product_balances from app.services.stock_service
-                        
-                # After deducting all items, check balances for warning
-                from app.services.stock_service import get_product_balances
-                current_balances = get_product_balances() # This might be heavy but it's reliable
+                try:
+                    if stock_entries_to_add:
+                        with file_lock(STOCK_ENTRIES_FILE):
+                            existing_entries = load_stock_entries()
+                            existing_ids = {str(e.get('id')) for e in existing_entries if e.get('id')}
+                            added_count = add_stock_entries_batch(stock_entries_to_add)
+                            added_stock_entry_ids = [
+                                str(entry.get('id'))
+                                for entry in stock_entries_to_add
+                                if entry.get('id') and str(entry.get('id')) not in existing_ids
+                            ]
+                            if added_count < len(stock_entries_to_add):
+                                current_app.logger.warning(f"Stock Deduplication: Skipped {len(stock_entries_to_add) - added_count} duplicate entries for Table {table_id}")
+                    
+                    from app.services.stock_service import get_product_balances
+                    current_balances = get_product_balances()
+                except Exception as stock_error:
+                    _rollback_stock_entries_by_ids(added_stock_entry_ids, user=session.get('user'))
+                    _rollback_cashier_transactions(added_cashier_transaction_ids)
+                    current_app.logger.error(f'Falha na baixa de estoque ao fechar mesa {table_id}: {stock_error}')
+                    flash('Erro ao registrar baixa de estoque. Mesa permanece aberta.')
+                    return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
                 
                 unique_deducted = {}
                 for p_obj in deducted_products:
@@ -2014,8 +2374,11 @@ def restaurant_table_order(table_id):
                             low_stock_items.append({'name': p_name, 'qty': curr_qty})
                 
                 if low_stock_items:
-                    printers_config = load_printers()
-                    print_consolidated_stock_warning(low_stock_items, printers_config)
+                    try:
+                        printers_config = load_printers()
+                        print_consolidated_stock_warning(low_stock_items, printers_config)
+                    except Exception as stock_warn_error:
+                        current_app.logger.warning(f"Falha ao imprimir aviso de estoque baixo após fechamento da mesa {table_id}: {stock_warn_error}")
 
 
 
@@ -2088,8 +2451,10 @@ def restaurant_table_order(table_id):
                         secure_save_sales_history(sales_history, session.get('user', 'Sistema'))
                     except Exception as e:
                         current_app.logger.error(f'Erro ao salvar histórico de vendas (Mesa {table_id}): {e}')
-                        # Do NOT return, proceed to close table to avoid inconsistency (Bug Fix Table 42)
-                        flash(f'Aviso: Erro ao salvar histórico de vendas. Mesa fechada, mas verifique logs.')
+                        _rollback_stock_entries_by_ids(added_stock_entry_ids, user=session.get('user'))
+                        _rollback_cashier_transactions(added_cashier_transaction_ids)
+                        flash('Erro ao salvar histórico de vendas. Mesa permanece aberta.')
+                        return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
 
                 # Shadow Log (Security Audit) - Backup for Closure
                 try:
@@ -2107,17 +2472,17 @@ def restaurant_table_order(table_id):
                 except Exception as e:
                     current_app.logger.error(f"Erro ao registrar auditoria de segurança (Mesa {table_id}): {e}")
                 
-                del orders[str_table_id]
-                if not save_table_orders(orders):
-                    # Rollback (manual) - Remove from sales history if table save fails
-                    # This is tricky with secure save, but let's try
+                updated_orders = dict(orders)
+                if str_table_id in updated_orders:
+                    del updated_orders[str_table_id]
+                if not save_table_orders(updated_orders):
                     try:
-                        sales_history = load_sales_history()
-                        sales_history = [s for s in sales_history if s.get('close_id') != close_id]
-                        secure_save_sales_history(sales_history, session.get('user', 'Sistema'))
-                    except:
+                        _rollback_sales_history_close_id(close_id, user=session.get('user'))
+                    except Exception:
                         pass
-                    flash('Erro ao atualizar mesas. Tente novamente.')
+                    _rollback_stock_entries_by_ids(added_stock_entry_ids, user=session.get('user'))
+                    _rollback_cashier_transactions(added_cashier_transaction_ids)
+                    flash('Erro ao atualizar mesas. Fechamento cancelado e mesa mantida aberta.')
                     return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
                 
                 log_action('Mesa Fechada', f'Mesa {table_id} fechada por {session.get("user")}. Total: R$ {grand_total:.2f}', department='Restaurante')
@@ -2155,7 +2520,8 @@ def restaurant_table_order(table_id):
                         customer_info={
                             'name': order.get('customer_name'),
                             'type': order.get('customer_type'),
-                            'cpf_cnpj': customer_doc
+                            'cpf_cnpj': customer_doc,
+                            'room_number': order.get('room_number')
                         },
                         notes=f"Mesa {table_id}"
                     )
@@ -2165,6 +2531,14 @@ def restaurant_table_order(table_id):
 
                 if request.form.get('emit_invoice') == 'on' and pool_entry_id:
                     try:
+                        current_pool_entry = FiscalPoolService.get_entry(pool_entry_id) or {}
+                        current_status = current_pool_entry.get('status')
+                        if current_status == 'ignored':
+                            why = current_pool_entry.get('non_fiscal_reason') or 'conta não elegível'
+                            flash(f'Mesa fechada. Emissão fiscal ignorada por regra: {why}.')
+                            flash('Acompanhe o registro no Pool Fiscal em Administração > Fiscal > Pool.')
+                            flash('Mesa fechada com sucesso!')
+                            return redirect(url_for('restaurant.restaurant_tables'))
                         emission_result = process_pending_emissions(settings=load_fiscal_settings(), specific_id=pool_entry_id)
                         if emission_result.get('success', 0) > 0:
                             try:
@@ -2192,6 +2566,7 @@ def restaurant_table_order(table_id):
                                     flash('NFC-e emitida e impressão fiscal enviada.')
                                 else:
                                     flash(f'NFC-e emitida, mas impressão não enviada: {err_print}')
+                                flash('Nota disponível no Pool Fiscal para abrir XML/PDF.')
                             except Exception as print_exc:
                                 flash(f'NFC-e emitida, mas ocorreu erro na impressão: {print_exc}')
                         else:
@@ -2310,6 +2685,7 @@ def restaurant_table_order(table_id):
             if str_table_id in orders:
                 orders[str_table_id]['locked'] = True
                 save_table_orders(orders)
+                log_action('Conta Puxada', f'Mesa {table_id} bloqueada por {session.get("user")}', department='Restaurante')
                 
                 # Print Bill
                 order = orders[str_table_id]
@@ -2337,8 +2713,12 @@ def restaurant_table_order(table_id):
 
         elif action == 'unlock_table':
             if str_table_id in orders:
+                if not _is_restaurant_cashier_supervisor_or_above():
+                    flash('Reabertura permitida apenas para supervisor ou acima.')
+                    return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
                 orders[str_table_id]['locked'] = False
                 save_table_orders(orders)
+                log_action('Mesa Reaberta', f'Mesa {table_id} reaberta por {session.get("user")}', department='Restaurante')
                 flash('Mesa desbloqueada.')
 
         elif action == 'cancel_table':
@@ -2408,6 +2788,11 @@ def restaurant_table_order(table_id):
             if target_table_id == str_table_id:
                 flash('Mesa de destino igual à origem.')
                 return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
+            source_is_staff_table = str_table_id.startswith('FUNC_')
+            target_is_staff_table = target_table_id.startswith('FUNC_')
+            if source_is_staff_table and not target_is_staff_table and not _is_restaurant_cashier_supervisor_or_above():
+                flash('A devolução de conta de funcionário para mesa exige supervisor ou acima.')
+                return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
 
             # VALIDATION START
             table_settings = load_restaurant_table_settings()
@@ -2430,6 +2815,18 @@ def restaurant_table_order(table_id):
             if not (is_standard or is_open or is_staff):
                  flash(f'Erro: Mesa de destino {target_table_id} inválida ou inexistente.')
                  return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
+
+            target_data = orders.get(target_table_id, {})
+            target_has_items = bool(target_data.get('items'))
+            target_has_total = float(target_data.get('total', 0) or 0) > 0
+            target_is_occupied = target_table_id in orders and (target_has_items or target_has_total)
+            transfer_confirmed = request.form.get('confirm_occupied_transfer') == '1'
+            if target_is_occupied and not transfer_confirmed:
+                current_app.logger.warning(
+                    f"Transferência Mesa sem confirmação explícita bloqueada: origem={table_id}, destino={target_table_id}, usuário={session.get('user')}"
+                )
+                flash(f'A mesa {target_table_id} já está ocupada. Confirme a mesclagem para concluir a transferência.')
+                return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
             # VALIDATION END
 
             # SPECIAL TABLES VALIDATION
@@ -2475,6 +2872,12 @@ def restaurant_table_order(table_id):
                         orders[target_table_id]['staff_name'] = staff_id
                         orders[target_table_id]['room_number'] = None
                         orders[target_table_id]['customer_name'] = None
+                    if source_is_staff_table and not target_is_staff_table:
+                        orders[target_table_id]['customer_type'] = 'passante'
+                        orders[target_table_id]['staff_name'] = None
+                        orders[target_table_id]['room_number'] = None
+                        if not orders[target_table_id].get('customer_name'):
+                            orders[target_table_id]['customer_name'] = 'Transferência de Funcionário'
                     # Se for mesa 36 (Café), normaliza metadados para evitar botão de transferência para quarto
                     if target_table_id == '36':
                         orders[target_table_id]['customer_type'] = 'passante'
@@ -2506,6 +2909,9 @@ def restaurant_table_order(table_id):
                         target_order['staff_name'] = staff_id
                         target_order['room_number'] = None
                         target_order['customer_name'] = None
+                    if source_is_staff_table and not target_is_staff_table:
+                        target_order['customer_type'] = target_order.get('customer_type') or 'passante'
+                        target_order['staff_name'] = None
                     # Se destino é mesa 36 (Café), normaliza metadados
                     if target_table_id == '36':
                         target_order['customer_type'] = 'passante'
@@ -2616,14 +3022,22 @@ def restaurant_table_order(table_id):
 
 
         elif action == 'transfer_to_room':
+            order = orders.get(str_table_id)
+            if not order:
+                flash('Mesa não encontrada ou já fechada.')
+                return redirect(url_for('restaurant.restaurant_tables'))
+
+            customer_type = _normalize_str(order.get('customer_type'))
+            if customer_type != 'hospede':
+                flash('Erro na transferência: apenas mesas do tipo hóspede podem ser transferidas para quarto.')
+                return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
+
             room_number = request.form.get('room_number')
             if not room_number:
-                order = orders.get(str_table_id)
-                if order:
-                    inferred_room = order.get('room_number')
-                    if not inferred_room and is_room:
-                        inferred_room = str_table_id
-                    room_number = inferred_room
+                inferred_room = order.get('room_number')
+                if not inferred_room and is_room:
+                    inferred_room = str_table_id
+                room_number = inferred_room
             if not room_number:
                 flash('Número do quarto obrigatório.')
                 return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
@@ -2651,14 +3065,21 @@ def restaurant_table_order(table_id):
                     order['closed_at'] = datetime.now().strftime('%d/%m/%Y %H:%M')
                     # Aplica regra: isento de taxa + 20% de desconto
                     try:
-                        subtotal = float(order.get('total', 0) or 0)
+                        subtotal = 0.0
+                        for item in order.get('items', []):
+                            item_price = float(item.get('price', 0) or 0)
+                            item_qty = float(item.get('qty', 1) or 1)
+                            comps_price = sum(float(c.get('price', 0) or 0) for c in item.get('complements', []))
+                            subtotal += item_qty * (item_price + comps_price)
                     except Exception:
                         subtotal = 0.0
                     discount_amount = round(subtotal * 0.20, 2)
                     final_total = max(0.0, subtotal - discount_amount)
                     order['service_fee'] = 0.0
+                    order['service_fee_removed'] = True
                     order['discounts'] = order.get('discounts', [])
                     order['discounts'].append({'type': 'staff', 'percent': 20, 'amount': discount_amount})
+                    order['total'] = subtotal
                     order['final_total'] = final_total
                     
                     with file_lock(SALES_HISTORY_FILE):
@@ -2685,7 +3106,12 @@ def restaurant_table_order(table_id):
                                 'staff_name': order.get('staff_name'),
                                 'source': 'transfer_to_staff_account',
                                 'subtotal': subtotal,
-                                'discount': discount_amount
+                                'discount': discount_amount,
+                                'service_fee_removed': True,
+                                'commission_eligible': False,
+                                'category': 'Conta Funcionário',
+                                'commission_reference_id': f"STAFF_ACCOUNT_{str_table_id}_{order.get('closed_at', '')}",
+                                'closed_by': session.get('user')
                             },
                             transaction_type='sale'
                         )
@@ -2830,6 +3256,7 @@ def restaurant_table_order(table_id):
     user_perms = session.get('permissions', [])
     # Only Admin/Manager can see inactive items, BUT paused items are hidden for everyone in order view
     can_manage_items = user_role in ['admin', 'gerente', 'supervisor'] or 'restaurante_full_access' in user_perms
+    can_cancel_items = user_role in ['admin', 'gerente', 'supervisor']
     
     hidden_paused_count = 0
     def _boolish(v):
@@ -3002,6 +3429,14 @@ def restaurant_table_order(table_id):
             else:
                 opened_by_display = opened_by_user
 
+    fiscal_emission_context = _build_restaurant_fiscal_context(
+        {
+            **(current_order or {}),
+            'table_id': table_id
+        },
+        grand_total
+    ) if isinstance(current_order, dict) else {'can_offer': True, 'block_reason': None, 'doc_required': False, 'auto_document': ''}
+
     return render_template('restaurant_table_order.html', 
                            table_id=table_id, 
                            breakfast_table_id=breakfast_table_id,
@@ -3024,7 +3459,12 @@ def restaurant_table_order(table_id):
                            all_tables=all_tables,
                            occupied_tables=occupied_tables,
                            can_manage_items=can_manage_items,
-                           opened_by_display=opened_by_display)
+                           can_cancel_items=can_cancel_items,
+                           opened_by_display=opened_by_display,
+                           can_offer_fiscal_emission=fiscal_emission_context.get('can_offer', True),
+                           fiscal_emission_block_reason=fiscal_emission_context.get('block_reason'),
+                           fiscal_doc_required=fiscal_emission_context.get('doc_required', False),
+                           fiscal_auto_document=fiscal_emission_context.get('auto_document', ''))
 
 @restaurant_bp.route('/restaurant/dashboard')
 @login_required
@@ -3035,8 +3475,8 @@ def restaurant_dashboard():
 @login_required
 def restaurant_transfer_item():
     try:
-        if session.get('role') not in ['admin', 'gerente', 'supervisor']:
-             return jsonify({'success': False, 'error': 'Permissão negada. Apenas Gerentes e Supervisores.'}), 403
+        if not _has_restaurant_or_reception_access():
+             return jsonify({'success': False, 'error': 'Permissão negada.'}), 403
 
         data = request.get_json()
         source_table_id = str(data.get('source_table_id'))
@@ -3050,6 +3490,11 @@ def restaurant_transfer_item():
         if not source_table_id or not dest_table_id or item_index is None or qty_to_transfer <= 0:
              current_app.logger.warning(f"Invalid transfer data: {data}")
              return jsonify({'success': False, 'error': 'Dados inválidos.'}), 400
+
+        if source_table_id == dest_table_id:
+            return jsonify({'success': False, 'error': 'Mesa de origem e destino não podem ser iguais.'}), 400
+        if source_table_id.startswith('FUNC_') and not dest_table_id.startswith('FUNC_') and not _is_restaurant_cashier_supervisor_or_above():
+            return jsonify({'success': False, 'error': 'A devolução de item/conta de funcionário para mesa exige supervisor ou acima.'}), 403
 
         orders = load_table_orders()
         
@@ -3479,9 +3924,6 @@ def restaurant_toggle_product_active():
         return jsonify({'success': False, 'error': 'ID do produto necessário.'}), 400
         
     menu_items = load_menu_items()
-    save_menu_items = None
-    from app.services.data_service import save_menu_items as _save_menu_items
-    save_menu_items = _save_menu_items
     
     found = False
     new_status = True
@@ -3494,7 +3936,7 @@ def restaurant_toggle_product_active():
             break
             
     if found:
-        save_menu_items(menu_items)
+        secure_save_menu_items(menu_items, session.get('user', 'Sistema'))
         status_str = "Ativo" if new_status else "Pausado"
         log_action('Produto Alterado', f'Produto {product_id} alterado para {status_str} por {session.get("user")}', department='Restaurante')
         return jsonify({'success': True, 'new_status': new_status})

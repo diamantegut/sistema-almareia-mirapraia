@@ -11,6 +11,11 @@
             <form action="{{ url_for('reception.process_call_sla_timeout') }}" method="POST">
                 <button class="btn btn-outline-dark"><i class="bi bi-alarm"></i> Processar SLA vencido</button>
             </form>
+            <form action="{{ url_for('reception.call_next_queue_customer') }}" method="POST">
+                <input type="hidden" name="channel" value="whatsapp">
+                <input type="hidden" name="reason" value="Chamar próximo da fila">
+                <button class="btn btn-success"><i class="bi bi-megaphone"></i> Chamar próximo</button>
+            </form>
             <a href="{{ queue_public_url }}" target="_blank" class="btn btn-outline-primary"><i class="bi bi-box-arrow-up-right"></i> Link Público</a>
             <a href="{{ url_for('reception.reception_dashboard') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Voltar</a>
         </div>

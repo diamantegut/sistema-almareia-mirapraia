@@ -1826,6 +1826,17 @@
     };
 
     function openReservationModal(guest, checkin, checkout, category, status, channel, amount, paid, to_receive, id, type) {
+        if (typeof openViewGuestModal === 'function') {
+            openViewGuestModal(id, guest, '', {
+                source: 'reservations',
+                checkin: checkin,
+                checkout: checkout,
+                category: category,
+                channel: channel,
+                status: status
+            });
+            return;
+        }
         console.log('openReservationModal called', {guest, id});
         var fmtMoney = (val) => {
             if (val === undefined || val === null || val === '') return '-';
@@ -3411,6 +3422,8 @@
     </div>
 </div>
 
+{% include 'partials/guest_unified_modal.html' %}
+
 <!-- Reservation Details Modal -->
 <div class="modal fade" id="reservationModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg">
@@ -4829,4 +4842,5 @@ async function submitReservationPayment() {
     }
 }
 </script>
+<script src="{{ url_for('static', filename='js/guest_view.js') }}"></script>
 {% endblock %}

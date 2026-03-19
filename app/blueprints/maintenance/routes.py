@@ -128,7 +128,23 @@ def update_maintenance_request(req_id):
 @maintenance_bp.route('/maintenance/new', methods=['GET'])
 @login_required
 def new_maintenance_request():
-    return render_template('maintenance_form.html')
+    room = str(request.args.get('room') or '').strip()
+    source = str(request.args.get('source') or '').strip()
+    prefill_location = str(request.args.get('location') or '').strip()
+    prefill_description = str(request.args.get('description') or '').strip()
+    if not prefill_location and room:
+        prefill_location = f"Quarto {room}"
+    return_to = ''
+    if source == 'governance':
+        return_to = url_for('governance.governance_rooms')
+    return render_template(
+        'maintenance_form.html',
+        prefill_location=prefill_location,
+        prefill_description=prefill_description,
+        source=source,
+        room=room,
+        return_to=return_to
+    )
 
 @maintenance_bp.route('/maintenance/submit', methods=['POST'])
 @login_required
@@ -187,6 +203,9 @@ def submit_maintenance():
             save_maintenance_requests(requests)
             
             flash('Solicitação de manutenção enviada com sucesso!')
+            return_to = str(request.form.get('return_to') or '').strip()
+            if return_to.startswith('/'):
+                return redirect(return_to)
             return redirect(url_for('main.service_page', service_id='manutencao'))
             
         except Exception as e:

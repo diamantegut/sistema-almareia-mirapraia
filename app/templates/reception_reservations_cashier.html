@@ -200,22 +200,21 @@
                 <form method="POST">
                     <div class="modal-body">
                         <input type="hidden" name="action" value="close_cashier">
-                        <p>Confirme o fechamento do caixa. O saldo atual será registrado.</p>
-                        
-                        <div class="alert alert-warning">
-                            <div class="d-flex justify-content-between">
-                                <span>Saldo Calculado:</span>
-                                <strong>R$ {{ "%.2f"|format(balance) }}</strong>
-                            </div>
-                        </div>
+                        <p>Informe os valores conferidos manualmente para fechamento.</p>
 
                         <div class="mb-3">
                             <label class="form-label">Valor em Dinheiro (Conferido)</label>
                             <div class="input-group">
                                 <span class="input-group-text">R$</span>
-                                <input type="tel" class="form-control" name="closing_cash" placeholder="0.00" oninput="formatCurrency(this)">
+                                <input type="tel" class="form-control" name="closing_cash" required placeholder="0,00" onfocus="this.select()" oninput="formatCurrency(this)">
                             </div>
-                            <div class="form-text">Opcional. Para conferência de quebra de caixa.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Total em Outras Formas de Pagamento</label>
+                            <div class="input-group">
+                                <span class="input-group-text">R$</span>
+                                <input type="tel" class="form-control" name="closing_non_cash" required placeholder="0,00" onfocus="this.select()" oninput="formatCurrency(this)">
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">

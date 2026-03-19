@@ -10,7 +10,7 @@ from werkzeug.utils import secure_filename
 from app.utils.decorators import login_required
 from app.utils.lock import file_lock
 from app.services.data_service import (
-    load_products, save_products, secure_save_products, load_stock_requests, save_stock_request, save_all_stock_requests,
+    load_products, secure_save_products, load_stock_requests, save_stock_request, save_all_stock_requests,
     load_stock_entries, save_stock_entry, save_stock_entries, load_suppliers, save_suppliers,
     load_payables, save_payables,
     load_sales_products, save_sales_products, load_sales_history,

@@ -11,12 +11,13 @@ import io
 from datetime import datetime, timedelta
 from typing import Optional
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session, current_app, send_file
+from werkzeug.routing import BuildError
 
 from . import reception_bp
 from app.utils.decorators import login_required
 from app.services.data_service import (
     load_room_charges, save_room_charges, load_menu_items, load_products, 
-    save_stock_entry, load_cashier_sessions, save_cashier_sessions, 
+    save_stock_entry,
     load_payment_methods, load_room_occupancy, save_room_occupancy,
     load_cleaning_status, save_cleaning_status, load_checklist_items, save_checklist_items,
     add_inspection_log, normalize_text, format_room_number, normalize_room_simple,
@@ -32,6 +33,7 @@ from app.services.transfer_service import return_charge_to_restaurant, TableOccu
 from app.services.cashier_service import CashierService
 from app.services.fiscal_pool_service import FiscalPoolService
 from app.services import waiting_list_service
+from app.services.authz import operational_request_service
 from app.services.reservation_service import ReservationService
 from app.services.reception_unified_repository import ReceptionUnifiedRepository
 from app.services import checklist_service
@@ -57,6 +59,7 @@ from app.services.channel_sync_log_service import ChannelSyncLogService
 from app.services.channel_commercial_audit_service import ChannelCommercialAuditService
 from app.services.channel_commission_service import ChannelCommissionService
 from app.services.channel_manager_dashboard_service import ChannelManagerDashboardService
+from app.services.governance_auto_deduct_service import apply_auto_deduction
 from app.utils.validators import (
     validate_required, validate_phone, validate_cpf, validate_email, 
     sanitize_input, validate_date, validate_room_number
@@ -105,10 +108,104 @@ def parse_br_currency(val):
     except ValueError:
         return 0.0
 
+
+def _safe_parse_date(value):
+    raw = str(value or '').strip()
+    if not raw:
+        return None
+    for fmt in ['%d/%m/%Y', '%Y-%m-%d', '%d/%m/%Y %H:%M', '%Y-%m-%d %H:%M:%S']:
+        try:
+            return datetime.strptime(raw, fmt).date()
+        except Exception:
+            continue
+    return None
+
+
+def _reservation_debt_snapshot(service, reservation):
+    total = parse_br_currency((reservation or {}).get('amount', 0))
+    paid = parse_br_currency((reservation or {}).get('paid_amount', 0))
+    if str((reservation or {}).get('source_type', '')).lower() != 'manual':
+        get_payments = getattr(service, 'get_reservation_payments', None)
+        payments_map = get_payments() if callable(get_payments) else {}
+        sidecar = (payments_map or {}).get(str((reservation or {}).get('id') or ''), [])
+        if isinstance(sidecar, list):
+            paid += sum(parse_br_currency((row or {}).get('amount', 0)) for row in sidecar if isinstance(row, dict))
+    remaining = max(0.0, total - paid)
+    state = 'none'
+    if total <= 0.01:
+        state = 'none'
+    elif remaining <= 0.01:
+        state = 'complete'
+    elif paid > 0.01:
+        state = 'partial'
+    return {
+        'total': round(total, 2),
+        'paid': round(paid, 2),
+        'remaining': round(remaining, 2),
+        'state': state
+    }
+
+
+def _build_ready_checkin_preloads(upcoming_reservations, occupancy_map, cleaning_status_map, today_date=None):
+    today_ref = today_date or datetime.now().date()
+    reservations = upcoming_reservations if isinstance(upcoming_reservations, list) else []
+    occupancy = occupancy_map if isinstance(occupancy_map, dict) else {}
+    cleaning = cleaning_status_map if isinstance(cleaning_status_map, dict) else {}
+    candidates_by_room = {}
+    skipped = {'missing_room': [], 'not_today': [], 'cancelled_or_noshow': [], 'occupied': [], 'not_ready': []}
+
+    for row in reservations:
+        if not isinstance(row, dict):
+            continue
+        rid = str(row.get('id') or '').strip()
+        checkin_date = _safe_parse_date(row.get('checkin'))
+        if not checkin_date or checkin_date != today_ref:
+            if rid:
+                skipped['not_today'].append(rid)
+            continue
+        status_norm = normalize_text(str(row.get('status') or ''))
+        if any(flag in status_norm for flag in ['cancel', 'no-show', 'noshow']):
+            if rid:
+                skipped['cancelled_or_noshow'].append(rid)
+            continue
+        room = format_room_number(row.get('room'))
+        if not room:
+            if rid:
+                skipped['missing_room'].append(rid)
+            continue
+        if room in occupancy:
+            if rid:
+                skipped['occupied'].append(rid)
+            continue
+        clean_row = cleaning.get(room, {}) if isinstance(cleaning.get(room, {}), dict) else {}
+        clean_status = str(clean_row.get('status') or '').strip().lower()
+        room_ready = clean_status == 'inspected'
+        if not room_ready:
+            if rid:
+                skipped['not_ready'].append(rid)
+            continue
+        candidates_by_room.setdefault(room, []).append(dict(row))
+
+    ready_preloads = {}
+    conflicts = {}
+    for room, rows in candidates_by_room.items():
+        if len(rows) == 1:
+            ready_preloads[room] = rows[0]
+        elif len(rows) > 1:
+            conflicts[room] = rows
+    return {'ready_preloads': ready_preloads, 'conflicts': conflicts, 'skipped': skipped}
+
 def _waiting_list_access_allowed():
     user_dept = session.get('department')
     user_role = session.get('role')
-    return user_role == 'admin' or user_role == 'gerente' or user_dept == 'Recepção' or user_dept == 'Restaurante'
+    user_perms = session.get('permissions', []) or []
+    normalized_dept = str(user_dept or '').strip().lower()
+    return (
+        user_role in {'admin', 'gerente'}
+        or normalized_dept in {'recepção', 'recepcao', 'restaurante', 'serviço', 'servico'}
+        or 'restaurante_mirapraia' in user_perms
+        or 'restaurante_full_access' in user_perms
+    )
 
 def _generate_unique_invite_ref(survey_id):
     for _ in range(20):
@@ -178,6 +275,272 @@ def _auto_invite_waiting_list_entry(entry, actor='system', trigger='status_updat
 
 # --- Routes ---
 
+def _has_reception_authorized_access():
+    role_norm = normalize_text(str(session.get('role') or ''))
+    dept_norm = normalize_text(str(session.get('department') or ''))
+    user_perms = session.get('permissions') or []
+    if not isinstance(user_perms, (list, tuple, set)):
+        user_perms = []
+    perms_norm = [normalize_text(str(p)) for p in user_perms]
+    return role_norm in ['admin', 'gerente', 'supervisor', 'recepcao'] or dept_norm == 'recepcao' or 'recepcao' in perms_norm
+
+def _has_supervisor_plus_access():
+    role_norm = normalize_text(str(session.get('role') or ''))
+    return role_norm in ['admin', 'gerente', 'supervisor']
+
+def _build_authz_request_payload(route_key, context=None):
+    context_payload = context if isinstance(context, dict) else {}
+    try:
+        create_endpoint = url_for('reception.reception_create_operational_authz_request')
+    except BuildError:
+        create_endpoint = '/reception/authz-requests/create'
+    return {
+        'available': True,
+        'route_key': route_key,
+        'create_endpoint': create_endpoint,
+        'context': context_payload,
+    }
+
+def _deny_with_authz_request(message, route_key, context=None):
+    return jsonify({
+        'success': False,
+        'message': message,
+        'authorization_request': _build_authz_request_payload(route_key, context=context),
+    }), 403
+
+def _has_operational_grant(route_key):
+    return operational_request_service.authorize_by_grant(
+        user=str(session.get('user') or ''),
+        route_key=str(route_key or ''),
+    )
+
+
+def _get_active_guest_consumption_session():
+    current_session = CashierService.get_active_session('guest_consumption')
+    if not current_session:
+        current_session = CashierService.get_active_session('reception_room_billing')
+    if not current_session:
+        current_session = CashierService.get_active_session('reception')
+    return current_session
+
+
+def _payment_method_tags(method_obj):
+    method = method_obj if isinstance(method_obj, dict) else {}
+    tags = []
+    available = method.get('available_in')
+    if isinstance(available, list):
+        tags.extend(str(x).strip().lower() for x in available if str(x).strip())
+    elif isinstance(available, str):
+        normalized = available.replace(';', ',')
+        tags.extend(part.strip().lower() for part in normalized.split(',') if part.strip())
+    if method.get('available_reservas') or method.get('available_reservations'):
+        tags.extend(['reservas', 'reservations'])
+    if method.get('available_reception'):
+        tags.extend(['reception', 'caixa_recepcao'])
+    if method.get('available_restaurant'):
+        tags.extend(['restaurant', 'caixa_restaurante'])
+    aliases = {
+        'reserva': 'reservas',
+        'reservation': 'reservations',
+        'receptions': 'reception',
+        'caixa reservas': 'caixa_reservas',
+        'caixa recepcao': 'caixa_recepcao',
+        'caixa recepção': 'caixa_recepcao'
+    }
+    normalized_tags = []
+    for raw in tags:
+        t = str(raw or '').strip().lower()
+        if not t:
+            continue
+        normalized_tags.append(aliases.get(t, t))
+    return set(normalized_tags)
+
+
+def _payment_method_enabled_for(method_obj, target_group):
+    tags = _payment_method_tags(method_obj)
+    if target_group == 'reception':
+        return any(tag in tags for tag in ['reception', 'caixa_recepcao'])
+    if target_group == 'reservations':
+        return any(tag in tags for tag in ['reservations', 'reservas', 'caixa_reservas'])
+    if target_group == 'restaurant':
+        return any(tag in tags for tag in ['restaurant', 'caixa_restaurante'])
+    return False
+
+
+def _load_reception_payment_methods():
+    all_methods = load_payment_methods()
+    return [
+        m for m in (all_methods if isinstance(all_methods, list) else [])
+        if isinstance(m, dict) and _payment_method_enabled_for(m, 'reception')
+    ]
+
+
+def _normalize_charge_payments(raw_payments, payment_methods_list):
+    normalized = []
+    methods = payment_methods_list if isinstance(payment_methods_list, list) else []
+    pm_by_id = {str(m.get('id')): m for m in methods if isinstance(m, dict)}
+    for row in raw_payments if isinstance(raw_payments, list) else []:
+        if not isinstance(row, dict):
+            continue
+        method_id = str(row.get('method_id') or row.get('id') or row.get('method') or '').strip()
+        try:
+            amount = float(row.get('amount') or 0)
+        except Exception:
+            amount = 0.0
+        if amount <= 0 or not method_id:
+            continue
+        pm_obj = pm_by_id.get(method_id)
+        if not pm_obj:
+            continue
+        method_name = str(row.get('method_name') or row.get('name') or (pm_obj or {}).get('name') or method_id)
+        is_fiscal = bool((pm_obj or {}).get('is_fiscal', False))
+        normalized.append({
+            'method_id': method_id,
+            'method_name': method_name,
+            'amount': round(amount, 2),
+            'is_fiscal': is_fiscal
+        })
+    return normalized
+
+
+def _is_cash_payment(method_id=None, method_name=None):
+    ref = f"{str(method_id or '')} {str(method_name or '')}".strip().lower()
+    return any(token in ref for token in ['dinheiro', 'espécie', 'especie', 'cash'])
+
+
+def _process_charge_payment(
+    charge,
+    payments_to_process,
+    room_charges_ref,
+    cashier_session,
+    current_user,
+    require_exact_total=True,
+    add_cashier_transactions=True,
+    add_fiscal_pool=True,
+    fiscal_origin='reception_charge'
+):
+    if not isinstance(charge, dict):
+        return {'success': False, 'error': 'Conta inválida.'}
+    if charge.get('status') != 'pending':
+        return {'success': False, 'error': 'Conta não encontrada ou já paga.'}
+    payments = payments_to_process if isinstance(payments_to_process, list) else []
+    if not payments:
+        return {'success': False, 'error': 'Nenhum pagamento informado.'}
+    charge_total = round(float(charge.get('total') or 0), 2)
+    paid_total = round(sum(float(p.get('amount') or 0) for p in payments), 2)
+    has_cash_payment = any(_is_cash_payment(p.get('method_id'), p.get('method_name')) for p in payments)
+    if require_exact_total:
+        if paid_total + 0.05 < charge_total:
+            return {'success': False, 'error': f'Valor pago (R$ {paid_total:.2f}) é menor que o total da conta (R$ {charge_total:.2f}).'}
+        if paid_total - charge_total > 0.05 and not has_cash_payment:
+            return {'success': False, 'error': 'Pagamento acima do total só é permitido quando houver forma em dinheiro (troco).'}
+    else:
+        if paid_total + 0.05 < charge_total:
+            return {'success': False, 'error': f'Valor pago (R$ {paid_total:.2f}) difere do total da conta (R$ {charge_total:.2f}).'}
+        if paid_total - charge_total > 0.05 and not has_cash_payment:
+            return {'success': False, 'error': 'Pagamento acima do total só é permitido quando houver forma em dinheiro (troco).'}
+
+    remaining_to_allocate = charge_total
+    allocated_payments = []
+    for row in payments:
+        raw_amount = round(float(row.get('amount') or 0), 2)
+        if raw_amount <= 0:
+            continue
+        if remaining_to_allocate <= 0:
+            break
+        allocated_amount = round(min(raw_amount, remaining_to_allocate), 2)
+        remaining_to_allocate = round(remaining_to_allocate - allocated_amount, 2)
+        if allocated_amount <= 0:
+            continue
+        allocated_payments.append({
+            'method_id': row.get('method_id'),
+            'method_name': row.get('method_name'),
+            'amount': allocated_amount,
+            'is_fiscal': bool(row.get('is_fiscal'))
+        })
+    if not allocated_payments and abs(charge_total) < 0.01:
+        allocated_payments.append({'method_id': 'isento', 'method_name': 'Isento', 'amount': 0.0, 'is_fiscal': False})
+    elif round(sum(float(p.get('amount') or 0) for p in allocated_payments), 2) + 0.05 < charge_total:
+        return {'success': False, 'error': 'Falha ao distribuir pagamentos para cobrir a conta.'}
+
+    now_str = datetime.now().strftime('%d/%m/%Y %H:%M')
+    payment_group_id = str(uuid.uuid4()) if len(allocated_payments) > 1 else None
+    total_payment_group_amount = round(sum(float(p.get('amount') or 0) for p in allocated_payments), 2) if payment_group_id else 0
+
+    if add_cashier_transactions:
+        for payment in allocated_payments:
+            details = {
+                'room_number': charge.get('room_number'),
+                'category': 'Pagamento de Conta',
+                'payment_details': allocated_payments,
+                'waiter_breakdown': charge.get('waiter_breakdown'),
+                'service_fee_removed': charge.get('service_fee_removed', False),
+                'commission_eligible': not bool(charge.get('service_fee_removed', False)),
+                'commission_reference_id': f"CHARGE_PAY_{charge.get('id')}",
+                'related_charge_id': charge.get('id'),
+                'closed_by': current_user
+            }
+            if payment_group_id:
+                details['payment_group_id'] = payment_group_id
+                details['total_payment_group_amount'] = total_payment_group_amount
+                details['payment_method_code'] = payment.get('method_name')
+            CashierService.add_transaction(
+                cashier_type='guest_consumption',
+                amount=float(payment.get('amount') or 0),
+                description=f"Pagamento Quarto {charge.get('room_number')} ({payment.get('method_name')})",
+                payment_method=payment.get('method_name'),
+                user=current_user,
+                details=details
+            )
+
+    charge['status'] = 'paid'
+    charge['paid_at'] = now_str
+    charge['reception_cashier_id'] = cashier_session.get('id') if isinstance(cashier_session, dict) else None
+    if len(allocated_payments) > 1:
+        charge['payment_method'] = 'Múltiplos'
+    else:
+        charge['payment_method'] = allocated_payments[0].get('method_name') or allocated_payments[0].get('method_id')
+    charge['payment_details'] = [
+        {'method': p.get('method_name'), 'method_id': p.get('method_id'), 'amount': float(p.get('amount') or 0)}
+        for p in allocated_payments
+    ]
+    charge['payment_tendered_total'] = paid_total
+    charge['change_amount'] = round(max(paid_total - charge_total, 0.0), 2)
+    save_room_charges(room_charges_ref)
+
+    fiscal_error = None
+    if add_fiscal_pool:
+        try:
+            items_list = charge.get('items', [])
+            if isinstance(items_list, str):
+                try:
+                    items_list = json.loads(items_list)
+                except Exception:
+                    items_list = []
+            occupancy = load_room_occupancy()
+            guest_name = occupancy.get(str(charge.get('room_number')), {}).get('guest_name', 'Hóspede')
+            FiscalPoolService.add_to_pool(
+                origin=fiscal_origin,
+                original_id=f"CHARGE_{charge.get('id')}",
+                total_amount=float(charge.get('total') or 0),
+                items=items_list,
+                payment_methods=[{'method': p.get('method_name'), 'amount': float(p.get('amount') or 0), 'is_fiscal': bool(p.get('is_fiscal'))} for p in allocated_payments],
+                user=current_user,
+                customer_info={'room_number': charge.get('room_number'), 'guest_name': guest_name}
+            )
+        except Exception as e:
+            fiscal_error = str(e)
+
+    log_action('Pagamento Concluído', f"Quarto {charge.get('room_number')}: R$ {float(charge.get('total') or 0):.2f} via {charge.get('payment_method')}", department='Recepção')
+    return {
+        'success': True,
+        'charge': charge,
+        'paid_total': paid_total,
+        'applied_total': round(sum(float(p.get('amount') or 0) for p in allocated_payments), 2),
+        'change_amount': round(max(paid_total - charge_total, 0.0), 2),
+        'fiscal_error': fiscal_error
+    }
+
 @reception_bp.route('/reception')
 @login_required
 def reception_dashboard():
@@ -194,7 +557,92 @@ def reception_dashboard():
     if role_norm not in ['admin', 'gerente', 'recepcao', 'supervisor'] and dept_norm != 'recepcao' and not has_reception_permission:
         flash('Acesso restrito.')
         return redirect(url_for('main.index'))
+    if _has_supervisor_plus_access():
+        pending_count = operational_request_service.count_pending()
+        if pending_count > 0:
+            flash(f'Existem {pending_count} solicitações de autorização pendentes.')
     return render_template('reception_dashboard.html')
+
+@reception_bp.route('/reception/authz-requests')
+@login_required
+def reception_operational_authz_requests():
+    if not _has_supervisor_plus_access():
+        flash('Acesso restrito.')
+        return redirect(url_for('main.index'))
+    pending = operational_request_service.list_requests(status='pending', limit=300)
+    recent = operational_request_service.list_requests(limit=300)
+    return render_template('reception_operational_authz_requests.html', pending=pending, recent=recent)
+
+@reception_bp.route('/reception/authz-requests/create', methods=['POST'])
+@login_required
+def reception_create_operational_authz_request():
+    payload = request.get_json(silent=True) if request.is_json else {}
+    route_key = str(request.form.get('route_key') or payload.get('route_key') or '').strip()
+    reason = str(request.form.get('reason') or payload.get('reason') or '').strip()
+    raw_context = payload.get('context') if request.is_json else request.form.get('context_json')
+    context = {}
+    if isinstance(raw_context, dict):
+        context = raw_context
+    elif isinstance(raw_context, str) and raw_context.strip():
+        try:
+            parsed = json.loads(raw_context)
+            if isinstance(parsed, dict):
+                context = parsed
+        except Exception:
+            context = {'raw': raw_context}
+    if not route_key:
+        if request.is_json:
+            return jsonify({'success': False, 'message': 'route_key obrigatório'}), 400
+        flash('Solicitação inválida: route_key obrigatório.')
+        return redirect(request.referrer or url_for('reception.reception_dashboard'))
+    record = operational_request_service.create_request(
+        requester_user=str(session.get('user') or 'unknown'),
+        requester_role=str(session.get('role') or ''),
+        route_key=route_key,
+        endpoint=str(request.headers.get('X-Request-Endpoint') or request.referrer or ''),
+        http_method=str(request.headers.get('X-Request-Method') or request.method or 'POST'),
+        context=context,
+        reason=reason,
+    )
+    if request.is_json:
+        return jsonify({'success': True, 'request_id': record.get('id'), 'status': record.get('status')})
+    flash('Solicitação de autorização registrada.')
+    return redirect(request.referrer or url_for('reception.reception_dashboard'))
+
+@reception_bp.route('/reception/authz-requests/<request_id>/decide', methods=['POST'])
+@login_required
+def reception_decide_operational_authz_request(request_id):
+    if not _has_supervisor_plus_access():
+        if request.is_json:
+            return jsonify({'success': False, 'message': 'Acesso restrito.'}), 403
+        flash('Acesso restrito.')
+        return redirect(url_for('main.index'))
+    payload = request.get_json(silent=True) if request.is_json else {}
+    decision = str(request.form.get('decision') or payload.get('decision') or '').strip().lower()
+    decision_reason = str(request.form.get('decision_reason') or payload.get('decision_reason') or '').strip()
+    ttl_minutes_raw = payload.get('ttl_minutes') if request.is_json else request.form.get('ttl_minutes')
+    try:
+        ttl_minutes = int(ttl_minutes_raw) if ttl_minutes_raw is not None else 60
+    except Exception:
+        ttl_minutes = 60
+    try:
+        updated = operational_request_service.decide_request(
+            request_id=request_id,
+            approver_user=str(session.get('user') or 'unknown'),
+            approver_role=str(session.get('role') or ''),
+            decision=decision,
+            decision_reason=decision_reason,
+            ttl_minutes=ttl_minutes,
+        )
+    except Exception as exc:
+        if request.is_json:
+            return jsonify({'success': False, 'message': str(exc)}), 400
+        flash(str(exc))
+        return redirect(url_for('reception.reception_operational_authz_requests'))
+    if request.is_json:
+        return jsonify({'success': True, 'request_id': updated.get('id'), 'status': updated.get('status'), 'decision_type': updated.get('decision_type')})
+    flash('Solicitação decidida com sucesso.')
+    return redirect(url_for('reception.reception_operational_authz_requests'))
 
 
 @reception_bp.route('/reception/revenue-management')
@@ -2008,6 +2456,8 @@ def reception_rooms():
     # Pre-allocation integration
     upcoming_checkins = {}
     upcoming_reservations = []
+    room_preloaded_checkins = {}
+    room_preload_conflicts = {}
     requested_reservation_id = (request.args.get('reservation_id') or '').strip()
     open_checkin = (request.args.get('open_checkin') or '').strip().lower() in ['1', 'true', 'yes', 'on']
     try:
@@ -2019,9 +2469,37 @@ def reception_rooms():
                 already_loaded = any(str(item.get('id')) == str(requested_reservation_id) for item in upcoming_reservations)
                 if not already_loaded:
                     upcoming_reservations.append(requested_res)
+        enriched_upcoming = []
+        for item in upcoming_reservations:
+            row = dict(item) if isinstance(item, dict) else {}
+            rid = str(row.get('id') or '').strip()
+            if rid:
+                debt = _reservation_debt_snapshot(res_service, row)
+                row['payment_total'] = debt.get('total', 0.0)
+                row['payment_paid'] = debt.get('paid', 0.0)
+                row['payment_remaining'] = debt.get('remaining', 0.0)
+                row['payment_state'] = debt.get('state', 'none')
+                try:
+                    details = res_service.get_guest_details(rid)
+                    if isinstance(details, dict):
+                        followup = details.get('payment_followup')
+                        if isinstance(followup, dict):
+                            row['payment_followup'] = followup
+                except Exception:
+                    pass
+            enriched_upcoming.append(row)
+        upcoming_reservations = enriched_upcoming
         for item in upcoming_reservations:
             if item.get('room'):
                 upcoming_checkins[str(item['room'])] = item
+        preload_result = _build_ready_checkin_preloads(
+            upcoming_reservations=upcoming_reservations,
+            occupancy_map=occupancy,
+            cleaning_status_map=cleaning_status,
+            today_date=datetime.now().date()
+        )
+        room_preloaded_checkins = preload_result.get('ready_preloads', {}) if isinstance(preload_result, dict) else {}
+        room_preload_conflicts = preload_result.get('conflicts', {}) if isinstance(preload_result, dict) else {}
     except Exception as e:
         print(f"Error loading upcoming checkins: {e}")
 
@@ -2030,10 +2508,7 @@ def reception_rooms():
 
         if action == 'pay_charge':
             current_user = session.get('user')
-            # Find current open reception session
-            current_session = CashierService.get_active_session('guest_consumption')
-            if not current_session:
-                 current_session = CashierService.get_active_session('reception_room_billing')
+            current_session = _get_active_guest_consumption_session()
             
             if not current_session:
                 flash('É necessário abrir o caixa de Consumo de Hóspedes antes de receber pagamentos.')
@@ -2056,97 +2531,29 @@ def reception_rooms():
                 flash('Nenhum pagamento informado.')
                 return redirect(url_for('reception.reception_rooms'))
 
-            emit_invoice = session.get('role') == 'admin' and request.form.get('emit_invoice') == 'on'
-            
             room_charges = load_room_charges()
             charge = next((c for c in room_charges if c['id'] == charge_id), None)
             
             if charge and charge.get('status') == 'pending':
-                payment_methods_list = load_payment_methods()
-                
-                # Validate Total
-                total_paid = sum(float(p.get('amount', 0)) for p in payments)
-                charge_total = float(charge['total'])
-                
-                if abs(total_paid - charge_total) > 0.05: # Tolerance
-                     flash(f'Valor pago (R$ {total_paid:.2f}) difere do total da conta (R$ {charge_total:.2f}).')
-                     return redirect(url_for('reception.reception_rooms'))
-
-                # Generate Payment Group ID
-                payment_group_id = str(uuid.uuid4()) if len(payments) > 1 else None
-                total_payment_group_amount = total_paid if payment_group_id else 0
-                
-                # Prepare Fiscal Payments List
-                fiscal_payments = []
-                primary_payment_method_id = payments[0].get('id')
-
-                # Process Transactions
-                for p in payments:
-                    p_amount = float(p.get('amount', 0))
-                    p_id = p.get('id')
-                    p_name = p.get('name')
-                    
-                    # Verify name against ID if possible
-                    p_method_obj = next((m for m in payment_methods_list if str(m['id']) == str(p_id)), None)
-                    if p_method_obj:
-                        p_name = p_method_obj['name']
-                        is_fiscal = p_method_obj.get('is_fiscal', False)
-                    else:
-                        is_fiscal = False
-                    
-                    fiscal_payments.append({
-                        'method': p_name,
-                        'amount': p_amount,
-                        'is_fiscal': is_fiscal
-                    })
-
-                    CashierService.add_transaction(
-                        cashier_type='guest_consumption',
-                        amount=p_amount,
-                        description=f"Pagamento Quarto {charge['room_number']} ({p_name})",
-                        payment_method=p_name,
-                        user=current_user,
-                        details={
-                            'room_number': charge['room_number'],
-                            'emit_invoice': emit_invoice,
-                            'category': 'Pagamento de Conta',
-                            'payment_group_id': payment_group_id,
-                            'total_payment_group_amount': total_payment_group_amount,
-                            'payment_details': payments # Store all payments in details too
-                        }
-                    )
-
-                # Update Charge
-                charge['status'] = 'paid'
-                charge['payment_method'] = 'Múltiplos' if len(payments) > 1 else fiscal_payments[0]['method']
-                charge['paid_at'] = datetime.now().strftime('%d/%m/%Y %H:%M')
-                charge['reception_cashier_id'] = current_session['id']
-                charge['payment_details'] = payments
-                save_room_charges(room_charges)
-                
+                payment_methods_list = _load_reception_payment_methods()
+                normalized_payments = _normalize_charge_payments(payments, payment_methods_list)
+                result = _process_charge_payment(
+                    charge=charge,
+                    payments_to_process=normalized_payments,
+                    room_charges_ref=room_charges,
+                    cashier_session=current_session,
+                    current_user=current_user,
+                    require_exact_total=True,
+                    add_cashier_transactions=True,
+                    add_fiscal_pool=True,
+                    fiscal_origin='reception_charge'
+                )
+                if not result.get('success'):
+                    flash(result.get('error') or 'Falha ao processar pagamento.')
+                    return redirect(url_for('reception.reception_rooms'))
+                if result.get('fiscal_error'):
+                    current_app.logger.error(f"Error adding charge to fiscal pool: {result.get('fiscal_error')}")
                 flash(f"Pagamento de R$ {charge['total']:.2f} recebido com sucesso.")
-
-                # FISCAL POOL INTEGRATION
-                try:
-                    items_list = charge.get('items', [])
-                    if isinstance(items_list, str):
-                        try: items_list = json.loads(items_list)
-                        except: items_list = []
-                    
-                    occupancy = load_room_occupancy()
-                    guest_name = occupancy.get(str(charge['room_number']), {}).get('guest_name', 'Hóspede')
-
-                    FiscalPoolService.add_to_pool(
-                        origin='reception',
-                        original_id=charge['id'],
-                        total_amount=float(charge['total']),
-                        items=items_list,
-                        payment_methods=fiscal_payments,
-                        user=current_user,
-                        customer_info={'room_number': charge['room_number'], 'guest_name': guest_name}
-                    )
-                except Exception as e:
-                    current_app.logger.error(f"Error adding charge to fiscal pool: {e}")
 
             else:
                 flash('Conta não encontrada ou já paga.')
@@ -2259,6 +2666,23 @@ def reception_rooms():
             if new_room in occupancy:
                 flash(f'Quarto de destino {new_room} já está ocupado.')
                 return redirect(url_for('reception.reception_rooms'))
+
+            guest_data = occupancy.get(old_room, {})
+            reservation_id = guest_data.get('reservation_id')
+            transfer_checkin = guest_data.get('checkin')
+            transfer_checkout = guest_data.get('checkout')
+            if transfer_checkin and transfer_checkout:
+                try:
+                    ReservationService().check_collision(
+                        reservation_id=reservation_id or 'new',
+                        room_number=new_room,
+                        checkin=transfer_checkin,
+                        checkout=transfer_checkout,
+                        occupancy_data=occupancy
+                    )
+                except ValueError as collision_err:
+                    flash(f'Troca bloqueada: {str(collision_err)}')
+                    return redirect(url_for('reception.reception_rooms'))
             
             # Transfer Occupancy
             guest_data = occupancy.pop(old_room)
@@ -2527,7 +2951,7 @@ def reception_rooms():
         print(f"[DEBUG reception_rooms] Loaded {len(pending_charges)} pending charges for rooms: {pending_rooms}")
 
         payment_methods = load_payment_methods()
-        payment_methods = [m for m in payment_methods if 'reception' in m.get('available_in', []) or 'caixa_recepcao' in m.get('available_in', [])]
+        payment_methods = [m for m in payment_methods if _payment_method_enabled_for(m, 'reception')]
         
     except Exception as e:
         print(f"[ERROR reception_rooms] Failed to load consumption data: {e}")
@@ -2544,11 +2968,11 @@ def reception_rooms():
     try:
         all_methods = load_payment_methods()
         # Filter for Reception (Close Account)
-        reception_payment_methods = [m for m in all_methods if 'reception' in m.get('available_in', []) or 'caixa_recepcao' in m.get('available_in', [])]
+        reception_payment_methods = [m for m in all_methods if _payment_method_enabled_for(m, 'reception')]
         # Filter for Reservations (Receber Reserva)
         reservation_payment_methods = [
             m for m in all_methods
-            if any(tag in (m.get('available_in') or []) for tag in ['reservations', 'reservas', 'caixa_reservas'])
+            if _payment_method_enabled_for(m, 'reservations')
         ]
     except Exception as e:
         current_app.logger.error(f"Error loading payment methods: {e}")
@@ -2606,6 +3030,8 @@ def reception_rooms():
                            collaborators=collaborators,
                            room_capacities=room_capacities,
                            room_operational_info=room_operational_info,
+                           room_preloaded_checkins=room_preloaded_checkins,
+                           room_preload_conflicts=room_preload_conflicts,
                            reservation_status_catalog=ReservationService.RESERVATION_STATUS_CATALOG,
                            operational_status_catalog=ReservationService.OPERATIONAL_STATUS_CATALOG,
                            open_consumption_room=open_consumption_room,
@@ -2626,7 +3052,7 @@ def reception_cashier():
         return redirect(url_for('main.index'))
 
     # Find current open session (Specific Type)
-    sessions = app_module.load_cashier_sessions()
+    sessions = CashierService.list_sessions()
     current_session = None
     
     # Prioritize guest_consumption
@@ -2715,17 +3141,17 @@ def reception_cashier():
                 flash('Não há caixa aberto para fechar.')
             else:
                 try:
-                    raw_cash = request.form.get('closing_cash')
-                    raw_non_cash = request.form.get('closing_non_cash')
-                    closing_cash = parse_br_currency(raw_cash) if raw_cash else None
-                    closing_non_cash = parse_br_currency(raw_non_cash) if raw_non_cash else None
-                    user_closing_balance = None
-                    if closing_cash is not None or closing_non_cash is not None:
-                        user_closing_balance = (closing_cash or 0.0) + (closing_non_cash or 0.0)
+                    raw_cash = (request.form.get('closing_cash') or '').strip()
+                    raw_non_cash = (request.form.get('closing_non_cash') or '').strip()
+                    if not raw_cash or not raw_non_cash:
+                        flash('Informe manualmente os valores de dinheiro e de outras formas para fechar o caixa.')
+                        return redirect(url_for('reception.reception_cashier'))
+                    closing_cash = parse_br_currency(raw_cash)
+                    closing_non_cash = parse_br_currency(raw_non_cash)
+                    user_closing_balance = (closing_cash or 0.0) + (closing_non_cash or 0.0)
                 except ValueError:
-                    closing_cash = None
-                    closing_non_cash = None
-                    user_closing_balance = None
+                    flash('Valores inválidos para fechamento. Use formato numérico válido.')
+                    return redirect(url_for('reception.reception_cashier'))
                 
                 try:
                     closed_session = CashierService.close_session(
@@ -2765,19 +3191,25 @@ def reception_cashier():
 
             charge_id = request.form.get('charge_id')
             payment_data_json = request.form.get('payment_data')
-            emit_invoice = False 
             
             charge = next((c for c in room_charges if c['id'] == charge_id), None)
             
             if charge and charge.get('status') == 'pending':
                 charge_total = float(charge.get('total', 0))
                 if abs(charge_total) < 0.01:
-                    charge['status'] = 'paid'
-                    charge['paid_at'] = datetime.now().strftime('%d/%m/%Y %H:%M')
-                    charge['reception_cashier_id'] = current_session['id']
-                    charge['payment_method'] = 'Isento/Zerado'
-                    
-                    save_room_charges(room_charges)
+                    result = _process_charge_payment(
+                        charge=charge,
+                        payments_to_process=[{'method_id': 'isento', 'method_name': 'Isento/Zerado', 'amount': 0.0, 'is_fiscal': False}],
+                        room_charges_ref=room_charges,
+                        cashier_session=current_session,
+                        current_user=current_user,
+                        require_exact_total=True,
+                        add_cashier_transactions=False,
+                        add_fiscal_pool=False
+                    )
+                    if not result.get('success'):
+                        flash(result.get('error') or 'Falha ao fechar conta zerada.')
+                        return redirect(url_for('reception.reception_cashier'))
                     log_action('Conta Zerada Fechada', f'Quarto {charge["room_number"]}: R$ 0.00 fechado.', department='Recepção')
                     flash(f"Conta do Quarto {charge['room_number']} (R$ 0.00) fechada com sucesso.")
                     
@@ -2815,99 +3247,25 @@ def reception_cashier():
                     if request.form.get('redirect_to') == 'reception_rooms':
                         return redirect(url_for('reception.reception_rooms'))
                     return redirect(url_for('reception.reception_cashier'))
-
-                charge['status'] = 'paid'
-                charge['paid_at'] = datetime.now().strftime('%d/%m/%Y %H:%M')
-                charge['reception_cashier_id'] = current_session['id']
-                
-                if len(payments_to_process) > 1:
-                    charge['payment_method'] = 'Múltiplos'
-                    charge['payment_details'] = payments_to_process
-                else:
-                    charge['payment_method'] = payments_to_process[0]['method_id']
-                
-                save_room_charges(room_charges)
-                
-                log_action('Início Pagamento', f'Iniciando processamento de pagamento para Quarto {charge["room_number"]}. Total: R$ {charge["total"]}', department='Recepção')
-
-                payment_group_id = str(uuid.uuid4()) if len(payments_to_process) > 1 else None
-                total_payment_group_amount = sum(float(p['amount']) for p in payments_to_process) if payment_group_id else 0
-
-                for payment in payments_to_process:
-                    details = {}
-                    if payment_group_id:
-                        details['payment_group_id'] = payment_group_id
-                        details['total_payment_group_amount'] = total_payment_group_amount
-                        details['payment_method_code'] = payment['method_name']
-
-                    transaction = {
-                        'id': f"TRANS_{datetime.now().strftime('%Y%m%d%H%M%S')}_{int(payment['amount']*100)}",
-                        'type': 'in',
-                        'category': 'Pagamento de Conta',
-                        'description': f"Pagamento Quarto {charge['room_number']} ({payment['method_name']})",
-                        'amount': payment['amount'],
-                        'payment_method': payment['method_name'],
-                        'emit_invoice': emit_invoice,
-                        'timestamp': datetime.now().strftime('%d/%m/%Y %H:%M'),
-                        'time': datetime.now().strftime('%H:%M'),
-                        'waiter': charge.get('waiter'),
-                        'waiter_breakdown': charge.get('waiter_breakdown'),
-                        'service_fee_removed': charge.get('service_fee_removed', False),
-                        'related_charge_id': charge['id'],
-                        'details': details
-                    }
-                    current_session['transactions'].append(transaction)
-                    log_action('Transação Parcial', f'Pagamento parcial: R$ {payment["amount"]:.2f} via {payment["method_name"]}', department='Recepção')
-                
-                save_cashier_sessions(sessions)
-                
-                try:
-                    all_payment_methods = load_payment_methods()
-                    pm_map = {m['id']: m for m in all_payment_methods}
-
-                    items_list = charge.get('items', [])
-                    if isinstance(items_list, str):
-                        try: items_list = json.loads(items_list)
-                        except: items_list = []
-                    
-                    occupancy = load_room_occupancy()
-                    guest_name = occupancy.get(str(charge['room_number']), {}).get('guest_name', 'Hóspede')
-
-                    fiscal_payments = []
-                    for p in payments_to_process:
-                        # Determine is_fiscal
-                        pm_id = p.get('method_id')
-                        # If method_id not available (passed from name?), try to find by name
-                        pm_obj = pm_map.get(pm_id)
-                        if not pm_obj:
-                             # Fallback lookup by name
-                             pm_obj = next((m for m in all_payment_methods if m['name'] == p['method_name']), None)
-                        
-                        is_fiscal = pm_obj.get('is_fiscal', False) if pm_obj else False
-
-                        fiscal_payments.append({
-                            'method': p['method_name'],
-                            'amount': p['amount'],
-                            'is_fiscal': is_fiscal
-                        })
-
-                    FiscalPoolService.add_to_pool(
-                        origin='reception_charge',
-                        original_id=f"CHARGE_{charge['id']}",
-                        total_amount=float(charge['total']),
-                        items=items_list,
-                        payment_methods=fiscal_payments,
-                        user=current_user,
-                        customer_info={'room_number': charge['room_number'], 'guest_name': guest_name}
-                    )
-                    log_action('Sincronização Fiscal', f'Conta {charge["id"]} enviada para pool fiscal.', department='Recepção')
-                except Exception as e:
-                    print(f"Error adding charge to fiscal pool: {e}")
-                    # Use a simpler logging mechanism if LoggerService is not available or too complex to import
-                    print(f"CRITICAL: Fiscal Pool Error: {e}")
-                    log_action('Erro Fiscal', f'Falha ao enviar conta {charge["id"]} para pool fiscal: {e}', department='Recepção')
-
-                log_action('Pagamento Concluído', f'Quarto {charge["room_number"]}: R$ {charge["total"]:.2f} via {charge["payment_method"]}', department='Recepção')
+                result = _process_charge_payment(
+                    charge=charge,
+                    payments_to_process=payments_to_process,
+                    room_charges_ref=room_charges,
+                    cashier_session=current_session,
+                    current_user=current_user,
+                    require_exact_total=True,
+                    add_cashier_transactions=True,
+                    add_fiscal_pool=True,
+                    fiscal_origin='reception_charge'
+                )
+                if not result.get('success'):
+                    flash(result.get('error') or 'Falha ao processar pagamento.')
+                    redirect_to = request.form.get('redirect_to')
+                    if redirect_to == 'reception_rooms':
+                        return redirect(url_for('reception.reception_rooms'))
+                    return redirect(url_for('reception.reception_cashier'))
+                if result.get('fiscal_error'):
+                    log_action('Erro Fiscal', f"Falha ao enviar conta {charge.get('id')} para pool fiscal: {result.get('fiscal_error')}", department='Recepção')
                 flash(f"Pagamento de R$ {charge['total']:.2f} recebido com sucesso.")
             else:
                 flash('Conta não encontrada ou já paga.')
@@ -4732,6 +5090,14 @@ def api_reception_return_to_restaurant():
 @login_required
 def reception_pay_charge(charge_id):
     try:
+        if not _has_reception_authorized_access():
+            if not _has_operational_grant('reception.pay_charge'):
+                return _deny_with_authz_request(
+                    'Acesso não autorizado.',
+                    'reception.pay_charge',
+                    context={'charge_id': charge_id, 'room_num': request.json.get('room_num') if request.is_json else None},
+                )
+
         data = request.json
         payments = data.get('payments', [])
         room_num = data.get('room_num')
@@ -4748,83 +5114,29 @@ def reception_pay_charge(charge_id):
         if charge.get('status') == 'paid':
              return jsonify({'success': False, 'message': 'Conta já paga.'})
 
-        # Load session
-        sessions = load_cashier_sessions()
-        
-        # Debug Logging for Session Verification
-        open_sessions = [s for s in sessions if s.get('status') == 'open']
-        current_app.logger.info(f"Payment Verification: Found {len(open_sessions)} open sessions. Types: {[s.get('type') for s in open_sessions]}")
-
-        # Check for any valid reception session type
-        # Valid types: 'reception' (legacy), 'guest_consumption', 'reception_room_billing'
-        valid_types = ['reception', 'guest_consumption', 'reception_room_billing']
-        
-        current_session = next((s for s in reversed(sessions) 
-                                if s['status'] == 'open' and s.get('type') in valid_types), None)
-        
+        current_session = _get_active_guest_consumption_session()
         if not current_session:
-             current_app.logger.warning("Payment Verification Failed: No open reception cashier session found.")
              return jsonify({'success': False, 'message': 'Caixa da recepção fechado. Abra o caixa para receber pagamentos.'})
-
-        current_app.logger.info(f"Payment Verification Success: Using session {current_session.get('id')} of type {current_session.get('type')}")
-
-        # Calculate total paid
-        total_paid = sum(float(p['amount']) for p in payments)
-        charge_total = float(charge.get('total', 0))
-        
-        # Register transactions
         user = session.get('user', 'Sistema')
-        timestamp = datetime.now().strftime('%d/%m/%Y %H:%M')
-        payment_methods_list = load_payment_methods()
-        
-        payment_group_id = str(uuid.uuid4()) if len(payments) > 1 else None
-        total_payment_group_amount = total_paid if payment_group_id else 0
-        
-        for p in payments:
-            method_id = str(p.get('method'))
-            method_name = next((m['name'] for m in payment_methods_list if str(m['id']) == method_id), 'Desconhecido')
-            
-            details = {}
-            if payment_group_id:
-                details['payment_group_id'] = payment_group_id
-                details['total_payment_group_amount'] = total_payment_group_amount
-                details['payment_method_code'] = method_name
-            
-            transaction = {
-                'id': f"PAY_{datetime.now().strftime('%Y%m%d%H%M%S')}_{random.randint(1000,9999)}",
-                'type': 'in',
-                'category': 'Pagamento Item',
-                'description': f"Pagamento Item Quarto {room_num} ({method_name})",
-                'amount': float(p['amount']),
-                'payment_method': method_name,
-                'timestamp': timestamp,
-                'user': user,
-                'related_charge_id': charge_id,
-                'details': details
-            }
-            current_session['transactions'].append(transaction)
-            
-        save_cashier_sessions(sessions)
-        
-        # Update charge
-        charge['status'] = 'paid'
-        charge['paid_at'] = timestamp
-        charge['reception_cashier_id'] = current_session['id']
-        # Persist the payments in a standard field
-        try:
-            normalized_payments = []
-            for p in payments:
-                normalized_payments.append({
-                    'method': str(p.get('method')),
-                    'amount': float(p.get('amount', 0))
-                })
-            charge['payments'] = normalized_payments
-        except Exception:
-            charge['payments'] = payments
-        
-        save_room_charges(room_charges)
-        
-        log_action('Pagamento Item', f'Quarto {room_num}: R$ {total_paid:.2f} pago.', department='Recepção')
+        payment_methods_list = _load_reception_payment_methods()
+        normalized_payments = _normalize_charge_payments(payments, payment_methods_list)
+        result = _process_charge_payment(
+            charge=charge,
+            payments_to_process=normalized_payments,
+            room_charges_ref=room_charges,
+            cashier_session=current_session,
+            current_user=user,
+            require_exact_total=True,
+            add_cashier_transactions=True,
+            add_fiscal_pool=True,
+            fiscal_origin='reception_charge'
+        )
+        if not result.get('success'):
+            return jsonify({'success': False, 'message': result.get('error')})
+        if result.get('fiscal_error'):
+            current_app.logger.error(f"Error adding charge to fiscal pool: {result.get('fiscal_error')}")
+        total_paid = result.get('paid_total', 0.0)
+        log_action('Pagamento Item', f'Quarto {room_num}: R$ {float(total_paid):.2f} pago.', department='Recepção')
         
         return jsonify({'success': True})
 
@@ -5085,7 +5397,7 @@ def reception_edit_charge():
             'justification': justification
         }
         
-        sessions = load_cashier_sessions()
+        sessions = CashierService.list_sessions()
         
         cashier_id = charge.get('reception_cashier_id')
         paying_session = next((s for s in sessions if s['id'] == cashier_id), None)
@@ -5176,7 +5488,10 @@ def reception_edit_charge():
                     'time': datetime.now().strftime('%H:%M'),
                     'waiter': charge.get('waiter'),
                     'waiter_breakdown': charge.get('waiter_breakdown'),
-                    'service_fee_removed': charge.get('service_fee_removed', False)
+                    'service_fee_removed': charge.get('service_fee_removed', False),
+                    'commission_eligible': not bool(charge.get('service_fee_removed', False)),
+                    'commission_reference_id': f"MANUAL_CHARGE_PAY_{charge.get('id')}",
+                    'operator': session.get('user')
                 }
                 current_reception_cashier['transactions'].append(payment_trans)
                 
@@ -5187,7 +5502,7 @@ def reception_edit_charge():
              else:
                 changes.append("AVISO: Pagamento não registrado financeiramente pois não há caixa aberto.")
 
-        save_cashier_sessions(sessions)
+        CashierService.persist_sessions(sessions, trigger_backup=False)
 
         if 'audit_log' not in charge:
             charge['audit_log'] = []
@@ -5271,19 +5586,14 @@ def reception_reservations_cashier():
                 flash('Não há caixa de reservas aberto para fechar.')
             else:
                 try:
-                    raw_cash = request.form.get('closing_cash')
-                    raw_non_cash = request.form.get('closing_non_cash')
-                    try:
-                        closing_cash = parse_br_currency(raw_cash) if raw_cash else None
-                    except Exception:
-                        closing_cash = None
-                    try:
-                        closing_non_cash = parse_br_currency(raw_non_cash) if raw_non_cash else None
-                    except Exception:
-                        closing_non_cash = None
-                    closing_balance = None
-                    if closing_cash is not None or closing_non_cash is not None:
-                        closing_balance = (closing_cash or 0.0) + (closing_non_cash or 0.0)
+                    raw_cash = (request.form.get('closing_cash') or '').strip()
+                    raw_non_cash = (request.form.get('closing_non_cash') or '').strip()
+                    if not raw_cash or not raw_non_cash:
+                        flash('Informe manualmente os valores de dinheiro e de outras formas para fechar o caixa de reservas.')
+                        return redirect(url_for('reception.reception_reservations_cashier'))
+                    closing_cash = parse_br_currency(raw_cash)
+                    closing_non_cash = parse_br_currency(raw_non_cash)
+                    closing_balance = (closing_cash or 0.0) + (closing_non_cash or 0.0)
                     
                     CashierService.close_session(
                         session_id=current_session['id'],
@@ -5294,6 +5604,9 @@ def reception_reservations_cashier():
                     )
                     log_action('Caixa Fechado', f'Caixa Reservas fechado por {current_user}', department='Recepção')
                     flash('Caixa de Reservas fechado com sucesso.')
+                except ValueError:
+                    flash('Valores inválidos para fechamento. Use formato numérico válido.')
+                    return redirect(url_for('reception.reception_reservations_cashier'))
                 except Exception as e:
                     flash(f'Erro ao fechar caixa: {str(e)}')
                     
@@ -6049,6 +6362,52 @@ def call_queue_customer(id):
     flash('Cliente chamado com sucesso.')
     return redirect(url_for('reception.reception_waiting_list'))
 
+@reception_bp.route('/reception/waiting-list/call-next', methods=['POST'])
+@login_required
+def call_next_queue_customer():
+    if not _waiting_list_access_allowed():
+        flash('Acesso restrito.')
+        return redirect(url_for('main.index'))
+    queue = waiting_list_service.get_waiting_list()
+    next_entry = next(
+        (
+            item for item in queue
+            if isinstance(item, dict) and str(item.get('status') or '').strip().lower() == 'aguardando'
+        ),
+        None
+    )
+    if not next_entry:
+        flash('Não há cliente aguardando para chamar.')
+        return redirect(url_for('reception.reception_waiting_list'))
+    channel = request.form.get('channel', 'whatsapp').strip() or 'whatsapp'
+    timeout_minutes = request.form.get('timeout_minutes', '')
+    reason = request.form.get('reason', '').strip() or 'Chamada automática do próximo da fila'
+    updated, error = waiting_list_service.call_customer(
+        customer_id=next_entry.get('id'),
+        user=session.get('user'),
+        channel=channel,
+        timeout_minutes=timeout_minutes,
+        reason=reason,
+        resend=False,
+        action_origin={'ip': request.remote_addr, 'endpoint': request.path, 'method': request.method, 'mode': 'call_next'}
+    )
+    if error:
+        flash(error)
+        return redirect(url_for('reception.reception_waiting_list'))
+    try:
+        LoggerService.log_acao(
+            acao='Fila Espera - Chamar Próximo',
+            entidade='Fila de Espera',
+            detalhes={'entry_id': next_entry.get('id'), 'channel': channel, 'timeout_minutes': timeout_minutes},
+            nivel_severidade='INFO',
+            departamento_id='Recepção',
+            colaborador_id=session.get('user')
+        )
+    except Exception:
+        pass
+    flash(f"Próximo cliente chamado: {updated.get('name')}.")
+    return redirect(url_for('reception.reception_waiting_list'))
+
 @reception_bp.route('/reception/waiting-list/notes/<id>', methods=['POST'])
 @login_required
 def update_queue_customer_notes(id):
@@ -6296,7 +6655,15 @@ def get_room_consumption_report(room_num):
         return f"Erro ao gerar relatório: {str(e)}", 500
 
 @reception_bp.route('/debug/report_calc/<room_num>')
+@login_required
 def debug_report_calc_route(room_num):
+    if not _has_supervisor_plus_access():
+        if not _has_operational_grant('reception.debug_report_calc'):
+            return _deny_with_authz_request(
+                'Permissão negada',
+                'reception.debug_report_calc',
+                context={'room_num': room_num},
+            )
     try:
         room_charges = load_room_charges()
         # Normalize room number (handle 02 vs 2)
@@ -6427,7 +6794,7 @@ def reception_close_account(room_num):
         total_pending = sum(float(c.get('total', 0)) for c in pending_charges)
         
         # Prepare Payment List
-        payment_methods_list = load_payment_methods()
+        payment_methods_list = _load_reception_payment_methods()
         pm_map = {m['id']: m for m in payment_methods_list}
         
         final_payments = []
@@ -6447,6 +6814,8 @@ def reception_close_account(room_num):
                 amt = float(p['amount'])
                 if amt <= 0: continue
                 m_obj = pm_map.get(mid)
+                if not m_obj:
+                    return jsonify({'success': False, 'error': f'Forma de pagamento inválida para recepção: {mid}'}), 400
                 m_name = m_obj['name'] if m_obj else mid
                 is_fiscal = m_obj.get('is_fiscal', False) if m_obj else False
                 final_payments.append({
@@ -6460,6 +6829,8 @@ def reception_close_account(room_num):
             # Legacy Single Method
             mid = legacy_payment_method
             m_obj = pm_map.get(mid)
+            if not m_obj:
+                return jsonify({'success': False, 'error': f'Forma de pagamento inválida para recepção: {mid}'}), 400
             m_name = m_obj['name'] if m_obj else mid
             is_fiscal = m_obj.get('is_fiscal', False) if m_obj else False
             final_payments.append({
@@ -6469,6 +6840,12 @@ def reception_close_account(room_num):
                 'is_fiscal': is_fiscal,
                 'remaining': total_pending
             })
+
+        total_paid_effective = round(sum(float(p.get('amount') or 0) for p in final_payments), 2)
+        if total_paid_effective - total_pending > 0.05:
+            has_cash = any(_is_cash_payment(p.get('id'), p.get('name')) for p in final_payments)
+            if not has_cash:
+                return jsonify({'success': False, 'error': 'Pagamento acima do total só é permitido quando houver dinheiro (troco).'}), 400
 
         # Calculate total and prepare receipt data
         total_amount = 0.0
@@ -6502,22 +6879,38 @@ def reception_close_account(room_num):
                         'is_fiscal': fp['is_fiscal']
                     })
             
-            # Update Status
-            charge['status'] = 'paid'
-            charge['paid_at'] = now_str
+            normalized_charge_payments = [
+                {
+                    'method_id': cp.get('method'),
+                    'method_name': cp.get('method'),
+                    'amount': float(cp.get('amount') or 0),
+                    'is_fiscal': bool(cp.get('is_fiscal'))
+                }
+                for cp in charge_payments
+            ]
+            if not normalized_charge_payments and charge_total == 0:
+                normalized_charge_payments = [{
+                    'method_id': 'isento',
+                    'method_name': 'Isento',
+                    'amount': 0.0,
+                    'is_fiscal': False
+                }]
+            pay_result = _process_charge_payment(
+                charge=charge,
+                payments_to_process=normalized_charge_payments,
+                room_charges_ref=room_charges,
+                cashier_session=current_session,
+                current_user=user,
+                require_exact_total=True,
+                add_cashier_transactions=False,
+                add_fiscal_pool=True,
+                fiscal_origin='reception_charge'
+            )
+            if not pay_result.get('success'):
+                return jsonify({'success': False, 'error': pay_result.get('error') or 'Falha ao processar baixa de conta.'}), 400
+            if pay_result.get('fiscal_error'):
+                current_app.logger.error(f"Error adding charge {charge.get('id')} to fiscal pool: {pay_result.get('fiscal_error')}")
             charge['closed_by'] = user
-            
-            # Store payment details
-            if not charge_payments:
-                charge['payment_method'] = 'Isento' if charge_total == 0 else 'Desconhecido'
-            elif len(charge_payments) == 1:
-                charge['payment_method'] = charge_payments[0]['method'] # Store Name
-            else:
-                # Store the one with highest amount as primary, but mark as split
-                primary = max(charge_payments, key=lambda x: x['amount'])
-                charge['payment_method'] = primary['method']
-                charge['payment_details'] = charge_payments # New field
-                
             charge['notes'] = charge.get('notes', '') + f" [Baixa Total por {user} em {now_str}]"
             
             # Prepare data for receipt
@@ -6541,23 +6934,6 @@ def reception_close_account(room_num):
             elif items_list is None:
                 items_list = []
 
-            # Add to Fiscal Pool (Individual Emission per Charge)
-            try:
-                # Use the distributed payments for this charge
-                fiscal_payments = charge_payments
-                
-                FiscalPoolService.add_to_pool(
-                    origin='reception_charge',
-                    original_id=f"CHARGE_{charge['id']}",
-                    total_amount=float(charge.get('total', 0)),
-                    items=items_list,
-                    payment_methods=fiscal_payments,
-                    user=user,
-                    customer_info={'room_number': room_num, 'guest_name': guest_name}
-                )
-            except Exception as e:
-                print(f"Error adding charge {charge['id']} to fiscal pool: {e}")
-                
             charge_items = []
             charge_subtotal = 0.0
             taxable_total = 0.0
@@ -6827,12 +7203,145 @@ def api_guest_details(reservation_id):
         # 2. Get Extended Info
         details = service.get_guest_details(reservation_id)
         
+        occupancy_map = _normalize_occupancy_map(load_room_occupancy())
+        room_charges = load_room_charges()
+        if not isinstance(room_charges, list):
+            room_charges = []
+        current_room = ''
+        for room_key, occ in (occupancy_map or {}).items():
+            if not isinstance(occ, dict):
+                continue
+            if str(occ.get('reservation_id') or '') == str(reservation_id):
+                current_room = str(room_key)
+                break
+        if not current_room:
+            fallback_room = str(res.get('room') or '').strip()
+            if fallback_room:
+                current_room = format_room_number(fallback_room)
+        current_occ = occupancy_map.get(current_room, {}) if current_room else {}
+        stay_checkin = _safe_parse_date((current_occ or {}).get('checkin') or res.get('checkin'))
+        stay_checkout = _safe_parse_date((current_occ or {}).get('checkout') or res.get('checkout'))
+
+        reservation_total = parse_br_currency(res.get('amount') or res.get('total_value') or 0)
+        reservation_paid = parse_br_currency(res.get('paid_amount') or 0)
+        reservation_pending = parse_br_currency(res.get('to_receive') or max(reservation_total - reservation_paid, 0))
+
+        consumption_total = 0.0
+        consumption_paid = 0.0
+        consumption_pending = 0.0
+        consumption_cancelled = 0.0
+        source_breakdown = {'restaurant': 0.0, 'minibar': 0.0, 'services': 0.0}
+
+        def resolve_charge_source(charge_row, items_list):
+            charge_source = str(charge_row.get('source') or '').lower()
+            if charge_source in ['restaurant', 'minibar', 'services']:
+                return charge_source
+            if str(charge_row.get('type') or '').lower() == 'minibar':
+                return 'minibar'
+            has_minibar = any(
+                isinstance(item, dict) and (
+                    str(item.get('category') or '').lower() == 'frigobar' or str(item.get('source') or '').lower() == 'minibar'
+                )
+                for item in (items_list or [])
+            )
+            if has_minibar:
+                return 'minibar'
+            has_service = any(
+                isinstance(item, dict) and (
+                    'servi' in str(item.get('category') or '').lower() or 'servi' in str(item.get('name') or '').lower()
+                )
+                for item in (items_list or [])
+            )
+            if has_service:
+                return 'services'
+            return 'restaurant'
+
+        def parse_charge_datetime(charge_row):
+            for key in ['date', 'paid_at', 'created_at', 'timestamp']:
+                raw_val = str((charge_row or {}).get(key) or '').strip()
+                if not raw_val:
+                    continue
+                for fmt in ['%d/%m/%Y %H:%M', '%d/%m/%Y', '%Y-%m-%d %H:%M:%S', '%Y-%m-%d']:
+                    try:
+                        return datetime.strptime(raw_val, fmt)
+                    except Exception:
+                        continue
+            return None
+
+        def charge_belongs_to_current_stay(charge_row, status_value):
+            if not isinstance(charge_row, dict):
+                return False
+            charge_reservation_id = str(charge_row.get('reservation_id') or '').strip()
+            if charge_reservation_id and charge_reservation_id != str(reservation_id):
+                return False
+            if not current_room:
+                return charge_reservation_id == str(reservation_id)
+            if format_room_number(charge_row.get('room_number')) != current_room:
+                return False
+            if stay_checkin is None:
+                return True
+            dt_val = parse_charge_datetime(charge_row)
+            if dt_val is None:
+                return status_value == 'pending'
+            dt_date = dt_val.date()
+            if dt_date < stay_checkin:
+                return False
+            if stay_checkout and dt_date > stay_checkout:
+                return False
+            return True
+
+        for charge in room_charges:
+            if not isinstance(charge, dict):
+                continue
+            status = str(charge.get('status') or '').lower()
+            if status not in ['pending', 'paid', 'cancelled', 'canceled']:
+                continue
+            if not charge_belongs_to_current_stay(charge, status):
+                continue
+            total_val = parse_br_currency(charge.get('total') or 0)
+            items_list = charge.get('items') if isinstance(charge.get('items'), list) else []
+            source = resolve_charge_source(charge, items_list)
+            if status in ['cancelled', 'canceled']:
+                consumption_cancelled += total_val
+                continue
+            consumption_total += total_val
+            source_breakdown[source] = round(float(source_breakdown.get(source, 0.0)) + total_val, 2)
+            if status == 'paid':
+                consumption_paid += total_val
+            elif status == 'pending':
+                consumption_pending += total_val
+
+        consumption_total = round(consumption_total, 2)
+        consumption_paid = round(consumption_paid, 2)
+        consumption_pending = round(consumption_pending, 2)
+        consumption_cancelled = round(consumption_cancelled, 2)
+        reservation_total = round(reservation_total, 2)
+        reservation_paid = round(reservation_paid, 2)
+        reservation_pending = round(reservation_pending, 2)
+
         return jsonify({
             'success': True,
             'data': {
                 'guest': details,
                 'reservation': res,
-                'unified': service.build_unified_reservation_record(reservation_id)
+                'unified': service.build_unified_reservation_record(reservation_id),
+                'current_room': current_room,
+                'reservation_financial': {
+                    'total': reservation_total,
+                    'paid': reservation_paid,
+                    'pending': reservation_pending,
+                    'cashier': 'Caixa Reservas',
+                    'fiscal_document': 'NFS-e'
+                },
+                'consumption_financial': {
+                    'total': consumption_total,
+                    'paid': consumption_paid,
+                    'pending': consumption_pending,
+                    'cancelled': consumption_cancelled,
+                    'cashier': 'Caixa Recepção',
+                    'fiscal_document': 'NFC-e',
+                    'source_breakdown': source_breakdown
+                }
             }
         })
     except Exception as e:
@@ -6842,13 +7351,26 @@ def api_guest_details(reservation_id):
 @login_required
 def api_guest_update():
     try:
-        data = request.json
+        data = request.json if isinstance(request.json, dict) else {}
         res_id = data.get('reservation_id')
         if not res_id:
             return jsonify({'success': False, 'error': 'ID da reserva necessário'}), 400
-            
+
+        payload = {'reservation_id': res_id}
+        personal_info = data.get('personal_info') if isinstance(data.get('personal_info'), dict) else {}
+        fiscal_info = data.get('fiscal_info') if isinstance(data.get('fiscal_info'), dict) else {}
+        operational_info = data.get('operational_info') if isinstance(data.get('operational_info'), dict) else {}
+        if personal_info:
+            payload['personal_info'] = personal_info
+            if str(personal_info.get('name') or '').strip():
+                payload['guest_name'] = str(personal_info.get('name')).strip()
+        if fiscal_info:
+            payload['fiscal_info'] = fiscal_info
+        if operational_info:
+            payload['operational_info'] = operational_info
+
         service = ReservationService()
-        service.update_guest_details(res_id, data)
+        service.update_guest_details(res_id, payload)
         
         return jsonify({'success': True})
     except Exception as e:
@@ -7537,8 +8059,7 @@ def reception_reservation_pay():
         method_obj = next((m for m in payment_methods if str(m.get('id')) == str(payment_method_id)), None)
         if not method_obj:
             return jsonify({'success': False, 'error': 'Forma de pagamento inválida.'}), 400
-        available_in = method_obj.get('available_in') or []
-        if not any(tag in available_in for tag in ['reservations', 'reservas', 'caixa_reservas']):
+        if not _payment_method_enabled_for(method_obj, 'reservations'):
             return jsonify({'success': False, 'error': 'Forma de pagamento não habilitada para Reservas.'}), 400
         payment_method_name = method_obj.get('name') or payment_method_name or 'Desconhecido'
 
@@ -7808,6 +8329,11 @@ def reception_checkin():
             'gender': request.form.get('gender'),
             'birth_date': request.form.get('birth_date')
         }
+        payment_decision = str(request.form.get('reservation_payment_decision') or '').strip()
+        payment_defer_reason = str(request.form.get('reservation_payment_defer_reason') or '').strip()
+        payment_snapshot = {'total': 0.0, 'paid': 0.0, 'remaining': 0.0, 'state': 'none'}
+        payment_due_date = datetime.now().strftime('%d/%m/%Y')
+        payment_followup = {}
 
         if reservation_id:
             try:
@@ -7846,15 +8372,84 @@ def reception_checkin():
             except Exception as e:
                 print(f"Error creating walk-in reservation: {e}")
 
+        if reservation_id:
+            get_reservation_fn = getattr(res_service, 'get_reservation_by_id', None)
+            reservation_for_payment = get_reservation_fn(reservation_id) if callable(get_reservation_fn) else {'id': reservation_id}
+            payment_snapshot = _reservation_debt_snapshot(res_service, reservation_for_payment or {})
+            if payment_snapshot.get('remaining', 0.0) > 0.01:
+                allowed_decisions = {'collect_now', 'defer_one_day', 'partial', 'none'}
+                if payment_decision not in allowed_decisions:
+                    flash('Diária pendente identificada. Selecione a ação de cobrança no check-in (cobrar agora, adiar 1 dia, parcial ou nenhum).')
+                    return redirect(url_for('reception.reception_rooms', open_checkin='true', reservation_id=reservation_id))
+                if payment_decision == 'defer_one_day':
+                    payment_due_date = (datetime.now() + timedelta(days=1)).strftime('%d/%m/%Y')
+                    if not payment_defer_reason:
+                        payment_defer_reason = 'Adiado no check-in por 1 dia.'
+                if payment_decision == 'collect_now':
+                    flash('Atenção: diária pendente. Conclua a cobrança da reserva no Caixa Reservas.')
+
+            payment_state = payment_snapshot.get('state') or 'none'
+            if payment_snapshot.get('remaining', 0.0) <= 0.01:
+                payment_state = 'complete'
+            elif payment_snapshot.get('paid', 0.0) > 0.01:
+                payment_state = 'partial'
+            else:
+                payment_state = 'none'
+
+            payment_followup = {
+                'state': payment_state,
+                'decision': payment_decision or ('collect_now' if payment_snapshot.get('remaining', 0.0) > 0.01 else 'none'),
+                'total': payment_snapshot.get('total', 0.0),
+                'paid': payment_snapshot.get('paid', 0.0),
+                'remaining': payment_snapshot.get('remaining', 0.0),
+                'due_date': payment_due_date,
+                'defer_reason': payment_defer_reason,
+                'updated_at': datetime.now().strftime('%d/%m/%Y %H:%M'),
+                'updated_by': session.get('user', 'Recepção')
+            }
+            try:
+                res_service.update_guest_details(
+                    reservation_id,
+                    {
+                        'personal_info': personal_info,
+                        'payment_followup': payment_followup
+                    }
+                )
+            except Exception as payment_info_err:
+                print(f"Error updating payment follow-up for reservation {reservation_id}: {payment_info_err}")
+
         occupancy[room_num] = {
             'guest_name': guest_name,
             'checkin': checkin_date,
             'checkout': checkout_date,
             'num_adults': num_adults,
             'checked_in_at': datetime.now().strftime('%d/%m/%Y %H:%M'),
-            'reservation_id': reservation_id # Link stored
+            'reservation_id': reservation_id,
+            'reservation_payment_state': payment_followup.get('state') or payment_snapshot.get('state') or 'none',
+            'reservation_payment_decision': payment_followup.get('decision') or payment_decision or '',
+            'reservation_payment_due_date': payment_followup.get('due_date') or payment_due_date,
+            'reservation_payment_remaining': float(payment_snapshot.get('remaining', 0.0)),
+            'reservation_payment_total': float(payment_snapshot.get('total', 0.0)),
+            'reservation_payment_paid': float(payment_snapshot.get('paid', 0.0)),
+            'reservation_payment_defer_reason': payment_followup.get('defer_reason') or '',
+            'reservation_payment_updated_by': session.get('user', 'Recepção'),
+            'reservation_payment_updated_at': datetime.now().strftime('%d/%m/%Y %H:%M')
         }
         save_room_occupancy(occupancy)
+        auto_deduction = apply_auto_deduction(
+            event_type='checkin',
+            room_number=room_num,
+            triggered_by=session.get('user') or 'Recepção',
+            source='reception_checkin',
+            event_ref=checkin_date or datetime.now().strftime('%d/%m/%Y'),
+            event_context={'stay_ref': reservation_id or checkin_date or room_num}
+        )
+        if auto_deduction.get('duplicate'):
+            flash('Baixa automática de governança já aplicada para esta estadia.')
+        if auto_deduction.get('applied_count', 0) > 0:
+            flash(f"Baixa automática de governança aplicada no check-in: {auto_deduction.get('applied_count')} item(ns).")
+        for warning in (auto_deduction.get('warnings') or []):
+            flash(f"Aviso de estoque governança: {warning}")
         
         # Automatically open restaurant table for the room
         orders = load_table_orders()

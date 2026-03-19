@@ -8,14 +8,34 @@ __pycache__/
 .ruff_cache/
 
 .vscode/
+.trae/
 
 Backups/
 instance/
 data/
+data/**
 
 *.bak
 *.backup
+*.backup*
 *.tmp
 *.log
 run.bet
 sistema-almareia-mirapraia/
+
+.env
+.env.*
+*.env
+
+*.pfx
+*.p12
+*.key
+*.pem
+*.crt
+certs/
+certs/**
+
+archived_*/
+runtime_evidence_*/
+temp_print/
+uploads/

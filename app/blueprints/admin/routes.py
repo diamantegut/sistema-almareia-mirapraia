@@ -4,6 +4,7 @@ import sys
 import json
 import io
 import time
+import copy
 import base64
 import threading
 import subprocess
@@ -13,6 +14,7 @@ from pathlib import Path
 from zipfile import ZipFile
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Set
+from werkzeug.routing import BuildError
 from . import admin_bp
 from app.utils.decorators import login_required
 from app.services.finance_dashboard_service import FinanceDashboardService
@@ -26,7 +28,6 @@ from app.services.data_service import (
     normalize_text,
     load_sales_history,
     load_menu_items,
-    save_menu_items,
     load_cashier_sessions,
     secure_save_menu_items,
     load_department_permissions,
@@ -37,6 +38,7 @@ from app.services.backup_service import backup_service
 from app.services.logging_service import get_logs, export_logs_to_csv
 from app.services.monitor_service import check_backup_health, load_system_alerts, get_latest_alerts
 from app.services.security_service import load_alerts, load_security_settings, save_security_settings, update_alert_status
+from app.services.authz import operational_request_service
 from app.services.system_config_manager import get_backup_path, load_system_config
 from app.services.ota_booking_integration_service import OTABookingIntegrationService
 from app.services.booking_connectivity_auth_service import BookingConnectivityAuthService
@@ -3326,7 +3328,7 @@ def admin_security_settings():
 
 from app.services.printer_manager import load_printers, save_printers, load_printer_settings, save_printer_settings
 from app.services.printing_service import test_printer_connection
-from app.services.data_service import load_menu_items, save_menu_items
+from app.services.data_service import load_menu_items
 from app.services.fiscal_service import load_fiscal_settings, save_fiscal_settings, FiscalPoolService, get_access_token, get_fiscal_integration, download_xml, get_nfce_status
 from app.services.system_config_manager import get_data_path
 
@@ -3605,6 +3607,8 @@ def fiscal_config():
         settings['integrations'].append(integration)
 
     if request.method == 'POST':
+        def _only_digits(value):
+            return ''.join(ch for ch in str(value or '') if ch.isdigit())
         env_val = request.form.get('environment')
         integration['environment'] = 'homologation' if env_val == '2' else 'production'
         
@@ -3616,6 +3620,12 @@ def fiscal_config():
         
         integration['client_id'] = request.form.get('client_id')
         integration['client_secret'] = request.form.get('client_secret')
+        cnpj_emitente = _only_digits(request.form.get('cnpj_emitente'))
+        ie_emitente = _only_digits(request.form.get('ie_emitente'))
+        if cnpj_emitente:
+            integration['cnpj_emitente'] = cnpj_emitente
+        if ie_emitente:
+            integration['ie_emitente'] = ie_emitente
         integration['csc_id'] = request.form.get('csc_id')
         integration['csc_token'] = request.form.get('csc_token')
         integration['serie'] = request.form.get('serie') or integration.get('serie')
@@ -3809,7 +3819,7 @@ def fiscal_pool_view():
                 entry['sefaz_message'] = sefaz_check.get('message') or 'Erro ao consultar na SEFAZ.'
 
         if pool_changed:
-            FiscalPoolService._save_pool(pool)
+            FiscalPoolService.save_pool(pool)
     
     # 3. Sort Logic
     if sort_order == 'value_desc':
@@ -3881,7 +3891,7 @@ def fiscal_pool_emit_until():
         remaining = round(total_fiscal - emitted_fiscal, 2)
         if remaining <= 0:
             return jsonify({'success': True, 'message': 'Não há saldo a emitir.', 'emitted': 0, 'failed': 0, 'remaining': remaining})
-        to_emit = [e for e in filtered if e.get('status') in ['pending', 'failed', 'error', 'error_config']]
+        to_emit = [e for e in filtered if e.get('status') in ['pending', 'manual_retry_required']]
         to_emit.sort(key=lambda x: x.get('closed_at') or '')
         from app.services.fiscal_service import process_pending_emissions
         emitted_count = 0
@@ -3930,12 +3940,35 @@ def fiscal_pool_action():
             return jsonify({'success': False, 'error': 'ID ausente'}), 400
         
         try:
+            payload = request.json or {}
+            customer_document = ''.join(ch for ch in str(payload.get('customer_document') or '') if ch.isdigit())
+            if customer_document:
+                pool = FiscalPoolService._load_pool()
+                touched = False
+                for item in pool:
+                    if str(item.get('id')) != str(entry_id):
+                        continue
+                    item['customer_document'] = customer_document
+                    customer = item.get('customer') if isinstance(item.get('customer'), dict) else {}
+                    customer['cpf_cnpj'] = customer_document
+                    item['customer'] = customer
+                    touched = True
+                    break
+                if touched:
+                    FiscalPoolService.save_pool(pool)
             # Use updated process_pending_emissions with specific_id
             from app.services.fiscal_service import process_pending_emissions
             results = process_pending_emissions(specific_id=entry_id)
             
             if results['success'] > 0:
+                refreshed_entry = FiscalPoolService.get_entry(entry_id) or {}
                 msg = "Emissão realizada com sucesso."
+                return jsonify({
+                    'success': True,
+                    'message': msg,
+                    'access_key': refreshed_entry.get('access_key') or '',
+                    'fiscal_doc_uuid': refreshed_entry.get('fiscal_doc_uuid') or ''
+                })
             elif results['failed'] > 0:
                 # Fetch error detail from entry
                 entry = FiscalPoolService.get_entry(entry_id)
@@ -3951,11 +3984,71 @@ def fiscal_pool_action():
         except Exception as e:
             try:
                 # Persist the error into the pool so it appears no modal
-                FiscalPoolService.update_status(entry_id, 'failed', user=session.get('user'), error_msg=str(e))
+                FiscalPoolService.update_status(entry_id, 'manual_retry_required', user=session.get('user'), error_msg=str(e))
             except Exception:
                 pass
             traceback.print_exc()
             return jsonify({'success': False, 'error': f"Erro interno ao emitir: {str(e)}"})
+    elif action == 'reemit':
+        if not entry_id:
+            return jsonify({'success': False, 'error': 'ID ausente'}), 400
+        entry = FiscalPoolService.get_entry(entry_id)
+        if not entry:
+            return jsonify({'success': False, 'error': 'Entrada não encontrada'}), 404
+        if entry.get('status') != 'emitted':
+            return jsonify({'success': False, 'error': 'Somente notas emitidas podem ser reemitidas.'}), 400
+        if str(entry.get('fiscal_type') or '').lower() != 'nfce':
+            return jsonify({'success': False, 'error': 'Reemissão automática disponível apenas para NFC-e.'}), 400
+        pool = FiscalPoolService._load_pool()
+        source = next((p for p in pool if p.get('id') == entry_id), None)
+        if not source:
+            return jsonify({'success': False, 'error': 'Entrada não encontrada na base.'}), 404
+        new_entry = copy.deepcopy(source)
+        new_id = str(uuid.uuid4())
+        new_entry['id'] = new_id
+        new_entry['status'] = 'pending'
+        new_entry['fiscal_doc_uuid'] = None
+        new_entry['fiscal_serie'] = None
+        new_entry['fiscal_number'] = None
+        new_entry['access_key'] = ''
+        new_entry['xml_ready'] = False
+        new_entry['pdf_ready'] = False
+        new_entry.pop('xml_path', None)
+        new_entry.pop('pdf_path', None)
+        new_entry['last_error'] = ''
+        new_entry['closed_at'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        new_entry['closed_by'] = session.get('user') or 'Sistema'
+        new_entry['reemitted_from'] = entry_id
+        history = new_entry.get('history') if isinstance(new_entry.get('history'), list) else []
+        history.append({
+            'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'action': 'reemit_requested',
+            'user': session.get('user'),
+            'source_entry_id': entry_id
+        })
+        new_entry['history'] = history
+        pool.append(new_entry)
+        FiscalPoolService.save_pool(pool)
+        try:
+            from app.services.fiscal_service import process_pending_emissions
+            results = process_pending_emissions(specific_id=new_id)
+            refreshed_entry = FiscalPoolService.get_entry(new_id) or {}
+            if results.get('success', 0) > 0 and refreshed_entry.get('status') == 'emitted':
+                return jsonify({
+                    'success': True,
+                    'message': 'Reemissão realizada com sucesso.',
+                    'new_entry_id': new_id,
+                    'access_key': refreshed_entry.get('access_key') or '',
+                    'fiscal_doc_uuid': refreshed_entry.get('fiscal_doc_uuid') or ''
+                })
+            error_detail = refreshed_entry.get('last_error') or 'Falha na reemissão.'
+            return jsonify({'success': False, 'error': error_detail}), 500
+        except Exception as e:
+            try:
+                FiscalPoolService.update_status(new_id, 'manual_retry_required', user=session.get('user'), error_msg=str(e))
+            except Exception:
+                pass
+            return jsonify({'success': False, 'error': f'Erro interno ao reemitir: {str(e)}'}), 500
     elif action == 'queue_nfse_reservation':
         if not entry_id:
             return jsonify({'success': False, 'error': 'ID ausente'}), 400
@@ -3998,7 +4091,7 @@ def fiscal_pool_action():
         if not updated:
             return jsonify({'success': False, 'error': 'Não foi possível atualizar a conta.'}), 500
 
-        FiscalPoolService._save_pool(pool)
+        FiscalPoolService.save_pool(pool)
         LoggerService.log_acao(
             acao='Preparar NFS-e Reserva',
             entidade='Fiscal Pool',
@@ -4199,11 +4292,33 @@ def fiscal_pool_download_xml(entry_id):
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @admin_bp.route('/api/fiscal/receive', methods=['POST'])
+@login_required
 def api_fiscal_receive():
     """
     Endpoint to receive fiscal data from other instances.
     """
     try:
+        user_role = normalize_text(str(session.get('role') or ''))
+        if user_role not in ['admin', 'gerente', 'supervisor']:
+            if not operational_request_service.authorize_by_grant(
+                user=str(session.get('user') or ''),
+                route_key='admin.api_fiscal_receive',
+            ):
+                try:
+                    create_endpoint = url_for('reception.reception_create_operational_authz_request')
+                except BuildError:
+                    create_endpoint = '/reception/authz-requests/create'
+                return jsonify({
+                    'success': False,
+                    'error': 'Unauthorized',
+                    'authorization_request': {
+                        'available': True,
+                        'route_key': 'admin.api_fiscal_receive',
+                        'create_endpoint': create_endpoint,
+                        'context': {'fiscal_id': request.json.get('id') if request.is_json else None},
+                    },
+                }), 403
+
         data = request.json
         if not data:
             return jsonify({'success': False, 'error': 'No data provided'}), 400
@@ -4216,7 +4331,7 @@ def api_fiscal_receive():
              
         # Append directly
         pool.append(data)
-        FiscalPoolService._save_pool(pool)
+        FiscalPoolService.save_pool(pool)
         
         LoggerService.log_acao(
             acao='Sync Fiscal',

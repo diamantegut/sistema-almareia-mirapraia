@@ -4,9 +4,9 @@ import shutil
 from datetime import datetime
 import uuid
 
+from app.services.data_service import load_users as load_core_users, save_users as save_core_users
 from app.services.system_config_manager import get_data_path
 
-USERS_FILE = get_data_path('users.json')
 HR_DATA_FILE = get_data_path('hr_data.json')
 EPIS_INVENTORY_FILE = get_data_path('epis_inventory.json')
 EPIS_DISTRIBUTION_FILE = get_data_path('epis_distribution.json')
@@ -41,7 +41,7 @@ def save_json(filename, data):
         json.dump(data, f, indent=4, ensure_ascii=False)
 
 def get_all_employees():
-    users = load_json(USERS_FILE)
+    users = load_core_users()
     hr_data = load_json(HR_DATA_FILE)
     
     employees = []
@@ -70,7 +70,7 @@ def get_all_employees():
     return employees
 
 def get_employee_details(username):
-    users = load_json(USERS_FILE)
+    users = load_core_users()
     if username not in users:
         return None
     
@@ -98,7 +98,7 @@ def update_employee_hr_data(username, form_data):
     save_json(HR_DATA_FILE, hr_data)
     
     # Also update basic info in users.json if present
-    users = load_json(USERS_FILE)
+    users = load_core_users()
     if username in users:
         if 'full_name' in form_data:
             users[username]['full_name'] = form_data['full_name']
@@ -106,10 +106,10 @@ def update_employee_hr_data(username, form_data):
             users[username]['admission_date'] = form_data['admission_date']
         if 'birthday' in form_data:
             users[username]['birthday'] = form_data['birthday']
-        save_json(USERS_FILE, users)
+        save_core_users(users)
 
 def hire_employee(username, password, basic_info, hr_info):
-    users = load_json(USERS_FILE)
+    users = load_core_users()
     if username in users:
         return False, "Usuário já existe"
     
@@ -123,7 +123,7 @@ def hire_employee(username, password, basic_info, hr_info):
         "birthday": basic_info.get('birthday', ''),
         "score": "0"
     }
-    save_json(USERS_FILE, users)
+    save_core_users(users)
     
     # Create in hr_data.json
     hr_data = load_json(HR_DATA_FILE)

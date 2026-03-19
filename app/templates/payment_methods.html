@@ -59,6 +59,11 @@
                             </select>
                             <div class="form-text">CNPJ que emitirá a nota para esta forma de pagamento.</div>
                         </div>
+                        <div class="mb-3">
+                            <label class="form-label">Alias da Conta PagSeguro (Opcional)</label>
+                            <input type="text" class="form-control" name="pagseguro_alias" placeholder="Ex: Mirapraia">
+                            <div class="form-text">Metadado auxiliar para operação. Não bloqueia a conciliação global.</div>
+                        </div>
 
                         <button type="submit" class="btn btn-primary w-100">
                             <i class="bi bi-plus-circle"></i> Adicionar
@@ -100,6 +105,9 @@
                                                         <i class="bi bi-receipt"></i> Fiscal
                                                     </span>
                                                 {% endif %}
+                                                {% if method.pagseguro_alias %}
+                                                    <div><small class="text-muted">PagSeguro: {{ method.pagseguro_alias }}</small></div>
+                                                {% endif %}
                                             </td>
                                             <td>
                                                 {% if is_rest %}
@@ -127,6 +135,7 @@
                                                             data-res="{{ 'true' if is_res else 'false' }}"
                                                             data-fiscal="{{ 'true' if is_fiscal else 'false' }}"
                                                             data-cnpj="{{ method.fiscal_cnpj|default('') }}"
+                                                            data-ps-alias="{{ method.pagseguro_alias|default('') }}"
                                                             onclick="openEditModal(this)"
                                                             aria-label="Editar">
                                                         <i class="bi bi-pencil"></i>
@@ -210,6 +219,11 @@
                         </select>
                         <div class="form-text">CNPJ que emitirá a nota para esta forma de pagamento.</div>
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label">Alias da Conta PagSeguro (Opcional)</label>
+                        <input type="text" class="form-control" name="pagseguro_alias" id="editPagSeguroAlias" placeholder="Ex: Mirapraia">
+                        <div class="form-text">Metadado auxiliar para operação. Não bloqueia a conciliação global.</div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" aria-label="Cancelar">Cancelar</button>
@@ -235,6 +249,7 @@
         const isRes = button.getAttribute('data-res') === 'true';
         const isFiscal = button.getAttribute('data-fiscal') === 'true';
         const fiscalCnpj = button.getAttribute('data-cnpj');
+        const pagseguroAlias = button.getAttribute('data-ps-alias') || '';
 
         document.getElementById('editMethodId').value = id;
         document.getElementById('editMethodName').value = name;
@@ -245,6 +260,7 @@
         // Fiscal fields
         document.getElementById('editIsFiscal').checked = isFiscal;
         document.getElementById('editFiscalCnpj').value = fiscalCnpj;
+        document.getElementById('editPagSeguroAlias').value = pagseguroAlias;
         
         toggleCnpjInput('edit'); // Initialize visibility
         

@@ -1,7 +1,7 @@
 from flask import render_template, request, redirect, url_for, session, flash, jsonify, current_app
 from . import menu_bp
 from app.services.data_service import (
-    load_menu_items, save_menu_items, secure_save_menu_items, load_settings, save_settings,
+    load_menu_items, secure_save_menu_items, load_settings, save_settings,
     load_flavor_groups, save_flavor_groups, load_products,
     load_table_orders, load_printers,
     PRODUCT_PHOTOS_DIR

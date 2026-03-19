@@ -2,10 +2,12 @@ import os
 import json
 import io
 import re
+import threading
 import calendar
 import traceback
 import zipfile
 import xlsxwriter
+import requests
 from datetime import datetime, timedelta
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session, send_file, send_from_directory, Response, current_app
 from werkzeug.utils import secure_filename
@@ -16,11 +18,12 @@ from . import finance_bp
 from app.utils.decorators import login_required, role_required
 from app.utils.files import allowed_file
 from app.services.data_service import (
-    load_cashier_sessions, save_cashier_sessions,
     load_users, load_table_orders, save_table_orders,
+    load_room_charges, save_room_charges,
     load_suppliers, save_suppliers, load_payables, save_payables,
     load_fiscal_settings,
-    load_stock_logs, load_stock_requests, load_stock_entries, load_products
+    load_stock_logs, load_stock_requests, load_stock_entries, load_products,
+    load_payment_methods
 )
 from app.services.card_reconciliation_service import load_card_settings, save_card_settings
 from app.services.cashier_service import CashierService
@@ -41,22 +44,32 @@ from app.services.fiscal_service import (
 )
 from app.services.fiscal_pool_service import FiscalPoolService
 from app.services.printing_service import print_fiscal_receipt
+from app.services.closed_account_service import ClosedAccountService
 from app.services.logger_service import LoggerService, log_system_action
 from app.services.security_service import check_sensitive_access
 from app.services.import_sales import calculate_monthly_sales
 from app.services.card_reconciliation_service import (
-    fetch_pagseguro_transactions, fetch_rede_transactions,
-    reconcile_transactions, parse_pagseguro_csv, parse_rede_csv,
-    append_reconciliation_audit, load_reconciliation_audits
+    fetch_pagseguro_transactions,
+    fetch_pagseguro_transactions_detailed,
+    reconcile_transactions, parse_pagseguro_csv,
+    append_reconciliation_audit, load_reconciliation_audits,
+    load_card_consumption_map, register_consumed_card_matches
+)
+from app.services.financial_discrepancy_service import (
+    list_card_discrepancies,
+    approve_card_discrepancy,
+    approve_card_discrepancies_for_period,
+)
+from app.services.pagseguro_daily_pull_service import (
+    run_pagseguro_daily_pull,
+    compare_session_with_daily_snapshot,
+    ensure_previous_day_snapshot,
+    get_pull_status,
 )
 
 
 def _load_cashier_sessions():
-    try:
-        from app import load_cashier_sessions as app_loader
-        return app_loader()
-    except Exception:
-        return load_cashier_sessions()
+    return CashierService.list_sessions()
 
 
 def _normalize_pagseguro_configs(settings):
@@ -66,6 +79,108 @@ def _normalize_pagseguro_configs(settings):
     if isinstance(configs, list):
         return configs
     return []
+
+
+def _mask_pagseguro_token(token):
+    token_str = str(token or '').strip()
+    if not token_str:
+        return ''
+    if len(token_str) <= 8:
+        return '*' * len(token_str)
+    return f"{token_str[:4]}{'*' * (len(token_str) - 8)}{token_str[-4:]}"
+
+
+def _pagseguro_environment_label(config):
+    sandbox = bool((config or {}).get('sandbox'))
+    env = str((config or {}).get('environment') or '').strip().lower()
+    if sandbox or env in {'sandbox', 'homolog', 'homologacao', 'homologation'}:
+        return 'sandbox'
+    return 'production'
+
+
+def _pagseguro_health_badge(status):
+    normalized = str(status or '').strip().lower()
+    if normalized == 'ok':
+        return ('success', 'OK')
+    if normalized == 'error':
+        return ('danger', 'Erro')
+    return ('secondary', 'Não testado')
+
+
+def _check_pagseguro_account_health(account, timeout_seconds=12):
+    alias = str((account or {}).get('alias') or 'Conta')
+    email = str((account or {}).get('email') or '').strip()
+    token = str((account or {}).get('token') or '').strip()
+    env = _pagseguro_environment_label(account)
+    base_url = "https://ws.pagseguro.uol.com.br/v3/transactions"
+    if env == 'sandbox':
+        base_url = "https://ws.sandbox.pagseguro.uol.com.br/v3/transactions"
+    now = datetime.now()
+    tested_at = now.strftime('%d/%m/%Y %H:%M:%S')
+    if not email or not token:
+        return {
+            'status': 'error',
+            'tested_at': tested_at,
+            'error_message': 'Credenciais incompletas (email/token).',
+            'http_status': None
+        }
+    start_dt = now - timedelta(minutes=15)
+    params = {
+        'email': email,
+        'token': token,
+        'initialDate': start_dt.strftime('%Y-%m-%dT%H:%M'),
+        'finalDate': now.strftime('%Y-%m-%dT%H:%M'),
+        'maxPageResults': 1,
+        'page': 1
+    }
+    try:
+        response = requests.get(base_url, params=params, timeout=timeout_seconds)
+        status_code = int(response.status_code)
+        if status_code == 200:
+            return {
+                'status': 'ok',
+                'tested_at': tested_at,
+                'error_message': '',
+                'http_status': status_code
+            }
+        if status_code in (401, 403):
+            message = f'Falha de autorização na API PagSeguro (HTTP {status_code}).'
+        else:
+            message = f'API PagSeguro respondeu com erro (HTTP {status_code}).'
+        return {
+            'status': 'error',
+            'tested_at': tested_at,
+            'error_message': message,
+            'http_status': status_code
+        }
+    except requests.RequestException as exc:
+        return {
+            'status': 'error',
+            'tested_at': tested_at,
+            'error_message': f'Falha de conectividade: {exc}',
+            'http_status': None
+        }
+
+
+def _build_pagseguro_accounts_view(settings):
+    accounts = _normalize_pagseguro_configs(settings)
+    view_rows = []
+    for idx, acc in enumerate(accounts):
+        status = str(acc.get('health_status') or 'not_tested')
+        badge_class, badge_label = _pagseguro_health_badge(status)
+        view_rows.append({
+            'index': idx,
+            'alias': acc.get('alias') or f'Conta {idx + 1}',
+            'email': acc.get('email') or '',
+            'environment': _pagseguro_environment_label(acc),
+            'token_masked': _mask_pagseguro_token(acc.get('token')),
+            'status': status,
+            'status_badge_class': badge_class,
+            'status_badge_label': badge_label,
+            'last_test_at': acc.get('last_test_at') or '',
+            'last_error': acc.get('last_error') or '',
+        })
+    return view_rows
 
 
 def _extract_pagseguro_alias(provider_name):
@@ -431,13 +546,8 @@ def api_fiscal_pool_emit():
             # I should update FiscalPoolService to support saving error.
             
             # Let's do a quick manual update for now or add 'notes'
-            pool = FiscalPoolService._load_pool()
-            for e in pool:
-                if e['id'] == entry_id:
-                    e['status'] = 'failed'
-                    e['last_error'] = result['message']
-                    FiscalPoolService._save_pool(pool)
-                    break
+            status_error = 'rejected' if 'rejei' in str(result.get('message') or '').lower() else 'manual_retry_required'
+            FiscalPoolService.update_status(entry_id, status_error, error_msg=result['message'], user=session.get('user'))
             
             return jsonify({'success': False, 'message': result['message']})
 
@@ -544,9 +654,39 @@ def api_fiscal_analyze_error():
 
 # --- Helpers ---
 
-def get_balance_data(period_type, year, specific_value=None):
+def _resolve_period_range(period_type, year, specific_value=None):
+    year = int(year)
+    if period_type == 'monthly':
+        month = int(specific_value)
+        _, last_day = calendar.monthrange(year, month)
+        return datetime(year, month, 1), datetime(year, month, last_day, 23, 59, 59)
+    if period_type == 'quarterly':
+        quarter = int(specific_value)
+        start_month = 3 * (quarter - 1) + 1
+        end_month = 3 * quarter
+        _, last_day = calendar.monthrange(year, end_month)
+        return datetime(year, start_month, 1), datetime(year, end_month, last_day, 23, 59, 59)
+    if period_type == 'semiannual':
+        semester = int(specific_value)
+        start_month = 6 * (semester - 1) + 1
+        end_month = 6 * semester
+        _, last_day = calendar.monthrange(year, end_month)
+        return datetime(year, start_month, 1), datetime(year, end_month, last_day, 23, 59, 59)
+    if period_type == 'annual':
+        return datetime(year, 1, 1), datetime(year, 12, 31, 23, 59, 59)
+    raise ValueError('Invalid period')
+
+
+def _build_daily_pull_comparison_for_session(session_obj):
+    if not isinstance(session_obj, dict):
+        return {'status': 'error', 'message': 'Sessão inválida'}
+    return compare_session_with_daily_snapshot(session_obj)
+
+def get_balance_data(period_type, year, specific_value=None, user_filter=None, payment_method_filter=None):
     sessions = _load_cashier_sessions()
     closed_sessions = [s for s in sessions if s.get('status') == 'closed']
+    user_filter_norm = str(user_filter or '').strip().lower()
+    payment_filter_norm = str(payment_method_filter or '').strip().lower()
     
     # Determine Date Range
     start_date = None
@@ -554,28 +694,7 @@ def get_balance_data(period_type, year, specific_value=None):
     
     try:
         year = int(year)
-        if period_type == 'monthly':
-            month = int(specific_value)
-            _, last_day = calendar.monthrange(year, month)
-            start_date = datetime(year, month, 1)
-            end_date = datetime(year, month, last_day, 23, 59, 59)
-        elif period_type == 'quarterly':
-            quarter = int(specific_value) # 1, 2, 3, 4
-            start_month = 3 * (quarter - 1) + 1
-            end_month = 3 * quarter
-            _, last_day = calendar.monthrange(year, end_month)
-            start_date = datetime(year, start_month, 1)
-            end_date = datetime(year, end_month, last_day, 23, 59, 59)
-        elif period_type == 'semiannual':
-            semester = int(specific_value) # 1, 2
-            start_month = 6 * (semester - 1) + 1
-            end_month = 6 * semester
-            _, last_day = calendar.monthrange(year, end_month)
-            start_date = datetime(year, start_month, 1)
-            end_date = datetime(year, end_month, last_day, 23, 59, 59)
-        elif period_type == 'annual':
-            start_date = datetime(year, 1, 1)
-            end_date = datetime(year, 12, 31, 23, 59, 59)
+        start_date, end_date = _resolve_period_range(period_type, year, specific_value)
     except (ValueError, TypeError):
         return {} # Return empty if invalid dates
 
@@ -586,8 +705,17 @@ def get_balance_data(period_type, year, specific_value=None):
             closed_at_str = s.get('closed_at')
             if not closed_at_str: continue
             closed_at = datetime.strptime(closed_at_str, '%d/%m/%Y %H:%M')
-            if start_date <= closed_at <= end_date:
-                filtered_sessions.append(s)
+            if not (start_date <= closed_at <= end_date):
+                continue
+            if user_filter_norm:
+                session_user = str(s.get('user') or s.get('closed_by') or '').strip().lower()
+                if session_user != user_filter_norm:
+                    continue
+            if payment_filter_norm:
+                txs = s.get('transactions') or []
+                if not any(str((tx or {}).get('payment_method') or '').strip().lower() == payment_filter_norm for tx in txs):
+                    continue
+            filtered_sessions.append(s)
         except (ValueError, TypeError):
             continue
             
@@ -644,7 +772,14 @@ def get_balance_data(period_type, year, specific_value=None):
                 data['final_balance'] = 0.0
             
             for s in data['sessions']:
-                for t in s.get('transactions', []):
+                session_transactions = s.get('transactions', []) or []
+                if payment_filter_norm:
+                    session_transactions = [
+                        t for t in session_transactions
+                        if str((t or {}).get('payment_method') or '').strip().lower() == payment_filter_norm
+                    ]
+                s['_balances_filtered_transactions_count'] = len(session_transactions)
+                for t in session_transactions:
                     try:
                         amount = float(t.get('amount', 0.0) or 0.0)
                     except:
@@ -741,7 +876,7 @@ def get_balance_data(period_type, year, specific_value=None):
             
             simple_sessions = []
             for s in data['sessions']:
-                transactions = s.get('transactions') or []
+                transactions_count = int(s.get('_balances_filtered_transactions_count', 0))
                 try:
                     session_diff = float(s.get('difference', 0.0) or 0.0)
                 except:
@@ -755,7 +890,7 @@ def get_balance_data(period_type, year, specific_value=None):
                     'closing_balance': s.get('closing_balance'),
                     'closing_cash': s.get('closing_cash'),
                     'closing_non_cash': s.get('closing_non_cash'),
-                    'transactions_count': len(transactions),
+                    'transactions_count': transactions_count,
                     'difference': session_diff,
                     'difference_approved': bool(s.get('difference_approved')),
                     'continuity_issue': bool(s.get('continuity_issue'))
@@ -785,6 +920,54 @@ def get_balance_data(period_type, year, specific_value=None):
                 data['has_anomaly'] = has_unapproved
                 data['has_approved_divergence'] = False
                 data['has_continuity_issue'] = any(s.get('continuity_issue') for s in simple_sessions)
+
+    card_discrepancies = list_card_discrepancies(start_date=start_date, end_date=end_date)
+    if card_discrepancies:
+        sessions = []
+        pending_found = False
+        approved_found = False
+        total_amount = 0.0
+        for row in card_discrepancies:
+            amount = float(row.get('amount') or 0.0)
+            total_amount += amount
+            is_pending = str(row.get('status') or '').lower() == 'pending'
+            if is_pending:
+                pending_found = True
+            if str(row.get('status') or '').lower() == 'approved':
+                approved_found = True
+            details = row.get('details') if isinstance(row.get('details'), dict) else {}
+            sessions.append({
+                'id': row.get('session_id'),
+                'opened_at': details.get('opened_at'),
+                'closed_at': details.get('closed_at'),
+                'user': details.get('closed_by'),
+                'opening_balance': 0.0,
+                'closing_balance': 0.0,
+                'closing_cash': 0.0,
+                'closing_non_cash': 0.0,
+                'transactions_count': 0,
+                'difference': amount,
+                'difference_approved': not is_pending,
+                'continuity_issue': False,
+                'difference_label': 'Diferença de cartão (sistema x PagSeguro)'
+            })
+        report['Divergência Cartão'] = {
+            'type_key': 'card_discrepancy',
+            'initial_balance': 0.0,
+            'total_in': 0.0,
+            'received_in': 0.0,
+            'transferred_in': 0.0,
+            'total_out': 0.0,
+            'final_balance': round(total_amount, 2),
+            'sessions_count': len(sessions),
+            'sessions': sessions,
+            'calculated_final': 0.0,
+            'difference': round(total_amount, 2),
+            'has_anomaly': pending_found,
+            'has_approved_divergence': approved_found and not pending_found,
+            'has_continuity_issue': False,
+            'difference_label': 'Diferença de cartão (sistema x PagSeguro)'
+        }
 
     return report
 
@@ -1031,21 +1214,56 @@ def finance_cashier_reports():
 @finance_bp.route('/finance/balances')
 @login_required
 def finance_balances():
-    return render_template('finance_balances.html')
+    denied = _ensure_admin_finance_balances_access()
+    if denied is not None:
+        return denied
+    users_map = load_users() or {}
+    users_for_filter = []
+    if isinstance(users_map, dict):
+        for username, data in users_map.items():
+            if not isinstance(data, dict):
+                continue
+            users_for_filter.append({
+                'username': username,
+                'name': data.get('full_name') or data.get('name') or username
+            })
+    users_for_filter.sort(key=lambda u: str(u.get('name') or '').lower())
+    payment_methods = load_payment_methods() or []
+    return render_template('finance_balances.html', users=users_for_filter, payment_methods=payment_methods)
+
+def _ensure_admin_finance_balances_access():
+    if session.get('role') == 'admin':
+        return None
+    wants_json = (
+        request.path.startswith('/api/')
+        or 'application/json' in str(request.headers.get('Content-Type') or '').lower()
+        or request.accept_mimetypes.best == 'application/json'
+    )
+    if wants_json:
+        return jsonify({'success': False, 'message': 'Acesso não autorizado'}), 403
+    flash('Acesso restrito à administração financeira.')
+    return redirect(url_for('main.index'))
 
 @finance_bp.route('/api/finance/session/<session_id>', methods=['GET'])
 @login_required
 def api_finance_session_details(session_id):
+    denied = _ensure_admin_finance_balances_access()
+    if denied is not None:
+        return denied
     session_data = CashierService.get_session_details(session_id)
     if not session_data:
         return jsonify({'success': False, 'message': 'Sessão não encontrada'}), 404
-    return jsonify({'success': True, 'data': session_data})
+    comparison = _build_daily_pull_comparison_for_session(session_data)
+    payload = dict(session_data)
+    payload['card_comparison'] = comparison
+    return jsonify({'success': True, 'data': payload})
 
 @finance_bp.route('/api/finance/session/<session_id>/approve_divergence', methods=['POST'])
 @login_required
 def api_finance_session_approve_divergence(session_id):
-    if session.get('role') != 'admin':
-        return jsonify({'success': False, 'message': 'Acesso não autorizado'}), 403
+    denied = _ensure_admin_finance_balances_access()
+    if denied is not None:
+        return denied
     
     sessions = _load_cashier_sessions()
     updated = False
@@ -1054,16 +1272,29 @@ def api_finance_session_approve_divergence(session_id):
             s['difference_approved'] = True
             updated = True
             break
+    card_updated = approve_card_discrepancy(session_id, approved_by=session.get('user'))
     if updated:
-        save_cashier_sessions(sessions)
+        CashierService.persist_sessions(sessions, trigger_backup=False)
+    if updated or card_updated:
+        log_system_action(
+            'Aprovação de divergência financeira',
+            {
+                'session_id': session_id,
+                'cash_divergence_approved': bool(updated),
+                'card_divergence_approved': bool(card_updated),
+                'approved_by': session.get('user')
+            },
+            category='Financeiro'
+        )
         return jsonify({'success': True})
     return jsonify({'success': False, 'message': 'Sessão não encontrada'}), 404
 
 @finance_bp.route('/api/finance/balances/approve_divergences', methods=['POST'])
 @login_required
 def api_finance_approve_divergences():
-    if session.get('role') != 'admin':
-        return jsonify({'success': False, 'message': 'Acesso não autorizado'}), 403
+    denied = _ensure_admin_finance_balances_access()
+    if denied is not None:
+        return denied
     
     payload = request.json or {}
     period_type = payload.get('period_type', 'monthly')
@@ -1074,38 +1305,29 @@ def api_finance_approve_divergences():
     if not year or (period_type != 'annual' and not specific_value) or not type_key:
         return jsonify({'success': False, 'message': 'Parâmetros inválidos'}), 400
     
-    sessions = _load_cashier_sessions()
-    closed_sessions = [s for s in sessions if s.get('status') == 'closed']
-    
-    start_date = None
-    end_date = None
-    
     try:
-        year_int = int(year)
-        if period_type == 'monthly':
-            month = int(specific_value)
-            _, last_day = calendar.monthrange(year_int, month)
-            start_date = datetime(year_int, month, 1)
-            end_date = datetime(year_int, month, last_day, 23, 59, 59)
-        elif period_type == 'quarterly':
-            quarter = int(specific_value)
-            start_month = 3 * (quarter - 1) + 1
-            end_month = 3 * quarter
-            _, last_day = calendar.monthrange(year_int, end_month)
-            start_date = datetime(year_int, start_month, 1)
-            end_date = datetime(year_int, end_month, last_day, 23, 59, 59)
-        elif period_type == 'semiannual':
-            semester = int(specific_value)
-            start_month = 6 * (semester - 1) + 1
-            end_month = 6 * semester
-            _, last_day = calendar.monthrange(year_int, end_month)
-            start_date = datetime(year_int, start_month, 1)
-            end_date = datetime(year_int, end_month, last_day, 23, 59, 59)
-        elif period_type == 'annual':
-            start_date = datetime(year_int, 1, 1)
-            end_date = datetime(year_int, 12, 31, 23, 59, 59)
+        start_date, end_date = _resolve_period_range(period_type, year, specific_value)
     except (ValueError, TypeError):
         return jsonify({'success': False, 'message': 'Período inválido'}), 400
+    
+    if type_key == 'card_discrepancy':
+        updated = approve_card_discrepancies_for_period(start_date, end_date, approved_by=session.get('user'))
+        if updated > 0:
+            log_system_action(
+                'Aprovação de divergências de cartão',
+                {
+                    'period_type': period_type,
+                    'year': year,
+                    'specific_value': specific_value,
+                    'updated_discrepancies': updated,
+                    'approved_by': session.get('user')
+                },
+                category='Financeiro'
+            )
+        return jsonify({'success': True, 'updated_sessions': updated})
+
+    sessions = _load_cashier_sessions()
+    closed_sessions = [s for s in sessions if s.get('status') == 'closed']
     
     updated = 0
     for s in closed_sessions:
@@ -1140,18 +1362,47 @@ def api_finance_approve_divergences():
             updated += 1
     
     if updated > 0:
-        save_cashier_sessions(sessions)
+        CashierService.persist_sessions(sessions, trigger_backup=False)
+        log_system_action(
+            'Aprovação de divergências de caixa',
+            {
+                'period_type': period_type,
+                'year': year,
+                'specific_value': specific_value,
+                'type_key': type_key,
+                'updated_sessions': updated,
+                'approved_by': session.get('user')
+            },
+            category='Financeiro'
+        )
     
     return jsonify({'success': True, 'updated_sessions': updated})
 
 @finance_bp.route('/finance/balances/data')
 @login_required
 def finance_balances_data():
+    denied = _ensure_admin_finance_balances_access()
+    if denied is not None:
+        return denied
     period_type = request.args.get('period_type', 'monthly')
     year = request.args.get('year', datetime.now().year)
     specific_value = request.args.get('specific_value', datetime.now().month)
+    user_filter = request.args.get('user_filter')
+    payment_method_filter = request.args.get('payment_method_filter')
+    try:
+        worker = threading.Thread(target=ensure_previous_day_snapshot)
+        worker.daemon = True
+        worker.start()
+    except Exception:
+        pass
     
-    report = get_balance_data(period_type, year, specific_value)
+    report = get_balance_data(
+        period_type,
+        year,
+        specific_value,
+        user_filter=user_filter,
+        payment_method_filter=payment_method_filter
+    )
     
     data_list = []
     for label, values in report.items():
@@ -1170,6 +1421,7 @@ def finance_balances_data():
             'has_approved_divergence': values.get('has_approved_divergence', False),
             'has_continuity_issue': values.get('has_continuity_issue', False),
             'type_key': values.get('type_key'),
+            'difference_label': values.get('difference_label'),
             'sessions': values.get('sessions', [])
         })
         
@@ -1178,11 +1430,22 @@ def finance_balances_data():
 @finance_bp.route('/finance/balances/export')
 @login_required
 def finance_balances_export():
+    denied = _ensure_admin_finance_balances_access()
+    if denied is not None:
+        return denied
     period_type = request.args.get('period_type')
     year = request.args.get('year')
     specific_value = request.args.get('specific_value')
+    user_filter = request.args.get('user_filter')
+    payment_method_filter = request.args.get('payment_method_filter')
     
-    data = get_balance_data(period_type, year, specific_value)
+    data = get_balance_data(
+        period_type,
+        year,
+        specific_value,
+        user_filter=user_filter,
+        payment_method_filter=payment_method_filter
+    )
     
     # Create Excel
     output = io.BytesIO()
@@ -1212,6 +1475,404 @@ def finance_balances_export():
     
     filename = f"balanco_{period_type}_{year}_{specific_value}.xlsx"
     return send_file(output, download_name=filename, as_attachment=True)
+
+@finance_bp.route('/api/closed_accounts', methods=['GET'])
+@login_required
+def api_closed_accounts():
+    denied = _ensure_admin_finance_balances_access()
+    if denied is not None:
+        return denied
+    page = request.args.get('page', default=1, type=int)
+    per_page = request.args.get('per_page', default=20, type=int)
+    origin = str(request.args.get('origin') or '').strip()
+    filters = {}
+    if origin:
+        filters['origin'] = origin
+    result = ClosedAccountService.search_closed_accounts(filters=filters, page=page, per_page=per_page)
+    sessions = CashierService.list_sessions()
+    room_charges = load_room_charges()
+    items = []
+    for acc in result.get('items', []):
+        row = dict(acc or {})
+        row['closed_at'] = row.get('closed_at') or row.get('timestamp')
+        row['closed_by'] = row.get('closed_by') or row.get('user') or '-'
+        row['status'] = row.get('status') or 'closed'
+        try:
+            row['total'] = float(row.get('total', 0.0) or 0.0)
+        except Exception:
+            row['total'] = 0.0
+        reopen_context = _build_closed_account_reopen_context(row, sessions, room_charges)
+        row['can_reopen'] = bool(reopen_context.get('can_reopen'))
+        row['reopen_block_reason'] = reopen_context.get('block_reason')
+        row['cashier_session_id'] = reopen_context.get('cashier_session_id')
+        row['cashier_session_status'] = reopen_context.get('cashier_session_status')
+        row['reversal_transactions_count'] = len(reopen_context.get('reversal_indexes', []))
+        items.append(row)
+    return jsonify({
+        'items': items,
+        'page': result.get('page', page),
+        'pages': result.get('pages', 1),
+        'total': result.get('total', len(items))
+    })
+
+
+def _parse_generic_datetime(value):
+    raw = str(value or '').strip()
+    if not raw:
+        return None
+    for fmt in ('%d/%m/%Y %H:%M:%S', '%d/%m/%Y %H:%M', '%Y-%m-%d %H:%M:%S', '%Y-%m-%dT%H:%M:%S'):
+        try:
+            return datetime.strptime(raw, fmt)
+        except Exception:
+            continue
+    return None
+
+
+def _tx_details(tx):
+    details = tx.get('details')
+    if isinstance(details, dict):
+        return details
+    return {}
+
+
+def _extract_closed_charge_ids(account):
+    charge_ids = []
+    details = account.get('details') if isinstance(account.get('details'), dict) else {}
+    explicit = str(details.get('charge_id') or '').strip()
+    if explicit:
+        charge_ids.append(explicit)
+    original_id = str(account.get('original_id') or '').strip()
+    if 'CHARGE_' in original_id:
+        idx = original_id.find('CHARGE_')
+        parsed = original_id[idx:]
+        if parsed:
+            charge_ids.append(parsed)
+    for item in (account.get('items') or []):
+        if not isinstance(item, dict):
+            continue
+        item_id = str(item.get('id') or '').strip()
+        if item_id and item_id.startswith('CHARGE_'):
+            charge_ids.append(item_id)
+    unique = []
+    for cid in charge_ids:
+        if cid not in unique:
+            unique.append(cid)
+    return unique
+
+
+def _extract_account_payment_amounts(account):
+    amounts = []
+    payments = account.get('payments') or []
+    if isinstance(payments, list):
+        for pay in payments:
+            if not isinstance(pay, dict):
+                continue
+            try:
+                amounts.append(round(float(pay.get('amount') or 0.0), 2))
+            except Exception:
+                continue
+    if not amounts:
+        try:
+            total = round(float(account.get('total') or 0.0), 2)
+            if total > 0:
+                amounts.append(total)
+        except Exception:
+            pass
+    return amounts
+
+
+def _select_reversal_indexes(session_obj, account, charge_ids, room_number=None):
+    transactions = list((session_obj or {}).get('transactions') or [])
+    closed_at = _parse_generic_datetime(account.get('closed_at') or account.get('timestamp'))
+    expected_amounts = _extract_account_payment_amounts(account)
+    candidates = []
+    origin = str(account.get('origin') or '').strip().lower()
+    account_id = str(account.get('original_id') or '').strip()
+    for idx, tx in enumerate(transactions):
+        if str(tx.get('type') or '').lower() != 'sale':
+            continue
+        try:
+            amount = round(float(tx.get('amount') or 0.0), 2)
+        except Exception:
+            continue
+        details = _tx_details(tx)
+        tx_time = _parse_generic_datetime(tx.get('timestamp'))
+        if origin == 'restaurant_table':
+            if str(details.get('table_id') or '') != account_id:
+                continue
+        elif charge_ids:
+            related_charge = str(details.get('related_charge_id') or details.get('charge_id') or '')
+            if related_charge:
+                if related_charge not in charge_ids:
+                    continue
+            else:
+                if room_number and str(details.get('room_number') or '') != str(room_number):
+                    continue
+        elif room_number and str(details.get('room_number') or '') != str(room_number):
+            continue
+        if closed_at and tx_time:
+            diff_hours = abs((closed_at - tx_time).total_seconds()) / 3600.0
+            if diff_hours > 12:
+                continue
+        candidates.append({'index': idx, 'amount': amount, 'time': tx_time, 'tx': tx})
+    if not candidates:
+        return []
+    selected = []
+    used = set()
+    for amount in expected_amounts:
+        best = None
+        best_score = None
+        for cand in candidates:
+            if cand['index'] in used:
+                continue
+            if abs(cand['amount'] - amount) > 0.05:
+                continue
+            score = 0.0
+            if closed_at and cand['time']:
+                score = abs((closed_at - cand['time']).total_seconds())
+            if best is None or score < best_score:
+                best = cand
+                best_score = score
+        if best is None:
+            return []
+        used.add(best['index'])
+        selected.append(best['index'])
+    if not selected and expected_amounts:
+        return []
+    return sorted(selected)
+
+
+def _find_session_by_id(sessions, session_id):
+    for idx, session_obj in enumerate(sessions):
+        if str(session_obj.get('id') or '') == str(session_id or ''):
+            return idx, session_obj
+    return None, None
+
+
+def _build_closed_account_reopen_context(account, sessions, room_charges):
+    context = {
+        'can_reopen': False,
+        'block_reason': '',
+        'cashier_session_id': None,
+        'cashier_session_status': None,
+        'reversal_indexes': [],
+        'charge_ids': [],
+        'room_number': None,
+        'session_index': None
+    }
+    if str(account.get('status') or '').lower() == 'reopened':
+        context['block_reason'] = 'Conta já reaberta.'
+        return context
+    origin = str(account.get('origin') or '').strip().lower()
+    details = account.get('details') if isinstance(account.get('details'), dict) else {}
+    charge_ids = _extract_closed_charge_ids(account)
+    context['charge_ids'] = charge_ids
+    room_number = details.get('room_number')
+    if not room_number:
+        candidate_room = str(account.get('original_id') or '').strip()
+        if candidate_room.isdigit():
+            room_number = candidate_room
+    context['room_number'] = room_number
+    target_session_id = None
+    if origin == 'restaurant_table':
+        table_id = str(account.get('original_id') or '').strip()
+        closed_at = _parse_generic_datetime(account.get('closed_at') or account.get('timestamp'))
+        best = None
+        best_score = None
+        for session_obj in sessions:
+            for tx in (session_obj.get('transactions') or []):
+                if str(tx.get('type') or '').lower() != 'sale':
+                    continue
+                tx_details = _tx_details(tx)
+                if str(tx_details.get('table_id') or '') != table_id:
+                    continue
+                tx_dt = _parse_generic_datetime(tx.get('timestamp'))
+                score = 0.0
+                if closed_at and tx_dt:
+                    score = abs((closed_at - tx_dt).total_seconds())
+                if best is None or score < best_score:
+                    best = session_obj
+                    best_score = score
+        if best:
+            target_session_id = best.get('id')
+    else:
+        session_ids = []
+        if charge_ids:
+            for charge in (room_charges or []):
+                cid = str(charge.get('id') or '')
+                if cid in charge_ids:
+                    sid = str(charge.get('reception_cashier_id') or '').strip()
+                    if sid:
+                        session_ids.append(sid)
+        session_ids = [sid for sid in session_ids if sid]
+        unique_session_ids = []
+        for sid in session_ids:
+            if sid not in unique_session_ids:
+                unique_session_ids.append(sid)
+        if len(unique_session_ids) == 1:
+            target_session_id = unique_session_ids[0]
+        elif len(unique_session_ids) > 1:
+            context['block_reason'] = 'Conta vinculada a mais de um caixa de recepção.'
+            return context
+    if not target_session_id:
+        context['block_reason'] = 'Caixa original não identificado.'
+        return context
+    session_index, session_obj = _find_session_by_id(sessions, target_session_id)
+    if session_obj is None:
+        context['block_reason'] = 'Caixa original não encontrado.'
+        return context
+    context['cashier_session_id'] = str(session_obj.get('id') or '')
+    context['cashier_session_status'] = str(session_obj.get('status') or '')
+    context['session_index'] = session_index
+    if str(session_obj.get('status') or '').lower() != 'open':
+        context['block_reason'] = 'Caixa original já está fechado.'
+        return context
+    reversal_indexes = _select_reversal_indexes(session_obj, account, charge_ids, room_number=room_number)
+    if not reversal_indexes:
+        context['block_reason'] = 'Pagamentos da conta não encontrados no caixa original.'
+        return context
+    context['reversal_indexes'] = reversal_indexes
+    context['can_reopen'] = True
+    return context
+
+
+def _apply_closed_account_reopen(account, reason, user):
+    sessions = CashierService.list_sessions()
+    room_charges = load_room_charges()
+    context = _build_closed_account_reopen_context(account, sessions, room_charges)
+    if not context.get('can_reopen'):
+        return False, context.get('block_reason') or 'Conta não elegível para reabertura.'
+    session_index = context.get('session_index')
+    if session_index is None:
+        return False, 'Sessão de caixa inválida.'
+    origin = str(account.get('origin') or '').strip().lower()
+    table_id = str(account.get('original_id') or '').strip()
+    orders = None
+    if origin == 'restaurant_table':
+        orders = load_table_orders()
+        if str(table_id) in orders and orders[str(table_id)].get('items'):
+            return False, 'Mesa já está em operação.'
+    else:
+        charge_ids = set(context.get('charge_ids') or [])
+        if not charge_ids:
+            return False, 'Cobrança de recepção sem identificação de charge.'
+        has_charge = any(str(charge.get('id') or '') in charge_ids for charge in room_charges)
+        if not has_charge:
+            return False, 'Cobranças da recepção não encontradas para reabertura.'
+    session_obj = sessions[session_index]
+    transactions = list(session_obj.get('transactions') or [])
+    removed_transactions = []
+    for tx_index in sorted(context.get('reversal_indexes', []), reverse=True):
+        if tx_index < 0 or tx_index >= len(transactions):
+            continue
+        removed_transactions.append(transactions.pop(tx_index))
+    if not removed_transactions:
+        return False, 'Nenhum pagamento removido do caixa.'
+    session_obj['transactions'] = transactions
+    sessions[session_index] = session_obj
+    CashierService.persist_sessions(sessions, trigger_backup=False)
+    if origin == 'restaurant_table':
+        new_order = {
+            'items': list(account.get('items') or []),
+            'total': float(account.get('total') or 0.0),
+            'status': 'open',
+            'waiter': (account.get('details') or {}).get('waiter') if isinstance(account.get('details'), dict) else '',
+            'opened_at': datetime.now().strftime('%d/%m/%Y %H:%M'),
+            'reopened_from_closed_id': account.get('id'),
+            'reopened_by': user,
+        }
+        orders[str(table_id)] = new_order
+        save_table_orders(orders)
+    else:
+        charge_ids = set(context.get('charge_ids') or [])
+        if not charge_ids:
+            return False, 'Cobrança de recepção sem identificação de charge.'
+        changed = 0
+        for charge in room_charges:
+            cid = str(charge.get('id') or '')
+            if cid not in charge_ids:
+                continue
+            charge['status'] = 'pending'
+            charge.pop('payment_method', None)
+            charge.pop('payments', None)
+            charge.pop('paid_at', None)
+            charge.pop('reception_cashier_id', None)
+            charge['updated_at'] = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+            changed += 1
+        if changed == 0:
+            return False, 'Nenhuma cobrança foi restaurada para pendente.'
+        save_room_charges(room_charges)
+    removed_ids = [str(tx.get('id') or '') for tx in removed_transactions if isinstance(tx, dict)]
+    ok = ClosedAccountService.mark_as_reopened(
+        account.get('id'),
+        user,
+        reason,
+        metadata={
+            'reopened_cashier_session_id': context.get('cashier_session_id'),
+            'reversed_transaction_ids': removed_ids
+        }
+    )
+    if not ok:
+        return False, 'Falha ao atualizar status da conta fechada.'
+    log_system_action(
+        'Reabertura de conta fechada',
+        {
+            'closed_account_id': account.get('id'),
+            'origin': account.get('origin'),
+            'original_id': account.get('original_id'),
+            'cashier_session_id': context.get('cashier_session_id'),
+            'removed_transactions': removed_ids,
+            'reopened_by': user,
+            'reason': reason
+        },
+        category='Financeiro'
+    )
+    return True, ''
+
+
+@finance_bp.route('/api/closed_accounts/<closed_id>', methods=['GET'])
+@login_required
+def api_closed_account_details(closed_id):
+    denied = _ensure_admin_finance_balances_access()
+    if denied is not None:
+        return denied
+    account = ClosedAccountService.get_closed_account(closed_id)
+    if not account:
+        return jsonify({'success': False, 'error': 'Conta fechada não encontrada'}), 404
+    sessions = CashierService.list_sessions()
+    room_charges = load_room_charges()
+    context = _build_closed_account_reopen_context(account, sessions, room_charges)
+    payload = dict(account)
+    payload['closed_at'] = payload.get('closed_at') or payload.get('timestamp')
+    payload['can_reopen'] = bool(context.get('can_reopen'))
+    payload['reopen_block_reason'] = context.get('block_reason')
+    payload['cashier_session_id'] = context.get('cashier_session_id')
+    payload['cashier_session_status'] = context.get('cashier_session_status')
+    payload['reversal_transactions_count'] = len(context.get('reversal_indexes', []))
+    return jsonify({'success': True, 'data': payload})
+
+@finance_bp.route('/admin/reopen_account', methods=['POST'])
+@login_required
+def admin_reopen_account():
+    denied = _ensure_admin_finance_balances_access()
+    if denied is not None:
+        return denied
+    payload = request.get_json(silent=True) or {}
+    closed_id = str(payload.get('id') or '').strip()
+    reason = str(payload.get('reason') or '').strip()
+    if not closed_id:
+        return jsonify({'success': False, 'error': 'ID não informado'}), 400
+    if not reason:
+        return jsonify({'success': False, 'error': 'Motivo obrigatório'}), 400
+    target = ClosedAccountService.get_closed_account(closed_id)
+    if not target:
+        return jsonify({'success': False, 'error': 'Conta fechada não encontrada'}), 404
+    if str(target.get('status') or 'closed') == 'reopened':
+        return jsonify({'success': True, 'message': 'Conta já marcada como reaberta'})
+    ok, error = _apply_closed_account_reopen(target, reason, session.get('user') or 'Sistema')
+    if not ok:
+        return jsonify({'success': False, 'error': error}), 400
+    return jsonify({'success': True})
 
 @finance_bp.route('/finance_commission')
 @login_required
@@ -1885,14 +2546,27 @@ def close_staff_month():
             transaction = {
                 'id': f"CLOSE_{table_id}_{datetime.now().strftime('%Y%m%d%H%M%S')}",
                 'type': 'sale',
+                'category': 'Conta Funcionário',
                 'amount': amount,
                 'description': f"Fechamento Mensal - {staff_name}",
                 'payment_method': 'Conta Funcionário',
                 'emit_invoice': False,
                 'staff_name': staff_name,
                 'waiter': 'Sistema',
+                'service_fee_removed': True,
+                'commission_eligible': False,
+                'commission_reference_id': f"STAFF_MONTHLY_{table_id}",
+                'operator': session.get('user', 'Sistema'),
                 'timestamp': datetime.now().strftime('%d/%m/%Y %H:%M'),
-                'details': {'subtotal': subtotal, 'discount': discount_amount}
+                'details': {
+                    'subtotal': subtotal,
+                    'discount': discount_amount,
+                    'category': 'Conta Funcionário',
+                    'service_fee_removed': True,
+                    'commission_eligible': False,
+                    'commission_reference_id': f"STAFF_MONTHLY_{table_id}",
+                    'closed_by': session.get('user', 'Sistema')
+                }
             }
             
             current_session['transactions'].append(transaction)
@@ -1936,7 +2610,7 @@ def close_staff_month():
             del orders[table_id]
             
     if count > 0:
-        save_cashier_sessions(sessions)
+        CashierService.persist_sessions(sessions, trigger_backup=False)
         save_table_orders(orders)
         flash(f'Sucesso: {count} contas fechadas. Total lançado: R$ {total_amount:.2f}')
     else:
@@ -2255,199 +2929,207 @@ def commission_ranking():
     # Start date to beginning of day
     start_date_comp = start_date.replace(hour=0, minute=0, second=0)
 
+    def _normalize_waiter_breakdown_map(waiter_breakdown):
+        if not isinstance(waiter_breakdown, dict):
+            return {}
+        normalized = {}
+        for key, value in waiter_breakdown.items():
+            waiter_name = str(key or '').strip() or 'Sem Colaborador'
+            try:
+                amount = float(value or 0)
+            except Exception:
+                amount = 0.0
+            normalized[waiter_name] = normalized.get(waiter_name, 0.0) + amount
+        return normalized
+
+    def _get_transaction_details(transaction):
+        details = transaction.get('details') or {}
+        if isinstance(details, str):
+            try:
+                details = json.loads(details)
+            except Exception:
+                details = {}
+        if not isinstance(details, dict):
+            details = {}
+        return details
+
+    def _get_transaction_category(transaction, details):
+        return str(transaction.get('category') or details.get('category') or '').strip()
+
+    def _is_ranking_transaction(transaction):
+        details = _get_transaction_details(transaction)
+        tx_type = str(transaction.get('type') or '').strip().lower()
+        tx_category = _get_transaction_category(transaction, details)
+        if tx_type == 'sale':
+            return True
+        if tx_type == 'in' and tx_category in ['Pagamento de Conta', 'Recebimento Manual']:
+            return True
+        return False
+
+    def _get_commission_reference(transaction, details):
+        ref = transaction.get('commission_reference_id') or details.get('commission_reference_id')
+        if ref:
+            return str(ref)
+        related_charge_id = transaction.get('related_charge_id') or details.get('related_charge_id')
+        if related_charge_id:
+            return f"charge:{related_charge_id}"
+        table_id = details.get('table_id')
+        if table_id:
+            return f"table:{table_id}:{transaction.get('timestamp', '')}"
+        room_number = details.get('room_number')
+        if room_number:
+            return f"room:{room_number}:{transaction.get('timestamp', '')}"
+        return f"tx:{transaction.get('id', '-')}"
+
+    def _get_reference_label(transaction, details):
+        related_charge_id = transaction.get('related_charge_id') or details.get('related_charge_id')
+        table_id = details.get('table_id')
+        room_number = details.get('room_number')
+        if related_charge_id:
+            return f"Quarto/Conta {related_charge_id}"
+        if table_id:
+            return f"Mesa {table_id}"
+        if room_number:
+            return f"Quarto {room_number}"
+        return "-"
+
     sessions = _load_cashier_sessions()
-    
-    # Aggregation dictionary: waiter -> {total: 0.0, count: 0}
     waiter_stats = {}
-    
+    logical_groups = {}
     total_sales_period = 0.0
-    removed_groups = {}
     audit_counters = {
         'total_transactions': 0,
-        'eligible_transactions': 0,
-        'removed_transactions': 0,
+        'logical_accounts': 0,
+        'eligible_accounts': 0,
+        'removed_or_ineligible_accounts': 0,
     }
-    
+
     for session_data in sessions:
         for transaction in session_data.get('transactions', []):
-            if transaction.get('type') == 'sale' or (transaction.get('type') == 'in' and transaction.get('category') in ['Pagamento de Conta', 'Recebimento Manual']):
-                # Check date
-                t_date_str = transaction.get('timestamp') # Format: dd/mm/YYYY HH:MM
-                if t_date_str:
-                    try:
-                        t_date = datetime.strptime(t_date_str, '%d/%m/%Y %H:%M')
-                        
-                        if start_date_comp <= t_date <= end_date_comp:
-                                waiter_breakdown = _get_waiter_breakdown(transaction)
-                                
-                                # Try to calculate breakdown from items if missing (for legacy or direct sales)
-                                if not waiter_breakdown and transaction.get('items'):
-                                    try:
-                                        temp_totals = {}
-                                        temp_total_val = 0.0
-                                        for item in transaction['items']:
-                                            try:
-                                                qty = float(item.get('qty', 1))
-                                                price = float(item.get('price', 0))
-                                                comps = sum(float(c.get('price', 0)) for c in item.get('complements', []))
-                                                val = qty * (price + comps)
-                                                
-                                                # Check for cover/service exempt if needed, but for commission usually we take all
-                                                # But original logic excluded cover? 
-                                                # Transfer service excluded cover. 
-                                                # Let's keep it simple: split everything based on waiter.
-                                                
-                                                w_name = item.get('waiter')
-                                                if not w_name:
-                                                    w_name = transaction.get('waiter') or transaction.get('user') or 'Sem Garçom'
-                                                
-                                                temp_totals[w_name] = temp_totals.get(w_name, 0.0) + val
-                                                temp_total_val += val
-                                            except:
-                                                continue
-                                        
-                                        if temp_total_val > 0:
-                                            # Normalize to transaction amount (handle discounts/service fee mismatch)
-                                            trans_amount = float(transaction.get('amount', 0))
-                                            ratio = trans_amount / temp_total_val if temp_total_val > 0 else 0
-                                            waiter_breakdown = {k: v * ratio for k, v in temp_totals.items()}
-                                    except Exception:
-                                        pass
+            if not _is_ranking_transaction(transaction):
+                continue
+            t_date_str = transaction.get('timestamp')
+            if not t_date_str:
+                continue
+            try:
+                t_date = datetime.strptime(t_date_str, '%d/%m/%Y %H:%M')
+            except Exception:
+                continue
+            if not (start_date_comp <= t_date <= end_date_comp):
+                continue
+            details = _get_transaction_details(transaction)
+            reference_key = _get_commission_reference(transaction, details)
+            waiter_breakdown = _normalize_waiter_breakdown_map(_get_waiter_breakdown(transaction))
+            try:
+                tx_amount = float(transaction.get('amount', 0) or 0)
+            except Exception:
+                tx_amount = 0.0
+            group = logical_groups.get(reference_key)
+            if not group:
+                group = {
+                    'reference_key': reference_key,
+                    'reference': _get_reference_label(transaction, details),
+                    'timestamp': t_date_str,
+                    'amount': 0.0,
+                    'payment_methods': set(),
+                    'operators': set(),
+                    'waiters': set(),
+                    'service_fee_removed': False,
+                    'commission_eligible_values': [],
+                    'waiter_breakdown': {},
+                    'waiter_breakdown_sum': 0.0,
+                }
+                logical_groups[reference_key] = group
+            group['amount'] += tx_amount
+            group['timestamp'] = max(group.get('timestamp') or '', t_date_str)
+            pm = transaction.get('payment_method') or '-'
+            group['payment_methods'].add(str(pm))
+            operator_name = transaction.get('operator') or details.get('operator') or _get_operator_name(transaction, session_data)
+            group['operators'].add(str(operator_name or '-'))
+            if waiter_breakdown:
+                current_sum = sum(max(0.0, float(v or 0)) for v in waiter_breakdown.values())
+                if current_sum >= group.get('waiter_breakdown_sum', 0.0):
+                    group['waiter_breakdown'] = waiter_breakdown
+                    group['waiter_breakdown_sum'] = current_sum
+                for waiter_name in waiter_breakdown.keys():
+                    group['waiters'].add(waiter_name)
+            else:
+                fallback_waiter = transaction.get('waiter') or transaction.get('user') or 'Sem Colaborador'
+                group['waiters'].add(str(fallback_waiter))
+            group['service_fee_removed'] = bool(group['service_fee_removed'] or is_service_fee_removed_for_transaction(transaction))
+            if 'commission_eligible' in transaction:
+                group['commission_eligible_values'].append(bool(transaction.get('commission_eligible')))
+            elif 'commission_eligible' in details:
+                group['commission_eligible_values'].append(bool(details.get('commission_eligible')))
+            audit_counters['total_transactions'] += 1
 
-                                is_removed = is_service_fee_removed_for_transaction(transaction)
-
-                                audit_counters['total_transactions'] += 1
-                                if is_removed:
-                                    audit_counters['removed_transactions'] += 1
-                                else:
-                                    audit_counters['eligible_transactions'] += 1
-
-                                if waiter_breakdown:
-                                    # Distribute by breakdown
-                                    for w, amt in waiter_breakdown.items():
-                                        if not w: w = 'Sem Colaborador'
-                                        try:
-                                            f_amt = float(amt)
-                                        except:
-                                            f_amt = 0.0
-                                            
-                                        if w not in waiter_stats:
-                                            waiter_stats[w] = {'total': 0.0, 'count': 0, 'commissionable': 0.0}
-                                        
-                                        waiter_stats[w]['total'] += f_amt
-                                        # Count is tricky with split. Fractional count? or just +1 per involvement?
-                                        # Let's add 1 to the main waiter (max share) or just +1 to everyone?
-                                        # Adding +1 to everyone inflates count. Let's add 1 if it's the main share?
-                                        # For simplicity, let's just increment count for everyone involved (participation).
-                                        waiter_stats[w]['count'] += 1 
-                                        
-                                        if not is_removed:
-                                            waiter_stats[w]['commissionable'] += f_amt
-                                            
-                                    total_sales_period += float(transaction.get('amount', 0))
-                                else:
-                                    # Fallback Logic
-                                    user_collab = transaction.get('user')
-                                    if not user_collab:
-                                        user_collab = transaction.get('waiter')
-                                    if not user_collab:
-                                        user_collab = 'Sem Colaborador'
-                                    
-                                    waiter = user_collab
-                                    amount = float(transaction.get('amount', 0))
-                                    
-                                    if waiter not in waiter_stats:
-                                        waiter_stats[waiter] = {'total': 0.0, 'count': 0, 'commissionable': 0.0}
-                                    waiter_stats[waiter]['total'] += amount
-                                    waiter_stats[waiter]['count'] += 1
-                                    if not is_removed:
-                                        waiter_stats[waiter]['commissionable'] += amount
-                                    
-                                    total_sales_period += amount
-
-                                if is_removed:
-                                    group_key = _get_removed_group_key(transaction, session_data)
-                                    group = removed_groups.get(group_key)
-                                    if not group:
-                                        details = transaction.get('details') or {}
-                                        related_charge_id = transaction.get('related_charge_id') or details.get('related_charge_id')
-                                        table_id = details.get('table_id')
-                                        room_number = details.get('room_number')
-
-                                        if related_charge_id:
-                                            ref_label = f"Quarto/Conta {related_charge_id}"
-                                        elif table_id:
-                                            ref_label = f"Mesa {table_id}"
-                                        elif room_number:
-                                            ref_label = f"Quarto {room_number}"
-                                        else:
-                                            ref_label = "-"
-
-                                        group = {
-                                            'timestamp': transaction.get('timestamp') or '-',
-                                            'reference': ref_label,
-                                            'operator': _get_operator_name(transaction, session_data),
-                                            'amount': 0.0,
-                                            'payment_methods': set(),
-                                            'waiters': set()
-                                        }
-                                        removed_groups[group_key] = group
-
-                                    try:
-                                        group['amount'] += float(transaction.get('amount', 0))
-                                    except Exception:
-                                        pass
-                                    pm = transaction.get('payment_method') or '-'
-                                    if isinstance(pm, str) and pm:
-                                        group['payment_methods'].add(pm)
-                                    elif pm is not None:
-                                        group['payment_methods'].add(str(pm))
-
-                                    wb_for_removed = waiter_breakdown
-                                    if wb_for_removed:
-                                        for w in wb_for_removed.keys():
-                                            if w:
-                                                group['waiters'].add(w)
-                                    else:
-                                        w = transaction.get('waiter')
-                                        if w:
-                                            group['waiters'].add(w)
-                    except ValueError:
-                        continue
-
-    # Convert to list and sort
     ranking = []
-    total_commission = 0.0 # Calculate based on individual waiter totals to be consistent
-    
-    for waiter, stats in waiter_stats.items():
-        base_calc = stats.get('commissionable', stats['total'])
-        comm_val = base_calc * (commission_rate / 100.0)
-        
-        ranking.append({
-            'waiter': waiter,
-            'total': stats['total'],
-            'count': stats['count'],
-            'commission': comm_val
-        })
-        total_commission += comm_val
-    
-    ranking.sort(key=lambda x: x['total'], reverse=True)
-
     removed_events = []
     removed_total_sales = 0.0
     removed_total_commission = 0.0
-    for g in removed_groups.values():
-        removed_total_sales += g.get('amount', 0.0)
-        removed_total_commission += g.get('amount', 0.0) * (commission_rate / 100.0)
-        removed_events.append({
-            'timestamp': g.get('timestamp', '-'),
-            'reference': g.get('reference', '-'),
-            'operator': g.get('operator', '-'),
-            'amount': g.get('amount', 0.0),
-            'commission': g.get('amount', 0.0) * (commission_rate / 100.0),
-            'payment_methods': ", ".join(sorted(list(g.get('payment_methods', set())))) if g.get('payment_methods') else '-',
-            'waiters': ", ".join(sorted(list(g.get('waiters', set())))) if g.get('waiters') else '-'
+    total_commission = 0.0
+
+    for group in logical_groups.values():
+        total_sales_period += group.get('amount', 0.0)
+        audit_counters['logical_accounts'] += 1
+        explicit_eligible = True
+        if group.get('commission_eligible_values'):
+            explicit_eligible = all(bool(v) for v in group.get('commission_eligible_values'))
+        is_removed = bool(group.get('service_fee_removed'))
+        is_commission_eligible = bool(explicit_eligible and not is_removed)
+        if is_commission_eligible:
+            audit_counters['eligible_accounts'] += 1
+        else:
+            audit_counters['removed_or_ineligible_accounts'] += 1
+        breakdown = group.get('waiter_breakdown') or {}
+        breakdown_sum = sum(max(0.0, float(v or 0)) for v in breakdown.values())
+        waiter_distribution = {}
+        if breakdown and breakdown_sum > 0:
+            for waiter_name, amount in breakdown.items():
+                try:
+                    share = float(amount or 0) / breakdown_sum
+                except Exception:
+                    share = 0.0
+                if share > 0:
+                    waiter_distribution[waiter_name] = share
+        if not waiter_distribution:
+            fallback_waiter = next(iter(group.get('waiters') or ['Sem Colaborador']))
+            waiter_distribution[fallback_waiter] = 1.0
+        for waiter_name, share in waiter_distribution.items():
+            allocated_amount = group.get('amount', 0.0) * share
+            if waiter_name not in waiter_stats:
+                waiter_stats[waiter_name] = {'total': 0.0, 'commissionable': 0.0, 'logical_refs': set()}
+            waiter_stats[waiter_name]['total'] += allocated_amount
+            waiter_stats[waiter_name]['logical_refs'].add(group.get('reference_key'))
+            if is_commission_eligible:
+                waiter_stats[waiter_name]['commissionable'] += allocated_amount
+        if not is_commission_eligible:
+            removed_total_sales += group.get('amount', 0.0)
+            removed_total_commission += group.get('amount', 0.0) * (commission_rate / 100.0)
+            removed_events.append({
+                'timestamp': group.get('timestamp', '-'),
+                'reference': group.get('reference', '-'),
+                'reference_key': group.get('reference_key'),
+                'operator': ", ".join(sorted(list(group.get('operators', set())))) if group.get('operators') else '-',
+                'amount': group.get('amount', 0.0),
+                'commission': group.get('amount', 0.0) * (commission_rate / 100.0),
+                'reason': '10% removido' if is_removed else 'Não elegível',
+                'payment_methods': ", ".join(sorted(list(group.get('payment_methods', set())))) if group.get('payment_methods') else '-',
+                'waiters': ", ".join(sorted(list(group.get('waiters', set())))) if group.get('waiters') else '-'
+            })
+
+    for waiter, stats in waiter_stats.items():
+        base_calc = stats.get('commissionable', 0.0)
+        comm_val = base_calc * (commission_rate / 100.0)
+        ranking.append({
+            'waiter': waiter,
+            'total': stats.get('total', 0.0),
+            'count': len(stats.get('logical_refs', set())),
+            'commission': comm_val
         })
+        total_commission += comm_val
+
+    ranking.sort(key=lambda x: x['total'], reverse=True)
     removed_events.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
 
     try:
@@ -2647,6 +3329,8 @@ def finance_reconciliation():
     
     settings = load_card_settings()
     today_date = datetime.now().strftime('%Y-%m-%d')
+    pagseguro_accounts = _build_pagseguro_accounts_view(settings)
+    pull_status = get_pull_status()
     
     return render_template(
         'finance_reconciliation.html',
@@ -2654,6 +3338,8 @@ def finance_reconciliation():
         suspected_matches=[],
         summary=summary,
         settings=settings,
+        pagseguro_accounts=pagseguro_accounts,
+        pull_status=pull_status,
         today_date=today_date,
         start_date=today_date,
         end_date=today_date
@@ -2667,39 +3353,33 @@ def finance_reconciliation_add_account():
         return redirect(url_for('main.index'))
 
     settings = load_card_settings()
-    provider = request.form.get('provider')
+    provider = (request.form.get('provider') or 'pagseguro').strip().lower()
     alias = request.form.get('alias')
     
-    if provider == 'pagseguro':
-        email = request.form.get('ps_email')
-        token = request.form.get('ps_token')
-        
-        if 'pagseguro' not in settings: settings['pagseguro'] = []
-        if isinstance(settings['pagseguro'], dict): settings['pagseguro'] = [settings['pagseguro']]
-        
-        settings['pagseguro'].append({
-            'alias': alias,
-            'email': email,
-            'token': token,
-            'sandbox': False
-        })
-        
-    elif provider == 'rede':
-        client_id = request.form.get('rede_client_id')
-        client_secret = request.form.get('rede_client_secret')
-        username = request.form.get('rede_username')
-        password = request.form.get('rede_password')
-        
-        if 'rede' not in settings: settings['rede'] = []
-        if isinstance(settings['rede'], dict): settings['rede'] = [settings['rede']]
-        
-        settings['rede'].append({
-            'alias': alias,
-            'client_id': client_id,
-            'client_secret': client_secret,
-            'username': username,
-            'password': password
-        })
+    if provider != 'pagseguro':
+        flash('A reconciliação está restrita ao PagSeguro.')
+        return redirect(url_for('finance.finance_reconciliation'))
+
+    email = request.form.get('ps_email')
+    token = request.form.get('ps_token')
+    environment = (request.form.get('ps_environment') or 'production').strip().lower()
+    sandbox = environment == 'sandbox'
+    
+    if 'pagseguro' not in settings:
+        settings['pagseguro'] = []
+    if isinstance(settings['pagseguro'], dict):
+        settings['pagseguro'] = [settings['pagseguro']]
+    
+    settings['pagseguro'].append({
+        'alias': alias,
+        'email': email,
+        'token': token,
+        'sandbox': sandbox,
+        'environment': environment,
+        'health_status': 'not_tested',
+        'last_test_at': '',
+        'last_error': ''
+    })
         
     save_card_settings(settings)
     flash('Conta adicionada com sucesso.')
@@ -2713,13 +3393,16 @@ def finance_reconciliation_remove_account():
         return redirect(url_for('main.index'))
 
     settings = load_card_settings()
-    provider = request.form.get('provider')
+    provider = (request.form.get('provider') or 'pagseguro').strip().lower()
     try:
         index = int(request.form.get('index'))
     except:
         flash('Índice inválido.')
         return redirect(url_for('finance.finance_reconciliation'))
     
+    if provider != 'pagseguro':
+        flash('A reconciliação está restrita ao PagSeguro.')
+        return redirect(url_for('finance.finance_reconciliation'))
     if provider in settings:
         config_list = settings[provider]
         if isinstance(config_list, list) and 0 <= index < len(config_list):
@@ -2729,6 +3412,158 @@ def finance_reconciliation_remove_account():
             
     return redirect(url_for('finance.finance_reconciliation'))
 
+@finance_bp.route('/admin/reconciliation/account/update', methods=['POST'])
+@login_required
+def finance_reconciliation_update_account():
+    if session.get('role') != 'admin':
+        flash('Acesso Restrito.')
+        return redirect(url_for('main.index'))
+    settings = load_card_settings()
+    provider = (request.form.get('provider') or 'pagseguro').strip().lower()
+    if provider != 'pagseguro':
+        flash('A reconciliação está restrita ao PagSeguro.')
+        return redirect(url_for('finance.finance_reconciliation'))
+    try:
+        index = int(request.form.get('index'))
+    except Exception:
+        flash('Índice inválido.')
+        return redirect(url_for('finance.finance_reconciliation'))
+    alias = str(request.form.get('alias') or '').strip()
+    email = str(request.form.get('ps_email') or '').strip()
+    environment = (request.form.get('ps_environment') or 'production').strip().lower()
+    if environment not in {'production', 'sandbox'}:
+        environment = 'production'
+    if not alias or not email:
+        flash('Alias e e-mail são obrigatórios para editar a conta.')
+        return redirect(url_for('finance.finance_reconciliation'))
+    config_list = settings.get('pagseguro')
+    if isinstance(config_list, dict):
+        config_list = [config_list]
+    if not isinstance(config_list, list) or not (0 <= index < len(config_list)):
+        flash('Conta PagSeguro não encontrada para edição.')
+        return redirect(url_for('finance.finance_reconciliation'))
+    current = dict(config_list[index] or {})
+    previous_token = str(current.get('token') or '')
+    new_token = str(request.form.get('ps_token') or '').strip()
+    token_to_save = new_token if new_token else previous_token
+    changed_credentials = (
+        str(current.get('email') or '').strip() != email
+        or _pagseguro_environment_label(current) != environment
+        or bool(new_token)
+    )
+    current['alias'] = alias
+    current['email'] = email
+    current['token'] = token_to_save
+    current['environment'] = environment
+    current['sandbox'] = environment == 'sandbox'
+    if changed_credentials:
+        current['health_status'] = 'not_tested'
+        current['last_error'] = ''
+        current['last_test_at'] = ''
+        current['last_http_status'] = None
+    config_list[index] = current
+    settings['pagseguro'] = config_list
+    save_card_settings(settings)
+    flash(f"Conta '{alias}' atualizada com sucesso.")
+    return redirect(url_for('finance.finance_reconciliation'))
+
+@finance_bp.route('/admin/reconciliation/account/edit/<int:index>', methods=['GET'])
+@login_required
+def finance_reconciliation_edit_account(index):
+    if session.get('role') != 'admin':
+        flash('Acesso Restrito.')
+        return redirect(url_for('main.index'))
+    settings = load_card_settings()
+    config_list = settings.get('pagseguro')
+    if isinstance(config_list, dict):
+        config_list = [config_list]
+    if not isinstance(config_list, list) or not (0 <= index < len(config_list)):
+        flash('Conta PagSeguro não encontrada para edição.')
+        return redirect(url_for('finance.finance_reconciliation'))
+    account = dict(config_list[index] or {})
+    return render_template(
+        'finance_reconciliation_edit_account.html',
+        account_index=index,
+        account={
+            'alias': account.get('alias') or '',
+            'email': account.get('email') or '',
+            'environment': _pagseguro_environment_label(account),
+        },
+    )
+
+@finance_bp.route('/admin/reconciliation/health-check', methods=['POST'])
+@login_required
+def finance_reconciliation_health_check():
+    if session.get('role') != 'admin':
+        flash('Acesso Restrito.')
+        return redirect(url_for('main.index'))
+    settings = load_card_settings()
+    if isinstance(settings.get('pagseguro'), dict):
+        settings['pagseguro'] = [settings['pagseguro']]
+    accounts = settings.get('pagseguro') or []
+    if not isinstance(accounts, list) or not accounts:
+        flash('Nenhuma conta PagSeguro configurada para teste.')
+        return redirect(url_for('finance.finance_reconciliation'))
+    check_index_raw = (request.form.get('index') or '').strip()
+    indexes = []
+    if check_index_raw:
+        try:
+            idx = int(check_index_raw)
+            if 0 <= idx < len(accounts):
+                indexes = [idx]
+        except Exception:
+            indexes = []
+        if not indexes:
+            flash('Conta selecionada para teste não é válida.')
+            return redirect(url_for('finance.finance_reconciliation'))
+    else:
+        indexes = list(range(len(accounts)))
+    ok_count = 0
+    err_count = 0
+    error_details = []
+    for idx in indexes:
+        account = dict(accounts[idx] or {})
+        result = _check_pagseguro_account_health(account)
+        account['health_status'] = result.get('status') or 'error'
+        account['last_test_at'] = result.get('tested_at') or datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+        account['last_error'] = result.get('error_message') or ''
+        account['last_http_status'] = result.get('http_status')
+        accounts[idx] = account
+        if account['health_status'] == 'ok':
+            ok_count += 1
+        else:
+            err_count += 1
+            alias = str(account.get('alias') or f'Conta {idx + 1}')
+            err_msg = str(account.get('last_error') or 'Erro desconhecido')
+            error_details.append(f"{alias}: {err_msg}")
+        append_reconciliation_audit({
+            'id': f"RECON_HEALTH_{datetime.now().strftime('%Y%m%d%H%M%S%f')}",
+            'created_at': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
+            'source': 'health_check',
+            'provider': 'pagseguro',
+            'period_start': '',
+            'period_end': '',
+            'user': session.get('user'),
+            'summary': {'ok': 1 if account['health_status'] == 'ok' else 0, 'error': 1 if account['health_status'] != 'ok' else 0},
+            'results': {
+                'alias': account.get('alias'),
+                'environment': _pagseguro_environment_label(account),
+                'status': account.get('health_status'),
+                'http_status': account.get('last_http_status'),
+                'error': account.get('last_error'),
+                'tested_at': account.get('last_test_at')
+            }
+        })
+    settings['pagseguro'] = accounts
+    save_card_settings(settings)
+    flash(f'Health check finalizado: {ok_count} OK, {err_count} com erro.')
+    if error_details:
+        for detail in error_details[:5]:
+            flash(f'Falha PagSeguro - {detail}')
+        if len(error_details) > 5:
+            flash(f'... e mais {len(error_details) - 5} conta(s) com erro. Abra Configurar para ver detalhes completos.')
+    return redirect(url_for('finance.finance_reconciliation'))
+
 @finance_bp.route('/admin/reconciliation/sync', methods=['POST'])
 @login_required
 def finance_reconciliation_sync():
@@ -2736,7 +3571,7 @@ def finance_reconciliation_sync():
         flash('Acesso Restrito.')
         return redirect(url_for('main.index'))
 
-    provider = request.form.get('provider')
+    provider = (request.form.get('provider') or 'pagseguro').strip().lower()
     start_date_str = (request.form.get('start_date') or '').strip()
     end_date_str = (request.form.get('end_date') or '').strip()
     date_str = (request.form.get('date') or '').strip()
@@ -2762,18 +3597,13 @@ def finance_reconciliation_sync():
 
     card_transactions = []
     
-    if provider == 'pagseguro':
-        card_transactions = fetch_pagseguro_transactions(start_date, end_date)
-        if not card_transactions:
-            flash('Nenhuma transação encontrada ou erro na API (verifique credenciais).')
-            
-    elif provider == 'rede':
-        card_transactions = fetch_rede_transactions(start_date, end_date)
-        if not card_transactions:
-            flash('Nenhuma transação encontrada ou erro na API (verifique credenciais).')
-    else:
-        flash('Adquirente inválido.')
+    if provider != 'pagseguro':
+        flash('A reconciliação está restrita ao PagSeguro.')
         return redirect(url_for('finance.finance_reconciliation'))
+    fetch_detail = fetch_pagseguro_transactions_detailed(start_date, end_date)
+    card_transactions = fetch_detail.get('transactions', []) if isinstance(fetch_detail, dict) else []
+    if not card_transactions:
+        flash('Nenhuma transação encontrada ou erro na API PagSeguro (verifique credenciais).')
     
     start_search = start_date
     end_search = end_date
@@ -2806,13 +3636,13 @@ def finance_reconciliation_sync():
                 except:
                     continue
                     
-    results = reconcile_transactions(system_transactions, card_transactions)
+    consumption_map = load_card_consumption_map()
+    results = reconcile_transactions(system_transactions, card_transactions, consumption_map=consumption_map)
     
     settings = load_card_settings()
-    if provider == 'pagseguro':
-        pagseguro_accounts = _normalize_pagseguro_configs(settings)
-        if len(pagseguro_accounts) > 1:
-            flash(f'Conciliação PagSeguro processada em {len(pagseguro_accounts)} tokens.')
+    pagseguro_accounts = _normalize_pagseguro_configs(settings)
+    if len(pagseguro_accounts) > 1:
+        flash(f'Conciliação PagSeguro processada em {len(pagseguro_accounts)} tokens.')
     results = _annotate_reconciliation_results(results, settings)
     approved_signatures = _load_manual_approval_signatures()
     suspected_matches = _build_suspected_time_gap_matches(
@@ -2825,7 +3655,11 @@ def finance_reconciliation_sync():
         'matched_count': len(results['matched']),
         'unmatched_system_count': len(results['unmatched_system']),
         'unmatched_card_count': len(results['unmatched_card']),
-        'suspected_count': len(suspected_matches)
+        'suspected_count': len(suspected_matches),
+        'skipped_consumed_card_count': int(results.get('skipped_consumed_card_count') or 0),
+        'pagseguro_total_accounts': int((fetch_detail or {}).get('total_accounts') or 0),
+        'pagseguro_processed_accounts': int((fetch_detail or {}).get('processed_accounts') or 0),
+        'pagseguro_errors': len((fetch_detail or {}).get('errors') or [])
     }
     display_start = start_date.strftime('%Y-%m-%d')
     display_end = end_date.strftime('%Y-%m-%d')
@@ -2837,6 +3671,19 @@ def finance_reconciliation_sync():
         results=results,
         summary=summary
     )
+    consumed_count = register_consumed_card_matches(
+        results.get('matched', []),
+        source='api_sync',
+        period_start=display_start,
+        period_end=display_end,
+        user=session.get('user') or ''
+    )
+    if consumed_count:
+        flash(f'{consumed_count} pagamentos PagSeguro vinculados e bloqueados para reuso em outros caixas.')
+    if summary['skipped_consumed_card_count'] > 0:
+        flash(f"{summary['skipped_consumed_card_count']} pagamentos já conciliados foram ignorados para evitar reuso.")
+    if summary['pagseguro_errors'] > 0:
+        flash(f"{summary['pagseguro_errors']} ocorrências de erro em contas PagSeguro durante o pull.")
     log_system_action(
         'Conciliação de Cartões',
         {
@@ -2857,10 +3704,76 @@ def finance_reconciliation_sync():
         suspected_matches=suspected_matches,
         summary=summary,
         settings=settings,
+        pagseguro_accounts=_build_pagseguro_accounts_view(settings),
+        pull_status=get_pull_status(),
         today_date=display_start,
         start_date=display_start,
         end_date=display_end
     )
+
+
+@finance_bp.route('/admin/reconciliation/pagseguro/daily-pull', methods=['POST'])
+@login_required
+def finance_reconciliation_daily_pull():
+    if session.get('role') != 'admin':
+        flash('Acesso Restrito.')
+        return redirect(url_for('main.index'))
+    target = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
+    try:
+        output = run_pagseguro_daily_pull(
+            date_ref=target,
+            source='manual_admin',
+            requested_by=session.get('user') or 'admin',
+            force=True
+        )
+        snapshot = output.get('snapshot') or {}
+        status_info = output.get('status') or {}
+        flash(
+            f"Pull diário PagSeguro ({status_info.get('status', 'not_run')}) para {snapshot.get('date_ref') or target}. "
+            f"Transações: {snapshot.get('normalized_count', 0)}."
+        )
+    except Exception as exc:
+        flash(f'Falha no pull diário PagSeguro: {exc}')
+    return redirect(url_for('finance.finance_reconciliation'))
+
+
+@finance_bp.route('/admin/reconciliation/pagseguro/daily-pull/dev', methods=['POST'])
+@login_required
+def finance_reconciliation_daily_pull_dev():
+    if session.get('role') != 'admin':
+        return jsonify({'success': False, 'message': 'Acesso Restrito.'}), 403
+    runtime_env = str(current_app.config.get('ALMAREIA_RUNTIME_ENV') or '').strip().lower()
+    if runtime_env != 'development':
+        return jsonify({'success': False, 'message': 'Endpoint DEV-only indisponível em produção.'}), 403
+    payload = request.json or {}
+    target_date = str(payload.get('date') or '').strip()
+    if not target_date:
+        target_date = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
+    try:
+        output = run_pagseguro_daily_pull(
+            date_ref=target_date,
+            source='dev_manual',
+            requested_by=session.get('user') or 'admin',
+            force=True
+        )
+        snapshot = output.get('snapshot') or {}
+        status_info = output.get('status') or {}
+        return jsonify({
+            'success': bool(output.get('success')),
+            'status': status_info.get('status', 'not_run'),
+            'date_ref': snapshot.get('date_ref'),
+            'normalized_count': snapshot.get('normalized_count', 0)
+        })
+    except Exception as exc:
+        return jsonify({'success': False, 'message': str(exc)}), 500
+
+
+@finance_bp.route('/admin/reconciliation/pagseguro/daily-pull/status', methods=['GET'])
+@login_required
+def finance_reconciliation_daily_pull_status():
+    if session.get('role') != 'admin':
+        return jsonify({'success': False, 'message': 'Acesso Restrito.'}), 403
+    return jsonify({'success': True, 'data': get_pull_status()})
 
 @finance_bp.route('/admin/reconciliation/upload', methods=['POST'])
 @login_required
@@ -2874,7 +3787,7 @@ def finance_reconciliation_upload():
         return redirect(url_for('finance.finance_reconciliation'))
         
     file = request.files['file']
-    provider = request.form.get('provider')
+    provider = (request.form.get('provider') or 'pagseguro').strip().lower()
     
     if file.filename == '':
         flash('Nenhum arquivo selecionado.')
@@ -2887,11 +3800,10 @@ def finance_reconciliation_upload():
         filepath = os.path.join(upload_folder, filename)
         file.save(filepath)
         
-        card_transactions = []
-        if provider == 'pagseguro':
-            card_transactions = parse_pagseguro_csv(filepath)
-        elif provider == 'rede':
-            card_transactions = parse_rede_csv(filepath)
+        if provider != 'pagseguro':
+            flash('A reconciliação por arquivo está restrita ao PagSeguro.')
+            return redirect(url_for('finance.finance_reconciliation'))
+        card_transactions = parse_pagseguro_csv(filepath)
         
         if not card_transactions:
             flash('Não foi possível ler as transações do arquivo. Verifique o formato.')
@@ -2987,6 +3899,8 @@ def finance_reconciliation_upload():
             suspected_matches=suspected_matches,
             summary=summary,
             settings=settings,
+            pagseguro_accounts=_build_pagseguro_accounts_view(settings),
+            pull_status=get_pull_status(),
             today_date=display_start,
             start_date=display_start,
             end_date=display_end

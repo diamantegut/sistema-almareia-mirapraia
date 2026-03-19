@@ -1,16 +1,192 @@
 import json
 import os
+import re
 import uuid
 import threading
 import requests
+import shutil
 from datetime import datetime
 from json import JSONDecodeError
-from app.services.system_config_manager import get_data_path, get_config_value, FISCAL_POOL_FILE
-from app.services.data_service import load_menu_items, _backup_before_write, _save_json_atomic
+from app.services.system_config_manager import get_config_value, FISCAL_POOL_FILE
+from app.services.data_service import load_menu_items, load_room_occupancy
 
 # FISCAL_POOL_FILE = get_data_path('fiscal_pool.json')
 
 class FiscalPoolService:
+    MIRAPRAIA_CNPJ = '28952732000109'
+    CANONICAL_STATUSES = {'pending', 'issuing', 'emitted', 'rejected', 'manual_retry_required', 'ignored'}
+
+    @staticmethod
+    def _normalize_digits(value):
+        return re.sub(r'[^0-9]', '', str(value or ''))
+
+    @staticmethod
+    def _normalize_status(status):
+        raw = str(status or '').strip().lower()
+        migration = {
+            'error': 'manual_retry_required',
+            'failed': 'manual_retry_required',
+            'error_config': 'manual_retry_required',
+        }
+        normalized = migration.get(raw, raw or 'pending')
+        if normalized not in FiscalPoolService.CANONICAL_STATUSES:
+            return 'pending'
+        return normalized
+
+    @staticmethod
+    def _is_valid_document(value):
+        digits = FiscalPoolService._normalize_digits(value)
+        return len(digits) in (11, 14)
+
+    @staticmethod
+    def _resolve_customer_document(customer_info):
+        if not isinstance(customer_info, dict):
+            return ''
+        candidates = [
+            customer_info.get('cpf_cnpj'),
+            customer_info.get('doc_id'),
+            customer_info.get('doc'),
+            customer_info.get('cpf'),
+            customer_info.get('cnpj'),
+            customer_info.get('document'),
+        ]
+        for cand in candidates:
+            digits = FiscalPoolService._normalize_digits(cand)
+            if len(digits) in (11, 14):
+                return digits
+        return ''
+
+    @staticmethod
+    def _is_non_fiscal_consumption(origin, customer_info, notes, original_id, items):
+        lower_origin = str(origin or '').lower()
+        lower_notes = str(notes or '').lower()
+        lower_original_id = str(original_id or '').lower()
+        customer_type = str((customer_info or {}).get('type') or (customer_info or {}).get('customer_type') or '').lower()
+        if 'funcion' in customer_type:
+            return 'consumo_funcionario'
+        if 'propriet' in customer_type:
+            return 'consumo_proprietario'
+        combined_text = f"{lower_origin} {lower_notes} {lower_original_id}"
+        if 'func_' in combined_text or 'funcionario' in combined_text:
+            return 'consumo_funcionario'
+        if 'propriet' in combined_text or 'mesa 68' in combined_text or 'mesa 69' in combined_text:
+            return 'consumo_proprietario'
+        item_text = []
+        for item in items or []:
+            if not isinstance(item, dict):
+                continue
+            item_text.append(str(item.get('name') or '').lower())
+            item_text.append(str(item.get('category') or '').lower())
+            item_text.append(str(item.get('source') or '').lower())
+        merged = " ".join(item_text + [lower_notes, lower_original_id, lower_origin])
+        if 'café da manhã' in merged or 'cafe da manha' in merged:
+            return 'cafe_da_manha'
+        if 'cortesia' in merged:
+            return 'cortesia'
+        return ''
+
+    @staticmethod
+    def _autofill_customer_document_for_reception(origin, total_amount, customer_info):
+        lower_origin = str(origin or '').lower()
+        if lower_origin not in {'reception_charge', 'restaurant'}:
+            return customer_info
+        info = dict(customer_info or {})
+        if lower_origin == 'restaurant':
+            customer_type = str(info.get('type') or info.get('customer_type') or '').lower()
+            if 'hospede' not in customer_type and 'hóspede' not in customer_type:
+                return info
+        current_doc = FiscalPoolService._resolve_customer_document(info)
+        if current_doc:
+            info['cpf_cnpj'] = current_doc
+            return info
+        if float(total_amount or 0) <= 999.0:
+            return info
+        room_number = str(info.get('room_number') or '').strip()
+        if not room_number:
+            return info
+        reservation_id = ''
+        try:
+            occupancy = load_room_occupancy() or {}
+            occ = occupancy.get(room_number)
+            if not occ and room_number.isdigit():
+                occ = occupancy.get(str(int(room_number)))
+            reservation_id = str((occ or {}).get('reservation_id') or '').strip()
+        except Exception:
+            reservation_id = ''
+        if not reservation_id:
+            return info
+        try:
+            from app.services.reservation_service import ReservationService
+            service = ReservationService()
+            reservation = service.get_reservation_by_id(reservation_id) or {}
+            details = service.get_guest_details(reservation_id) or {}
+            personal_info = details.get('personal_info') if isinstance(details, dict) else {}
+            candidates = [
+                reservation.get('doc_id'),
+                reservation.get('cpf_cnpj'),
+                reservation.get('cpf'),
+                reservation.get('cnpj'),
+                reservation.get('document'),
+                personal_info.get('cpf'),
+                personal_info.get('cnpj'),
+                personal_info.get('document'),
+            ] if isinstance(personal_info, dict) else [
+                reservation.get('doc_id'),
+                reservation.get('cpf_cnpj'),
+                reservation.get('cpf'),
+                reservation.get('cnpj'),
+                reservation.get('document'),
+            ]
+            for cand in candidates:
+                digits = FiscalPoolService._normalize_digits(cand)
+                if len(digits) in (11, 14):
+                    info['cpf_cnpj'] = digits
+                    info['reservation_id'] = reservation_id
+                    break
+        except Exception:
+            pass
+        return info
+
+    @staticmethod
+    def evaluate_fiscal_policy(origin, total_amount, items, customer_info=None, notes=None, original_id=None, fiscal_type='nfce'):
+        info = FiscalPoolService._autofill_customer_document_for_reception(origin, total_amount, customer_info)
+        customer_doc = FiscalPoolService._resolve_customer_document(info)
+        non_fiscal_reason = FiscalPoolService._is_non_fiscal_consumption(
+            origin=origin,
+            customer_info=info,
+            notes=notes,
+            original_id=original_id,
+            items=items,
+        )
+        document_required = float(total_amount or 0) > 999.0 and str(fiscal_type or '').lower() == 'nfce'
+        return {
+            'customer_info': info,
+            'customer_document': customer_doc,
+            'non_fiscal_reason': non_fiscal_reason or None,
+            'eligible_for_fiscal': not bool(non_fiscal_reason),
+            'document_required': bool(document_required),
+        }
+
+    @staticmethod
+    def _backup_pool_file():
+        if not os.path.exists(FISCAL_POOL_FILE):
+            return
+        backup_dir = os.path.join(os.path.dirname(FISCAL_POOL_FILE), 'backups', 'fiscal_pool')
+        os.makedirs(backup_dir, exist_ok=True)
+        backup_name = f"fiscal_pool_{datetime.now().strftime('%Y%m%d_%H%M%S_%f')}.json"
+        shutil.copy2(FISCAL_POOL_FILE, os.path.join(backup_dir, backup_name))
+
+    @staticmethod
+    def _write_pool_atomic(pool):
+        os.makedirs(os.path.dirname(FISCAL_POOL_FILE), exist_ok=True)
+        temp_path = f"{FISCAL_POOL_FILE}.tmp.{uuid.uuid4().hex}"
+        with open(temp_path, 'w', encoding='utf-8') as f:
+            json.dump(pool, f, indent=4, ensure_ascii=False)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(temp_path, FISCAL_POOL_FILE)
+        return True
+
     @staticmethod
     def _log_pool_recovery(action, details):
         try:
@@ -99,8 +275,8 @@ class FiscalPoolService:
 
                 pool = recovered_pool
                 try:
-                    _backup_before_write(FISCAL_POOL_FILE)
-                    _save_json_atomic(FISCAL_POOL_FILE, pool)
+                    FiscalPoolService._backup_pool_file()
+                    FiscalPoolService._write_pool_atomic(pool)
                 except Exception:
                     pass
 
@@ -134,6 +310,15 @@ class FiscalPoolService:
                 if 'closed_at' not in entry:
                     entry['closed_at'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                     modified = True
+                normalized_status = FiscalPoolService._normalize_status(entry.get('status'))
+                if entry.get('status') != normalized_status:
+                    entry['status'] = normalized_status
+                    modified = True
+                if entry.get('fiscal_type') == 'nfce':
+                    normalized_cnpj = FiscalPoolService._normalize_digits(entry.get('cnpj_emitente'))
+                    if not normalized_cnpj or normalized_cnpj != FiscalPoolService.MIRAPRAIA_CNPJ:
+                        entry['cnpj_emitente'] = FiscalPoolService.MIRAPRAIA_CNPJ
+                        modified = True
                 
                 # Check if we need to recalculate fiscal_amount
                 # Scenarios:
@@ -176,8 +361,8 @@ class FiscalPoolService:
             
             if modified:
                 try:
-                    _backup_before_write(FISCAL_POOL_FILE)
-                    _save_json_atomic(FISCAL_POOL_FILE, pool)
+                    FiscalPoolService._backup_pool_file()
+                    FiscalPoolService._write_pool_atomic(pool)
                 except: pass
                 
             return pool
@@ -187,10 +372,14 @@ class FiscalPoolService:
     @staticmethod
     def _save_pool(pool):
         try:
-            _backup_before_write(FISCAL_POOL_FILE)
-            return _save_json_atomic(FISCAL_POOL_FILE, pool)
+            FiscalPoolService._backup_pool_file()
+            return FiscalPoolService._write_pool_atomic(pool)
         except Exception:
             return False
+
+    @staticmethod
+    def save_pool(pool):
+        return FiscalPoolService._save_pool(pool)
 
     @staticmethod
     def add_to_pool(origin, original_id, total_amount, items, payment_methods, user, customer_info=None, notes=None):
@@ -201,8 +390,8 @@ class FiscalPoolService:
         pool = FiscalPoolService._load_pool()
         
         # Determine fiscal type and issuer CNPJ
-        fiscal_type = 'nfce' # Default (Product)
-        cnpj_emitente = '28952732000109' # Default: Mirapraia
+        fiscal_type = 'nfce'
+        cnpj_emitente = FiscalPoolService.MIRAPRAIA_CNPJ
         
         # Load Menu Items for enrichment
         try:
@@ -298,6 +487,19 @@ class FiscalPoolService:
         if fiscal_amount > float(total_amount):
             fiscal_amount = float(total_amount)
             
+        policy = FiscalPoolService.evaluate_fiscal_policy(
+            origin=origin,
+            total_amount=total_amount,
+            items=enriched_items,
+            customer_info=customer_info,
+            notes=notes,
+            original_id=original_id,
+            fiscal_type=fiscal_type,
+        )
+        customer_info = policy.get('customer_info') or {}
+        customer_doc = policy.get('customer_document') or ''
+        doc_required = bool(policy.get('document_required'))
+        non_fiscal_reason = policy.get('non_fiscal_reason') or ''
         status = 'pending'
         notes_str = notes
         
@@ -305,6 +507,10 @@ class FiscalPoolService:
         if float(total_amount) <= 0.001 or fiscal_amount <= 0.001:
             status = 'ignored'
             notes_str = (notes_str or "") + " | Auto-ignored: Valor Zero"
+        if non_fiscal_reason:
+            status = 'ignored'
+            fiscal_amount = 0.0
+            notes_str = (notes_str or "") + f" | Auto-ignored: {non_fiscal_reason}"
             
         entry = {
             'id': str(uuid.uuid4()),
@@ -319,7 +525,11 @@ class FiscalPoolService:
             'items': enriched_items,
             'payment_methods': payment_methods,
             'customer': customer_info or {},
-            'status': status, # pending, emitted, ignored
+            'status': FiscalPoolService._normalize_status(status),
+            'eligible_for_fiscal': not bool(non_fiscal_reason) and round(fiscal_amount, 2) > 0,
+            'non_fiscal_reason': non_fiscal_reason or None,
+            'document_required': bool(doc_required),
+            'customer_document': customer_doc or None,
             'notes': notes_str,
             'fiscal_doc_uuid': None,
             'history': []
@@ -405,12 +615,7 @@ class FiscalPoolService:
                 entry['xml_ready'] = bool(ready)
                 if xml_path:
                     entry['xml_path'] = xml_path
-                try:
-                    with open(FISCAL_POOL_FILE, 'w', encoding='utf-8') as f:
-                        json.dump(pool, f, indent=4, ensure_ascii=False)
-                    return True
-                except Exception:
-                    return False
+                return FiscalPoolService._save_pool(pool)
         return False
 
     @staticmethod
@@ -421,12 +626,7 @@ class FiscalPoolService:
                 entry['pdf_ready'] = bool(ready)
                 if pdf_path:
                     entry['pdf_path'] = pdf_path
-                try:
-                    with open(FISCAL_POOL_FILE, 'w', encoding='utf-8') as f:
-                        json.dump(pool, f, indent=4, ensure_ascii=False)
-                    return True
-                except Exception:
-                    return False
+                return FiscalPoolService._save_pool(pool)
         return False
 
     @staticmethod
@@ -465,12 +665,12 @@ class FiscalPoolService:
         return None
 
     @staticmethod
-    def update_status(entry_id, new_status, fiscal_doc_uuid=None, user='Sistema', serie=None, number=None, error_msg=None):
+    def update_status(entry_id, new_status, fiscal_doc_uuid=None, user='Sistema', serie=None, number=None, error_msg=None, access_key=None):
         pool = FiscalPoolService._load_pool()
         for entry in pool:
             if entry['id'] == entry_id:
                 old_status = entry['status']
-                entry['status'] = new_status
+                entry['status'] = FiscalPoolService._normalize_status(new_status)
                 if fiscal_doc_uuid:
                     entry['fiscal_doc_uuid'] = fiscal_doc_uuid
                 
@@ -478,6 +678,8 @@ class FiscalPoolService:
                     entry['fiscal_serie'] = serie
                 if number:
                     entry['fiscal_number'] = number
+                if access_key:
+                    entry['access_key'] = str(access_key)
                 
                 if error_msg:
                     entry['last_error'] = error_msg

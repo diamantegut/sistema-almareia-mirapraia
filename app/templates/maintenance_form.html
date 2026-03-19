@@ -12,17 +12,25 @@
     <div style="margin-bottom: 20px;">
         <a href="{{ url_for('main.index') }}" class="action-btn" style="background-color: #95a5a6; text-decoration: none;">← Voltar</a>
     </div>
+    {% if source == 'governance' %}
+    <div class="alert alert-info">
+        Abertura rápida pela Governança{% if room %} - Quarto {{ room }}{% endif %}.
+    </div>
+    {% endif %}
     
     <div class="auth-box" style="max-width: 600px;">
         <form method="POST" action="{{ url_for('maintenance.submit_maintenance') }}" enctype="multipart/form-data">
+            {% if return_to %}
+            <input type="hidden" name="return_to" value="{{ return_to }}">
+            {% endif %}
             <div class="form-group">
                 <label for="location">Local do Problema</label>
-                <input type="text" id="location" name="location" placeholder="Ex: Quarto 101, Cozinha, Hall" required>
+                <input type="text" id="location" name="location" placeholder="Ex: Quarto 101, Cozinha, Hall" value="{{ prefill_location or '' }}" required>
             </div>
 
             <div class="form-group">
                 <label for="description">Descrição do Problema</label>
-                <textarea id="description" name="description" rows="4" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" placeholder="Descreva o problema encontrado..."></textarea>
+                <textarea id="description" name="description" rows="4" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" placeholder="Descreva o problema encontrado...">{{ prefill_description or '' }}</textarea>
             </div>
 
             <div class="form-group">
@@ -33,7 +41,7 @@
 
             <div class="form-actions">
                 <button type="submit" class="auth-btn">Enviar Solicitação</button>
-                <a href="{{ url_for('main.index') }}" class="back-link" style="display: block; text-align: center; margin-top: 10px;">Cancelar</a>
+                <a href="{{ return_to or url_for('main.index') }}" class="back-link" style="display: block; text-align: center; margin-top: 10px;">Cancelar</a>
             </div>
         </form>
     </div>

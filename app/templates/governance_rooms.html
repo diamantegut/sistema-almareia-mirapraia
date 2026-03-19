@@ -32,6 +32,134 @@
         </div>
     </div>
 
+    <div class="card mb-4">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-box-seam"></i> Baixa Automática de Itens de Governança</h5>
+            {% if can_manage_auto_rules %}
+            <span class="badge bg-primary">Configuração Ativa</span>
+            {% else %}
+            <span class="badge bg-secondary">Somente Visualização</span>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            {% if low_stock_alerts %}
+            <div class="alert alert-warning mb-3">
+                <div class="fw-semibold mb-1">Alerta de Estoque Baixo nos Itens Automáticos</div>
+                {% for item in low_stock_alerts %}
+                <div class="small">{{ item.product_name }} — Saldo: {{ item.balance }} | Mínimo: {{ item.min_stock }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            <div class="row g-3">
+                {% for event_type in auto_event_types %}
+                {% set event_label = 'Check-in' if event_type == 'checkin' else ('Limpeza Diária' if event_type == 'daily_cleaning' else 'Limpeza de Check-out') %}
+                <div class="col-12 col-lg-4">
+                    <div class="border rounded p-3 h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <strong>{{ event_label }}</strong>
+                            <span class="badge bg-dark">{{ auto_deduct_config.get(event_type, [])|length }} regra(s)</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Produto</th>
+                                        <th class="text-end">Qtd</th>
+                                        {% if can_manage_auto_rules %}<th></th>{% endif %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for rule in auto_deduct_config.get(event_type, []) %}
+                                    <tr>
+                                        <td>{{ rule.product_name or ('ID ' ~ rule.product_id) }}</td>
+                                        <td class="text-end">{{ '%.2f'|format(rule.qty) }}</td>
+                                        {% if can_manage_auto_rules %}
+                                        <td class="text-end">
+                                            <form method="POST" class="d-inline">
+                                                <input type="hidden" name="action" value="auto_rule_remove">
+                                                <input type="hidden" name="event_type" value="{{ event_type }}">
+                                                <input type="hidden" name="product_id" value="{{ rule.product_id }}">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">Remover</button>
+                                            </form>
+                                        </td>
+                                        {% endif %}
+                                    </tr>
+                                    {% else %}
+                                    <tr><td colspan="3" class="text-muted small">Sem regras configuradas.</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% if can_manage_auto_rules %}
+                        <form method="POST" class="row g-2 mt-2">
+                            <input type="hidden" name="action" value="auto_rule_add">
+                            <input type="hidden" name="event_type" value="{{ event_type }}">
+                            <div class="col-12">
+                                <select class="form-select form-select-sm" name="product_id" required>
+                                    <option value="">Selecionar produto</option>
+                                    {% for p in governance_products %}
+                                    <option value="{{ p.id }}">{{ p.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-8">
+                                <input type="number" class="form-control form-control-sm" step="0.01" min="0.01" name="qty" placeholder="Quantidade" required>
+                            </div>
+                            <div class="col-4 d-grid">
+                                <button type="submit" class="btn btn-sm btn-primary">Salvar</button>
+                            </div>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="mt-3">
+                <h6 class="mb-2"><i class="bi bi-journal-text"></i> Rastreabilidade (últimos lançamentos)</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped">
+                        <thead>
+                            <tr>
+                                <th>Data/Hora</th>
+                                <th>Evento</th>
+                                <th>Quarto</th>
+                                <th>Usuário</th>
+                                <th>Itens</th>
+                                <th>Avisos</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in auto_deduct_audit %}
+                            <tr>
+                                <td>{{ row.timestamp }}</td>
+                                <td>{{ row.event_type }}</td>
+                                <td>{{ row.room_number }}</td>
+                                <td>{{ row.triggered_by }}</td>
+                                <td>
+                                    {% for item in row.get('items', []) %}
+                                    <div class="small">{{ item.product }} ({{ item.qty }})</div>
+                                    {% else %}
+                                    <span class="text-muted small">Sem baixa</span>
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                    {% for warn in row.warnings or [] %}
+                                    <div class="small text-warning">{{ warn }}</div>
+                                    {% else %}
+                                    <span class="text-muted small">-</span>
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="6" class="text-muted small">Sem eventos registrados.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Rooms Grid -->
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
         {% set excluded_rooms = [4, 5, 6, 7, 8, 9, 10, 13, 18, 19, 20, 27, 28, 29, 30] %}
@@ -133,6 +261,11 @@
 
                             <!-- Actions -->
                             <div class="d-grid gap-2">
+                                <button type="button"
+                                        class="btn btn-outline-dark btn-sm w-100"
+                                        onclick='openRoomActionsModal({{ room_num|tojson }}, {{ status|tojson }}, {{ (occ_data is not none)|tojson }}, {{ (occ_data.guest_name if occ_data else "")|tojson }}, {{ (occ_data.checkout if occ_data else "")|tojson }}, {{ (clean_data.get("pending_note", "") if clean_data else "")|tojson }})'>
+                                    <i class="bi bi-layout-text-window-reverse"></i> Operar Quarto
+                                </button>
                                 {% if status == 'in_progress' %}
                                     <button type="button" class="btn btn-success w-100" onclick="openMinibarModal('{{ room_num }}')">
                                         <i class="bi bi-check-circle"></i> Finalizar Limpeza
@@ -162,6 +295,68 @@
                 </div>
             {% endif %}
         {% endfor %}
+    </div>
+</div>
+
+<div class="modal fade" id="roomActionsModal" tabindex="-1">
+    <div class="modal-dialog modal-fullscreen-sm-down modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title">Operação do Quarto <span id="roomActionsRoomLabel"></span></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-2 mb-3">
+                    <div class="col-md-4">
+                        <div class="border rounded p-2 h-100">
+                            <div class="small text-muted">Status</div>
+                            <div class="fw-semibold" id="roomActionsStatus"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="border rounded p-2 h-100">
+                            <div class="small text-muted">Ocupação</div>
+                            <div class="fw-semibold" id="roomActionsOccupancy"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="border rounded p-2 h-100">
+                            <div class="small text-muted">Saída prevista</div>
+                            <div class="fw-semibold" id="roomActionsCheckout"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-grid gap-2 mb-3">
+                    <button type="button" class="btn btn-primary" id="btnRoomStartCleaning" onclick="submitGovernanceAction('start_cleaning')">
+                        <i class="bi bi-play-circle"></i> Iniciar Limpeza
+                    </button>
+                    <button type="button" class="btn btn-success" id="btnRoomFinishCleaning" onclick="openMinibarModal(roomActionsContext.room)">
+                        <i class="bi bi-check-circle"></i> Finalizar Limpeza
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" id="btnRoomMarkDirty" onclick="submitGovernanceAction('mark_dirty')">
+                        <i class="bi bi-arrow-counterclockwise"></i> Marcar como Sujo
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" id="btnRoomOpenFrigobar" onclick="openFrigobarModal(roomActionsContext.room)">
+                        <i class="bi bi-snow"></i> Lançar Frigobar
+                    </button>
+                </div>
+                <div class="border rounded p-3 bg-light">
+                    <label class="form-label fw-semibold">Pendência / Observação operacional</label>
+                    <textarea class="form-control mb-2" rows="3" id="roomActionsNote" placeholder="Ex: Lâmpada queimada no banheiro, toalhas faltando..."></textarea>
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-outline-dark" onclick="submitGovernanceAction('add_note', {note: document.getElementById('roomActionsNote').value})">
+                            <i class="bi bi-journal-check"></i> Salvar Pendência
+                        </button>
+                        <button type="button" class="btn btn-danger" onclick="openMaintenanceFromRoom()">
+                            <i class="bi bi-tools"></i> Abrir Manutenção com este Contexto
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -377,6 +572,79 @@
             doc.save('estatisticas_limpeza.pdf');
         }
     }
+</script>
+
+<script>
+let roomActionsContext = {
+    room: '',
+    status: '',
+    occupied: false,
+    guest: '',
+    checkout: '',
+    note: ''
+};
+
+function openRoomActionsModal(room, status, occupied, guest, checkout, note) {
+    roomActionsContext = {
+        room: String(room || ''),
+        status: String(status || 'dirty'),
+        occupied: Boolean(occupied),
+        guest: String(guest || ''),
+        checkout: String(checkout || ''),
+        note: String(note || '')
+    };
+    document.getElementById('roomActionsRoomLabel').textContent = roomActionsContext.room;
+    const statusMap = {
+        clean: 'Limpo (aguardando inspeção)',
+        inspected: 'Pronto/Liberado',
+        rejected: 'Reprovado',
+        in_progress: 'Em Limpeza',
+        dirty_checkout: 'Saída / Limpeza completa',
+        dirty: 'Sujo'
+    };
+    document.getElementById('roomActionsStatus').textContent = statusMap[roomActionsContext.status] || roomActionsContext.status;
+    document.getElementById('roomActionsOccupancy').textContent = roomActionsContext.occupied
+        ? `Ocupado${roomActionsContext.guest ? ' - ' + roomActionsContext.guest : ''}`
+        : 'Livre';
+    document.getElementById('roomActionsCheckout').textContent = roomActionsContext.checkout || '-';
+    document.getElementById('roomActionsNote').value = roomActionsContext.note || '';
+    const isInProgress = roomActionsContext.status === 'in_progress';
+    document.getElementById('btnRoomStartCleaning').disabled = isInProgress;
+    document.getElementById('btnRoomFinishCleaning').disabled = !isInProgress;
+    const allowMarkDirty = ['clean', 'inspected', 'rejected', 'dirty_checkout'].includes(roomActionsContext.status);
+    document.getElementById('btnRoomMarkDirty').disabled = !allowMarkDirty;
+    const allowFrigobar = roomActionsContext.occupied || roomActionsContext.status === 'dirty_checkout';
+    document.getElementById('btnRoomOpenFrigobar').disabled = !allowFrigobar;
+    new bootstrap.Modal(document.getElementById('roomActionsModal')).show();
+}
+
+function submitGovernanceAction(action, extra = {}) {
+    if (!roomActionsContext.room) return;
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = "{{ url_for('governance.governance_rooms') }}";
+    const add = (name, value) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = name;
+        input.value = value;
+        form.appendChild(input);
+    };
+    add('action', action);
+    add('room_number', roomActionsContext.room);
+    Object.keys(extra || {}).forEach((k) => add(k, String(extra[k] || '')));
+    document.body.appendChild(form);
+    form.submit();
+}
+
+function openMaintenanceFromRoom() {
+    if (!roomActionsContext.room) return;
+    const note = encodeURIComponent(String(document.getElementById('roomActionsNote').value || '').trim());
+    const location = encodeURIComponent(`Quarto ${roomActionsContext.room}`);
+    const descriptionBase = `Solicitação aberta pela Governança no quarto ${roomActionsContext.room}.`;
+    const description = encodeURIComponent(note ? `${descriptionBase} Pendência: ${decodeURIComponent(note)}` : descriptionBase);
+    window.location.href = `/maintenance/new?source=governance&room=${encodeURIComponent(roomActionsContext.room)}&location=${location}&description=${description}`;
+}
 </script>
 
 <!-- Minibar Check Modal -->
@@ -864,20 +1132,5 @@ function submitCapsuleDeduction() {
             btn.innerHTML = originalText;
         });
     }
-</script>
-                <button type="button" class="btn-close btn-close-white" onclick="location.reload()"></button>
-            </div>
-            <div class="modal-body text-center" id="receiptContent">
-                <!-- Injected via JS -->
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="location.reload()">Fechar</button>
-                <button type="button" class="btn btn-primary" onclick="printLastReceipt()">
-                    <i class="bi bi-printer"></i> Imprimir Comprovante
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
+ </script>
 {% endblock %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="mb-0">Editar Conta PagSeguro</h3>
+        <a href="{{ url_for('finance.finance_reconciliation') }}" class="btn btn-outline-secondary">Voltar</a>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <form action="{{ url_for('finance.finance_reconciliation_update_account') }}" method="POST">
+                <input type="hidden" name="provider" value="pagseguro">
+                <input type="hidden" name="index" value="{{ account_index }}">
+                <div class="mb-3">
+                    <label class="form-label">Apelido</label>
+                    <input type="text" class="form-control" name="alias" required value="{{ account.alias }}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Ambiente</label>
+                    <select class="form-select" name="ps_environment" required>
+                        <option value="production" {% if account.environment != 'sandbox' %}selected{% endif %}>Produção</option>
+                        <option value="sandbox" {% if account.environment == 'sandbox' %}selected{% endif %}>Sandbox</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">E-mail da Conta</label>
+                    <input type="email" class="form-control" name="ps_email" required value="{{ account.email }}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Novo Token (opcional)</label>
+                    <input type="password" class="form-control" name="ps_token" placeholder="Deixe vazio para manter o token atual">
+                </div>
+                <button type="submit" class="btn btn-primary">Salvar alterações</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

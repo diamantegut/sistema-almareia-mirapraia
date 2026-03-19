@@ -46,8 +46,8 @@
                                 <tr>
                                     <th scope="col" class="text-center">#</th>
                                     <th scope="col">Garçom</th>
-                                    <th scope="col" class="text-center">Vendas (Qtd)</th>
-                                    <th scope="col" class="text-end">Total Vendas</th>
+                                    <th scope="col" class="text-center">Contas (Qtd)</th>
+                                    <th scope="col" class="text-end">Total Rateado</th>
                                     <th scope="col" class="text-end">Comissão (R$)</th>
                                 </tr>
                             </thead>
@@ -91,7 +91,7 @@
         <div class="col-md-5">
             <div class="card shadow mb-4">
                 <div class="card-header bg-danger text-white">
-                    <h5 class="mb-0"><i class="bi bi-x-circle"></i> Comissões Retiradas</h5>
+                    <h5 class="mb-0"><i class="bi bi-x-circle"></i> 10% Retirado / Não Elegível</h5>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -99,7 +99,8 @@
                             <thead class="table-light">
                                 <tr>
                                     <th scope="col">Data</th>
-                                    <th scope="col">Mesa/Quarto</th>
+                                    <th scope="col">Referência</th>
+                                    <th scope="col">Motivo</th>
                                     <th scope="col" class="text-end">Valor Retirado</th>
                                     <th scope="col">Responsável</th>
                                 </tr>
@@ -111,8 +112,10 @@
                                         <small>{{ item.timestamp }}</small>
                                     </td>
                                     <td>
-                                        <span class="badge bg-secondary">{{ item.reference }}</span>
+                                        <div><span class="badge bg-secondary">{{ item.reference }}</span></div>
+                                        <small class="text-muted">{{ item.reference_key }}</small>
                                     </td>
+                                    <td><span class="badge {{ 'bg-danger' if item.reason == '10% removido' else 'bg-warning text-dark' }}">{{ item.reason }}</span></td>
                                     <td class="text-end text-danger fw-bold">
                                         R$ {{ "%.2f"|format(item.amount) }}
                                     </td>
@@ -122,7 +125,7 @@
                                 </tr>
                                 {% else %}
                                 <tr>
-                                    <td colspan="4" class="text-center py-4 text-muted">
+                                    <td colspan="5" class="text-center py-4 text-muted">
                                         Nenhuma comissão retirada no período.
                                     </td>
                                 </tr>

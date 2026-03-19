@@ -50,6 +50,17 @@
                     <label class="form-label">Client Secret</label>
                     <input type="text" name="client_secret" id="clientSecret" class="form-control" value="{{ settings.get('integrations', [{}])[0].get('client_secret', '') }}" required>
                 </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">CNPJ do Emitente</label>
+                        <input type="text" name="cnpj_emitente" class="form-control" value="{{ settings.get('integrations', [{}])[0].get('cnpj_emitente', '') }}" placeholder="28952732000109" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Inscrição Estadual (PE)</label>
+                        <input type="text" name="ie_emitente" class="form-control" value="{{ settings.get('integrations', [{}])[0].get('ie_emitente', '') }}" placeholder="0743532-09" required>
+                    </div>
+                </div>
                 
                 <div class="d-flex justify-content-end mb-3">
                     <button type="button" class="btn btn-outline-info" onclick="testConnection()">

@@ -16,6 +16,22 @@
                     <button class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#configModal" style="min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" aria-label="Configurar"><i class="bi bi-gear-fill"></i> Configurar</button>
                 </div>
                 <div class="card-body">
+                    <div class="border rounded p-2 mb-3 bg-light">
+                        <div class="small fw-bold mb-1">Status do Pull Diário (PagSeguro)</div>
+                        <div class="small">Status: <span class="badge bg-{{ 'success' if pull_status.status == 'success' else ('warning text-dark' if pull_status.status == 'partial' else ('danger' if pull_status.status == 'error' else 'secondary')) }}">{{ pull_status.status or 'not_run' }}</span></div>
+                        <div class="small">Última execução: {{ pull_status.last_run_at or '-' }}</div>
+                        <div class="small">Data referência: {{ pull_status.date_ref or '-' }}</div>
+                        <div class="small">Pagamentos puxados: {{ pull_status.pulled_count or 0 }}</div>
+                        {% if pull_status.error %}
+                        <div class="small text-danger">Erro: {{ pull_status.error }}</div>
+                        {% endif %}
+                        <div class="mt-2 d-grid gap-2">
+                            <form action="{{ url_for('finance.finance_reconciliation_daily_pull') }}" method="POST">
+                                <button type="submit" class="btn btn-sm btn-warning w-100"><i class="bi bi-arrow-clockwise"></i> Reprocessar Ontem (Seguro)</button>
+                            </form>
+                        </div>
+                    </div>
+
                     <!-- API Sync -->
                     <form action="{{ url_for('finance.finance_reconciliation_sync') }}" method="POST" class="mb-4">
                         <div class="row g-2 mb-3">
@@ -30,7 +46,6 @@
                         </div>
                         <div class="d-grid gap-2">
                             <button type="submit" name="provider" value="pagseguro" class="btn btn-outline-primary"><i class="bi bi-arrow-repeat"></i> Sincronizar PagSeguro</button>
-                            <button type="submit" name="provider" value="rede" class="btn btn-outline-danger"><i class="bi bi-arrow-repeat"></i> Sincronizar Rede</button>
                         </div>
                     </form>
 
@@ -42,7 +57,6 @@
                         <div class="mb-3">
                             <select class="form-select form-select-sm" name="provider" id="provider" required>
                                 <option value="pagseguro">PagSeguro (CSV)</option>
-                                <option value="rede">Rede (CSV)</option>
                             </select>
                         </div>
                         <div class="mb-3">
@@ -334,113 +348,97 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Configurar Integrações (Múltiplos CNPJs)</h5>
+                <h5 class="modal-title">Configurar Contas PagSeguro</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <ul class="nav nav-tabs" id="configTabs" role="tablist">
-                    <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#cfg-pagseguro">PagSeguro</a></li>
-                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#cfg-rede">Rede</a></li>
-                </ul>
-
-                <div class="tab-content pt-3">
-                    <!-- PagSeguro Tab -->
-                    <div class="tab-pane fade show active" id="cfg-pagseguro">
-                        <!-- List Existing -->
-                        <h6>Contas Conectadas</h6>
-                        <ul class="list-group mb-3">
-                            {% for acc in settings.get('pagseguro', []) %}
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <div>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="mb-0">Contas Conectadas</h6>
+                    <form action="{{ url_for('finance.finance_reconciliation_health_check') }}" method="POST">
+                        <button type="submit" class="btn btn-sm btn-outline-primary">Testar todas</button>
+                    </form>
+                </div>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm align-middle">
+                        <thead>
+                            <tr>
+                                <th>Alias</th>
+                                <th>Ambiente</th>
+                                <th>Token</th>
+                                <th>Status</th>
+                                <th>Último teste</th>
+                                <th>Erro</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for acc in pagseguro_accounts %}
+                            <tr>
+                                <td>
                                     <strong>{{ acc.alias }}</strong><br>
                                     <small class="text-muted">{{ acc.email }}</small>
-                                </div>
-                                <form action="{{ url_for('finance.finance_reconciliation_remove_account') }}" method="POST" onsubmit="return confirm('Remover esta conta?');">
-                                    <input type="hidden" name="provider" value="pagseguro">
-                                    <input type="hidden" name="index" value="{{ loop.index0 }}">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger" style="min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" aria-label="Remover"><i class="bi bi-x-lg"></i></button>
-                                </form>
-                            </li>
+                                </td>
+                                <td>{{ 'Sandbox' if acc.environment == 'sandbox' else 'Produção' }}</td>
+                                <td><code>{{ acc.token_masked or '-' }}</code></td>
+                                <td><span class="badge bg-{{ acc.status_badge_class }}">{{ acc.status_badge_label }}</span></td>
+                                <td>{{ acc.last_test_at or '-' }}</td>
+                                <td class="text-danger small">{{ acc.last_error or '-' }}</td>
+                                <td class="d-flex gap-1">
+                                    <a
+                                        href="{{ url_for('finance.finance_reconciliation_edit_account', index=acc.index) }}"
+                                        class="btn btn-sm btn-outline-secondary"
+                                        style="min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;"
+                                        aria-label="Editar"
+                                    ><i class="bi bi-pencil"></i></a>
+                                    <a
+                                        href="{{ url_for('finance.finance_reconciliation_edit_account', index=acc.index) }}"
+                                        class="btn btn-sm btn-light"
+                                    >Editar</a>
+                                    <form action="{{ url_for('finance.finance_reconciliation_health_check') }}" method="POST">
+                                        <input type="hidden" name="index" value="{{ acc.index }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-primary" style="min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" aria-label="Testar"><i class="bi bi-heart-pulse"></i></button>
+                                    </form>
+                                    <form action="{{ url_for('finance.finance_reconciliation_remove_account') }}" method="POST" onsubmit="return confirm('Remover esta conta?');">
+                                        <input type="hidden" name="provider" value="pagseguro">
+                                        <input type="hidden" name="index" value="{{ acc.index }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" style="min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" aria-label="Remover"><i class="bi bi-x-lg"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
                             {% else %}
-                            <li class="list-group-item text-muted">Nenhuma conta configurada.</li>
+                            <tr><td colspan="7" class="text-muted text-center">Nenhuma conta configurada.</td></tr>
                             {% endfor %}
-                        </ul>
-
-                        <hr>
-
-                        <!-- Add New -->
-                        <h6>Adicionar Nova Conta</h6>
-                        <form action="{{ url_for('finance.finance_reconciliation_add_account') }}" method="POST">
-                            <input type="hidden" name="provider" value="pagseguro">
-                            <div class="mb-2">
-                                <label class="form-label">Apelido (ex: CNPJ Matriz)</label>
-                                <input type="text" class="form-control form-control-sm" name="alias" required placeholder="Identificação da conta">
-                            </div>
-                            <div class="mb-2">
-                                <label class="form-label">E-mail da Conta</label>
-                                <input type="email" class="form-control form-control-sm" name="ps_email" required>
-                            </div>
-                            <div class="mb-2">
-                                <label class="form-label">Token (V3)</label>
-                                <input type="password" class="form-control form-control-sm" name="ps_token" required>
-                                <div class="form-text">Gere o token no painel do PagSeguro em Integrações > Token.</div>
-                            </div>
-                            <button type="submit" class="btn btn-sm btn-success w-100">Adicionar PagSeguro</button>
-                        </form>
-                    </div>
-
-                    <!-- Rede Tab -->
-                    <div class="tab-pane fade" id="cfg-rede">
-                        <!-- List Existing -->
-                         <h6>Contas Conectadas</h6>
-                        <ul class="list-group mb-3">
-                            {% for acc in settings.get('rede', []) %}
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <div>
-                                    <strong>{{ acc.alias }}</strong><br>
-                                    <small class="text-muted">ID: {{ acc.client_id }}</small>
-                                </div>
-                                <form action="{{ url_for('finance.finance_reconciliation_remove_account') }}" method="POST" onsubmit="return confirm('Remover esta conta?');">
-                                    <input type="hidden" name="provider" value="rede">
-                                    <input type="hidden" name="index" value="{{ loop.index0 }}">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger" style="min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" aria-label="Remover"><i class="bi bi-x-circle"></i></button>
-                                </form>
-                            </li>
-                            {% else %}
-                            <li class="list-group-item text-muted">Nenhuma conta configurada.</li>
-                            {% endfor %}
-                        </ul>
-
-                        <hr>
-
-                        <!-- Add New -->
-                        <h6>Adicionar Nova Conta</h6>
-                         <form action="{{ url_for('finance.finance_reconciliation_add_account') }}" method="POST">
-                            <input type="hidden" name="provider" value="rede">
-                            <div class="mb-2">
-                                <label class="form-label">Apelido (ex: CNPJ Filial)</label>
-                                <input type="text" class="form-control form-control-sm" name="alias" required placeholder="Identificação da conta">
-                            </div>
-                            <div class="mb-2">
-                                <label class="form-label">Client ID</label>
-                                <input type="text" class="form-control form-control-sm" name="rede_client_id" required>
-                            </div>
-                            <div class="mb-2">
-                                <label class="form-label">Client Secret</label>
-                                <input type="password" class="form-control form-control-sm" name="rede_client_secret" required>
-                            </div>
-                            <div class="mb-2">
-                                <label class="form-label">Usuário (API)</label>
-                                <input type="text" class="form-control form-control-sm" name="rede_username" required>
-                            </div>
-                            <div class="mb-2">
-                                <label class="form-label">Senha (API)</label>
-                                <input type="password" class="form-control form-control-sm" name="rede_password" required>
-                            </div>
-                            <button type="submit" class="btn btn-sm btn-success w-100">Adicionar Rede</button>
-                        </form>
-                    </div>
+                        </tbody>
+                    </table>
                 </div>
+
+                <hr>
+
+                <h6>Adicionar Nova Conta</h6>
+                <form action="{{ url_for('finance.finance_reconciliation_add_account') }}" method="POST">
+                    <input type="hidden" name="provider" value="pagseguro">
+                    <div class="mb-2">
+                        <label class="form-label">Apelido (ex: CNPJ Matriz)</label>
+                        <input type="text" class="form-control form-control-sm" name="alias" required placeholder="Identificação da conta">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Ambiente</label>
+                        <select class="form-select form-select-sm" name="ps_environment" required>
+                            <option value="production">Produção</option>
+                            <option value="sandbox">Sandbox</option>
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">E-mail da Conta</label>
+                        <input type="email" class="form-control form-control-sm" name="ps_email" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Token (V3)</label>
+                        <input type="password" class="form-control form-control-sm" name="ps_token" required>
+                        <div class="form-text">Gere o token no painel do PagSeguro em Integrações > Token.</div>
+                    </div>
+                    <button type="submit" class="btn btn-sm btn-success w-100">Adicionar PagSeguro</button>
+                </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
@@ -448,6 +446,7 @@
         </div>
     </div>
 </div>
+
 {% endblock %}
 
 {% block scripts %}
@@ -455,24 +454,25 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const modalEl = document.getElementById('accountSummaryModal');
-    if (!modalEl) return;
-    const modal = new bootstrap.Modal(modalEl);
-    document.querySelectorAll('.js-open-account-summary').forEach(btn => {
-        btn.addEventListener('click', function() {
-            document.getElementById('sumSystemId').textContent = this.dataset.systemId || '-';
-            document.getElementById('sumRoom').textContent = this.dataset.roomNumber || '-';
-            document.getElementById('sumGuest').textContent = this.dataset.guestName || '-';
-            document.getElementById('sumUser').textContent = this.dataset.user || '-';
-            document.getElementById('sumDesc').textContent = this.dataset.description || '-';
-            document.getElementById('sumMethod').textContent = this.dataset.paymentMethod || '-';
-            document.getElementById('sumSystemDate').textContent = this.dataset.systemDate || '-';
-            document.getElementById('sumSystemAmount').textContent = this.dataset.systemAmount ? `R$ ${this.dataset.systemAmount}` : '-';
-            document.getElementById('sumCardProvider').textContent = this.dataset.cardProvider || '-';
-            document.getElementById('sumCardDate').textContent = this.dataset.cardDate || '-';
-            document.getElementById('sumCardAmount').textContent = this.dataset.cardAmount ? `R$ ${this.dataset.cardAmount}` : '-';
-            modal.show();
+    if (modalEl) {
+        const modal = new bootstrap.Modal(modalEl);
+        document.querySelectorAll('.js-open-account-summary').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.getElementById('sumSystemId').textContent = this.dataset.systemId || '-';
+                document.getElementById('sumRoom').textContent = this.dataset.roomNumber || '-';
+                document.getElementById('sumGuest').textContent = this.dataset.guestName || '-';
+                document.getElementById('sumUser').textContent = this.dataset.user || '-';
+                document.getElementById('sumDesc').textContent = this.dataset.description || '-';
+                document.getElementById('sumMethod').textContent = this.dataset.paymentMethod || '-';
+                document.getElementById('sumSystemDate').textContent = this.dataset.systemDate || '-';
+                document.getElementById('sumSystemAmount').textContent = this.dataset.systemAmount ? `R$ ${this.dataset.systemAmount}` : '-';
+                document.getElementById('sumCardProvider').textContent = this.dataset.cardProvider || '-';
+                document.getElementById('sumCardDate').textContent = this.dataset.cardDate || '-';
+                document.getElementById('sumCardAmount').textContent = this.dataset.cardAmount ? `R$ ${this.dataset.cardAmount}` : '-';
+                modal.show();
+            });
         });
-    });
+    }
 });
 </script>
 {% endblock %}

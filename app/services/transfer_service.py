@@ -7,7 +7,7 @@ from datetime import datetime
 from app.services.logger_service import LoggerService
 from app.services.system_config_manager import get_data_path
 from app.services.data_service import (
-    load_sales_history, save_sales_history,
+    load_sales_history, secure_save_sales_history,
     load_products, load_menu_items, save_stock_entry, log_stock_action
 )
 from app.services.cashier_service import CashierService
@@ -248,6 +248,10 @@ def transfer_table_to_room(table_id, raw_room_number, user_name, mode='restauran
             order = orders[str_table_id]
             if not order.get('items'):
                 raise TransferError("Mesa sem itens para transferir.")
+
+            customer_type = str(order.get('customer_type') or '').strip().lower()
+            if customer_type != 'hospede':
+                raise TransferError("Apenas mesas do tipo hóspede podem ser transferidas para quarto.")
                 
             # 2. Validate Room
             target_key = normalize_room_key(raw_room_number, room_occupancy.keys())
@@ -483,7 +487,7 @@ def transfer_table_to_room(table_id, raw_room_number, user_name, mode='restauran
                 order_to_archive['final_total'] = sum(c['total'] for c in new_charges) # Total transferred
                 
                 sales_history.append(order_to_archive)
-                save_sales_history(sales_history)
+                secure_save_sales_history(sales_history, user_id='Sistema')
                 
                 # Deduct Stock
                 products_db = load_products()

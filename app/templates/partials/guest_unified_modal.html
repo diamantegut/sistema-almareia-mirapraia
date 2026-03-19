@@ -1,0 +1,296 @@
+<div class="modal fade" id="viewGuestModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="bi bi-person-vcard"></i> Ficha do Hóspede</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="viewGuestLoading" class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                    <p class="mt-2 text-muted">Carregando dados do hóspede...</p>
+                </div>
+
+                <div id="viewGuestContent" class="d-none">
+                    <input type="hidden" id="vg_reservation_id_hidden" value="">
+                    <div id="vg_header_actions" class="d-none d-flex flex-wrap gap-2 mb-3">
+                        <button type="button" class="btn btn-sm btn-success" id="vg_btn_receive_reservation">
+                            <i class="bi bi-currency-dollar"></i> Receber Diária
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-dark" id="vg_btn_fin_timeline">
+                            <i class="bi bi-clock-history"></i> Timeline Financeira
+                        </button>
+                        <button type="button" class="btn btn-sm btn-primary" id="vg_btn_open_checkin">
+                            <i class="bi bi-box-arrow-in-right"></i> Fazer Check-in
+                        </button>
+                    </div>
+
+                    <ul class="nav nav-tabs mb-3" id="guestTabs" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-summary" type="button">Resumo / Estadia</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-financial" type="button">Financeiro</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-guest" type="button">Dados do Hóspede</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-operational" type="button">Operacional</button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="tab-summary">
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <h6 class="fw-bold">Nome Completo</h6>
+                                    <p id="vg_name" class="border-bottom pb-1">-</p>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6 class="fw-bold">Ficha Nº</h6>
+                                    <p id="vg_ficha" class="border-bottom pb-1">-</p>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6 class="fw-bold">Quarto Atual</h6>
+                                    <p id="vg_room" class="fs-5 text-primary mb-0">-</p>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6 class="fw-bold">Status</h6>
+                                    <p id="vg_status" class="badge bg-success">-</p>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6 class="fw-bold">Canal / Categoria</h6>
+                                    <p class="mb-0"><span id="vg_channel">-</span> · <span id="vg_category">-</span></p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold">Check-in</h6>
+                                    <p id="vg_checkin" class="border-bottom pb-1">-</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold">Check-out (Previsto)</h6>
+                                    <p id="vg_checkout" class="border-bottom pb-1">-</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="tab-financial">
+                            <div class="card border-primary mb-2">
+                                <div class="card-header bg-primary-subtle fw-bold">Hospedagem / Diárias (Caixa Reservas - NFS-e)</div>
+                                <div class="card-body py-2">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span>Total de Diárias:</span>
+                                        <span class="fw-bold" id="vg_stay_total">R$ 0,00</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span>Total Recebido:</span>
+                                        <span class="text-success fw-bold" id="vg_stay_paid">R$ 0,00</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <span>Saldo Caixa Reservas:</span>
+                                        <span class="fw-bold text-danger" id="vg_stay_balance">R$ 0,00</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card border-info">
+                                <div class="card-header bg-info-subtle fw-bold">Consumo (Caixa Recepção - NFC-e)</div>
+                                <div class="card-body py-2">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span>Total de Consumo:</span>
+                                        <span class="fw-bold" id="vg_cons_total">R$ 0,00</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span>Total Pago:</span>
+                                        <span class="text-success fw-bold" id="vg_cons_paid">R$ 0,00</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <span>Saldo Caixa Recepção:</span>
+                                        <span class="fw-bold text-danger" id="vg_cons_balance">R$ 0,00</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-2 text-end">
+                                <button class="btn btn-sm btn-outline-primary" id="vg_btn_consumption_details" onclick="viewDetailedCharges()">
+                                    <i class="bi bi-receipt"></i> Ver Detalhes da Conta de Consumo
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="tab-guest">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold">Documento (CPF/Passaporte)</h6>
+                                    <p id="vg_doc" class="border-bottom pb-1">-</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold">Data de Nascimento</h6>
+                                    <p id="vg_birth" class="border-bottom pb-1">-</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold">Email</h6>
+                                    <p id="vg_email" class="border-bottom pb-1">-</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold">Telefone</h6>
+                                    <p id="vg_phone" class="border-bottom pb-1">-</p>
+                                </div>
+                                <div class="col-12">
+                                    <h6 class="fw-bold">Endereço</h6>
+                                    <p id="vg_address" class="border-bottom pb-1">-</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold">CPF/CNPJ Fiscal</h6>
+                                    <p id="vg_fiscal_doc" class="border-bottom pb-1">-</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold">Razão Social</h6>
+                                    <p id="vg_fiscal_name" class="border-bottom pb-1">-</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="tab-operational">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold">Alergias / Observações</h6>
+                                    <p id="vg_allergies" class="border-bottom pb-1">-</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold">Horário de Café</h6>
+                                    <p id="vg_breakfast" class="border-bottom pb-1">-</p>
+                                </div>
+                                <div class="col-12">
+                                    <h6 class="fw-bold">Restrições Alimentares</h6>
+                                    <p id="vg_dietary" class="border-bottom pb-1">-</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold">Datas Comemorativas</h6>
+                                    <p id="vg_commemorative" class="border-bottom pb-1">-</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold">Observação VIP</h6>
+                                    <p id="vg_vip" class="border-bottom pb-1">-</p>
+                                </div>
+                                <div class="col-12">
+                                    <h6 class="fw-bold">Histórico (últimas estadias)</h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-hover mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>Data</th>
+                                                    <th>Quarto</th>
+                                                    <th>Valor</th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="vg_history_table"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="vg_edit_panel" class="d-none mt-4 border-top pt-3">
+                        <h6 class="fw-bold mb-3">Editar Ficha Unificada</h6>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <div class="small text-uppercase text-muted fw-semibold">Dados Pessoais</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Nome</label>
+                                <input type="text" class="form-control form-control-sm" id="vg_edit_name">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Documento</label>
+                                <input type="text" class="form-control form-control-sm" id="vg_edit_doc">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Nascimento</label>
+                                <input type="text" class="form-control form-control-sm" id="vg_edit_birth">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Email</label>
+                                <input type="text" class="form-control form-control-sm" id="vg_edit_email">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Telefone</label>
+                                <input type="text" class="form-control form-control-sm" id="vg_edit_phone">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Endereço</label>
+                                <input type="text" class="form-control form-control-sm" id="vg_edit_address">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Cidade</label>
+                                <input type="text" class="form-control form-control-sm" id="vg_edit_city">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">UF</label>
+                                <input type="text" class="form-control form-control-sm" id="vg_edit_state" maxlength="2">
+                            </div>
+
+                            <div class="col-12 mt-3">
+                                <div class="small text-uppercase text-muted fw-semibold">Dados Fiscais</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">CPF/CNPJ Fiscal</label>
+                                <input type="text" class="form-control form-control-sm" id="vg_edit_fiscal_doc">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Razão Social</label>
+                                <input type="text" class="form-control form-control-sm" id="vg_edit_fiscal_name">
+                            </div>
+
+                            <div class="col-12 mt-3">
+                                <div class="small text-uppercase text-muted fw-semibold">Dados Operacionais</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Alergias / Observações</label>
+                                <input type="text" class="form-control form-control-sm" id="vg_edit_allergies">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Restrições Alimentares (vírgula)</label>
+                                <input type="text" class="form-control form-control-sm" id="vg_edit_dietary">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Café início</label>
+                                <input type="time" class="form-control form-control-sm" id="vg_edit_breakfast_start">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Café fim</label>
+                                <input type="time" class="form-control form-control-sm" id="vg_edit_breakfast_end">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Datas comemorativas (vírgula)</label>
+                                <input type="text" class="form-control form-control-sm" id="vg_edit_commemorative">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Observação VIP</label>
+                                <textarea class="form-control form-control-sm" id="vg_edit_vip" rows="2"></textarea>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-end gap-2 mt-3">
+                            <button type="button" class="btn btn-sm btn-secondary" onclick="cancelGuestEdit()">Cancelar Edição</button>
+                            <button type="button" class="btn btn-sm btn-primary" id="vg_save_btn" onclick="saveUnifiedGuestData()">Salvar Ficha</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="viewGuestError" class="d-none text-center py-4">
+                    <i class="bi bi-exclamation-circle text-danger fs-1"></i>
+                    <p class="mt-2 text-danger">Erro ao carregar dados do hóspede.</p>
+                    <p class="small text-muted" id="viewGuestErrorMsg"></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" id="vg_edit_btn" onclick="switchToEdit()">
+                    <i class="bi bi-pencil"></i> Editar Dados
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

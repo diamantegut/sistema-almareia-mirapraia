@@ -23,6 +23,9 @@ from app.services.sefaz_service import SefazService
 logger = logging.getLogger(__name__)
 
 PENDING_EMISSIONS_FILE = PENDING_FISCAL_EMISSIONS_FILE
+EMISSION_MIN_INTERVAL_SECONDS = 1.2
+_EMISSION_LOCK = threading.Lock()
+_LAST_EMISSION_TS = None
 
 def _round_money(val):
     try:
@@ -296,214 +299,211 @@ def increment_fiscal_number(settings, cnpj):
         logger.error(f"Error incrementing fiscal number: {e}")
         return False
 
+def _status_is_rejected_message(message):
+    txt = str(message or '').strip().lower()
+    return (
+        'rejei' in txt
+        or 'não autorizou' in txt
+        or 'nao autorizou' in txt
+        or 'não autorizada' in txt
+        or 'nao autorizada' in txt
+    )
+
+def _normalize_doc(value):
+    digits = _normalize_digits(value)
+    if len(digits) in (11, 14):
+        return digits
+    return ''
+
+def _enforce_serial_emission_interval():
+    global _LAST_EMISSION_TS
+    now_ts = time.time()
+    min_interval = float(EMISSION_MIN_INTERVAL_SECONDS or 0)
+    if _LAST_EMISSION_TS is not None and min_interval > 0:
+        elapsed = now_ts - _LAST_EMISSION_TS
+        wait_for = min_interval - elapsed
+        if wait_for > 0:
+            time.sleep(wait_for)
+    _LAST_EMISSION_TS = time.time()
+
 def process_pending_emissions(settings=None, specific_id=None):
     """
     Processes all pending fiscal emissions (Queue + Pool).
     Returns summary of success/failures.
     """
-    if settings is None:
-        settings = load_fiscal_settings()
+    with _EMISSION_LOCK:
+        if settings is None:
+            settings = load_fiscal_settings()
 
-    all_pending = []
-    
-    if specific_id:
-        # Optimized path for single item (supports retry of failed items)
-        found = False
-        
-        # Check Legacy Queue
+        all_pending = []
         queue = load_pending_emissions()
-        queue_item = next((i for i in queue if i['id'] == specific_id), None)
-        if queue_item:
-             if queue_item.get('status') != 'emitted':
-                 all_pending.append({'source': 'queue', 'data': queue_item})
-                 found = True
         
-        if not found:
-            # Check Pool (Direct Fetch)
-            pool_entry = FiscalPoolService.get_entry(specific_id)
-            if pool_entry:
-                # Allow retrying 'failed' or 'error_config' items
-                if pool_entry['status'] in ['pending', 'failed', 'error_config']:
-                     if pool_entry.get('fiscal_type') == 'nfce':
-                         all_pending.append({'source': 'pool', 'data': pool_entry})
-    else:
-        # Bulk processing - Only Pending
-        
-        # 1. Process Legacy Queue
-        queue = load_pending_emissions()
-        pending_queue = [e for e in queue if e['status'] == 'pending']
-        
-        # 2. Process Fiscal Pool (Unified)
-        pool_pending = FiscalPoolService.get_pool(filters={'status': 'pending'})
-        pool_to_process = [p for p in pool_pending if p.get('fiscal_type') == 'nfce']
-        
-        for item in pending_queue:
-            all_pending.append({'source': 'queue', 'data': item})
-            
-        for item in pool_to_process:
-            all_pending.append({'source': 'pool', 'data': item})
+        if specific_id:
+            found = False
+            queue_item = next((i for i in queue if i['id'] == specific_id), None)
+            if queue_item and queue_item.get('status') != 'emitted':
+                all_pending.append({'source': 'queue', 'data': queue_item})
+                found = True
+            if not found:
+                pool_entry = FiscalPoolService.get_entry(specific_id)
+                if pool_entry and pool_entry.get('fiscal_type') == 'nfce':
+                    if pool_entry.get('status') in ['pending', 'manual_retry_required', 'rejected']:
+                        all_pending.append({'source': 'pool', 'data': pool_entry})
+        else:
+            pending_queue = [e for e in queue if e.get('status') == 'pending']
+            pool_pending = FiscalPoolService.get_pool(filters={'status': 'pending'})
+            pool_to_process = [p for p in pool_pending if p.get('fiscal_type') == 'nfce']
+            for item in pending_queue:
+                all_pending.append({'source': 'queue', 'data': item})
+            for item in pool_to_process:
+                all_pending.append({'source': 'pool', 'data': item})
 
-    if not all_pending:
-        return {"processed": 0, "success": 0, "failed": 0}
-        
-    success_count = 0
-    failed_count = 0
-    
-    # Load products once for lookup optimization
-    from app.services.data_service import load_products
-    try:
-        products_db = load_products()
-        products_map = {str(p['id']): p for p in products_db}
-    except:
-        products_map = {}
-    
-    for entry in all_pending:
-        emission = entry['data']
-        source = entry['source']
-        
-        # Prepare transaction object for emit_invoice
-        
-        # REFRESH ITEM DATA FROM PRODUCTS DB
-        # To avoid stale NCM/CFOP/CEST errors if product was updated after order closing
-        if emission.get('items'):
-            for item in emission['items']:
-                p_id = str(item.get('id', ''))
-                p_id_alt = str(item.get('product_id', ''))
-                
-                product_data = None
-                if p_id in products_map:
-                    product_data = products_map[p_id]
-                elif p_id_alt in products_map:
-                    product_data = products_map[p_id_alt]
-                
-                if product_data:
-                    # Update fiscal fields if present in product registration
-                    if product_data.get('ncm'):
-                        ncm_clean = str(product_data.get('ncm', '')).replace('.', '').strip()
-                        if ncm_clean:
-                            item['ncm'] = ncm_clean
-                    if product_data.get('cest'):
-                        cest_clean = str(product_data.get('cest', '')).replace('.', '').strip()
-                        if cest_clean:
-                            item['cest'] = cest_clean
-                    if product_data.get('cfop_default'):
-                        cfop_clean = str(product_data.get('cfop_default', '')).replace('.', '').strip()
-                        if cfop_clean:
-                            item['cfop'] = cfop_clean
-                    if product_data.get('origin'): # icms origin
-                        item['origin'] = product_data.get('origin')
-        
-        # Payments handling
-        payments = emission.get('payments') or emission.get('payment_methods') or []
-        
-        # Determine primary method logic:
-        # Prioritize any payment method that is explicitly marked as 'is_fiscal'
-        primary_method = 'Outros'
-        if payments:
-            # First pass: look for is_fiscal=True
-            fiscal_method = next((p.get('method') for p in payments if p.get('is_fiscal')), None)
+        if not all_pending:
+            return {"processed": 0, "success": 0, "failed": 0}
             
-            if fiscal_method:
-                primary_method = fiscal_method
-            else:
-                # Fallback: if no explicit flag, try to find one that is KNOWN to be fiscal via global config
-                try:
-                    from app.services.data_service import load_payment_methods
-                    all_methods = load_payment_methods()
-                    fiscal_names = {m['name'] for m in all_methods if m.get('is_fiscal')}
-                    
-                    fiscal_match = next((p.get('method') for p in payments if p.get('method') in fiscal_names), None)
-                    if fiscal_match:
-                        primary_method = fiscal_match
-                    else:
-                        # Final Fallback: just take the first one
-                        primary_method = payments[0].get('method', 'Outros')
-                except Exception:
-                     primary_method = payments[0].get('method', 'Outros')
+        success_count = 0
+        failed_count = 0
         
-        transaction = {
-            'id': emission['id'],
-            'amount': emission['total_amount'] if 'total_amount' in emission else emission['amount'],
-            'payment_method': primary_method, 
-        }
+        from app.services.data_service import load_products
+        try:
+            products_db = load_products()
+            products_map = {str(p['id']): p for p in products_db}
+        except Exception:
+            products_map = {}
         
-        # Get specific integration settings for this emission's CNPJ
-        emission_cnpj = emission.get('cnpj_emitente')
-        integration_settings = get_fiscal_integration(settings, emission_cnpj).copy()
-        
-        # Se existir snapshot fiscal, só usamos para filas legadas (queue).
-        # Para itens do Fiscal Pool, SEMPRE usamos a configuração fiscal atual,
-        # inclusive ambiente (homologação/produção), série, CRT etc.
-        snap = emission.get('fiscal_snapshot') or {}
-        if source != 'pool' and isinstance(snap, dict) and snap:
-            for k in ['sefaz_environment', 'environment', 'serie', 'ie_emitente', 'CRT', 'crt']:
-                if snap.get(k) is not None:
-                    integration_settings[k] = snap.get(k)
-        
-        if not integration_settings:
-            logger.error(f"No fiscal integration found for CNPJ {emission_cnpj}. Skipping emission {emission['id']}")
-            # Update status to error/ignored to prevent loop
-            msg = "Configuração fiscal não encontrada para este CNPJ"
+        for entry in all_pending:
+            emission = entry['data']
+            source = entry['source']
             if source == 'pool':
-                FiscalPoolService.update_status(emission['id'], 'error_config', error_msg=msg)
-            else:
-                emission['attempts'] = emission.get('attempts', 0) + 1
-                emission['last_error'] = msg
+                FiscalPoolService.update_status(emission['id'], 'issuing', user='Sistema')
+            if emission.get('items'):
+                for item in emission['items']:
+                    p_id = str(item.get('id', ''))
+                    p_id_alt = str(item.get('product_id', ''))
+                    product_data = None
+                    if p_id in products_map:
+                        product_data = products_map[p_id]
+                    elif p_id_alt in products_map:
+                        product_data = products_map[p_id_alt]
+                    if product_data:
+                        if product_data.get('ncm'):
+                            ncm_clean = str(product_data.get('ncm', '')).replace('.', '').strip()
+                            if ncm_clean:
+                                item['ncm'] = ncm_clean
+                        if product_data.get('cest'):
+                            cest_clean = str(product_data.get('cest', '')).replace('.', '').strip()
+                            if cest_clean:
+                                item['cest'] = cest_clean
+                        if product_data.get('cfop_default'):
+                            cfop_clean = str(product_data.get('cfop_default', '')).replace('.', '').strip()
+                            if cfop_clean:
+                                item['cfop'] = cfop_clean
+                        if product_data.get('origin'):
+                            item['origin'] = product_data.get('origin')
             
-            failed_count += 1
-            continue
+            payments = emission.get('payments') or emission.get('payment_methods') or []
+            primary_method = 'Outros'
+            if payments:
+                fiscal_method = next((p.get('method') for p in payments if p.get('is_fiscal')), None)
+                if fiscal_method:
+                    primary_method = fiscal_method
+                else:
+                    try:
+                        from app.services.data_service import load_payment_methods
+                        all_methods = load_payment_methods()
+                        fiscal_names = {m['name'] for m in all_methods if m.get('is_fiscal')}
+                        fiscal_match = next((p.get('method') for p in payments if p.get('method') in fiscal_names), None)
+                        primary_method = fiscal_match or payments[0].get('method', 'Outros')
+                    except Exception:
+                        primary_method = payments[0].get('method', 'Outros')
+            
+            transaction = {
+                'id': emission['id'],
+                'amount': emission['total_amount'] if 'total_amount' in emission else emission['amount'],
+                'payment_method': primary_method, 
+            }
+            
+            emission_cnpj = str(emission.get('cnpj_emitente') or '')
+            if source == 'pool':
+                if _normalize_digits(emission_cnpj) != '28952732000109':
+                    err = 'Emitente inválido para consumo. Obrigatório Mirapraia 28952732000109.'
+                    FiscalPoolService.update_status(emission['id'], 'manual_retry_required', error_msg=err)
+                    failed_count += 1
+                    continue
+            integration_settings = get_fiscal_integration(settings, emission_cnpj).copy()
+            snap = emission.get('fiscal_snapshot') or {}
+            if source != 'pool' and isinstance(snap, dict) and snap:
+                for k in ['sefaz_environment', 'environment', 'serie', 'ie_emitente', 'CRT', 'crt']:
+                    if snap.get(k) is not None:
+                        integration_settings[k] = snap.get(k)
+            
+            if not integration_settings:
+                msg = "Configuração fiscal não encontrada para este CNPJ"
+                if source == 'pool':
+                    FiscalPoolService.update_status(emission['id'], 'manual_retry_required', error_msg=msg)
+                else:
+                    emission['attempts'] = emission.get('attempts', 0) + 1
+                    emission['last_error'] = msg
+                failed_count += 1
+                continue
 
-        customer_info = emission.get('customer', {})
-        customer_cpf_cnpj = emission.get('customer_cpf_cnpj') or customer_info.get('cpf_cnpj') or customer_info.get('doc')
-        
-        # Validate Mandatory Fields
-        if not integration_settings.get('client_id') or not integration_settings.get('client_secret'):
-             msg = f"Credenciais ausentes para CNPJ {emission_cnpj}"
-             logger.error(msg)
-             if source == 'pool':
-                 FiscalPoolService.update_status(emission['id'], 'error_config', error_msg=msg)
-             else:
-                 emission['attempts'] = emission.get('attempts', 0) + 1
-                 emission['last_error'] = msg
-                 
-             failed_count += 1
-             continue
-             
-        result = emit_invoice(transaction, integration_settings, emission['items'], customer_cpf_cnpj)
-        
-        if result['success']:
-            nfe_id = result['data'].get('id')
-            nfe_serie = result['data'].get('serie')
-            nfe_number = result['data'].get('numero')
+            customer_info = emission.get('customer', {})
+            customer_cpf_cnpj = _normalize_doc(
+                emission.get('customer_document')
+                or emission.get('customer_cpf_cnpj')
+                or customer_info.get('cpf_cnpj')
+                or customer_info.get('doc')
+                or customer_info.get('doc_id')
+            )
+            try:
+                amount_value = float(emission.get('fiscal_amount', emission.get('total_amount', 0)) or 0)
+            except Exception:
+                amount_value = 0.0
+            if amount_value > 999.0 and not customer_cpf_cnpj:
+                msg = 'CPF/CNPJ obrigatório para emissão acima de R$ 999,00.'
+                if source == 'pool':
+                    FiscalPoolService.update_status(emission['id'], 'manual_retry_required', error_msg=msg)
+                else:
+                    emission['attempts'] = emission.get('attempts', 0) + 1
+                    emission['last_error'] = msg
+                failed_count += 1
+                continue
             
-            if not nfe_number and 'numero_sequencial' in result['data']:
-                nfe_number = result['data']['numero_sequencial']
+            if not integration_settings.get('client_id') or not integration_settings.get('client_secret'):
+                msg = f"Credenciais ausentes para CNPJ {emission_cnpj}"
+                if source == 'pool':
+                    FiscalPoolService.update_status(emission['id'], 'manual_retry_required', error_msg=msg)
+                else:
+                    emission['attempts'] = emission.get('attempts', 0) + 1
+                    emission['last_error'] = msg
+                failed_count += 1
+                continue
 
-            xml_ok = False
-            xml_error_msg = None
+            _enforce_serial_emission_interval()
+            result = emit_invoice(transaction, integration_settings, emission['items'], customer_cpf_cnpj)
             
-            # Special Handling for Duplicity Recovery
-            # If we recovered a key, we might not have the ID for download_xml if it came from a raw message.
-            # But usually we have the ID from Nuvem Fiscal even in error response (nfe_id).
-            # If we don't have nfe_id (e.g. if the error response didn't contain 'id'), we might skip XML download or try by key?
-            # Nuvem Fiscal API allows download by ID.
-            
-            if result.get('recovered_key'):
-                 # We have a key but maybe the ID in result['data']['id'] is the new (rejected) one?
-                 # Actually, the error response usually contains the ID of the attempt.
-                 # The "Duplicidade" means there is ANOTHER note with same number/series but diff key.
-                 # We should probably trust the ID returned in the error response to try to download the XML of the FAILED attempt?
-                 # No, we want the XML of the ORIGINAL authorized note.
-                 # But we don't have the ID of the original note, only the key.
-                 # Does Nuvem Fiscal allow fetching by key?
-                 # GET /nfce?chave=...
-                 
-                 # For now, let's assume we can't download the XML easily without the ID of the original note.
-                 # But we mark as emitted so the user is not blocked.
-                 xml_ok = True
-                 xml_path = "" 
-                 logger.info(f"Recovered from duplicity. Key: {result['recovered_key']}. XML download skipped (missing original ID).")
-            else:
+            if result['success']:
+                result_data = result.get('data') or {}
+                nfe_id = result_data.get('id') or result_data.get('uuid')
+                nfe_serie = result_data.get('serie')
+                nfe_number = result_data.get('numero')
+                if not nfe_number and 'numero_sequencial' in result_data:
+                    nfe_number = result_data['numero_sequencial']
+                access_key = _extract_access_key(result_data)
+                if not nfe_id:
+                    err_msg = "Emissão retornou sucesso, mas sem UUID fiscal para rastreamento/impressão."
+                    if source == 'pool':
+                        FiscalPoolService.update_status(emission['id'], 'manual_retry_required', error_msg=err_msg)
+                    else:
+                        emission['attempts'] = emission.get('attempts', 0) + 1
+                        emission['last_error'] = err_msg
+                        if emission['attempts'] >= 3:
+                            emission['status'] = 'failed'
+                    failed_count += 1
+                    continue
+
+                xml_ok = False
+                xml_error_msg = None
                 try:
                     xml_path = download_xml(nfe_id, integration_settings)
                     if xml_path:
@@ -515,72 +515,79 @@ def process_pending_emissions(settings=None, specific_id=None):
                                 FiscalPoolService.set_xml_ready(emission['id'], True, xml_path)
                             except Exception:
                                 pass
-                        logger.info(f"XML saved at {xml_path}")
                     else:
                         xml_error_msg = "XML da NFC-e não disponível na Nuvem Fiscal (verifique autorização)."
                 except Exception as e:
                     xml_error_msg = f"Falha ao baixar XML da NFC-e: {e}"
-                    logger.error(f"Failed to download XML for {nfe_id}: {e}")
 
-            if not xml_ok:
-                err_msg = xml_error_msg or "XML da NFC-e não disponível."
+                if not xml_ok:
+                    err_msg = xml_error_msg or "XML da NFC-e não disponível."
+                    if source == 'pool':
+                        FiscalPoolService.update_status(emission['id'], 'manual_retry_required', error_msg=err_msg)
+                    else:
+                        emission['attempts'] = emission.get('attempts', 0) + 1
+                        emission['last_error'] = err_msg
+                        if emission['attempts'] >= 3:
+                            emission['status'] = 'failed'
+                    failed_count += 1
+                    continue
+
                 if source == 'pool':
-                    FiscalPoolService.update_status(emission['id'], 'failed', error_msg=err_msg)
+                    FiscalPoolService.update_status(
+                        emission['id'],
+                        'emitted',
+                        fiscal_doc_uuid=nfe_id,
+                        serie=nfe_serie,
+                        number=nfe_number,
+                        access_key=access_key
+                    )
+                else:
+                    emission['status'] = 'emitted'
+                    emission['nfe_id'] = nfe_id
+                    if access_key:
+                        emission['access_key'] = access_key
+                    emission['emitted_at'] = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+                    if emission.get('id', '').startswith('POOL-'):
+                        try:
+                            pool_id = emission['id'].replace('POOL-', '')
+                            FiscalPoolService.update_status(
+                                pool_id,
+                                'emitted',
+                                fiscal_doc_uuid=nfe_id,
+                                serie=nfe_serie,
+                                number=nfe_number,
+                                access_key=access_key
+                            )
+                        except Exception:
+                            pass
+                increment_fiscal_number(settings, emission_cnpj)
+                try:
+                    pdf_path = download_pdf(nfe_id, integration_settings)
+                    if pdf_path:
+                        if source == 'queue':
+                            emission['pdf_path'] = pdf_path
+                        if source == 'pool':
+                            try:
+                                FiscalPoolService.set_pdf_ready(emission['id'], True, pdf_path)
+                            except Exception:
+                                pass
+                except Exception:
+                    pass
+                success_count += 1
+            else:
+                error_msg = result.get('message')
+                if source == 'pool':
+                    next_status = 'rejected' if _status_is_rejected_message(error_msg) else 'manual_retry_required'
+                    FiscalPoolService.update_status(emission['id'], next_status, error_msg=error_msg)
                 else:
                     emission['attempts'] = emission.get('attempts', 0) + 1
-                    emission['last_error'] = err_msg
+                    emission['last_error'] = error_msg
                     if emission['attempts'] >= 3:
                         emission['status'] = 'failed'
                 failed_count += 1
-                continue
-
-            # Update Source only após XML confirmado
-            if source == 'pool':
-                FiscalPoolService.update_status(emission['id'], 'emitted', fiscal_doc_uuid=nfe_id, serie=nfe_serie, number=nfe_number)
-            else:
-                emission['status'] = 'emitted'
-                emission['nfe_id'] = nfe_id
-                emission['emitted_at'] = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
-                if emission.get('id', '').startswith('POOL-'):
-                    try:
-                        pool_id = emission['id'].replace('POOL-', '')
-                        FiscalPoolService.update_status(pool_id, 'emitted', fiscal_doc_uuid=nfe_id, serie=nfe_serie, number=nfe_number)
-                    except:
-                        pass
-
-            # Increment fiscal number somente após XML ok
-            increment_fiscal_number(settings, emission_cnpj)
-            
-            try:
-                pdf_path = download_pdf(nfe_id, integration_settings)
-                if pdf_path:
-                    if source == 'queue':
-                        emission['pdf_path'] = pdf_path
-                    if source == 'pool':
-                        try:
-                            FiscalPoolService.set_pdf_ready(emission['id'], True, pdf_path)
-                        except Exception:
-                            pass
-            except Exception as e:
-                logger.error(f"Failed to download PDF for {nfe_id}: {e}")
                 
-            success_count += 1
-        else:
-            # Handle Failure / Contingency
-            error_msg = result['message']
-            if source == 'pool':
-                # Don't mark as error immediately, maybe retry? 
-                # Or mark as 'failed' and allow retry in UI
-                FiscalPoolService.update_status(emission['id'], 'failed', error_msg=error_msg)
-            else:
-                emission['attempts'] = emission.get('attempts', 0) + 1
-                emission['last_error'] = error_msg
-                if emission['attempts'] >= 3:
-                    emission['status'] = 'failed'
-            failed_count += 1
-            
-    save_pending_emissions(queue)
-    return {"processed": len(all_pending), "success": success_count, "failed": failed_count}
+        save_pending_emissions(queue)
+        return {"processed": len(all_pending), "success": success_count, "failed": failed_count}
 
 def get_access_token(client_id, client_secret, scope="nfce", audience=None):
     url = "https://auth.nuvemfiscal.com.br/oauth/token"
@@ -605,6 +612,49 @@ def _normalize_digits(value):
     if value is None:
         return ""
     return re.sub(r'[^0-9]', '', str(value))
+
+
+def _is_valid_pe_ie(ie_digits):
+    digits = _normalize_digits(ie_digits)
+    if len(digits) != 9:
+        return False
+    nums = [int(ch) for ch in digits]
+    base7 = nums[:7]
+    dv1_expected = nums[7]
+    dv2_expected = nums[8]
+    sum1 = sum(n * w for n, w in zip(base7, [8, 7, 6, 5, 4, 3, 2]))
+    mod1 = sum1 % 11
+    dv1_calc = 0 if mod1 < 2 else 11 - mod1
+    if dv1_calc != dv1_expected:
+        return False
+    base8 = nums[:8]
+    sum2 = sum(n * w for n, w in zip(base8, [9, 8, 7, 6, 5, 4, 3, 2]))
+    mod2 = sum2 % 11
+    dv2_calc = 0 if mod2 < 2 else 11 - mod2
+    return dv2_calc == dv2_expected
+
+
+def _extract_access_key(resp_data):
+    if not isinstance(resp_data, dict):
+        return ""
+    candidates = [
+        resp_data.get('chave'),
+        resp_data.get('chave_acesso'),
+        resp_data.get('chNFe'),
+        resp_data.get('access_key'),
+    ]
+    autorizacao = resp_data.get('autorizacao')
+    if isinstance(autorizacao, dict):
+        candidates.extend([
+            autorizacao.get('chave'),
+            autorizacao.get('chNFe'),
+            autorizacao.get('chave_acesso'),
+        ])
+    for value in candidates:
+        digits = _normalize_digits(value)
+        if len(digits) == 44:
+            return digits
+    return ""
 
 def sync_nfce_company_settings(integration_settings):
     if not isinstance(integration_settings, dict):
@@ -1597,8 +1647,8 @@ def emit_invoice(transaction, settings, order_items, customer_cpf_cnpj=None):
 
     client_id = settings.get('client_id')
     client_secret = settings.get('client_secret')
-    cnpj_emitente = settings.get('cnpj_emitente')
-    ie_emitente = settings.get('ie_emitente')
+    cnpj_emitente = _normalize_digits(settings.get('cnpj_emitente'))
+    ie_emitente = _normalize_digits(settings.get('ie_emitente'))
     crt_val = settings.get('CRT') or settings.get('crt')
     
     missing_fields = []
@@ -1606,7 +1656,7 @@ def emit_invoice(transaction, settings, order_items, customer_cpf_cnpj=None):
         missing_fields.append("Client ID Nuvem Fiscal")
     if not client_secret:
         missing_fields.append("Client Secret Nuvem Fiscal")
-    if not cnpj_emitente:
+    if len(cnpj_emitente) != 14:
         missing_fields.append("CNPJ do emitente")
     if not ie_emitente:
         missing_fields.append("Inscrição Estadual do emitente")
@@ -1631,6 +1681,15 @@ def emit_invoice(transaction, settings, order_items, customer_cpf_cnpj=None):
         return {
             "success": False,
             "message": "CRT inválido para Simples Nacional. Use 1 ou 2."
+        }
+    if not _is_valid_pe_ie(ie_emitente):
+        return {
+            "success": False,
+            "message": (
+                "Inscrição Estadual inválida para PE. "
+                f"Valor informado: {settings.get('ie_emitente') or ''} | Normalizado: {ie_emitente}. "
+                "Use formato válido (ex.: 0743532-09)."
+            )
         }
 
     erros_itens = []
@@ -1793,6 +1852,43 @@ def emit_invoice(transaction, settings, order_items, customer_cpf_cnpj=None):
     target_payment_method = transaction.get('payment_method')
     
     pay_code = payment_map.get(target_payment_method, '99')
+    try:
+        intended_total = _round_money(float(transaction.get('amount', total_items) or total_items))
+    except Exception:
+        intended_total = _round_money(total_items)
+    service_fee_amount = _round_money(intended_total - total_items)
+    if service_fee_amount > 0.009:
+        fee_prod = {
+            "cProd": "TAXA_SERVICO",
+            "cEAN": "SEM GTIN",
+            "xProd": "Taxa de Serviço",
+            "NCM": "21069090",
+            "CFOP": "5102",
+            "uCom": "UN",
+            "qCom": 1.0,
+            "vUnCom": service_fee_amount,
+            "vProd": service_fee_amount,
+            "cEANTrib": "SEM GTIN",
+            "uTrib": "UN",
+            "qTrib": 1.0,
+            "vUnTrib": service_fee_amount,
+            "indTot": 1,
+        }
+        fee_item = {
+            "nItem": nItem,
+            "prod": fee_prod,
+            "imposto": {
+                "ICMS": {
+                    "ICMSSN102": {
+                        "orig": 0,
+                        "CSOSN": "102"
+                    }
+                }
+            }
+        }
+        nfe_items.append(fee_item)
+        total_items = _round_money(total_items + service_fee_amount)
+        nItem += 1
  
 
     
@@ -1981,6 +2077,9 @@ def emit_invoice(transaction, settings, order_items, customer_cpf_cnpj=None):
                 
                 if not base_msg:
                     base_msg = resp_data.get("message") or resp_data.get("title") or f"NFC-e não autorizada (Status: {status_val})"
+                if isinstance(base_msg, str) and "ie do emitente invalida" in base_msg.lower():
+                    ie_debug = settings.get('ie_emitente') or ''
+                    base_msg += f" | IE enviada: {ie_emitente} (config: {ie_debug}) | CNPJ: {cnpj_emitente}"
                 
                 # Handling Duplicity (Rejeicao 539)
                 # If we have a key but not authorized, it might be a rejection or processing

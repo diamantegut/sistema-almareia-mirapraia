@@ -6,12 +6,13 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from app.services.import_sales import process_sales_files
 from app.services.fiscal_service import sync_received_nfes, get_last_nsu
 from app.services.system_config_manager import (
-    get_data_path, SYSTEM_STATUS_FILE, SETTINGS_FILE, FISCAL_SETTINGS_FILE,
-    CLEANING_STATUS_FILE, ROOM_OCCUPANCY_FILE
+    get_data_path, SYSTEM_STATUS_FILE, SETTINGS_FILE, FISCAL_SETTINGS_FILE
 )
 from app.services.stock_security_service import StockSecurityService
 from app.services.menu_security_service import MenuSecurityService
 from app.services.financial_risk_service import FinancialRiskService
+from app.services.pagseguro_daily_pull_service import run_pagseguro_daily_pull, ensure_previous_day_snapshot
+from app.services.data_service import load_room_occupancy, load_cleaning_status, save_cleaning_status
 STATUS_FILE = SYSTEM_STATUS_FILE
 _scheduler_instance = None
 # SETTINGS_FILE already imported
@@ -98,6 +99,15 @@ def run_nfe_sync_job():
         except Exception:
             pass
 
+
+def run_pagseguro_daily_pull_job():
+    now = datetime.now()
+    try:
+        run_pagseguro_daily_pull(source='scheduler', requested_by='scheduler')
+        print(f"[{now}] Pull diário PagSeguro concluído.")
+    except Exception as e:
+        print(f"[{now}] Erro no pull diário PagSeguro: {e}")
+
 def update_daily_cleaning_status():
     """
     Updates room cleaning status based on occupancy:
@@ -108,21 +118,12 @@ def update_daily_cleaning_status():
         now = datetime.now()
         print(f"[{now}] Iniciando atualização diária de status de limpeza...")
         
-        cleaning_file = get_data_path('cleaning_status.json')
-        occupancy_file = get_data_path('room_occupancy.json')
-        
-        if not os.path.exists(occupancy_file):
-            print(f"[{now}] Arquivo de ocupação não encontrado. Pulando.")
+        occupancy = load_room_occupancy()
+        if not occupancy:
+            print(f"[{now}] Arquivo de ocupação não encontrado ou vazio. Pulando.")
             return
 
-        occupancy = {}
-        with open(occupancy_file, 'r', encoding='utf-8') as f:
-            occupancy = json.load(f)
-            
-        cleaning_status = {}
-        if os.path.exists(cleaning_file):
-            with open(cleaning_file, 'r', encoding='utf-8') as f:
-                cleaning_status = json.load(f)
+        cleaning_status = load_cleaning_status()
         
         today = now.replace(hour=0, minute=0, second=0, microsecond=0)
         updates_count = 0
@@ -172,8 +173,7 @@ def update_daily_cleaning_status():
                 print(f"Erro processando quarto {room_num}: {e}")
         
         if updates_count > 0:
-            with open(cleaning_file, 'w', encoding='utf-8') as f:
-                json.dump(cleaning_status, f, indent=4, ensure_ascii=False)
+            save_cleaning_status(cleaning_status)
             print(f"[{datetime.now()}] Atualização concluída. {updates_count} quartos atualizados.")
         else:
             print(f"[{datetime.now()}] Nenhuma atualização necessária.")
@@ -204,11 +204,13 @@ def start_scheduler():
     
     # Financial Risk Scan (Every 15 minutes)
     scheduler.add_job(run_risk_scan, 'interval', minutes=15)
+    scheduler.add_job(run_pagseguro_daily_pull_job, 'cron', hour=6, minute=10)
 
     # Also run NFe sync and Cleaning Update immediately on startup (threaded to not block)
     import threading
     threading.Thread(target=run_nfe_sync_job).start()
     threading.Thread(target=update_daily_cleaning_status).start()
+    threading.Thread(target=ensure_previous_day_snapshot).start()
     
     scheduler.start()
     _scheduler_instance = scheduler

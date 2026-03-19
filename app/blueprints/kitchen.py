@@ -3,18 +3,19 @@ import os
 import re
 import unicodedata
 from datetime import datetime, timedelta
+from pathlib import Path
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify
 from app.utils.decorators import login_required
 import uuid
 from app.services.data_service import (
     load_products, load_settings, save_settings, load_stock_entries,
-    save_stock_entry, save_stock_entries, load_stock_logs, STOCK_LOGS_FILE, STOCK_ENTRIES_FILE,
+    save_stock_entry, save_stock_entries, load_stock_logs, save_stock_logs, STOCK_LOGS_FILE, STOCK_ENTRIES_FILE,
     load_table_orders, save_table_orders, load_menu_items, load_printers, secure_save_products,
     load_suppliers
 )
 from app.services.logger_service import LoggerService
 from app.services.kitchen_checklist_service import KitchenChecklistService
-from app.services.data_service import load_products, load_menu_items, save_menu_items
+from app.services.data_service import load_products, load_menu_items, secure_save_menu_items
 from app.services.system_config_manager import get_data_path, PRODUCT_PHOTOS_DIR, PRODUCTS_FILE
 from werkzeug.utils import secure_filename
 from app.services.printing_service import get_default_printer, print_portion_labels
@@ -320,6 +321,7 @@ def _build_kds_payload(station, now=None):
         active_items = [i for i in table_items if i.get('status') != 'done']
         basis_items = active_items if active_items else table_items
         
+        order_wait_minutes = order_max_wait_minutes
         wait_bucket = _compute_order_wait_bucket(order_max_wait_minutes)
         is_over_avg = order_late # Use late flag for order highlighting too
         
@@ -1435,8 +1437,7 @@ def acknowledge_low_stock():
     
     if updated:
         try:
-            with open(STOCK_LOGS_FILE, 'w', encoding='utf-8') as f:
-                json.dump(logs, f, indent=4, ensure_ascii=False)
+            save_stock_logs(logs)
             flash(f'Aviso de estoque baixo para {product_name} marcado como ciente por 3 dias.')
         except Exception:
             flash('Erro ao atualizar avisos de estoque.')
@@ -1815,18 +1816,26 @@ RECIPES_FILE = get_data_path('kitchen_recipes.json')
 
 
 def load_kitchen_recipes():
-    if not os.path.exists(RECIPES_FILE):
+    recipes_path = Path(RECIPES_FILE)
+    if not recipes_path.exists():
         return []
     try:
-        with open(RECIPES_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except (json.JSONDecodeError, FileNotFoundError):
+        raw = recipes_path.read_text(encoding='utf-8')
+        parsed = json.loads(raw)
+        if isinstance(parsed, list):
+            return parsed
+        return []
+    except Exception:
         return []
 
 
 def save_kitchen_recipes(recipes):
-    with open(RECIPES_FILE, 'w', encoding='utf-8') as f:
-        json.dump(recipes, f, indent=4, ensure_ascii=False)
+    recipes_path = Path(RECIPES_FILE)
+    recipes_path.parent.mkdir(parents=True, exist_ok=True)
+    temp_path = recipes_path.with_name(f"{recipes_path.name}.tmp.{uuid.uuid4().hex}")
+    temp_path.write_text(json.dumps(recipes, indent=4, ensure_ascii=False), encoding='utf-8')
+    os.replace(str(temp_path), str(recipes_path))
+    return True
 
 
 @kitchen_bp.route('/kitchen/recipes')
@@ -1960,7 +1969,7 @@ def kitchen_recipe_save():
         if image_filename:
             target['image'] = image_filename
             target['image_url'] = image_url or ''
-        save_menu_items(items)
+        secure_save_menu_items(items, session.get('user', 'Sistema'))
         flash('Ficha técnica atualizada no produto do cardápio.')
         return redirect(url_for('kitchen.kitchen_recipes'))
 
@@ -2017,7 +2026,7 @@ def kitchen_recipe_mark_no_recipe():
         flash('Produto do cardápio não encontrado.')
         return redirect(url_for('kitchen.kitchen_recipes'))
     target['no_preparation'] = True
-    save_menu_items(items)
+    secure_save_menu_items(items, session.get('user', 'Sistema'))
     flash('Produto marcado como "não possui receita". Ele não aparecerá mais na lista de pendentes.')
     return redirect(url_for('kitchen.kitchen_recipes'))
 
@@ -2083,7 +2092,7 @@ def kitchen_recipe_publish(recipe_id):
         'pause_reason': ''
     }
     menu_items.append(new_item)
-    save_menu_items(menu_items)
+    secure_save_menu_items(menu_items, session.get('user', 'Sistema'))
     for r in recipes:
         if r.get('id') == recipe_id:
             r['menu_product_id'] = new_id

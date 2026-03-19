@@ -253,6 +253,161 @@ class CashierService:
             raise e
 
     @staticmethod
+    def list_sessions():
+        return CashierService._load_sessions()
+
+    @staticmethod
+    def persist_sessions(sessions, trigger_backup=False):
+        if isinstance(sessions, list):
+            for session_obj in sessions:
+                if not isinstance(session_obj, dict):
+                    continue
+                txs = session_obj.get('transactions', [])
+                if not isinstance(txs, list):
+                    continue
+                for tx in txs:
+                    if isinstance(tx, dict):
+                        CashierService._apply_commission_contract(tx)
+        with file_lock(CASHIER_SESSIONS_FILE):
+            CashierService._save_sessions(sessions)
+        if trigger_backup:
+            CashierService._perform_backup(sessions)
+        return True
+
+    @staticmethod
+    def _as_bool(value):
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, (int, float)):
+            return value != 0
+        if isinstance(value, str):
+            return value.strip().lower() in {'1', 'true', 'sim', 'yes', 'on', 'removed'}
+        return False
+
+    @staticmethod
+    def _normalize_waiter_breakdown(waiter_breakdown):
+        if not isinstance(waiter_breakdown, dict):
+            return {}
+        normalized = {}
+        for key, val in waiter_breakdown.items():
+            waiter = str(key or '').strip()
+            if not waiter:
+                waiter = 'Sem Colaborador'
+            try:
+                amount = float(val or 0)
+            except Exception:
+                amount = 0.0
+            normalized[waiter] = normalized.get(waiter, 0.0) + amount
+        return normalized
+
+    @staticmethod
+    def _build_commission_reference_id(transaction, details):
+        existing = transaction.get('commission_reference_id') or details.get('commission_reference_id')
+        if existing:
+            return str(existing)
+        related_charge_id = transaction.get('related_charge_id') or details.get('related_charge_id')
+        if related_charge_id:
+            return f"charge:{related_charge_id}"
+        payment_group_id = details.get('payment_group_id')
+        if payment_group_id:
+            return f"group:{payment_group_id}"
+        close_id = details.get('close_id') or transaction.get('close_id')
+        if close_id:
+            return f"close:{close_id}"
+        table_id = details.get('table_id') or transaction.get('table_id')
+        if table_id:
+            return f"table:{table_id}:{transaction.get('timestamp', '')}"
+        room_number = details.get('room_number') or transaction.get('room_number')
+        if room_number:
+            return f"room:{room_number}:{transaction.get('timestamp', '')}"
+        return f"tx:{transaction.get('id', uuid.uuid4().hex)}"
+
+    @staticmethod
+    def _infer_category(transaction, details):
+        category = transaction.get('category') or details.get('category')
+        if category:
+            return str(category)
+        tx_type = str(transaction.get('type') or '').lower()
+        payment_method = str(transaction.get('payment_method') or '').lower()
+        description = str(transaction.get('description') or '').lower()
+        if tx_type == 'sale':
+            return 'Venda'
+        if tx_type == 'in':
+            if 'manual' in description:
+                return 'Recebimento Manual'
+            if 'quarto' in description or 'room' in payment_method or 'quarto' in payment_method:
+                return 'Pagamento de Conta'
+            return 'Recebimento'
+        if tx_type == 'out':
+            return 'Saída'
+        return '-'
+
+    @staticmethod
+    def _infer_commission_eligible(transaction, details, service_fee_removed):
+        if 'commission_eligible' in transaction:
+            return CashierService._as_bool(transaction.get('commission_eligible'))
+        if 'commission_eligible' in details:
+            return CashierService._as_bool(details.get('commission_eligible'))
+        tx_type = str(transaction.get('type') or '').lower()
+        category = str(transaction.get('category') or details.get('category') or '').lower()
+        payment_method = str(transaction.get('payment_method') or '').lower()
+        if service_fee_removed:
+            return False
+        if payment_method in {'conta funcionário', 'conta funcionario', 'consumo proprio', 'cortesia'}:
+            return False
+        if tx_type not in {'sale', 'in'}:
+            return False
+        if tx_type == 'in' and category not in {'pagamento de conta', 'recebimento manual'}:
+            return False
+        return True
+
+    @staticmethod
+    def _apply_commission_contract(transaction):
+        if not isinstance(transaction, dict):
+            return transaction
+        details = transaction.get('details') or {}
+        if isinstance(details, str):
+            try:
+                details = json.loads(details)
+            except Exception:
+                details = {}
+        if not isinstance(details, dict):
+            details = {}
+        waiter_breakdown = transaction.get('waiter_breakdown')
+        if not waiter_breakdown:
+            waiter_breakdown = details.get('waiter_breakdown')
+        waiter_breakdown = CashierService._normalize_waiter_breakdown(waiter_breakdown)
+        if waiter_breakdown:
+            transaction['waiter_breakdown'] = waiter_breakdown
+            details['waiter_breakdown'] = waiter_breakdown
+        service_fee_removed = CashierService._as_bool(
+            transaction.get('service_fee_removed', details.get('service_fee_removed', False))
+        )
+        transaction['service_fee_removed'] = service_fee_removed
+        details['service_fee_removed'] = service_fee_removed
+        category = CashierService._infer_category(transaction, details)
+        transaction['category'] = category
+        details['category'] = category
+        reference_id = CashierService._build_commission_reference_id(transaction, details)
+        transaction['commission_reference_id'] = reference_id
+        details['commission_reference_id'] = reference_id
+        operator = transaction.get('operator') or transaction.get('user') or details.get('operator') or details.get('closed_by') or 'Sistema'
+        transaction['operator'] = operator
+        details['operator'] = operator
+        commission_eligible = CashierService._infer_commission_eligible(transaction, details, service_fee_removed)
+        transaction['commission_eligible'] = bool(commission_eligible)
+        details['commission_eligible'] = bool(commission_eligible)
+        contract_meta = details.get('commission_contract') or {}
+        if not isinstance(contract_meta, dict):
+            contract_meta = {}
+        contract_meta['version'] = 1
+        contract_meta['updated_at'] = datetime.now().strftime('%d/%m/%Y %H:%M')
+        details['commission_contract'] = contract_meta
+        transaction['commission_contract_version'] = 1
+        transaction['details'] = details
+        return transaction
+
+    @staticmethod
     def export_closed_sessions_audit(sessions=None):
         try:
             drive = os.path.splitdrive(CLOSED_CASHIERS_AUDIT_DIR)[0]
@@ -424,8 +579,7 @@ class CashierService:
             if _is_test_environment() and not os.path.exists(CASHIER_SESSIONS_FILE):
                 try:
                     os.makedirs(os.path.dirname(CASHIER_SESSIONS_FILE), exist_ok=True)
-                    with open(CASHIER_SESSIONS_FILE, 'w', encoding='utf-8') as f:
-                        json.dump([], f)
+                    CashierService._save_sessions([])
                 except Exception:
                     pass
                 sessions = []
@@ -585,6 +739,11 @@ class CashierService:
             # Force user update if provided
             if user:
                 session['closed_by'] = user
+            session['reconciliation_status'] = 'daily_pull_pending'
+            session['reconciliation_summary'] = {
+                'mode': 'daily_pagseguro_pull',
+                'message': 'Conciliação disponível no detalhamento após pull diário.'
+            }
             
             sessions[session_idx] = session
             CashierService._save_sessions(sessions)
@@ -702,6 +861,7 @@ class CashierService:
                 "user": user,
                 "details": details
             }
+            CashierService._apply_commission_contract(transaction)
             
             sessions[session_idx]['transactions'].append(transaction)
             CashierService._save_sessions(sessions)

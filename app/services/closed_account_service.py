@@ -70,7 +70,7 @@ class ClosedAccountService:
             return None
 
     @staticmethod
-    def mark_as_reopened(closed_id, reopened_by, reason):
+    def mark_as_reopened(closed_id, reopened_by, reason, metadata=None):
         """Marks a closed account as reopened."""
         with closed_accounts_lock:
             accounts = ClosedAccountService._load_closed_accounts()
@@ -81,6 +81,9 @@ class ClosedAccountService:
                     acc['reopened_by'] = reopened_by
                     acc['reopen_reason'] = reason
                     acc['reopened_at'] = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+                    if isinstance(metadata, dict):
+                        for key, value in metadata.items():
+                            acc[key] = value
                     updated = True
                     break
             
@@ -159,8 +162,13 @@ class ClosedAccountService:
                         continue
                         
                     # 4. Origin Filter
-                    if origin_filter and acc.get('origin') != origin_filter:
-                        continue
+                    if origin_filter:
+                        acc_origin = str(acc.get('origin') or '')
+                        if str(origin_filter) == 'reception':
+                            if not acc_origin.startswith('reception'):
+                                continue
+                        elif acc_origin != origin_filter:
+                            continue
                         
                     # 5. Status Filter
                     # Default status is 'closed' (implied if missing)

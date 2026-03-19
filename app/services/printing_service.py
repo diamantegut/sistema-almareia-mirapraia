@@ -4,8 +4,12 @@ import time
 import logging
 import os
 import uuid
+import re
+from contextlib import contextmanager
+from pathlib import Path
 from datetime import datetime
 from app.services.printer_manager import load_printer_settings, load_printers
+from app.services.system_config_manager import BASE_DIR
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -13,11 +17,168 @@ logger = logging.getLogger(__name__)
 
 # Global lock for printing synchronization
 print_lock = threading.RLock()
+_print_context = threading.local()
 
 try:
     import win32print
 except ImportError:
     win32print = None
+
+def _normalize_runtime_env(value):
+    env = str(value or '').strip().lower()
+    if env in {'prod', 'production'}:
+        return 'production'
+    if env in {'dev', 'development'}:
+        return 'development'
+    return ''
+
+def _parse_bool_env(value):
+    raw = str(value or '').strip().lower()
+    if raw in {'1', 'true', 'yes', 'on'}:
+        return True
+    if raw in {'0', 'false', 'no', 'off'}:
+        return False
+    return None
+
+def _get_runtime_environment():
+    try:
+        from flask import current_app
+        if current_app:
+            app_env = _normalize_runtime_env(current_app.config.get('ALMAREIA_RUNTIME_ENV'))
+            if app_env:
+                return app_env
+    except Exception:
+        pass
+    env_name = _normalize_runtime_env(os.environ.get('ALMAREIA_ENV'))
+    if env_name:
+        return env_name
+    return 'production'
+
+def get_print_mode_status():
+    runtime_env = _get_runtime_environment()
+    dev_flag = _parse_bool_env(os.environ.get('ALMAREIA_DEV_PRINT_MODE'))
+    if runtime_env == 'production':
+        return {
+            'runtime_env': runtime_env,
+            'dev_disk_print_enabled': False,
+            'reason': 'production_fail_safe',
+        }
+    if runtime_env == 'development':
+        if dev_flag is False:
+            return {
+                'runtime_env': runtime_env,
+                'dev_disk_print_enabled': False,
+                'reason': 'disabled_by_env_flag',
+            }
+        return {
+            'runtime_env': runtime_env,
+            'dev_disk_print_enabled': True,
+            'reason': 'development_mode',
+        }
+    return {
+        'runtime_env': runtime_env,
+        'dev_disk_print_enabled': False,
+        'reason': 'unknown_environment_fail_safe',
+    }
+
+def _is_dev_print_mode():
+    return bool(get_print_mode_status().get('dev_disk_print_enabled'))
+
+def log_print_mode_startup(logger_obj=None):
+    status = get_print_mode_status()
+    active_mode = 'temp_print' if status.get('dev_disk_print_enabled') else 'physical_printer'
+    target_logger = logger_obj if logger_obj is not None else logger
+    target_logger.info(
+        f"PRINT_MODE active={active_mode} runtime_env={status.get('runtime_env')} reason={status.get('reason')}"
+    )
+    return status
+
+def _sanitize_path_name(value):
+    raw = str(value or '').strip()
+    if not raw:
+        return 'Unknown'
+    cleaned = re.sub(r'[\\/:*?"<>|]+', '_', raw)
+    cleaned = re.sub(r'\s+', ' ', cleaned).strip()
+    return cleaned or 'Unknown'
+
+def _decode_print_data(data):
+    if isinstance(data, bytes):
+        for encoding in ('cp850', 'utf-8', 'latin-1'):
+            try:
+                return data.decode(encoding, errors='replace')
+            except Exception:
+                continue
+        return repr(data)
+    return str(data)
+
+def _get_print_context():
+    ctx = getattr(_print_context, 'data', None)
+    return ctx if isinstance(ctx, dict) else {}
+
+@contextmanager
+def _with_print_context(**kwargs):
+    previous = _get_print_context().copy()
+    merged = previous.copy()
+    for key, value in kwargs.items():
+        if value is not None:
+            merged[key] = value
+    _print_context.data = merged
+    try:
+        yield
+    finally:
+        _print_context.data = previous
+
+def _resolve_printer_label(destination):
+    explicit_name = destination.get('printer_name')
+    if explicit_name:
+        return str(explicit_name)
+    windows_name = destination.get('windows_name')
+    if windows_name:
+        return str(windows_name)
+    ip = destination.get('ip')
+    port = int(destination.get('port', 9100))
+    if ip:
+        for printer in load_printers():
+            try:
+                if str(printer.get('ip')) == str(ip) and int(printer.get('port', 9100)) == int(port):
+                    return str(printer.get('name') or f'{ip}_{port}')
+            except Exception:
+                continue
+        return f'{ip}_{port}'
+    return 'Unknown'
+
+def _write_dev_print_file(data, destination):
+    context = _get_print_context()
+    timestamp = datetime.now()
+    printer_label = _resolve_printer_label(destination)
+    printer_folder = Path(BASE_DIR) / 'temp_print' / _sanitize_path_name(printer_label)
+    printer_folder.mkdir(parents=True, exist_ok=True)
+    print_type = str(context.get('print_type') or destination.get('print_type') or 'generic')
+    filename = f"{timestamp.strftime('%Y%m%d_%H%M%S_%f')}_{_sanitize_path_name(print_type)}_{uuid.uuid4().hex[:8]}.txt"
+    file_path = printer_folder / filename
+
+    reference_bits = []
+    for key in ('table_id', 'order_id', 'room_number', 'waiter_name', 'charge_id'):
+        value = context.get(key)
+        if value not in (None, ''):
+            reference_bits.append(f"{key}: {value}")
+    reference_line = '; '.join(reference_bits) if reference_bits else 'n/a'
+
+    meta_lines = [
+        f"timestamp: {timestamp.strftime('%Y-%m-%d %H:%M:%S')}",
+        f"printer: {printer_label}",
+        f"printer_transport: {destination.get('transport', 'network')}",
+        f"printer_target: {destination.get('target', 'n/a')}",
+        f"print_type: {print_type}",
+        f"reference: {reference_line}",
+        "",
+        "--- BEGIN CONTENT ---",
+        _decode_print_data(data),
+        "--- END CONTENT ---",
+        "",
+    ]
+    file_path.write_text('\n'.join(meta_lines), encoding='utf-8')
+    return True, None
 
 def format_room_number_str(room_number):
     """
@@ -50,6 +211,16 @@ def get_available_windows_printers():
 
 def send_to_windows_printer(printer_name, data):
     """Sends raw bytes to a Windows printer."""
+    if _is_dev_print_mode():
+        return _write_dev_print_file(
+            data,
+            {
+                'printer_name': printer_name,
+                'windows_name': printer_name,
+                'transport': 'windows',
+                'target': printer_name,
+            },
+        )
     if not win32print:
         return False, "win32print module not installed"
     
@@ -74,6 +245,16 @@ def send_to_printer(ip, port, data, retries=3):
     """
     Sends data to a network printer with exponential backoff retry logic.
     """
+    if _is_dev_print_mode():
+        return _write_dev_print_file(
+            data,
+            {
+                'ip': ip,
+                'port': port,
+                'transport': 'network',
+                'target': f'{ip}:{int(port)}',
+            },
+        )
     last_error = None
     
     for attempt in range(1, retries + 1):
@@ -502,10 +683,19 @@ def print_order_items(table_id, waiter_name, new_items, printers_config, product
                 error = None
                 
                 if printer.get('type') == 'windows':
-                    success, error = send_to_windows_printer(printer.get('windows_name'), ticket_data)
+                    with _with_print_context(
+                        print_type='kitchen_order',
+                        table_id=table_id,
+                        waiter_name=waiter_name,
+                    ):
+                        success, error = send_to_windows_printer(printer.get('windows_name'), ticket_data)
                 else:
-                    # Default to network
-                    success, error = send_to_printer(printer.get('ip'), printer.get('port', 9100), ticket_data)
+                    with _with_print_context(
+                        print_type='kitchen_order',
+                        table_id=table_id,
+                        waiter_name=waiter_name,
+                    ):
+                        success, error = send_to_printer(printer.get('ip'), printer.get('port', 9100), ticket_data)
                 
                 results[f"{printer['name']}"] = "OK" if success else f"Error: {error}"
                 
@@ -897,9 +1087,21 @@ def print_bill(printer_config, table_id, items, subtotal, service_fee, total, wa
         data = format_bill(table_id, items, subtotal, service_fee, total, waiter_name, guest_name, room_number)
         
         if target_printer.get('type') == 'windows':
-            return send_to_windows_printer(target_printer.get('windows_name'), data)
+            with _with_print_context(
+                print_type='bill',
+                table_id=table_id,
+                waiter_name=waiter_name,
+                room_number=room_number,
+            ):
+                return send_to_windows_printer(target_printer.get('windows_name'), data)
         else:
-            return send_to_printer(target_printer.get('ip'), target_printer.get('port', 9100), data)
+            with _with_print_context(
+                print_type='bill',
+                table_id=table_id,
+                waiter_name=waiter_name,
+                room_number=room_number,
+            ):
+                return send_to_printer(target_printer.get('ip'), target_printer.get('port', 9100), data)
 
     except Exception as e:
         logger.error(f"Error printing bill: {e}")

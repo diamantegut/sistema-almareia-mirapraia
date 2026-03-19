@@ -155,9 +155,7 @@
                         if(row) {
                             row.classList.remove('table-warning');
                             row.classList.add('table-success');
-                            // Update status badge locally
-                            // Assuming status is in the 10th column (index 9) because we added a checkbox column at index 0
-                            const badgeCell = row.cells[9]; 
+                            const badgeCell = row.querySelector('[data-col="status"]');
                             if(badgeCell) badgeCell.innerHTML = '<span class="badge bg-success">Emitida</span>';
                             
                             // Remove checkbox and disable it
@@ -239,12 +237,13 @@
                         <tr>
                             <th style="width: 40px;"></th>
                             <th>Data</th>
-                            <th>Origem</th>
-                            <th>ID</th>
-                            <th>Série/Nº</th>
+                            <th>Conta / Referência</th>
+                            <th>Origem / Caixa</th>
+                            <th>Tipo</th>
                             <th>Total</th>
-                            <th>Pagamento</th>
-                            <th>Status</th>
+                            <th class="d-none d-lg-table-cell">Pagamento</th>
+                            <th>Elegibilidade</th>
+                            <th>Status Fiscal</th>
                             <th class="text-end">Ações</th>
                         </tr>
                     </thead>
@@ -252,28 +251,59 @@
                         {% for entry in pool %}
                         <tr id="row-{{ entry.id }}">
                             <td>
-                                {% if entry.status in ['pending', 'error', 'failed'] and entry.fiscal_type != 'nfse' %}
+                                {% if entry.status in ['pending', 'manual_retry_required'] and entry.fiscal_type != 'nfse' %}
                                     <input class="form-check-input row-checkbox" type="checkbox" value="{{ entry.id }}" onclick="updateSelectedCount()">
                                 {% endif %}
                             </td>
                             <td><small>{{ entry.closed_at }}</small></td>
                             <td>
+                                <div class="fw-semibold">
+                                    {% if entry.original_id %}
+                                        {{ entry.original_id }}
+                                    {% else %}
+                                        Sem referência
+                                    {% endif %}
+                                </div>
+                                <small class="text-muted d-block">
+                                    {% if entry.customer and entry.customer.room_number %}
+                                        Quarto {{ entry.customer.room_number }}
+                                    {% elif entry.customer and entry.customer.reservation_id %}
+                                        Reserva {{ entry.customer.reservation_id }}
+                                    {% elif entry.customer and entry.customer.guest_name %}
+                                        {{ entry.customer.guest_name }}
+                                    {% else %}
+                                        Conta avulsa
+                                    {% endif %}
+                                </small>
+                                <small class="text-muted d-block">Fechado por: {{ entry.closed_by or '-' }}</small>
+                            </td>
+                            <td>
                                 {% if entry.origin == 'restaurant' %}
-                                    <span class="badge bg-warning text-dark"><i class="bi bi-cup-straw"></i> Rest.</span>
-                                {% elif entry.origin == 'reception' %}
-                                    <span class="badge bg-info text-dark"><i class="bi bi-door-open"></i> Rec.</span>
+                                    <span class="badge bg-warning text-dark"><i class="bi bi-cup-straw"></i> Restaurante</span>
+                                {% elif entry.origin in ['reception', 'reception_charge'] %}
+                                    <span class="badge bg-info text-dark"><i class="bi bi-door-open"></i> Recepção</span>
                                 {% elif entry.origin == 'daily_rates' %}
                                     <span class="badge bg-primary"><i class="bi bi-building"></i> Diárias</span>
                                 {% elif entry.origin in ['reservations', 'reservation_checkin'] %}
                                     <span class="badge bg-secondary"><i class="bi bi-calendar2-check"></i> Reservas</span>
                                 {% else %}
-                                    <span class="badge bg-secondary">{{ entry.origin|truncate(4, True, '') }}</span>
+                                    <span class="badge bg-secondary">{{ entry.origin or '-' }}</span>
                                 {% endif %}
                             </td>
-                            <td><small class="text-muted">{{ entry.original_id|truncate(15, True, '...') }}</small></td>
-                            <td><small>{{ entry.serie|default('-') }}/{{ entry.number|default('-') }}</small></td>
-                            <td class="fw-bold"><small>R$ {{ "%.2f"|format(entry.get('total_amount', 0)) }}</small></td>
                             <td>
+                                {% set ctype = ((entry.customer.type if entry.customer else '') or (entry.customer.customer_type if entry.customer else '') or '')|lower %}
+                                {% if 'func' in ctype %}
+                                    <span class="badge bg-dark">Funcionário</span>
+                                {% elif (entry.customer and (entry.customer.room_number or entry.customer.reservation_id)) %}
+                                    <span class="badge bg-primary">Hóspede</span>
+                                {% elif entry.non_fiscal_reason %}
+                                    <span class="badge bg-secondary">Especial/Não Fiscal</span>
+                                {% else %}
+                                    <span class="badge bg-light text-dark border">Passante</span>
+                                {% endif %}
+                            </td>
+                            <td class="fw-bold"><small>R$ {{ "%.2f"|format(entry.get('total_amount', 0)) }}</small></td>
+                            <td class="d-none d-lg-table-cell">
                                 {% for pm in entry.payment_methods %}
                                     <div class="d-flex align-items-center">
                                         <small class="text-truncate" style="max-width: 80px;" title="{{ pm.method }}">{{ pm.method }}</small>
@@ -283,29 +313,50 @@
                                     </div>
                                 {% endfor %}
                             </td>
-                            <td>
-                                {% if entry.get('status') == 'pending' %}
-                                    <span class="badge bg-warning text-dark">Pend.</span>
-                                {% elif entry.get('status') == 'emitted' %}
-                                    <span class="badge bg-success">Emit.</span>
-                                {% elif entry.get('status') == 'error' %}
-                                    <span class="badge bg-danger">Erro</span>
-                                {% elif entry.get('status') == 'failed' %}
-                                    <span class="badge bg-danger">Falha</span>
-                                {% elif entry.get('status') == 'ignored' %}
-                                    <span class="badge bg-secondary">Ign.</span>
+                            <td data-col="eligibility">
+                                {% if entry.non_fiscal_reason or entry.status == 'ignored' or not entry.eligible_for_fiscal %}
+                                    <span class="badge bg-secondary">Não elegível</span>
+                                    <small class="text-muted d-block">{{ entry.non_fiscal_reason or 'ignorado' }}</small>
+                                {% elif entry.document_required %}
+                                    <span class="badge bg-danger">Obrigatório emitir</span>
+                                    <small class="text-muted d-block">Documento obrigatório</small>
+                                {% else %}
+                                    <span class="badge bg-success">Opcional emitir</span>
+                                    <small class="text-muted d-block">Sem obrigatoriedade</small>
                                 {% endif %}
                             </td>
-                            <td class="text-end text-nowrap">
+                            <td data-col="status">
+                                {% if entry.get('status') == 'pending' %}
+                                    <span class="badge bg-warning text-dark">Pendente</span>
+                                {% elif entry.get('status') == 'issuing' %}
+                                    <span class="badge bg-info text-dark">Emitindo</span>
+                                {% elif entry.get('status') == 'emitted' %}
+                                    <span class="badge bg-success">Emitida</span>
+                                {% elif entry.get('status') == 'rejected' %}
+                                    <span class="badge bg-danger">Rejeitada</span>
+                                {% elif entry.get('status') == 'manual_retry_required' %}
+                                    <span class="badge bg-danger">Retry Manual</span>
+                                {% elif entry.get('status') == 'ignored' %}
+                                    <span class="badge bg-secondary">Ignorada</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ entry.get('status', '-') }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end text-nowrap" data-col="actions">
                                 <button class="btn btn-sm btn-info p-1 px-2" onclick="viewDetails('{{ entry.id }}')" title="Ver Detalhes">
                                     <i class="bi bi-eye"></i>
                                 </button>
                                 {% if entry.status == 'emitted' %}
-                                    <button class="btn btn-sm btn-primary p-1 px-2" onclick="printInvoice('{{ entry.id }}')" title="Imprimir">
-                                        <i class="bi bi-printer"></i>
+                                    <button class="btn btn-sm btn-primary p-1 px-2" onclick="printInvoice('{{ entry.id }}')" title="Imprimir DANFE NFC-e">
+                                        <i class="bi bi-printer"></i> <span class="d-none d-md-inline">Imprimir</span>
                                     </button>
+                                    {% if session.get('role') == 'admin' %}
+                                    <button class="btn btn-sm btn-warning p-1 px-2" onclick="reemitInvoice('{{ entry.id }}')" title="Reemitir">
+                                        <i class="bi bi-arrow-repeat"></i>
+                                    </button>
+                                    {% endif %}
                                 {% endif %}
-                                {% if entry.status in ['pending','error','failed'] %}
+                                {% if entry.status in ['pending','manual_retry_required','rejected'] %}
                                     {% if entry.fiscal_type == 'nfse' or entry.origin in ['reservations', 'reservation_checkin'] %}
                                     <button class="btn btn-sm btn-warning p-1 px-2" onclick="openNfseReservationModal('{{ entry.id }}')" title="Preparar NFS-e">
                                         <i class="bi bi-receipt"></i>
@@ -351,6 +402,33 @@
     </div>
 </div>
 
+<div class="modal fade" id="emitDocumentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">Confirmar Documento para Emissão</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="emitDocumentEntryId">
+                <div class="mb-2 small text-muted" id="emitDocumentContext"></div>
+                <div class="mb-3">
+                    <label class="form-label">CPF ou CNPJ na nota</label>
+                    <input type="text" class="form-control" id="emitDocumentValue" placeholder="Somente números ou formatado">
+                    <div class="form-text" id="emitDocumentRuleHint"></div>
+                </div>
+                <div class="alert alert-warning py-2 mb-0 d-none" id="emitDocumentAlert"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-success" id="btnConfirmEmitDocument" onclick="confirmEmitWithDocument()">
+                    <i class="bi bi-cloud-upload"></i> Confirmar Emissão
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade" id="nfseReservationModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -386,6 +464,7 @@
 <script id="pool-data" type="application/json">{{ pool|tojson }}</script>
 <script>
 const poolData = JSON.parse(document.getElementById('pool-data').textContent);
+const isAdminUser = {{ 'true' if session.get('role') == 'admin' else 'false' }};
 
 function viewDetails(id) {
     const entry = poolData.find(e => e.id === id);
@@ -432,6 +511,9 @@ function viewDetails(id) {
                   <div id="xml-status-${entry.id}" class="form-text mt-1 text-muted">
                     ${entry.xml_ready ? 'XML disponível.' : 'Aguardando disponibilidade do XML...'}
                   </div>
+                  <div class="small mt-1">
+                    <strong>Chave:</strong> ${entry.access_key ? `<code>${entry.access_key}</code>` : '<span class="text-muted">não disponível</span>'}
+                  </div>
                 ` : ''}
             </div>
         </div>
@@ -462,12 +544,20 @@ function viewDetails(id) {
             <button class="btn btn-outline-secondary btn-sm" onclick="downloadXml('${entry.id}')">
                 <i class="bi bi-download"></i> Baixar XML
             </button>
+            <button class="btn btn-outline-dark btn-sm" onclick="copyAccessKey('${entry.id}')">
+                <i class="bi bi-clipboard"></i> Copiar Chave
+            </button>
             <button class="btn btn-danger btn-sm" onclick="downloadPdf('${entry.id}')">
                 <i class="bi bi-file-earmark-pdf"></i> Baixar PDF
             </button>
             <button class="btn btn-primary btn-sm" onclick="printInvoice('${entry.id}')">
                 <i class="bi bi-printer"></i> Imprimir
             </button>
+            ${isAdminUser ? `
+            <button class="btn btn-warning btn-sm" onclick="reemitInvoice('${entry.id}')">
+                <i class="bi bi-arrow-repeat"></i> Reemitir
+            </button>
+            ` : ''}
         `;
     } else {
         footer.classList.add('d-none');
@@ -482,9 +572,47 @@ function viewDetails(id) {
 const emissionQueue = [];
 let isQueueRunning = false;
 
+function _normalizeDocumentInput(value) {
+    return String(value || '').replace(/\D/g, '');
+}
+
 function emitInvoice(id) {
-    if (!confirm('Deseja iniciar a emissão fiscal para esta conta?')) return;
-    
+    const entry = poolData.find(e => e.id === id);
+    if (!entry) return;
+    const modalEl = document.getElementById('emitDocumentModal');
+    const amount = Number(entry.fiscal_amount || entry.total_amount || 0);
+    const required = Boolean(entry.document_required) || amount > 999;
+    const prefill = String(entry.customer_document || (entry.customer && entry.customer.cpf_cnpj) || '').trim();
+    document.getElementById('emitDocumentEntryId').value = id;
+    document.getElementById('emitDocumentValue').value = prefill;
+    document.getElementById('emitDocumentContext').textContent = `Conta: ${entry.original_id || id} | Valor fiscal: R$ ${amount.toFixed(2)}`;
+    document.getElementById('emitDocumentRuleHint').textContent = required
+        ? 'Documento obrigatório para emissão acima de R$ 999,00.'
+        : 'Documento opcional para emissão até R$ 999,00.';
+    const alertEl = document.getElementById('emitDocumentAlert');
+    alertEl.classList.add('d-none');
+    alertEl.textContent = '';
+    const modal = new bootstrap.Modal(modalEl);
+    modal.show();
+}
+
+function confirmEmitWithDocument() {
+    const id = document.getElementById('emitDocumentEntryId').value;
+    const entry = poolData.find(e => e.id === id);
+    if (!entry) return;
+    const rawDocument = document.getElementById('emitDocumentValue').value;
+    const normalizedDocument = _normalizeDocumentInput(rawDocument);
+    const amount = Number(entry.fiscal_amount || entry.total_amount || 0);
+    const required = Boolean(entry.document_required) || amount > 999;
+    const alertEl = document.getElementById('emitDocumentAlert');
+    if (required && !normalizedDocument) {
+        alertEl.textContent = 'CPF/CNPJ é obrigatório para este valor fiscal.';
+        alertEl.classList.remove('d-none');
+        return;
+    }
+    const modalEl = document.getElementById('emitDocumentModal');
+    const modal = bootstrap.Modal.getInstance(modalEl);
+    if (modal) modal.hide();
     const btn = document.querySelector(`#row-${id} .btn-success`);
     if (btn) {
         btn.disabled = true;
@@ -494,7 +622,10 @@ function emitInvoice(id) {
         btn.title = 'Aguardando na fila...';
     }
 
-    emissionQueue.push(id);
+    emissionQueue.push({
+        id: id,
+        customer_document: normalizedDocument || ''
+    });
     processQueue();
 }
 
@@ -505,7 +636,8 @@ async function processQueue() {
     isQueueRunning = true;
 
     while (emissionQueue.length > 0) {
-        const id = emissionQueue.shift();
+        const queueItem = emissionQueue.shift();
+        const id = queueItem.id;
         const row = document.getElementById(`row-${id}`);
         const btn = row ? row.querySelector('.btn-warning') : null;
 
@@ -520,27 +652,48 @@ async function processQueue() {
             const response = await fetch('/admin/fiscal/pool/action', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ action: 'emit', id: id })
+                body: JSON.stringify({ action: 'emit', id: id, customer_document: queueItem.customer_document || '' })
             });
             const result = await response.json();
 
             if (result.success) {
+                const idx = poolData.findIndex(e => e.id === id);
+                if (idx >= 0) {
+                    poolData[idx].status = 'emitted';
+                    if (queueItem.customer_document) {
+                        poolData[idx].customer_document = queueItem.customer_document;
+                        if (!poolData[idx].customer) poolData[idx].customer = {};
+                        poolData[idx].customer.cpf_cnpj = queueItem.customer_document;
+                    }
+                    if (result.access_key) poolData[idx].access_key = result.access_key;
+                    if (result.fiscal_doc_uuid) poolData[idx].fiscal_doc_uuid = result.fiscal_doc_uuid;
+                }
                 // Success: Update UI without reload
                 if (row) {
                     row.classList.remove('table-warning', 'table-danger');
                     row.classList.add('table-success');
                     
                     // Update Status Badge (Index 7)
-                    const badgeCell = row.cells[7];
-                    if (badgeCell) badgeCell.innerHTML = '<span class="badge bg-success">Emit.</span>';
+                    const badgeCell = row.querySelector('[data-col="status"]');
+                    if (badgeCell) badgeCell.innerHTML = '<span class="badge bg-success">Emitida</span>';
                     
-                    // Update Actions (Index 8)
-                    const actionsCell = row.cells[8];
+                    const actionsCell = row.querySelector('[data-col="actions"]');
                     if (actionsCell) {
                         actionsCell.innerHTML = `
                             <button class="btn btn-sm btn-info p-1 px-2" onclick="viewDetails('${id}')" title="Ver Detalhes">
                                 <i class="bi bi-eye"></i>
                             </button>
+                            <button class="btn btn-sm btn-outline-dark p-1 px-2" onclick="copyAccessKey('${id}')" title="Copiar Chave">
+                                <i class="bi bi-clipboard"></i>
+                            </button>
+                            <button class="btn btn-sm btn-primary p-1 px-2" onclick="printInvoice('${id}')" title="Imprimir DANFE NFC-e">
+                                <i class="bi bi-printer"></i> <span class="d-none d-md-inline">Imprimir</span>
+                            </button>
+                            ${isAdminUser ? `
+                            <button class="btn btn-sm btn-warning p-1 px-2" onclick="reemitInvoice('${id}')" title="Reemitir">
+                                <i class="bi bi-arrow-repeat"></i>
+                            </button>
+                            ` : ''}
                         `;
                     }
                     
@@ -583,6 +736,44 @@ async function processQueue() {
     }
 
     isQueueRunning = false;
+}
+
+async function copyAccessKey(id) {
+    const entry = poolData.find(e => e.id === id);
+    const key = entry && entry.access_key ? String(entry.access_key).trim() : '';
+    if (!key) {
+        alert('Chave de acesso ainda não disponível. Tente abrir os detalhes após alguns segundos.');
+        return;
+    }
+    try {
+        await navigator.clipboard.writeText(key);
+        alert('Chave copiada com sucesso.');
+    } catch (e) {
+        alert('Não foi possível copiar automaticamente. Chave: ' + key);
+    }
+}
+
+async function reemitInvoice(id) {
+    if (!isAdminUser) {
+        alert('Apenas admin pode reemitir.');
+        return;
+    }
+    if (!confirm('Deseja reemitir esta nota? Será criada uma nova emissão com os mesmos dados.')) return;
+    try {
+        const response = await fetch('/admin/fiscal/pool/action', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ action: 'reemit', id: id })
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+            throw new Error(result.error || 'Falha na reemissão');
+        }
+        alert('Reemissão concluída com sucesso.');
+        window.location.reload();
+    } catch (e) {
+        alert('Erro ao reemitir: ' + e.message);
+    }
 }
 
 
@@ -684,11 +875,11 @@ async function ignoreEntry(id) {
                 
                 // Option 2: Mark as Ignored visually
                 row.classList.add('table-secondary');
-                const badgeCell = row.cells[7]; // Status column index
-                if(badgeCell) badgeCell.innerHTML = '<span class="badge bg-secondary">Ign.</span>';
+                const badgeCell = row.querySelector('[data-col="status"]');
+                if(badgeCell) badgeCell.innerHTML = '<span class="badge bg-secondary">Ignorada</span>';
                 
                 // Remove buttons
-                const actionsCell = row.cells[8]; // Actions column index
+                const actionsCell = row.querySelector('[data-col="actions"]');
                 if(actionsCell) actionsCell.innerHTML = '';
                 
                 // Remove checkbox

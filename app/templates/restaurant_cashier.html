@@ -19,20 +19,25 @@
                 </div>
                 <div class="card-body p-4">
                     <p class="text-center text-muted mb-4">O caixa está fechado. Informe o valor inicial para abrir.</p>
-                    
-                    <form method="POST">
-                        <input type="hidden" name="action" value="open_cashier">
-                        <div class="mb-4">
-                            <label class="form-label">Fundo de Caixa (R$)</label>
-                            <div class="input-group input-group-lg">
-                                <span class="input-group-text">R$</span>
-                                <input type="tel" class="form-control" name="opening_balance" value="0.00" required onfocus="this.select()" oninput="formatCurrency(this)">
+                    {% if session.get('role') in ['admin', 'gerente', 'supervisor'] %}
+                        <form method="POST">
+                            <input type="hidden" name="action" value="open_cashier">
+                            <div class="mb-4">
+                                <label class="form-label">Fundo de Caixa (R$)</label>
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text">R$</span>
+                                    <input type="tel" class="form-control" name="opening_balance" value="0.00" required onfocus="this.select()" oninput="formatCurrency(this)">
+                                </div>
                             </div>
+                            <button type="submit" class="btn btn-success w-100 btn-lg">
+                                <i class="bi bi-unlock-fill"></i> Abrir Caixa
+                            </button>
+                        </form>
+                    {% else %}
+                        <div class="alert alert-warning mb-0">
+                            Apenas Supervisor+ podem abrir o caixa.
                         </div>
-                        <button type="submit" class="btn btn-success w-100 btn-lg">
-                            <i class="bi bi-unlock-fill"></i> Abrir Caixa
-                        </button>
-                    </form>
+                    {% endif %}
                 </div>
             </div>
             
@@ -96,19 +101,21 @@
             <div class="card">
                 <div class="card-body d-grid gap-2 d-md-flex justify-content-md-end bg-light">
                     {% if session.get('role') in ['admin', 'gerente', 'supervisor'] %}
-                    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#sangriaModal">
-                        <i class="bi bi-dash-circle"></i> Sangria
-                    </button>
+                        <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#sangriaModal">
+                            <i class="bi bi-dash-circle"></i> Sangria
+                        </button>
+                        <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#suprimentoModal">
+                            <i class="bi bi-plus-circle"></i> Suprimento
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#transferModal">
+                            <i class="bi bi-arrow-left-right"></i> Transferência
+                        </button>
+                        <button type="button" class="btn btn-dark ms-md-auto" data-bs-toggle="modal" data-bs-target="#closeCashierModal">
+                            <i class="bi bi-lock-fill"></i> Fechar Caixa
+                        </button>
+                    {% else %}
+                        <div class="text-muted small">Operações avançadas disponíveis apenas para Supervisor+.</div>
                     {% endif %}
-                    <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#suprimentoModal">
-                        <i class="bi bi-plus-circle"></i> Suprimento
-                    </button>
-                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#transferModal">
-                        <i class="bi bi-arrow-left-right"></i> Transferência
-                    </button>
-                    <button type="button" class="btn btn-dark ms-md-auto" data-bs-toggle="modal" data-bs-target="#closeCashierModal">
-                        <i class="bi bi-lock-fill"></i> Fechar Caixa
-                    </button>
                 </div>
             </div>
         </div>
@@ -359,10 +366,7 @@
                 <form method="POST" onsubmit="return confirm('ATENÇÃO: Você está prestes a fechar o caixa do restaurante. Esta ação é irreversível e bloqueará novas operações até a reabertura.\n\nTem certeza que conferiu todos os valores e deseja continuar?');">
                     <div class="modal-body">
                         <input type="hidden" name="action" value="close_cashier">
-                        <p>Confira os valores antes de fechar.</p>
-                        <div class="alert alert-info">
-                            Saldo Calculado em Dinheiro pelo Sistema: <strong>R$ {{ "%.2f"|format(total_balance) }}</strong>
-                        </div>
+                        <p>Informe os valores conferidos manualmente antes de fechar.</p>
                         <div class="mb-3">
                             <label class="form-label">Saldo Final em Dinheiro (Gaveta)</label>
                             <input type="tel" class="form-control" name="closing_cash" required placeholder="0,00" onfocus="this.select()" oninput="formatCurrency(this)">

@@ -2,7 +2,7 @@ import pandas as pd
 import unicodedata
 import re
 import os
-from app.services.data_service import load_menu_items, save_menu_items
+from app.services.data_service import load_menu_items, secure_save_menu_items
 
 def _excel_clean_value(value):
     try:
@@ -187,7 +187,7 @@ def rescue_menu_items_fiscal_from_excel(excel_paths):
                 updated_items += 1
 
     if updated_items > 0:
-        save_menu_items(items)
+        secure_save_menu_items(items, user_id='Sistema')
 
     return {
         'success': True,

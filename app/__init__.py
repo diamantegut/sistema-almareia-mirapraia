@@ -1,5 +1,6 @@
 import os
 import sys
+import json
 from flask import Flask, redirect, url_for
 from app.models.database import db
 
@@ -7,6 +8,11 @@ from app.models.database import db
 def create_app(config_name=None):
     app = Flask(__name__, template_folder='templates', static_folder='static')
     app.secret_key = os.environ.get('SECRET_KEY', 'chave_secreta_almareia_hotel')
+    raw_env = str(os.environ.get('ALMAREIA_ENV') or '').strip().lower()
+    if raw_env in ('dev', 'development'):
+        app.config['ALMAREIA_RUNTIME_ENV'] = 'development'
+    else:
+        app.config['ALMAREIA_RUNTIME_ENV'] = 'production'
     app.config['EXTERNAL_OPEN_MODE'] = str(os.environ.get('ALMAREIA_EXTERNAL_OPEN_MODE', '0')).strip().lower() in ('1', 'true', 'yes', 'on')
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     data_dir = os.path.join(base_dir, 'data')
@@ -60,6 +66,20 @@ def create_app(config_name=None):
     app.register_blueprint(financial_audit_bp)
     from app.services.logger_service import LoggerService
     LoggerService.init_app(app)
+    try:
+        from app.services.printing_service import log_print_mode_startup
+        with app.app_context():
+            print_status = log_print_mode_startup(app.logger)
+            app.logger.info(
+                f"ENVIRONMENT runtime_env={app.config.get('ALMAREIA_RUNTIME_ENV')} debug_mode={bool(app.debug)} print_mode={'temp_print' if print_status.get('dev_disk_print_enabled') else 'physical_printer'}"
+            )
+    except Exception as e:
+        print(f"Failed to log print mode startup: {e}")
+    try:
+        from app.services.data_cleanup_monitor_service import ensure_monitor_files
+        ensure_monitor_files()
+    except Exception as e:
+        print(f"Failed to initialize data cleanup monitor: {e}")
     
     # Start Scheduler
     if os.environ.get('WERKZEUG_RUN_MAIN') == 'true' or not app.debug:
@@ -196,6 +216,39 @@ def create_app(config_name=None):
             except Exception as e:
                 print(f"Error logging slow request: {e}")
         return response
+
+    @app.errorhandler(FileNotFoundError)
+    def handle_file_not_found_error(exc):
+        try:
+            from app.services.data_cleanup_monitor_service import record_data_cleanup_event
+            requested = ''
+            try:
+                requested = str(getattr(exc, 'filename', '') or '')
+            except Exception:
+                requested = ''
+            record_data_cleanup_event(
+                event_type='file_not_found',
+                requested_file=requested,
+                error_message=str(exc),
+                tb=exc.__traceback__
+            )
+        except Exception:
+            pass
+        raise exc
+
+    @app.errorhandler(json.JSONDecodeError)
+    def handle_json_decode_error(exc):
+        try:
+            from app.services.data_cleanup_monitor_service import record_data_cleanup_event
+            record_data_cleanup_event(
+                event_type='json_decode_error',
+                requested_file='',
+                error_message=str(exc),
+                tb=exc.__traceback__
+            )
+        except Exception:
+            pass
+        raise exc
 
     return app
 

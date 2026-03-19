@@ -1,5 +1,6 @@
 import json
 import os
+from app.services.path_resolver import PathResolver, get_audit_events
 
 # Base directory is the directory containing this script (project root)
 # Refactored: Now inside app/services, so root is two levels up
@@ -22,6 +23,9 @@ DEFAULT_CONFIG = {
     'uploads_dir': 'static/uploads/maintenance', # Updated path
     'sales_excel_path': '' # Deprecated or handled via upload
 }
+
+PATH_RESOLVER_MODE = 'legacy'
+_PATH_RESOLVER = None
 
 def load_system_config():
     """Loads the system configuration from system_config.json."""
@@ -48,91 +52,39 @@ def get_config_value(key, default=None):
     config = load_system_config()
     return config.get(key, default)
 
+def _get_path_resolver():
+    global _PATH_RESOLVER
+    if _PATH_RESOLVER is None:
+        _PATH_RESOLVER = PathResolver(
+            base_dir=BASE_DIR,
+            config_loader=load_system_config,
+            mode=PATH_RESOLVER_MODE
+        )
+    return _PATH_RESOLVER
+
 def get_data_path(filename):
-    """Returns the full path for a data file, ensuring the directory exists."""
-    config = load_system_config()
-    data_dir = config.get('data_dir', 'data')
-    
-    # Ensure relative paths are relative to the project root
-    if not os.path.isabs(data_dir):
-        data_dir = os.path.join(BASE_DIR, data_dir)
-        
-    if not os.path.exists(data_dir):
-        try:
-            os.makedirs(data_dir)
-        except Exception as e:
-            print(f"Error creating data directory: {e}")
-            
-    return os.path.join(data_dir, filename)
+    resolver = _get_path_resolver()
+    return str(resolver.resolve_data(filename))
 
 def get_log_path(filename):
-    """Returns the full path for a log file, ensuring the directory exists."""
-    config = load_system_config()
-    logs_dir = config.get('logs_dir', 'logs')
-    
-    if not os.path.isabs(logs_dir):
-        logs_dir = os.path.join(BASE_DIR, logs_dir)
-        
-    if not os.path.exists(logs_dir):
-        os.makedirs(logs_dir, exist_ok=True)
-        
-    return os.path.join(logs_dir, filename)
+    resolver = _get_path_resolver()
+    return str(resolver.resolve_log(filename))
 
 def get_backup_path(subpath=''):
-    """Returns the full path for backups, ensuring the directory exists."""
-    config = load_system_config()
-    backups_dir = config.get('backups_dir', 'backups')
-    
-    if not os.path.isabs(backups_dir):
-        backups_dir = os.path.join(BASE_DIR, backups_dir)
-        
-    if not os.path.exists(backups_dir):
-        try:
-            os.makedirs(backups_dir, exist_ok=True)
-        except OSError as e:
-            print(f"Error creating backup directory '{backups_dir}': {e}. Falling back to local 'Backups' directory.")
-            backups_dir = os.path.join(BASE_DIR, 'Backups')
-            os.makedirs(backups_dir, exist_ok=True)
-        
-    return os.path.join(backups_dir, subpath)
+    resolver = _get_path_resolver()
+    return str(resolver.resolve_backup(subpath))
 
 def get_fiscal_path(subpath=''):
-    """Returns the full path for fiscal documents, ensuring the directory exists."""
-    config = load_system_config()
-    fiscal_dir = config.get('fiscal_dir', 'fiscal_documents')
-    
-    if not os.path.isabs(fiscal_dir):
-        fiscal_dir = os.path.join(BASE_DIR, fiscal_dir)
-        
-    if not os.path.exists(fiscal_dir):
-        os.makedirs(fiscal_dir, exist_ok=True)
-        
-    return os.path.join(fiscal_dir, subpath)
+    resolver = _get_path_resolver()
+    return str(resolver.resolve_fiscal(subpath))
 
 def validate_paths():
-    """Ensures all configured directories exist."""
-    config = load_system_config()
-    results = []
-    for key in ['data_dir', 'logs_dir', 'backups_dir', 'fiscal_dir']:
-        path = config.get(key)
-        if path:
-            if not os.path.isabs(path):
-                path = os.path.join(BASE_DIR, path)
-            status = 'OK'
-            try:
-                if not os.path.exists(path):
-                    os.makedirs(path)
-                    print(f"Created directory: {path}")
-                # Check writability
-                test_file = os.path.join(path, '.test_write')
-                with open(test_file, 'w') as f:
-                    f.write('test')
-                os.remove(test_file)
-            except Exception as e:
-                status = f'ERROR: {e}'
-                print(f"Error creating/checking directory {path}: {e}")
-            results.append((path, status))
-    return results
+    resolver = _get_path_resolver()
+    report = resolver.validate(['data', 'log', 'backup', 'fiscal'])
+    return list(report.checks.items())
+
+def get_path_resolution_audit(limit=200):
+    return get_audit_events(limit=limit)
 
 # --- CENTRALIZED FILE PATH CONSTANTS ---
 # These constants define the canonical location of all system files.

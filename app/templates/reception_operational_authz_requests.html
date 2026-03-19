@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Solicitações de Autorização Operacional</h2>
+        <a href="{{ url_for('reception.reception_dashboard') }}" class="btn btn-outline-secondary">Voltar</a>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+            <strong>Pendentes</strong>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuário</th>
+                        <th>Rota</th>
+                        <th>Contexto</th>
+                        <th>Motivo</th>
+                        <th>Criado em</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in pending %}
+                    <tr>
+                        <td>{{ row.id }}</td>
+                        <td>{{ row.requester_user }}</td>
+                        <td>{{ row.route_key }}</td>
+                        <td><pre class="mb-0" style="white-space: pre-wrap; font-size: 12px;">{{ row.context }}</pre></td>
+                        <td>{{ row.reason }}</td>
+                        <td>{{ row.created_at }}</td>
+                        <td>
+                            <div class="d-flex flex-column gap-1">
+                                <form method="post" action="{{ url_for('reception.reception_decide_operational_authz_request', request_id=row.id) }}" class="d-flex gap-1">
+                                    <input type="hidden" name="decision" value="approve_once">
+                                    <input type="text" name="decision_reason" class="form-control form-control-sm" placeholder="Motivo">
+                                    <button type="submit" class="btn btn-sm btn-success">Aprovar 1x</button>
+                                </form>
+                                <form method="post" action="{{ url_for('reception.reception_decide_operational_authz_request', request_id=row.id) }}" class="d-flex gap-1">
+                                    <input type="hidden" name="decision" value="approve_temporary">
+                                    <input type="number" name="ttl_minutes" class="form-control form-control-sm" value="60" min="1" max="1440">
+                                    <input type="text" name="decision_reason" class="form-control form-control-sm" placeholder="Motivo">
+                                    <button type="submit" class="btn btn-sm btn-primary">Aprovar temp</button>
+                                </form>
+                                <form method="post" action="{{ url_for('reception.reception_decide_operational_authz_request', request_id=row.id) }}" class="d-flex gap-1">
+                                    <input type="hidden" name="decision" value="approve_permanent">
+                                    <input type="text" name="decision_reason" class="form-control form-control-sm" placeholder="Motivo">
+                                    <button type="submit" class="btn btn-sm btn-warning">Aprovar permanente</button>
+                                </form>
+                                <form method="post" action="{{ url_for('reception.reception_decide_operational_authz_request', request_id=row.id) }}" class="d-flex gap-1">
+                                    <input type="hidden" name="decision" value="deny">
+                                    <input type="text" name="decision_reason" class="form-control form-control-sm" placeholder="Motivo">
+                                    <button type="submit" class="btn btn-sm btn-danger">Negar</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not pending %}
+                    <tr><td colspan="7" class="text-center text-muted">Sem solicitações pendentes.</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-light">
+            <strong>Histórico recente</strong>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuário</th>
+                        <th>Rota</th>
+                        <th>Status</th>
+                        <th>Tipo decisão</th>
+                        <th>Decidido por</th>
+                        <th>Decidido em</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in recent %}
+                    <tr>
+                        <td>{{ row.id }}</td>
+                        <td>{{ row.requester_user }}</td>
+                        <td>{{ row.route_key }}</td>
+                        <td>{{ row.status }}</td>
+                        <td>{{ row.decision_type }}</td>
+                        <td>{{ row.decided_by }}</td>
+                        <td>{{ row.decided_at }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% if not recent %}
+                    <tr><td colspan="7" class="text-center text-muted">Sem histórico.</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
