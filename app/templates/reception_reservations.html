@@ -3716,6 +3716,8 @@
                 <th>Forma</th>
                 <th>Fiscal</th>
                 <th>Valor</th>
+                <th>Recebido</th>
+                <th>Troco</th>
                 <th>Referência</th>
               </tr>
             </thead>
@@ -3751,12 +3753,17 @@
                 tbody.innerHTML = '';
                 (data.timeline || []).forEach(function(item) {
                     var tr = document.createElement('tr');
+                    var amountReceived = Number(item.amount_received || 0);
+                    var changeAmount = Number(item.change_amount || 0);
+                    var hasReceived = amountReceived > 0;
                     tr.innerHTML = `
                         <td>${item.timestamp || '-'}</td>
                         <td>${item.label || '-'}</td>
                         <td>${item.payment_method || '-'}</td>
                         <td><span class="badge ${item.is_fiscal ? 'bg-success' : 'bg-secondary'}">${item.is_fiscal ? 'Fiscal' : 'N/F'}</span></td>
                         <td>${money(item.value || 0)}</td>
+                        <td>${hasReceived ? money(amountReceived) : '-'}</td>
+                        <td>${changeAmount > 0 ? money(changeAmount) : '-'}</td>
                         <td><small>${item.reference || ''}</small></td>
                     `;
                     tbody.appendChild(tr);
@@ -4653,6 +4660,7 @@ Use o botão "Remover" para limpar este item da lista se não for mais necessár
                             <label class="form-label">Valor a Receber (R$)</label>
                             <input type="number" step="0.01" class="form-control form-control-lg" id="resPayAmount" name="amount" required>
                             <div class="form-text text-danger" id="resPayError" style="display:none;"></div>
+                            <div class="form-text text-success" id="resPayChangePreview" style="display:none;"></div>
                         </div>
 
                         <div class="mb-3">
@@ -4686,6 +4694,7 @@ async function openReservationPaymentModal(guestId, guestName, roomInfo) {
     document.getElementById('resPaymentLoading').style.display = 'block';
     document.getElementById('resPaymentContent').style.display = 'none';
     document.getElementById('resPayError').style.display = 'none';
+    document.getElementById('resPayChangePreview').style.display = 'none';
     document.getElementById('btnConfirmResPayment').disabled = true;
     
     document.getElementById('resPayGuestName').textContent = guestName;
@@ -4731,6 +4740,7 @@ async function openReservationPaymentModal(guestId, guestName, roomInfo) {
             option.dataset.name = m.name; // Store name for submission
             select.appendChild(option);
         });
+        updateReservationChangePreview();
 
         document.getElementById('resPaymentLoading').style.display = 'none';
         document.getElementById('resPaymentContent').style.display = 'block';
@@ -4739,6 +4749,33 @@ async function openReservationPaymentModal(guestId, guestName, roomInfo) {
     } catch (error) {
         alert(error.message);
         // modal.hide();
+    }
+}
+
+function updateReservationChangePreview() {
+    const amount = parseFloat(document.getElementById('resPayAmount').value || '0');
+    const maxAmount = parseFloat(document.getElementById('resPayAmount').max || '0');
+    const methodSelect = document.getElementById('resPayMethod');
+    const option = methodSelect.options[methodSelect.selectedIndex];
+    const methodName = String((option && option.dataset && option.dataset.name) || '').toLowerCase();
+    const isCash = methodName.includes('dinheiro');
+    const preview = document.getElementById('resPayChangePreview');
+    if (!methodName || amount <= 0) {
+        preview.style.display = 'none';
+        return;
+    }
+    if (isCash && amount > maxAmount + 0.01) {
+        const troco = amount - maxAmount;
+        preview.textContent = `Troco estimado: R$ ${troco.toFixed(2)} (recebido acima do saldo em dinheiro).`;
+        preview.style.display = 'block';
+    } else if (Math.abs(amount - maxAmount) <= 0.01) {
+        preview.textContent = 'Pagamento exato (sem troco).';
+        preview.style.display = 'block';
+    } else if (amount < maxAmount - 0.01) {
+        preview.textContent = 'Pagamento parcial do saldo pendente.';
+        preview.style.display = 'block';
+    } else {
+        preview.style.display = 'none';
     }
 }
 
@@ -4799,14 +4836,16 @@ async function submitReservationPayment() {
         return;
     }
     
-    if (amount > maxAmount) {
-        if (!confirm(`O valor R$ ${amount.toFixed(2)} é maior que o saldo pendente (R$ ${maxAmount.toFixed(2)}). Deseja continuar?`)) {
-            return;
-        }
-    }
-    
     if (!methodSelect.value) {
         alert('Selecione uma forma de pagamento.');
+        return;
+    }
+    const option = methodSelect.options[methodSelect.selectedIndex];
+    const methodName = String((option && option.dataset && option.dataset.name) || '').toLowerCase();
+    const isCash = methodName.includes('dinheiro');
+    if (!isCash && amount > maxAmount + 0.01) {
+        errorDiv.textContent = `O valor informado excede o saldo pendente de R$ ${maxAmount.toFixed(2)} para esta forma de pagamento.`;
+        errorDiv.style.display = 'block';
         return;
     }
 
@@ -4814,8 +4853,6 @@ async function submitReservationPayment() {
     btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Processando...';
     
     try {
-        const option = methodSelect.options[methodSelect.selectedIndex];
-        
         const resp = await fetch('/reception/reservation/pay', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -4832,7 +4869,12 @@ async function submitReservationPayment() {
         
         if (!resp.ok) throw new Error(result.error || 'Erro ao processar pagamento');
         
-        alert('Pagamento registrado com sucesso!');
+        const troco = parseFloat(result.change_amount || 0);
+        if (troco > 0) {
+            alert(`Pagamento registrado com sucesso!\nTroco: R$ ${troco.toFixed(2)}`);
+        } else {
+            alert('Pagamento registrado com sucesso!');
+        }
         location.reload();
         
     } catch (error) {
@@ -4841,6 +4883,13 @@ async function submitReservationPayment() {
         btn.innerHTML = '<i class="bi bi-check-circle"></i> Confirmar Pagamento';
     }
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const amountInput = document.getElementById('resPayAmount');
+    const methodSelect = document.getElementById('resPayMethod');
+    if (amountInput) amountInput.addEventListener('input', updateReservationChangePreview);
+    if (methodSelect) methodSelect.addEventListener('change', updateReservationChangePreview);
+});
 </script>
 <script src="{{ url_for('static', filename='js/guest_view.js') }}"></script>
 {% endblock %}

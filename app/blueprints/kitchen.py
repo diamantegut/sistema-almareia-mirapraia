@@ -19,6 +19,7 @@ from app.services.data_service import load_products, load_menu_items, secure_sav
 from app.services.system_config_manager import get_data_path, PRODUCT_PHOTOS_DIR, PRODUCTS_FILE
 from werkzeug.utils import secure_filename
 from app.services.printing_service import get_default_printer, print_portion_labels
+from app.services.stock_service import get_product_balances
 from app.utils.lock import file_lock
 
 kitchen_bp = Blueprint('kitchen', __name__)
@@ -33,6 +34,21 @@ def _normalize_station(value):
     if v in ['bar', 'balcao']:
         return 'bar'
     return None
+
+
+def _normalize_print_destination(value):
+    if not value:
+        return ''
+    normalized = unicodedata.normalize('NFKD', str(value)).encode('ASCII', 'ignore').decode('utf-8')
+    normalized = ' '.join(normalized.strip().lower().split())
+    return normalized
+
+
+def _resolve_kitchen_visual_lane(destination_name):
+    normalized = _normalize_print_destination(destination_name)
+    if normalized in ['cozinha entradas', 'cozinha sobremesa']:
+        return 'secondary'
+    return 'primary'
 
 
 def _classify_section(category):
@@ -170,6 +186,7 @@ def _build_kds_payload(station, now=None):
                     printer_name = 'Cozinha'
 
             section_name = printer_name
+            section_lane = _resolve_kitchen_visual_lane(section_name)
 
             # Station Filtering Logic
             if station == 'kitchen':
@@ -285,6 +302,8 @@ def _build_kds_payload(station, now=None):
                 'qty': item.get('qty', 1),
                 'category': cat,
                 'section': section_name,
+                'print_destination': section_name,
+                'visual_lane': section_lane,
                 'status': kds_status,
                 'order_time': item_created_at.isoformat(),
                 'start_time': start_time,
@@ -322,7 +341,7 @@ def _build_kds_payload(station, now=None):
         basis_items = active_items if active_items else table_items
         
         order_wait_minutes = order_max_wait_minutes
-        wait_bucket = _compute_order_wait_bucket(order_max_wait_minutes)
+        wait_bucket = _compute_order_wait_bucket(order_wait_minutes)
         is_over_avg = order_late # Use late flag for order highlighting too
         
         sections = {}
@@ -333,8 +352,10 @@ def _build_kds_payload(station, now=None):
             sections[key].append(i)
         sections_list = []
         for name, items_list in sections.items():
+            section_lane = _resolve_kitchen_visual_lane(name)
             sections_list.append({
                 'name': name,
+                'visual_lane': section_lane,
                 'pending': sum(1 for i in items_list if i['status'] == 'pending'),
                 'preparing': sum(1 for i in items_list if i['status'] == 'preparing'),
                 'done': sum(1 for i in items_list if i['status'] == 'done'),
@@ -720,7 +741,7 @@ def kitchen_portion():
     }))
 
     if request.method == 'POST':
-        origin_name = request.form.get('origin_product')
+        origin_name = str(request.form.get('origin_product') or '').strip()
         origin_supplier = str(request.form.get('origin_supplier') or '').strip()
         frozen_weight = request.form.get('frozen_weight')
         thawed_weight = request.form.get('thawed_weight')
@@ -735,15 +756,32 @@ def kitchen_portion():
         final_qties = request.form.getlist('final_qty[]')
         dest_counts = request.form.getlist('dest_count[]')
 
-        if not all([origin_name, frozen_weight, thawed_weight, trim_weight, discard_weight]) or not dest_names:
-            flash('Preencha todos os campos.')
+        components = []
+        for i in range(len(component_names)):
+            name = component_names[i].strip() if i < len(component_names) and component_names[i] else ''
+            weight_str = component_weights[i] if i < len(component_weights) else ''
+            if not name and not weight_str:
+                continue
+            try:
+                weight_g = float(weight_str)
+            except (TypeError, ValueError):
+                weight_g = 0.0
+            if name and weight_g > 0:
+                components.append({'name': name, 'weight_g': weight_g})
+
+        has_origin_input = bool(origin_name)
+        if not all([frozen_weight, thawed_weight, trim_weight, discard_weight]) or not dest_names:
+            flash('Preencha os campos obrigatórios dos passos utilizados.')
+            return redirect(url_for('kitchen.kitchen_portion'))
+        if not has_origin_input and not components:
+            flash('Informe o item de origem no Passo 1 ou preencha ao menos um item válido no Passo 2.')
             return redirect(url_for('kitchen.kitchen_portion'))
         if origin_supplier and origin_supplier not in supplier_names:
             flash('Fornecedor inválido. Selecione um fornecedor cadastrado.')
             return redirect(url_for('kitchen.kitchen_portion'))
 
         # Validate against Portioning Rules (Server-side enforcement)
-        origin_prod_data = next((p for p in products if p['name'] == origin_name), None)
+        origin_prod_data = next((p for p in products if p['name'] == origin_name), None) if has_origin_input else None
         if origin_prod_data:
             allowed_prods = product_rules_map.get(origin_name)
             allowed_cats = rules_map.get(origin_prod_data.get('category'))
@@ -834,22 +872,33 @@ def kitchen_portion():
             flash('Peso cozido não pode ser maior que o peso limpo após aparas e descarte.')
             return redirect(url_for('kitchen.kitchen_portion'))
 
-        # Build optional multi-origin components
-        components = []
-        for i in range(len(component_names)):
-            name = component_names[i].strip() if i < len(component_names) and component_names[i] else ''
-            weight_str = component_weights[i] if i < len(component_weights) else ''
-            if not name and not weight_str:
-                continue
-            try:
-                weight_g = float(weight_str)
-            except (TypeError, ValueError):
-                weight_g = 0.0
-            if name and weight_g > 0:
-                components.append({'name': name, 'weight_g': weight_g})
-
         # Get product details for pricing
         origin_prod = next((p for p in products if p['name'] == origin_name), None)
+        origin_label = origin_name if origin_name else 'KIT DE ORIGEM'
+        trim_return_product = origin_name
+        if not trim_return_product and components:
+            trim_return_product = components[0]['name'] if len(components) == 1 else 'INSUMOS BRUTOS (KIT)'
+
+        current_balances = get_product_balances()
+        stock_errors = []
+        if components:
+            for comp in components:
+                comp_name = comp.get('name')
+                required_kg = float(comp.get('weight_g', 0) or 0) / 1000.0
+                available_kg = float(current_balances.get(comp_name, 0.0) or 0.0)
+                if required_kg > available_kg:
+                    stock_errors.append(
+                        f"{comp_name}: disponível {available_kg:.3f}kg, necessário {required_kg:.3f}kg"
+                    )
+        else:
+            available_kg = float(current_balances.get(origin_name, 0.0) or 0.0)
+            if frozen_weight_kg > available_kg:
+                stock_errors.append(
+                    f"{origin_name}: disponível {available_kg:.3f}kg, necessário {frozen_weight_kg:.3f}kg"
+                )
+        if stock_errors:
+            flash('Estoque insuficiente para porcionamento. ' + ' | '.join(stock_errors))
+            return redirect(url_for('kitchen.kitchen_portion'))
 
         # Calculate Losses
         thaw_loss_kg = frozen_weight_kg - thawed_weight_kg
@@ -885,7 +934,7 @@ def kitchen_portion():
                     'supplier': "PORCIONAMENTO (SAÍDA)",
                     'qty': -comp_weight_kg,
                     'price': price,
-                    'invoice': f"{supplier_info} | Transf: {', '.join([d['name'] for d in parsed_destinations])} | {loss_info}",
+                    'invoice': f"{supplier_info} | Origem: {origin_label} | Transf: {', '.join([d['name'] for d in parsed_destinations])} | {loss_info}",
                     'origin_supplier': origin_supplier,
                     'date': datetime.now().strftime('%d/%m/%Y'),
                     'entry_date': datetime.now().strftime('%d/%m/%Y %H:%M')
@@ -902,7 +951,7 @@ def kitchen_portion():
                 'supplier': "PORCIONAMENTO (SAÍDA)",
                 'qty': -frozen_weight_kg,
                 'price': origin_price,
-                'invoice': f"{supplier_info} | Transf: {', '.join([d['name'] for d in parsed_destinations])} | {loss_info}",
+                'invoice': f"{supplier_info} | Origem: {origin_label} | Transf: {', '.join([d['name'] for d in parsed_destinations])} | {loss_info}",
                 'origin_supplier': origin_supplier,
                 'date': datetime.now().strftime('%d/%m/%Y'),
                 'entry_date': datetime.now().strftime('%d/%m/%Y %H:%M')
@@ -919,11 +968,11 @@ def kitchen_portion():
             trim_return_entry = {
                 'id': datetime.now().strftime('%Y%m%d%H%M%S') + "_PORT_TRIM_RETURN",
                 'user': session['user'],
-                'product': origin_name,
+                'product': trim_return_product,
                 'supplier': "PORCIONAMENTO (RETORNO APARAS)",
                 'qty': trim_weight_kg,
                 'price': average_origin_cost_per_kg,
-                'invoice': f"{supplier_info} | Retorno de aparas ao bruto | Origem: {origin_name} | Aparas: {trim_weight_kg:.3f}kg",
+                'invoice': f"{supplier_info} | Retorno de aparas ao bruto | Origem: {origin_label} | Aparas: {trim_weight_kg:.3f}kg",
                 'origin_supplier': origin_supplier,
                 'date': datetime.now().strftime('%d/%m/%Y'),
                 'entry_date': datetime.now().strftime('%d/%m/%Y %H:%M')
@@ -945,7 +994,7 @@ def kitchen_portion():
                 'supplier': "PORCIONAMENTO (ENTRADA)",
                 'qty': final_qty,
                 'price': final_price,
-                'invoice': f"{supplier_info} | Origem: {origin_name} | Qtd: {dest['count']} | Rateio Custo: {((dest['qty_kg']/total_output_weight_kg)*100):.1f}% | Méd: {(dest['qty_g']/dest['count']):.1f}g",
+                'invoice': f"{supplier_info} | Origem: {origin_label} | Qtd: {dest['count']} | Rateio Custo: {((dest['qty_kg']/total_output_weight_kg)*100):.1f}% | Méd: {(dest['qty_g']/dest['count']):.1f}g",
                 'origin_supplier': origin_supplier,
                 'date': datetime.now().strftime('%d/%m/%Y'),
                 'entry_date': datetime.now().strftime('%d/%m/%Y %H:%M')
@@ -996,7 +1045,7 @@ def kitchen_portion():
                         acao='Preço unitário atualizado por porcionamento',
                         entidade='Estoque',
                         detalhes={
-                            'origin_product': origin_name,
+                            'origin_product': origin_label,
                             'updated_products': updated_products
                         },
                         nivel_severidade='INFO'
@@ -1005,7 +1054,7 @@ def kitchen_portion():
             LoggerService.log_acao(
                 acao='Falha ao atualizar preço unitário no porcionamento',
                 entidade='Estoque',
-                detalhes={'origin_product': origin_name, 'erro': str(e)},
+                detalhes={'origin_product': origin_label, 'erro': str(e)},
                 nivel_severidade='ERRO'
             )
             flash('Porcionamento salvo, mas houve falha ao atualizar preço unitário dos produtos.')

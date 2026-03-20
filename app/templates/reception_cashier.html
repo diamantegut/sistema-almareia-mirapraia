@@ -309,6 +309,19 @@
                                 <td class="text-end fw-bold {{ 'text-danger' if t.type in ['out', 'withdrawal'] else 'text-success' }}">
                                     {% if t.type in ['out', 'withdrawal'] %}-{% endif %}
                                     R$ {{ "%.2f"|format(t.amount) }}
+                                    {% if t.details and t.details.change_amount %}
+                                        <div class="small text-danger">Troco: R$ {{ "%.2f"|format(t.details.change_amount) }}</div>
+                                    {% endif %}
+                                    {% if t.details and t.details.amount_received %}
+                                        <div class="small text-muted">Recebido: R$ {{ "%.2f"|format(t.details.amount_received) }}</div>
+                                        {% if t.type in ['sale', 'in'] %}
+                                            {% if (t.details.change_amount|default(0)|float) > 0 %}
+                                                <div><span class="badge bg-warning text-dark">Com troco</span></div>
+                                            {% else %}
+                                                <div><span class="badge bg-success-subtle text-success">Pagamento exato</span></div>
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endif %}
                                 </td>
                             </tr>
                             {% else %}
@@ -1526,7 +1539,13 @@ function submitPrintReport() {
 
         remainingEl.textContent = remaining > 0 ? remaining.toFixed(2) : '0.00';
         
-        if (remaining <= 0.01) {
+        if (remaining < -0.01) {
+            const change = Math.abs(remaining);
+            document.getElementById('remainingContainer').classList.remove('text-danger');
+            document.getElementById('remainingContainer').classList.add('text-success');
+            document.getElementById('remainingContainer').innerHTML = 'Troco: R$ <span id="remainingAmount">' + change.toFixed(2) + '</span>';
+            confirmBtn.disabled = false;
+        } else if (remaining <= 0.01) {
             document.getElementById('remainingContainer').classList.remove('text-danger');
             document.getElementById('remainingContainer').classList.add('text-success');
             document.getElementById('remainingContainer').innerHTML = 'Total Pago <i class="bi bi-check-circle-fill"></i>';
@@ -1727,6 +1746,21 @@ function submitPrintReport() {
                 const amountClass = isNegative ? 'text-danger' : 'text-success';
                 const prefix = isNegative ? '-' : '';
 
+                const details = t.details || {};
+                const receivedAmount = Number(details.amount_received || 0);
+                const changeAmount = Number(details.change_amount || 0);
+                let moneyDetails = '';
+                if (changeAmount > 0) {
+                    moneyDetails += `<div class="small text-danger">Troco: R$ ${changeAmount.toFixed(2)}</div>`;
+                }
+                if (receivedAmount > 0) {
+                    moneyDetails += `<div class="small text-muted">Recebido: R$ ${receivedAmount.toFixed(2)}</div>`;
+                    if (['sale', 'in'].includes(t.type)) {
+                        moneyDetails += changeAmount > 0
+                            ? `<div><span class="badge bg-warning text-dark">Com troco</span></div>`
+                            : `<div><span class="badge bg-success-subtle text-success">Pagamento exato</span></div>`;
+                    }
+                }
                 row.innerHTML = `
                     <td>${t.timestamp ? t.timestamp.split(' ')[1] : t.time}</td>
                     <td>${typeBadge}</td>
@@ -1734,6 +1768,7 @@ function submitPrintReport() {
                     <td>${paymentCol}</td>
                     <td class="text-end fw-bold ${amountClass}">
                         ${prefix} R$ ${parseFloat(t.amount).toFixed(2)}
+                        ${moneyDetails}
                     </td>
                 `;
                 tbody.appendChild(row);

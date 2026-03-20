@@ -24,6 +24,7 @@ from app.services.printing_service import (
 )
 from app.services.fiscal_service import load_fiscal_settings, process_pending_emissions
 from app.services.fiscal_pool_service import FiscalPoolService
+from app.services.payment_allocation_service import allocate_payments_with_change
 from app.services.logger_service import log_system_action, log_security_audit
 from app.services.data_service import load_stock_entries
 from app.utils.logger import log_action
@@ -2126,13 +2127,33 @@ def restaurant_table_order(table_id):
                     if grand_total < 0:
                         grand_total = 0.0
                     
-                    already_paid = order.get('total_paid', 0)
-                    new_payments_total = sum(float(p.get('amount', 0)) for p in payments)
+                    already_paid = float(order.get('total_paid', 0) or 0)
+                    needed = max(0.0, grand_total - already_paid)
+                    if needed <= 0.01 and not payments:
+                        allocation = {
+                            'payments': [],
+                            'amount_due': 0.0,
+                            'total_received': 0.0,
+                            'total_change': 0.0,
+                            'total_applied': 0.0
+                        }
+                    else:
+                        try:
+                            allocation = allocate_payments_with_change(payments, needed)
+                        except ValueError as e:
+                            flash(f'Erro de pagamento: {str(e)}')
+                            return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
+
+                    normalized_payments = allocation['payments']
+                    total_due_payment = float(allocation['amount_due'])
+                    total_received = float(allocation['total_received'])
+                    total_change = float(allocation['total_change'])
+                    new_payments_total = float(allocation['total_applied'])
                     total_paid_all = already_paid + new_payments_total
                     
                     current_app.logger.info(f"Closing Table {table_id}: GrandTotal={grand_total:.2f}, AlreadyPaid={already_paid:.2f}, NewPayments={new_payments_total:.2f}, TotalAll={total_paid_all:.2f}")
     
-                    remaining_check = grand_total - already_paid
+                    remaining_check = total_due_payment
                     if not payments and remaining_check > 0.01:
                         flash(f'Erro: Nenhum pagamento informado e saldo pendente (R$ {remaining_check:.2f}).')
                         return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
@@ -2142,25 +2163,14 @@ def restaurant_table_order(table_id):
                         flash(f'Erro: Valor total pago (R$ {total_paid_all:.2f}) é menor que o total da conta (R$ {grand_total:.2f}). Falta R$ {remaining:.2f}.')
                         return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
                     
-                    # Validation: Prevent overcharging on non-cash methods (Critical Fix)
-                    needed = grand_total - already_paid
-                    if needed < 0: needed = 0
-                    
-                    new_non_cash = sum(float(p.get('amount', 0)) for p in payments if 'dinheiro' not in str(p.get('method', '')).lower())
-                    
-                    if new_non_cash > (needed + 0.05):
-                         current_app.logger.warning(f"Overpayment attempt blocked for table {table_id}. Needed: {needed}, Non-Cash Attempt: {new_non_cash}")
-                         flash(f'Erro: O valor em cartão/outros (R$ {new_non_cash:.2f}) excede o restante a pagar (R$ {needed:.2f}). Verifique os pagamentos parciais.')
-                         return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
-                    
                     current_cashier = get_current_cashier(cashier_type='restaurant')
                     if not current_cashier:
                         flash('Erro: Caixa fechado. Não é possível finalizar.')
                         return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
                     
-                    payment_group_id = str(uuid.uuid4()) if len(payments) > 1 else None
+                    payment_group_id = str(uuid.uuid4()) if len(normalized_payments) > 1 else None
                     commission_reference_id = f"TABLE_CLOSE_{str_table_id}_{datetime.now().strftime('%Y%m%d%H%M%S')}_{uuid.uuid4().hex[:6]}"
-                    total_payment_group_amount = sum(float(p.get('amount', 0)) for p in payments) if payment_group_id else 0
+                    total_payment_group_amount = new_payments_total if payment_group_id else 0
                     added_cashier_transaction_ids = []
                     added_stock_entry_ids = []
                     close_id = None
@@ -2197,7 +2207,7 @@ def restaurant_table_order(table_id):
                                 'table_id': table_id,
                                 'service_fee_removed': service_fee_removed,
                                 'grand_total': grand_total,
-                                'payments': payments,
+                                'payments': normalized_payments,
                             },
                             user=session.get('user', 'Sistema'),
                             category='Restaurante'
@@ -2206,11 +2216,12 @@ def restaurant_table_order(table_id):
                         pass
 
                     try:
-                        for p in payments:
+                        for p in normalized_payments:
                             method = sanitize_input(p.get('method'))
-                            try:
-                                amount = float(p.get('amount'))
-                            except:
+                            amount = float(p.get('amount_applied', 0) or 0)
+                            amount_received = float(p.get('amount_input', amount) or amount)
+                            change_amount = float(p.get('change_amount', 0) or 0)
+                            if amount <= 0 and change_amount <= 0:
                                 continue
                             
                             details = {}
@@ -2225,6 +2236,9 @@ def restaurant_table_order(table_id):
                             details['closed_by'] = session.get('user')
                             details['category'] = 'Pagamento de Conta'
                             details['commission_eligible'] = not service_fee_removed
+                            details['amount_due'] = total_due_payment
+                            details['amount_received'] = amount_received
+                            details['change_amount'] = change_amount
                             if service_fee_removed:
                                 details['service_fee_removed'] = True
 
@@ -2394,11 +2408,13 @@ def restaurant_table_order(table_id):
                 if 'partial_payments' in order:
                     all_payments.extend(order['partial_payments'])
                 
-                for p in payments:
+                for p in normalized_payments:
                     all_payments.append({
                         'id': str(uuid.uuid4()),
                         'timestamp': datetime.now().strftime('%d/%m/%Y %H:%M'),
-                        'amount': float(p.get('amount', 0)),
+                        'amount': float(p.get('amount_applied', 0)),
+                        'received_amount': float(p.get('amount_input', 0)),
+                        'change_amount': float(p.get('change_amount', 0)),
                         'method': p.get('method'),
                         'user': session.get('user'),
                         'type': 'final_payment'
@@ -2576,7 +2592,10 @@ def restaurant_table_order(table_id):
                     except Exception as emit_exc:
                         flash(f'Mesa fechada, mas emissão imediata falhou: {emit_exc}')
                 
-                flash('Mesa fechada com sucesso!')
+                if total_change > 0:
+                    flash(f'Mesa fechada com sucesso! Recebido: R$ {total_received:.2f} | Troco: R$ {total_change:.2f}.')
+                else:
+                    flash('Mesa fechada com sucesso!')
                 return redirect(url_for('restaurant.restaurant_tables'))
             except Exception as e:
                 import traceback
@@ -2616,18 +2635,39 @@ def restaurant_table_order(table_id):
                 return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
             
             if str_table_id in orders:
+                current_total = float(orders[str_table_id].get('total', 0) or 0) * 1.1
+                already_paid = float(orders[str_table_id].get('total_paid', 0) or 0)
+                needed = max(0.0, current_total - already_paid)
+                try:
+                    allocation = allocate_payments_with_change(
+                        [{'method': method, 'amount': amount}],
+                        needed
+                    )
+                except ValueError as e:
+                    flash(f'Erro de pagamento: {str(e)}')
+                    return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
+                payment_alloc = allocation['payments'][0]
+                applied_amount = float(payment_alloc.get('amount_applied', 0) or 0)
+                received_amount = float(payment_alloc.get('amount_input', amount) or amount)
+                change_amount = float(payment_alloc.get('change_amount', 0) or 0)
+                if applied_amount <= 0 and change_amount <= 0:
+                    flash('Pagamento inválido para o saldo atual.')
+                    return redirect(url_for('restaurant.restaurant_table_order', table_id=table_id))
+
                 if 'partial_payments' not in orders[str_table_id]:
                     orders[str_table_id]['partial_payments'] = []
                 
                 orders[str_table_id]['partial_payments'].append({
                     'id': str(uuid.uuid4()),
                     'timestamp': datetime.now().strftime('%d/%m/%Y %H:%M'),
-                    'amount': amount,
+                    'amount': applied_amount,
+                    'received_amount': received_amount,
+                    'change_amount': change_amount,
                     'method': method,
                     'user': session.get('user')
                 })
                 
-                orders[str_table_id]['total_paid'] = orders[str_table_id].get('total_paid', 0) + amount
+                orders[str_table_id]['total_paid'] = orders[str_table_id].get('total_paid', 0) + applied_amount
                 
                 # Register in Cashier IMMEDIATELY
                 # Ensure using robust get_current_cashier
@@ -2635,11 +2675,16 @@ def restaurant_table_order(table_id):
                 if current_cashier:
                     CashierService.add_transaction(
                         cashier_type='restaurant',
-                        amount=amount,
+                        amount=applied_amount,
                         description=f"Pagamento Parcial Mesa {table_id}",
                         payment_method=method,
                         user=session.get('user'),
-                        transaction_type='sale'
+                        transaction_type='sale',
+                        details={
+                            'amount_due': needed,
+                            'amount_received': received_amount,
+                            'change_amount': change_amount
+                        }
                     )
                 else:
                     flash('Aviso: Pagamento registrado na mesa, mas CAIXA ESTÁ FECHADO. Lance manualmente no caixa depois.')
@@ -2650,8 +2695,11 @@ def restaurant_table_order(table_id):
                      current_app.logger.info(f"Mesa {table_id} totalmente paga via parcial. Total Pago: {orders[str_table_id]['total_paid']:.2f}")
 
                 save_table_orders(orders)
-                log_action('Pagamento Parcial', f'Mesa {table_id}: R$ {amount:.2f} ({method}) por {session.get("user")}', department='Restaurante')
-                flash('Pagamento parcial registrado.')
+                log_action('Pagamento Parcial', f'Mesa {table_id}: R$ {applied_amount:.2f} ({method}) por {session.get("user")}', department='Restaurante')
+                if change_amount > 0:
+                    flash(f'Pagamento parcial registrado. Recebido: R$ {received_amount:.2f} | Troco: R$ {change_amount:.2f}.')
+                else:
+                    flash('Pagamento parcial registrado.')
 
         elif action == 'void_partial_payment':
             payment_id = request.form.get('payment_id')

@@ -32,7 +32,7 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
                 <i class="bi bi-arrows-fullscreen"></i>
                 Tela cheia
             </button>
-            <span class="badge bg-info text-dark kds-refresh-label">Atualizando a cada 20s</span>
+            <span class="badge bg-info text-dark kds-refresh-label">Atualizando a cada 8s</span>
             <button type="button" class="btn btn-sm btn-outline-light" id="kds-refresh-now">
                 <i class="bi bi-arrow-clockwise"></i>
                 Atualizar agora
@@ -49,9 +49,9 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
         <div class="kds-row-title">Bar</div>
         <div id="kds-orders-bar" class="kds-orders-strip"></div>
         {% else %}
-        <div class="kds-row-title">Pedidos Cozinha</div>
+        <div class="kds-row-title">Pedidos Cozinha (Impressão: Cozinha)</div>
         <div id="kds-orders-main" class="kds-orders-strip"></div>
-        <div class="kds-row-title">Entradas / Sobremesas</div>
+        <div class="kds-row-title">Entradas e Sobremesas (Impressão: Cozinha Entradas/Sobremesa)</div>
         <div id="kds-orders-secondary" class="kds-orders-strip"></div>
         {% endif %}
     </div>
@@ -59,7 +59,7 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
 
 <script>
     const kdsStation = "{{ station }}";
-    const pollingIntervalMs = 20000;
+    const pollingIntervalMs = 8000;
     let kdsTimerId = null;
     const kdsUpdateUrl = "{{ url_for('kitchen.kitchen_kds_update_status') }}";
     const kdsMarkReceivedUrl = "{{ url_for('kitchen.kitchen_kds_mark_received') }}";
@@ -68,6 +68,10 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
     let kdsKnownActiveItems = new Set();
     let kdsFirstFetchCompleted = false;
     let kdsAudioContext = null;
+    const kdsQuery = new URLSearchParams(window.location.search || "");
+    const autoFullscreenRequested = kdsQuery.get("autofs") === "1";
+    const coarsePointer = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+    let kdsAutoFullscreenTried = false;
 
     function formatTimeFromIso(isoString) {
         if (!isoString) return "";
@@ -169,9 +173,11 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
     function clearOrders() {
         const main = document.getElementById("kds-orders-main");
         const secondary = document.getElementById("kds-orders-secondary");
+        const barDrinks = document.getElementById("kds-orders-bar-drinks");
         const bar = document.getElementById("kds-orders-bar");
         if (main) main.innerHTML = "";
         if (secondary) secondary.innerHTML = "";
+        if (barDrinks) barDrinks.innerHTML = "";
         if (bar) bar.innerHTML = "";
     }
 
@@ -245,6 +251,35 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
         overlay.classList.remove("show");
     }
 
+    function requestKdsFullscreen() {
+        if (document.fullscreenElement) return Promise.resolve(true);
+        const root = document.documentElement;
+        const req = root.requestFullscreen || root.webkitRequestFullscreen || root.msRequestFullscreen;
+        if (!req) return Promise.resolve(false);
+        try {
+            const result = req.call(root);
+            if (result && typeof result.then === "function") {
+                return result.then(() => true).catch(() => false);
+            }
+            return Promise.resolve(true);
+        } catch (_) {
+            return Promise.resolve(false);
+        }
+    }
+
+    function setupAutoFullscreenHooks() {
+        const shouldAttempt = autoFullscreenRequested || coarsePointer;
+        if (!shouldAttempt || kdsAutoFullscreenTried) return;
+        const attempt = () => {
+            if (kdsAutoFullscreenTried) return;
+            kdsAutoFullscreenTried = true;
+            requestKdsFullscreen();
+        };
+        setTimeout(attempt, 100);
+        document.addEventListener("pointerdown", attempt, { once: true, passive: true });
+        document.addEventListener("touchstart", attempt, { once: true, passive: true });
+    }
+
     function renderKds(payload) {
         const isBar = kdsStation === "bar";
         const mainStrip = document.getElementById("kds-orders-main");
@@ -288,8 +323,10 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
                         barMainCards.push({ order, section, items, ts, waitMinutes });
                     }
                 } else {
+                    const lane = (section.visual_lane || "").toString().toLowerCase();
                     const secName = (section.name || "").toString().toLowerCase();
-                    if (secName.indexOf("entrada") !== -1 || secName.indexOf("sobremesa") !== -1) {
+                    const isSecondary = lane === "secondary" || secName.indexOf("entrada") !== -1 || secName.indexOf("sobremesa") !== -1;
+                    if (isSecondary) {
                         secondaryCards.push({ order, section, items, ts, waitMinutes });
                     } else {
                         mainCards.push({ order, section, items, ts, waitMinutes });
@@ -372,7 +409,7 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
             }
             const actionBtn = document.createElement("button");
             actionBtn.type = "button";
-            actionBtn.className = "btn btn-sm ms-2 kds-card-action";
+            actionBtn.className = "btn ms-2 kds-card-action";
             actionBtn.dataset.tableId = order.table_id || "";
             const idsPending = items.filter(i => i.status === "pending").map(i => i.id).filter(Boolean);
             const idsPreparing = items.filter(i => i.status === "preparing").map(i => i.id).filter(Boolean);
@@ -391,13 +428,22 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
                 actionBtn.textContent = "Finalizado";
                 actionBtn.classList.add("btn-success");
             }
-            actionBtn.addEventListener("click", function (ev) {
+            const detailsBtn = document.createElement("button");
+            detailsBtn.type = "button";
+            detailsBtn.className = "btn btn-outline-light kds-card-details";
+            detailsBtn.textContent = "Detalhes";
+            detailsBtn.addEventListener("click", function (ev) {
                 ev.stopPropagation();
+                openKdsOverlay(card);
+            });
+
+            function runCardStatusTransition() {
                 const tableId = actionBtn.dataset.tableId || "";
                 const getIds = (key) => {
                     try { return JSON.parse(actionBtn.dataset[key] || "[]"); } catch { return []; }
                 };
                 if (!tableId) return;
+                card.classList.add("kds-card-updating");
                 const current = actionBtn.dataset.status || "pending";
                 let next = "preparing";
                 if (current === "pending") {
@@ -413,17 +459,21 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
                     actionBtn.textContent = "Preparando";
                     actionBtn.classList.add("btn-warning");
                     actionBtn.dataset.status = "preparing";
+                    card.classList.remove("kds-order-state-pending", "kds-order-state-done");
+                    card.classList.add("kds-order-state-preparing");
                 } else if (next === "done") {
                     actionBtn.textContent = "Finalizado";
                     actionBtn.classList.add("btn-success");
                     actionBtn.dataset.status = "done";
+                    card.classList.remove("kds-order-state-pending", "kds-order-state-preparing");
+                    card.classList.add("kds-order-state-done");
                 } else if (next === "archived") {
                     actionBtn.textContent = "Arquivando...";
                 }
                 // Determina quais itens mudar baseado no passo
                 if (next === "archived") {
                     const ids = getIds("doneIds");
-                    if (!ids.length) { fetchKdsData(); return; }
+                    if (!ids.length) { fetchKdsData(); card.classList.remove("kds-card-updating"); return; }
                     const colEl = card.parentElement;
                     if (colEl) {
                         colEl.remove();
@@ -443,10 +493,34 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
                     } else {
                         ids = getIds("preparingIds");
                     }
-                    if (!ids.length) { fetchKdsData(); return; }
+                    if (!ids.length) { fetchKdsData(); card.classList.remove("kds-card-updating"); return; }
                     updateItemsStatus(tableId, ids, next).then(fetchKdsData);
                 }
+                setTimeout(function () {
+                    card.classList.remove("kds-card-updating");
+                }, 280);
+            }
+
+            actionBtn.addEventListener("click", function (ev) {
+                ev.stopPropagation();
+                runCardStatusTransition();
             });
+            card.addEventListener("click", function (ev) {
+                if (ev.target.closest(".kds-item-local-toggle") || ev.target.closest(".kds-card-action") || ev.target.closest(".kds-card-details")) {
+                    return;
+                }
+                runCardStatusTransition();
+            });
+            card.addEventListener("touchstart", function () {
+                card.classList.add("kds-card-touching");
+            }, { passive: true });
+            card.addEventListener("touchend", function () {
+                card.classList.remove("kds-card-touching");
+            }, { passive: true });
+            card.addEventListener("touchcancel", function () {
+                card.classList.remove("kds-card-touching");
+            }, { passive: true });
+            titleRow.appendChild(detailsBtn);
             titleRow.appendChild(actionBtn);
             titleWrap.appendChild(titleRow);
             const waiterSpan = document.createElement("div");
@@ -562,9 +636,6 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
                 footer.appendChild(doneMark);
             }
             card.appendChild(footer);
-            card.addEventListener("click", function () {
-                openKdsOverlay(card);
-            });
             col.appendChild(card);
             return col;
         }
@@ -678,7 +749,7 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
                 ev.stopPropagation();
                 const inFullscreen = Boolean(document.fullscreenElement);
                 if (!inFullscreen) {
-                    document.documentElement.requestFullscreen().catch(() => null);
+                    requestKdsFullscreen();
                 } else {
                     document.exitFullscreen().catch(() => null);
                 }
@@ -691,6 +762,7 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
                 document.body.classList.remove("kds-fullscreen");
             }
         });
+        setupAutoFullscreenHooks();
         startKdsPolling();
     });
 </script>
@@ -705,8 +777,14 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
 </div>
 
 <style>
+    html, body {
+        min-height: 100%;
+        height: 100%;
+    }
+
     body {
         background-color: #343a40;
+        overflow-x: hidden;
     }
 
     body.kds-mode #background-watermark,
@@ -723,7 +801,8 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
     body.kds-mode .cs_site_main > .container.cs_py_40 {
         width: 100%;
         max-width: 100%;
-        padding: 0.25rem 0.45rem;
+        min-height: 100vh;
+        padding: 0.1rem 0.25rem;
     }
 
     body.kds-fullscreen .kds-refresh-label,
@@ -733,8 +812,9 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
     }
 
     .kds-page {
-        padding-top: 0.5rem;
-        padding-bottom: 0.5rem;
+        padding-top: 0.2rem;
+        padding-bottom: 0.2rem;
+        min-height: 100vh;
     }
 
     .kds-header {
@@ -742,7 +822,9 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
     }
 
     .kds-station-toggle .btn {
-        padding-inline: 0.75rem;
+        padding-inline: 0.95rem;
+        min-height: 48px;
+        font-size: 1rem;
     }
 
     .kds-title {
@@ -755,17 +837,17 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
     }
 
     .kds-clock {
-        font-size: 0.9rem;
-        min-width: 80px;
+        font-size: 1rem;
+        min-width: 92px;
         text-align: right;
     }
 
     .kds-refresh-label {
-        font-size: 0.75rem;
+        font-size: 0.85rem;
     }
 
     .kds-summary {
-        min-height: 1.5rem;
+        min-height: 2rem;
     }
 
     .kds-summary-pill {
@@ -792,13 +874,13 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
     }
 
     .kds-orders-strip {
-        display: flex;
-        flex-wrap: nowrap;
-        gap: 0.5rem;
-        align-items: stretch;
-        overflow-x: auto;
-        padding-bottom: 0.25rem;
-        -webkit-overflow-scrolling: touch;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 0.75rem;
+        align-items: start;
+        overflow-x: hidden;
+        overflow-y: visible;
+        padding-bottom: 0.4rem;
     }
 
     .kds-row-title {
@@ -812,8 +894,7 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
     }
 
     .kds-col {
-        flex: 0 0 auto;
-        width: auto;
+        width: 100%;
     }
 
     .kds-order-card {
@@ -821,16 +902,26 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
         color: #f8f9fa;
         border-radius: 0.5rem;
         box-shadow: 0 0.15rem 0.4rem rgba(0, 0, 0, 0.5);
-        padding: 0.35rem 0.4rem 0.35rem 0.4rem;
+        padding: 0.55rem 0.55rem 0.45rem 0.55rem;
         display: flex;
         flex-direction: column;
-        min-width: 240px;
-        max-width: 320px;
-        min-height: 150px;
-        max-height: 230px;
+        width: 100%;
+        min-width: 0;
+        max-width: none;
+        min-height: 220px;
+        max-height: none;
         cursor: pointer;
         border: 2px solid rgba(255, 255, 255, 0.08);
         transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .kds-order-card:active,
+    .kds-order-card.kds-card-touching {
+        transform: scale(0.992);
+    }
+
+    .kds-order-card.kds-card-updating {
+        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.35), 0 0.2rem 0.55rem rgba(0, 0, 0, 0.45);
     }
 
     .kds-order-late {
@@ -898,7 +989,7 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
     }
 
     .kds-order-title {
-        font-size: 1rem;
+        font-size: 1.18rem;
         font-weight: 600;
         white-space: nowrap;
         overflow: hidden;
@@ -912,7 +1003,7 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
     }
 
     .kds-order-waiter {
-        font-size: 0.75rem;
+        font-size: 0.88rem;
         color: #ced4da;
         white-space: nowrap;
         overflow: hidden;
@@ -931,7 +1022,7 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
         border-radius: 999px;
         padding: 0.1rem 0.4rem;
         background-color: #0d6efd;
-        font-size: 0.7rem;
+        font-size: 0.82rem;
         max-width: 120px;
         white-space: nowrap;
         overflow: hidden;
@@ -944,9 +1035,9 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
 
     .kds-badge-wait {
         border-radius: 999px;
-        font-size: 0.72rem;
+        font-size: 0.92rem;
         font-weight: 700;
-        padding: 0.08rem 0.45rem;
+        padding: 0.2rem 0.62rem;
         border: 1px solid currentColor;
     }
 
@@ -964,7 +1055,7 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
     .kds-order-body {
         flex: 1 1 auto;
         overflow-y: auto;
-        padding: 0.25rem 0.1rem 0.1rem 0.1rem;
+        padding: 0.35rem 0.1rem 0.2rem 0.1rem;
         border-top: 1px solid rgba(255, 255, 255, 0.08);
         border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
@@ -974,8 +1065,8 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
         align-items: center;
         justify-content: space-between;
         gap: 0.35rem;
-        padding: 0.1rem 0;
-        font-size: 0.8rem;
+        padding: 0.3rem 0;
+        font-size: 0.95rem;
     }
 
     .kds-item-main {
@@ -992,12 +1083,12 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
     }
 
     .kds-item-name {
-        font-weight: 500;
+        font-weight: 600;
         color: #f8f9fa;
     }
 
     .kds-item-notes {
-        font-size: 0.7rem;
+        font-size: 0.82rem;
         color: #ffc9c9;
         max-height: 2.1em;
         overflow: hidden;
@@ -1005,17 +1096,25 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
     }
 
     .kds-item-status {
-        font-size: 0.7rem;
-        padding: 0.1rem 0.35rem;
+        font-size: 0.82rem;
+        padding: 0.22rem 0.52rem;
         border-radius: 999px;
         background-color: rgba(255, 255, 255, 0.07);
         white-space: nowrap;
     }
     
     .kds-card-action {
-        font-size: 0.72rem;
-        padding: 0.1rem 0.35rem;
+        font-size: 0.95rem;
+        padding: 0.5rem 0.9rem;
+        min-height: 48px;
         line-height: 1.1;
+        font-weight: 700;
+    }
+
+    .kds-card-details {
+        min-height: 48px;
+        font-size: 0.88rem;
+        padding: 0.46rem 0.78rem;
     }
 
     .kds-item-local-toggle {
@@ -1023,9 +1122,53 @@ KDS - {% if station == 'bar' %}Bar{% else %}Cozinha{% endif %}
         background: rgba(40, 167, 69, 0.15);
         color: #8ce99a;
         border-radius: 999px;
-        font-size: 0.65rem;
-        padding: 0.05rem 0.3rem;
+        font-size: 0.86rem;
+        padding: 0.28rem 0.62rem;
+        min-height: 48px;
         cursor: pointer;
+    }
+
+    @media (pointer: coarse) {
+        .kds-order-card {
+            min-height: 230px;
+        }
+        .kds-item-row {
+            padding: 0.35rem 0;
+            gap: 0.55rem;
+        }
+        .kds-card-action {
+            font-size: 1.02rem;
+            padding: 0.56rem 0.95rem;
+            min-height: 52px;
+        }
+        .kds-card-details {
+            font-size: 0.95rem;
+            min-height: 52px;
+        }
+        .kds-item-local-toggle {
+            font-size: 1rem;
+            padding: 0.42rem 0.8rem;
+            min-height: 52px;
+        }
+        .kds-orders-strip {
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+        }
+    }
+
+    @media (max-width: 1280px) {
+        .kds-orders-strip {
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        }
+    }
+
+    @media (max-width: 900px) {
+        .kds-header {
+            flex-direction: column;
+            align-items: stretch !important;
+        }
+        .kds-orders-strip {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
     }
 
     .kds-item-local-done .kds-item-name {

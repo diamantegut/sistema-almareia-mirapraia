@@ -1160,6 +1160,8 @@
                                         <th>Responsável</th>
                                         <th>Método</th>
                                         <th class="text-end">Valor</th>
+                                        <th class="text-end">Recebido</th>
+                                        <th class="text-end">Troco</th>
                                         <th class="text-center" style="width: 50px;">Ação</th>
                                     </tr>
                                 </thead>
@@ -1170,6 +1172,8 @@
                                         <td>{{ payment.user }}</td>
                                         <td>{{ payment.method }}</td>
                                         <td class="text-end fw-bold text-success">R$ {{ "%.2f"|format(payment.amount) }}</td>
+                                        <td class="text-end">R$ {{ "%.2f"|format(payment.received_amount|default(payment.amount)) }}</td>
+                                        <td class="text-end text-danger">R$ {{ "%.2f"|format(payment.change_amount|default(0)) }}</td>
                                         <td class="text-center">
                                             <form action="{{ url_for('restaurant.restaurant_table_order', table_id=table_id) }}" method="POST" onsubmit="return confirm('Tem certeza que deseja estornar este pagamento?');" style="margin: 0;">
                                                 <input type="hidden" name="action" value="void_partial_payment">

@@ -14,12 +14,19 @@ Backups/
 instance/
 data/
 data/**
+certs/
+.env*
 
 *.bak
 *.backup
 *.backup*
 *.tmp
 *.log
+*.pfx
+*.pem
+*.key
+*.crt
+*.cer
 run.bet
 sistema-almareia-mirapraia/
 

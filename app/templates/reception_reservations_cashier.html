@@ -145,6 +145,13 @@
                             {% if t.details and t.details.room_number %}
                             <span class="badge bg-light text-dark border ms-1">Qto {{ t.details.room_number }}</span>
                             {% endif %}
+                            {% if t.details and t.details.amount_received and t.type in ['sale', 'in'] %}
+                                {% if (t.details.change_amount|default(0)|float) > 0 %}
+                                    <span class="badge bg-warning text-dark ms-1">Com troco</span>
+                                {% else %}
+                                    <span class="badge bg-success-subtle text-success ms-1">Pagamento exato</span>
+                                {% endif %}
+                            {% endif %}
                         </td>
                         <td>
                             {% if t.type == 'sale' or t.type == 'in' %}
@@ -160,6 +167,12 @@
                         <td>{{ t.payment_method }}</td>
                         <td class="text-end fw-bold {{ 'text-danger' if t.amount < 0 or t.type in ['out', 'withdrawal', 'sangria'] else 'text-success' }}">
                             R$ {{ "%.2f"|format(t.amount) }}
+                            {% if t.details and t.details.change_amount %}
+                                <div class="small text-danger">Troco: R$ {{ "%.2f"|format(t.details.change_amount) }}</div>
+                            {% endif %}
+                            {% if t.details and t.details.amount_received %}
+                                <div class="small text-muted">Recebido: R$ {{ "%.2f"|format(t.details.amount_received) }}</div>
+                            {% endif %}
                         </td>
                         <td class="small text-muted">{{ t.user }}</td>
                     </tr>
