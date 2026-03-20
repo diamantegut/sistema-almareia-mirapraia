@@ -47,7 +47,7 @@ def _login(client, role="admin", department="Cozinha", user="tester"):
 
 
 def test_kitchen_pages_require_login(app_client):
-    for route in ["/kitchen/portion", "/kitchen/kds", "/kitchen/reports"]:
+    for route in ["/kitchen/portion", "/kitchen/kds", "/kitchen/reports", "/kitchen/breakfast-kds"]:
         resp = app_client.get(route)
         assert resp.status_code == 302
         assert "/auth/login" in resp.location
@@ -55,7 +55,7 @@ def test_kitchen_pages_require_login(app_client):
 
 def test_kitchen_authorization_blocks_non_kitchen_users(app_client):
     _login(app_client, role="colaborador", department="Recepção")
-    for route in ["/kitchen/portion", "/kitchen/kds", "/kitchen/reports"]:
+    for route in ["/kitchen/portion", "/kitchen/kds", "/kitchen/reports", "/kitchen/breakfast-kds"]:
         resp = app_client.get(route)
         assert resp.status_code == 302
         assert "/service/cozinha" in resp.location
@@ -63,6 +63,8 @@ def test_kitchen_authorization_blocks_non_kitchen_users(app_client):
     assert resp_api.status_code == 403
     payload = resp_api.get_json()
     assert payload["success"] is False
+    resp_breakfast_api = app_client.get("/kitchen/breakfast-kds/data")
+    assert resp_breakfast_api.status_code == 403
 
 
 def test_kitchen_pages_load_for_desktop_and_mobile(app_client, monkeypatch):
@@ -134,6 +136,18 @@ def test_kds_template_touchscreen_optimizations():
     assert "min-height: 48px;" in kds_html
 
 
+def test_breakfast_kds_template_has_tablet_and_modal_patterns():
+    root = Path(__file__).resolve().parents[1] / "app" / "templates"
+    html = (root / "kitchen_breakfast_kds.html").read_text(encoding="utf-8")
+    assert "KDS Café da Manhã" in html
+    assert "breakfast-kds-card" in html
+    assert 'id="breakfastKdsDetailsModal"' in html
+    assert "data-next-status=\"preparing\"" in html
+    assert "data-next-status=\"ready\"" in html
+    assert "data-next-status=\"delivered\"" in html
+    assert "requestBreakfastFullscreen" in html
+
+
 def test_kds_data_and_status_flow(app_client, monkeypatch):
     _login(app_client)
     orders = {
@@ -191,6 +205,70 @@ def test_kds_data_and_status_flow(app_client, monkeypatch):
     assert resp_received.status_code == 200
     assert orders["12"]["items"][0]["kds_status"] == "archived"
     assert len(saved_snapshots) >= 3
+
+
+def test_breakfast_kds_data_and_status_flow(app_client, monkeypatch):
+    _login(app_client)
+    occupancy = {
+        "12": {"reservation_id": "RES-12", "guest_name": "Ana"},
+        "2": {"reservation_id": "RES-2", "guest_name": "Bia"},
+    }
+    saved_store = {}
+
+    class _BreakfastServiceStub:
+        def get_reservation_by_id(self, rid):
+            return {"id": rid, "guest_name": "Ana" if rid == "RES-12" else "Bia", "room": "12" if rid == "RES-12" else "2"}
+
+        def build_operational_sheet(self, rid):
+            if rid == "RES-2":
+                return {
+                    "base_cafe_manha": {
+                        "quarto": "2",
+                        "hospede_principal": "Bia",
+                        "numero_hospedes": 3,
+                        "horario_cafe": "07:30",
+                        "frutas_preferidas": ["Mamão", "Banana", "Uva"],
+                        "alergias_restricoes": ["Alergia a Leite", "Sem Glúten"],
+                        "aniversariante": True,
+                        "comemoracao": "Aniversário",
+                        "observacoes_especiais": "Mesa sem lactose",
+                        "demais_hospedes": [{"nome": "Carlos", "relacao": "Filho"}],
+                    },
+                    "alergias": ["Leite"],
+                    "restricoes_alimentares": ["Sem Glúten"],
+                }
+            return {
+                "base_cafe_manha": {
+                    "quarto": "12",
+                    "hospede_principal": "Ana",
+                    "numero_hospedes": 1,
+                    "horario_cafe": "",
+                },
+                "alergias": [],
+                "restricoes_alimentares": [],
+            }
+
+    monkeypatch.setattr(kitchen_module, "load_room_occupancy", lambda: occupancy)
+    monkeypatch.setattr(kitchen_module, "ReservationService", lambda: _BreakfastServiceStub())
+    monkeypatch.setattr(kitchen_module, "_load_breakfast_kds_store", lambda: {"status_by_date": {}})
+    monkeypatch.setattr(kitchen_module, "_save_breakfast_kds_store", lambda payload: saved_store.update(payload))
+
+    resp = app_client.get("/kitchen/breakfast-kds/data")
+    assert resp.status_code == 200
+    payload = resp.get_json()
+    assert payload["success"] is True
+    rooms = payload["data"]["rooms"]
+    assert rooms[0]["room"] == "2"
+    assert rooms[0]["special"] == "🎉"
+    assert rooms[1]["room"] == "12"
+
+    resp_update = app_client.post("/kitchen/breakfast-kds/update_status", json={"room": "12", "status": "ready"})
+    assert resp_update.status_code == 200
+    out = resp_update.get_json()
+    assert out["success"] is True
+    assert out["status"] == "ready"
+    day_map = next(iter(saved_store["status_by_date"].values()))
+    assert day_map["12"]["status"] == "ready"
 
 
 def test_kds_visual_lane_by_print_destination(app_client, monkeypatch):

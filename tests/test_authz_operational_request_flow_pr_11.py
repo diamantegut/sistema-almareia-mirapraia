@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 
 from flask import Flask, session
 
@@ -205,3 +206,17 @@ def test_admin_fiscal_route_exposes_request_option_and_respects_grant(tmp_path, 
         session.update({"user": "oper5", "role": "colaborador", "department": "Serviço"})
         allowed = admin_routes.api_fiscal_receive.__wrapped__()
     assert _status_code(allowed) == 200
+
+
+def test_authz_policy_reception_rooms_sem_scope_obrigatorio():
+    policy_file = Path(__file__).resolve().parents[1] / "data" / "authz" / "policies_v1.json"
+    payload = json.loads(policy_file.read_text(encoding="utf-8"))
+    policies = payload.get("policies", [])
+    by_endpoint = {str(item.get("endpoint")): item for item in policies if isinstance(item, dict)}
+    reception_policy = by_endpoint.get("reception.reception_rooms")
+    assert isinstance(reception_policy, dict)
+    scope = reception_policy.get("scope", {})
+    assert scope.get("scopes_any", []) == []
+    assert scope.get("scopes_all", []) == []
+    service_click = by_endpoint.get("main.service_click")
+    assert isinstance(service_click, dict)

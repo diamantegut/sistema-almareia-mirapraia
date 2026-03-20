@@ -1,4 +1,5 @@
 import json
+import errno
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -71,3 +72,55 @@ def test_concorrencia_basica_persistencia_cashier_sessions(monkeypatch, tmp_path
     assert any(results)
     parsed = json.loads(sessions_file.read_text(encoding="utf-8"))
     assert isinstance(parsed, list)
+
+
+def test_file_lock_fallback_em_pasta_temp_quando_lock_no_destino_sem_permissao(monkeypatch, tmp_path):
+    target_file = tmp_path / "manual_allocations.json"
+    target_file.write_text("{}", encoding="utf-8")
+    target_lock = f"{target_file}.lock"
+    fallback_lock = cashier_service._resolve_fallback_lock_path(str(target_file))
+    real_open = cashier_service.os.open
+    calls = {"target": 0, "fallback": 0}
+
+    def _open(path, flags):
+        if path == target_lock:
+            calls["target"] += 1
+            raise PermissionError(errno.EACCES, "Permission denied", path)
+        if path == fallback_lock:
+            calls["fallback"] += 1
+        return real_open(path, flags)
+
+    monkeypatch.setattr(cashier_service.os, "open", _open)
+
+    with cashier_service.file_lock(str(target_file), timeout=2):
+        assert Path(fallback_lock).exists()
+
+    assert calls["target"] >= 1
+    assert calls["fallback"] >= 1
+    assert not Path(fallback_lock).exists()
+
+
+def test_file_lock_fallback_quando_permission_error_sem_errno(monkeypatch, tmp_path):
+    target_file = tmp_path / "manual_allocations.json"
+    target_file.write_text("{}", encoding="utf-8")
+    target_lock = f"{target_file}.lock"
+    fallback_lock = cashier_service._resolve_fallback_lock_path(str(target_file))
+    real_open = cashier_service.os.open
+    calls = {"target": 0, "fallback": 0}
+
+    def _open(path, flags):
+        if path == target_lock:
+            calls["target"] += 1
+            raise PermissionError(None, "Access denied", path)
+        if path == fallback_lock:
+            calls["fallback"] += 1
+        return real_open(path, flags)
+
+    monkeypatch.setattr(cashier_service.os, "open", _open)
+
+    with cashier_service.file_lock(str(target_file), timeout=2):
+        assert Path(fallback_lock).exists()
+
+    assert calls["target"] >= 1
+    assert calls["fallback"] >= 1
+    assert not Path(fallback_lock).exists()

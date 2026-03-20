@@ -4,12 +4,15 @@ import hashlib
 import uuid
 from datetime import datetime, timedelta
 from app.services.guest_manager import guest_manager
+from app.services.system_config_manager import get_data_path, get_legacy_root_json_path
 
 class PreCheckinService:
-    def __init__(self, data_dir='data'):
-        self.data_dir = data_dir
-        self.links_file = os.path.join(data_dir, 'pre_checkin_links.json')
-        self.manual_allocations_file = os.path.join(data_dir, 'manual_allocations.json')
+    def __init__(self, data_dir=None):
+        self.data_dir = data_dir or get_data_path('')
+        self.links_file = get_data_path('pre_checkin_links.json')
+        self.legacy_links_file = get_legacy_root_json_path('pre_checkin_links.json')
+        self.manual_allocations_file = get_data_path('manual_allocations.json')
+        self.legacy_manual_allocations_file = get_legacy_root_json_path('manual_allocations.json')
         self._ensure_file()
 
     def _ensure_file(self):
@@ -23,8 +26,11 @@ class PreCheckinService:
                 json.dump({}, f)
 
     def _load_links(self):
+        target_file = self.links_file
+        if not os.path.exists(target_file) and os.path.exists(self.legacy_links_file):
+            target_file = self.legacy_links_file
         try:
-            with open(self.links_file, 'r') as f:
+            with open(target_file, 'r') as f:
                 return json.load(f)
         except:
             return {}

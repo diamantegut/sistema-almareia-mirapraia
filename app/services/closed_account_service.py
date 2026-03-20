@@ -2,18 +2,21 @@ import json
 import os
 from datetime import datetime
 from threading import Lock
+from app.services.system_config_manager import CLOSED_ACCOUNTS_FILE, get_legacy_root_json_path
 
-# Define path for closed accounts storage
-CLOSED_ACCOUNTS_FILE = os.path.join("data", "closed_accounts.json")
 closed_accounts_lock = Lock()
+LEGACY_CLOSED_ACCOUNTS_FILE = get_legacy_root_json_path('closed_accounts.json')
 
 class ClosedAccountService:
     @staticmethod
     def _load_closed_accounts():
-        if not os.path.exists(CLOSED_ACCOUNTS_FILE):
+        target_path = CLOSED_ACCOUNTS_FILE
+        if not os.path.exists(target_path) and os.path.exists(LEGACY_CLOSED_ACCOUNTS_FILE):
+            target_path = LEGACY_CLOSED_ACCOUNTS_FILE
+        if not os.path.exists(target_path):
             return []
         try:
-            with open(CLOSED_ACCOUNTS_FILE, 'r', encoding='utf-8') as f:
+            with open(target_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
                 # Ensure backward compatibility for missing 'status'
                 for acc in data:

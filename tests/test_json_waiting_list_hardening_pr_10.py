@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 from datetime import datetime
 
@@ -112,6 +113,19 @@ def test_waiting_list_functional_regression_add_and_update(tmp_path, monkeypatch
     assert entry_id in queue_ids
 
 
+def test_waiting_list_load_fallback_legacy_when_canonical_missing(tmp_path, monkeypatch):
+    canonical_file = tmp_path / "data" / "waiting_list.json"
+    canonical_file.parent.mkdir(parents=True, exist_ok=True)
+    legacy_file = tmp_path / "waiting_list.json"
+    legacy_payload = _default_waiting_payload()
+    legacy_payload["queue"] = [{"id": "legacy-1", "name": "Fila", "status": "aguardando", "entry_time": "2026-01-01T10:00:00"}]
+    legacy_file.write_text(json.dumps(legacy_payload, ensure_ascii=False), encoding="utf-8")
+    monkeypatch.setattr(waiting_list_service, "WAITING_LIST_FILE", str(canonical_file))
+    monkeypatch.setattr(waiting_list_service, "LEGACY_WAITING_LIST_FILE", str(legacy_file))
+    loaded = waiting_list_service.load_waiting_data()
+    assert loaded["queue"][0]["id"] == "legacy-1"
+
+
 def test_data_service_strict_load_raises_on_invalid_json(tmp_path):
     target = tmp_path / "sales_history.json"
     target.write_text("{invalid", encoding="utf-8")
@@ -134,3 +148,54 @@ def test_data_service_save_json_critical_uses_atomic(monkeypatch):
 
     assert ok is True
     assert called["atomic"] == 1
+
+
+def test_data_service_load_json_critical_fallback_to_legacy_root(tmp_path, monkeypatch):
+    canonical_file = tmp_path / "data" / "sales_history.json"
+    canonical_file.parent.mkdir(parents=True, exist_ok=True)
+    legacy_file = tmp_path / "sales_history.json"
+    legacy_file.write_text('[{"id":"legacy"}]', encoding="utf-8")
+    monkeypatch.setattr(data_service, "get_data_path", lambda filename: str(canonical_file))
+    monkeypatch.setattr(data_service, "get_legacy_root_json_path", lambda filename: str(legacy_file))
+    loaded = data_service._load_json(str(canonical_file), [], strict=True)
+    assert isinstance(loaded, list)
+    assert loaded[0]["id"] == "legacy"
+
+
+def test_data_service_save_json_critical_canonicaliza_path(monkeypatch, tmp_path):
+    called = {"path": None}
+    canonical_file = tmp_path / "data" / "sales_history.json"
+    canonical_file.parent.mkdir(parents=True, exist_ok=True)
+
+    def fake_atomic(path, data):
+        called["path"] = path
+        return True
+
+    monkeypatch.setattr(data_service, "get_data_path", lambda filename: str(canonical_file))
+    monkeypatch.setattr(data_service, "_CRITICAL_JSON_PATHS", {os.path.abspath(str(canonical_file))})
+    monkeypatch.setattr(data_service, "_save_json_atomic", fake_atomic)
+    legacy_like_path = str(tmp_path / "sales_history.json")
+    ok = data_service._save_json(legacy_like_path, [{"id": "1"}])
+    assert ok is True
+    assert called["path"] == str(canonical_file)
+
+
+def test_data_service_alerta_divergencia_legado_apenas_uma_vez(monkeypatch, tmp_path):
+    canonical_file = tmp_path / "data" / "sales_history.json"
+    canonical_file.parent.mkdir(parents=True, exist_ok=True)
+    canonical_file.write_text('[{"id":"canonical"}]', encoding="utf-8")
+    legacy_file = tmp_path / "sales_history.json"
+    legacy_file.write_text('[{"id":"legacy"}]', encoding="utf-8")
+    monkeypatch.setattr(data_service, "get_data_path", lambda filename: str(canonical_file))
+    monkeypatch.setattr(data_service, "get_legacy_root_json_path", lambda filename: str(legacy_file))
+    monkeypatch.setattr(data_service, "_LEGACY_DIVERGENCE_ALERTED", set())
+    calls = {"count": 0}
+
+    def fake_warning(msg):
+        if "json_legacy_divergence_detected" in str(msg):
+            calls["count"] += 1
+
+    monkeypatch.setattr(data_service.logging, "warning", fake_warning)
+    data_service._load_json(str(canonical_file), [], strict=True)
+    data_service._load_json(str(canonical_file), [], strict=True)
+    assert calls["count"] == 1

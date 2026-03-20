@@ -374,6 +374,9 @@
             <a href="{{ url_for('reception.reception_cashier') }}" class="btn btn-success me-2">
                 <i class="bi bi-cash-coin"></i> Caixa
             </a>
+            <a href="{{ url_for('reception.reception_rooms_breakfast_table') }}" class="btn btn-outline-dark me-2" target="_blank" rel="noopener">
+                <i class="bi bi-cup-hot"></i> Tabela Café da Manhã
+            </a>
             <button class="btn btn-outline-info me-2" data-bs-toggle="modal" data-bs-target="#checklistConfigModal">
                 <i class="bi bi-list-check"></i> Gerenciar Checklist
             </button>
@@ -562,11 +565,11 @@
                                 <div class="room-center-value">
                                     {% set pay_state = occ_data.reservation_payment_state or 'none' %}
                                     {% if pay_state == 'complete' %}
-                                    <span class="badge bg-success">Completo</span>
+                                    <span class="badge bg-success">Pago</span>
                                     {% elif pay_state == 'partial' %}
                                     <span class="badge bg-warning text-dark">Parcial</span>
                                     {% else %}
-                                    <span class="badge bg-danger">Nenhum</span>
+                                    <span class="badge bg-danger">Em aberto</span>
                                     {% endif %}
                                     {% if occ_data.reservation_payment_due_date %}
                                     <small class="d-block text-muted mt-1">Cobrança até {{ occ_data.reservation_payment_due_date }}</small>
@@ -584,11 +587,11 @@
                                     {% endif %}
                                     {% set upcoming_state = upcoming_entry.payment_state or 'none' %}
                                     {% if upcoming_state == 'complete' %}
-                                    <span class="badge bg-success mt-1">Diária completa</span>
+                                    <span class="badge bg-success mt-1">Diária paga</span>
                                     {% elif upcoming_state == 'partial' %}
                                     <span class="badge bg-warning text-dark mt-1">Diária parcial</span>
                                     {% else %}
-                                    <span class="badge bg-danger mt-1">Diária pendente</span>
+                                    <span class="badge bg-danger mt-1">Diária em aberto</span>
                                     {% endif %}
                                 </div>
                             </div>
@@ -601,14 +604,29 @@
                                         {% if op_data.allergies %}
                                         <span class="badge bg-danger">Alergia</span>
                                         {% endif %}
-                                        {% for restriction in op_data.dietary_restrictions or [] %}
+                                        {% set restrictions = op_data.dietary_restrictions or [] %}
+                                        {% for restriction in restrictions[:2] %}
                                         <span class="badge bg-warning text-dark">{{ restriction }}</span>
                                         {% endfor %}
-                                        {% if op_data.breakfast_time_start or op_data.breakfast_time_end %}
+                                        {% if restrictions|length > 2 %}
+                                        <span class="badge bg-warning text-dark">+{{ (restrictions|length) - 2 }} restrições</span>
+                                        {% endif %}
+                                        {% if op_data.breakfast_time_standard %}
+                                        <span class="badge bg-info text-dark">Café {{ op_data.breakfast_time_standard }}</span>
+                                        {% elif op_data.breakfast_time_start or op_data.breakfast_time_end %}
                                         <span class="badge bg-info text-dark">Café {{ op_data.breakfast_time_start or '--:--' }}-{{ op_data.breakfast_time_end or '--:--' }}</span>
+                                        {% endif %}
+                                        {% if op_data.breakfast_fruit_preferences %}
+                                        <span class="badge bg-success">Frutas</span>
+                                        {% endif %}
+                                        {% if op_data.is_birthday %}
+                                        <span class="badge bg-warning text-dark">Aniversário</span>
                                         {% endif %}
                                         {% if op_data.commemorative_dates %}
                                         <span class="badge bg-primary">Data especial</span>
+                                        {% endif %}
+                                        {% if op_data.special_celebration %}
+                                        <span class="badge bg-primary">Comemoração</span>
                                         {% endif %}
                                         {% if op_data.vip_note %}
                                         <span class="badge bg-dark">VIP</span>
@@ -707,72 +725,8 @@
 </div>
 
 <!-- Modals -->
-
-<div class="modal fade" id="reservationPaymentModal" tabindex="-1" style="z-index: 1060;">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title">Receber Reserva</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div id="resPaymentLoading" class="text-center py-3">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Carregando...</span>
-                    </div>
-                </div>
-
-                <div id="resPaymentContent" style="display:none;">
-                    <div class="alert alert-info mb-3">
-                        <strong>Hóspede:</strong> <span id="resPayGuestName"></span><br>
-                        <strong>Categoria/Quarto:</strong> <span id="resPayRoom"></span>
-                    </div>
-
-                    <div class="card bg-light mb-3">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between mb-2">
-                                <span>Valor Total da Reserva:</span>
-                                <span class="fw-bold" id="resPayTotal">R$ 0,00</span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-2">
-                                <span>Já Pago:</span>
-                                <span class="text-success fw-bold" id="resPayPaid">R$ 0,00</span>
-                            </div>
-                            <div class="d-flex justify-content-between border-top pt-2">
-                                <span>Saldo Pendente:</span>
-                                <span class="text-danger fw-bold fs-5" id="resPayRemaining">R$ 0,00</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <form id="reservationPaymentForm">
-                        <input type="hidden" id="resPayId" name="reservation_id">
-
-                        <div class="mb-3">
-                            <label class="form-label">Valor a Receber (R$)</label>
-                            <input type="number" step="0.01" class="form-control form-control-lg" id="resPayAmount" name="amount" required>
-                            <div class="form-text text-danger" id="resPayError" style="display:none;"></div>
-                            <div class="form-text text-success" id="resPayChangePreview" style="display:none;"></div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Forma de Pagamento</label>
-                            <select class="form-select" id="resPayMethod" name="payment_method" required>
-                                <option value="">Selecione...</option>
-                            </select>
-                        </div>
-                    </form>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-success" id="btnConfirmResPayment" onclick="submitReservationPayment()">
-                    <i class="bi bi-check-circle"></i> Confirmar Pagamento
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
+{% set reservation_payment_origin = 'checkin' %}
+{% include 'partials/reservation_payment_modal.html' %}
 
 <!-- Check-in Modal -->
 <div class="modal fade" id="checkinModal" tabindex="-1">
@@ -1127,6 +1081,7 @@
     const upcomingReservations = checkinConfigData.upcoming_reservations || [];
     const roomCapacities = checkinConfigData.room_capacities || {};
     const reservationPaymentMethods = checkinConfigData.reservation_payment_methods || [];
+    window.reservationPaymentMethods = reservationPaymentMethods;
     const openCheckinFromUrl = Boolean(checkinConfigData.open_checkin);
     const requestedReservationId = String(checkinConfigData.requested_reservation_id || '');
     let preselectedCheckinRoom = '';
@@ -1411,161 +1366,6 @@
         const roomLabel = element.getAttribute('data-room-label') || '';
         openReservationPaymentModal(reservationId, guestName, roomLabel);
     }
-
-    async function openReservationPaymentModal(reservationId, guestName, roomInfo) {
-        const modal = new bootstrap.Modal(document.getElementById('reservationPaymentModal'));
-        modal.show();
-
-        document.getElementById('resPaymentLoading').style.display = 'block';
-        document.getElementById('resPaymentContent').style.display = 'none';
-        document.getElementById('resPayError').style.display = 'none';
-        document.getElementById('resPayChangePreview').style.display = 'none';
-        document.getElementById('btnConfirmResPayment').disabled = true;
-
-        document.getElementById('resPayGuestName').textContent = guestName;
-        document.getElementById('resPayRoom').textContent = roomInfo || '-';
-        document.getElementById('resPayId').value = reservationId;
-
-        try {
-            const debtResp = await fetch(`/reception/reservation/${reservationId}/debt`);
-            if (!debtResp.ok) throw new Error('Erro ao buscar dados da reserva');
-            const debtData = await debtResp.json();
-
-            document.getElementById('resPayTotal').textContent = `R$ ${Number(debtData.total || 0).toFixed(2)}`;
-            document.getElementById('resPayPaid').textContent = `R$ ${Number(debtData.paid || 0).toFixed(2)}`;
-            document.getElementById('resPayRemaining').textContent = `R$ ${Number(debtData.remaining || 0).toFixed(2)}`;
-            document.getElementById('resPayAmount').value = Number(debtData.remaining || 0).toFixed(2);
-            document.getElementById('resPayAmount').max = Number(debtData.remaining || 0) + 0.01;
-
-            const select = document.getElementById('resPayMethod');
-            select.innerHTML = '<option value="">Selecione...</option>';
-            let methodsToUse = Array.isArray(reservationPaymentMethods) ? reservationPaymentMethods.slice() : [];
-            if (!methodsToUse.length) {
-                const methodsResp = await fetch('/api/payment-methods');
-                if (methodsResp.ok) {
-                    const methodsData = await methodsResp.json();
-                    const allMethods = (methodsData || {}).methods || [];
-                    methodsToUse = allMethods.filter(m => {
-                        const availableIn = Array.isArray(m.available_in)
-                            ? m.available_in.map(v => String(v || '').toLowerCase())
-                            : String(m.available_in || '').split(',').map(v => v.trim().toLowerCase());
-                        return ['reservations', 'reservas', 'caixa_reservas', 'reservation', 'reserva'].some(tag => availableIn.includes(tag));
-                    });
-                }
-            }
-            methodsToUse.forEach(m => {
-                const option = document.createElement('option');
-                option.value = m.id;
-                option.textContent = m.name;
-                option.dataset.name = m.name;
-                select.appendChild(option);
-            });
-            updateReservationChangePreview();
-
-            if (!methodsToUse.length) {
-                throw new Error('Nenhuma forma de pagamento habilitada para Reservas em /payment-methods.');
-            }
-
-            document.getElementById('resPaymentLoading').style.display = 'none';
-            document.getElementById('resPaymentContent').style.display = 'block';
-            document.getElementById('btnConfirmResPayment').disabled = false;
-        } catch (error) {
-            alert(error.message);
-        }
-    }
-
-    function updateReservationChangePreview() {
-        const amount = parseFloat(document.getElementById('resPayAmount').value || '0');
-        const maxAmount = parseFloat(document.getElementById('resPayAmount').max || '0');
-        const methodSelect = document.getElementById('resPayMethod');
-        const option = methodSelect.options[methodSelect.selectedIndex];
-        const methodName = String((option && option.dataset && option.dataset.name) || '').toLowerCase();
-        const isCash = methodName.includes('dinheiro');
-        const preview = document.getElementById('resPayChangePreview');
-        if (!methodName || amount <= 0) {
-            preview.style.display = 'none';
-            return;
-        }
-        if (isCash && amount > maxAmount + 0.01) {
-            const troco = amount - maxAmount;
-            preview.textContent = `Troco estimado: R$ ${troco.toFixed(2)} (recebido acima do saldo em dinheiro).`;
-            preview.style.display = 'block';
-        } else if (Math.abs(amount - maxAmount) <= 0.01) {
-            preview.textContent = 'Pagamento exato (sem troco).';
-            preview.style.display = 'block';
-        } else if (amount < maxAmount - 0.01) {
-            preview.textContent = 'Pagamento parcial do saldo pendente.';
-            preview.style.display = 'block';
-        } else {
-            preview.style.display = 'none';
-        }
-    }
-
-    async function submitReservationPayment() {
-        const btn = document.getElementById('btnConfirmResPayment');
-        const amountInput = document.getElementById('resPayAmount');
-        const methodSelect = document.getElementById('resPayMethod');
-        const errorDiv = document.getElementById('resPayError');
-
-        const amount = parseFloat(amountInput.value);
-        const maxAmount = parseFloat(amountInput.max);
-
-        if (!amount || amount <= 0) {
-            errorDiv.textContent = 'Digite um valor válido.';
-            errorDiv.style.display = 'block';
-            return;
-        }
-
-        if (!methodSelect.value) {
-            alert('Selecione uma forma de pagamento.');
-            return;
-        }
-        const option = methodSelect.options[methodSelect.selectedIndex];
-        const methodName = String((option && option.dataset && option.dataset.name) || '').toLowerCase();
-        const isCash = methodName.includes('dinheiro');
-        if (!isCash && amount > maxAmount + 0.01) {
-            errorDiv.textContent = `O valor informado excede o saldo pendente de R$ ${maxAmount.toFixed(2)} para esta forma de pagamento.`;
-            errorDiv.style.display = 'block';
-            return;
-        }
-
-        errorDiv.style.display = 'none';
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Processando...';
-
-        try {
-            const resp = await fetch('/reception/reservation/pay', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    reservation_id: document.getElementById('resPayId').value,
-                    amount: amount,
-                    payment_method_id: methodSelect.value,
-                    payment_method_name: option.dataset.name,
-                    origin: 'checkin'
-                })
-            });
-            const result = await resp.json();
-            if (!resp.ok) throw new Error(result.error || 'Erro ao processar pagamento');
-            const troco = parseFloat(result.change_amount || 0);
-            if (troco > 0) {
-                alert(`Pagamento registrado com sucesso!\nTroco: R$ ${troco.toFixed(2)}`);
-            } else {
-                alert('Pagamento registrado com sucesso!');
-            }
-            location.reload();
-        } catch (error) {
-            alert(error.message);
-            btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-check-circle"></i> Confirmar Pagamento';
-        }
-    }
-    document.addEventListener('DOMContentLoaded', function () {
-        const amountInput = document.getElementById('resPayAmount');
-        const methodSelect = document.getElementById('resPayMethod');
-        if (amountInput) amountInput.addEventListener('input', updateReservationChangePreview);
-        if (methodSelect) methodSelect.addEventListener('change', updateReservationChangePreview);
-    });
 
     document.addEventListener('change', function(event) {
         if (event.target && event.target.id === 'reservation_payment_decision') {

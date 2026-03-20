@@ -3,9 +3,9 @@ def test_guest_unified_modal_has_max_four_tabs():
         html = f.read()
     assert html.count('data-bs-target="#tab-') == 4
     assert "Resumo / Estadia" in html
-    assert "Financeiro" in html
     assert "Dados do Hóspede" in html
-    assert "Operacional" in html
+    assert "Preferências e Cuidados" in html
+    assert "Café da Manhã / Hospitalidade" in html
 
 
 def test_rooms_and_reservations_use_same_unified_modal_partial():

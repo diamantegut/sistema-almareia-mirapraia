@@ -2,11 +2,14 @@ import os
 import json
 import shutil
 import base64
+import errno
+import hashlib
 from datetime import datetime
 import uuid
 from threading import Lock
 import sys
 import time
+import tempfile
 from contextlib import contextmanager
 import re
 
@@ -39,35 +42,56 @@ def _is_test_environment():
     parts = path.split(os.sep)
     return 'tests' in parts
 
+def _resolve_fallback_lock_path(lock_path_base):
+    lock_root = os.path.join(tempfile.gettempdir(), "almareia_file_locks")
+    os.makedirs(lock_root, exist_ok=True)
+    token = hashlib.sha256(os.path.abspath(lock_path_base).encode("utf-8")).hexdigest()
+    return os.path.join(lock_root, f"{token}.lock")
+
+def _is_permission_lock_error(exc):
+    if isinstance(exc, PermissionError):
+        return True
+    errno_value = getattr(exc, "errno", None)
+    if errno_value in (errno.EACCES, errno.EROFS):
+        return True
+    winerror_value = getattr(exc, "winerror", None)
+    return winerror_value == 5
+
 @contextmanager
 def file_lock(lock_path_base, timeout=10, stale_timeout=120):
-    """
-    Cross-process file locking to prevent race conditions.
-    """
     lock_path = lock_path_base + '.lock'
+    active_lock_path = lock_path
+    fallback_lock_path = None
     start_time = time.time()
     while True:
         try:
-            # Exclusive creation
-            fd = os.open(lock_path, os.O_CREAT | os.O_EXCL | os.O_RDWR)
+            fd = os.open(active_lock_path, os.O_CREAT | os.O_EXCL | os.O_RDWR)
             os.close(fd)
             break
         except FileExistsError:
             try:
-                lock_age = time.time() - os.path.getmtime(lock_path)
+                lock_age = time.time() - os.path.getmtime(active_lock_path)
             except OSError:
                 lock_age = 0
             if lock_age > stale_timeout:
                 try:
-                    os.remove(lock_path)
+                    os.remove(active_lock_path)
                     continue
                 except OSError:
                     pass
             if time.time() - start_time > timeout:
-                logger.warning(f"Timeout waiting for lock: {lock_path}")
+                logger.warning(f"Timeout waiting for lock: {active_lock_path}")
                 raise TimeoutError(f"Could not acquire lock for {lock_path_base}")
             time.sleep(0.1)
         except OSError as e:
+            if _is_permission_lock_error(e):
+                if fallback_lock_path is None:
+                    fallback_lock_path = _resolve_fallback_lock_path(lock_path_base)
+                if active_lock_path != fallback_lock_path:
+                    logger.warning(f"Primary lock path unavailable, using temp lock fallback: {lock_path}")
+                    active_lock_path = fallback_lock_path
+                    start_time = time.time()
+                    continue
             logger.error(f"Error acquiring lock: {e}")
             raise
     
@@ -75,8 +99,8 @@ def file_lock(lock_path_base, timeout=10, stale_timeout=120):
         yield
     finally:
         try:
-            if os.path.exists(lock_path):
-                os.remove(lock_path)
+            if os.path.exists(active_lock_path):
+                os.remove(active_lock_path)
         except OSError:
             pass
 

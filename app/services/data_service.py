@@ -26,7 +26,7 @@ from app.services.system_config_manager import (
     BAR_DATA_FILE,
     DEPARTMENT_PERMISSIONS_FILE,
     DEPARTMENTS, # for load/save helpers
-    get_backup_path
+    get_backup_path, get_data_path, get_legacy_root_json_path
 )
 
 _CRITICAL_JSON_PATHS = {
@@ -35,6 +35,63 @@ _CRITICAL_JSON_PATHS = {
     os.path.abspath(STOCK_ENTRIES_FILE),
     os.path.abspath(CASHIER_SESSIONS_FILE),
 }
+
+_CRITICAL_JSON_FILENAMES = {
+    'cashier_sessions.json',
+    'room_charges.json',
+    'table_orders.json',
+    'sales_history.json',
+    'closed_accounts.json',
+    'guest_details.json',
+    'manual_allocations.json',
+    'waiting_list.json',
+    'products.json',
+    'stock_entries.json',
+    'stock_logs.json',
+}
+_LEGACY_DIVERGENCE_ALERTED = set()
+
+def _critical_filename(filepath):
+    return os.path.basename(str(filepath or '')).lower()
+
+def _legacy_read_candidate(filepath):
+    filename = _critical_filename(filepath)
+    if filename not in _CRITICAL_JSON_FILENAMES:
+        return None
+    legacy = get_legacy_root_json_path(filename)
+    if os.path.abspath(str(legacy)) == os.path.abspath(str(filepath)):
+        return None
+    return legacy
+
+def _canonical_write_path(filepath):
+    filename = _critical_filename(filepath)
+    if filename not in _CRITICAL_JSON_FILENAMES:
+        return filepath
+    canonical = get_data_path(filename)
+    if os.path.abspath(str(canonical)) != os.path.abspath(str(filepath)):
+        logging.warning(f"json_write_canonicalized file={filename} from={filepath} to={canonical}")
+    return canonical
+
+def _alert_legacy_divergence_once(filepath):
+    filename = _critical_filename(filepath)
+    if filename not in _CRITICAL_JSON_FILENAMES or filename in _LEGACY_DIVERGENCE_ALERTED:
+        return
+    canonical = get_data_path(filename)
+    legacy = get_legacy_root_json_path(filename)
+    if os.path.abspath(canonical) == os.path.abspath(legacy):
+        return
+    if not os.path.exists(canonical) or not os.path.exists(legacy):
+        return
+    try:
+        with open(canonical, 'rb') as stream:
+            canonical_hash = hashlib.sha256(stream.read()).hexdigest()
+        with open(legacy, 'rb') as stream:
+            legacy_hash = hashlib.sha256(stream.read()).hexdigest()
+    except Exception:
+        return
+    if canonical_hash != legacy_hash:
+        logging.warning(f"json_legacy_divergence_detected file={filename} canonical={canonical} legacy={legacy}")
+        _LEGACY_DIVERGENCE_ALERTED.add(filename)
 
 def format_room_number(room_num):
     """
@@ -70,7 +127,14 @@ def normalize_room_simple(r):
 def _load_json(filepath, default=None, strict=False):
     import time
     if default is None: default = []
-    if not os.path.exists(filepath):
+    _alert_legacy_divergence_once(filepath)
+    target_path = filepath
+    if not os.path.exists(target_path):
+        legacy_candidate = _legacy_read_candidate(target_path)
+        if legacy_candidate and os.path.exists(legacy_candidate):
+            logging.warning(f"json_read_fallback_legacy file={_critical_filename(filepath)} canonical={filepath} legacy={legacy_candidate}")
+            target_path = legacy_candidate
+    if not os.path.exists(target_path):
         record_data_cleanup_event(
             event_type='file_not_found',
             requested_file=filepath,
@@ -81,40 +145,41 @@ def _load_json(filepath, default=None, strict=False):
     max_retries = 20
     for i in range(max_retries):
         try:
-            with open(filepath, 'r', encoding='utf-8') as f:
+            with open(target_path, 'r', encoding='utf-8') as f:
                 return json.load(f)
         except (PermissionError, OSError):
             if i == max_retries - 1:
-                logging.error(f"Could not acquire lock for {filepath} after {max_retries} attempts.")
+                logging.error(f"Could not acquire lock for {target_path} after {max_retries} attempts.")
                 record_data_cleanup_event(
                     event_type='config_read_failure',
-                    requested_file=filepath,
+                    requested_file=target_path,
                     error_message=f'Falha de leitura/lock após {max_retries} tentativas'
                 )
                 if strict:
-                    raise RuntimeError(f"JSON read lock timeout: {filepath}")
+                    raise RuntimeError(f"JSON read lock timeout: {target_path}")
                 return default
             time.sleep(0.1)
         except json.JSONDecodeError as exc:
-            backup_path = f"{filepath}.corrupt_{datetime.now().strftime('%Y%m%d_%H%M%S_%f')}.json"
+            backup_path = f"{target_path}.corrupt_{datetime.now().strftime('%Y%m%d_%H%M%S_%f')}.json"
             try:
-                with open(filepath, 'r', encoding='utf-8', errors='replace') as src, open(backup_path, 'w', encoding='utf-8') as dst:
+                with open(target_path, 'r', encoding='utf-8', errors='replace') as src, open(backup_path, 'w', encoding='utf-8') as dst:
                     dst.write(src.read())
             except Exception:
                 pass
-            logging.error(f"Invalid JSON detected in {filepath}: {exc}")
+            logging.error(f"Invalid JSON detected in {target_path}: {exc}")
             record_data_cleanup_event(
                 event_type='json_decode_error',
-                requested_file=filepath,
+                requested_file=target_path,
                 error_message=str(exc)
             )
             if strict:
-                raise RuntimeError(f"JSON corrupt: {filepath}") from exc
+                raise RuntimeError(f"JSON corrupt: {target_path}") from exc
             return default
             
     return default
 
 def _save_json(filepath, data):
+    filepath = _canonical_write_path(filepath)
     if os.path.abspath(filepath) in _CRITICAL_JSON_PATHS:
         return _save_json_atomic(filepath, data)
     try:
@@ -126,6 +191,7 @@ def _save_json(filepath, data):
         return False
 
 def _save_json_atomic(filepath, data):
+    filepath = _canonical_write_path(filepath)
     import time
     temp_file = filepath + ".tmp"
     try:
@@ -157,6 +223,7 @@ def _save_json_atomic(filepath, data):
         return False
 
 def _backup_before_write(filepath, max_backups=30):
+    filepath = _canonical_write_path(filepath)
     try:
         if not os.path.exists(filepath):
             return
@@ -256,7 +323,7 @@ def load_room_occupancy():
         normalized_data[format_room_number(k)] = v
     return normalized_data
 
-def save_room_occupancy(occupancy): return _save_json_atomic(ROOM_OCCUPANCY_FILE, occupancy)
+def save_room_occupancy(occupancy): return _save_json_atomic(_get_room_occupancy_path(), occupancy)
 
 # --- Quality Audits ---
 # Note: There were duplicate definitions for load/save_quality_audits in original file. Consolidating.

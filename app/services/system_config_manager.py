@@ -1,5 +1,6 @@
 import json
 import os
+import hashlib
 from app.services.path_resolver import PathResolver, get_audit_events
 
 # Base directory is the directory containing this script (project root)
@@ -65,6 +66,110 @@ def _get_path_resolver():
 def get_data_path(filename):
     resolver = _get_path_resolver()
     return str(resolver.resolve_data(filename))
+
+def get_project_root_path(filename):
+    return os.path.join(BASE_DIR, str(filename or ''))
+
+def get_legacy_root_json_path(filename):
+    name = os.path.basename(str(filename or ''))
+    return get_project_root_path(name)
+
+def resolve_json_read_path(filename, canonical_path=None):
+    canonical = str(canonical_path or get_data_path(filename))
+    if os.path.exists(canonical):
+        return canonical, False
+    legacy = get_legacy_root_json_path(filename)
+    if os.path.abspath(legacy) != os.path.abspath(canonical) and os.path.exists(legacy):
+        return legacy, True
+    return canonical, False
+
+def build_json_pair_snapshot(filename):
+    name = os.path.basename(str(filename or ''))
+    canonical = get_data_path(name)
+    legacy = get_legacy_root_json_path(name)
+    def _meta(path):
+        if not os.path.exists(path):
+            return {
+                'exists': False,
+                'size': 0,
+                'mtime': None,
+                'sha256': None,
+                'valid_json': False
+            }
+        size = os.path.getsize(path)
+        mtime = os.path.getmtime(path)
+        sha256 = None
+        valid_json = False
+        try:
+            digest = hashlib.sha256()
+            with open(path, 'rb') as stream:
+                while True:
+                    chunk = stream.read(1024 * 1024)
+                    if not chunk:
+                        break
+                    digest.update(chunk)
+            sha256 = digest.hexdigest()
+        except Exception:
+            sha256 = None
+        try:
+            with open(path, 'r', encoding='utf-8') as stream:
+                json.load(stream)
+            valid_json = True
+        except Exception:
+            valid_json = False
+        return {
+            'exists': True,
+            'size': int(size),
+            'mtime': float(mtime),
+            'sha256': sha256,
+            'valid_json': valid_json
+        }
+    canonical_meta = _meta(canonical)
+    legacy_meta = _meta(legacy)
+    return {
+        'name': name,
+        'canonical_path': canonical,
+        'legacy_path': legacy,
+        'canonical': canonical_meta,
+        'legacy': legacy_meta
+    }
+
+CRITICAL_JSON_RECONCILIATION_FILES = (
+    'cashier_sessions.json',
+    'room_charges.json',
+    'table_orders.json',
+    'sales_history.json',
+    'closed_accounts.json',
+    'guest_details.json',
+    'manual_allocations.json',
+    'waiting_list.json',
+    'products.json',
+    'stock_entries.json',
+    'stock_logs.json',
+)
+
+def build_critical_json_reconciliation_report():
+    report = []
+    for name in CRITICAL_JSON_RECONCILIATION_FILES:
+        snapshot = build_json_pair_snapshot(name)
+        canonical = snapshot['canonical']
+        legacy = snapshot['legacy']
+        divergent = bool(
+            canonical.get('exists') and
+            legacy.get('exists') and
+            canonical.get('sha256') != legacy.get('sha256')
+        )
+        newer = 'none'
+        canonical_mtime = canonical.get('mtime')
+        legacy_mtime = legacy.get('mtime')
+        if canonical.get('exists') and (not legacy.get('exists') or (canonical_mtime or 0) >= (legacy_mtime or 0)):
+            newer = 'data'
+        elif legacy.get('exists'):
+            newer = 'legacy_root'
+        snapshot['divergent'] = divergent
+        snapshot['newer'] = newer
+        report.append(snapshot)
+    return report
 
 def get_log_path(filename):
     resolver = _get_path_resolver()

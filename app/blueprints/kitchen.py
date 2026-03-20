@@ -10,7 +10,7 @@ import uuid
 from app.services.data_service import (
     load_products, load_settings, save_settings, load_stock_entries,
     save_stock_entry, save_stock_entries, load_stock_logs, save_stock_logs, STOCK_LOGS_FILE, STOCK_ENTRIES_FILE,
-    load_table_orders, save_table_orders, load_menu_items, load_printers, secure_save_products,
+    load_table_orders, save_table_orders, load_menu_items, load_printers, secure_save_products, load_room_occupancy,
     load_suppliers
 )
 from app.services.logger_service import LoggerService
@@ -20,6 +20,7 @@ from app.services.system_config_manager import get_data_path, PRODUCT_PHOTOS_DIR
 from werkzeug.utils import secure_filename
 from app.services.printing_service import get_default_printer, print_portion_labels
 from app.services.stock_service import get_product_balances
+from app.services.reservation_service import ReservationService
 from app.utils.lock import file_lock
 
 kitchen_bp = Blueprint('kitchen', __name__)
@@ -113,6 +114,176 @@ def _emit_server_done_sound():
         print('\a', end='', flush=True)
     except Exception:
         pass
+
+
+BREAKFAST_KDS_FILE = get_data_path('kitchen_breakfast_kds.json')
+BREAKFAST_KDS_STATUSES = ['pending', 'preparing', 'ready', 'delivered']
+
+
+def _normalize_breakfast_room_sort_key(room_label):
+    room = str(room_label or '').strip()
+    digits = ''.join(ch for ch in room if ch.isdigit())
+    if digits:
+        return (0, int(digits), room)
+    return (1, room)
+
+
+def _normalize_breakfast_status(value):
+    status = str(value or '').strip().lower()
+    if status in BREAKFAST_KDS_STATUSES:
+        return status
+    return 'pending'
+
+
+def _normalize_breakfast_list(value, max_items=12, item_limit=40):
+    if isinstance(value, list):
+        source = value
+    elif isinstance(value, str):
+        source = [chunk.strip() for chunk in value.split(',')]
+    else:
+        source = []
+    out = []
+    seen = set()
+    for item in source:
+        text = str(item or '').strip()
+        if not text:
+            continue
+        text = text[:item_limit]
+        key = text.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(text)
+        if len(out) >= max_items:
+            break
+    return out
+
+
+def _truncate_breakfast_text(value, limit=100):
+    text = str(value or '').strip()
+    if len(text) <= limit:
+        return text
+    return text[: max(0, limit - 1)].rstrip() + '…'
+
+
+def _load_breakfast_kds_store():
+    default_store = {'status_by_date': {}}
+    if not os.path.exists(BREAKFAST_KDS_FILE):
+        return default_store
+    try:
+        with open(BREAKFAST_KDS_FILE, 'r', encoding='utf-8') as f:
+            payload = json.load(f)
+        if not isinstance(payload, dict):
+            return default_store
+        if not isinstance(payload.get('status_by_date'), dict):
+            payload['status_by_date'] = {}
+        return payload
+    except Exception:
+        return default_store
+
+
+def _save_breakfast_kds_store(store):
+    payload = store if isinstance(store, dict) else {'status_by_date': {}}
+    if not isinstance(payload.get('status_by_date'), dict):
+        payload['status_by_date'] = {}
+    os.makedirs(os.path.dirname(BREAKFAST_KDS_FILE), exist_ok=True)
+    lock_ctx = file_lock(BREAKFAST_KDS_FILE) if callable(file_lock) else None
+    if lock_ctx is None:
+        with open(BREAKFAST_KDS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(payload, f, indent=2, ensure_ascii=False)
+        return
+    with lock_ctx:
+        with open(BREAKFAST_KDS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(payload, f, indent=2, ensure_ascii=False)
+
+
+def _build_breakfast_kds_payload(now=None):
+    ref_now = now if isinstance(now, datetime) else datetime.now()
+    today_key = ref_now.strftime('%Y-%m-%d')
+    occupancy = load_room_occupancy()
+    if not isinstance(occupancy, dict):
+        occupancy = {}
+    service = ReservationService()
+    store = _load_breakfast_kds_store()
+    statuses_for_day = store.get('status_by_date', {}).get(today_key, {})
+    rows = []
+    status_totals = {key: 0 for key in BREAKFAST_KDS_STATUSES}
+
+    for room_key in sorted(occupancy.keys(), key=_normalize_breakfast_room_sort_key):
+        occ = occupancy.get(room_key)
+        if not isinstance(occ, dict):
+            continue
+        reservation_id = str(occ.get('reservation_id') or '').strip()
+        reservation = service.get_reservation_by_id(reservation_id) if reservation_id else {}
+        sheet = service.build_operational_sheet(reservation_id) if reservation_id else {}
+        base = sheet.get('base_cafe_manha') if isinstance(sheet.get('base_cafe_manha'), dict) else {}
+        restrictions = _normalize_breakfast_list((base.get('alergias_restricoes') or sheet.get('restricoes_alimentares') or []), max_items=12, item_limit=45)
+        allergies = _normalize_breakfast_list(sheet.get('alergias') or [], max_items=10, item_limit=45)
+        fruits = _normalize_breakfast_list(base.get('frutas_preferidas') or (sheet.get('preferencias_cafe_manha') or {}).get('frutas') or [], max_items=8, item_limit=30)
+        companions = base.get('demais_hospedes') if isinstance(base.get('demais_hospedes'), list) else []
+
+        guest_main = _truncate_breakfast_text(
+            base.get('hospede_principal') or occ.get('guest_name') or reservation.get('guest_name') or 'Hóspede',
+            60
+        ) or 'Hóspede'
+        room_label = str(base.get('quarto') or room_key).strip() or str(room_key)
+        pax_raw = base.get('numero_hospedes')
+        try:
+            pax = int(pax_raw) if pax_raw not in [None, ''] else int(1 + len(companions))
+        except Exception:
+            pax = int(1 + len(companions))
+        pax = max(1, pax)
+
+        fruits_summary = ', '.join(fruits[:2]) if fruits else '-'
+        if len(fruits) > 2:
+            fruits_summary = f"{fruits_summary} +{len(fruits) - 2}"
+        restrictions_summary = ', '.join(restrictions) if restrictions else 'Sem restrições informadas'
+        observations = _truncate_breakfast_text(base.get('observacoes_especiais') or '', 140) or '-'
+        celebration = _truncate_breakfast_text(base.get('comemoracao') or '', 60)
+        is_birthday = bool(base.get('aniversariante'))
+        special_tokens = []
+        if is_birthday:
+            special_tokens.append('Aniversariante')
+        if celebration:
+            special_tokens.append(celebration)
+        special_flag = '🎉' if special_tokens else ''
+        has_alert = any('alerg' in str(v).lower() for v in (allergies + restrictions))
+
+        status_meta = statuses_for_day.get(room_label) if isinstance(statuses_for_day.get(room_label), dict) else {}
+        status = _normalize_breakfast_status(status_meta.get('status'))
+        status_totals[status] = status_totals.get(status, 0) + 1
+
+        rows.append({
+            'room': room_label,
+            'guest_main': guest_main,
+            'pax': pax,
+            'breakfast_time': _truncate_breakfast_text(base.get('horario_cafe') or '--:--', 20) or '--:--',
+            'fruits_summary': fruits_summary,
+            'restrictions_summary': _truncate_breakfast_text(restrictions_summary, 140),
+            'observations': observations,
+            'has_observation': observations != '-',
+            'special': special_flag,
+            'special_desc': ', '.join(special_tokens),
+            'status': status,
+            'has_alert': has_alert,
+            'allergies': allergies,
+            'restrictions': restrictions,
+            'fruits': fruits,
+            'companions': companions,
+            'updated_at': status_meta.get('updated_at') or '',
+            'updated_by': status_meta.get('updated_by') or '',
+        })
+
+    return {
+        'generated_at': ref_now.isoformat(),
+        'generated_label': ref_now.strftime('%d/%m/%Y %H:%M'),
+        'rooms': rows,
+        'summary': {
+            'total_rooms': len(rows),
+            'total_pax': sum(int(r.get('pax') or 0) for r in rows),
+            'statuses': status_totals
+        }
+    }
 
 
 def _build_kds_payload(station, now=None):
@@ -553,6 +724,60 @@ def kitchen_kds_mark_received():
         nivel_severidade='INFO'
     )
     return jsonify({'success': True})
+
+
+@kitchen_bp.route('/kitchen/breakfast-kds')
+@login_required
+def kitchen_breakfast_kds():
+    if session.get('role') not in ['admin', 'gerente'] and session.get('department') != 'Cozinha':
+        flash('Acesso restrito.')
+        return redirect(url_for('main.service_page', service_id='cozinha'))
+    payload = _build_breakfast_kds_payload()
+    return render_template('kitchen_breakfast_kds.html', initial_payload=payload)
+
+
+@kitchen_bp.route('/kitchen/breakfast-kds/data')
+@login_required
+def kitchen_breakfast_kds_data():
+    if session.get('role') not in ['admin', 'gerente'] and session.get('department') != 'Cozinha':
+        return jsonify({'success': False, 'error': 'Acesso restrito.'}), 403
+    payload = _build_breakfast_kds_payload()
+    return jsonify({'success': True, 'data': payload})
+
+
+@kitchen_bp.route('/kitchen/breakfast-kds/update_status', methods=['POST'])
+@login_required
+def kitchen_breakfast_kds_update_status():
+    if session.get('role') not in ['admin', 'gerente'] and session.get('department') != 'Cozinha':
+        return jsonify({'success': False, 'error': 'Acesso restrito.'}), 403
+    try:
+        data = request.get_json(force=True) or {}
+    except Exception:
+        data = {}
+    room = str(data.get('room') or '').strip()
+    status = _normalize_breakfast_status(data.get('status'))
+    if not room:
+        return jsonify({'success': False, 'error': 'Quarto inválido.'}), 400
+    now = datetime.now()
+    today_key = now.strftime('%Y-%m-%d')
+    store = _load_breakfast_kds_store()
+    by_date = store.get('status_by_date') if isinstance(store.get('status_by_date'), dict) else {}
+    day_map = by_date.get(today_key) if isinstance(by_date.get(today_key), dict) else {}
+    day_map[room] = {
+        'status': status,
+        'updated_at': now.strftime('%d/%m/%Y %H:%M'),
+        'updated_by': session.get('user') or 'Sistema'
+    }
+    by_date[today_key] = day_map
+    store['status_by_date'] = by_date
+    _save_breakfast_kds_store(store)
+    LoggerService.log_acao(
+        acao='KDS café status atualizado',
+        entidade='Cozinha',
+        detalhes={'room': room, 'status': status, 'updated_by': session.get('user')},
+        nivel_severidade='INFO'
+    )
+    return jsonify({'success': True, 'room': room, 'status': status})
 
 @kitchen_bp.route('/kitchen/portion/settings', methods=['GET', 'POST'])
 @login_required

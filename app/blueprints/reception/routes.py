@@ -122,6 +122,107 @@ def _safe_parse_date(value):
     return None
 
 
+def _truncate_operational_text(value, limit=90):
+    text = str(value or '').strip()
+    if len(text) <= limit:
+        return text
+    return text[: max(0, limit - 1)].rstrip() + '…'
+
+
+def _normalize_operational_list(value, max_items=12, item_limit=40):
+    if isinstance(value, list):
+        raw = value
+    elif isinstance(value, str):
+        raw = [chunk.strip() for chunk in value.split(',')]
+    else:
+        raw = []
+    out = []
+    seen = set()
+    for item in raw:
+        text = str(item or '').strip()
+        if not text:
+            continue
+        text = _truncate_operational_text(text, item_limit)
+        key = text.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(text)
+        if len(out) >= max_items:
+            break
+    return out
+
+
+def _room_sort_key(room_label):
+    room = str(room_label or '').strip()
+    digits = ''.join(ch for ch in room if ch.isdigit())
+    if digits:
+        return (0, int(digits), room)
+    return (1, room)
+
+
+def _build_breakfast_table_context(occupancy_map, service=None, report_date=None):
+    occupancy = occupancy_map if isinstance(occupancy_map, dict) else {}
+    rs = service if service is not None else ReservationService()
+    rows = []
+    total_pax = 0
+    for room_key in sorted(occupancy.keys(), key=_room_sort_key):
+        occ = occupancy.get(room_key) if isinstance(occupancy.get(room_key), dict) else {}
+        reservation_id = str(occ.get('reservation_id') or '').strip()
+        reservation = rs.get_reservation_by_id(reservation_id) if reservation_id else {}
+        guest_name_default = str(occ.get('guest_name') or reservation.get('guest_name') or 'Hóspede').strip()
+        sheet = rs.build_operational_sheet(reservation_id) if reservation_id else {}
+        base = sheet.get('base_cafe_manha') if isinstance(sheet.get('base_cafe_manha'), dict) else {}
+
+        companions = base.get('demais_hospedes') if isinstance(base.get('demais_hospedes'), list) else []
+        pax_raw = base.get('numero_hospedes')
+        try:
+            pax = int(pax_raw) if pax_raw not in [None, ''] else int(1 + len(companions) if guest_name_default else len(companions) or 1)
+        except Exception:
+            pax = int(1 + len(companions) if guest_name_default else len(companions) or 1)
+        pax = max(1, pax)
+        total_pax += pax
+
+        fruits = _normalize_operational_list(base.get('frutas_preferidas') or [])
+        fruits_text = ', '.join(fruits[:2]) if fruits else '-'
+        if len(fruits) > 2:
+            fruits_text = f"{fruits_text} +{len(fruits) - 2}"
+
+        restrictions = _normalize_operational_list(base.get('alergias_restricoes') or [])
+        restrictions_text = ', '.join(restrictions) if restrictions else 'Sem restrições informadas'
+
+        special_tokens = []
+        if bool(base.get('aniversariante')):
+            special_tokens.append('Aniversariante')
+        celebration = _truncate_operational_text(base.get('comemoracao') or '', 50)
+        if celebration:
+            special_tokens.append(celebration)
+        special_flag = '🎉' if special_tokens else ''
+
+        observations_raw = _truncate_operational_text(base.get('observacoes_especiais') or '', 100)
+        observations = observations_raw if observations_raw else '-'
+
+        rows.append({
+            'room': str(base.get('quarto') or room_key),
+            'guest_main': _truncate_operational_text(base.get('hospede_principal') or guest_name_default, 50) or 'Hóspede',
+            'pax': pax,
+            'breakfast_time': _truncate_operational_text(base.get('horario_cafe') or '', 20) or '--:--',
+            'fruits': fruits_text,
+            'restrictions': _truncate_operational_text(restrictions_text, 120),
+            'observations': observations,
+            'special': special_flag,
+            'special_desc': ', '.join(special_tokens) if special_tokens else '',
+            'has_observation': observations != '-',
+        })
+    return {
+        'report_date': report_date or datetime.now().strftime('%d/%m/%Y'),
+        'report_generated_at': datetime.now().strftime('%d/%m/%Y %H:%M'),
+        'rows': rows,
+        'total_rooms': len(rows),
+        'total_pax': total_pax,
+    }
+
+
 def _reservation_debt_snapshot(service, reservation):
     total = parse_br_currency((reservation or {}).get('amount', 0))
     paid = parse_br_currency((reservation or {}).get('paid_amount', 0))
@@ -145,6 +246,67 @@ def _reservation_debt_snapshot(service, reservation):
         'remaining': round(remaining, 2),
         'state': state
     }
+
+
+@reception_bp.route('/reception/rooms/breakfast-table')
+@login_required
+def reception_rooms_breakfast_table():
+    user_role = session.get('role')
+    role_norm = normalize_text(str(user_role or ''))
+    user_dept = session.get('department')
+    dept_norm = normalize_text(str(user_dept or ''))
+    user_perms = session.get('permissions') or []
+    has_reception_permission = isinstance(user_perms, (list, tuple, set)) and any(normalize_text(str(p)) == 'recepcao' for p in user_perms)
+    if role_norm not in ['admin', 'gerente', 'recepcao', 'supervisor'] and dept_norm != 'recepcao' and not has_reception_permission:
+        flash('Acesso restrito.')
+        return redirect(url_for('main.index'))
+
+    occupancy = _normalize_occupancy_map(load_room_occupancy())
+    breakfast_context = _build_breakfast_table_context(occupancy_map=occupancy, service=ReservationService())
+    return render_template('reception_breakfast_table.html', **breakfast_context)
+
+
+def _sync_room_occupancy_reservation_financial_state(reservation_id, service=None):
+    rid = str(reservation_id or '').strip()
+    if not rid:
+        return {'updated': False, 'room': None, 'snapshot': {'total': 0.0, 'paid': 0.0, 'remaining': 0.0, 'state': 'none'}}
+    svc = service if service is not None else ReservationService()
+    reservation = svc.get_reservation_by_id(rid) or {'id': rid}
+    snapshot = _reservation_debt_snapshot(svc, reservation)
+    occupancy = _normalize_occupancy_map(load_room_occupancy())
+    target_room = None
+    for room_key, occ in (occupancy or {}).items():
+        if not isinstance(occ, dict):
+            continue
+        if str(occ.get('reservation_id') or '').strip() == rid:
+            target_room = str(room_key)
+            break
+    if not target_room:
+        return {'updated': False, 'room': None, 'snapshot': snapshot}
+    room_data = occupancy.get(target_room) or {}
+    previous = {
+        'state': str(room_data.get('reservation_payment_state') or 'none'),
+        'remaining': round(float(room_data.get('reservation_payment_remaining') or 0.0), 2),
+        'paid': round(float(room_data.get('reservation_payment_paid') or 0.0), 2),
+        'total': round(float(room_data.get('reservation_payment_total') or 0.0), 2),
+    }
+    room_data['reservation_payment_state'] = snapshot.get('state') or 'none'
+    room_data['reservation_payment_remaining'] = float(snapshot.get('remaining', 0.0))
+    room_data['reservation_payment_paid'] = float(snapshot.get('paid', 0.0))
+    room_data['reservation_payment_total'] = float(snapshot.get('total', 0.0))
+    room_data['reservation_payment_updated_by'] = session.get('user', 'Recepção')
+    room_data['reservation_payment_updated_at'] = datetime.now().strftime('%d/%m/%Y %H:%M')
+    occupancy[target_room] = room_data
+    current = {
+        'state': str(room_data.get('reservation_payment_state') or 'none'),
+        'remaining': round(float(room_data.get('reservation_payment_remaining') or 0.0), 2),
+        'paid': round(float(room_data.get('reservation_payment_paid') or 0.0), 2),
+        'total': round(float(room_data.get('reservation_payment_total') or 0.0), 2),
+    }
+    if current != previous:
+        save_room_occupancy(occupancy)
+        return {'updated': True, 'room': target_room, 'snapshot': snapshot}
+    return {'updated': False, 'room': target_room, 'snapshot': snapshot}
 
 
 def _build_ready_checkin_preloads(upcoming_reservations, occupancy_map, cleaning_status_map, today_date=None):
@@ -3007,12 +3169,27 @@ def reception_rooms():
             op = details.get('operational_info') if isinstance(details, dict) else {}
             if not isinstance(op, dict):
                 op = {}
+            allergies_value = op.get('allergies')
+            allergies_list = op.get('allergies_list') if isinstance(op.get('allergies_list'), list) else []
+            if isinstance(allergies_value, list):
+                allergies_list = allergies_value
+            elif isinstance(allergies_value, str) and allergies_value.strip():
+                allergies_list = [x.strip() for x in allergies_value.split(',') if x.strip()]
+            breakfast_standard = str(op.get('breakfast_time_standard') or '').strip()
+            if not breakfast_standard:
+                b_start = str(op.get('breakfast_time_start') or '').strip()
+                b_end = str(op.get('breakfast_time_end') or '').strip()
+                breakfast_standard = f"{b_start}-{b_end}".strip('-') if (b_start or b_end) else ''
             room_operational_info[str(room_key)] = {
-                'allergies': op.get('allergies') or '',
+                'allergies': allergies_list,
                 'dietary_restrictions': op.get('dietary_restrictions') or [],
                 'breakfast_time_start': op.get('breakfast_time_start') or '',
                 'breakfast_time_end': op.get('breakfast_time_end') or '',
+                'breakfast_time_standard': breakfast_standard,
+                'breakfast_fruit_preferences': op.get('breakfast_fruit_preferences') if isinstance(op.get('breakfast_fruit_preferences'), list) else [],
                 'commemorative_dates': op.get('commemorative_dates') or [],
+                'special_celebration': op.get('special_celebration') or '',
+                'is_birthday': bool(op.get('is_birthday') or op.get('birthday_flag')),
                 'vip_note': op.get('vip_note') or ''
             }
     except Exception as e:
@@ -7462,18 +7639,168 @@ def api_guest_update():
         if not res_id:
             return jsonify({'success': False, 'error': 'ID da reserva necessário'}), 400
 
+        def _clean_text(value, max_len=180):
+            if value is None:
+                return ''
+            return str(value).strip()[:max_len]
+
+        def _normalize_list(value, max_items=12, max_len=40):
+            if isinstance(value, list):
+                source = value
+            elif isinstance(value, str):
+                source = [part.strip() for part in value.split(',')]
+            else:
+                source = []
+            out = []
+            seen = set()
+            for item in source:
+                if item is None:
+                    continue
+                clean = str(item).strip()
+                if not clean:
+                    continue
+                clean = clean[:max_len]
+                key = clean.lower()
+                if key in seen:
+                    continue
+                seen.add(key)
+                out.append(clean)
+                if len(out) >= max_items:
+                    break
+            return out
+
+        def _normalize_hhmm(value):
+            clean = _clean_text(value, max_len=5)
+            if not clean:
+                return ''
+            if not re.match(r'^(?:[01]\d|2[0-3]):[0-5]\d$', clean):
+                raise ValueError('Horário de café inválido. Use HH:MM.')
+            return clean
+
+        def _build_companion_signature(comp):
+            if not isinstance(comp, dict):
+                return ''
+            doc = _clean_text(comp.get('doc_id') or comp.get('cpf') or '', 40)
+            email = _clean_text(comp.get('email'), 120).lower()
+            phone = re.sub(r'\D+', '', _clean_text(comp.get('phone'), 24))
+            name = _clean_text(comp.get('name'), 120).lower()
+            if doc:
+                return f'doc:{doc}'
+            if email:
+                return f'email:{email}'
+            if phone:
+                return f'phone:{phone}'
+            if name:
+                return f'name:{name}'
+            return ''
+
         payload = {'reservation_id': res_id}
         personal_info = data.get('personal_info') if isinstance(data.get('personal_info'), dict) else {}
         fiscal_info = data.get('fiscal_info') if isinstance(data.get('fiscal_info'), dict) else {}
         operational_info = data.get('operational_info') if isinstance(data.get('operational_info'), dict) else {}
+        companions = data.get('companions') if isinstance(data.get('companions'), list) else None
+        source_hint = _clean_text(data.get('source') or request.args.get('source') or request.headers.get('X-Reception-Source') or '', 40).lower()
+        if source_hint not in ['rooms', 'reservations']:
+            source_hint = 'unknown'
         if personal_info:
-            payload['personal_info'] = personal_info
-            if str(personal_info.get('name') or '').strip():
-                payload['guest_name'] = str(personal_info.get('name')).strip()
+            normalized_personal = {
+                'name': _clean_text(personal_info.get('name'), 120),
+                'doc_id': _clean_text(personal_info.get('doc_id') or personal_info.get('cpf'), 40),
+                'birth_date': _clean_text(personal_info.get('birth_date'), 20),
+                'email': _clean_text(personal_info.get('email'), 120),
+                'phone': _clean_text(personal_info.get('phone'), 24),
+                'address': _clean_text(personal_info.get('address'), 180),
+                'city': _clean_text(personal_info.get('city'), 80),
+                'state': _clean_text(personal_info.get('state'), 2).upper(),
+            }
+            normalized_personal = {k: v for k, v in normalized_personal.items() if v != ''}
+            if 'doc_id' in normalized_personal:
+                normalized_personal['cpf'] = normalized_personal['doc_id']
+            payload['personal_info'] = normalized_personal
+            if str(normalized_personal.get('name') or '').strip():
+                payload['guest_name'] = str(normalized_personal.get('name')).strip()
         if fiscal_info:
-            payload['fiscal_info'] = fiscal_info
+            normalized_fiscal = {
+                'cpf_cnpj': _clean_text(fiscal_info.get('cpf_cnpj') or fiscal_info.get('cpf') or fiscal_info.get('cnpj'), 20),
+                'razao_social': _clean_text(fiscal_info.get('razao_social') or fiscal_info.get('nome'), 120),
+            }
+            normalized_fiscal = {k: v for k, v in normalized_fiscal.items() if v != ''}
+            if normalized_fiscal:
+                payload['fiscal_info'] = normalized_fiscal
         if operational_info:
-            payload['operational_info'] = operational_info
+            try:
+                start_time = _normalize_hhmm(operational_info.get('breakfast_time_start'))
+                end_time = _normalize_hhmm(operational_info.get('breakfast_time_end'))
+                standard_time = _normalize_hhmm(operational_info.get('breakfast_time_standard'))
+            except ValueError as validation_error:
+                return jsonify({'success': False, 'error': str(validation_error)}), 400
+            if start_time and end_time and end_time < start_time:
+                return jsonify({'success': False, 'error': 'Horário de café inconsistente: fim anterior ao início.'}), 400
+            normalized_operational = {
+                'allergies_list': _normalize_list(operational_info.get('allergies_list') or operational_info.get('allergies'), max_items=12, max_len=40),
+                'dietary_restrictions': _normalize_list(operational_info.get('dietary_restrictions'), max_items=12, max_len=40),
+                'breakfast_fruit_preferences': _normalize_list(operational_info.get('breakfast_fruit_preferences'), max_items=8, max_len=30),
+                'food_notes': _clean_text(operational_info.get('food_notes'), 300),
+                'breakfast_notes': _clean_text(operational_info.get('breakfast_notes'), 300),
+                'hospitality_notes': _clean_text(operational_info.get('hospitality_notes') or operational_info.get('service_notes'), 300),
+                'vip_note': _clean_text(operational_info.get('vip_note'), 220),
+                'special_celebration': _clean_text(operational_info.get('special_celebration'), 120),
+                'commemorative_dates': _normalize_list(operational_info.get('commemorative_dates'), max_items=8, max_len=80),
+                'breakfast_time_start': start_time,
+                'breakfast_time_end': end_time,
+                'breakfast_time_standard': standard_time,
+                'is_birthday': bool(operational_info.get('is_birthday') or operational_info.get('birthday_flag')),
+                'birthday_flag': bool(operational_info.get('is_birthday') or operational_info.get('birthday_flag')),
+                'last_updated_at': datetime.now().strftime('%d/%m/%Y %H:%M'),
+                'last_updated_by': session.get('user') or 'Sistema',
+                'last_updated_source': source_hint,
+            }
+            normalized_operational['allergies'] = ', '.join(normalized_operational.get('allergies_list') or [])
+            normalized_operational['service_notes'] = normalized_operational.get('hospitality_notes') or ''
+            payload['operational_info'] = normalized_operational
+        if companions is not None:
+            normalized_companions = []
+            signatures = set()
+            for index, companion in enumerate(companions):
+                if not isinstance(companion, dict):
+                    continue
+                try:
+                    breakfast_time = _normalize_hhmm(companion.get('breakfast_time'))
+                except ValueError as validation_error:
+                    return jsonify({'success': False, 'error': f'Acompanhante {index + 1}: {validation_error}'}), 400
+                normalized_companion = {
+                    'id': _clean_text(companion.get('id'), 80) or str(uuid.uuid4()),
+                    'name': _clean_text(companion.get('name') or companion.get('full_name'), 120),
+                    'relationship': _clean_text(companion.get('relationship'), 60),
+                    'doc_id': _clean_text(companion.get('doc_id') or companion.get('cpf'), 40),
+                    'phone': _clean_text(companion.get('phone'), 24),
+                    'email': _clean_text(companion.get('email'), 120),
+                    'dietary_restrictions': _normalize_list(companion.get('dietary_restrictions'), max_items=8, max_len=40),
+                    'allergies': _normalize_list(companion.get('allergies') or companion.get('allergies_list'), max_items=8, max_len=40),
+                    'food_notes': _clean_text(companion.get('food_notes'), 220),
+                    'breakfast_time': breakfast_time,
+                    'breakfast_fruits': _normalize_list(companion.get('breakfast_fruits') or companion.get('breakfast_fruit_preferences'), max_items=6, max_len=30),
+                    'breakfast_notes': _clean_text(companion.get('breakfast_notes'), 220),
+                    'is_birthday': bool(companion.get('is_birthday')),
+                    'special_celebration': _clean_text(companion.get('special_celebration'), 120),
+                    'hospitality_notes': _clean_text(companion.get('hospitality_notes'), 220),
+                    'updated_at': datetime.now().strftime('%d/%m/%Y %H:%M'),
+                    'updated_by': session.get('user') or 'Sistema',
+                    'updated_source': source_hint,
+                }
+                if normalized_companion.get('doc_id'):
+                    normalized_companion['cpf'] = normalized_companion.get('doc_id')
+                sig = _build_companion_signature(normalized_companion)
+                if sig and sig in signatures:
+                    return jsonify({'success': False, 'error': f'Hóspede duplicado na lista de acompanhantes (item {index + 1}).'}), 400
+                if sig:
+                    signatures.add(sig)
+                if not any([normalized_companion.get('name'), normalized_companion.get('doc_id'), normalized_companion.get('phone'), normalized_companion.get('email')]):
+                    continue
+                normalized_companions.append(normalized_companion)
+                if len(normalized_companions) >= 8:
+                    break
+            payload['companions'] = normalized_companions
 
         service = ReservationService()
         service.update_guest_details(res_id, payload)
@@ -7579,10 +7906,11 @@ def api_update_reservation_financials():
             save_room_occupancy(occupancy)
         if sync_changes.get('cleaning_changed'):
             save_cleaning_status(cleaning)
+        occupancy_sync = _sync_room_occupancy_reservation_financial_state(res_id, service=service)
         # Return merged details
         res = service.get_reservation_by_id(res_id) or {}
         res = service.merge_overrides_into_reservation(res_id, res)
-        return jsonify({'success': True, 'financial': fin, 'reservation': res, 'sync': sync_changes})
+        return jsonify({'success': True, 'financial': fin, 'reservation': res, 'sync': sync_changes, 'occupancy_financial_sync': occupancy_sync})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
@@ -8275,6 +8603,7 @@ def reception_reservation_pay():
         
         log_action('Pagamento Reserva', f"Recebido R$ {amount_received:.2f} ({payment_method_name}) para Reserva #{res_id} (Origem: {origin})", department='Recepção')
         
+        occupancy_sync = _sync_room_occupancy_reservation_financial_state(res_id, service=service)
         remaining_after = max(0.0, remaining_before - amount_applied)
         return jsonify({
             'success': True,
@@ -8282,7 +8611,8 @@ def reception_reservation_pay():
             'amount_due': remaining_before,
             'amount_received': amount_received,
             'change_amount': change_amount,
-            'amount_applied': amount_applied
+            'amount_applied': amount_applied,
+            'occupancy_financial_sync': occupancy_sync
         })
     except Exception as e:
         current_app.logger.error(f"Erro pagamento reserva: {e}")

@@ -160,6 +160,7 @@ def test_templates_show_change_feedback_and_history_columns():
     reservations_cashier_html = (root / "reception_reservations_cashier.html").read_text(encoding="utf-8")
     reception_rooms_html = (root / "reception_rooms.html").read_text(encoding="utf-8")
     reception_reservations_html = (root / "reception_reservations.html").read_text(encoding="utf-8")
+    reservation_payment_partial_html = (root / "partials" / "reservation_payment_modal.html").read_text(encoding="utf-8")
 
     assert "Troco" in restaurant_html
     assert "received_amount" in restaurant_html
@@ -170,10 +171,10 @@ def test_templates_show_change_feedback_and_history_columns():
     assert "Com troco" in reception_cashier_html
     assert "Troco: R$" in reservations_cashier_html
     assert "Pagamento exato" in reservations_cashier_html
-    assert 'id="resPayChangePreview"' in reception_rooms_html
-    assert 'id="resPayChangePreview"' in reception_reservations_html
-    assert "Pagamento exato (sem troco)." in reception_rooms_html
-    assert "Pagamento exato (sem troco)." in reception_reservations_html
+    assert "partials/reservation_payment_modal.html" in reception_rooms_html
+    assert "partials/reservation_payment_modal.html" in reception_reservations_html
+    assert 'id="resPayChangePreview"' in reservation_payment_partial_html
+    assert "Pagamento exato (sem troco)." in reservation_payment_partial_html
     assert "<th>Recebido</th>" in reception_reservations_html
     assert "<th>Troco</th>" in reception_reservations_html
 

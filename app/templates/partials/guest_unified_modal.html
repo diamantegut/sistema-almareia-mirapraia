@@ -32,13 +32,13 @@
                             <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-summary" type="button">Resumo / Estadia</button>
                         </li>
                         <li class="nav-item">
-                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-financial" type="button">Financeiro</button>
-                        </li>
-                        <li class="nav-item">
                             <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-guest" type="button">Dados do Hóspede</button>
                         </li>
                         <li class="nav-item">
-                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-operational" type="button">Operacional</button>
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-care" type="button">Preferências e Cuidados</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-breakfast" type="button">Café da Manhã / Hospitalidade</button>
                         </li>
                     </ul>
 
@@ -73,11 +73,19 @@
                                     <h6 class="fw-bold">Check-out (Previsto)</h6>
                                     <p id="vg_checkout" class="border-bottom pb-1">-</p>
                                 </div>
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold">Quantidade de Hóspedes</h6>
+                                    <p id="vg_guest_count" class="border-bottom pb-1">1</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold">Sinalizações de Hospitalidade</h6>
+                                    <div id="vg_hospitality_badges" class="d-flex flex-wrap gap-1"></div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="small text-muted">Última atualização: <span id="vg_last_update_at">-</span> · por <span id="vg_last_update_by">-</span> · origem <span id="vg_last_update_source">-</span></div>
+                                </div>
                             </div>
-                        </div>
-
-                        <div class="tab-pane fade" id="tab-financial">
-                            <div class="card border-primary mb-2">
+                            <div class="card border-primary mb-2 mt-3">
                                 <div class="card-header bg-primary-subtle fw-bold">Hospedagem / Diárias (Caixa Reservas - NFS-e)</div>
                                 <div class="card-body py-2">
                                     <div class="d-flex justify-content-between mb-1">
@@ -148,30 +156,46 @@
                                     <h6 class="fw-bold">Razão Social</h6>
                                     <p id="vg_fiscal_name" class="border-bottom pb-1">-</p>
                                 </div>
+                                <div class="col-12">
+                                    <h6 class="fw-bold">Hóspedes do Quarto</h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm align-middle mb-2">
+                                            <thead>
+                                                <tr>
+                                                    <th>Nome</th>
+                                                    <th>Relação</th>
+                                                    <th>Documento</th>
+                                                    <th class="d-none d-md-table-cell">Preferências</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="vg_guest_list"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="tab-pane fade" id="tab-operational">
+                        <div class="tab-pane fade" id="tab-care">
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <h6 class="fw-bold">Alergias / Observações</h6>
+                                    <h6 class="fw-bold">Alergias</h6>
                                     <p id="vg_allergies" class="border-bottom pb-1">-</p>
                                 </div>
                                 <div class="col-md-6">
-                                    <h6 class="fw-bold">Horário de Café</h6>
-                                    <p id="vg_breakfast" class="border-bottom pb-1">-</p>
-                                </div>
-                                <div class="col-12">
                                     <h6 class="fw-bold">Restrições Alimentares</h6>
                                     <p id="vg_dietary" class="border-bottom pb-1">-</p>
                                 </div>
-                                <div class="col-md-6">
-                                    <h6 class="fw-bold">Datas Comemorativas</h6>
-                                    <p id="vg_commemorative" class="border-bottom pb-1">-</p>
+                                <div class="col-12">
+                                    <h6 class="fw-bold">Observações Alimentares</h6>
+                                    <p id="vg_food_notes" class="border-bottom pb-1">-</p>
                                 </div>
                                 <div class="col-md-6">
-                                    <h6 class="fw-bold">Observação VIP</h6>
+                                    <h6 class="fw-bold">VIP / Atendimento</h6>
                                     <p id="vg_vip" class="border-bottom pb-1">-</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold">Perfil Recorrente</h6>
+                                    <p id="vg_recurrence" class="border-bottom pb-1">-</p>
                                 </div>
                                 <div class="col-12">
                                     <h6 class="fw-bold">Histórico (últimas estadias)</h6>
@@ -188,6 +212,35 @@
                                             <tbody id="vg_history_table"></tbody>
                                         </table>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="tab-breakfast">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold">Horário Padrão de Café</h6>
+                                    <p id="vg_breakfast" class="border-bottom pb-1">-</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold">Frutas Preferidas</h6>
+                                    <p id="vg_breakfast_fruits" class="border-bottom pb-1">-</p>
+                                </div>
+                                <div class="col-12">
+                                    <h6 class="fw-bold">Observações Especiais do Café</h6>
+                                    <p id="vg_breakfast_notes" class="border-bottom pb-1">-</p>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6 class="fw-bold">Aniversariante</h6>
+                                    <p id="vg_is_birthday" class="border-bottom pb-1">-</p>
+                                </div>
+                                <div class="col-md-8">
+                                    <h6 class="fw-bold">Comemoração Especial</h6>
+                                    <p id="vg_commemorative" class="border-bottom pb-1">-</p>
+                                </div>
+                                <div class="col-12">
+                                    <h6 class="fw-bold">Observações de Hospitalidade</h6>
+                                    <p id="vg_hospitality_notes" class="border-bottom pb-1">-</p>
                                 </div>
                             </div>
                         </div>
@@ -245,15 +298,25 @@
                             </div>
 
                             <div class="col-12 mt-3">
-                                <div class="small text-uppercase text-muted fw-semibold">Dados Operacionais</div>
+                                <div class="small text-uppercase text-muted fw-semibold">Preferências e Cuidados</div>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Alergias / Observações</label>
-                                <input type="text" class="form-control form-control-sm" id="vg_edit_allergies">
+                                <label class="form-label">Restrições Alimentares</label>
+                                <div id="vg_edit_dietary_options" class="d-flex flex-wrap gap-2 border rounded p-2"></div>
+                                <input type="text" class="form-control form-control-sm d-none" id="vg_edit_dietary">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Restrições Alimentares (vírgula)</label>
-                                <input type="text" class="form-control form-control-sm" id="vg_edit_dietary">
+                                <label class="form-label">Alergias</label>
+                                <div id="vg_edit_allergies_options" class="d-flex flex-wrap gap-2 border rounded p-2"></div>
+                                <input type="text" class="form-control form-control-sm d-none" id="vg_edit_allergies">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Observações Alimentares</label>
+                                <textarea class="form-control form-control-sm" id="vg_edit_food_notes" rows="2" maxlength="300"></textarea>
+                                <div class="form-text">Use notas curtas e objetivas para cozinha e serviço.</div>
+                            </div>
+                            <div class="col-12 mt-3">
+                                <div class="small text-uppercase text-muted fw-semibold">Café da Manhã e Hospitalidade</div>
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label">Café início</label>
@@ -264,12 +327,45 @@
                                 <input type="time" class="form-control form-control-sm" id="vg_edit_breakfast_end">
                             </div>
                             <div class="col-md-6">
+                                <label class="form-label">Horário padrão de café</label>
+                                <input type="time" class="form-control form-control-sm" id="vg_edit_breakfast_time_standard">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Frutas Preferidas</label>
+                                <div id="vg_edit_fruits_options" class="d-flex flex-wrap gap-2 border rounded p-2"></div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Observações especiais do café</label>
+                                <textarea class="form-control form-control-sm" id="vg_edit_breakfast_notes" rows="2" maxlength="300"></textarea>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check mt-4">
+                                    <input class="form-check-input" type="checkbox" id="vg_edit_is_birthday">
+                                    <label class="form-check-label" for="vg_edit_is_birthday">Aniversariante</label>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label">Comemoração especial</label>
+                                <input type="text" class="form-control form-control-sm" id="vg_edit_special_celebration" maxlength="120">
+                            </div>
+                            <div class="col-12">
                                 <label class="form-label">Datas comemorativas (vírgula)</label>
                                 <input type="text" class="form-control form-control-sm" id="vg_edit_commemorative">
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Observação VIP</label>
-                                <textarea class="form-control form-control-sm" id="vg_edit_vip" rows="2"></textarea>
+                                <textarea class="form-control form-control-sm" id="vg_edit_vip" rows="2" maxlength="220"></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Observações de hospitalidade</label>
+                                <textarea class="form-control form-control-sm" id="vg_edit_hospitality_notes" rows="2" maxlength="300"></textarea>
+                            </div>
+                            <div class="col-12 mt-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="small text-uppercase text-muted fw-semibold">Múltiplos Hóspedes do Quarto</div>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" id="vg_add_companion_btn">Adicionar hóspede</button>
+                                </div>
+                                <div id="vg_companion_editor_list" class="d-flex flex-column gap-2 mt-2"></div>
                             </div>
                         </div>
                         <div class="d-flex justify-content-end gap-2 mt-3">

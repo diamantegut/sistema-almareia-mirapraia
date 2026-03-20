@@ -54,13 +54,30 @@ class ReservationService:
         manual_alloc_file = self.MANUAL_ALLOCATIONS_FILE
         if not os.path.exists(manual_alloc_file):
             return {}
+        cached_data = getattr(self, '_manual_allocations_cache_data', None)
+        cached_mtime = getattr(self, '_manual_allocations_cache_mtime', None)
+        current_mtime = None
+        try:
+            current_mtime = os.path.getmtime(manual_alloc_file)
+        except Exception:
+            current_mtime = None
+        if isinstance(cached_data, dict) and cached_mtime == current_mtime:
+            return dict(cached_data)
+        def _read_unlocked():
+            with open(manual_alloc_file, 'r', encoding='utf-8') as f:
+                loaded = json.load(f)
+            return loaded if isinstance(loaded, dict) else {}
         try:
             with file_lock(manual_alloc_file):
-                with open(manual_alloc_file, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
-                    return data if isinstance(data, dict) else {}
+                data = _read_unlocked()
         except Exception:
-            return {}
+            try:
+                data = _read_unlocked()
+            except Exception:
+                return dict(cached_data) if isinstance(cached_data, dict) else {}
+        self._manual_allocations_cache_data = dict(data)
+        self._manual_allocations_cache_mtime = current_mtime
+        return data
 
     def _enrich_reservation_for_checkin(self, reservation):
         if not isinstance(reservation, dict):
@@ -509,21 +526,76 @@ class ReservationService:
 
     def build_operational_sheet(self, reservation_id, guest_details=None):
         rid = str(reservation_id)
+        reservation = self.get_reservation_by_id(rid) or {}
         details = guest_details if isinstance(guest_details, dict) else (self.get_guest_details(rid) or {})
         op = details.get('operational_info') if isinstance(details.get('operational_info'), dict) else {}
         recurrence = details.get('recurrence_summary') if isinstance(details.get('recurrence_summary'), dict) else {}
+        companions = details.get('companions') if isinstance(details.get('companions'), list) else []
+        companions_clean = []
+        for comp in companions:
+            if not isinstance(comp, dict):
+                continue
+            companions_clean.append({
+                'nome': str(comp.get('name') or '').strip(),
+                'relacao': str(comp.get('relationship') or '').strip(),
+                'documento': str(comp.get('doc_id') or comp.get('cpf') or '').strip(),
+                'alergias': comp.get('allergies') if isinstance(comp.get('allergies'), list) else [],
+                'restricoes': comp.get('dietary_restrictions') if isinstance(comp.get('dietary_restrictions'), list) else [],
+                'frutas_preferidas': comp.get('breakfast_fruits') if isinstance(comp.get('breakfast_fruits'), list) else [],
+                'aniversariante': bool(comp.get('is_birthday')),
+                'comemoracao': str(comp.get('special_celebration') or '').strip(),
+                'observacoes': str(comp.get('hospitality_notes') or comp.get('food_notes') or '').strip()
+            })
+        breakfast_standard = str(op.get('breakfast_time_standard') or '').strip()
+        if not breakfast_standard:
+            start = str(op.get('breakfast_time_start') or '').strip()
+            end = str(op.get('breakfast_time_end') or '').strip()
+            breakfast_standard = f"{start}-{end}".strip('-') if (start or end) else ''
+        breakfast_fruits = op.get('breakfast_fruit_preferences') if isinstance(op.get('breakfast_fruit_preferences'), list) else []
+        breakfast_fruits = [str(v).strip() for v in breakfast_fruits if str(v).strip()][:8]
+        allergies_value = op.get('allergies')
+        allergies_list = op.get('allergies_list') if isinstance(op.get('allergies_list'), list) else []
+        if isinstance(allergies_value, list):
+            allergies_list = allergies_value
+        elif isinstance(allergies_value, str) and allergies_value.strip():
+            allergies_list = [x.strip() for x in allergies_value.split(',') if x.strip()]
+        special_events = op.get('special_events') if isinstance(op.get('special_events'), list) else []
+        if not special_events:
+            special_events = op.get('commemorative_dates') if isinstance(op.get('commemorative_dates'), list) else []
+        dietary_restrictions = op.get('dietary_restrictions') if isinstance(op.get('dietary_restrictions'), list) else []
+        dietary_restrictions = [str(v).strip() for v in dietary_restrictions if str(v).strip()][:12]
         return {
-            'restricoes_alimentares': op.get('dietary_restrictions') or [],
-            'alergias': op.get('allergies') or '',
+            'restricoes_alimentares': dietary_restrictions,
+            'alergias': allergies_list,
             'preferencias_cafe_manha': {
                 'inicio': op.get('breakfast_time_start') or '',
-                'fim': op.get('breakfast_time_end') or ''
+                'fim': op.get('breakfast_time_end') or '',
+                'padrao': breakfast_standard,
+                'frutas': breakfast_fruits,
+                'observacoes': op.get('breakfast_notes') or ''
             },
-            'datas_comemorativas': op.get('commemorative_dates') or [],
+            'datas_comemorativas': special_events,
             'observacoes_atendimento': op.get('service_notes') or op.get('vip_note') or '',
             'observacoes_governanca': op.get('housekeeping_notes') or '',
             'sinalizacao_vip': bool(op.get('vip_note') or op.get('vip') or recurrence.get('stays_count', 0) >= 3),
-            'sinalizacao_recorrente': recurrence.get('stays_count', 0) >= 2
+            'sinalizacao_recorrente': recurrence.get('stays_count', 0) >= 2,
+            'base_cafe_manha': {
+                'quarto': reservation.get('room') or '',
+                'hospede_principal': (details.get('personal_info') or {}).get('name') or reservation.get('guest_name') or '',
+                'demais_hospedes': companions_clean,
+                'numero_hospedes': 1 + len(companions_clean),
+                'horario_cafe': breakfast_standard,
+                'frutas_preferidas': breakfast_fruits,
+                'alergias_restricoes': list(dict.fromkeys(dietary_restrictions + allergies_list)),
+                'aniversariante': bool(op.get('is_birthday') or op.get('birthday_flag')),
+                'comemoracao': op.get('special_celebration') or '',
+                'observacoes_especiais': op.get('hospitality_notes') or op.get('service_notes') or '',
+                'ultima_atualizacao': {
+                    'quando': op.get('last_updated_at') or '',
+                    'quem': op.get('last_updated_by') or '',
+                    'origem': op.get('last_updated_source') or ''
+                }
+            }
         }
 
     def build_unified_reservation_record(self, reservation_id, occupancy_data=None, cleaning_status=None):
@@ -1180,9 +1252,17 @@ class ReservationService:
                 if 'payment_followup' in updates and isinstance(updates.get('payment_followup'), dict):
                     current_details['payment_followup'] = updates.get('payment_followup')
                 if 'fiscal_info' in updates and isinstance(updates.get('fiscal_info'), dict):
-                    current_details['fiscal_info'] = updates.get('fiscal_info')
+                    existing_fiscal = current_details.get('fiscal_info')
+                    if not isinstance(existing_fiscal, dict):
+                        existing_fiscal = {}
+                    existing_fiscal.update(updates.get('fiscal_info') or {})
+                    current_details['fiscal_info'] = existing_fiscal
                 if 'operational_info' in updates and isinstance(updates.get('operational_info'), dict):
-                    current_details['operational_info'] = updates.get('operational_info')
+                    existing_operational = current_details.get('operational_info')
+                    if not isinstance(existing_operational, dict):
+                        existing_operational = {}
+                    existing_operational.update(updates.get('operational_info') or {})
+                    current_details['operational_info'] = existing_operational
 
                 current_details = self._ensure_guest_identity(reservation_id, current_details, all_details=all_details)
                 current_details['recurrence_summary'] = self._build_guest_recurrence_summary(reservation_id, current_details, all_details=all_details)
@@ -1817,18 +1897,39 @@ class ReservationService:
                     
                     # Store simple dict or full res?
                     # Store dict with needed info
+                    amount_val = self._parse_money(res.get('amount') or res.get('amount_val'))
+                    paid_val = self._parse_money(res.get('paid_amount') or res.get('paid_amount_val'))
+                    to_receive_raw = res.get('to_receive')
+                    if to_receive_raw in (None, ''):
+                        to_receive_val = max(0.0, amount_val - paid_val)
+                    else:
+                        to_receive_val = self._parse_money(to_receive_raw)
+                    payment_state = 'none'
+                    payment_status_label = 'Em aberto'
+                    if amount_val <= 0.01:
+                        payment_state = 'none'
+                        payment_status_label = 'Em aberto'
+                    elif to_receive_val <= 0.01:
+                        payment_state = 'complete'
+                        payment_status_label = 'Pago'
+                    elif paid_val > 0.01:
+                        payment_state = 'partial'
+                        payment_status_label = 'Parcial'
+                    reservation_status_label = res.get('reservation_status_label') or res.get('status') or ''
                     cell_data = {
                         'id': res_id,
                         'guest': res.get('guest_name'),
                         'checkin': cin.strftime('%d/%m/%Y'),
                         'checkout': cout.strftime('%d/%m/%Y'),
                         'category': res.get('category'),
-                        'payment_status': res.get('reservation_status_label') or res.get('status'),
+                        'reservation_status': reservation_status_label,
+                        'payment_status': payment_status_label,
+                        'payment_state': payment_state,
                         'channel': res.get('channel'),
                         'num_adults': res.get('num_adults'),
-                        'amount': res.get('amount'),
-                        'paid_amount': res.get('paid_amount'),
-                        'to_receive': res.get('to_receive')
+                        'amount': f"{amount_val:.2f}",
+                        'paid_amount': f"{paid_val:.2f}",
+                        'to_receive': f"{to_receive_val:.2f}"
                     }
                     
                     for s in range(eff_start, eff_end + 1):

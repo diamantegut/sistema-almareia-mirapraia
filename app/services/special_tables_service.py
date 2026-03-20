@@ -17,8 +17,10 @@ from app.services.data_service import (
     log_stock_action,
 )
 from app.services.logger_service import log_system_action
+from app.services.system_config_manager import get_data_path, get_legacy_root_json_path
 
-SPECIAL_TABLES_LOG_FILE = r"f:\Sistema Almareia Mirapraia\data\special_tables_log.json"
+SPECIAL_TABLES_LOG_FILE = get_data_path('special_tables_log.json')
+LEGACY_SPECIAL_TABLES_LOG_FILE = get_legacy_root_json_path('special_tables_log.json')
 
 class SpecialTablesService:
     @staticmethod
@@ -162,10 +164,11 @@ class SpecialTablesService:
 
     @staticmethod
     def _load_logs():
-        if not os.path.exists(SPECIAL_TABLES_LOG_FILE):
-            return []
+        target_path = SPECIAL_TABLES_LOG_FILE
+        if not os.path.exists(target_path) and os.path.exists(LEGACY_SPECIAL_TABLES_LOG_FILE):
+            target_path = LEGACY_SPECIAL_TABLES_LOG_FILE
         try:
-            with open(SPECIAL_TABLES_LOG_FILE, 'r') as f:
+            with open(target_path, 'r') as f:
                 return json.load(f)
         except:
             return []

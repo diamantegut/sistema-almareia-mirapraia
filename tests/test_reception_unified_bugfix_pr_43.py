@@ -1,7 +1,10 @@
 from flask import Flask, session
 from datetime import datetime
+from contextlib import contextmanager
 
 from app.blueprints.reception import routes as reception_routes
+from app.services import reservation_service as reservation_service_module
+from app.services.reservation_service import ReservationService
 
 
 def _make_app():
@@ -78,6 +81,8 @@ def test_guest_update_saves_personal_fiscal_and_operational(monkeypatch):
             "personal_info": {"name": "Maria", "doc_id": "123"},
             "fiscal_info": {"cpf_cnpj": "12345678900", "razao_social": "Maria LTDA"},
             "operational_info": {"allergies": "Lactose"},
+            "companions": [{"id": "c1", "name": "João"}],
+            "source": "rooms",
         },
     ):
         _set_user()
@@ -88,6 +93,57 @@ def test_guest_update_saves_personal_fiscal_and_operational(monkeypatch):
     assert captured["payload"]["guest_name"] == "Maria"
     assert "fiscal_info" in captured["payload"]
     assert "operational_info" in captured["payload"]
+    assert "companions" in captured["payload"]
+    assert captured["payload"]["operational_info"]["last_updated_source"] == "rooms"
+
+
+def test_guest_update_rejects_invalid_breakfast_time(monkeypatch):
+    app = _make_app()
+
+    class _ServiceUpdateStub:
+        def update_guest_details(self, rid, payload):
+            return True
+
+    monkeypatch.setattr(reception_routes, "ReservationService", _ServiceUpdateStub)
+    with app.test_request_context(
+        "/api/guest/update",
+        method="POST",
+        json={
+            "reservation_id": "RES-903",
+            "operational_info": {"breakfast_time_standard": "25:90"},
+        },
+    ):
+        _set_user()
+        response, status = reception_routes.api_guest_update.__wrapped__()
+    payload = response.get_json()
+    assert status == 400
+    assert payload["success"] is False
+
+
+def test_guest_update_rejects_duplicate_companions(monkeypatch):
+    app = _make_app()
+
+    class _ServiceUpdateStub:
+        def update_guest_details(self, rid, payload):
+            return True
+
+    monkeypatch.setattr(reception_routes, "ReservationService", _ServiceUpdateStub)
+    with app.test_request_context(
+        "/api/guest/update",
+        method="POST",
+        json={
+            "reservation_id": "RES-904",
+            "companions": [
+                {"name": "Ana", "doc_id": "111"},
+                {"name": "Ana duplicada", "doc_id": "111"},
+            ],
+        },
+    ):
+        _set_user()
+        response, status = reception_routes.api_guest_update.__wrapped__()
+    payload = response.get_json()
+    assert status == 400
+    assert payload["success"] is False
 
 
 def test_reservation_payment_method_filter_supports_aliases():
@@ -106,6 +162,9 @@ def test_unified_modal_has_edit_fields_for_operational_and_fiscal():
     assert "vg_edit_allergies" in html
     assert "vg_edit_dietary" in html
     assert "vg_edit_vip" in html
+    assert "vg_companion_editor_list" in html
+    assert "vg_edit_breakfast_time_standard" in html
+    assert "vg_last_update_at" in html
 
 
 def test_guest_view_js_supports_unified_edit_save_flow():
@@ -115,14 +174,21 @@ def test_guest_view_js_supports_unified_edit_save_flow():
     assert "fetch('/api/guest/update'" in js
     assert "function cancelGuestEdit()" in js
     assert "function switchToEdit()" in js
+    assert "renderCompanionEditor" in js
+    assert "breakfast_fruit_preferences" in js
+    assert "isValidHHMM" in js
+    assert "source: (currentGuestContext && currentGuestContext.source)" in js
 
 
 def test_checkin_script_has_room_preselection_and_payment_method_fallback():
     with open("app/templates/reception_rooms.html", "r", encoding="utf-8") as f:
         html = f.read()
+    with open("app/templates/partials/reservation_payment_modal.html", "r", encoding="utf-8") as f:
+        payment_modal_partial = f.read()
     assert "let preselectedCheckinRoom = ''" in html
     assert "else if (preselectedCheckinRoom)" in html
-    assert "fetch('/api/payment-methods')" in html
+    assert "window.reservationPaymentMethods = reservationPaymentMethods;" in html
+    assert "fetch('/api/payment-methods')" in payment_modal_partial
 
 
 def test_build_ready_checkin_preloads_only_when_room_is_inspected_and_today():
@@ -157,3 +223,24 @@ def test_rooms_template_has_preload_ui_and_action():
     assert "Pré-carregada para check-in" in html
     assert "Check-in (Reserva Sugerida)" in html
     assert "openCheckinModalWithReservation" in html
+
+
+def test_load_manual_allocations_fallback_unlocked_e_cache(monkeypatch, tmp_path):
+    manual_alloc_file = tmp_path / "manual_allocations.json"
+    manual_alloc_file.write_text('{"R1":{"room":"12"}}', encoding="utf-8")
+    service = ReservationService()
+    monkeypatch.setattr(service, "MANUAL_ALLOCATIONS_FILE", str(manual_alloc_file))
+    calls = {"count": 0}
+
+    @contextmanager
+    def _failing_lock(_path):
+        calls["count"] += 1
+        raise PermissionError(None, "denied", _path)
+        yield
+
+    monkeypatch.setattr(reservation_service_module, "file_lock", _failing_lock)
+    first = service._load_manual_allocations()
+    second = service._load_manual_allocations()
+    assert first.get("R1", {}).get("room") == "12"
+    assert second.get("R1", {}).get("room") == "12"
+    assert calls["count"] == 1

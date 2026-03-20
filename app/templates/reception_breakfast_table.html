@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabela Café da Manhã - {{ report_date }}</title>
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 10mm;
+        }
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            margin: 0;
+            color: #111827;
+            background: #f7f7f8;
+        }
+        .no-print {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 12px 12px 0 12px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .no-print .btn {
+            border: 0;
+            border-radius: 8px;
+            padding: 10px 14px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .btn-print { background: #0f172a; color: #fff; }
+        .btn-back { background: #e5e7eb; color: #111827; }
+        .sheet {
+            max-width: 1100px;
+            margin: 10px auto 18px auto;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            padding: 14px;
+        }
+        .header {
+            border-bottom: 2px solid #111827;
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+        }
+        .header h2 {
+            margin: 0;
+            font-size: 1.18rem;
+            letter-spacing: 0.02em;
+        }
+        .meta {
+            margin-top: 6px;
+            display: flex;
+            gap: 18px;
+            flex-wrap: wrap;
+            color: #374151;
+            font-size: 0.9rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+        thead th {
+            border: 1px solid #111827;
+            background: #f3f4f6;
+            text-align: left;
+            font-size: 0.78rem;
+            padding: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+        tbody td {
+            border: 1px solid #d1d5db;
+            padding: 6px;
+            font-size: 0.83rem;
+            vertical-align: top;
+            word-break: break-word;
+        }
+        tbody tr:nth-child(even) td { background: #fafafa; }
+        .col-room { width: 7%; text-align: center; font-weight: 700; }
+        .col-guest { width: 18%; }
+        .col-pax { width: 6%; text-align: center; font-weight: 700; }
+        .col-time { width: 10%; text-align: center; }
+        .col-fruit { width: 14%; }
+        .col-rest { width: 23%; }
+        .col-obs { width: 17%; }
+        .col-special { width: 5%; text-align: center; font-size: 1.1rem; }
+        .allergy-flag {
+            display: inline-block;
+            border: 1px solid #991b1b;
+            color: #991b1b;
+            border-radius: 999px;
+            padding: 1px 7px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            margin-right: 4px;
+        }
+        .muted { color: #6b7280; }
+        .empty {
+            text-align: center;
+            color: #6b7280;
+            padding: 12px 8px;
+            border: 1px dashed #d1d5db;
+            border-radius: 8px;
+            margin-top: 12px;
+        }
+        .special-title {
+            display: block;
+            font-size: 0.68rem;
+            color: #6b7280;
+        }
+        .obs-note {
+            border-left: 3px solid #111827;
+            padding-left: 5px;
+            font-weight: 600;
+        }
+        @media (max-width: 900px) {
+            .sheet { padding: 10px; border-radius: 8px; }
+            thead th, tbody td { font-size: 0.75rem; padding: 5px; }
+        }
+        @media print {
+            body { background: #fff; }
+            .no-print { display: none; }
+            .sheet {
+                max-width: none;
+                margin: 0;
+                border: 0;
+                box-shadow: none;
+                border-radius: 0;
+                padding: 0;
+            }
+            .header { background: #fff; }
+            table { border: 1px solid #000; }
+            thead { display: table-header-group; }
+            tfoot { display: table-footer-group; }
+            thead th, tbody td { border-color: #000; color: #000; background: #fff; }
+            .allergy-flag { border-color: #000; color: #000; }
+            tbody tr:nth-child(even) td { background: #fff; }
+            tr, td, th { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print">
+        <button class="btn btn-print" onclick="window.print()">Imprimir / Salvar PDF</button>
+        <button class="btn btn-back" onclick="window.location.href='{{ url_for('reception.reception_rooms') }}'">Voltar para Quartos</button>
+    </div>
+
+    <section class="sheet">
+        <div class="header">
+            <h2>Tabela A4 · Café da Manhã</h2>
+            <div class="meta">
+                <div><strong>Data:</strong> {{ report_date }}</div>
+                <div><strong>Gerado em:</strong> {{ report_generated_at or report_date }}</div>
+                <div><strong>Quartos:</strong> {{ total_rooms }}</div>
+                <div><strong>Total de Hóspedes:</strong> {{ total_pax }}</div>
+            </div>
+        </div>
+
+        {% if rows %}
+        <table>
+            <thead>
+                <tr>
+                    <th class="col-room">Quarto</th>
+                    <th class="col-guest">Hóspede Principal</th>
+                    <th class="col-pax">Pax</th>
+                    <th class="col-time">Horário</th>
+                    <th class="col-fruit">Frutas</th>
+                    <th class="col-rest">Restrições / Alergias</th>
+                    <th class="col-obs">Observações</th>
+                    <th class="col-special">🎉</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rows %}
+                <tr>
+                    <td class="col-room">{{ row.room }}</td>
+                    <td class="col-guest">{{ row.guest_main }}</td>
+                    <td class="col-pax">{{ row.pax }}</td>
+                    <td class="col-time">{{ row.breakfast_time }}</td>
+                    <td class="col-fruit">{{ row.fruits }}</td>
+                    <td class="col-rest">
+                        {% if 'alerg' in (row.restrictions or '')|lower %}
+                        <span class="allergy-flag">ALERTA</span>
+                        {% endif %}
+                        {{ row.restrictions }}
+                    </td>
+                    <td class="col-obs {% if row.has_observation %}obs-note{% endif %}">{{ row.observations }}</td>
+                    <td class="col-special" title="{{ row.special_desc }}">{{ row.special }}{% if row.special_desc %}<span class="special-title">{{ row.special_desc }}</span>{% endif %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty">Nenhum quarto ocupado com dados de café da manhã para exibir.</div>
+        {% endif %}
+    </section>
+</body>
+</html>

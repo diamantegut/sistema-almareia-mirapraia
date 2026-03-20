@@ -3,17 +3,15 @@ import os
 import uuid
 from datetime import datetime
 from cryptography.fernet import Fernet
+from app.services.system_config_manager import get_data_path
 
 class GuestManager:
-    def __init__(self, data_dir='data'):
-        self.data_dir = data_dir
-        # New structure root
-        self.hospedes_root = os.path.join(data_dir, 'Hospedes')
-        # Legacy for backward compatibility
-        self.guests_dir = os.path.join(data_dir, 'guests_encrypted')
-        
-        self.key_file = os.path.join(data_dir, 'secret.key')
-        self.index_file = os.path.join(data_dir, 'guest_index.json')
+    def __init__(self, data_dir=None):
+        self.data_dir = data_dir or get_data_path('')
+        self.hospedes_root = os.path.join(self.data_dir, 'Hospedes')
+        self.guests_dir = os.path.join(self.data_dir, 'guests_encrypted')
+        self.key_file = os.path.join(self.data_dir, 'secret.key')
+        self.index_file = os.path.join(self.data_dir, 'guest_index.json')
         
         self._ensure_dir()
         self._load_key()

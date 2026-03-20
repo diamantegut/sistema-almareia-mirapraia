@@ -83,3 +83,29 @@ def test_backup_fallback_for_invalid_backup_root(tmp_path):
     backup_events = [e for e in events if e["namespace"] == "backup"]
     assert backup_events
     assert backup_events[-1]["fallback_used"] is True
+
+
+def test_critical_json_reconciliation_report_marks_divergence(monkeypatch):
+    def fake_snapshot(name):
+        if name == "cashier_sessions.json":
+            return {
+                "name": name,
+                "canonical_path": "x/data/cashier_sessions.json",
+                "legacy_path": "x/cashier_sessions.json",
+                "canonical": {"exists": True, "size": 10, "mtime": 20.0, "sha256": "a", "valid_json": True},
+                "legacy": {"exists": True, "size": 8, "mtime": 10.0, "sha256": "b", "valid_json": True},
+            }
+        return {
+            "name": name,
+            "canonical_path": f"x/data/{name}",
+            "legacy_path": f"x/{name}",
+            "canonical": {"exists": True, "size": 10, "mtime": 10.0, "sha256": "z", "valid_json": True},
+            "legacy": {"exists": True, "size": 10, "mtime": 10.0, "sha256": "z", "valid_json": True},
+        }
+
+    monkeypatch.setattr(system_config_manager, "build_json_pair_snapshot", fake_snapshot)
+    report = system_config_manager.build_critical_json_reconciliation_report()
+    by_name = {item["name"]: item for item in report}
+    assert by_name["cashier_sessions.json"]["divergent"] is True
+    assert by_name["cashier_sessions.json"]["newer"] == "data"
+    assert by_name["room_charges.json"]["divergent"] is False

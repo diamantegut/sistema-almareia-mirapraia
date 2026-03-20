@@ -1,0 +1,409 @@
+{% extends "base.html" %}
+
+{% block title %}KDS Café da Manhã{% endblock %}
+
+{% block content %}
+<div class="container-fluid breakfast-kds-page">
+    <div class="breakfast-kds-header d-flex flex-wrap justify-content-between align-items-center mb-3">
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            <h2 class="mb-0 text-white"><i class="bi bi-cup-hot-fill"></i> KDS Café da Manhã</h2>
+            <span class="badge bg-light text-dark text-uppercase fw-semibold">Tablet Fullscreen</span>
+        </div>
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            <span class="text-white fw-semibold" id="breakfast-kds-clock"></span>
+            <button type="button" class="btn btn-outline-light btn-lg px-3" id="breakfast-kds-fullscreen-btn">
+                <i class="bi bi-arrows-fullscreen"></i> Tela cheia
+            </button>
+            <button type="button" class="btn btn-light btn-lg px-3" id="breakfast-kds-refresh-btn">
+                <i class="bi bi-arrow-clockwise"></i> Atualizar
+            </button>
+            <a href="{{ url_for('kitchen.kitchen_kds') }}" class="btn btn-outline-light btn-lg px-3">KDS Restaurante</a>
+        </div>
+    </div>
+
+    <div class="breakfast-kds-summary mb-3" id="breakfast-kds-summary"></div>
+    <div class="breakfast-kds-grid" id="breakfast-kds-grid"></div>
+</div>
+
+<div class="modal fade" id="breakfastKdsDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen-lg-down modal-xl">
+        <div class="modal-content breakfast-kds-modal-content">
+            <div class="modal-header">
+                <div>
+                    <h4 class="modal-title mb-1" id="breakfastKdsModalTitle">Quarto</h4>
+                    <div class="small" id="breakfastKdsModalMeta">-</div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="breakfast-kds-alert-block mb-3" id="breakfastKdsAlertBlock"></div>
+                <div class="row g-3">
+                    <div class="col-lg-6">
+                        <div class="breakfast-kds-detail-card h-100">
+                            <h6 class="mb-2">Operacional</h6>
+                            <p class="mb-2"><strong>Frutas:</strong> <span id="breakfastKdsDetailFruits">-</span></p>
+                            <p class="mb-2"><strong>Horário:</strong> <span id="breakfastKdsDetailTime">--:--</span></p>
+                            <p class="mb-0"><strong>Observações:</strong> <span id="breakfastKdsDetailObs">-</span></p>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="breakfast-kds-detail-card h-100">
+                            <h6 class="mb-2">Demais Hóspedes</h6>
+                            <div id="breakfastKdsDetailGuests" class="small text-muted">Sem hóspedes adicionais</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer breakfast-kds-modal-footer">
+                <button type="button" class="btn btn-outline-secondary btn-lg flex-fill" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-warning btn-lg flex-fill breakfast-status-action" data-next-status="preparing">Marcar Em Preparo</button>
+                <button type="button" class="btn btn-success btn-lg flex-fill breakfast-status-action" data-next-status="ready">Marcar Pronto</button>
+                <button type="button" class="btn btn-dark btn-lg flex-fill breakfast-status-action" data-next-status="delivered">Marcar Entregue</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const breakfastDataUrl = "{{ url_for('kitchen.kitchen_breakfast_kds_data') }}";
+const breakfastUpdateUrl = "{{ url_for('kitchen.kitchen_breakfast_kds_update_status') }}";
+const breakfastPollingMs = 10000;
+const breakfastInitialPayload = {{ (initial_payload or {})|tojson }};
+const breakfastStatusMeta = {
+    pending: { label: 'Pendente', className: 'status-pending' },
+    preparing: { label: 'Em preparo', className: 'status-preparing' },
+    ready: { label: 'Pronto', className: 'status-ready' },
+    delivered: { label: 'Entregue', className: 'status-delivered' }
+};
+let breakfastState = { rooms: [] };
+let breakfastModal = null;
+let breakfastSelectedRoom = null;
+let breakfastTimerId = null;
+
+function renderBreakfastClock() {
+    const el = document.getElementById('breakfast-kds-clock');
+    if (!el) return;
+    el.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+function normalizeArray(value) {
+    if (Array.isArray(value)) return value.filter(Boolean);
+    if (!value) return [];
+    return String(value).split(',').map(v => v.trim()).filter(Boolean);
+}
+
+function renderBreakfastSummary(data) {
+    const summary = (data && data.summary) || {};
+    const statuses = summary.statuses || {};
+    const wrap = document.getElementById('breakfast-kds-summary');
+    if (!wrap) return;
+    wrap.innerHTML = `
+        <div class="summary-pill">Quartos <strong>${summary.total_rooms || 0}</strong></div>
+        <div class="summary-pill">Hóspedes <strong>${summary.total_pax || 0}</strong></div>
+        <div class="summary-pill status-pending">Pendentes <strong>${statuses.pending || 0}</strong></div>
+        <div class="summary-pill status-preparing">Em preparo <strong>${statuses.preparing || 0}</strong></div>
+        <div class="summary-pill status-ready">Prontos <strong>${statuses.ready || 0}</strong></div>
+        <div class="summary-pill status-delivered">Entregues <strong>${statuses.delivered || 0}</strong></div>
+    `;
+}
+
+function renderBreakfastCards(data) {
+    const rooms = Array.isArray(data && data.rooms) ? data.rooms : [];
+    breakfastState = { rooms: rooms };
+    const grid = document.getElementById('breakfast-kds-grid');
+    if (!grid) return;
+    if (!rooms.length) {
+        grid.innerHTML = '<div class="breakfast-kds-empty">Nenhum quarto com dados de café para monitorar no momento.</div>';
+        return;
+    }
+    const html = rooms.map(room => {
+        const statusMeta = breakfastStatusMeta[room.status] || breakfastStatusMeta.pending;
+        const alertClass = room.has_alert ? 'alert-on' : '';
+        const obsClass = room.has_observation ? 'obs-on' : '';
+        const special = room.special ? `<span class="special-badge" title="${room.special_desc || ''}">🎉</span>` : '';
+        return `
+            <button type="button" class="breakfast-kds-card ${statusMeta.className} ${alertClass} ${obsClass}" data-room="${room.room}">
+                <div class="card-top">
+                    <div class="room-label">Quarto ${room.room}</div>
+                    <div class="status-pill ${statusMeta.className}">${statusMeta.label}</div>
+                </div>
+                <div class="guest-line">${room.guest_main || 'Hóspede'} ${special}</div>
+                <div class="metrics-row">
+                    <div><span class="metric-label">Pax</span><span class="metric-value">${room.pax || 1}</span></div>
+                    <div><span class="metric-label">Horário</span><span class="metric-value">${room.breakfast_time || '--:--'}</span></div>
+                </div>
+                <div class="chips-row">
+                    <span class="chip">${room.fruits_summary || '-'}</span>
+                    <span class="chip ${room.has_alert ? 'chip-alert' : ''}">${room.restrictions_summary || 'Sem restrições'}</span>
+                </div>
+                <div class="obs-row">${room.observations || '-'}</div>
+            </button>
+        `;
+    }).join('');
+    grid.innerHTML = html;
+}
+
+function renderBreakfastModal(roomData) {
+    if (!roomData) return;
+    breakfastSelectedRoom = roomData.room;
+    const statusMeta = breakfastStatusMeta[roomData.status] || breakfastStatusMeta.pending;
+    document.getElementById('breakfastKdsModalTitle').textContent = `Quarto ${roomData.room} · ${roomData.guest_main || 'Hóspede'}`;
+    document.getElementById('breakfastKdsModalMeta').textContent = `Pax ${roomData.pax || 1} · ${roomData.breakfast_time || '--:--'} · ${statusMeta.label}`;
+    document.getElementById('breakfastKdsDetailFruits').textContent = (normalizeArray(roomData.fruits).join(', ') || roomData.fruits_summary || '-');
+    document.getElementById('breakfastKdsDetailTime').textContent = roomData.breakfast_time || '--:--';
+    document.getElementById('breakfastKdsDetailObs').textContent = roomData.observations || '-';
+    const guestsEl = document.getElementById('breakfastKdsDetailGuests');
+    const companions = Array.isArray(roomData.companions) ? roomData.companions : [];
+    if (!companions.length) {
+        guestsEl.innerHTML = 'Sem hóspedes adicionais';
+    } else {
+        guestsEl.innerHTML = companions.map((g, idx) => {
+            const name = (g && (g.nome || g.name)) ? (g.nome || g.name) : `Hóspede ${idx + 1}`;
+            const rel = (g && (g.relacao || g.relationship)) ? ` · ${g.relacao || g.relationship}` : '';
+            return `<div class="guest-pill">${name}${rel}</div>`;
+        }).join('');
+    }
+    const alertRows = [];
+    const allergies = normalizeArray(roomData.allergies);
+    const restrictions = normalizeArray(roomData.restrictions);
+    if (allergies.length) alertRows.push(`<div><strong>Alergias:</strong> ${allergies.join(', ')}</div>`);
+    if (restrictions.length) alertRows.push(`<div><strong>Restrições:</strong> ${restrictions.join(', ')}</div>`);
+    if (roomData.has_observation && roomData.observations && roomData.observations !== '-') alertRows.push(`<div><strong>Observações:</strong> ${roomData.observations}</div>`);
+    if (!alertRows.length) alertRows.push('<div class="text-muted">Sem alertas críticos.</div>');
+    document.getElementById('breakfastKdsAlertBlock').innerHTML = alertRows.join('');
+    if (!breakfastModal) {
+        breakfastModal = new bootstrap.Modal(document.getElementById('breakfastKdsDetailsModal'));
+    }
+    breakfastModal.show();
+}
+
+function applyBreakfastPayload(payload) {
+    const data = payload && payload.data ? payload.data : payload;
+    renderBreakfastSummary(data || {});
+    renderBreakfastCards(data || {});
+}
+
+function fetchBreakfastData() {
+    return fetch(breakfastDataUrl, { headers: { 'Accept': 'application/json' } })
+        .then(resp => {
+            if (!resp.ok) throw new Error('Erro ao carregar dados do KDS de café');
+            return resp.json();
+        })
+        .then(payload => {
+            if (!payload.success) throw new Error(payload.error || 'Erro de payload');
+            applyBreakfastPayload(payload);
+        })
+        .catch(() => null);
+}
+
+function requestBreakfastFullscreen() {
+    const el = document.documentElement;
+    if (el && el.requestFullscreen) {
+        el.requestFullscreen().catch(() => {});
+    }
+}
+
+function updateBreakfastStatus(status) {
+    if (!breakfastSelectedRoom) return;
+    fetch(breakfastUpdateUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ room: breakfastSelectedRoom, status: status })
+    })
+    .then(resp => resp.json().then(data => ({ ok: resp.ok, data: data })))
+    .then(result => {
+        if (!result.ok || !result.data.success) {
+            throw new Error((result.data && result.data.error) || 'Falha ao atualizar status');
+        }
+        return fetchBreakfastData();
+    })
+    .catch(() => null);
+}
+
+function setupBreakfastEvents() {
+    const grid = document.getElementById('breakfast-kds-grid');
+    if (grid) {
+        grid.addEventListener('click', function(event) {
+            const card = event.target.closest('.breakfast-kds-card');
+            if (!card) return;
+            const roomKey = String(card.dataset.room || '');
+            const roomData = (breakfastState.rooms || []).find(r => String(r.room) === roomKey);
+            renderBreakfastModal(roomData);
+        });
+    }
+    document.querySelectorAll('.breakfast-status-action').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const next = btn.dataset.nextStatus;
+            updateBreakfastStatus(next);
+        });
+    });
+    const fullscreenBtn = document.getElementById('breakfast-kds-fullscreen-btn');
+    if (fullscreenBtn) fullscreenBtn.addEventListener('click', requestBreakfastFullscreen);
+    const refreshBtn = document.getElementById('breakfast-kds-refresh-btn');
+    if (refreshBtn) refreshBtn.addEventListener('click', fetchBreakfastData);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    renderBreakfastClock();
+    setInterval(renderBreakfastClock, 1000);
+    applyBreakfastPayload({ data: breakfastInitialPayload || {} });
+    setupBreakfastEvents();
+    fetchBreakfastData();
+    breakfastTimerId = window.setInterval(fetchBreakfastData, breakfastPollingMs);
+});
+</script>
+
+<style>
+    .breakfast-kds-page {
+        min-height: calc(100vh - 1rem);
+        background: #0f172a;
+        border-radius: 12px;
+        padding: 14px;
+        color: #e5e7eb;
+    }
+    .breakfast-kds-header h2 { font-size: clamp(1.2rem, 2vw, 1.9rem); }
+    .breakfast-kds-summary {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .summary-pill {
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.18);
+        border-radius: 12px;
+        padding: 8px 12px;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+    .breakfast-kds-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 12px;
+    }
+    .breakfast-kds-card {
+        text-align: left;
+        border: 1px solid rgba(255,255,255,0.16);
+        border-radius: 14px;
+        background: #111827;
+        color: #f9fafb;
+        min-height: 260px;
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        touch-action: manipulation;
+    }
+    .breakfast-kds-card.alert-on { border-color: #ef4444; box-shadow: 0 0 0 2px rgba(239,68,68,0.2); }
+    .breakfast-kds-card.obs-on { box-shadow: 0 0 0 2px rgba(14,165,233,0.16); }
+    .card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+    }
+    .room-label { font-size: 1.25rem; font-weight: 800; }
+    .status-pill {
+        border-radius: 999px;
+        padding: 4px 10px;
+        font-size: 0.86rem;
+        font-weight: 700;
+    }
+    .status-pending { background: #f59e0b22; color: #fcd34d; border: 1px solid #f59e0b55; }
+    .status-preparing { background: #0ea5e922; color: #7dd3fc; border: 1px solid #0ea5e955; }
+    .status-ready { background: #22c55e22; color: #86efac; border: 1px solid #22c55e55; }
+    .status-delivered { background: #6b728022; color: #d1d5db; border: 1px solid #6b728055; }
+    .guest-line { font-size: 1.1rem; font-weight: 700; line-height: 1.2; }
+    .special-badge { margin-left: 6px; }
+    .metrics-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+    .metric-label {
+        display: block;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        opacity: 0.8;
+    }
+    .metric-value { font-size: 1.08rem; font-weight: 700; }
+    .chips-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    .chip {
+        background: rgba(255,255,255,0.08);
+        border-radius: 999px;
+        padding: 4px 10px;
+        font-size: 0.84rem;
+        font-weight: 600;
+    }
+    .chip-alert { background: rgba(239,68,68,0.22); color: #fecaca; border: 1px solid rgba(239,68,68,0.45); }
+    .obs-row {
+        margin-top: auto;
+        font-size: 0.9rem;
+        line-height: 1.3;
+        color: #d1d5db;
+    }
+    .breakfast-kds-empty {
+        min-height: 180px;
+        border: 1px dashed rgba(255,255,255,0.25);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        color: #cbd5e1;
+        background: rgba(255,255,255,0.04);
+    }
+    .breakfast-kds-modal-content {
+        border-radius: 14px;
+    }
+    .breakfast-kds-alert-block {
+        border: 1px solid #ef4444;
+        border-radius: 10px;
+        background: #fff5f5;
+        color: #7f1d1d;
+        padding: 10px 12px;
+        font-size: 1rem;
+        line-height: 1.35;
+    }
+    .breakfast-kds-detail-card {
+        border: 1px solid #d1d5db;
+        border-radius: 10px;
+        padding: 12px;
+        background: #fff;
+    }
+    .breakfast-kds-modal-footer .btn {
+        min-height: 62px;
+        font-size: 1.03rem;
+        font-weight: 700;
+    }
+    .guest-pill {
+        border: 1px solid #d1d5db;
+        border-radius: 999px;
+        padding: 4px 10px;
+        margin-bottom: 6px;
+        background: #f8fafc;
+        color: #1f2937;
+        display: inline-block;
+        margin-right: 6px;
+    }
+    @media (pointer: coarse) {
+        .breakfast-kds-grid {
+            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+            gap: 14px;
+        }
+        .breakfast-kds-card {
+            min-height: 290px;
+            padding: 16px;
+        }
+        .breakfast-kds-card, .btn, .breakfast-status-action {
+            touch-action: manipulation;
+        }
+        .breakfast-kds-modal-content {
+            min-height: 90vh;
+        }
+    }
+</style>
+{% endblock %}

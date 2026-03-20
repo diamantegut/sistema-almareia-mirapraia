@@ -9,11 +9,12 @@ from copy import deepcopy
 from flask import current_app
 from app.models.database import db
 from app.models.models import WaitingListEntry, WaitingListEvent, WaitingListTableAllocation
-from app.services.system_config_manager import WAITING_LIST_FILE as SYSTEM_WAITING_LIST_FILE
+from app.services.system_config_manager import WAITING_LIST_FILE as SYSTEM_WAITING_LIST_FILE, get_legacy_root_json_path
 from app.utils.lock import file_lock
 
 logger = logging.getLogger(__name__)
 WAITING_LIST_FILE = SYSTEM_WAITING_LIST_FILE
+LEGACY_WAITING_LIST_FILE = get_legacy_root_json_path('waiting_list.json')
 _WAITING_LIST_DB_SYNC_DONE = False
 STATUS_ALIASES = {
     'waiting': 'aguardando',
@@ -605,11 +606,15 @@ def load_waiting_data():
         ]
     }
     
-    if not os.path.exists(WAITING_LIST_FILE):
+    target_file = WAITING_LIST_FILE
+    if not os.path.exists(target_file) and os.path.exists(LEGACY_WAITING_LIST_FILE):
+        logger.warning(f"waiting_list fallback read from legacy path: {LEGACY_WAITING_LIST_FILE}")
+        target_file = LEGACY_WAITING_LIST_FILE
+    if not os.path.exists(target_file):
         return _waiting_default_payload(default_settings)
     try:
-        with file_lock(WAITING_LIST_FILE):
-            with open(WAITING_LIST_FILE, 'r', encoding='utf-8') as f:
+        with file_lock(target_file):
+            with open(target_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
             # Ensure settings exist and have defaults
             if "settings" not in data:
