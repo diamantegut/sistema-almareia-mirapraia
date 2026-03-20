@@ -1,132 +1,160 @@
 @echo off
-cd /d "%~dp0"
 setlocal
+cd /d "%~dp0"
 set "BASE_DIR=%CD%"
 
+set "DEV_PORT=5001"
+set "DEV_DOMAIN=syrupy-jaliyah-intracranial.ngrok-free.dev"
+set "PROD_PORT=5000"
+set "PROD_DOMAIN=hospedes.almareia.mirapraia.ngrok.app"
+
+if /I "%~1"=="__RUN_APP" goto RUN_APP
+if /I "%~1"=="__RUN_NGROK" goto RUN_NGROK
+if /I "%~1"=="--print" goto PRINT_ONLY
+if /I "%~1"=="DEV" goto PRESET_DEV
+if /I "%~1"=="PRODUCAO" goto PRESET_PROD
+if /I "%~1"=="PROD" goto PRESET_PROD
+
+call :CHECK_PREREQS || goto END
+
+echo.
+echo ===================================================
+echo     SISTEMA ALMAREIA - EXECUCAO WINDOWS
+echo ===================================================
+echo.
+echo [1] DEV       - Porta %DEV_PORT% - %DEV_DOMAIN%
+echo [2] PRODUCAO  - Porta %PROD_PORT% - %PROD_DOMAIN%
+echo.
+set /p "ENV_CHOICE=Escolha o ambiente [1/2]: "
+
+if "%ENV_CHOICE%"=="1" goto PRESET_DEV
+if "%ENV_CHOICE%"=="2" goto PRESET_PROD
+echo [ERRO] Opcao invalida.
+goto END
+
+:PRESET_DEV
+set "ENV_LABEL=DEV"
+set "ALMAREIA_ENV=development"
+set "TARGET_PORT=%DEV_PORT%"
+set "TARGET_DOMAIN=%DEV_DOMAIN%"
+goto START_ALL
+
+:PRESET_PROD
+set "ENV_LABEL=PRODUCAO"
+set "ALMAREIA_ENV=production"
+set "TARGET_PORT=%PROD_PORT%"
+set "TARGET_DOMAIN=%PROD_DOMAIN%"
+goto START_ALL
+
+:START_ALL
+echo.
+echo [INFO] Ambiente escolhido: %ENV_LABEL%
+echo [INFO] Porta usada: %TARGET_PORT%
+echo [INFO] Dominio ngrok: %TARGET_DOMAIN%
+echo.
+
+start "ALMAREIA APP - %ENV_LABEL%" cmd /k ""%~f0" __RUN_APP "%ENV_LABEL%" "%TARGET_PORT%" "%ALMAREIA_ENV%""
+start "ALMAREIA NGROK - %ENV_LABEL%" cmd /k ""%~f0" __RUN_NGROK "%ENV_LABEL%" "%TARGET_PORT%" "%TARGET_DOMAIN%""
+
+echo [OK] Janelas iniciadas para APP e NGROK.
+goto END
+
+:RUN_APP
+set "ENV_LABEL=%~2"
+set "TARGET_PORT=%~3"
+set "ALMAREIA_ENV=%~4"
+cd /d "%BASE_DIR%"
+echo.
+echo ===============================================
+echo   ALMAREIA APP - %ENV_LABEL%
+echo ===============================================
+echo [INFO] Ambiente: %ALMAREIA_ENV%
+echo [INFO] Porta: %TARGET_PORT%
+echo.
+set "ALMAREIA_PORT=%TARGET_PORT%"
+set "PORT=%TARGET_PORT%"
+python "%BASE_DIR%\run.py"
+echo.
+echo [ERRO] Aplicacao finalizada com codigo %ERRORLEVEL%.
+pause
+goto END
+
+:RUN_NGROK
+set "ENV_LABEL=%~2"
+set "TARGET_PORT=%~3"
+set "TARGET_DOMAIN=%~4"
+cd /d "%BASE_DIR%"
+echo.
+echo ===============================================
+echo   ALMAREIA NGROK - %ENV_LABEL%
+echo ===============================================
+echo [INFO] Porta: %TARGET_PORT%
+echo [INFO] Dominio: %TARGET_DOMAIN%
+echo.
+where ngrok >nul 2>&1
+if errorlevel 1 (
+    echo [ERRO] ngrok nao encontrado no PATH.
+    echo [ACAO] Instale/configure ngrok e rode novamente.
+    pause
+    goto END
+)
+ngrok http --domain=%TARGET_DOMAIN% %TARGET_PORT%
+echo.
+echo [ERRO] ngrok finalizado com codigo %ERRORLEVEL%.
+pause
+goto END
+
+:PRINT_ONLY
+if "%~2"=="" (
+    echo Uso: run.bat --print DEV ^| PRODUCAO
+    goto END
+)
+if /I "%~2"=="DEV" (
+    set "ENV_LABEL=DEV"
+    set "ALMAREIA_ENV=development"
+    set "TARGET_PORT=%DEV_PORT%"
+    set "TARGET_DOMAIN=%DEV_DOMAIN%"
+    goto SHOW_PRINT
+)
+if /I "%~2"=="PRODUCAO" (
+    set "ENV_LABEL=PRODUCAO"
+    set "ALMAREIA_ENV=production"
+    set "TARGET_PORT=%PROD_PORT%"
+    set "TARGET_DOMAIN=%PROD_DOMAIN%"
+    goto SHOW_PRINT
+)
+if /I "%~2"=="PROD" (
+    set "ENV_LABEL=PRODUCAO"
+    set "ALMAREIA_ENV=production"
+    set "TARGET_PORT=%PROD_PORT%"
+    set "TARGET_DOMAIN=%PROD_DOMAIN%"
+    goto SHOW_PRINT
+)
+echo Uso: run.bat --print DEV ^| PRODUCAO
+goto END
+
+:SHOW_PRINT
+echo [PRINT] Ambiente: %ENV_LABEL%
+echo [PRINT] APP: set ALMAREIA_ENV=%ALMAREIA_ENV%^&^& set ALMAREIA_PORT=%TARGET_PORT%^&^& set PORT=%TARGET_PORT%^&^& python "%BASE_DIR%\run.py"
+echo [PRINT] NGROK: ngrok http --domain=%TARGET_DOMAIN% %TARGET_PORT%
+goto END
+
+:CHECK_PREREQS
 where python >nul 2>&1
 if errorlevel 1 (
-    echo [ERRO] Python nao encontrado no PATH. Instale o Python 3.x e tente novamente.
-    goto END
+    echo [ERRO] Python nao encontrado no PATH.
+    exit /b 1
 )
-
 if not exist "%BASE_DIR%\run.py" (
-    echo [ERRO] Arquivo run.py nao encontrado em "%BASE_DIR%".
-    goto END
+    echo [ERRO] run.py nao encontrado em "%BASE_DIR%".
+    exit /b 1
 )
-
-if not exist "%BASE_DIR%\scripts" (
-    echo [ERRO] Pasta scripts nao encontrada em "%BASE_DIR%".
-    goto END
+where ngrok >nul 2>&1
+if errorlevel 1 (
+    echo [AVISO] ngrok nao encontrado no PATH neste momento.
+    echo [AVISO] A janela de APP sera iniciada normalmente e a janela de NGROK exibira erro orientativo.
 )
-
-if not exist "%BASE_DIR%\scripts\setup_env.py" (
-    echo [ERRO] Arquivo scripts\setup_env.py nao encontrado em "%BASE_DIR%\scripts".
-    goto END
-)
-
-if not exist "%BASE_DIR%\scripts\check_ngrok_config.py" (
-    echo [ERRO] Arquivo scripts\check_ngrok_config.py nao encontrado em "%BASE_DIR%\scripts".
-    goto END
-)
-
-set "PYTHON=python"
-set "NGROK_DOMAIN_5001=syrupy-jaliyah-intracranial.ngrok-free.dev"
-set "NGROK_DOMAIN="
-set "GUEST_DOMAIN=hospedes.almareia.mirapraia.ngrok.app"
-set "NGROK_SCOPE_FLAG="
-
-echo.
-echo ===================================================
-echo      SISTEMA MIRAPRAIA - INICIALIZACAO SERVIDOR
-echo ===================================================
-echo.
-
-:ASK_PORT
-echo.
-set /p server_port="Digite a porta do servidor (Ex: 5000, 5001): "
-if "%server_port%"=="" goto ASK_PORT
-
-if "%server_port%"=="5000" (
-    set "NGROK_ENV=production"
-    set "NGROK_DOMAIN="
-    echo [INFO] Modo de Producao detectado - Porta 5000.
-) else (
-    set "NGROK_ENV=development"
-    set "NGROK_DOMAIN=%NGROK_DOMAIN_5001%"
-    echo [INFO] Modo de Desenvolvimento detectado.
-)
-
-if "%server_port%"=="5001" (
-    set "NGROK_SCOPE_FLAG=--staff-only"
-    echo [INFO] Regra 5001 ativa: somente dominio %NGROK_DOMAIN% sera publicado externamente.
-    echo [INFO] Regra 5001 ativa: configuracao ngrok sera automatica sem pergunta.
-    goto CONFIG_NGROK
-)
-
-if "%server_port%"=="5000" goto ASK_NGROK
-goto START_SERVER
-
-:ASK_NGROK
-echo.
-echo Deseja configurar o ngrok para esta instancia?
-echo S - Sim, configurar ngrok para a porta %server_port%
-echo N - Nao, iniciar apenas o servidor local
-set /p use_ngrok="Opcao (S/N): "
-
-if /I "%use_ngrok%"=="S" goto ASK_DOMAIN_5000
-if /I "%use_ngrok%"=="N" goto START_SERVER
-
-echo Opcao invalida. Tente novamente.
-goto ASK_NGROK
-
-:ASK_DOMAIN_5000
-echo.
-set /p NGROK_DOMAIN="Digite o dominio reservado do ngrok para a porta 5000: "
-if "%NGROK_DOMAIN%"=="" (
-    echo [ERRO] Dominio do ngrok nao pode ficar vazio.
-    goto ASK_DOMAIN_5000
-)
-goto CONFIG_NGROK
-
-:CONFIG_NGROK
-echo.
-echo [INFO] Verificando instancias existentes do ngrok...
-tasklist /FI "IMAGENAME eq ngrok.exe" | find /I "ngrok.exe" >nul 2>&1
-if not errorlevel 1 (
-    echo [AVISO] Uma instancia do ngrok esta em execucao.
-    echo [INFO] Ela sera mantida. Esta instancia iniciara seu proprio gerenciador ngrok em "%BASE_DIR%".
-)
-
-echo.
-echo [INFO] Atualizando configuracao do sistema e do ngrok para a porta %server_port%.
-%PYTHON% "%BASE_DIR%\scripts\setup_env.py" --env %NGROK_ENV% --port %server_port% --domain %NGROK_DOMAIN% --guest-domain %GUEST_DOMAIN% %NGROK_SCOPE_FLAG%
-
-echo.
-echo [INFO] Verificando consistencia da configuracao do ngrok...
-%PYTHON% "%BASE_DIR%\scripts\check_ngrok_config.py"
-
-echo.
-echo [INFO] Iniciando servico ngrok (tunnels)...
-start "Ngrok Service %server_port%" /MIN %PYTHON% "%BASE_DIR%\scripts\manage_ngrok.py" %NGROK_ENV%
-
-goto START_SERVER
-
-:START_SERVER
-echo.
-echo --- INICIANDO SERVIDOR NA PORTA %server_port% ---
-if "%server_port%"=="5001" (
-    set "ALMAREIA_EXTERNAL_OPEN_MODE=1"
-    echo [INFO] Regra 5001 ativa: login/senha/permissoes desativados para acesso externo.
-) else (
-    set "ALMAREIA_EXTERNAL_OPEN_MODE=0"
-)
-%PYTHON% "%BASE_DIR%\scripts\setup_env.py" --port %server_port% --no-ngrok
-%PYTHON% "%BASE_DIR%\run.py"
-
-if %ERRORLEVEL% NEQ 0 (
-    echo [ERRO] O servidor parou com codigo %ERRORLEVEL%.
-    pause
-)
+exit /b 0
 
 :END
 endlocal

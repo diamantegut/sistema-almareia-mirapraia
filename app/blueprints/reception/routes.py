@@ -2536,82 +2536,28 @@ def reception_rooms():
             charge = next((c for c in room_charges if c['id'] == charge_id), None)
             
             if charge and charge.get('status') == 'pending':
-                payment_methods_list = load_payment_methods()
-                
-                charge_total = float(charge['total'])
-                try:
-                    allocation = allocate_payments_with_change(payments, charge_total)
-                except ValueError as e:
-                    flash(f'Erro de pagamento: {str(e)}')
+                payment_methods_list = _load_reception_payment_methods()
+                normalized_payments = _normalize_charge_payments(payments, payment_methods_list)
+                result = _process_charge_payment(
+                    charge=charge,
+                    payments_to_process=normalized_payments,
+                    room_charges_ref=room_charges,
+                    cashier_session=current_session,
+                    current_user=current_user,
+                    require_exact_total=True,
+                    add_cashier_transactions=True,
+                    add_fiscal_pool=True,
+                    fiscal_origin='reception_charge'
+                )
+                if not result.get('success'):
+                    flash(result.get('error') or 'Falha ao processar pagamento.')
                     return redirect(url_for('reception.reception_rooms'))
-
-                normalized_payments = allocation['payments']
-                total_paid = float(allocation['total_applied'])
-                total_received = float(allocation['total_received'])
-                total_change = float(allocation['total_change'])
-
-                # Generate Payment Group ID
-                payment_group_id = str(uuid.uuid4()) if len(normalized_payments) > 1 else None
-                total_payment_group_amount = total_paid if payment_group_id else 0
-                
-                # Prepare Fiscal Payments List
-                fiscal_payments = []
-                primary_payment_method_id = normalized_payments[0].get('id')
-
-                # Process Transactions
-                for p in normalized_payments:
-                    p_amount = float(p.get('amount_applied', 0))
-                    p_id = p.get('id')
-                    p_name = p.get('method')
-                    p_received = float(p.get('amount_input', p_amount))
-                    p_change = float(p.get('change_amount', 0))
-                    
-                    # Verify name against ID if possible
-                    p_method_obj = next((m for m in payment_methods_list if str(m['id']) == str(p_id)), None)
-                    if p_method_obj:
-                        p_name = p_method_obj['name']
-                        is_fiscal = p_method_obj.get('is_fiscal', False)
-                    else:
-                        is_fiscal = False
-                    
-                    fiscal_payments.append({
-                        'method': p_name,
-                        'amount': p_amount,
-                        'is_fiscal': is_fiscal
-                    })
-
-                    CashierService.add_transaction(
-                        cashier_type='guest_consumption',
-                        amount=p_amount,
-                        description=f"Pagamento Quarto {charge['room_number']} ({p_name})",
-                        payment_method=p_name,
-                        user=current_user,
-                        details={
-                            'room_number': charge['room_number'],
-                            'emit_invoice': emit_invoice,
-                            'category': 'Pagamento de Conta',
-                            'payment_group_id': payment_group_id,
-                            'total_payment_group_amount': total_payment_group_amount,
-                            'payment_details': normalized_payments,
-                            'amount_due': charge_total,
-                            'amount_received': p_received,
-                            'change_amount': p_change
-                        }
-                    )
-
-                # Update Charge
-                charge['status'] = 'paid'
-                charge['payment_method'] = 'Múltiplos' if len(normalized_payments) > 1 else fiscal_payments[0]['method']
-                charge['paid_at'] = datetime.now().strftime('%d/%m/%Y %H:%M')
-                charge['reception_cashier_id'] = current_session['id']
-                charge['payment_details'] = normalized_payments
-                charge['amount_due'] = charge_total
-                charge['amount_received'] = total_received
-                charge['change_given'] = total_change
-                save_room_charges(room_charges)
-                
-                if total_change > 0:
-                    flash(f"Pagamento recebido com sucesso. Recebido: R$ {total_received:.2f} | Troco: R$ {total_change:.2f}.")
+                if result.get('fiscal_error'):
+                    current_app.logger.error(f"Error adding charge to fiscal pool: {result.get('fiscal_error')}")
+                change_amount = float(result.get('change_amount') or 0)
+                paid_total = float(result.get('paid_total') or charge.get('total') or 0)
+                if change_amount > 0:
+                    flash(f"Pagamento recebido com sucesso. Recebido: R$ {paid_total:.2f} | Troco: R$ {change_amount:.2f}.")
                 else:
                     flash(f"Pagamento de R$ {charge['total']:.2f} recebido com sucesso.")
 
@@ -3374,7 +3320,7 @@ def reception_cashier():
                     current_session['transactions'].append(transaction)
                     log_action('Transação Parcial', f'Pagamento parcial: R$ {float(payment["amount_applied"]):.2f} via {payment["method"]}', department='Recepção')
                 
-                save_cashier_sessions(sessions)
+                CashierService.persist_sessions(sessions, trigger_backup=False)
                 
                 try:
                     all_payment_methods = load_payment_methods()

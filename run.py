@@ -4,6 +4,12 @@ from app import create_app
 
 # Carregar configuração de porta
 def load_port():
+    env_port = os.environ.get('ALMAREIA_PORT') or os.environ.get('PORT')
+    if env_port:
+        try:
+            return int(str(env_port).strip())
+        except Exception:
+            print(f"Aviso: porta de ambiente invalida ({env_port}). Usando configuracao padrao.")
     try:
         config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'system_config.json')
         if os.path.exists(config_path):
