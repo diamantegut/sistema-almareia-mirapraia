@@ -54,11 +54,27 @@ def _parse_weekly_day_off(val):
 
 
 def _ensure_system_permissions_access(*, as_json: bool = False):
-    if session.get('role') == 'administracao_sistema':
+    role_value = str(session.get('role') or '').strip().lower()
+    permissions_value = session.get('permissions')
+    permissions = permissions_value if isinstance(permissions_value, list) else []
+    permissions_norm = {str(item or '').strip().lower() for item in permissions}
+    if role_value in {'administracao_sistema', 'admin'} or 'administracao_sistema' in permissions_norm:
         return None
-    if as_json:
-        return jsonify({'error': 'Forbidden'}), 403
-    return "Forbidden", 403
+    from app.services.permission_service import build_authorization_required_response
+    return build_authorization_required_response(
+        route_key=str(request.endpoint or 'admin.admin_system_permissions'),
+        module_key='admin',
+        sensitivity='administrativo_sensivel',
+        message='Você não possui acesso a esta área',
+        context={'path': request.path, 'target': 'admin_system_permissions'},
+        status_code=403,
+    )
+
+
+def _is_permissions_advanced_mode_enabled() -> bool:
+    role_value = str(session.get('role') or '').strip().lower()
+    runtime_env = str(current_app.config.get('ALMAREIA_RUNTIME_ENV') or '').strip().lower()
+    return role_value == 'admin_advanced' or runtime_env != 'production'
 
 
 def _parse_csv_tokens(value: Any) -> List[str]:
@@ -132,6 +148,55 @@ def _parse_authz_log_events(
         )
     output.sort(key=lambda row: row.get('timestamp') or '', reverse=True)
     return output
+
+
+def _build_permissions_users_payload() -> Dict[str, Any]:
+    from app.services.permission_service import effective_profile_for_user
+    from app.services.authz.policy_coverage import discover_endpoints_by_prefix
+    users = load_users() if isinstance(load_users(), dict) else {}
+    selected_user = str(request.args.get('user_id') or '').strip()
+    profile = None
+    endpoint_results: List[Dict[str, Any]] = []
+    if selected_user and selected_user in users:
+        profile = effective_profile_for_user(selected_user, users, load_department_permissions())
+        checks = discover_endpoints_by_prefix('finance')[:20]
+        areas = (profile.get('areas') or {}) if isinstance(profile, dict) else {}
+        for item in checks:
+            endpoint = str(item.get('endpoint') or '')
+            prefix = endpoint.split('.', 1)[0] if '.' in endpoint else endpoint
+            has_access = bool(areas.get(prefix, {}).get('all')) if isinstance(areas, dict) else False
+            endpoint_results.append({'endpoint': endpoint, 'access': 'ALLOW' if has_access else 'DENY'})
+    return {
+        'users': users,
+        'selected_user': selected_user,
+        'profile': profile,
+        'endpoint_results': endpoint_results,
+    }
+
+
+def _build_permissions_roles_payload() -> Dict[str, Any]:
+    from app.services.authz.schemas import ROLE_LEVELS
+    roles_data = [{'role': key, 'level': int(value), 'areas': ['administracao_sistema', 'financeiro', 'auditoria_financeira'], 'permissions': ['scope.department']} for key, value in ROLE_LEVELS.items()]
+    return {'roles_data': roles_data}
+
+
+def _build_permissions_overrides_payload() -> Dict[str, Any]:
+    from app.services.permission_service import _get_override_service
+    service = _get_override_service()
+    items = []
+    for record in sorted(list(getattr(service, '_items', {}).values()), key=lambda row: str(getattr(row, 'created_at', '')), reverse=True):
+        items.append(
+            {
+                'override_id': record.override_id,
+                'usuario': record.executor_user,
+                'acao': record.action,
+                'area': record.endpoint.split('.', 1)[0] if '.' in record.endpoint else record.endpoint,
+                'status': record.status,
+                'ttl': record.ttl_seconds,
+                'created_at': record.created_at,
+            }
+        )
+    return {'service': service, 'items': items}
 
 # --- Routes ---
 
@@ -2878,30 +2943,239 @@ def admin_system_permissions():
     denied = _ensure_system_permissions_access()
     if denied is not None:
         return denied
-    tools = [
-        {'icon': 'bi-cpu', 'title': 'Simulador de Permissão', 'description': 'Teste decisões do permission_engine por contexto.', 'url': url_for('admin.admin_system_permissions_simulator')},
-        {'icon': 'bi-person-badge', 'title': 'Roles e Permissões', 'description': 'Visualize roles, áreas e permissões oficiais.', 'url': url_for('admin.admin_system_permissions_roles')},
-        {'icon': 'bi-people', 'title': 'Permissões por Usuário', 'description': 'Inspecione permissões efetivas de um usuário.', 'url': url_for('admin.admin_system_permissions_users')},
-        {'icon': 'bi-unlock', 'title': 'Overrides', 'description': 'Aprove, revogue ou expire solicitações de override.', 'url': url_for('admin.admin_system_permissions_overrides')},
-        {'icon': 'bi-journal-check', 'title': 'Auditoria de Autorização', 'description': 'Consulte decisões do sistema de autorização.', 'url': url_for('admin.admin_system_permissions_audit')},
-        {'icon': 'bi-broadcast', 'title': 'Monitoramento do Piloto', 'description': 'Acompanhe rollout e sinais de risco do piloto.', 'url': url_for('admin.admin_system_permissions_pilot')},
-        {'icon': 'bi-grid-1x2-fill', 'title': 'Heatmap de Autorização', 'description': 'Padrões de bloqueio e override por endpoint.', 'url': url_for('admin.admin_system_permissions_heatmap')},
-        {'icon': 'bi-pie-chart', 'title': 'Cobertura de Policies', 'description': 'Cobertura de endpoints protegidos por área.', 'url': url_for('admin.admin_system_permissions_coverage')},
-    ]
+    pending_rows = operational_request_service.list_requests(status='pending', limit=5)
+    pending_all_rows = operational_request_service.list_requests(status='pending', limit=5000)
+    pending_count = len(pending_all_rows)
+    suggestion_available_count = sum(
+        1
+        for row in pending_all_rows
+        if float(row.get('suggestion_confidence') or 0.0) >= 0.5 and str(row.get('suggested_scope') or '').strip()
+    )
+    promotion_candidates = operational_request_service.list_promotion_candidates(limit=5)
+    promotion_candidate_count = len(promotion_candidates)
+    promoted_rules = operational_request_service.list_promoted_rules(include_inactive=True, limit=5000)
+    promoted_rules_active_count = sum(1 for row in promoted_rules if str(row.get('status') or '').strip().lower() == 'active')
+    promoted_rules_revoked_count = sum(1 for row in promoted_rules if str(row.get('status') or '').strip().lower() == 'revoked')
+    expiring_temporary_count = 0
+    broad_grants_count = 0
+    try:
+        with operational_request_service.file_lock(operational_request_service.REQUESTS_FILE):
+            requests_data = operational_request_service._load_data()
+        grants = requests_data.get('grants') if isinstance(requests_data, dict) else []
+        if not isinstance(grants, list):
+            grants = []
+        now = datetime.now()
+        for grant in grants:
+            if not isinstance(grant, dict):
+                continue
+            if bool(grant.get('revoked')):
+                continue
+            if str(grant.get('grant_type') or '').strip().lower() == 'temporary':
+                expires_at = str(grant.get('expires_at') or '').strip()
+                if expires_at:
+                    try:
+                        expires_dt = datetime.fromisoformat(expires_at)
+                        if now <= expires_dt <= (now + timedelta(hours=24)):
+                            expiring_temporary_count += 1
+                    except Exception:
+                        pass
+            if str(grant.get('grant_scope') or '').strip().lower() in {'department', 'role'} and str(grant.get('grant_type') or '').strip().lower() == 'permanent':
+                broad_grants_count += 1
+    except Exception:
+        expiring_temporary_count = 0
+        broad_grants_count = 0
+    from app.services.permission_service import _get_override_service
+    override_service = _get_override_service()
+    override_records = list(getattr(override_service, '_items', {}).values())
+    active_overrides = [record for record in override_records if str(getattr(record, 'status', '')).strip().lower() == 'approved']
+    active_override_count = len(active_overrides)
+    excessive_override_alert = active_override_count >= 10
     return render_template(
         'admin_system_permissions.html',
-        title='Controle de Permissões do Sistema',
-        description='Ferramentas para visualizar, monitorar e operar o sistema de autorização.',
-        tools=tools,
+        pending_count=pending_count,
+        pending_rows=pending_rows,
+        active_override_count=active_override_count,
+        expiring_temporary_count=expiring_temporary_count,
+        broad_grants_count=broad_grants_count,
+        excessive_override_alert=excessive_override_alert,
+        suggestion_available_count=suggestion_available_count,
+        promotion_candidate_count=promotion_candidate_count,
+        promotion_candidates=promotion_candidates,
+        promoted_rules_active_count=promoted_rules_active_count,
+        promoted_rules_revoked_count=promoted_rules_revoked_count,
+        advanced_mode=_is_permissions_advanced_mode_enabled(),
     )
 
 
-@admin_bp.route('/admin/system/permissions/simulator', methods=['GET', 'POST'])
+@admin_bp.route('/admin/system/permissions/access', methods=['GET', 'POST'])
 @login_required
-def admin_system_permissions_simulator():
+def admin_system_permissions_access():
     denied = _ensure_system_permissions_access()
     if denied is not None:
         return denied
+    active_tab = str(request.args.get('tab') or request.form.get('tab') or 'users').strip().lower()
+    if active_tab not in {'users', 'roles', 'overrides', 'promotions'}:
+        active_tab = 'users'
+    if request.method == 'POST' and active_tab == 'overrides':
+        payload = _build_permissions_overrides_payload()
+        service = payload.get('service')
+        action = str(request.form.get('action') or '').strip().lower()
+        override_id = str(request.form.get('override_id') or '').strip()
+        if override_id and service is not None:
+            try:
+                if action == 'approve':
+                    service.approve_override(override_id=override_id, approver_user=str(session.get('user') or 'system_admin'), approver_role='administracao_sistema', reason='approved_from_console')
+                elif action == 'revoke':
+                    service.deny_override(override_id=override_id, approver_user=str(session.get('user') or 'system_admin'), reason='revoked_from_console')
+                elif action == 'expire':
+                    service.expire_override(override_id=override_id)
+            except Exception as exc:
+                flash(str(exc))
+    if request.method == 'POST' and active_tab == 'promotions':
+        action = str(request.form.get('action') or '').strip().lower()
+        if action == 'promote_rule':
+            permission_key = str(request.form.get('permission_key') or '').strip()
+            module_key = str(request.form.get('module_key') or '').strip()
+            promotion_scope = str(request.form.get('promotion_scope') or '').strip().lower()
+            promotion_duration = str(request.form.get('promotion_duration') or '').strip().lower()
+            target_department = str(request.form.get('promotion_target_department') or '').strip()
+            target_role = str(request.form.get('promotion_target_role') or '').strip().lower()
+            duration_raw = str(request.form.get('promotion_duration_value') or '').strip()
+            try:
+                duration_minutes = int(duration_raw) if duration_raw else 120
+            except Exception:
+                duration_minutes = 120
+            try:
+                operational_request_service.apply_promotion_candidate(
+                    permission_key=permission_key,
+                    module=module_key,
+                    promoted_by=str(session.get('user') or 'unknown'),
+                    promotion_scope=promotion_scope,
+                    promotion_duration=promotion_duration,
+                    duration_minutes=duration_minutes,
+                    target_department=target_department,
+                    target_role=target_role,
+                )
+            except Exception as exc:
+                flash(str(exc))
+        elif action == 'rollback_promotion':
+            rule_id = str(request.form.get('rule_id') or '').strip()
+            try:
+                operational_request_service.rollback_promoted_rule(rule_id=rule_id, revoked_by=str(session.get('user') or 'unknown'))
+            except Exception as exc:
+                flash(str(exc))
+        elif action == 'reactivate_promotion':
+            rule_id = str(request.form.get('rule_id') or '').strip()
+            duration_raw = str(request.form.get('reactivate_duration_value') or '').strip()
+            try:
+                duration_minutes = int(duration_raw) if duration_raw else 120
+            except Exception:
+                duration_minutes = 120
+            try:
+                operational_request_service.reactivate_promoted_rule(rule_id=rule_id, reactivated_by=str(session.get('user') or 'unknown'), duration_minutes=duration_minutes)
+            except Exception as exc:
+                flash(str(exc))
+    users_payload = _build_permissions_users_payload()
+    roles_payload = _build_permissions_roles_payload()
+    overrides_payload = _build_permissions_overrides_payload()
+    promotion_module_filter = str(request.args.get('promotion_module') or request.form.get('promotion_module') or '').strip().lower()
+    promotion_scope_filter = str(request.args.get('promotion_scope') or request.form.get('promotion_scope') or '').strip().lower()
+    promotion_status_filter = str(request.args.get('promotion_status') or request.form.get('promotion_status') or '').strip().lower()
+    promotion_confidence_filter = str(request.args.get('promotion_confidence') or request.form.get('promotion_confidence') or '').strip().lower()
+    promotion_start_date = str(request.args.get('promotion_start_date') or request.form.get('promotion_start_date') or '').strip()
+    promotion_end_date = str(request.args.get('promotion_end_date') or request.form.get('promotion_end_date') or '').strip()
+    candidates_rows = operational_request_service.list_promotion_candidates(limit=5000)
+    promoted_rules_rows = operational_request_service.list_promoted_rules(include_inactive=True, limit=5000)
+
+    def _confidence_ok(value: float) -> bool:
+        if not promotion_confidence_filter:
+            return True
+        confidence = float(value or 0.0)
+        if promotion_confidence_filter == 'high':
+            return confidence >= 0.8
+        if promotion_confidence_filter == 'medium':
+            return 0.5 <= confidence < 0.8
+        if promotion_confidence_filter == 'low':
+            return confidence < 0.5
+        return True
+
+    def _date_between(raw_iso: str) -> bool:
+        if not promotion_start_date and not promotion_end_date:
+            return True
+        value = str(raw_iso or '').strip()
+        if not value:
+            return False
+        day = value[:10]
+        if promotion_start_date and day < promotion_start_date:
+            return False
+        if promotion_end_date and day > promotion_end_date:
+            return False
+        return True
+
+    candidates_rows = [
+        row
+        for row in candidates_rows
+        if (not promotion_module_filter or str(row.get('module') or '').strip().lower() == promotion_module_filter)
+        and (not promotion_scope_filter or str(row.get('recommended_scope') or '').strip().lower() == promotion_scope_filter)
+        and _confidence_ok(float(row.get('confidence_score') or 0.0))
+        and _date_between(str(row.get('last_seen_at') or ''))
+    ]
+    promoted_rules_rows = [
+        row
+        for row in promoted_rules_rows
+        if (not promotion_module_filter or str(row.get('module') or '').strip().lower() == promotion_module_filter)
+        and (not promotion_scope_filter or str(row.get('promotion_scope') or '').strip().lower() == promotion_scope_filter)
+        and (not promotion_status_filter or str(row.get('status') or '').strip().lower() == promotion_status_filter)
+        and _confidence_ok(float(row.get('promotion_confidence') or 0.0))
+        and _date_between(str(row.get('created_at') or ''))
+    ]
+    return render_template(
+        'admin_system_permissions_access.html',
+        active_tab=active_tab,
+        users=users_payload.get('users'),
+        selected_user=users_payload.get('selected_user'),
+        profile=users_payload.get('profile'),
+        endpoint_results=users_payload.get('endpoint_results'),
+        roles_data=roles_payload.get('roles_data'),
+        overrides_items=overrides_payload.get('items'),
+        promotion_candidates=candidates_rows,
+        promoted_rules=promoted_rules_rows,
+        promotion_filters={
+            'module': promotion_module_filter,
+            'scope': promotion_scope_filter,
+            'status': promotion_status_filter,
+            'confidence': promotion_confidence_filter,
+            'start_date': promotion_start_date,
+            'end_date': promotion_end_date,
+        },
+    )
+
+
+@admin_bp.route('/admin/system/permissions/advanced', methods=['GET'])
+@login_required
+def admin_system_permissions_advanced():
+    denied = _ensure_system_permissions_access()
+    if denied is not None:
+        return denied
+    if not _is_permissions_advanced_mode_enabled():
+        return ('', 404)
+    tools = [
+        {'icon': 'bi-cpu', 'title': 'Simulador', 'description': 'Simule decisões do motor de autorização.', 'url': url_for('admin.admin_system_permissions_advanced_simulator')},
+        {'icon': 'bi-broadcast', 'title': 'Piloto', 'description': 'Acompanhe sinais do rollout de autorização.', 'url': url_for('admin.admin_system_permissions_advanced_pilot')},
+        {'icon': 'bi-pie-chart', 'title': 'Cobertura', 'description': 'Cobertura de policies por área.', 'url': url_for('admin.admin_system_permissions_advanced_coverage')},
+        {'icon': 'bi-grid-1x2-fill', 'title': 'Heatmap', 'description': 'Matriz e tendência de risco por endpoint.', 'url': url_for('admin.admin_system_permissions_advanced_heatmap')},
+    ]
+    return render_template('admin_system_permissions_advanced.html', tools=tools)
+
+
+@admin_bp.route('/admin/system/permissions/advanced/simulator', methods=['GET', 'POST'])
+@login_required
+def admin_system_permissions_advanced_simulator():
+    denied = _ensure_system_permissions_access()
+    if denied is not None:
+        return denied
+    if not _is_permissions_advanced_mode_enabled():
+        return ('', 404)
     from datetime import datetime, timezone
     from app.services.authz.permission_engine import evaluate
     from app.services.authz.policy_registry import PolicyRegistry
@@ -2968,9 +3242,7 @@ def admin_system_permissions_roles():
     denied = _ensure_system_permissions_access()
     if denied is not None:
         return denied
-    from app.services.authz.schemas import ROLE_LEVELS
-    roles_data = [{'role': key, 'level': int(value), 'areas': ['administracao_sistema', 'financeiro', 'auditoria_financeira'], 'permissions': ['scope.department']} for key, value in ROLE_LEVELS.items()]
-    return render_template('admin_system_permissions_roles.html', roles_data=roles_data)
+    return redirect(url_for('admin.admin_system_permissions_access', tab='roles'), code=302)
 
 
 @admin_bp.route('/admin/system/permissions/users', methods=['GET'])
@@ -2979,28 +3251,11 @@ def admin_system_permissions_users():
     denied = _ensure_system_permissions_access()
     if denied is not None:
         return denied
-    from app.services.permission_service import effective_profile_for_user
-    from app.services.authz.policy_coverage import discover_endpoints_by_prefix
-    users = load_users() if isinstance(load_users(), dict) else {}
-    selected_user = str(request.args.get('user_id') or '').strip()
-    profile = None
-    endpoint_results: List[Dict[str, Any]] = []
-    if selected_user and selected_user in users:
-        profile = effective_profile_for_user(selected_user, users, load_department_permissions())
-        checks = discover_endpoints_by_prefix('finance')[:20]
-        areas = (profile.get('areas') or {}) if isinstance(profile, dict) else {}
-        for item in checks:
-            endpoint = str(item.get('endpoint') or '')
-            prefix = endpoint.split('.', 1)[0] if '.' in endpoint else endpoint
-            has_access = bool(areas.get(prefix, {}).get('all')) if isinstance(areas, dict) else False
-            endpoint_results.append({'endpoint': endpoint, 'access': 'ALLOW' if has_access else 'DENY'})
-    return render_template(
-        'admin_system_permissions_users.html',
-        users=users,
-        selected_user=selected_user,
-        profile=profile,
-        endpoint_results=endpoint_results,
-    )
+    target_user = str(request.args.get('user_id') or '').strip()
+    redirect_url = url_for('admin.admin_system_permissions_access', tab='users')
+    if target_user:
+        redirect_url = f"{redirect_url}&user_id={target_user}"
+    return redirect(redirect_url, code=302)
 
 
 @admin_bp.route('/admin/system/permissions/overrides', methods=['GET', 'POST'])
@@ -3009,34 +3264,140 @@ def admin_system_permissions_overrides():
     denied = _ensure_system_permissions_access()
     if denied is not None:
         return denied
-    from app.services.permission_service import _get_override_service
-    service = _get_override_service()
-    action = str(request.form.get('action') or '').strip().lower()
-    override_id = str(request.form.get('override_id') or '').strip()
-    if request.method == 'POST' and override_id:
+    if request.method == 'POST':
+        return redirect(url_for('admin.admin_system_permissions_access', tab='overrides'), code=307)
+    return redirect(url_for('admin.admin_system_permissions_access', tab='overrides'), code=302)
+
+
+@admin_bp.route('/admin/system/permissions/requests', methods=['GET', 'POST'])
+@login_required
+def admin_system_permissions_requests():
+    denied = _ensure_system_permissions_access()
+    if denied is not None:
+        return denied
+    if request.method == 'POST':
+        request_id = str(request.form.get('request_id') or '').strip()
+        action = str(request.form.get('action') or '').strip().lower()
+        if action == 'promote_rule':
+            permission_key = str(request.form.get('permission_key') or '').strip()
+            module_key = str(request.form.get('module_key') or '').strip()
+            promotion_scope = str(request.form.get('promotion_scope') or '').strip().lower()
+            promotion_duration = str(request.form.get('promotion_duration') or '').strip().lower()
+            target_department = str(request.form.get('promotion_target_department') or '').strip()
+            target_role = str(request.form.get('promotion_target_role') or '').strip().lower()
+            duration_raw = str(request.form.get('promotion_duration_value') or '').strip()
+            try:
+                duration_minutes = int(duration_raw) if duration_raw else 120
+            except Exception:
+                duration_minutes = 120
+            try:
+                operational_request_service.apply_promotion_candidate(
+                    permission_key=permission_key,
+                    module=module_key,
+                    promoted_by=str(session.get('user') or 'unknown'),
+                    promotion_scope=promotion_scope,
+                    promotion_duration=promotion_duration,
+                    duration_minutes=duration_minutes,
+                    target_department=target_department,
+                    target_role=target_role,
+                )
+            except Exception as exc:
+                flash(str(exc))
+            return redirect(url_for('admin.admin_system_permissions_requests'))
+        if action == 'rollback_promotion':
+            rule_id = str(request.form.get('rule_id') or '').strip()
+            try:
+                operational_request_service.rollback_promoted_rule(rule_id=rule_id, revoked_by=str(session.get('user') or 'unknown'))
+            except Exception as exc:
+                flash(str(exc))
+            return redirect(url_for('admin.admin_system_permissions_requests'))
+        decision = str(request.form.get('decision') or '').strip().lower()
+        decision_reason = str(request.form.get('decision_reason') or '').strip()
+        target_department = str(request.form.get('target_department') or '').strip()
+        target_role = str(request.form.get('target_role') or '').strip().lower()
+        suggestion_used = str(request.form.get('suggestion_used') or '').strip() in {'1', 'true', 'True', 'on'}
+        suggested_scope = str(request.form.get('suggested_scope') or '').strip().lower()
+        suggested_duration = str(request.form.get('suggested_duration') or '').strip().lower()
+        suggested_duration_value_raw = str(request.form.get('suggested_duration_value') or '').strip()
         try:
-            if action == 'approve':
-                service.approve_override(override_id=override_id, approver_user=str(session.get('user') or 'system_admin'), approver_role='administracao_sistema', reason='approved_from_console')
-            elif action == 'revoke':
-                service.deny_override(override_id=override_id, approver_user=str(session.get('user') or 'system_admin'), reason='revoked_from_console')
-            elif action == 'expire':
-                service.expire_override(override_id=override_id)
+            suggested_duration_value = int(suggested_duration_value_raw) if suggested_duration_value_raw else 0
         except Exception:
-            pass
-    items = []
-    for record in sorted(list(getattr(service, '_items', {}).values()), key=lambda row: str(getattr(row, 'created_at', '')), reverse=True):
-        items.append(
-            {
-                'override_id': record.override_id,
-                'usuario': record.executor_user,
-                'acao': record.action,
-                'area': record.endpoint.split('.', 1)[0] if '.' in record.endpoint else record.endpoint,
-                'status': record.status,
-                'ttl': record.ttl_seconds,
-                'created_at': record.created_at,
-            }
-        )
-    return render_template('admin_system_permissions_overrides.html', items=items)
+            suggested_duration_value = 0
+        ttl_raw = request.form.get('ttl_minutes')
+        try:
+            ttl_minutes = int(ttl_raw) if ttl_raw is not None and str(ttl_raw).strip() else 60
+        except Exception:
+            ttl_minutes = 60
+        if request_id:
+            try:
+                operational_request_service.decide_request(
+                    request_id=request_id,
+                    approver_user=str(session.get('user') or 'unknown'),
+                    approver_role=str(session.get('role') or ''),
+                    decision=decision,
+                    decision_reason=decision_reason,
+                    ttl_minutes=ttl_minutes,
+                    target_department=target_department,
+                    target_role=target_role,
+                    suggestion_used=suggestion_used,
+                    suggested_scope=suggested_scope,
+                    suggested_duration=suggested_duration,
+                    suggested_duration_value=suggested_duration_value,
+                )
+            except Exception as exc:
+                flash(str(exc))
+    module_filter = str(request.args.get('module') or '').strip().lower()
+    user_filter = str(request.args.get('user') or '').strip().lower()
+    department_filter = str(request.args.get('department') or '').strip().lower()
+    sensitivity_filter = str(request.args.get('sensitivity') or '').strip().lower()
+    status_filter = str(request.args.get('status') or '').strip().lower()
+    rows = operational_request_service.list_requests(limit=1000)
+    promotion_candidates_all = operational_request_service.list_promotion_candidates(limit=5000)
+    candidates_by_key = {
+        str(row.get('permission_key') or ''): row
+        for row in promotion_candidates_all
+        if isinstance(row, dict)
+    }
+    promoted_rules = []
+    try:
+        with operational_request_service.file_lock(operational_request_service.REQUESTS_FILE):
+            payload = operational_request_service._load_data()
+        promoted_rules = payload.get('promoted_rules') if isinstance(payload.get('promoted_rules'), list) else []
+    except Exception:
+        promoted_rules = []
+
+    def _match(row):
+        if module_filter and str(row.get('module_key') or '').strip().lower() != module_filter:
+            return False
+        if user_filter and user_filter not in str(row.get('requester_user') or '').strip().lower():
+            return False
+        if department_filter and department_filter not in str(row.get('requester_department') or '').strip().lower():
+            return False
+        if sensitivity_filter and str(row.get('sensitivity') or '').strip().lower() != sensitivity_filter:
+            return False
+        if status_filter and str(row.get('status') or '').strip().lower() != status_filter:
+            return False
+        return True
+
+    filtered = [r for r in rows if _match(r)]
+    pending = [r for r in filtered if str(r.get('status') or '').strip().lower() == 'pending']
+    for row in pending:
+        permission_key = f"{str(row.get('route_key') or '').strip()}|{str(row.get('http_method') or 'GET').strip().upper()}|{str(row.get('module_key') or '').strip()}"
+        row['promotion_candidate'] = candidates_by_key.get(permission_key)
+    recent = filtered[:300]
+    return render_template(
+        'admin_system_permissions_requests.html',
+        pending=pending,
+        recent=recent,
+        promoted_rules=promoted_rules,
+        filters={
+            'module': module_filter,
+            'user': user_filter,
+            'department': department_filter,
+            'sensitivity': sensitivity_filter,
+            'status': status_filter,
+        },
+    )
 
 
 @admin_bp.route('/admin/system/permissions/audit', methods=['GET'])
@@ -3079,9 +3440,17 @@ def admin_system_permissions_audit():
 @admin_bp.route('/admin/system/permissions/pilot', methods=['GET'])
 @login_required
 def admin_system_permissions_pilot():
+    return redirect(url_for('admin.admin_system_permissions_advanced_pilot', **request.args))
+
+
+@admin_bp.route('/admin/system/permissions/advanced/pilot', methods=['GET'])
+@login_required
+def admin_system_permissions_advanced_pilot():
     denied = _ensure_system_permissions_access()
     if denied is not None:
         return denied
+    if not _is_permissions_advanced_mode_enabled():
+        return ('', 404)
     today = datetime.now().strftime('%Y-%m-%d')
     start_date = str(request.args.get('start_date') or today).strip()
     end_date = str(request.args.get('end_date') or today).strip()
@@ -3096,18 +3465,23 @@ def admin_system_permissions_pilot():
 @admin_bp.route('/admin/system/permissions/heatmap', methods=['GET'])
 @login_required
 def admin_system_permissions_heatmap():
-    denied = _ensure_system_permissions_access()
-    if denied is not None:
-        return denied
-    return redirect(url_for('admin.admin_authorization_heatmap', **request.args))
+    return redirect(url_for('admin.admin_system_permissions_advanced_heatmap', **request.args))
 
 
 @admin_bp.route('/admin/system/permissions/coverage', methods=['GET'])
 @login_required
 def admin_system_permissions_coverage():
+    return redirect(url_for('admin.admin_system_permissions_advanced_coverage', **request.args))
+
+
+@admin_bp.route('/admin/system/permissions/advanced/coverage', methods=['GET'])
+@login_required
+def admin_system_permissions_advanced_coverage():
     denied = _ensure_system_permissions_access()
     if denied is not None:
         return denied
+    if not _is_permissions_advanced_mode_enabled():
+        return ('', 404)
     from app.services.authz.policy_coverage import check_policy_coverage
 
     areas = ['finance', 'admin', 'financial_audit']
@@ -3127,11 +3501,32 @@ def admin_system_permissions_coverage():
     return render_template('admin_system_permissions_coverage.html', coverage_rows=coverage_rows)
 
 
+@admin_bp.route('/admin/system/permissions/simulator', methods=['GET', 'POST'])
+@login_required
+def admin_system_permissions_simulator():
+    if request.method == 'POST':
+        return redirect(url_for('admin.admin_system_permissions_advanced_simulator'), code=307)
+    return redirect(url_for('admin.admin_system_permissions_advanced_simulator', **request.args))
+
+
+@admin_bp.route('/admin/system/permissions/advanced/heatmap', methods=['GET'])
+@login_required
+def admin_system_permissions_advanced_heatmap():
+    denied = _ensure_system_permissions_access()
+    if denied is not None:
+        return denied
+    if not _is_permissions_advanced_mode_enabled():
+        return ('', 404)
+    return redirect(url_for('admin.admin_authorization_heatmap', **request.args))
+
+
 @admin_bp.route('/admin/security/authorization-trace', methods=['GET'])
 @login_required
 def admin_authorization_trace():
     if session.get('role') != 'admin':
         return redirect(url_for('main.index'))
+    if not _is_permissions_advanced_mode_enabled():
+        return ('', 404)
     from app.services.authz.policy_coverage import discover_endpoints_by_prefix
 
     finance_endpoints = discover_endpoints_by_prefix(area_prefix="finance")
@@ -3143,6 +3538,8 @@ def admin_authorization_trace():
 def admin_authorization_trace_simulate():
     if session.get('role') != 'admin':
         return jsonify({'success': False, 'error': 'Unauthorized'}), 403
+    if not _is_permissions_advanced_mode_enabled():
+        return jsonify({'success': False, 'error': 'Not Found'}), 404
     from app.services.authz.compatibility_adapter import build_grant_from_session
     from app.services.authz.permission_engine import evaluate
     from app.services.authz.policy_registry import PolicyRegistry
@@ -3233,6 +3630,8 @@ def admin_authorization_trace_simulate():
 def admin_authorization_heatmap():
     if session.get('role') not in ['admin', 'administracao_sistema']:
         return redirect(url_for('main.index'))
+    if not _is_permissions_advanced_mode_enabled():
+        return ('', 404)
     from app.services.admin.authz_console.heatmap.authorization_heatmap_service import AuthorizationHeatmapService
 
     today = datetime.now()
@@ -3276,6 +3675,8 @@ def admin_authorization_heatmap():
 def admin_authorization_heatmap_data():
     if session.get('role') not in ['admin', 'administracao_sistema']:
         return jsonify({'success': False, 'error': 'Unauthorized'}), 403
+    if not _is_permissions_advanced_mode_enabled():
+        return jsonify({'success': False, 'error': 'Not Found'}), 404
     from app.services.admin.authz_console.heatmap.authorization_heatmap_service import AuthorizationHeatmapService
 
     today = datetime.now()

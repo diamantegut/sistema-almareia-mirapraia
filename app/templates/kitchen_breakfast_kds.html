@@ -73,12 +73,14 @@
     </div>
 </div>
 
+<script id="breakfast-kds-initial-payload" type="application/json">{{ (initial_payload or {})|tojson|safe }}</script>
 <script>
 const breakfastDataUrl = "{{ url_for('kitchen.kitchen_breakfast_kds_data') }}";
 const breakfastUpdateUrl = "{{ url_for('kitchen.kitchen_breakfast_kds_update_status') }}";
+const breakfastRestaurantUpdateUrl = "{{ url_for('kitchen.kitchen_breakfast_kds_update_restaurant_status') }}";
 const breakfastDevSeedUrl = "{{ url_for('kitchen.kitchen_breakfast_kds_dev_test_orders') }}";
 const breakfastPollingMs = 10000;
-const breakfastInitialPayload = {{ (initial_payload or {})|tojson }};
+const breakfastInitialPayload = JSON.parse(document.getElementById('breakfast-kds-initial-payload').textContent || '{}');
 const breakfastStatusMeta = {
     pending: { label: 'Pendente', className: 'status-pending' },
     in_preparo: { label: 'Em preparo', className: 'status-preparing' },
@@ -88,6 +90,7 @@ let breakfastState = { rooms: [], restaurantOrders: [], devMode: false };
 let breakfastModal = null;
 let breakfastSelectedRoom = null;
 let breakfastTimerId = null;
+let breakfastActionInFlight = new Set();
 
 function renderBreakfastClock() {
     const el = document.getElementById('breakfast-kds-clock');
@@ -117,6 +120,14 @@ function escapeHtml(value) {
         .replace(/'/g, '&#39;');
 }
 
+function escapeSelectorValue(value) {
+    const text = String(value || '');
+    if (window.CSS && typeof window.CSS.escape === 'function') {
+        return window.CSS.escape(text);
+    }
+    return text.replace(/(["\\.#:[\],])/g, '\\$1');
+}
+
 function renderBreakfastSummary(data) {
     const summary = (data && data.summary) || {};
     const statuses = summary.statuses || {};
@@ -137,28 +148,71 @@ function renderBreakfastRestaurantOrders(data) {
     const lane = document.getElementById('breakfast-kds-future-lane');
     if (!lane) return;
     const orders = Array.isArray(data && data.restaurant_orders) ? data.restaurant_orders : [];
-    const isDevMode = Boolean(data && data.dev_mode);
     const ticketsHtml = orders.length
-        ? orders.map(order => `<div class="future-ticket ${order.is_dev_test ? 'future-ticket-dev' : ''}">
-                <span class="ticket-main">${escapeHtml(order.table_label || order.table_id)} · ${escapeHtml(order.item)} ×${Number(order.qty || 1)}</span>
-                ${order.observation ? `<span class="ticket-note">${escapeHtml(order.observation)}</span>` : ''}
-                <span class="ticket-time">${escapeHtml(order.time || '--:--')}</span>
-            </div>`).join('')
+        ? orders.map(order => {
+            const status = String(order.status || 'pending').trim().toLowerCase();
+            const statusMeta = breakfastStatusMeta[status] || breakfastStatusMeta.pending;
+            const nextMeta = status === 'pending'
+                ? { next: 'in_preparo', label: 'Iniciar', className: 'btn-warning' }
+                : (status === 'in_preparo' ? { next: 'pronto', label: 'Marcar pronto', className: 'btn-success' } : null);
+            return `<div class="breakfast-restaurant-ticket ${statusMeta.className} ${order.is_dev_test ? 'future-ticket-dev' : ''}">
+                <div class="restaurant-ticket-head">
+                    <span class="restaurant-ticket-table" title="${escapeHtml(order.table_label || order.table_id)}">${escapeHtml(order.table_label || order.table_id)}</span>
+                    <span class="restaurant-ticket-status ${statusMeta.className}">${statusMeta.label}</span>
+                </div>
+                <div class="restaurant-ticket-item" title="${escapeHtml(order.item_full || order.item)}">${escapeHtml(order.item)} <strong>×${Number(order.qty || 1)}</strong></div>
+                <div class="restaurant-ticket-note" title="${escapeHtml(order.observation_full || order.observation || '')}">${order.observation ? escapeHtml(order.observation) : 'Sem observação'}</div>
+                <div class="restaurant-ticket-footer">
+                    <span class="restaurant-ticket-time">${escapeHtml(order.time || '--:--')}</span>
+                    ${nextMeta ? `<button type="button" class="btn btn-sm breakfast-restaurant-action ${nextMeta.className}" data-ticket-key="${escapeHtml(order.ticket_key || '')}" data-table-id="${escapeHtml(order.table_id || '')}" data-item-id="${escapeHtml(order.id || '')}" data-next-status="${nextMeta.next}">${nextMeta.label}</button>` : ''}
+                </div>
+            </div>`;
+        }).join('')
         : '<div class="future-empty">Sem pedidos de restaurante para café no intervalo 07:00–11:00.</div>';
-    const devActions = isDevMode
-        ? `<div class="future-dev-actions">
-                <button type="button" class="btn btn-outline-light btn-sm px-2" data-dev-breakfast-action="seed">Gerar teste DEV</button>
-                <button type="button" class="btn btn-outline-warning btn-sm px-2" data-dev-breakfast-action="clear">Limpar teste DEV</button>
-           </div>`
-        : '';
     lane.innerHTML = `
         <div class="future-lane-head">
-            <span class="future-lane-title"><i class="bi bi-journal-plus"></i> Pedidos restaurante do café (07:00–11:00)</span>
+            <span class="future-lane-title"><i class="bi bi-journal-plus"></i> PEDIDOS RESTAURANTE DO CAFÉ (07:00–11:00)</span>
             <span class="future-lane-chip">${orders.length} itens</span>
         </div>
         <div class="future-lane-tickets">${ticketsHtml}</div>
-        ${devActions}
     `;
+}
+
+function applyOptimisticRestaurantStatus(payload, triggerBtn) {
+    const status = String((payload && payload.status) || '').trim().toLowerCase();
+    const ticketKey = String((payload && payload.ticket_key) || '').trim();
+    if (!status) return;
+    const actionBtn = triggerBtn || (ticketKey ? document.querySelector(`.breakfast-restaurant-action[data-ticket-key="${escapeSelectorValue(ticketKey)}"]`) : null);
+    if (!actionBtn) return;
+    const ticket = actionBtn.closest('.breakfast-restaurant-ticket');
+    if (!ticket) return;
+    if (status === 'pronto') {
+        ticket.remove();
+        const lane = document.querySelector('.future-lane-tickets');
+        if (lane && !lane.querySelector('.breakfast-restaurant-ticket')) {
+            lane.innerHTML = '<div class="future-empty">Sem pedidos de restaurante para café no intervalo 07:00–11:00.</div>';
+        }
+        return;
+    }
+    const meta = breakfastStatusMeta[status] || breakfastStatusMeta.pending;
+    const statusEl = ticket.querySelector('.restaurant-ticket-status');
+    if (statusEl) {
+        statusEl.textContent = meta.label;
+        statusEl.classList.remove('status-pending', 'status-preparing', 'status-ready');
+        statusEl.classList.add(meta.className);
+    }
+    ticket.classList.remove('status-pending', 'status-preparing', 'status-ready');
+    ticket.classList.add(meta.className, 'ticket-pulse');
+    const nextMeta = status === 'pending'
+        ? { next: 'in_preparo', label: 'Iniciar', className: 'btn-warning' }
+        : (status === 'in_preparo' ? { next: 'pronto', label: 'Marcar pronto', className: 'btn-success' } : null);
+    if (nextMeta) {
+        actionBtn.textContent = nextMeta.label;
+        actionBtn.setAttribute('data-next-status', nextMeta.next);
+        actionBtn.classList.remove('btn-warning', 'btn-success');
+        actionBtn.classList.add(nextMeta.className);
+    }
+    window.setTimeout(() => ticket.classList.remove('ticket-pulse'), 240);
 }
 
 function quickActionConfig(status) {
@@ -322,6 +376,31 @@ function updateBreakfastStatus(status, roomOverride) {
     .catch(() => null);
 }
 
+function updateBreakfastRestaurantStatus(payload, triggerBtn) {
+    const status = String((payload && payload.status) || '').trim().toLowerCase();
+    const ticketKey = String((payload && payload.ticket_key) || '').trim();
+    const inflightKey = ticketKey || `${payload && payload.table_id || ''}:${payload && payload.item_id || ''}:${status}`;
+    if (!status || !inflightKey || breakfastActionInFlight.has(inflightKey)) return;
+    breakfastActionInFlight.add(inflightKey);
+    applyOptimisticRestaurantStatus({ status: status, ticket_key: ticketKey }, triggerBtn);
+    fetch(breakfastRestaurantUpdateUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload || {})
+    })
+    .then(resp => resp.json().then(data => ({ ok: resp.ok, data: data })))
+    .then(result => {
+        if (!result.ok || !result.data.success) {
+            throw new Error((result.data && result.data.error) || 'Falha ao atualizar status do pedido');
+        }
+        return fetchBreakfastData();
+    })
+    .catch(() => fetchBreakfastData())
+    .finally(() => {
+        breakfastActionInFlight.delete(inflightKey);
+    });
+}
+
 function runBreakfastDevSeed(action) {
     return fetch(breakfastDevSeedUrl, {
         method: 'POST',
@@ -363,12 +442,24 @@ function setupBreakfastEvents() {
     const lane = document.getElementById('breakfast-kds-future-lane');
     if (lane) {
         lane.addEventListener('click', function(event) {
-            const btn = event.target.closest('[data-dev-breakfast-action]');
-            if (!btn) return;
-            event.preventDefault();
-            event.stopPropagation();
-            const action = String(btn.getAttribute('data-dev-breakfast-action') || 'seed').trim().toLowerCase();
-            runBreakfastDevSeed(action);
+            const ticketBtn = event.target.closest('.breakfast-restaurant-action');
+            if (ticketBtn) {
+                event.preventDefault();
+                event.stopPropagation();
+                const next = String(ticketBtn.getAttribute('data-next-status') || '').trim();
+                const ticketKey = String(ticketBtn.getAttribute('data-ticket-key') || '').trim();
+                const tableId = String(ticketBtn.getAttribute('data-table-id') || '').trim();
+                const itemId = String(ticketBtn.getAttribute('data-item-id') || '').trim();
+                if (next && (ticketKey || (tableId && itemId))) {
+                    updateBreakfastRestaurantStatus({
+                        ticket_key: ticketKey,
+                        table_id: tableId,
+                        item_id: itemId,
+                        status: next
+                    }, ticketBtn);
+                }
+                return;
+            }
         });
     }
     document.querySelectorAll('.breakfast-status-action').forEach(btn => {
@@ -465,16 +556,16 @@ document.addEventListener('DOMContentLoaded', function() {
         margin: 0 auto 10px;
     }
     .breakfast-kds-future-lane {
-        max-width: 1800px;
+        max-width: 1860px;
         margin: 0 auto 9px;
-        min-height: 32px;
-        border: 1px dashed rgba(197, 211, 227, 0.32);
-        border-radius: 10px;
-        padding: 5px 9px;
+        min-height: 92px;
+        border: 1px solid rgba(197, 211, 227, 0.32);
+        border-radius: 12px;
+        padding: 6px 8px;
         display: grid;
         gap: 5px;
         color: #cdd9e8;
-        background: rgba(30, 40, 51, 0.35);
+        background: rgba(30, 40, 51, 0.62);
     }
     .future-lane-head {
         display: flex;
@@ -483,13 +574,13 @@ document.addEventListener('DOMContentLoaded', function() {
         gap: 8px;
     }
     .future-lane-title {
-        font-size: 0.77rem;
+        font-size: 0.8rem;
         letter-spacing: 0.04em;
         text-transform: uppercase;
         opacity: 0.9;
     }
     .future-lane-chip {
-        font-size: 0.7rem;
+        font-size: 0.72rem;
         border-radius: 999px;
         padding: 2px 8px;
         border: 1px solid rgba(197, 211, 227, 0.3);
@@ -497,51 +588,102 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     .future-lane-tickets {
         display: flex;
-        flex-wrap: wrap;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        gap: 8px;
+        height: 236px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding-right: 4px;
+        align-items: stretch;
+        scroll-snap-type: x proximity;
+    }
+    .breakfast-restaurant-ticket {
+        border: 1px solid rgba(197, 211, 227, 0.3);
+        border-radius: 10px;
+        background: rgba(36, 47, 60, 0.8);
+        padding: 7px 8px;
+        min-height: 100%;
+        height: 100%;
+        flex: 0 0 clamp(232px, 20.2%, 304px);
+        max-width: 304px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        scroll-snap-align: start;
+    }
+    .breakfast-restaurant-ticket.ticket-pulse {
+        box-shadow: 0 0 0 2px rgba(117, 168, 231, 0.56), 0 8px 20px rgba(7, 10, 16, 0.35);
+        transition: box-shadow 0.2s ease;
+    }
+    .breakfast-restaurant-ticket.ticket-exit {
+        opacity: 0;
+        transform: scale(0.97);
+        transition: all 0.14s ease;
+    }
+    .restaurant-ticket-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
         gap: 6px;
     }
-    .future-ticket {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
+    .restaurant-ticket-table {
+        font-size: 0.76rem;
+        font-weight: 780;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #f3f8ff;
+    }
+    .restaurant-ticket-status {
+        font-size: 0.65rem;
         border-radius: 999px;
-        border: 1px solid rgba(197, 211, 227, 0.3);
-        background: rgba(36, 47, 60, 0.7);
-        padding: 3px 8px;
-        max-width: 100%;
-        min-height: 24px;
+        padding: 1px 7px;
+        border-width: 1px;
+        border-style: solid;
+    }
+    .restaurant-ticket-item {
+        font-size: 0.84rem;
+        color: #f3f8ff;
+        line-height: 1.24;
+        font-weight: 700;
+    }
+    .restaurant-ticket-note {
+        font-size: 0.73rem;
+        color: #e2ebf6;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        line-clamp: 3;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        min-height: 2.8em;
+    }
+    .restaurant-ticket-footer {
+        margin-top: auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+    }
+    .restaurant-ticket-time {
+        font-size: 0.72rem;
+        color: #b4d2f2;
+        font-weight: 700;
     }
     .future-ticket-dev {
         border-color: rgba(242, 188, 66, 0.6);
         background: rgba(90, 73, 27, 0.38);
     }
-    .ticket-main {
+    .breakfast-restaurant-action {
+        min-height: 34px;
+        border-radius: 8px;
         font-size: 0.72rem;
-        font-weight: 600;
-        color: #f3f8ff;
-    }
-    .ticket-note {
-        font-size: 0.67rem;
-        color: #d2deec;
-        max-width: 190px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-    .ticket-time {
-        font-size: 0.66rem;
-        color: #9ec2eb;
-        border-left: 1px solid rgba(158, 194, 235, 0.4);
-        padding-left: 6px;
+        font-weight: 700;
+        padding: 5px 10px;
     }
     .future-empty {
         font-size: 0.72rem;
         color: #c0d0e2;
-    }
-    .future-dev-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 6px;
     }
     .summary-pill {
         background: linear-gradient(180deg, rgba(47, 59, 75, 0.94) 0%, rgba(36, 46, 60, 0.94) 100%);
@@ -638,6 +780,7 @@ document.addEventListener('DOMContentLoaded', function() {
         line-height: 1.12;
         color: #f8fbff;
         display: -webkit-box;
+        line-clamp: 1;
         -webkit-line-clamp: 1;
         -webkit-box-orient: vertical;
         overflow: hidden;
@@ -842,16 +985,22 @@ document.addEventListener('DOMContentLoaded', function() {
         white-space: nowrap;
     }
     @media (max-width: 1700px) {
+        .future-lane-tickets { height: 228px; }
+        .breakfast-restaurant-ticket { flex-basis: clamp(216px, 21.5%, 276px); max-width: 276px; }
         .breakfast-kds-grid {
             grid-template-columns: repeat(3, minmax(0, 1fr));
         }
     }
     @media (max-width: 1380px) {
+        .future-lane-tickets { height: 220px; }
+        .breakfast-restaurant-ticket { flex-basis: clamp(205px, 26%, 260px); max-width: 260px; }
         .breakfast-kds-grid {
             grid-template-columns: repeat(3, minmax(0, 1fr));
         }
     }
     @media (max-width: 980px) {
+        .future-lane-tickets { height: 206px; }
+        .breakfast-restaurant-ticket { flex-basis: 220px; max-width: 240px; }
         .breakfast-kds-card {
             min-height: 78px;
         }
@@ -876,6 +1025,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     @media (max-width: 720px) {
+        .future-lane-tickets { height: 192px; }
+        .breakfast-restaurant-ticket { flex-basis: 200px; max-width: 220px; }
         .breakfast-kds-grid {
             grid-template-columns: 1fr;
         }

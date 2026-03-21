@@ -1,0 +1,10 @@
+{
+  "policy_version": "2026.03",
+  "endpoints": [
+    "auth.login",
+    "auth.forgot_password",
+    "main.health",
+    "restaurant.public_waiting_list",
+    "menu.get_public_paused_products"
+  ]
+}

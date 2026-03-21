@@ -47,7 +47,12 @@ def normalize_name_key(value):
 
 
 def load_breakfast_kds_store():
-    default_store = {'status_by_date': {}, 'history_by_date': {}}
+    default_store = {
+        'status_by_date': {},
+        'history_by_date': {},
+        'restaurant_status_by_date': {},
+        'restaurant_history_by_date': {},
+    }
     if not os.path.exists(BREAKFAST_KDS_FILE):
         return default_store
     try:
@@ -59,17 +64,30 @@ def load_breakfast_kds_store():
             payload['status_by_date'] = {}
         if not isinstance(payload.get('history_by_date'), dict):
             payload['history_by_date'] = {}
+        if not isinstance(payload.get('restaurant_status_by_date'), dict):
+            payload['restaurant_status_by_date'] = {}
+        if not isinstance(payload.get('restaurant_history_by_date'), dict):
+            payload['restaurant_history_by_date'] = {}
         return payload
     except Exception:
         return default_store
 
 
 def save_breakfast_kds_store(store):
-    payload = store if isinstance(store, dict) else {'status_by_date': {}, 'history_by_date': {}}
+    payload = store if isinstance(store, dict) else {
+        'status_by_date': {},
+        'history_by_date': {},
+        'restaurant_status_by_date': {},
+        'restaurant_history_by_date': {},
+    }
     if not isinstance(payload.get('status_by_date'), dict):
         payload['status_by_date'] = {}
     if not isinstance(payload.get('history_by_date'), dict):
         payload['history_by_date'] = {}
+    if not isinstance(payload.get('restaurant_status_by_date'), dict):
+        payload['restaurant_status_by_date'] = {}
+    if not isinstance(payload.get('restaurant_history_by_date'), dict):
+        payload['restaurant_history_by_date'] = {}
     os.makedirs(os.path.dirname(BREAKFAST_KDS_FILE), exist_ok=True)
     lock_ctx = file_lock(BREAKFAST_KDS_FILE) if callable(file_lock) else None
     if lock_ctx is None:
@@ -104,6 +122,32 @@ def get_room_history_for_day(store, date_key, room):
     if not isinstance(day_map, dict):
         return []
     entries = day_map.get(room_key)
+    return entries if isinstance(entries, list) else []
+
+
+def get_restaurant_statuses_for_day(store, date_key):
+    if not isinstance(store, dict):
+        return {}
+    by_date = store.get('restaurant_status_by_date')
+    if not isinstance(by_date, dict):
+        return {}
+    day_map = by_date.get(date_key)
+    return day_map if isinstance(day_map, dict) else {}
+
+
+def get_restaurant_history_for_day(store, date_key, ticket_key):
+    if not isinstance(store, dict):
+        return []
+    key = str(ticket_key or '').strip()
+    if not key:
+        return []
+    by_date = store.get('restaurant_history_by_date')
+    if not isinstance(by_date, dict):
+        return []
+    day_map = by_date.get(date_key)
+    if not isinstance(day_map, dict):
+        return []
+    entries = day_map.get(key)
     return entries if isinstance(entries, list) else []
 
 
@@ -149,6 +193,55 @@ def update_breakfast_status(room, status, user, source='manual', context=None, n
     return {
         'success': True,
         'room': room_key,
+        'status': next_status,
+        'previous_status': prev_status,
+        'changed': changed,
+        'date_key': date_key,
+    }
+
+
+def update_breakfast_restaurant_status(ticket_key, status, user, source='manual', context=None, now=None):
+    key = str(ticket_key or '').strip()
+    if not key:
+        return {'success': False, 'error': 'ticket_invalid'}
+    next_status = normalize_breakfast_status(status)
+    ref_now = now if isinstance(now, datetime) else datetime.now()
+    date_key = _today_key(ref_now)
+    store = load_breakfast_kds_store()
+    status_by_date = store.get('restaurant_status_by_date') if isinstance(store.get('restaurant_status_by_date'), dict) else {}
+    history_by_date = store.get('restaurant_history_by_date') if isinstance(store.get('restaurant_history_by_date'), dict) else {}
+    day_map = status_by_date.get(date_key) if isinstance(status_by_date.get(date_key), dict) else {}
+    prev_meta = day_map.get(key) if isinstance(day_map.get(key), dict) else {}
+    prev_status = normalize_breakfast_status(prev_meta.get('status'))
+    changed = prev_status != next_status
+    day_map[key] = {
+        'status': next_status,
+        'updated_at': ref_now.strftime('%d/%m/%Y %H:%M'),
+        'updated_by': str(user or 'Sistema').strip() or 'Sistema',
+        'updated_source': str(source or 'manual').strip() or 'manual',
+    }
+    status_by_date[date_key] = day_map
+
+    day_history = history_by_date.get(date_key) if isinstance(history_by_date.get(date_key), dict) else {}
+    ticket_history = day_history.get(key) if isinstance(day_history.get(key), list) else []
+    if changed:
+        ticket_history.append({
+            'status': next_status,
+            'at': ref_now.strftime('%d/%m/%Y %H:%M'),
+            'by': str(user or 'Sistema').strip() or 'Sistema',
+            'source': str(source or 'manual').strip() or 'manual',
+            'context': context if isinstance(context, dict) else {},
+        })
+        ticket_history = ticket_history[-20:]
+    day_history[key] = ticket_history
+    history_by_date[date_key] = day_history
+
+    store['restaurant_status_by_date'] = status_by_date
+    store['restaurant_history_by_date'] = history_by_date
+    save_breakfast_kds_store(store)
+    return {
+        'success': True,
+        'ticket_key': key,
         'status': next_status,
         'previous_status': prev_status,
         'changed': changed,

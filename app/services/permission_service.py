@@ -7,7 +7,9 @@ import time
 import uuid
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
 
-from flask import current_app, flash, g, jsonify, redirect, request, session, url_for
+from flask import current_app, flash, g, jsonify, redirect, render_template, request, session, url_for
+from jinja2 import TemplateNotFound
+from werkzeug.routing import BuildError
 
 from app.services.data_service import (
     DEPARTMENT_PERMISSIONS_FILE,
@@ -658,6 +660,49 @@ def _pilot_deny_response(message: str, *, status_code: int = 403, extra: Optiona
         return jsonify(payload), status_code
     flash(message)
     return redirect(url_for("main.index"))
+
+
+def build_authorization_required_response(
+    *,
+    route_key: str = "",
+    module_key: str = "",
+    sensitivity: str = "operacional_sensivel",
+    message: str = "Você não possui acesso a esta área",
+    context: Optional[Dict[str, Any]] = None,
+    status_code: int = 403,
+):
+    endpoint = str(request.endpoint or "").strip()
+    method = str(request.method or "GET").upper()
+    route_key_value = str(route_key or endpoint).strip() or endpoint
+    module_value = str(module_key or (endpoint.split(".", 1)[0] if "." in endpoint else "sistema")).strip() or "sistema"
+    context_payload = context if isinstance(context, dict) else {}
+    try:
+        create_endpoint = url_for("reception.reception_create_operational_authz_request")
+    except BuildError:
+        create_endpoint = "/reception/authz-requests/create"
+    payload = {
+        "success": False,
+        "error": message,
+        "authorization_required": True,
+        "authorization_request_available": True,
+        "authorization_request": {
+            "route_key": route_key_value,
+            "endpoint": endpoint,
+            "method": method,
+            "action": f"action.{route_key_value}.{method.lower()}",
+            "module": module_value,
+            "sensitivity": str(sensitivity or "operacional_sensivel"),
+            "create_endpoint": create_endpoint,
+            "context": context_payload,
+        },
+    }
+    if _wants_json_response() or str(request.path or "").startswith("/api/"):
+        return jsonify(payload), status_code
+    try:
+        return render_template("access_restricted.html", auth_payload=payload), status_code
+    except TemplateNotFound:
+        flash(message)
+        return redirect(url_for("main.index"))
 
 
 def handle_authorization_flow_exception(exc: Exception):

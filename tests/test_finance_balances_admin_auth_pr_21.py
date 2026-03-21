@@ -28,7 +28,7 @@ def test_finance_balances_denies_non_admin():
     with app.test_request_context("/finance/balances", method="GET"):
         _set_profile("gerente")
         response = finance_routes.finance_balances.__wrapped__()
-    assert response.status_code == 302
+    assert getattr(response, "status_code", None) in {302, 403}
 
 
 def test_finance_balances_allows_admin(monkeypatch):
@@ -40,6 +40,15 @@ def test_finance_balances_allows_admin(monkeypatch):
     assert response == "ok"
 
 
+def test_finance_balances_allows_administracao_sistema(monkeypatch):
+    app = _make_test_app()
+    monkeypatch.setattr(finance_routes, "render_template", lambda *args, **kwargs: "ok")
+    with app.test_request_context("/finance/balances", method="GET"):
+        _set_profile("administracao_sistema")
+        response = finance_routes.finance_balances.__wrapped__()
+    assert response == "ok"
+
+
 def test_finance_balances_data_denies_non_admin_json():
     app = _make_test_app()
     with app.test_request_context("/finance/balances/data", method="GET", headers={"Accept": "application/json"}):
@@ -47,6 +56,7 @@ def test_finance_balances_data_denies_non_admin_json():
         response, status = finance_routes.finance_balances_data.__wrapped__()
     assert status == 403
     assert response.get_json()["success"] is False
+    assert response.get_json()["authorization_required"] is True
 
 
 def test_finance_balances_data_allows_admin(monkeypatch):
@@ -67,6 +77,7 @@ def test_api_finance_session_details_denies_non_admin():
         response, status = finance_routes.api_finance_session_details.__wrapped__("S1")
     assert status == 403
     assert response.get_json()["success"] is False
+    assert response.get_json()["authorization_request_available"] is True
 
 
 def test_finance_balances_export_denies_non_admin():
@@ -74,7 +85,7 @@ def test_finance_balances_export_denies_non_admin():
     with app.test_request_context("/finance/balances/export", method="GET"):
         _set_profile("gerente")
         response = finance_routes.finance_balances_export.__wrapped__()
-    assert response.status_code == 302
+    assert getattr(response, "status_code", None) in {302, 403}
 
 
 def test_approve_endpoints_deny_non_admin():

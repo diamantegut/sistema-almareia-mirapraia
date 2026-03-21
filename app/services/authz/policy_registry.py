@@ -16,6 +16,8 @@ from app.services.authz.schemas import (
 
 DEFAULT_POLICY_FILE = Path(__file__).resolve().parents[3] / "data" / "authz" / "policies_v1.json"
 DEFAULT_PUBLIC_FILE = Path(__file__).resolve().parents[3] / "data" / "authz" / "public_endpoints_v1.json"
+FALLBACK_POLICY_FILE = Path(__file__).resolve().parent / "defaults" / "policies_v1.json"
+FALLBACK_PUBLIC_FILE = Path(__file__).resolve().parent / "defaults" / "public_endpoints_v1.json"
 
 
 class PolicyRegistryError(ValueError):
@@ -56,8 +58,10 @@ class PolicyRegistry:
         policy_file: Path | str = DEFAULT_POLICY_FILE,
         public_file: Path | str = DEFAULT_PUBLIC_FILE,
     ) -> "PolicyRegistry":
-        policy_payload = cls._load_json(Path(policy_file))
-        public_payload = cls._load_json(Path(public_file))
+        policy_path = Path(policy_file)
+        public_path = Path(public_file)
+        policy_payload = cls._load_json(policy_path, fallback_path=FALLBACK_POLICY_FILE if policy_path == DEFAULT_POLICY_FILE else None)
+        public_payload = cls._load_json(public_path, fallback_path=FALLBACK_PUBLIC_FILE if public_path == DEFAULT_PUBLIC_FILE else None)
 
         policy_version = str(policy_payload.get("policy_version") or "").strip()
         policy_hash = str(policy_payload.get("policy_hash") or "").strip()
@@ -100,15 +104,18 @@ class PolicyRegistry:
         )
 
     @staticmethod
-    def _load_json(path: Path) -> Dict[str, Any]:
+    def _load_json(path: Path, fallback_path: Optional[Path] = None) -> Dict[str, Any]:
+        selected = path
         if not path.exists():
-            raise PolicyRegistryError(f"arquivo não encontrado: {path}")
+            if fallback_path is None or not fallback_path.exists():
+                raise PolicyRegistryError(f"arquivo não encontrado: {path}")
+            selected = fallback_path
         try:
-            loaded = json.loads(path.read_text(encoding="utf-8"))
+            loaded = json.loads(selected.read_text(encoding="utf-8"))
         except json.JSONDecodeError as exc:
-            raise PolicyRegistryError(f"json inválido: {path}") from exc
+            raise PolicyRegistryError(f"json inválido: {selected}") from exc
         if not isinstance(loaded, dict):
-            raise PolicyRegistryError(f"payload inválido (esperado objeto): {path}")
+            raise PolicyRegistryError(f"payload inválido (esperado objeto): {selected}")
         return loaded
 
     @staticmethod

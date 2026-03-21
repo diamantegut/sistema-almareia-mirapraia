@@ -41,6 +41,18 @@
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#legendModal" title="Legenda Visual">
                 <i class="bi bi-info-circle"></i> <span class="d-none d-sm-inline">Legenda</span>
             </button>
+            {% if can_request_review_qr_restaurant|default(false) %}
+            <button type="button" class="btn btn-dark" onclick="openReviewQrModal('table', 'geral')">
+                <i class="bi bi-qr-code"></i> <span class="d-none d-sm-inline">QR Avaliação Restaurante</span><span class="d-inline d-sm-none">QR Avaliação</span>
+            </button>
+            {% else %}
+            <button type="button" class="btn btn-outline-secondary" disabled title="Sem permissão para solicitar avaliação">
+                <i class="bi bi-qr-code"></i> <span class="d-none d-sm-inline">QR Avaliação Restaurante</span><span class="d-inline d-sm-none">QR Avaliação</span>
+            </button>
+            <button type="button" class="btn btn-link text-decoration-none px-1" onclick="requestReviewQrPermission('table', 'geral')">
+                Solicitar Permissão
+            </button>
+            {% endif %}
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staffOrderModal">
                 <i class="bi bi-person-badge"></i> <span class="d-none d-sm-inline">Consumo Funcionário</span><span class="d-inline d-sm-none">Func.</span>
             </button>
@@ -148,6 +160,8 @@
                             {% endif %}
 
                             {% if has_order %}
+                                {% set table_customer_name = clean_guest_name(order.get('customer_name') or '')|trim %}
+                                {% set table_room = (order.get('room_number') or (table_id if is_room else '') or '')|string|trim %}
                                 {% set mobile_guest_name = '' %}
                                 {% if cust_type == 'hospede' and order and order.get('customer_name') %}
                                     {% set mobile_guest_name = clean_guest_name(order.customer_name)|trim %}
@@ -158,52 +172,15 @@
                                 <small class="price-tag mb-1">R$ {{ "%.0f"|format(open_orders[table_id]['total']|default(0)) }}</small>
                                 {% if mobile_guest_name %}
                                     <small class="table-guest-priority text-truncate">{{ mobile_guest_name }}</small>
+                                {% elif table_customer_name %}
+                                    <small class="table-guest-priority text-truncate">{{ table_customer_name }}</small>
+                                {% elif order and order.get('room_number') and occupancy is defined and order.room_number in occupancy %}
+                                    <small class="table-guest-priority text-truncate">{{ clean_guest_name(occupancy[order.room_number].guest_name)|trim }}</small>
                                 {% endif %}
-                                <small class="table-time text-muted fw-semibold {% if mobile_guest_name %}table-time-secondary{% endif %}"></small>
-                                
-                                {# Breakfast Icon #}
-                                {% if open_orders[table_id].get('is_breakfast') %}
-                                    <div class="mt-1">
-                                        <span class="badge bg-warning text-dark border border-light shadow-sm" style="font-size: 0.6em;">
-                                            <i class="bi bi-cup-hot-fill"></i> Café
-                                        </span>
-                                    </div>
-                                {% endif %}
-
-                                {# Visual Badge for Customer Type #}
-                                {% if cust_type == 'hospede' %}
-                                    <span class="badge bg-primary text-white border border-light shadow-sm mt-1 table-card-extra" style="font-size: 0.6em;">Hóspede</span>
-                                {% elif cust_type == 'passante' %}
-                                    <span class="badge bg-success text-white border border-light shadow-sm mt-1 table-card-extra" style="font-size: 0.6em;">Passante</span>
-                                {% endif %}
-                                
-                                {# Display Customer Name if available (for passersby or guests) #}
-                                {% if not mobile_guest_name and order and order.get('customer_name') %}
-                                    <div class="text-truncate px-1 w-100 text-center fw-bold text-dark mt-1 table-card-extra" style="font-size: 0.65em;">
-                                        {{ clean_guest_name(order.customer_name)|trim }}
-                                    </div>
-                                {% elif not mobile_guest_name and order and order.get('room_number') and occupancy is defined and order.room_number in occupancy %}
-                                    <div class="text-truncate px-1 w-100 text-center fw-bold text-dark mt-1 table-card-extra" style="font-size: 0.65em;">
-                                        {{ clean_guest_name(occupancy[order.room_number].guest_name)|trim }}
-                                    </div>
-                                {% endif %}
-
-                                {% if order.customer_type == 'funcionario' %}
-                                    <div class="alert alert-info py-1 px-1 d-inline-block mb-0 mt-1 table-card-extra" style="font-size: 0.6em;">
-                                        <i class="bi bi-info-circle"></i> Consumo Salvo
-                                    </div>
-                                {% endif %}
-
-                                {% if order and order.get('last_transfer') and session.get('role') in ['admin', 'gerente', 'supervisor'] %}
-                                    <div class="mt-1 table-card-extra">
-                                        <span class="badge bg-warning text-dark" style="font-size: 0.65em;">
-                                            <i class="bi bi-arrow-counterclockwise"></i> Desfazer
-                                        </span>
-                                    </div>
-                                {% endif %}
-
-                                {% if order.opened_by or order.waiter %}
-                                    <div class="text-muted text-truncate mt-1 table-card-extra" style="font-size: 0.6em;">Aberto por: {{ order.opened_by or order.waiter }}</div>
+                                {% if table_room %}
+                                    <small class="table-room-chip mt-1 text-truncate" title="Quarto {{ table_room|format_room }}">
+                                        <i class="bi bi-house-door-fill"></i> {{ table_room|format_room }}
+                                    </small>
                                 {% endif %}
                             {% else %}
                                 {% if not is_occupied_room %}
@@ -391,6 +368,44 @@
         box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     }
 
+    .table-room-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-size: 0.67rem;
+        line-height: 1;
+        padding: 0.2rem 0.36rem;
+        border-radius: 999px;
+        border: 1px solid rgba(13, 110, 253, 0.35);
+        background: rgba(13, 110, 253, 0.08);
+        color: #0a58ca;
+        max-width: 100%;
+    }
+
+    #reviewQrCodeMount {
+        width: min(74vw, 420px);
+        height: min(74vw, 420px);
+        margin: 0 auto;
+        background: #fff;
+        border-radius: 0.6rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.2s ease;
+    }
+
+    #reviewQrCodeMount.review-qr-rotated {
+        transform: rotate(90deg);
+    }
+
+    #reviewQrCodeMount.review-qr-zoomed {
+        transform: scale(1.2);
+    }
+
+    #reviewQrCodeMount.review-qr-rotated.review-qr-zoomed {
+        transform: rotate(90deg) scale(1.2);
+    }
+
     @media (min-width: 768px) {
         .tables-area-grid {
             grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -414,7 +429,7 @@
 
     @media (max-width: 767.98px) {
         .table-card {
-            min-height: 128px;
+            min-height: 112px;
         }
 
         .table-card .table-card-extra {
@@ -423,6 +438,10 @@
 
         .table-time-secondary {
             display: none;
+        }
+
+        .table-room-chip {
+            font-size: 0.62rem;
         }
     }
 </style>
@@ -515,10 +534,62 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="reviewQrModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-fullscreen-md-down modal-xl">
+        <div class="modal-content border-0">
+            <div class="modal-header bg-dark text-white">
+                <div>
+                    <h5 class="modal-title mb-0" id="reviewQrTitle">{{ (review_profile_restaurant|default({})).get('title', 'MIRAPRAIA') }}</h5>
+                    <small class="opacity-75" id="reviewQrHeadline">{{ (review_profile_restaurant|default({})).get('headline', 'Avalie sua experiência') }}</small>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body bg-white text-center py-4">
+                <div class="small text-muted mb-2" id="reviewQrOriginLabel"></div>
+                <div id="reviewQrCodeMount"></div>
+                <p class="mt-3 mb-0 fs-6" id="reviewQrHelper">{{ (review_profile_restaurant|default({})).get('helper', 'Aponte a câmera do seu celular') }}</p>
+            </div>
+            <div class="modal-footer justify-content-between flex-wrap gap-2">
+                <div class="d-flex flex-wrap gap-2">
+                    <button type="button" class="btn btn-outline-secondary" id="reviewQrRotateBtn">Virar Tela</button>
+                    <button type="button" class="btn btn-outline-secondary" id="reviewQrZoomBtn">Aumentar QR</button>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <button type="button" class="btn btn-outline-primary" onclick="copyReviewQrLink()">Copiar link</button>
+                    <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script id="breakfast-tables-data" type="application/json">
     {{ breakfast_tables|default([])|tojson|safe }}
 </script>
+<script id="review-qr-config-data" type="application/json">
+    {{ {
+        'link': (review_profile_restaurant|default({})).get('link', ''),
+        'can_open': can_request_review_qr_restaurant|default(false),
+        'auth_request': review_qr_auth_request_restaurant|default({}),
+        'log_endpoint': url_for('restaurant.review_restaurant_qr_open'),
+        'title': (review_profile_restaurant|default({})).get('title', 'MIRAPRAIA'),
+        'headline': (review_profile_restaurant|default({})).get('headline', 'Avalie sua experiência'),
+        'helper': (review_profile_restaurant|default({})).get('helper', 'Aponte a câmera do seu celular')
+    }|tojson|safe }}
+</script>
 <script>
+    const reviewQrConfigData = JSON.parse(document.getElementById('review-qr-config-data').textContent || '{}');
+    const reviewQrLink = String(reviewQrConfigData.link || '');
+    const reviewQrCanOpen = Boolean(reviewQrConfigData.can_open);
+    const reviewQrAuthRequest = reviewQrConfigData.auth_request || {};
+    const reviewQrLogEndpoint = String(reviewQrConfigData.log_endpoint || '');
+    let reviewQrModalInstance = null;
+    let reviewQrOpenedAt = null;
+    let reviewQrCurrentOriginType = '';
+    let reviewQrCurrentOriginId = '';
+    let reviewQrRotated = false;
+    let reviewQrZoomed = false;
+
     document.addEventListener('DOMContentLoaded', function() {
         checkBreakfastTime();
         refreshTableTimes();
@@ -530,7 +601,136 @@
         var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
           return new bootstrap.Tooltip(tooltipTriggerEl)
         })
+        const reviewModalEl = document.getElementById('reviewQrModal');
+        if (reviewModalEl) {
+            reviewQrModalInstance = new bootstrap.Modal(reviewModalEl);
+            reviewModalEl.addEventListener('hidden.bs.modal', function() {
+                if (!reviewQrOpenedAt || !reviewQrCurrentOriginType || !reviewQrCurrentOriginId) {
+                    return;
+                }
+                const durationSeconds = Math.max(0, (Date.now() - reviewQrOpenedAt) / 1000);
+                fetch(reviewQrLogEndpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        event_type: 'close',
+                        origin_type: reviewQrCurrentOriginType,
+                        origin_id: reviewQrCurrentOriginId,
+                        duration_seconds: durationSeconds,
+                        source_page: 'restaurant_tables'
+                    })
+                }).catch(() => {});
+            });
+        }
+        const rotateBtn = document.getElementById('reviewQrRotateBtn');
+        if (rotateBtn) {
+            rotateBtn.addEventListener('click', function() {
+                reviewQrRotated = !reviewQrRotated;
+                updateReviewQrMountTransform();
+            });
+        }
+        const zoomBtn = document.getElementById('reviewQrZoomBtn');
+        if (zoomBtn) {
+            zoomBtn.addEventListener('click', function() {
+                reviewQrZoomed = !reviewQrZoomed;
+                updateReviewQrMountTransform();
+            });
+        }
     });
+
+    function updateReviewQrMountTransform() {
+        const mount = document.getElementById('reviewQrCodeMount');
+        if (!mount) return;
+        mount.classList.toggle('review-qr-rotated', reviewQrRotated);
+        mount.classList.toggle('review-qr-zoomed', reviewQrZoomed);
+    }
+
+    function requestReviewQrPermission(originType, originId) {
+        if (!reviewQrAuthRequest || !reviewQrAuthRequest.create_endpoint) {
+            alert('Solicitação de permissão indisponível no momento.');
+            return;
+        }
+        const payload = {
+            route_key: reviewQrAuthRequest.route_key || 'review.request_review_qr_restaurant',
+            module_key: reviewQrAuthRequest.module_key || 'review',
+            sensitivity: reviewQrAuthRequest.sensitivity || 'operacional',
+            reason: `Solicitação para mostrar QR de avaliação (${originType} ${originId}).`,
+            context: Object.assign({}, reviewQrAuthRequest.context || {}, {
+                origin_type: originType,
+                origin_id: originId,
+                attempted_action: 'open_review_qr'
+            })
+        };
+        fetch(reviewQrAuthRequest.create_endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+            .then(resp => resp.json().then(data => ({ ok: resp.ok, data })))
+            .then(({ ok, data }) => {
+                if (!ok || !data.success) {
+                    throw new Error((data && (data.message || data.error)) || 'Falha ao solicitar');
+                }
+                alert(`Solicitação enviada. Protocolo: ${data.request_id || '-'}`);
+            })
+            .catch(() => {
+                alert('Não foi possível solicitar permissão agora.');
+            });
+    }
+
+    function openReviewQrModal(originType, originId) {
+        if (!reviewQrCanOpen) {
+            requestReviewQrPermission(originType, originId);
+            return;
+        }
+        const mount = document.getElementById('reviewQrCodeMount');
+        const originLabel = document.getElementById('reviewQrOriginLabel');
+        if (!mount || !reviewQrModalInstance) {
+            return;
+        }
+        reviewQrCurrentOriginType = String(originType || '');
+        reviewQrCurrentOriginId = String(originId || '');
+        reviewQrOpenedAt = Date.now();
+        reviewQrRotated = false;
+        reviewQrZoomed = false;
+        updateReviewQrMountTransform();
+        mount.innerHTML = '';
+        const size = Math.round(Math.min(window.innerWidth * 0.68, 420));
+        new QRCode(mount, {
+            text: reviewQrLink,
+            width: size,
+            height: size,
+            colorDark: '#000000',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.H
+        });
+        if (originLabel) {
+            const prefix = reviewQrCurrentOriginType === 'table' ? 'Mesa' : 'Origem';
+            originLabel.textContent = `${prefix} ${reviewQrCurrentOriginId}`;
+        }
+        reviewQrModalInstance.show();
+        fetch(reviewQrLogEndpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                event_type: 'open',
+                origin_type: reviewQrCurrentOriginType,
+                origin_id: reviewQrCurrentOriginId,
+                source_page: 'restaurant_tables'
+            })
+        }).catch(() => {});
+    }
+
+    function copyReviewQrLink() {
+        const text = String(reviewQrLink || '');
+        if (!text) {
+            alert('Link indisponível.');
+            return;
+        }
+        navigator.clipboard.writeText(text)
+            .then(() => alert('Link copiado com sucesso.'))
+            .catch(() => alert('Não foi possível copiar o link.'));
+    }
 
     function refreshTableTimes() {
         document.querySelectorAll('.table-card[data-opened-at]').forEach(card => {

@@ -165,6 +165,32 @@
         line-height: 1.2;
     }
 
+    .table-info-panel {
+        border: 1px solid #dbe7ff;
+        background: #f6f9ff;
+        border-radius: 0.65rem;
+        padding: 0.7rem 0.8rem;
+        width: 100%;
+    }
+
+    .table-info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.35rem 0.85rem;
+        font-size: 0.82rem;
+    }
+
+    .table-info-item {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .table-info-item strong {
+        color: #0d6efd;
+        font-weight: 700;
+    }
+
     @media (max-width: 767.98px) {
         #order-layout-row {
             margin-bottom: 130px;
@@ -196,6 +222,11 @@
 
         .table-action-row {
             display: none !important;
+        }
+
+        .table-info-grid {
+            grid-template-columns: 1fr;
+            font-size: 0.78rem;
         }
 
         .category-chips {
@@ -493,35 +524,43 @@
         </h2>
         
         {% if order %}
+        {% set order_name_raw = (order.customer_name or '')|string|trim %}
+        {% set order_name_label = order_name_raw if order_name_raw else 'Não informado' %}
+        {% set order_adults_raw = order.num_adults if order.num_adults is defined else None %}
+        {% set order_adults_label = order_adults_raw if order_adults_raw not in [None, '', 0] else 'Não informado' %}
+        {% set order_type_raw = (order.customer_type or '')|string|lower|trim %}
+        {% if order_type_raw == 'hospede' %}
+            {% set order_type_label = 'Hóspede' %}
+        {% elif order_type_raw == 'passante' %}
+            {% set order_type_label = 'Passante' %}
+        {% elif order_type_raw == 'funcionario' %}
+            {% set order_type_label = 'Funcionário' %}
+        {% else %}
+            {% set order_type_label = 'Não informado' %}
+        {% endif %}
+        {% set order_opened_by_label = (opened_by_display or '')|string|trim if (opened_by_display or '')|string|trim else 'Não informado' %}
+        {% set order_room_raw = (order.room_number or '')|string|trim %}
+        {% set order_room_label = order_room_raw|format_room if order_room_raw else 'Não informado' %}
+        <div class="table-info-panel mb-3">
+            <div class="table-info-grid">
+                <div class="table-info-item"><strong>Nome:</strong> {{ order_name_label }}</div>
+                <div class="table-info-item">
+                    <strong>Adultos:</strong> {{ order_adults_label }}
+                    {% if mode != 'minibar' %}
+                    <a href="#" class="text-decoration-none ms-1" data-bs-toggle="modal" data-bs-target="#editPaxModal"><i class="bi bi-pencil-square"></i></a>
+                    {% endif %}
+                </div>
+                <div class="table-info-item"><strong>Tipo:</strong> {{ order_type_label }}</div>
+                <div class="table-info-item"><strong>Aberta por:</strong> {{ order_opened_by_label }}</div>
+                <div class="table-info-item"><strong>Quarto:</strong> {{ order_room_label }}</div>
+            </div>
+        </div>
         <div class="w-100 d-flex d-md-none justify-content-end">
             <button type="button" class="btn btn-outline-primary mobile-actions-trigger" data-bs-toggle="offcanvas" data-bs-target="#mobileActionsSheet">
                 AÇÕES <i class="bi bi-three-dots"></i>
             </button>
         </div>
         <div class="d-flex gap-2 align-items-center flex-wrap justify-content-center justify-content-md-end table-action-row">
-            <div class="text-center text-md-end w-100 w-md-auto mb-2 mb-md-0">
-                <div class="text-muted small">
-                    Nome: <strong>{{ order.customer_name if order.customer_name else 'Não informado' }}</strong>
-                </div>
-                <div class="text-muted small">
-                    Adultos: <strong>{{ order.num_adults }}</strong>
-                    {% if mode != 'minibar' %}
-                    <a href="#" class="text-decoration-none ms-1" data-bs-toggle="modal" data-bs-target="#editPaxModal">
-                        <i class="bi bi-pencil-square"></i>
-                    </a>
-                    {% endif %}
-                </div>
-                <div class="text-muted small">
-                    Tipo: <strong>{{ order.customer_type|default('Passante')|title }}</strong>
-                </div>
-                <div class="text-muted small">
-                    Aberta por: <strong>{{ opened_by_display }}</strong>
-                </div>
-                {% if order.room_number %}
-            <div class="text-muted small">Quarto: <strong>{{ order.room_number|format_room }}</strong></div>
-            {% endif %}
-            </div>
-            
             {% if order %}
                 {% set is_locked = order.locked if order.locked is defined else false %}
                 {% if session.get('role') in ['admin', 'gerente', 'supervisor'] %}
@@ -1561,7 +1600,10 @@
                 <h5 class="modal-title">Fechar Conta</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <form action="{{ url_for('restaurant.restaurant_table_order', table_id=table_id) }}" method="POST" id="checkoutForm">
+            <form action="{{ url_for('restaurant.restaurant_table_order', table_id=table_id) }}" method="POST" id="checkoutForm"
+                  data-can-offer-emission="{{ 1 if can_offer_fiscal_emission else 0 }}"
+                  data-doc-required="{{ 1 if fiscal_doc_required else 0 }}"
+                  data-auto-doc="{{ fiscal_auto_document or '' }}">
                 <div class="modal-body">
                     <input type="hidden" name="action" value="close_order">
                     <input type="hidden" name="payment_data" id="paymentData">
@@ -2516,9 +2558,9 @@
             const docInput = checkoutFormEl.querySelector('input[name="customer_cpf_cnpj"]');
             if (!emitCheckbox || !docInput) return;
 
-            const canOfferEmission = {{ 'true' if can_offer_fiscal_emission else 'false' }};
-            const docRequired = {{ 'true' if fiscal_doc_required else 'false' }};
-            const autoDoc = '{{ fiscal_auto_document or "" }}';
+            const canOfferEmission = checkoutFormEl.dataset.canOfferEmission === '1';
+            const docRequired = checkoutFormEl.dataset.docRequired === '1';
+            const autoDoc = String(checkoutFormEl.dataset.autoDoc || '');
             if (!emitCheckbox.checked && canOfferEmission) {
                 const wantEmitNow = window.confirm('Deseja emitir a NFC-e agora?');
                 if (wantEmitNow) {

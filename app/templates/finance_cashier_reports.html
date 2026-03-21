@@ -19,16 +19,20 @@
                     </thead>
                     <tbody>
                         {% for session in sessions %}
+                        {% set closed_at_value = session.closed_at or '' %}
+                        {% set closed_at_parts = closed_at_value.split(' ') if closed_at_value else [] %}
+                        {% set closed_date = closed_at_parts[0] if closed_at_parts|length > 0 else '-' %}
+                        {% set closed_time = closed_at_parts[1] if closed_at_parts|length > 1 else '-' %}
                         <tr>
                             <td>
-                                <div>{{ session.closed_at.split(' ')[0] }}</div>
-                                <small class="text-muted">{{ session.closed_at.split(' ')[1] }}</small>
+                                <div>{{ closed_date }}</div>
+                                <small class="text-muted">{{ closed_time }}</small>
                             </td>
                             <td>{{ session.user }}</td>
-                            <td class="text-end">R$ {{ "%.2f"|format(session.opening_balance) }}</td>
-                            <td class="text-end text-success">R$ {{ "%.2f"|format(session.total_in) }}</td>
-                            <td class="text-end text-danger">R$ {{ "%.2f"|format(session.total_out) }}</td>
-                            <td class="text-end fw-bold">R$ {{ "%.2f"|format(session.closing_balance) }}</td>
+                            <td class="text-end">R$ {{ "%.2f"|format(session.opening_balance|default(0, true)) }}</td>
+                            <td class="text-end text-success">R$ {{ "%.2f"|format(session.total_in|default(0, true)) }}</td>
+                            <td class="text-end text-danger">R$ {{ "%.2f"|format(session.total_out|default(0, true)) }}</td>
+                            <td class="text-end fw-bold">R$ {{ "%.2f"|format(session.closing_balance|default(0, true)) }}</td>
                             <td class="text-center">
                                 <button class="btn btn-sm btn-outline-info" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ id_prefix }}{{ loop.index }}" style="min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" aria-label="Ver Detalhes">
                                     <i class="bi bi-chevron-down"></i>
@@ -68,7 +72,7 @@
                                                 </td>
                                                 <td>{{ t.description }}</td>
                                                 <td>{{ t.payment_method }}</td>
-                                                <td class="text-end">R$ {{ "%.2f"|format(t.amount) }}</td>
+                                                <td class="text-end">R$ {{ "%.2f"|format(t.amount|default(0, true)) }}</td>
                                             </tr>
                                             {% endfor %}
                                         </tbody>
@@ -111,7 +115,7 @@
                     {% if status_summary.restaurant.status == 'open' %}
                         <p class="mb-1 text-muted">Operador: <strong>{{ status_summary.restaurant.user }}</strong></p>
                         <p class="mb-1 text-muted">Aberto em: {{ status_summary.restaurant.opened_at }}</p>
-                        <h3 class="text-primary mt-3">R$ {{ "%.2f"|format(status_summary.restaurant.current_balance) }}</h3>
+                        <h3 class="text-primary mt-3">R$ {{ "%.2f"|format(status_summary.restaurant.current_balance|default(0, true)) }}</h3>
                         <small class="text-muted">{{ status_summary.restaurant.transaction_count }} transações</small>
                     {% else %}
                         <p class="mb-1 text-muted">Último Fechamento:</p>
@@ -119,7 +123,7 @@
                         <p class="mb-1">Por: {{ status_summary.restaurant.last_closed_by or '-' }}</p>
                         {% if status_summary.restaurant.last_difference and status_summary.restaurant.last_difference != 0 %}
                             <div class="alert alert-warning py-1 mt-2 mb-0">
-                                <i class="bi bi-exclamation-triangle"></i> Divergência: R$ {{ "%.2f"|format(status_summary.restaurant.last_difference) }}
+                                <i class="bi bi-exclamation-triangle"></i> Divergência: R$ {{ "%.2f"|format(status_summary.restaurant.last_difference|default(0, true)) }}
                             </div>
                         {% endif %}
                     {% endif %}
@@ -140,7 +144,7 @@
                     {% if status_summary.guest_consumption.status == 'open' %}
                         <p class="mb-1 text-muted">Operador: <strong>{{ status_summary.guest_consumption.user }}</strong></p>
                         <p class="mb-1 text-muted">Aberto em: {{ status_summary.guest_consumption.opened_at }}</p>
-                        <h3 class="text-primary mt-3">R$ {{ "%.2f"|format(status_summary.guest_consumption.current_balance) }}</h3>
+                        <h3 class="text-primary mt-3">R$ {{ "%.2f"|format(status_summary.guest_consumption.current_balance|default(0, true)) }}</h3>
                         <small class="text-muted">{{ status_summary.guest_consumption.transaction_count }} transações</small>
                     {% else %}
                         <p class="mb-1 text-muted">Último Fechamento:</p>
@@ -148,7 +152,7 @@
                         <p class="mb-1">Por: {{ status_summary.guest_consumption.last_closed_by or '-' }}</p>
                         {% if status_summary.guest_consumption.last_difference and status_summary.guest_consumption.last_difference != 0 %}
                             <div class="alert alert-warning py-1 mt-2 mb-0">
-                                <i class="bi bi-exclamation-triangle"></i> Divergência: R$ {{ "%.2f"|format(status_summary.guest_consumption.last_difference) }}
+                                <i class="bi bi-exclamation-triangle"></i> Divergência: R$ {{ "%.2f"|format(status_summary.guest_consumption.last_difference|default(0, true)) }}
                             </div>
                         {% endif %}
                     {% endif %}
@@ -169,7 +173,7 @@
                     {% if status_summary.daily_rates.status == 'open' %}
                         <p class="mb-1 text-muted">Operador: <strong>{{ status_summary.daily_rates.user }}</strong></p>
                         <p class="mb-1 text-muted">Aberto em: {{ status_summary.daily_rates.opened_at }}</p>
-                        <h3 class="text-primary mt-3">R$ {{ "%.2f"|format(status_summary.daily_rates.current_balance) }}</h3>
+                        <h3 class="text-primary mt-3">R$ {{ "%.2f"|format(status_summary.daily_rates.current_balance|default(0, true)) }}</h3>
                         <small class="text-muted">{{ status_summary.daily_rates.transaction_count }} transações</small>
                     {% else %}
                         <p class="mb-1 text-muted">Último Fechamento:</p>
@@ -177,7 +181,7 @@
                         <p class="mb-1">Por: {{ status_summary.daily_rates.last_closed_by or '-' }}</p>
                         {% if status_summary.daily_rates.last_difference and status_summary.daily_rates.last_difference != 0 %}
                             <div class="alert alert-warning py-1 mt-2 mb-0">
-                                <i class="bi bi-exclamation-triangle"></i> Divergência: R$ {{ "%.2f"|format(status_summary.daily_rates.last_difference) }}
+                                <i class="bi bi-exclamation-triangle"></i> Divergência: R$ {{ "%.2f"|format(status_summary.daily_rates.last_difference|default(0, true)) }}
                             </div>
                         {% endif %}
                     {% endif %}

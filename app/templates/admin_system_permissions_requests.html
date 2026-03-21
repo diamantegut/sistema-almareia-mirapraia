@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Solicitações de Acesso</h2>
+        <a href="{{ url_for('admin.admin_system_permissions') }}" class="btn btn-outline-secondary">Voltar</a>
+    </div>
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+            <form method="GET" class="row g-2">
+                <div class="col-md-2"><input class="form-control" name="module" placeholder="Módulo" value="{{ filters.module }}"></div>
+                <div class="col-md-2"><input class="form-control" name="user" placeholder="Usuário" value="{{ filters.user }}"></div>
+                <div class="col-md-2"><input class="form-control" name="department" placeholder="Departamento" value="{{ filters.department }}"></div>
+                <div class="col-md-2"><input class="form-control" name="sensitivity" placeholder="Criticidade" value="{{ filters.sensitivity }}"></div>
+                <div class="col-md-2"><input class="form-control" name="status" placeholder="Status" value="{{ filters.status }}"></div>
+                <div class="col-md-2 d-grid"><button class="btn btn-primary">Filtrar</button></div>
+            </form>
+        </div>
+    </div>
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light"><strong>Pendentes</strong></div>
+        <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr><th>Protocolo</th><th>Quem pediu</th><th>Classe</th><th>Departamento</th><th>Módulo</th><th>Acesso solicitado</th><th>Criticidade</th><th>Sugestão</th><th>Ações</th></tr>
+                </thead>
+                <tbody>
+                    {% for row in pending %}
+                    <tr>
+                        <td>{{ row.id }}</td>
+                        <td>{{ row.requester_user }}</td>
+                        <td>{{ row.requester_class or row.requester_role }}</td>
+                        <td>{{ row.requester_department }}</td>
+                        <td>{{ row.module_key }}</td>
+                        <td>{{ row.route_key }}<br><small class="text-muted">{{ row.http_method }}</small></td>
+                        <td>{{ row.sensitivity }}</td>
+                        <td>
+                            {% if row.suggested_scope and (row.suggestion_confidence or 0) >= 0.5 %}
+                            <div class="border rounded p-2 bg-light">
+                                <div class="fw-semibold">Sugestão do sistema</div>
+                                <div class="small">Escopo: <strong>{{ row.suggested_scope }}</strong></div>
+                                <div class="small">Duração: <strong>{{ row.suggested_duration }}</strong>{% if row.suggested_duration == 'temporary' and row.suggested_duration_value %} ({{ row.suggested_duration_value }} min){% endif %}</div>
+                                <div class="small">Confiança: <strong>{% if (row.suggestion_confidence or 0) > 0.8 %}Alta{% elif (row.suggestion_confidence or 0) >= 0.5 %}Média{% else %}Baixa{% endif %}</strong></div>
+                                <div class="small text-muted">{{ row.suggestion_reason or '-' }}</div>
+                            </div>
+                            {% else %}
+                            <small class="text-muted">{{ row.suggestion_reason or 'Sem dados suficientes para sugestão' }}</small>
+                            {% endif %}
+                            {% if row.promotion_candidate %}
+                            <div class="border rounded p-2 bg-white mt-2">
+                                <div class="fw-semibold">Sugestão avançada do sistema</div>
+                                <div class="small">Esta permissão já foi aprovada {{ row.promotion_candidate.total_approvals }} vezes.</div>
+                                <div class="small">Recomendação: transformar em padrão para evitar novas solicitações.</div>
+                                <div class="small text-muted">Confiança: {{ "%.0f"|format((row.promotion_candidate.confidence_score or 0) * 100) }}%</div>
+                                <form method="post" class="mt-2">
+                                    <input type="hidden" name="action" value="promote_rule">
+                                    <input type="hidden" name="permission_key" value="{{ row.promotion_candidate.permission_key }}">
+                                    <input type="hidden" name="module_key" value="{{ row.promotion_candidate.module }}">
+                                    <div class="d-flex gap-1 mb-1">
+                                        <select name="promotion_scope" class="form-select form-select-sm">
+                                            <option value="role" {% if row.promotion_candidate.recommended_scope == 'role' %}selected{% endif %}>Regra por cargo</option>
+                                            <option value="department" {% if row.promotion_candidate.recommended_scope == 'department' %}selected{% endif %}>Regra por departamento</option>
+                                        </select>
+                                        <select name="promotion_duration" class="form-select form-select-sm">
+                                            <option value="temporary" {% if row.promotion_candidate.recommended_duration == 'temporary' %}selected{% endif %}>Temporária</option>
+                                            <option value="permanent" {% if row.promotion_candidate.recommended_duration == 'permanent' %}selected{% endif %}>Permanente</option>
+                                        </select>
+                                    </div>
+                                    <div class="d-flex gap-1 mb-1">
+                                        <input type="text" name="promotion_target_department" class="form-control form-control-sm" value="{{ row.requester_department }}" placeholder="Departamento">
+                                        <input type="text" name="promotion_target_role" class="form-control form-control-sm" value="{{ row.requester_class or row.requester_role }}" placeholder="Classe">
+                                    </div>
+                                    <div class="d-flex gap-1">
+                                        <input type="number" name="promotion_duration_value" class="form-control form-control-sm" value="{{ row.suggested_duration_value or 120 }}" min="1" max="1440">
+                                        <button type="submit" class="btn btn-sm btn-outline-success">Promover para regra padrão</button>
+                                    </div>
+                                </form>
+                            </div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="d-flex flex-column gap-1">
+                                <form method="post" class="border rounded p-2 bg-light suggestion-form">
+                                    <input type="hidden" name="request_id" value="{{ row.id }}">
+                                    <input type="hidden" name="suggestion_used" value="0" class="suggestion-used">
+                                    <input type="hidden" name="suggested_scope" value="{{ row.suggested_scope or '' }}" class="suggested-scope">
+                                    <input type="hidden" name="suggested_duration" value="{{ row.suggested_duration or '' }}" class="suggested-duration">
+                                    <input type="hidden" name="suggested_duration_value" value="{{ row.suggested_duration_value or 0 }}" class="suggested-duration-value">
+                                    <div class="d-flex gap-1 mb-1">
+                                        <select name="decision" class="form-select form-select-sm decision-select">
+                                            <option value="approve_temporary">Acesso temporário (usuário)</option>
+                                            <option value="approve_permanent">Acesso permanente (usuário)</option>
+                                            <option value="approve_department_temporary">Acesso temporário (departamento)</option>
+                                            <option value="approve_department_permanent">Acesso permanente (departamento)</option>
+                                            <option value="approve_role_temporary">Acesso temporário (classe)</option>
+                                            <option value="approve_role_permanent">Acesso permanente (classe)</option>
+                                            <option value="deny">Negar acesso</option>
+                                        </select>
+                                    </div>
+                                    <div class="d-flex gap-1 mb-1">
+                                        <input type="text" name="target_department" class="form-control form-control-sm target-department" value="{{ row.requester_department }}" placeholder="Departamento">
+                                        <input type="text" name="target_role" class="form-control form-control-sm target-role" value="{{ row.requester_class or row.requester_role }}" placeholder="Classe">
+                                    </div>
+                                    <div class="d-flex gap-1 mb-1">
+                                        <input type="number" name="ttl_minutes" class="form-control form-control-sm ttl-minutes" value="{{ row.suggested_duration_value or 120 }}" min="1" max="1440">
+                                        <input type="text" name="decision_reason" class="form-control form-control-sm" placeholder="Motivo">
+                                    </div>
+                                    <div class="d-flex gap-1">
+                                        <button
+                                            type="button"
+                                            class="btn btn-sm btn-outline-primary apply-suggestion-btn"
+                                            data-scope="{{ row.suggested_scope or '' }}"
+                                            data-duration="{{ row.suggested_duration or '' }}"
+                                            data-duration-value="{{ row.suggested_duration_value or 0 }}"
+                                        >Aplicar sugestão</button>
+                                        <button type="submit" class="btn btn-sm btn-primary">Aplicar decisão</button>
+                                    </div>
+                                </form>
+                                <form method="post" class="d-flex gap-1">
+                                    <input type="hidden" name="request_id" value="{{ row.id }}">
+                                    <input type="hidden" name="decision" value="approve_once">
+                                    <input type="text" name="decision_reason" class="form-control form-control-sm" placeholder="Motivo">
+                                    <button type="submit" class="btn btn-sm btn-success">Liberar 1x</button>
+                                </form>
+                                <form method="post" class="d-flex gap-1">
+                                    <input type="hidden" name="request_id" value="{{ row.id }}">
+                                    <input type="hidden" name="decision" value="approve_temporary">
+                                    <input type="number" name="ttl_minutes" class="form-control form-control-sm" value="60" min="1" max="1440">
+                                    <button type="submit" class="btn btn-sm btn-primary">Acesso temporário (usuário)</button>
+                                </form>
+                                <form method="post" class="d-flex gap-1">
+                                    <input type="hidden" name="request_id" value="{{ row.id }}">
+                                    <input type="hidden" name="decision" value="approve_permanent">
+                                    <button type="submit" class="btn btn-sm btn-warning">Acesso permanente (usuário)</button>
+                                </form>
+                                <form method="post" class="d-flex gap-1">
+                                    <input type="hidden" name="request_id" value="{{ row.id }}">
+                                    <input type="hidden" name="decision" value="approve_department_temporary">
+                                    <input type="text" name="target_department" class="form-control form-control-sm" value="{{ row.requester_department }}" placeholder="Departamento">
+                                    <input type="number" name="ttl_minutes" class="form-control form-control-sm" value="60" min="1" max="1440">
+                                    <button type="submit" class="btn btn-sm btn-outline-primary">Acesso temporário (departamento)</button>
+                                </form>
+                                <form method="post" class="d-flex gap-1">
+                                    <input type="hidden" name="request_id" value="{{ row.id }}">
+                                    <input type="hidden" name="decision" value="approve_department_permanent">
+                                    <input type="text" name="target_department" class="form-control form-control-sm" value="{{ row.requester_department }}" placeholder="Departamento">
+                                    <button type="submit" class="btn btn-sm btn-outline-warning">Acesso permanente (departamento)</button>
+                                </form>
+                                <form method="post" class="d-flex gap-1">
+                                    <input type="hidden" name="request_id" value="{{ row.id }}">
+                                    <input type="hidden" name="decision" value="approve_role_temporary">
+                                    <input type="text" name="target_role" class="form-control form-control-sm" value="{{ row.requester_class or row.requester_role }}" placeholder="Classe">
+                                    <input type="number" name="ttl_minutes" class="form-control form-control-sm" value="60" min="1" max="1440">
+                                    <button type="submit" class="btn btn-sm btn-outline-info">Acesso temporário (classe)</button>
+                                </form>
+                                <form method="post" class="d-flex gap-1">
+                                    <input type="hidden" name="request_id" value="{{ row.id }}">
+                                    <input type="hidden" name="decision" value="approve_role_permanent">
+                                    <input type="text" name="target_role" class="form-control form-control-sm" value="{{ row.requester_class or row.requester_role }}" placeholder="Classe">
+                                    <button type="submit" class="btn btn-sm btn-outline-dark">Acesso permanente (classe)</button>
+                                </form>
+                                <form method="post" class="d-flex gap-1">
+                                    <input type="hidden" name="request_id" value="{{ row.id }}">
+                                    <input type="hidden" name="decision" value="deny">
+                                    <input type="text" name="decision_reason" class="form-control form-control-sm" placeholder="Motivo">
+                                    <button type="submit" class="btn btn-sm btn-danger">Negar acesso</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not pending %}
+                    <tr><td colspan="9" class="text-center text-muted">Sem solicitações pendentes.</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card shadow-sm">
+        <div class="card-header bg-light"><strong>Histórico recente</strong></div>
+        <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle mb-0">
+                <thead class="table-light"><tr><th>ID</th><th>Usuário</th><th>Classe</th><th>Depto</th><th>Rota</th><th>Status</th><th>Tipo decisão</th><th>Decidido por</th><th>Decidido em</th></tr></thead>
+                <tbody>
+                    {% for row in recent %}
+                    <tr>
+                        <td>{{ row.id }}</td><td>{{ row.requester_user }}</td><td>{{ row.requester_class or row.requester_role }}</td><td>{{ row.requester_department }}</td><td>{{ row.route_key }}</td>
+                        <td>{{ row.status }}</td><td>{{ row.decision_type }}</td><td>{{ row.decided_by }}</td><td>{{ row.decided_at }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% if not recent %}
+                    <tr><td colspan="9" class="text-center text-muted">Sem histórico.</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card shadow-sm mt-4">
+        <div class="card-header bg-light"><strong>Regras padrão promovidas</strong></div>
+        <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle mb-0">
+                <thead class="table-light"><tr><th>ID</th><th>Permissão</th><th>Escopo</th><th>Duração</th><th>Confiança</th><th>Ação</th></tr></thead>
+                <tbody>
+                    {% for rule in promoted_rules if rule.active %}
+                    <tr>
+                        <td>{{ rule.id }}</td>
+                        <td>{{ rule.permission_key }}</td>
+                        <td>{{ rule.promotion_scope }}</td>
+                        <td>{{ rule.promotion_duration }}</td>
+                        <td>{{ "%.0f"|format((rule.promotion_confidence or 0) * 100) }}%</td>
+                        <td>
+                            <form method="post">
+                                <input type="hidden" name="action" value="rollback_promotion">
+                                <input type="hidden" name="rule_id" value="{{ rule.id }}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Remover regra</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not promoted_rules %}
+                    <tr><td colspan="6" class="text-center text-muted">Sem regras promovidas.</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script>
+(() => {
+    document.querySelectorAll('.apply-suggestion-btn').forEach((button) => {
+        button.addEventListener('click', () => {
+            const form = button.closest('.suggestion-form');
+            if (!form) return;
+            const scope = String(button.dataset.scope || '').toLowerCase();
+            const duration = String(button.dataset.duration || '').toLowerCase();
+            const durationValue = Number(button.dataset.durationValue || 0);
+            const decisionSelect = form.querySelector('.decision-select');
+            const ttlInput = form.querySelector('.ttl-minutes');
+            const usedInput = form.querySelector('.suggestion-used');
+            if (scope === 'department') {
+                decisionSelect.value = duration === 'permanent' ? 'approve_department_permanent' : 'approve_department_temporary';
+            } else if (scope === 'role') {
+                decisionSelect.value = duration === 'permanent' ? 'approve_role_permanent' : 'approve_role_temporary';
+            } else {
+                decisionSelect.value = duration === 'permanent' ? 'approve_permanent' : 'approve_temporary';
+            }
+            if (duration !== 'permanent' && durationValue > 0 && ttlInput) {
+                ttlInput.value = String(durationValue);
+            }
+            if (usedInput) {
+                usedInput.value = '1';
+            }
+        });
+    });
+})();
+</script>
+{% endblock %}

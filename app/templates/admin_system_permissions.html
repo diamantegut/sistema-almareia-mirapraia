@@ -4,25 +4,125 @@
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-start mb-4">
         <div>
-            <h2><i class="bi bi-shield-lock"></i> {{ title }}</h2>
-            <p class="text-muted mb-0">{{ description }}</p>
+            <h2><i class="bi bi-shield-lock"></i> Permissões do Sistema</h2>
+            <p class="text-muted mb-0">Painel operacional para decidir acessos com segurança e rapidez.</p>
         </div>
         <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-outline-secondary">Voltar</a>
     </div>
 
-    <div class="row g-3">
-        {% for tool in tools %}
-        <div class="col-md-6 col-lg-3">
+    <div class="row g-3 mb-4">
+        <div class="col-md-2">
             <div class="card shadow-sm h-100">
-                <div class="card-body d-flex flex-column">
-                    <div class="mb-2 text-primary"><i class="bi {{ tool.icon }} fs-3"></i></div>
-                    <h5 class="card-title">{{ tool.title }}</h5>
-                    <p class="card-text text-muted small flex-grow-1">{{ tool.description }}</p>
-                    <a href="{{ tool.url }}" class="btn btn-primary w-100">Abrir</a>
+                <div class="card-body">
+                    <small class="text-muted">Solicitações pendentes</small>
+                    <div class="h3 mb-0">{{ pending_count }}</div>
                 </div>
             </div>
         </div>
-        {% endfor %}
+        <div class="col-md-2">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <small class="text-muted">Sugestões disponíveis</small>
+                    <div class="h3 mb-0">{{ suggestion_available_count }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <small class="text-muted">Candidatas à promoção</small>
+                    <div class="h3 mb-0">{{ promotion_candidate_count }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <small class="text-muted">Promovidas ativas</small>
+                    <div class="h3 mb-0">{{ promoted_rules_active_count }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <small class="text-muted">Promovidas revogadas</small>
+                    <div class="h3 mb-0">{{ promoted_rules_revoked_count }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <small class="text-muted">Overrides temporários (24h)</small>
+                    <div class="h3 mb-0">{{ expiring_temporary_count }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body d-flex flex-wrap gap-2">
+            <span class="badge bg-info text-dark align-self-center">{{ suggestion_available_count }} solicitações com sugestão automática disponível</span>
+            <a href="{{ url_for('admin.admin_system_permissions_requests') }}" class="btn btn-primary">Ver pedidos</a>
+            <a href="{{ url_for('admin.admin_system_permissions_access') }}" class="btn btn-outline-primary">Gerenciar acessos</a>
+            <a href="{{ url_for('admin.admin_system_permissions_access', tab='promotions') }}" class="btn btn-outline-success">Revisar promoções</a>
+            <a href="{{ url_for('admin.admin_system_permissions_audit') }}" class="btn btn-outline-secondary">Auditoria</a>
+            {% if advanced_mode %}
+            <a href="{{ url_for('admin.admin_system_permissions_advanced') }}" class="btn btn-outline-dark">Modo avançado</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white"><strong>Permissões candidatas à automação</strong></div>
+        <div class="card-body">
+            <div class="mb-2">{{ promotion_candidate_count }} permissões com padrão recorrente detectado.</div>
+            {% if promotion_candidates %}
+            <ul class="mb-3">
+                {% for row in promotion_candidates %}
+                <li>{{ row.permission_key }} — confiança {{ "%.0f"|format((row.confidence_score or 0) * 100) }}%</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            <a href="{{ url_for('admin.admin_system_permissions_requests') }}" class="btn btn-outline-primary">Revisar sugestões</a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white"><strong>Pendências para decisão</strong></div>
+        <div class="table-responsive">
+            <table class="table table-sm table-hover mb-0">
+                <thead class="table-light"><tr><th>Usuário</th><th>Módulo</th><th>Rota</th><th>Criticidade</th><th>Quando</th></tr></thead>
+                <tbody>
+                    {% for row in pending_rows %}
+                    <tr>
+                        <td>{{ row.requester_user }}</td>
+                        <td>{{ row.module_key }}</td>
+                        <td>{{ row.route_key }}</td>
+                        <td>{{ row.sensitivity }}</td>
+                        <td>{{ row.created_at }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% if not pending_rows %}
+                    <tr><td colspan="5" class="text-center text-muted">Sem pendências no momento.</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="alert alert-warning mb-0">
+                <strong>Atenção operacional:</strong> permissões amplas permanentes devem ser revisadas regularmente para evitar escopo excessivo.
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="alert {{ 'alert-danger' if excessive_override_alert else 'alert-info' }} mb-0">
+                <strong>Overrides:</strong> {% if excessive_override_alert %}volume elevado de overrides ativos. Recomenda-se revisão imediata.{% else %}volume sob controle no momento.{% endif %}
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

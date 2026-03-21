@@ -4,6 +4,9 @@ import json
 from flask import Flask, redirect, url_for
 from app.models.database import db
 
+def _is_truthy(value):
+    return str(value or "").strip().lower() in ('1', 'true', 'yes', 'on')
+
 
 def create_app(config_name=None):
     app = Flask(__name__, template_folder='templates', static_folder='static')
@@ -81,8 +84,14 @@ def create_app(config_name=None):
     except Exception as e:
         print(f"Failed to initialize data cleanup monitor: {e}")
     
-    # Start Scheduler
-    if os.environ.get('WERKZEUG_RUN_MAIN') == 'true' or not app.debug:
+    debug_env = os.environ.get('ALMAREIA_DEBUG')
+    if debug_env is None:
+        debug_env = os.environ.get('FLASK_DEBUG')
+    runtime_env = str(app.config.get('ALMAREIA_RUNTIME_ENV') or '').strip().lower()
+    debug_requested = _is_truthy(debug_env) if debug_env is not None else runtime_env == 'development'
+    is_reloader_child = os.environ.get('WERKZEUG_RUN_MAIN') == 'true'
+    should_start_scheduler = (not debug_requested) or is_reloader_child
+    if should_start_scheduler:
         try:
             from app.services.scheduler_service import start_scheduler
             start_scheduler()

@@ -33,12 +33,32 @@ DEPARTMENT_SCOPE_HINTS: Dict[str, List[str]] = {
     "cozinha": ["scope.department", "scope.shift.current"],
     "estoque": ["scope.department", "scope.warehouse"],
     "fornecedores": ["scope.department", "scope.warehouse"],
-    "financeiro": ["scope.department", "scope.finance.period"],
+    "financeiro": ["scope.department", "scope.finance.period", "scope.finance.read", "scope.finance.write"],
     "auditoria": ["scope.audit.readonly", "scope.department"],
     "governanca": ["scope.department", "scope.shift.current"],
     "rh": ["scope.department"],
     "manutencao": ["scope.department", "scope.shift.current"],
-    "admin": ["scope.global"],
+    "admin": ["scope.department", "scope.global", "scope.finance.read", "scope.finance.write", "scope.finance.approve"],
+}
+
+ROLE_SCOPE_HINTS: Dict[str, List[str]] = {
+    "admin": ["scope.department", "scope.global", "scope.finance.read", "scope.finance.write", "scope.finance.approve"],
+    "gerente": ["scope.department", "scope.finance.read", "scope.finance.write"],
+    "supervisor": ["scope.department", "scope.finance.read"],
+    "colaborador": ["scope.department"],
+}
+
+FINANCE_ACTIONS_MANAGER: Set[str] = {
+    "action.finance.close_staff_month.post",
+    "action.finance.finance_commission_new.post",
+    "action.finance.finance_commission_refresh_scores.post",
+    "action.finance.finance_commission_update_employee.post",
+    "action.finance.finance_commission_calculate.post",
+    "action.finance.finance_commission_delete.post",
+}
+
+FINANCE_ACTIONS_ADMIN: Set[str] = {
+    "action.finance.finance_commission_approve.post",
 }
 
 
@@ -120,17 +140,74 @@ def _tokens_to_actions(tokens: Iterable[str]) -> Set[str]:
     return actions
 
 
+def _augment_actions_for_finance(
+    *,
+    base_actions: Iterable[str],
+    role: str,
+    department: str,
+    explicit_permissions: Optional[Iterable[Any]] = None,
+    effective_profile: Optional[Dict[str, Any]] = None,
+    pages: Optional[Iterable[str]] = None,
+) -> Set[str]:
+    actions = {str(item).strip() for item in (base_actions or []) if str(item).strip()}
+    role_norm = _normalize_text(role)
+    dept_norm = _normalize_text(department)
+    perm_values = [str(item or "").strip().lower() for item in (explicit_permissions or []) if str(item or "").strip()]
+    has_finance_permission = any("finance" in item or "financeiro" in item for item in perm_values)
+    profile = effective_profile if isinstance(effective_profile, dict) else {}
+    profile_areas = profile.get("areas") if isinstance(profile.get("areas"), dict) else {}
+    finance_area = profile_areas.get("financeiro") if isinstance(profile_areas.get("financeiro"), dict) else {}
+    finance_all = bool(finance_area.get("all"))
+    page_values = [str(item or "").strip().lower() for item in (pages or []) if str(item or "").strip()]
+    has_finance_page = any(item.startswith("page.finance.") for item in page_values)
+    finance_context = has_finance_permission or finance_all or has_finance_page or "financeiro" in dept_norm
+    if role_norm in {"admin", "gerente"} or finance_context:
+        actions.update(FINANCE_ACTIONS_MANAGER)
+    if role_norm == "admin":
+        actions.update(FINANCE_ACTIONS_ADMIN)
+    return actions
+
+
 def _derive_scopes(
     department: str,
     role: str,
+    explicit_permissions: Optional[Iterable[Any]] = None,
+    effective_profile: Optional[Dict[str, Any]] = None,
+    pages: Optional[Iterable[str]] = None,
+    actions: Optional[Iterable[str]] = None,
     context: Optional[Dict[str, Any]] = None,
 ) -> Set[str]:
     scopes: Set[str] = set()
     dept_norm = _normalize_text(department)
     role_norm = _normalize_text(role)
+    scopes.add("scope.department")
+    for hinted in ROLE_SCOPE_HINTS.get(role_norm, []):
+        scopes.add(str(hinted))
     for key, hinted in DEPARTMENT_SCOPE_HINTS.items():
         if key in dept_norm or key in role_norm:
             scopes.update(hinted)
+    perm_values = [str(item or "").strip().lower() for item in (explicit_permissions or []) if str(item or "").strip()]
+    has_finance_permission = any("finance" in item or "financeiro" in item for item in perm_values)
+    profile = effective_profile if isinstance(effective_profile, dict) else {}
+    profile_areas = profile.get("areas") if isinstance(profile.get("areas"), dict) else {}
+    finance_area = profile_areas.get("financeiro") if isinstance(profile_areas.get("financeiro"), dict) else {}
+    finance_all = bool(finance_area.get("all"))
+    finance_pages = finance_area.get("pages") if isinstance(finance_area.get("pages"), dict) else {}
+    has_finance_profile_page = any(
+        bool(v) and str(k).startswith("finance.") for k, v in finance_pages.items()
+    ) or any(str(item or "").startswith("finance.") for item in (profile.get("level_pages") or []))
+    page_values = [str(item or "").strip().lower() for item in (pages or []) if str(item or "").strip()]
+    action_values = [str(item or "").strip().lower() for item in (actions or []) if str(item or "").strip()]
+    has_finance_page = any(item.startswith("page.finance.") for item in page_values)
+    has_finance_action = any(item.startswith("action.finance.") for item in action_values)
+    if has_finance_permission or finance_all or has_finance_profile_page or has_finance_page or has_finance_action or "financeiro" in dept_norm:
+        scopes.add("scope.finance.read")
+    if role_norm in {"admin", "gerente"} or has_finance_permission or finance_all or "financeiro" in dept_norm:
+        scopes.add("scope.finance.write")
+    if role_norm == "admin":
+        scopes.add("scope.finance.approve")
+    if "scope.finance.read" in scopes or "scope.finance.write" in scopes or "scope.finance.approve" in scopes:
+        scopes.add("scope.finance.period")
     context_data = context if isinstance(context, dict) else {}
     if context_data.get("shift_id"):
         scopes.add("scope.shift.current")
@@ -172,7 +249,23 @@ def build_grant_from_user(
     explicit_permissions = (session_payload or {}).get("permissions", user_data.get("permissions"))
     tokens = _collect_legacy_tokens(explicit_permissions, effective_profile)
     actions = _tokens_to_actions(tokens)
-    scopes = _derive_scopes(department, role_normalized, context=session_payload)
+    actions = _augment_actions_for_finance(
+        base_actions=actions,
+        role=role_normalized,
+        department=department,
+        explicit_permissions=explicit_permissions if isinstance(explicit_permissions, (list, tuple, set)) else [],
+        effective_profile=effective_profile,
+        pages=pages,
+    )
+    scopes = _derive_scopes(
+        department,
+        role_normalized,
+        explicit_permissions=explicit_permissions if isinstance(explicit_permissions, (list, tuple, set)) else [],
+        effective_profile=effective_profile,
+        pages=pages,
+        actions=actions,
+        context=session_payload,
+    )
 
     grants = GrantPermissions(
         pages=sorted(pages),
@@ -241,7 +334,23 @@ def build_grant_from_session(
     pages = _profile_to_pages(effective_profile, policy_registry=policy_registry)
     tokens = _collect_legacy_tokens(explicit_permissions, effective_profile)
     actions = _tokens_to_actions(tokens)
-    scopes = _derive_scopes(department, role_normalized, context=session_payload)
+    actions = _augment_actions_for_finance(
+        base_actions=actions,
+        role=role_normalized,
+        department=department,
+        explicit_permissions=explicit_permissions if isinstance(explicit_permissions, (list, tuple, set)) else [],
+        effective_profile=effective_profile,
+        pages=pages,
+    )
+    scopes = _derive_scopes(
+        department,
+        role_normalized,
+        explicit_permissions=explicit_permissions if isinstance(explicit_permissions, (list, tuple, set)) else [],
+        effective_profile=effective_profile,
+        pages=pages,
+        actions=actions,
+        context=session_payload,
+    )
 
     grants = GrantPermissions(
         pages=sorted(pages),

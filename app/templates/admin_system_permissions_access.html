@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Perfis e Acessos</h2>
+        <a href="{{ url_for('admin.admin_system_permissions') }}" class="btn btn-outline-secondary">Voltar</a>
+    </div>
+
+    <ul class="nav nav-tabs mb-3">
+        <li class="nav-item"><a class="nav-link {% if active_tab == 'users' %}active{% endif %}" href="{{ url_for('admin.admin_system_permissions_access', tab='users') }}">Usuários</a></li>
+        <li class="nav-item"><a class="nav-link {% if active_tab == 'roles' %}active{% endif %}" href="{{ url_for('admin.admin_system_permissions_access', tab='roles') }}">Cargos</a></li>
+        <li class="nav-item"><a class="nav-link {% if active_tab == 'overrides' %}active{% endif %}" href="{{ url_for('admin.admin_system_permissions_access', tab='overrides') }}">Exceções</a></li>
+        <li class="nav-item"><a class="nav-link {% if active_tab == 'promotions' %}active{% endif %}" href="{{ url_for('admin.admin_system_permissions_access', tab='promotions') }}">Promoções</a></li>
+    </ul>
+
+    {% if active_tab == 'users' %}
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+            <form method="GET" class="row g-2 align-items-end">
+                <input type="hidden" name="tab" value="users">
+                <div class="col-md-8">
+                    <label class="form-label">Usuário</label>
+                    <select class="form-select" name="user_id">
+                        <option value="">Selecione</option>
+                        {% for username, user in users.items() %}
+                        <option value="{{ username }}" {% if selected_user == username %}selected{% endif %}>{{ username }}{% if user.full_name %} - {{ user.full_name }}{% endif %}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4"><button class="btn btn-primary w-100">Carregar</button></div>
+            </form>
+        </div>
+    </div>
+    {% if profile %}
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+            <div><strong>Roles:</strong> {{ profile.roles|join(', ') if profile.roles else '-' }}</div>
+            <div><strong>Scopes:</strong> {{ profile.scopes|join(', ') if profile.scopes else '-' }}</div>
+        </div>
+    </div>
+    <div class="card shadow-sm">
+        <div class="card-header bg-white"><strong>Acesso por Endpoint</strong></div>
+        <div class="table-responsive">
+            <table class="table table-sm mb-0">
+                <thead class="table-light"><tr><th>Endpoint</th><th>Resultado</th></tr></thead>
+                <tbody>
+                    {% for row in endpoint_results %}
+                    <tr><td>{{ row.endpoint }}</td><td>{{ row.access }}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+    {% elif active_tab == 'roles' %}
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr><th>Cargo</th><th>Nível</th><th>Permissões Associadas</th><th>Áreas Permitidas</th></tr>
+                </thead>
+                <tbody>
+                    {% for row in roles_data %}
+                    <tr>
+                        <td>{{ row.role }}</td>
+                        <td>{{ row.level }}</td>
+                        <td>{{ row.permissions|join(', ') }}</td>
+                        <td>{{ row.areas|join(', ') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% elif active_tab == 'overrides' %}
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr><th>ID</th><th>Usuário</th><th>Ação</th><th>Área</th><th>Status</th><th>TTL</th><th>Criado em</th><th>Ações</th></tr>
+                </thead>
+                <tbody>
+                    {% for row in overrides_items %}
+                    <tr>
+                        <td>{{ row.override_id }}</td>
+                        <td>{{ row.usuario }}</td>
+                        <td>{{ row.acao }}</td>
+                        <td>{{ row.area }}</td>
+                        <td>{{ row.status }}</td>
+                        <td>{{ row.ttl }}</td>
+                        <td>{{ row.created_at }}</td>
+                        <td>
+                            <div class="d-flex gap-1">
+                                <form method="POST">
+                                    <input type="hidden" name="tab" value="overrides">
+                                    <input type="hidden" name="override_id" value="{{ row.override_id }}">
+                                    <input type="hidden" name="action" value="approve">
+                                    <button class="btn btn-sm btn-success">Liberar acesso</button>
+                                </form>
+                                <form method="POST">
+                                    <input type="hidden" name="tab" value="overrides">
+                                    <input type="hidden" name="override_id" value="{{ row.override_id }}">
+                                    <input type="hidden" name="action" value="revoke">
+                                    <button class="btn btn-sm btn-warning">Negar acesso</button>
+                                </form>
+                                <form method="POST">
+                                    <input type="hidden" name="tab" value="overrides">
+                                    <input type="hidden" name="override_id" value="{{ row.override_id }}">
+                                    <input type="hidden" name="action" value="expire">
+                                    <button class="btn btn-sm btn-danger">Expirar agora</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not overrides_items %}
+                    <tr><td colspan="8" class="text-center text-muted">Sem exceções ativas.</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+            <form method="GET" class="row g-2">
+                <input type="hidden" name="tab" value="promotions">
+                <div class="col-md-2"><input class="form-control" name="promotion_module" placeholder="Módulo" value="{{ promotion_filters.module }}"></div>
+                <div class="col-md-2">
+                    <select class="form-select" name="promotion_confidence">
+                        <option value="">Confiança</option>
+                        <option value="high" {% if promotion_filters.confidence == 'high' %}selected{% endif %}>Alta</option>
+                        <option value="medium" {% if promotion_filters.confidence == 'medium' %}selected{% endif %}>Média</option>
+                        <option value="low" {% if promotion_filters.confidence == 'low' %}selected{% endif %}>Baixa</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" name="promotion_scope">
+                        <option value="">Escopo</option>
+                        <option value="department" {% if promotion_filters.scope == 'department' %}selected{% endif %}>Departamento</option>
+                        <option value="role" {% if promotion_filters.scope == 'role' %}selected{% endif %}>Cargo</option>
+                        <option value="user" {% if promotion_filters.scope == 'user' %}selected{% endif %}>Usuário</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" name="promotion_status">
+                        <option value="">Status</option>
+                        <option value="active" {% if promotion_filters.status == 'active' %}selected{% endif %}>Ativa</option>
+                        <option value="expired" {% if promotion_filters.status == 'expired' %}selected{% endif %}>Expirada</option>
+                        <option value="revoked" {% if promotion_filters.status == 'revoked' %}selected{% endif %}>Revogada</option>
+                    </select>
+                </div>
+                <div class="col-md-2"><input type="date" class="form-control" name="promotion_start_date" value="{{ promotion_filters.start_date }}"></div>
+                <div class="col-md-2"><input type="date" class="form-control" name="promotion_end_date" value="{{ promotion_filters.end_date }}"></div>
+                <div class="col-md-12 d-grid"><button class="btn btn-primary">Filtrar promoções</button></div>
+            </form>
+        </div>
+    </div>
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white"><strong>Candidatas à promoção</strong> <span class="text-muted small">padrão recorrente detectado para reduzir novas solicitações</span></div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr><th>Permissão</th><th>Módulo</th><th>Escopo recomendado</th><th>Duração</th><th>Confiança</th><th>Total</th><th>Uso sugestão</th><th>Consistência</th><th>Criada</th><th>Último uso</th><th>Ações</th></tr>
+                </thead>
+                <tbody>
+                    {% for row in promotion_candidates %}
+                    <tr>
+                        <td>{{ row.permission_key }}</td>
+                        <td>{{ row.module }}</td>
+                        <td>{{ row.recommended_scope }}</td>
+                        <td>{{ row.recommended_duration }}</td>
+                        <td>{{ "%.0f"|format((row.confidence_score or 0) * 100) }}%</td>
+                        <td>{{ row.total_approvals }}</td>
+                        <td>{{ "%.0f"|format((row.suggestion_used_rate or 0) * 100) }}%</td>
+                        <td>{{ "%.0f"|format((row.consistency_score or 0) * 100) }}%</td>
+                        <td>{{ row.created_at }}</td>
+                        <td>{{ row.last_seen_at }}</td>
+                        <td>
+                            <form method="POST" class="d-flex flex-column gap-1">
+                                <input type="hidden" name="tab" value="promotions">
+                                <input type="hidden" name="action" value="promote_rule">
+                                <input type="hidden" name="permission_key" value="{{ row.permission_key }}">
+                                <input type="hidden" name="module_key" value="{{ row.module }}">
+                                <select name="promotion_scope" class="form-select form-select-sm">
+                                    <option value="role" {% if row.recommended_scope == 'role' %}selected{% endif %}>Regra por cargo</option>
+                                    <option value="department" {% if row.recommended_scope == 'department' %}selected{% endif %}>Regra por departamento</option>
+                                </select>
+                                <select name="promotion_duration" class="form-select form-select-sm">
+                                    <option value="temporary" {% if row.recommended_duration == 'temporary' %}selected{% endif %}>Temporária</option>
+                                    <option value="permanent" {% if row.recommended_duration == 'permanent' %}selected{% endif %}>Permanente</option>
+                                </select>
+                                <input class="form-control form-control-sm" name="promotion_target_department" placeholder="Departamento">
+                                <input class="form-control form-control-sm" name="promotion_target_role" placeholder="Cargo">
+                                <input class="form-control form-control-sm" type="number" name="promotion_duration_value" min="1" max="1440" value="120">
+                                <button type="submit" class="btn btn-sm btn-success">Promover regra</button>
+                                <details>
+                                    <summary class="small">Ver detalhes</summary>
+                                    <div class="small text-muted">Padrão recorrente detectado e alta consistência histórica.</div>
+                                </details>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not promotion_candidates %}
+                    <tr><td colspan="11" class="text-center text-muted">Sem candidatas no filtro atual.</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-white"><strong>Regras promovidas</strong> <span class="text-muted small">governança e acompanhamento</span></div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr><th>Permissão</th><th>Escopo</th><th>Duração</th><th>Status</th><th>Criada em</th><th>Origem</th><th>Ações</th></tr>
+                </thead>
+                <tbody>
+                    {% for row in promoted_rules %}
+                    <tr>
+                        <td>{{ row.permission_key }}</td>
+                        <td>{{ row.promotion_scope }}</td>
+                        <td>{{ row.promotion_duration }}</td>
+                        <td>{{ row.status }}</td>
+                        <td>{{ row.created_at }}</td>
+                        <td>{{ row.promoted_by }}</td>
+                        <td>
+                            <div class="d-flex gap-1 flex-wrap">
+                                <form method="POST">
+                                    <input type="hidden" name="tab" value="promotions">
+                                    <input type="hidden" name="action" value="rollback_promotion">
+                                    <input type="hidden" name="rule_id" value="{{ row.id }}">
+                                    <button class="btn btn-sm btn-outline-danger">Rollback/Revogar</button>
+                                </form>
+                                {% if row.status in ['revoked', 'expired'] %}
+                                <form method="POST" class="d-flex gap-1">
+                                    <input type="hidden" name="tab" value="promotions">
+                                    <input type="hidden" name="action" value="reactivate_promotion">
+                                    <input type="hidden" name="rule_id" value="{{ row.id }}">
+                                    <input type="number" class="form-control form-control-sm" name="reactivate_duration_value" min="1" max="1440" value="120">
+                                    <button class="btn btn-sm btn-outline-success">Reativar</button>
+                                </form>
+                                {% endif %}
+                                <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('admin.admin_system_permissions_audit', endpoint=(row.permission_key.split('|', 1)[0])) }}">Ver auditoria</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not promoted_rules %}
+                    <tr><td colspan="7" class="text-center text-muted">Sem regras promovidas no filtro atual.</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

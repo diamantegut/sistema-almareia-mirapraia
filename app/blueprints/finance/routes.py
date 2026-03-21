@@ -1232,17 +1232,21 @@ def finance_balances():
     return render_template('finance_balances.html', users=users_for_filter, payment_methods=payment_methods)
 
 def _ensure_admin_finance_balances_access():
-    if session.get('role') == 'admin':
+    role_value = str(session.get('role') or '').strip().lower()
+    permissions_value = session.get('permissions')
+    permissions = permissions_value if isinstance(permissions_value, list) else []
+    permissions_norm = {str(item or '').strip().lower() for item in permissions}
+    if role_value in {'admin', 'administracao_sistema'} or 'administracao_sistema' in permissions_norm:
         return None
-    wants_json = (
-        request.path.startswith('/api/')
-        or 'application/json' in str(request.headers.get('Content-Type') or '').lower()
-        or request.accept_mimetypes.best == 'application/json'
+    from app.services.permission_service import build_authorization_required_response
+    return build_authorization_required_response(
+        route_key=str(request.endpoint or 'finance.finance_balances'),
+        module_key='finance',
+        sensitivity='financeiro_critico',
+        message='Você não possui acesso a esta área',
+        context={'path': request.path, 'target': 'finance_balances'},
+        status_code=403,
     )
-    if wants_json:
-        return jsonify({'success': False, 'message': 'Acesso não autorizado'}), 403
-    flash('Acesso restrito à administração financeira.')
-    return redirect(url_for('main.index'))
 
 @finance_bp.route('/api/finance/session/<session_id>', methods=['GET'])
 @login_required
@@ -2051,10 +2055,6 @@ def manage_suppliers():
 @finance_bp.route('/finance/commission/new', methods=['POST'])
 @login_required
 def finance_commission_new():
-    if session.get('role') not in ['admin', 'gerente', 'financeiro'] and 'comissao' not in session.get('permissions', []):
-        flash('Acesso não autorizado.')
-        return redirect(url_for('finance.finance_commission'))
-        
     name = request.form.get('name')
     month = request.form.get('month') # YYYY-MM
     
@@ -2233,9 +2233,6 @@ def finance_commission_detail(cycle_id):
 @finance_bp.route('/finance/commission/<cycle_id>/refresh_scores', methods=['POST'])
 @login_required
 def finance_commission_refresh_scores(cycle_id):
-    if session.get('role') not in ['admin', 'gerente', 'financeiro'] and 'comissao' not in session.get('permissions', []):
-        flash('Acesso não autorizado.')
-        return redirect(url_for('finance.finance_commission'))
     cycle = get_commission_cycle(cycle_id)
     if not cycle:
         flash('Ciclo não encontrado.')
@@ -2284,10 +2281,6 @@ def finance_commission_refresh_scores(cycle_id):
 @finance_bp.route('/finance/commission/<cycle_id>/employee/update', methods=['POST'])
 @login_required
 def finance_commission_update_employee(cycle_id):
-    if session.get('role') not in ['admin', 'gerente', 'financeiro'] and 'comissao' not in session.get('permissions', []):
-        flash('Acesso não autorizado.')
-        return redirect(url_for('finance.finance_commission_detail', cycle_id=cycle_id))
-        
     cycle = get_commission_cycle(cycle_id)
     if not cycle:
         flash('Ciclo não encontrado.')
@@ -2337,10 +2330,6 @@ def finance_commission_update_employee(cycle_id):
 @finance_bp.route('/finance/commission/<cycle_id>/calculate', methods=['POST'])
 @login_required
 def finance_commission_calculate(cycle_id):
-    if session.get('role') not in ['admin', 'gerente', 'financeiro'] and 'comissao' not in session.get('permissions', []):
-        flash('Acesso não autorizado.')
-        return redirect(url_for('finance.finance_commission'))
-
     cycle = get_commission_cycle(cycle_id)
     if not cycle:
         flash('Ciclo não encontrado.')

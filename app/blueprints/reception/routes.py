@@ -22,7 +22,7 @@ from app.services.data_service import (
     load_cleaning_status, save_cleaning_status, load_checklist_items, save_checklist_items,
     add_inspection_log, normalize_text, format_room_number, normalize_room_simple,
     ARCHIVED_ORDERS_FILE, load_table_orders, save_table_orders,
-    load_audit_logs, save_audit_logs
+    load_audit_logs, save_audit_logs, load_settings
 )
 from app.services.system_config_manager import RESERVATIONS_DIR
 from app.services.printer_manager import load_printers, load_printer_settings, save_printer_settings
@@ -472,10 +472,73 @@ def _deny_with_authz_request(message, route_key, context=None):
     }), 403
 
 def _has_operational_grant(route_key):
-    return operational_request_service.authorize_by_grant(
+    return operational_request_service.authorize_by_grant_with_scope(
         user=str(session.get('user') or ''),
         route_key=str(route_key or ''),
+        department=str(session.get('department') or ''),
+        role=str(session.get('role') or ''),
     )
+
+
+REVIEW_QR_HOTEL_ROUTE_KEY = 'review.request_review_qr_hotel'
+REVIEW_QR_HOTEL_LINK_DEFAULT = 'https://www.tripadvisor.com.br/UserReviewEdit-d27970944?m=68676'
+
+
+def _review_profiles_config():
+    settings = load_settings() if isinstance(load_settings(), dict) else {}
+    review_cfg = settings.get('review_profiles') if isinstance(settings.get('review_profiles'), dict) else {}
+    hotel_cfg = review_cfg.get('hotel') if isinstance(review_cfg.get('hotel'), dict) else {}
+    restaurant_cfg = review_cfg.get('restaurant') if isinstance(review_cfg.get('restaurant'), dict) else {}
+    return {
+        'hotel': {
+            'title': str(hotel_cfg.get('title') or 'ALMAREIA').strip(),
+            'subtitle': str(hotel_cfg.get('subtitle') or 'Boutique Hotel').strip(),
+            'headline': str(hotel_cfg.get('headline') or 'Avalie sua hospedagem').strip(),
+            'helper': str(hotel_cfg.get('helper') or 'Aponte a câmera do seu celular').strip(),
+            'link': str(hotel_cfg.get('link') or REVIEW_QR_HOTEL_LINK_DEFAULT).strip(),
+        },
+        'restaurant': {
+            'title': str(restaurant_cfg.get('title') or 'MIRAPRAIA').strip(),
+            'subtitle': str(restaurant_cfg.get('subtitle') or '').strip(),
+            'headline': str(restaurant_cfg.get('headline') or 'Avalie sua experiência').strip(),
+            'helper': str(restaurant_cfg.get('helper') or 'Aponte a câmera do seu celular').strip(),
+            'link': str(restaurant_cfg.get('link') or 'https://www.tripadvisor.com.br/UserReviewEdit-d13317409?m=68676').strip(),
+        }
+    }
+
+
+def _build_review_qr_auth_request_payload(route_key, context=None):
+    context_payload = context if isinstance(context, dict) else {}
+    base_context = {
+        'feature': str(route_key or ''),
+        'path': str(request.path or ''),
+        'endpoint': str(request.endpoint or ''),
+    }
+    base_context.update(context_payload)
+    payload = _build_authz_request_payload(route_key, context=base_context)
+    payload.update({'module_key': 'review', 'sensitivity': 'operacional'})
+    return payload
+
+
+def _has_review_qr_hotel_permission():
+    role_norm = normalize_text(str(session.get('role') or ''))
+    dept_norm = normalize_text(str(session.get('department') or ''))
+    raw_perms = session.get('permissions') or []
+    if not isinstance(raw_perms, (list, tuple, set)):
+        raw_perms = []
+    perms_norm = {normalize_text(str(p)) for p in raw_perms}
+    if role_norm in {'admin', 'gerente', 'supervisor', 'recepcao'}:
+        return True
+    if dept_norm == 'recepcao':
+        return True
+    if 'request_review_qr_hotel' in perms_norm or 'recepcao' in perms_norm:
+        return True
+    try:
+        if _has_operational_grant(REVIEW_QR_HOTEL_ROUTE_KEY):
+            return True
+    except Exception:
+        return False
+    return False
 
 
 def _get_active_guest_consumption_session():
@@ -741,6 +804,8 @@ def reception_operational_authz_requests():
 def reception_create_operational_authz_request():
     payload = request.get_json(silent=True) if request.is_json else {}
     route_key = str(request.form.get('route_key') or payload.get('route_key') or '').strip()
+    module_key = str(request.form.get('module_key') or payload.get('module_key') or '').strip()
+    sensitivity = str(request.form.get('sensitivity') or payload.get('sensitivity') or 'operacional').strip().lower()
     reason = str(request.form.get('reason') or payload.get('reason') or '').strip()
     raw_context = payload.get('context') if request.is_json else request.form.get('context_json')
     context = {}
@@ -761,9 +826,13 @@ def reception_create_operational_authz_request():
     record = operational_request_service.create_request(
         requester_user=str(session.get('user') or 'unknown'),
         requester_role=str(session.get('role') or ''),
+        requester_department=str(session.get('department') or ''),
+        requester_class=str(session.get('role') or ''),
         route_key=route_key,
         endpoint=str(request.headers.get('X-Request-Endpoint') or request.referrer or ''),
         http_method=str(request.headers.get('X-Request-Method') or request.method or 'POST'),
+        module_key=module_key,
+        sensitivity=sensitivity,
         context=context,
         reason=reason,
     )
@@ -783,6 +852,8 @@ def reception_decide_operational_authz_request(request_id):
     payload = request.get_json(silent=True) if request.is_json else {}
     decision = str(request.form.get('decision') or payload.get('decision') or '').strip().lower()
     decision_reason = str(request.form.get('decision_reason') or payload.get('decision_reason') or '').strip()
+    target_department = str(request.form.get('target_department') or payload.get('target_department') or '').strip()
+    target_role = str(request.form.get('target_role') or payload.get('target_role') or '').strip().lower()
     ttl_minutes_raw = payload.get('ttl_minutes') if request.is_json else request.form.get('ttl_minutes')
     try:
         ttl_minutes = int(ttl_minutes_raw) if ttl_minutes_raw is not None else 60
@@ -796,6 +867,8 @@ def reception_decide_operational_authz_request(request_id):
             decision=decision,
             decision_reason=decision_reason,
             ttl_minutes=ttl_minutes,
+            target_department=target_department,
+            target_role=target_role,
         )
     except Exception as exc:
         if request.is_json:
@@ -817,6 +890,50 @@ def reception_revenue_management():
         flash('Acesso restrito.')
         return redirect(url_for('main.index'))
     return render_template('reception_revenue_management.html')
+
+
+@reception_bp.route('/api/review/hotel-qr-open', methods=['POST'])
+@login_required
+def review_hotel_qr_open():
+    payload = request.get_json(silent=True) or {}
+    origin_type = normalize_text(str(payload.get('origin_type') or ''))
+    origin_id = str(payload.get('origin_id') or '').strip()
+    event_type = normalize_text(str(payload.get('event_type') or 'open'))
+    if origin_type != 'room':
+        return jsonify({'success': False, 'message': 'origin_type inválido.'}), 400
+    if not origin_id:
+        return jsonify({'success': False, 'message': 'origin_id obrigatório.'}), 400
+    if event_type not in {'open', 'close'}:
+        event_type = 'open'
+    if not _has_review_qr_hotel_permission():
+        return _deny_with_authz_request(
+            'Você não possui permissão para solicitar avaliação do hotel.',
+            REVIEW_QR_HOTEL_ROUTE_KEY,
+            context={'origin_type': origin_type, 'origin_id': origin_id, 'review_type': 'hotel', 'event_type': event_type}
+        )
+    now_iso = datetime.now().isoformat(timespec='seconds')
+    duration_seconds = payload.get('duration_seconds')
+    try:
+        duration_seconds = float(duration_seconds) if duration_seconds is not None else None
+    except Exception:
+        duration_seconds = None
+    details = {
+        'user_id': str(session.get('user') or ''),
+        'timestamp': now_iso,
+        'origin_type': 'room',
+        'origin_id': origin_id,
+        'review_type': 'hotel',
+        'source_page': str(payload.get('source_page') or 'reception_rooms'),
+    }
+    if duration_seconds is not None and duration_seconds >= 0:
+        details['duration_seconds'] = round(duration_seconds, 2)
+    log_system_action(
+        action='REVIEW_HOTEL_QR_OPEN' if event_type == 'open' else 'REVIEW_HOTEL_QR_CLOSE',
+        details=details,
+        user=str(session.get('user') or 'Sistema'),
+        category='Review'
+    )
+    return jsonify({'success': True, 'timestamp': now_iso, 'endpoint': 'review.hotel_qr_open'})
 
 
 @reception_bp.route('/api/reception/revenue-management/simulate')
@@ -3194,8 +3311,15 @@ def reception_rooms():
             }
     except Exception as e:
         print(f"Erro ao montar resumo operacional dos quartos: {e}")
+    review_profiles = _review_profiles_config()
+    review_profile = review_profiles.get('hotel', {})
+    can_request_review_qr_hotel = _has_review_qr_hotel_permission()
+    review_qr_auth_request_hotel = _build_review_qr_auth_request_payload(
+        REVIEW_QR_HOTEL_ROUTE_KEY,
+        {'origin_page': 'reception_rooms', 'review_type': 'hotel'}
+    )
 
-    return render_template('reception_rooms.html', 
+    return render_template('reception_rooms_review.html', 
                            occupancy=occupancy, 
                            cleaning_status=cleaning_status,
                            checklist_items=checklist_items,
@@ -3219,7 +3343,10 @@ def reception_rooms():
                            operational_status_catalog=ReservationService.OPERATIONAL_STATUS_CATALOG,
                            open_consumption_room=open_consumption_room,
                            open_checkin=open_checkin,
-                           requested_reservation_id=requested_reservation_id)
+                           requested_reservation_id=requested_reservation_id,
+                           can_request_review_qr_hotel=can_request_review_qr_hotel,
+                           review_qr_auth_request_hotel=review_qr_auth_request_hotel,
+                           review_profile_hotel=review_profile)
 
 @reception_bp.route('/reception/cashier', methods=['GET', 'POST'])
 @login_required

@@ -2,6 +2,18 @@ import json
 import os
 from app import create_app
 
+def _is_truthy(value):
+    return str(value or "").strip().lower() in ("1", "true", "yes", "on")
+
+def is_debug_enabled():
+    debug_env = os.environ.get("ALMAREIA_DEBUG")
+    if debug_env is None:
+        debug_env = os.environ.get("FLASK_DEBUG")
+    if debug_env is not None:
+        return _is_truthy(debug_env)
+    runtime_env = str(os.environ.get("ALMAREIA_ENV") or "").strip().lower()
+    return runtime_env in ("dev", "development")
+
 # Carregar configuração de porta
 def load_port():
     env_port = os.environ.get('ALMAREIA_PORT') or os.environ.get('PORT')
@@ -25,5 +37,9 @@ app = create_app()
 
 if __name__ == "__main__":
     port = load_port()
-    print(f"--- INICIANDO SERVIDOR DE DESENVOLVIMENTO (Porta {port}) ---")
-    app.run(host='0.0.0.0', port=port, debug=True)
+    debug_mode = is_debug_enabled()
+    if debug_mode:
+        print(f"--- INICIANDO SERVIDOR DE DESENVOLVIMENTO (Porta {port}) ---")
+    else:
+        print(f"--- INICIANDO SERVIDOR DE PRODUCAO (Porta {port}) ---")
+    app.run(host='0.0.0.0', port=port, debug=debug_mode, use_reloader=debug_mode)

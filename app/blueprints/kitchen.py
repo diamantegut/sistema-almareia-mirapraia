@@ -20,7 +20,10 @@ from app.services.breakfast_kds_service import (
     save_breakfast_kds_store as _svc_save_breakfast_kds_store,
     get_statuses_for_day as _svc_get_statuses_for_day,
     get_room_history_for_day as _svc_get_room_history_for_day,
+    get_restaurant_statuses_for_day as _svc_get_restaurant_statuses_for_day,
+    get_restaurant_history_for_day as _svc_get_restaurant_history_for_day,
     update_breakfast_status as _svc_update_breakfast_status,
+    update_breakfast_restaurant_status as _svc_update_breakfast_restaurant_status,
 )
 from app.services.logger_service import LoggerService
 from app.services.kitchen_checklist_service import KitchenChecklistService
@@ -213,12 +216,16 @@ def _is_breakfast_item_match(order, item, table_id):
     return any(token in basket for token in keywords)
 
 
-def _collect_breakfast_restaurant_orders(now=None):
+def _collect_breakfast_restaurant_orders(now=None, store=None):
     ref_now = now if isinstance(now, datetime) else datetime.now()
+    date_key = ref_now.strftime('%Y-%m-%d')
+    store_payload = store if isinstance(store, dict) else _load_breakfast_kds_store()
+    status_map = _svc_get_restaurant_statuses_for_day(store_payload, date_key)
     orders = load_table_orders()
     if not isinstance(orders, dict):
         return []
     tickets = []
+    status_sort = {'pending': 0, 'in_preparo': 1, 'pronto': 2}
     for table_id, order in orders.items():
         if not isinstance(order, dict):
             continue
@@ -242,38 +249,86 @@ def _collect_breakfast_restaurant_orders(now=None):
             if not _is_breakfast_item_match(order, item, table_id):
                 continue
             observations = item.get('observations') if isinstance(item.get('observations'), list) else []
-            note = _truncate_breakfast_text(', '.join(str(o).strip() for o in observations if str(o).strip()), 70)
+            note_full = ', '.join(str(o).strip() for o in observations if str(o).strip())
+            note = _truncate_breakfast_text(note_full, 70)
             qty_raw = item.get('qty')
             try:
                 qty = int(float(qty_raw))
             except Exception:
                 qty = 1
+            ticket_id = str(item.get('id') or f"{table_id}-{len(tickets)+1}")
+            ticket_key = f"{table_id}:{ticket_id}"
+            persisted_meta = status_map.get(ticket_key) if isinstance(status_map.get(ticket_key), dict) else {}
+            persisted_status = _svc_normalize_breakfast_status(persisted_meta.get('status'))
+            default_status = _svc_normalize_breakfast_status(item.get('kds_status'))
+            effective_status = persisted_status if persisted_meta else default_status
+            if effective_status == 'pronto':
+                continue
+            status_history = _svc_get_restaurant_history_for_day(store_payload, date_key, ticket_key)
+            item_full = str(item.get('name') or 'Item').strip() or 'Item'
+            item_short = _truncate_breakfast_text(item_full, 60)
             tickets.append({
-                'id': str(item.get('id') or f"{table_id}-{len(tickets)+1}"),
+                'id': ticket_id,
+                'ticket_key': ticket_key,
                 'table_id': str(table_id),
                 'table_label': f"Mesa {table_id}",
-                'item': _truncate_breakfast_text(item.get('name') or 'Item', 60),
+                'item': item_short,
+                'item_full': item_full,
                 'qty': max(1, qty),
                 'observation': note,
+                'observation_full': note_full,
                 'time': created_dt.strftime('%H:%M'),
+                'status': effective_status,
+                'status_history': status_history,
                 'is_dev_test': bool(order.get('dev_seed')) or str(table_id).startswith('DEV_CAFE_TEST_'),
             })
-    tickets.sort(key=lambda row: (row.get('time') or '', row.get('table_id') or '', row.get('item') or ''))
+    tickets.sort(key=lambda row: (status_sort.get(row.get('status'), 9), row.get('time') or '', row.get('table_id') or '', row.get('item') or '', row.get('ticket_key') or ''))
     return tickets
 
 
-def _seed_breakfast_dev_test_orders(user):
+def _seed_breakfast_dev_test_orders(user, stress_mode=False):
     now_ref = datetime.now()
     orders = load_table_orders()
     if not isinstance(orders, dict):
         orders = {}
-    table_ids = ['DEV_CAFE_TEST_01', 'DEV_CAFE_TEST_02', 'DEV_CAFE_TEST_03', 'DEV_CAFE_TEST_04']
-    samples = [
-        [('Tapioca de Queijo', 1, []), ('Café Coado', 1, [])],
-        [('Omelete da Casa', 2, ['Sem cebola'])],
-        [('Cuscuz Nordestino', 1, []), ('Suco de Laranja', 1, [])],
-        [('Pão na Chapa', 1, ['Sem manteiga'])],
-    ]
+    if stress_mode:
+        table_ids = ['DEV_CAFE_TEST_10', 'DEV_CAFE_TEST_11', 'DEV_CAFE_TEST_12']
+        samples = [
+            [
+                ('Tapioca artesanal premium recheada com queijo coalho e ervas finas da casa', 3, ['Servir muito quente', 'Sem pimenta']),
+                ('Bowl de frutas selecionadas com granola crocante e mel de engenho', 2, ['Sem banana', 'Adicionar maçã extra']),
+                ('Café especial filtrado lote único torrado médio', 4, ['Pouco açúcar']),
+                ('Omelete funcional com legumes orgânicos e queijo branco', 2, ['Sem cebola roxa']),
+                ('Pão de fermentação natural na chapa com manteiga trufada', 3, ['Manteiga à parte']),
+                ('Suco detox verde prensado a frio com gengibre e limão', 2, ['Sem gelo']),
+                ('Cuscuz nordestino completo com ovos mexidos e carne de sol desfiada', 1, ['Carne bem passada']),
+                ('Iogurte natural artesanal com compota de frutas vermelhas', 2, ['Compota separada']),
+            ],
+            [
+                ('Sanduíche integral duplo de peito de peru, queijo minas e rúcula', 5, ['Cortar ao meio']),
+                ('Panqueca de banana com aveia e cobertura de mel silvestre', 4, ['Sem canela']),
+                ('Chocolate quente cremoso com raspas de cacau', 3, ['Temperatura média']),
+                ('Misto quente tradicional com pão de forma artesanal', 6, ['Sem presunto em 2 unidades']),
+                ('Vitamina energética de açaí com whey e leite vegetal', 2, ['Sem whey em 1 unidade']),
+                ('Ovos mexidos cremosos com cebolinha fresca', 7, ['Ponto firme']),
+            ],
+            [
+                ('Waffle belga com calda de frutas amarelas e chantilly', 8, ['Calda à parte']),
+                ('Queijo coalho grelhado com melaço e orégano', 5, ['Pouco melaço']),
+                ('Torradas multigrãos com pasta de abacate e tomate confit', 6, ['Sem pimenta dedo-de-moça']),
+                ('Smoothie de morango, banana e iogurte grego', 3, ['Sem açúcar']),
+                ('Tapioca doce de coco queimado com leite condensado', 4, ['Leite condensado extra em 1']),
+                ('Café coado tradicional garrafa térmica 1L', 2, ['Repor a cada 20 min']),
+            ],
+        ]
+    else:
+        table_ids = ['DEV_CAFE_TEST_01', 'DEV_CAFE_TEST_02', 'DEV_CAFE_TEST_03', 'DEV_CAFE_TEST_04']
+        samples = [
+            [('Tapioca de Queijo', 1, []), ('Café Coado', 1, [])],
+            [('Omelete da Casa', 2, ['Sem cebola'])],
+            [('Cuscuz Nordestino', 1, []), ('Suco de Laranja', 1, [])],
+            [('Pão na Chapa', 1, ['Sem manteiga'])],
+        ]
     created = []
     for idx, table_id in enumerate(table_ids):
         minute = 5 + idx * 3
@@ -292,10 +347,10 @@ def _seed_breakfast_dev_test_orders(user):
                 'waiter': user or 'dev',
                 'printed': False,
                 'print_status': 'pending',
-                'complements': [],
+                'complements': ['Complemento especial A', 'Complemento especial B'] if stress_mode else [],
                 'observations': observations,
-                'accompaniments': [],
-                'flavor': '',
+                'accompaniments': ['Acompanhamento 1', 'Acompanhamento 2'] if stress_mode else [],
+                'flavor': 'Sabor teste extenso' if stress_mode else '',
                 'questions_answers': [],
                 'kds_status': 'pending',
             })
@@ -313,6 +368,7 @@ def _seed_breakfast_dev_test_orders(user):
             'staff_name': None,
             'is_breakfast': True,
             'dev_seed': True,
+            'dev_seed_mode': 'stress' if stress_mode else 'standard',
         }
         created.append(table_id)
     save_table_orders(orders)
@@ -423,7 +479,7 @@ def _build_breakfast_kds_payload(now=None):
             'status_history': status_history,
         })
 
-    restaurant_orders = _collect_breakfast_restaurant_orders(now=ref_now)
+    restaurant_orders = _collect_breakfast_restaurant_orders(now=ref_now, store=store)
     return {
         'generated_at': ref_now.isoformat(),
         'generated_label': ref_now.strftime('%d/%m/%Y %H:%M'),
@@ -936,6 +992,49 @@ def kitchen_breakfast_kds_update_status():
     return jsonify({'success': True, 'room': room, 'status': status, 'changed': bool(result.get('changed'))})
 
 
+@kitchen_bp.route('/kitchen/breakfast-kds/update_restaurant_status', methods=['POST'])
+@login_required
+def kitchen_breakfast_kds_update_restaurant_status():
+    if session.get('role') not in ['admin', 'gerente'] and session.get('department') != 'Cozinha':
+        return jsonify({'success': False, 'error': 'Acesso restrito.'}), 403
+    try:
+        data = request.get_json(force=True) or {}
+    except Exception:
+        data = {}
+    table_id = str(data.get('table_id') or '').strip()
+    item_id = str(data.get('item_id') or '').strip()
+    status = _normalize_breakfast_status(data.get('status'))
+    ticket_key = str(data.get('ticket_key') or '').strip()
+    if not ticket_key and table_id and item_id:
+        ticket_key = f"{table_id}:{item_id}"
+    if not ticket_key:
+        return jsonify({'success': False, 'error': 'Ticket inválido.'}), 400
+    result = _svc_update_breakfast_restaurant_status(
+        ticket_key=ticket_key,
+        status=status,
+        user=session.get('user') or 'Sistema',
+        source='kitchen_breakfast_restaurant_manual',
+        context={'action': 'restaurant_ticket_update', 'table_id': table_id, 'item_id': item_id},
+    )
+    if not result.get('success'):
+        return jsonify({'success': False, 'error': 'Falha ao atualizar status do pedido.'}), 500
+    LoggerService.log_acao(
+        acao='KDS café pedido status atualizado',
+        entidade='Cozinha',
+        detalhes={
+            'ticket_key': ticket_key,
+            'table_id': table_id,
+            'item_id': item_id,
+            'status': status,
+            'updated_by': session.get('user'),
+            'previous_status': result.get('previous_status'),
+            'changed': bool(result.get('changed')),
+        },
+        nivel_severidade='INFO'
+    )
+    return jsonify({'success': True, 'ticket_key': ticket_key, 'status': status, 'changed': bool(result.get('changed'))})
+
+
 @kitchen_bp.route('/kitchen/breakfast-kds/dev-test-orders', methods=['POST'])
 @login_required
 def kitchen_breakfast_kds_dev_test_orders():
@@ -951,14 +1050,15 @@ def kitchen_breakfast_kds_dev_test_orders():
     if action == 'clear':
         removed = _clear_breakfast_dev_test_orders()
         return jsonify({'success': True, 'action': 'clear', 'removed_tables': removed})
-    created = _seed_breakfast_dev_test_orders(session.get('user') or 'dev')
+    stress_mode = action in ('seed_stress', 'stress')
+    created = _seed_breakfast_dev_test_orders(session.get('user') or 'dev', stress_mode=stress_mode)
     LoggerService.log_acao(
         acao='Seed DEV pedidos café',
         entidade='Cozinha',
-        detalhes={'tables': created, 'action': 'seed_dev_breakfast_orders'},
+        detalhes={'tables': created, 'action': 'seed_dev_breakfast_orders', 'seed_mode': 'stress' if stress_mode else 'standard'},
         nivel_severidade='INFO'
     )
-    return jsonify({'success': True, 'action': 'seed', 'tables': created})
+    return jsonify({'success': True, 'action': 'seed_stress' if stress_mode else 'seed', 'tables': created, 'seed_mode': 'stress' if stress_mode else 'standard'})
 
 @kitchen_bp.route('/kitchen/portion/settings', methods=['GET', 'POST'])
 @login_required

@@ -100,6 +100,7 @@
         }
         .room-guest-name {
             display: -webkit-box;
+            line-clamp: 2;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
@@ -400,6 +401,18 @@
             <button class="btn btn-outline-info me-2" data-bs-toggle="modal" data-bs-target="#checklistConfigModal">
                 <i class="bi bi-list-check"></i> Gerenciar Checklist
             </button>
+            {% if can_request_review_qr_hotel %}
+            <button type="button" class="btn btn-dark" onclick="openReviewQrModal('room', 'geral')">
+                <i class="bi bi-qr-code"></i> <span class="d-none d-sm-inline">QR Avaliação Hotel</span><span class="d-inline d-sm-none">QR Avaliação</span>
+            </button>
+            {% else %}
+            <button type="button" class="btn btn-outline-secondary" disabled title="Sem permissão para solicitar avaliação">
+                <i class="bi bi-qr-code"></i> <span class="d-none d-sm-inline">QR Avaliação Hotel</span><span class="d-inline d-sm-none">QR Avaliação</span>
+            </button>
+            <button type="button" class="btn btn-link text-decoration-none px-1" onclick="requestReviewQrPermission('room', 'geral')">
+                Solicitar Permissão
+            </button>
+            {% endif %}
             <button class="btn btn-primary" onclick="openCheckinModal('')">
                 <i class="bi bi-person-plus"></i> Novo Check-in
             </button>
@@ -695,22 +708,6 @@
                                                     onclick="openTransferModalFromElement(this)">
                                                 Trocar Quarto
                                             </button>
-                                        </div>
-                                    </div>
-                                    <div class="row g-2 mt-1">
-                                        <div class="col-12">
-                                            {% if can_request_review_qr %}
-                                            <button type="button" class="btn btn-dark room-action-secondary w-100" onclick="openReviewQrModal('room', '{{ room_num }}')">
-                                                Mostrar QR de Avaliação
-                                            </button>
-                                            {% else %}
-                                            <button type="button" class="btn btn-outline-secondary room-action-secondary w-100" disabled title="Sem permissão para solicitar avaliação">
-                                                Mostrar QR de Avaliação
-                                            </button>
-                                            <button type="button" class="btn btn-link btn-sm w-100 py-0" onclick="requestReviewQrPermission('room', '{{ room_num }}')">
-                                                Solicitar Permissão
-                                            </button>
-                                            {% endif %}
                                         </div>
                                     </div>
                                 {% elif status == 'inspected' %}
@@ -1116,15 +1113,16 @@
         <div class="modal-content border-0">
             <div class="modal-header bg-dark text-white">
                 <div>
-                    <h5 class="modal-title mb-0">MIRAPRAIA</h5>
-                    <small class="opacity-75">Avalie sua experiência</small>
+                    <h5 class="modal-title mb-0" id="reviewQrTitle">{{ review_profile_hotel.title }}</h5>
+                    <small class="opacity-75" id="reviewQrHeadline">{{ review_profile_hotel.subtitle }}</small>
+                    <div class="small opacity-75">{{ review_profile_hotel.headline }}</div>
                 </div>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body bg-white text-center py-4">
                 <div class="small text-muted mb-2" id="reviewQrOriginLabel"></div>
                 <div id="reviewQrCodeMount"></div>
-                <p class="mt-3 mb-0 fs-6">Aponte a câmera do seu celular</p>
+                <p class="mt-3 mb-0 fs-6" id="reviewQrHelper">{{ review_profile_hotel.helper }}</p>
             </div>
             <div class="modal-footer justify-content-between flex-wrap gap-2">
                 <div class="d-flex flex-wrap gap-2">
@@ -1141,6 +1139,7 @@
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script id="checkinConfigData" type="application/json">{{ {'upcoming_reservations': upcoming_reservations, 'room_capacities': room_capacities, 'reservation_payment_methods': reservation_payment_methods, 'open_checkin': open_checkin, 'requested_reservation_id': requested_reservation_id} | tojson | safe }}</script>
+<script id="review-qr-config-data" type="application/json">{{ {'link': review_profile_hotel.link, 'can_open': can_request_review_qr_hotel, 'auth_request': review_qr_auth_request_hotel, 'log_endpoint': url_for('reception.review_hotel_qr_open'), 'title': review_profile_hotel.title, 'subtitle': review_profile_hotel.subtitle, 'headline': review_profile_hotel.headline, 'helper': review_profile_hotel.helper} | tojson | safe }}</script>
 <script>
     const checkinConfigData = JSON.parse(document.getElementById('checkinConfigData').textContent || '{}');
     const upcomingReservations = checkinConfigData.upcoming_reservations || [];
@@ -1149,10 +1148,11 @@
     window.reservationPaymentMethods = reservationPaymentMethods;
     const openCheckinFromUrl = Boolean(checkinConfigData.open_checkin);
     const requestedReservationId = String(checkinConfigData.requested_reservation_id || '');
-    const reviewQrLink = {{ review_qr_link|tojson }};
-    const reviewQrCanOpen = {{ can_request_review_qr|tojson }};
-    const reviewQrAuthRequest = {{ review_qr_auth_request|tojson }};
-    const reviewQrLogEndpoint = {{ url_for('reception.review_qr_open')|tojson }};
+    const reviewQrConfigData = JSON.parse(document.getElementById('review-qr-config-data').textContent || '{}');
+    const reviewQrLink = String(reviewQrConfigData.link || '');
+    const reviewQrCanOpen = Boolean(reviewQrConfigData.can_open);
+    const reviewQrAuthRequest = reviewQrConfigData.auth_request || {};
+    const reviewQrLogEndpoint = String(reviewQrConfigData.log_endpoint || '');
     let reviewQrModalInstance = null;
     let reviewQrOpenedAt = null;
     let reviewQrCurrentOriginType = '';
@@ -1350,7 +1350,7 @@
             return;
         }
         const payload = {
-            route_key: reviewQrAuthRequest.route_key || 'review.request_review_qr',
+            route_key: reviewQrAuthRequest.route_key || 'review.request_review_qr_hotel',
             module_key: reviewQrAuthRequest.module_key || 'review',
             sensitivity: reviewQrAuthRequest.sensitivity || 'operacional',
             reason: `Solicitação para mostrar QR de avaliação (${originType} ${originId}).`,

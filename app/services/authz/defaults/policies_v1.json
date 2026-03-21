@@ -1,0 +1,738 @@
+{
+  "policy_version": "2026.03",
+  "policy_hash": "a81f29d",
+  "policies": [
+    {
+      "endpoint": "restaurant.get_paused_products",
+      "area": "restaurante_mirapraia",
+      "public": false,
+      "page": "page.restaurant.get_paused_products",
+      "action": {
+        "required": false,
+        "name_by_method": {}
+      },
+      "override": {
+        "required": false,
+        "reason_required": true,
+        "ttl_seconds": 300
+      },
+      "scope": {
+        "scopes_any": [],
+        "scopes_all": []
+      },
+      "minimum_role": "colaborador",
+      "minimum_role_level": 1,
+      "sensitivity": {
+        "classification": "operacional",
+        "is_sensitive": false,
+        "is_critical": false,
+        "is_destructive": false,
+        "is_systemic": false
+      },
+      "policy_status": "active",
+      "policy_version": "2026.03",
+      "policy_hash": "a81f29d"
+    },
+    {
+      "endpoint": "restaurant.restaurant_tables",
+      "area": "restaurante_mirapraia",
+      "public": false,
+      "page": "page.restaurant.restaurant_tables",
+      "action": {
+        "required": false,
+        "name_by_method": {}
+      },
+      "override": {
+        "required": false,
+        "reason_required": true,
+        "ttl_seconds": 300
+      },
+      "scope": {
+        "scopes_any": [],
+        "scopes_all": []
+      },
+      "minimum_role": "colaborador",
+      "minimum_role_level": 1,
+      "sensitivity": {
+        "classification": "sensivel",
+        "is_sensitive": true,
+        "is_critical": false,
+        "is_destructive": false,
+        "is_systemic": false
+      },
+      "policy_status": "active",
+      "policy_version": "2026.03",
+      "policy_hash": "a81f29d"
+    },
+    {
+      "endpoint": "restaurant.open_staff_table",
+      "area": "restaurante_mirapraia",
+      "public": false,
+      "page": "page.restaurant.open_staff_table",
+      "action": {
+        "required": true,
+        "name_by_method": {
+          "POST": "action.restaurant.open_staff_table.post"
+        }
+      },
+      "override": {
+        "required": false,
+        "reason_required": true,
+        "ttl_seconds": 300
+      },
+      "scope": {
+        "scopes_any": [],
+        "scopes_all": []
+      },
+      "minimum_role": "colaborador",
+      "minimum_role_level": 1,
+      "sensitivity": {
+        "classification": "sensivel",
+        "is_sensitive": true,
+        "is_critical": false,
+        "is_destructive": false,
+        "is_systemic": false
+      },
+      "policy_status": "active",
+      "policy_version": "2026.03",
+      "policy_hash": "a81f29d"
+    },
+    {
+      "endpoint": "restaurant.restaurant_table_order",
+      "area": "restaurante_mirapraia",
+      "public": false,
+      "page": "page.restaurant.restaurant_table_order",
+      "action": {
+        "required": true,
+        "name_by_method": {
+          "POST": "action.restaurant.restaurant_table_order.post"
+        }
+      },
+      "override": {
+        "required": false,
+        "reason_required": true,
+        "ttl_seconds": 300
+      },
+      "scope": {
+        "scopes_any": [],
+        "scopes_all": []
+      },
+      "minimum_role": "colaborador",
+      "minimum_role_level": 1,
+      "sensitivity": {
+        "classification": "sensivel",
+        "is_sensitive": true,
+        "is_critical": false,
+        "is_destructive": false,
+        "is_systemic": false
+      },
+      "policy_status": "active",
+      "policy_version": "2026.03",
+      "policy_hash": "a81f29d"
+    },
+    {
+      "endpoint": "restaurant.toggle_live_music",
+      "area": "restaurante_mirapraia",
+      "public": false,
+      "page": "page.restaurant.toggle_live_music",
+      "action": {
+        "required": true,
+        "name_by_method": {
+          "POST": "action.restaurant.toggle_live_music.post"
+        }
+      },
+      "override": {
+        "required": false,
+        "reason_required": true,
+        "ttl_seconds": 300
+      },
+      "scope": {
+        "scopes_any": [],
+        "scopes_all": []
+      },
+      "minimum_role": "supervisor",
+      "minimum_role_level": 2,
+      "sensitivity": {
+        "classification": "sensivel",
+        "is_sensitive": true,
+        "is_critical": false,
+        "is_destructive": false,
+        "is_systemic": false
+      },
+      "policy_status": "active",
+      "policy_version": "2026.03",
+      "policy_hash": "a81f29d"
+    },
+    {
+      "endpoint": "restaurant.toggle_table_disabled",
+      "area": "restaurante_mirapraia",
+      "public": false,
+      "page": "page.restaurant.toggle_table_disabled",
+      "action": {
+        "required": true,
+        "name_by_method": {
+          "POST": "action.restaurant.toggle_table_disabled.post"
+        }
+      },
+      "override": {
+        "required": true,
+        "approver_minimum_role": "admin",
+        "reason_required": true,
+        "ttl_seconds": 300
+      },
+      "scope": {
+        "scopes_any": [],
+        "scopes_all": []
+      },
+      "minimum_role": "admin",
+      "minimum_role_level": 4,
+      "sensitivity": {
+        "classification": "sistemica",
+        "is_sensitive": true,
+        "is_critical": true,
+        "is_destructive": true,
+        "is_systemic": true
+      },
+      "policy_status": "active",
+      "policy_version": "2026.03",
+      "policy_hash": "a81f29d"
+    },
+    {
+      "endpoint": "restaurant.close_special_table",
+      "area": "restaurante_mirapraia",
+      "public": false,
+      "page": "page.restaurant.close_special_table",
+      "action": {
+        "required": true,
+        "name_by_method": {
+          "POST": "action.restaurant.close_special_table.post"
+        }
+      },
+      "override": {
+        "required": false,
+        "reason_required": true,
+        "ttl_seconds": 300
+      },
+      "scope": {
+        "scopes_any": [],
+        "scopes_all": []
+      },
+      "minimum_role": "supervisor",
+      "minimum_role_level": 2,
+      "sensitivity": {
+        "classification": "sensivel",
+        "is_sensitive": true,
+        "is_critical": false,
+        "is_destructive": false,
+        "is_systemic": false
+      },
+      "policy_status": "active",
+      "policy_version": "2026.03",
+      "policy_hash": "a81f29d"
+    },
+    {
+      "endpoint": "menu.get_public_paused_products",
+      "area": "menu",
+      "public": true,
+      "page": "page.menu.get_public_paused_products",
+      "action": {
+        "required": false,
+        "name_by_method": {}
+      },
+      "override": {
+        "required": false,
+        "reason_required": true,
+        "ttl_seconds": 300
+      },
+      "scope": {
+        "scopes_any": [],
+        "scopes_all": []
+      },
+      "minimum_role": "colaborador",
+      "minimum_role_level": 1,
+      "sensitivity": {
+        "classification": "operacional",
+        "is_sensitive": false,
+        "is_critical": false,
+        "is_destructive": false,
+        "is_systemic": false
+      },
+      "policy_status": "active",
+      "policy_version": "2026.03",
+      "policy_hash": "a81f29d"
+    },
+    {
+      "endpoint": "reception.reception_rooms",
+      "area": "recepcao",
+      "public": false,
+      "page": "page.reception.reception_rooms",
+      "action": {
+        "required": false,
+        "name_by_method": {}
+      },
+      "override": {
+        "required": false,
+        "reason_required": true,
+        "ttl_seconds": 300
+      },
+      "scope": {
+        "scopes_any": [],
+        "scopes_all": []
+      },
+      "minimum_role": "colaborador",
+      "minimum_role_level": 1,
+      "sensitivity": {
+        "classification": "operacional",
+        "is_sensitive": false,
+        "is_critical": false,
+        "is_destructive": false,
+        "is_systemic": false
+      },
+      "policy_status": "active",
+      "policy_version": "2026.03",
+      "policy_hash": "a81f29d"
+    },
+    {
+      "endpoint": "main.service_click",
+      "area": "navegacao_principal",
+      "public": false,
+      "page": "page.main.service_click",
+      "action": {
+        "required": false,
+        "name_by_method": {}
+      },
+      "override": {
+        "required": false,
+        "reason_required": true,
+        "ttl_seconds": 300
+      },
+      "scope": {
+        "scopes_any": [],
+        "scopes_all": []
+      },
+      "minimum_role": "colaborador",
+      "minimum_role_level": 1,
+      "sensitivity": {
+        "classification": "operacional",
+        "is_sensitive": false,
+        "is_critical": false,
+        "is_destructive": false,
+        "is_systemic": false
+      },
+      "policy_status": "active",
+      "policy_version": "2026.03",
+      "policy_hash": "a81f29d"
+    },
+    {
+      "endpoint": "kitchen.kitchen_breakfast_kds_data",
+      "area": "cozinha",
+      "public": false,
+      "page": "page.kitchen.kitchen_breakfast_kds_data",
+      "action": {
+        "required": false,
+        "name_by_method": {}
+      },
+      "override": {
+        "required": false,
+        "reason_required": true,
+        "ttl_seconds": 300
+      },
+      "scope": {
+        "scopes_any": [],
+        "scopes_all": []
+      },
+      "minimum_role": "colaborador",
+      "minimum_role_level": 1,
+      "sensitivity": {
+        "classification": "operacional",
+        "is_sensitive": false,
+        "is_critical": false,
+        "is_destructive": false,
+        "is_systemic": false
+      },
+      "policy_status": "active",
+      "policy_version": "2026.03",
+      "policy_hash": "a81f29d"
+    },
+    {
+      "endpoint": "admin.admin_system_permissions_requests",
+      "area": "administracao_sistema",
+      "public": false,
+      "page": "page.admin.admin_system_permissions_requests",
+      "action": {
+        "required": false,
+        "name_by_method": {}
+      },
+      "override": {
+        "required": false,
+        "reason_required": true,
+        "ttl_seconds": 300
+      },
+      "scope": {
+        "scopes_any": [],
+        "scopes_all": []
+      },
+      "minimum_role": "admin",
+      "minimum_role_level": 4,
+      "sensitivity": {
+        "classification": "sistemica",
+        "is_sensitive": true,
+        "is_critical": true,
+        "is_destructive": false,
+        "is_systemic": true
+      },
+      "policy_status": "active",
+      "policy_version": "2026.03",
+      "policy_hash": "a81f29d"
+    },
+    {
+      "endpoint": "admin.admin_system_permissions",
+      "area": "administracao_sistema",
+      "public": false,
+      "page": "page.admin.admin_system_permissions",
+      "action": {
+        "required": false,
+        "name_by_method": {}
+      },
+      "override": {
+        "required": false,
+        "reason_required": true,
+        "ttl_seconds": 300
+      },
+      "scope": {
+        "scopes_any": [],
+        "scopes_all": []
+      },
+      "minimum_role": "admin",
+      "minimum_role_level": 4,
+      "sensitivity": {
+        "classification": "sistemica",
+        "is_sensitive": true,
+        "is_critical": true,
+        "is_destructive": false,
+        "is_systemic": true
+      },
+      "policy_status": "active",
+      "policy_version": "2026.03",
+      "policy_hash": "a81f29d"
+    },
+    {
+      "endpoint": "admin.admin_system_permissions_simulator",
+      "area": "administracao_sistema",
+      "public": false,
+      "page": "page.admin.admin_system_permissions_simulator",
+      "action": {
+        "required": true,
+        "name_by_method": {
+          "POST": "simulate"
+        }
+      },
+      "override": {
+        "required": false,
+        "reason_required": true,
+        "ttl_seconds": 300
+      },
+      "scope": {
+        "scopes_any": [],
+        "scopes_all": []
+      },
+      "minimum_role": "admin",
+      "minimum_role_level": 4,
+      "sensitivity": {
+        "classification": "sistemica",
+        "is_sensitive": true,
+        "is_critical": true,
+        "is_destructive": false,
+        "is_systemic": true
+      },
+      "policy_status": "active",
+      "policy_version": "2026.03",
+      "policy_hash": "a81f29d"
+    },
+    {
+      "endpoint": "admin.admin_system_permissions_roles",
+      "area": "administracao_sistema",
+      "public": false,
+      "page": "page.admin.admin_system_permissions_roles",
+      "action": {
+        "required": false,
+        "name_by_method": {}
+      },
+      "override": {
+        "required": false,
+        "reason_required": true,
+        "ttl_seconds": 300
+      },
+      "scope": {
+        "scopes_any": [],
+        "scopes_all": []
+      },
+      "minimum_role": "admin",
+      "minimum_role_level": 4,
+      "sensitivity": {
+        "classification": "sistemica",
+        "is_sensitive": true,
+        "is_critical": true,
+        "is_destructive": false,
+        "is_systemic": true
+      },
+      "policy_status": "active",
+      "policy_version": "2026.03",
+      "policy_hash": "a81f29d"
+    },
+    {
+      "endpoint": "admin.admin_system_permissions_users",
+      "area": "administracao_sistema",
+      "public": false,
+      "page": "page.admin.admin_system_permissions_users",
+      "action": {
+        "required": false,
+        "name_by_method": {}
+      },
+      "override": {
+        "required": false,
+        "reason_required": true,
+        "ttl_seconds": 300
+      },
+      "scope": {
+        "scopes_any": [],
+        "scopes_all": []
+      },
+      "minimum_role": "admin",
+      "minimum_role_level": 4,
+      "sensitivity": {
+        "classification": "sistemica",
+        "is_sensitive": true,
+        "is_critical": true,
+        "is_destructive": false,
+        "is_systemic": true
+      },
+      "policy_status": "active",
+      "policy_version": "2026.03",
+      "policy_hash": "a81f29d"
+    },
+    {
+      "endpoint": "admin.admin_system_permissions_overrides",
+      "area": "administracao_sistema",
+      "public": false,
+      "page": "page.admin.admin_system_permissions_overrides",
+      "action": {
+        "required": true,
+        "name_by_method": {
+          "POST": "approve"
+        }
+      },
+      "override": {
+        "required": false,
+        "reason_required": true,
+        "ttl_seconds": 300
+      },
+      "scope": {
+        "scopes_any": [],
+        "scopes_all": []
+      },
+      "minimum_role": "admin",
+      "minimum_role_level": 4,
+      "sensitivity": {
+        "classification": "sistemica",
+        "is_sensitive": true,
+        "is_critical": true,
+        "is_destructive": true,
+        "is_systemic": true
+      },
+      "policy_status": "active",
+      "policy_version": "2026.03",
+      "policy_hash": "a81f29d"
+    },
+    {
+      "endpoint": "admin.admin_system_permissions_audit",
+      "area": "administracao_sistema",
+      "public": false,
+      "page": "page.admin.admin_system_permissions_audit",
+      "action": {
+        "required": false,
+        "name_by_method": {}
+      },
+      "override": {
+        "required": false,
+        "reason_required": true,
+        "ttl_seconds": 300
+      },
+      "scope": {
+        "scopes_any": [],
+        "scopes_all": []
+      },
+      "minimum_role": "admin",
+      "minimum_role_level": 4,
+      "sensitivity": {
+        "classification": "sistemica",
+        "is_sensitive": true,
+        "is_critical": true,
+        "is_destructive": false,
+        "is_systemic": true
+      },
+      "policy_status": "active",
+      "policy_version": "2026.03",
+      "policy_hash": "a81f29d"
+    },
+    {
+      "endpoint": "admin.admin_system_permissions_pilot",
+      "area": "administracao_sistema",
+      "public": false,
+      "page": "page.admin.admin_system_permissions_pilot",
+      "action": {
+        "required": false,
+        "name_by_method": {}
+      },
+      "override": {
+        "required": false,
+        "reason_required": true,
+        "ttl_seconds": 300
+      },
+      "scope": {
+        "scopes_any": [],
+        "scopes_all": []
+      },
+      "minimum_role": "admin",
+      "minimum_role_level": 4,
+      "sensitivity": {
+        "classification": "sistemica",
+        "is_sensitive": true,
+        "is_critical": true,
+        "is_destructive": false,
+        "is_systemic": true
+      },
+      "policy_status": "active",
+      "policy_version": "2026.03",
+      "policy_hash": "a81f29d"
+    },
+    {
+      "endpoint": "admin.admin_system_permissions_heatmap",
+      "area": "administracao_sistema",
+      "public": false,
+      "page": "page.admin.admin_system_permissions_heatmap",
+      "action": {
+        "required": false,
+        "name_by_method": {}
+      },
+      "override": {
+        "required": false,
+        "reason_required": true,
+        "ttl_seconds": 300
+      },
+      "scope": {
+        "scopes_any": [],
+        "scopes_all": []
+      },
+      "minimum_role": "admin",
+      "minimum_role_level": 4,
+      "sensitivity": {
+        "classification": "sistemica",
+        "is_sensitive": true,
+        "is_critical": true,
+        "is_destructive": false,
+        "is_systemic": true
+      },
+      "policy_status": "active",
+      "policy_version": "2026.03",
+      "policy_hash": "a81f29d"
+    },
+    {
+      "endpoint": "admin.admin_system_permissions_coverage",
+      "area": "administracao_sistema",
+      "public": false,
+      "page": "page.admin.admin_system_permissions_coverage",
+      "action": {
+        "required": false,
+        "name_by_method": {}
+      },
+      "override": {
+        "required": false,
+        "reason_required": true,
+        "ttl_seconds": 300
+      },
+      "scope": {
+        "scopes_any": [],
+        "scopes_all": []
+      },
+      "minimum_role": "admin",
+      "minimum_role_level": 4,
+      "sensitivity": {
+        "classification": "sistemica",
+        "is_sensitive": true,
+        "is_critical": true,
+        "is_destructive": false,
+        "is_systemic": true
+      },
+      "policy_status": "active",
+      "policy_version": "2026.03",
+      "policy_hash": "a81f29d"
+    },
+    {
+      "endpoint": "reception.reception_create_operational_authz_request",
+      "area": "recepcao",
+      "public": false,
+      "page": "page.reception.reception_create_operational_authz_request",
+      "action": {
+        "required": true,
+        "name_by_method": {
+          "POST": "create"
+        }
+      },
+      "override": {
+        "required": false,
+        "reason_required": true,
+        "ttl_seconds": 300
+      },
+      "scope": {
+        "scopes_any": [],
+        "scopes_all": []
+      },
+      "minimum_role": "colaborador",
+      "minimum_role_level": 1,
+      "sensitivity": {
+        "classification": "sensivel",
+        "is_sensitive": true,
+        "is_critical": false,
+        "is_destructive": false,
+        "is_systemic": false
+      },
+      "policy_status": "active",
+      "policy_version": "2026.03",
+      "policy_hash": "a81f29d"
+    },
+    {
+      "endpoint": "reception.reception_decide_operational_authz_request",
+      "area": "administracao_sistema",
+      "public": false,
+      "page": "page.reception.reception_decide_operational_authz_request",
+      "action": {
+        "required": true,
+        "name_by_method": {
+          "POST": "approve"
+        }
+      },
+      "override": {
+        "required": false,
+        "reason_required": true,
+        "ttl_seconds": 300
+      },
+      "scope": {
+        "scopes_any": [],
+        "scopes_all": []
+      },
+      "minimum_role": "admin",
+      "minimum_role_level": 4,
+      "sensitivity": {
+        "classification": "sistemica",
+        "is_sensitive": true,
+        "is_critical": true,
+        "is_destructive": true,
+        "is_systemic": true
+      },
+      "policy_status": "active",
+      "policy_version": "2026.03",
+      "policy_hash": "a81f29d"
+    }
+  ]
+}

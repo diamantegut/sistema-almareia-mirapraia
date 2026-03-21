@@ -31,10 +31,12 @@ from app.utils.logger import log_action
 from app.services.cashier_service import CashierService, file_lock
 from app.services.transfer_service import transfer_table_to_room, TransferError
 from app.services.breakfast_kds_service import auto_set_in_preparo_from_table_open
+from app.services.authz import operational_request_service
 from app.services.system_config_manager import TABLE_ORDERS_FILE, SALES_HISTORY_FILE, STOCK_ENTRIES_FILE
 from app.utils.validators import (
     validate_required, sanitize_input, validate_room_number
 )
+from werkzeug.routing import BuildError
 import json
 import os
 import re
@@ -47,6 +49,8 @@ import time
 
 # Idempotency cache for batch submissions (prevents duplicate on refresh)
 PROCESSED_BATCHES = {}
+REVIEW_QR_RESTAURANT_ROUTE_KEY = 'review.request_review_qr_restaurant'
+REVIEW_QR_RESTAURANT_LINK_DEFAULT = 'https://www.tripadvisor.com.br/UserReviewEdit-d13317409?m=68676'
 
 # --- Helpers ---
 
@@ -201,8 +205,78 @@ def _has_restaurant_or_reception_access():
 def _ensure_restaurant_operation_access():
     if _has_restaurant_or_reception_access():
         return None
-    flash('Acesso restrito.')
-    return redirect(url_for('main.index'))
+    from app.services.permission_service import build_authorization_required_response
+    return build_authorization_required_response(
+        route_key=str(request.endpoint or 'restaurant.restaurant_tables'),
+        module_key='restaurant',
+        sensitivity='operacional_sensivel',
+        message='Você não possui acesso a esta área',
+        context={'path': request.path, 'action': str(request.method or 'GET').upper()},
+        status_code=403,
+    )
+
+def _has_operational_grant(route_key):
+    return operational_request_service.authorize_by_grant_with_scope(
+        user=str(session.get('user') or ''),
+        route_key=str(route_key or ''),
+        department=str(session.get('department') or ''),
+        role=str(session.get('role') or ''),
+    )
+
+def _review_profiles_config():
+    settings = load_settings() if isinstance(load_settings(), dict) else {}
+    review_cfg = settings.get('review_profiles') if isinstance(settings.get('review_profiles'), dict) else {}
+    restaurant_cfg = review_cfg.get('restaurant') if isinstance(review_cfg.get('restaurant'), dict) else {}
+    return {
+        'title': str(restaurant_cfg.get('title') or 'MIRAPRAIA').strip(),
+        'subtitle': str(restaurant_cfg.get('subtitle') or '').strip(),
+        'headline': str(restaurant_cfg.get('headline') or 'Avalie sua experiência').strip(),
+        'helper': str(restaurant_cfg.get('helper') or 'Aponte a câmera do seu celular').strip(),
+        'link': str(restaurant_cfg.get('link') or REVIEW_QR_RESTAURANT_LINK_DEFAULT).strip(),
+    }
+
+def _build_review_qr_auth_request_payload(context=None):
+    context_payload = context if isinstance(context, dict) else {}
+    try:
+        create_endpoint = url_for('reception.reception_create_operational_authz_request')
+    except BuildError:
+        create_endpoint = '/reception/authz-requests/create'
+    base_context = {
+        'feature': 'request_review_qr_restaurant',
+        'path': str(request.path or ''),
+        'endpoint': str(request.endpoint or ''),
+    }
+    base_context.update(context_payload)
+    return {
+        'available': True,
+        'route_key': REVIEW_QR_RESTAURANT_ROUTE_KEY,
+        'module_key': 'review',
+        'sensitivity': 'operacional',
+        'create_endpoint': create_endpoint,
+        'context': base_context,
+    }
+
+def _has_review_qr_restaurant_permission():
+    role_norm = _normalize_str(session.get('role'))
+    dept_norm = _normalize_str(session.get('department'))
+    raw_perms = session.get('permissions', [])
+    if not isinstance(raw_perms, (list, tuple, set)):
+        raw_perms = []
+    perms_norm = {_normalize_str(p) for p in raw_perms}
+    if role_norm in {'admin', 'gerente', 'supervisor', 'recepcao', 'garcom', 'garçom'}:
+        return True
+    if dept_norm in {'recepcao', 'recepção', 'restaurante', 'servico', 'serviço'}:
+        return True
+    if 'request_review_qr_restaurant' in perms_norm:
+        return True
+    if any('restaurante' in token for token in perms_norm):
+        return True
+    try:
+        if _has_operational_grant(REVIEW_QR_RESTAURANT_ROUTE_KEY):
+            return True
+    except Exception:
+        return False
+    return False
 
 def _has_restaurant_cashier_access():
     return _has_restaurant_or_reception_access()
@@ -803,6 +877,9 @@ def restaurant_tables():
     for t_id, order in orders.items():
         if any(item.get('category') == 'Café da Manhã' for item in order.get('items', [])):
             breakfast_tables.append(t_id)
+    can_request_review_qr_restaurant = _has_review_qr_restaurant_permission()
+    review_qr_auth_request_restaurant = _build_review_qr_auth_request_payload({'origin_page': 'restaurant_tables', 'review_type': 'restaurant'})
+    review_profile_restaurant = _review_profiles_config()
 
     return render_template('restaurant_tables.html', 
                            open_orders=orders, 
@@ -812,7 +889,55 @@ def restaurant_tables():
                            disabled_tables=disabled_tables,
                            live_music_active=settings.get('live_music_active', False),
                            is_cashier_open=is_cashier_open,
-                           breakfast_tables=breakfast_tables)
+                           breakfast_tables=breakfast_tables,
+                           can_request_review_qr_restaurant=can_request_review_qr_restaurant,
+                           review_qr_auth_request_restaurant=review_qr_auth_request_restaurant,
+                           review_profile_restaurant=review_profile_restaurant)
+
+@restaurant_bp.route('/api/review/restaurant-qr-open', methods=['POST'])
+@login_required
+def review_restaurant_qr_open():
+    payload = request.get_json(silent=True) or {}
+    origin_type = _normalize_str(payload.get('origin_type'))
+    origin_id = str(payload.get('origin_id') or '').strip()
+    event_type = _normalize_str(payload.get('event_type') or 'open')
+    if origin_type != 'table':
+        return jsonify({'success': False, 'message': 'origin_type inválido.'}), 400
+    if not origin_id:
+        return jsonify({'success': False, 'message': 'origin_id obrigatório.'}), 400
+    if event_type not in {'open', 'close'}:
+        event_type = 'open'
+    if not _has_review_qr_restaurant_permission():
+        return jsonify({
+            'success': False,
+            'message': 'Você não possui permissão para solicitar avaliação do restaurante.',
+            'authorization_request': _build_review_qr_auth_request_payload(
+                {'origin_type': origin_type, 'origin_id': origin_id, 'review_type': 'restaurant', 'event_type': event_type}
+            ),
+        }), 403
+    now_iso = datetime.now().isoformat(timespec='seconds')
+    duration_seconds = payload.get('duration_seconds')
+    try:
+        duration_seconds = float(duration_seconds) if duration_seconds is not None else None
+    except Exception:
+        duration_seconds = None
+    details = {
+        'user_id': str(session.get('user') or ''),
+        'timestamp': now_iso,
+        'origin_type': 'table',
+        'origin_id': origin_id,
+        'review_type': 'restaurant',
+        'source_page': str(payload.get('source_page') or 'restaurant_tables'),
+    }
+    if duration_seconds is not None and duration_seconds >= 0:
+        details['duration_seconds'] = round(duration_seconds, 2)
+    log_system_action(
+        action='REVIEW_RESTAURANT_QR_OPEN' if event_type == 'open' else 'REVIEW_RESTAURANT_QR_CLOSE',
+        details=details,
+        user=str(session.get('user') or 'Sistema'),
+        category='Review'
+    )
+    return jsonify({'success': True, 'timestamp': now_iso, 'endpoint': 'review.restaurant_qr_open'})
 
 @restaurant_bp.route('/restaurant/breakfast_report')
 @login_required
