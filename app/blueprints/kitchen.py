@@ -4,7 +4,7 @@ import re
 import unicodedata
 from datetime import datetime, timedelta
 from pathlib import Path
-from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify, current_app
 from app.utils.decorators import login_required
 import uuid
 from app.services.data_service import (
@@ -12,6 +12,15 @@ from app.services.data_service import (
     save_stock_entry, save_stock_entries, load_stock_logs, save_stock_logs, STOCK_LOGS_FILE, STOCK_ENTRIES_FILE,
     load_table_orders, save_table_orders, load_menu_items, load_printers, secure_save_products, load_room_occupancy,
     load_suppliers
+)
+from app.services.breakfast_kds_service import (
+    BREAKFAST_KDS_STATUSES,
+    normalize_breakfast_status as _svc_normalize_breakfast_status,
+    load_breakfast_kds_store as _svc_load_breakfast_kds_store,
+    save_breakfast_kds_store as _svc_save_breakfast_kds_store,
+    get_statuses_for_day as _svc_get_statuses_for_day,
+    get_room_history_for_day as _svc_get_room_history_for_day,
+    update_breakfast_status as _svc_update_breakfast_status,
 )
 from app.services.logger_service import LoggerService
 from app.services.kitchen_checklist_service import KitchenChecklistService
@@ -116,10 +125,6 @@ def _emit_server_done_sound():
         pass
 
 
-BREAKFAST_KDS_FILE = get_data_path('kitchen_breakfast_kds.json')
-BREAKFAST_KDS_STATUSES = ['pending', 'preparing', 'ready', 'delivered']
-
-
 def _normalize_breakfast_room_sort_key(room_label):
     room = str(room_label or '').strip()
     digits = ''.join(ch for ch in room if ch.isdigit())
@@ -129,10 +134,7 @@ def _normalize_breakfast_room_sort_key(room_label):
 
 
 def _normalize_breakfast_status(value):
-    status = str(value or '').strip().lower()
-    if status in BREAKFAST_KDS_STATUSES:
-        return status
-    return 'pending'
+    return _svc_normalize_breakfast_status(value)
 
 
 def _normalize_breakfast_list(value, max_items=12, item_limit=40):
@@ -166,35 +168,177 @@ def _truncate_breakfast_text(value, limit=100):
     return text[: max(0, limit - 1)].rstrip() + '…'
 
 
+def _normalize_breakfast_text_key(value):
+    text = unicodedata.normalize('NFKD', str(value or '')).encode('ASCII', 'ignore').decode('utf-8')
+    return ' '.join(text.strip().lower().split())
+
+
+def _parse_breakfast_order_datetime(value):
+    raw = str(value or '').strip()
+    if not raw:
+        return None
+    for fmt in ('%d/%m/%Y %H:%M', '%d/%m/%Y %H:%M:%S', '%Y-%m-%d %H:%M:%S', '%Y-%m-%dT%H:%M:%S'):
+        try:
+            return datetime.strptime(raw, fmt)
+        except Exception:
+            continue
+    return None
+
+
+def _is_breakfast_runtime_env():
+    env = str(current_app.config.get('ALMAREIA_RUNTIME_ENV') or '').strip().lower()
+    return env == 'development'
+
+
+def _is_breakfast_item_match(order, item, table_id):
+    if str(table_id or '').strip().startswith('DEV_CAFE_TEST_'):
+        return True
+    if bool(order.get('is_breakfast')):
+        return True
+    name_key = _normalize_breakfast_text_key(item.get('name'))
+    category_key = _normalize_breakfast_text_key(item.get('category'))
+    questions_key = _normalize_breakfast_text_key(' '.join(str((qa or {}).get('answer') or '') for qa in (item.get('questions_answers') or [])))
+    basket = f"{name_key} {category_key} {questions_key}"
+    keywords = (
+        'cafe da manha',
+        'cafe da manhã',
+        'cafe',
+        'manha',
+        'tapioca',
+        'omelete',
+        'cuscuz',
+        'pao',
+        'suco',
+    )
+    return any(token in basket for token in keywords)
+
+
+def _collect_breakfast_restaurant_orders(now=None):
+    ref_now = now if isinstance(now, datetime) else datetime.now()
+    orders = load_table_orders()
+    if not isinstance(orders, dict):
+        return []
+    tickets = []
+    for table_id, order in orders.items():
+        if not isinstance(order, dict):
+            continue
+        status = str(order.get('status') or '').strip().lower()
+        if status not in {'open', 'aberta', 'aberto'}:
+            continue
+        items = order.get('items') if isinstance(order.get('items'), list) else []
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            item_status = str(item.get('kds_status') or '').strip().lower()
+            if item_status in {'done', 'archived', 'received'}:
+                continue
+            created_dt = _parse_breakfast_order_datetime(item.get('created_at') or order.get('opened_at'))
+            if not isinstance(created_dt, datetime):
+                continue
+            if created_dt.date() != ref_now.date():
+                continue
+            if created_dt.hour < 7 or created_dt.hour >= 11:
+                continue
+            if not _is_breakfast_item_match(order, item, table_id):
+                continue
+            observations = item.get('observations') if isinstance(item.get('observations'), list) else []
+            note = _truncate_breakfast_text(', '.join(str(o).strip() for o in observations if str(o).strip()), 70)
+            qty_raw = item.get('qty')
+            try:
+                qty = int(float(qty_raw))
+            except Exception:
+                qty = 1
+            tickets.append({
+                'id': str(item.get('id') or f"{table_id}-{len(tickets)+1}"),
+                'table_id': str(table_id),
+                'table_label': f"Mesa {table_id}",
+                'item': _truncate_breakfast_text(item.get('name') or 'Item', 60),
+                'qty': max(1, qty),
+                'observation': note,
+                'time': created_dt.strftime('%H:%M'),
+                'is_dev_test': bool(order.get('dev_seed')) or str(table_id).startswith('DEV_CAFE_TEST_'),
+            })
+    tickets.sort(key=lambda row: (row.get('time') or '', row.get('table_id') or '', row.get('item') or ''))
+    return tickets
+
+
+def _seed_breakfast_dev_test_orders(user):
+    now_ref = datetime.now()
+    orders = load_table_orders()
+    if not isinstance(orders, dict):
+        orders = {}
+    table_ids = ['DEV_CAFE_TEST_01', 'DEV_CAFE_TEST_02', 'DEV_CAFE_TEST_03', 'DEV_CAFE_TEST_04']
+    samples = [
+        [('Tapioca de Queijo', 1, []), ('Café Coado', 1, [])],
+        [('Omelete da Casa', 2, ['Sem cebola'])],
+        [('Cuscuz Nordestino', 1, []), ('Suco de Laranja', 1, [])],
+        [('Pão na Chapa', 1, ['Sem manteiga'])],
+    ]
+    created = []
+    for idx, table_id in enumerate(table_ids):
+        minute = 5 + idx * 3
+        opened_at = now_ref.replace(hour=8, minute=minute, second=0, microsecond=0).strftime('%d/%m/%Y %H:%M')
+        items = []
+        for item_name, qty, observations in samples[idx]:
+            item_created = now_ref.replace(hour=8, minute=min(59, minute + 1), second=0, microsecond=0).strftime('%d/%m/%Y %H:%M')
+            items.append({
+                'id': str(uuid.uuid4()),
+                'product_id': f'dev-breakfast-{idx + 1}',
+                'name': item_name,
+                'price': 0.0,
+                'qty': qty,
+                'category': 'Café da Manhã',
+                'created_at': item_created,
+                'waiter': user or 'dev',
+                'printed': False,
+                'print_status': 'pending',
+                'complements': [],
+                'observations': observations,
+                'accompaniments': [],
+                'flavor': '',
+                'questions_answers': [],
+                'kds_status': 'pending',
+            })
+        orders[table_id] = {
+            'items': items,
+            'total': 0.0,
+            'status': 'open',
+            'opened_at': opened_at,
+            'num_adults': 1,
+            'customer_type': 'passante',
+            'customer_name': 'TESTE DEV CAFÉ',
+            'room_number': None,
+            'waiter': user or 'dev',
+            'opened_by': user or 'dev',
+            'staff_name': None,
+            'is_breakfast': True,
+            'dev_seed': True,
+        }
+        created.append(table_id)
+    save_table_orders(orders)
+    return created
+
+
+def _clear_breakfast_dev_test_orders():
+    orders = load_table_orders()
+    if not isinstance(orders, dict):
+        return []
+    removed = []
+    for table_id in list(orders.keys()):
+        if str(table_id).startswith('DEV_CAFE_TEST_') or bool((orders.get(table_id) or {}).get('dev_seed')):
+            removed.append(str(table_id))
+            orders.pop(table_id, None)
+    if removed:
+        save_table_orders(orders)
+    return removed
+
+
 def _load_breakfast_kds_store():
-    default_store = {'status_by_date': {}}
-    if not os.path.exists(BREAKFAST_KDS_FILE):
-        return default_store
-    try:
-        with open(BREAKFAST_KDS_FILE, 'r', encoding='utf-8') as f:
-            payload = json.load(f)
-        if not isinstance(payload, dict):
-            return default_store
-        if not isinstance(payload.get('status_by_date'), dict):
-            payload['status_by_date'] = {}
-        return payload
-    except Exception:
-        return default_store
+    return _svc_load_breakfast_kds_store()
 
 
 def _save_breakfast_kds_store(store):
-    payload = store if isinstance(store, dict) else {'status_by_date': {}}
-    if not isinstance(payload.get('status_by_date'), dict):
-        payload['status_by_date'] = {}
-    os.makedirs(os.path.dirname(BREAKFAST_KDS_FILE), exist_ok=True)
-    lock_ctx = file_lock(BREAKFAST_KDS_FILE) if callable(file_lock) else None
-    if lock_ctx is None:
-        with open(BREAKFAST_KDS_FILE, 'w', encoding='utf-8') as f:
-            json.dump(payload, f, indent=2, ensure_ascii=False)
-        return
-    with lock_ctx:
-        with open(BREAKFAST_KDS_FILE, 'w', encoding='utf-8') as f:
-            json.dump(payload, f, indent=2, ensure_ascii=False)
+    _svc_save_breakfast_kds_store(store)
 
 
 def _build_breakfast_kds_payload(now=None):
@@ -205,7 +349,7 @@ def _build_breakfast_kds_payload(now=None):
         occupancy = {}
     service = ReservationService()
     store = _load_breakfast_kds_store()
-    statuses_for_day = store.get('status_by_date', {}).get(today_key, {})
+    statuses_for_day = _svc_get_statuses_for_day(store, today_key)
     rows = []
     status_totals = {key: 0 for key in BREAKFAST_KDS_STATUSES}
 
@@ -252,6 +396,10 @@ def _build_breakfast_kds_payload(now=None):
         status_meta = statuses_for_day.get(room_label) if isinstance(statuses_for_day.get(room_label), dict) else {}
         status = _normalize_breakfast_status(status_meta.get('status'))
         status_totals[status] = status_totals.get(status, 0) + 1
+        status_history = _svc_get_room_history_for_day(store, today_key, room_label)
+
+        if status == 'pronto':
+            continue
 
         rows.append({
             'room': room_label,
@@ -272,15 +420,21 @@ def _build_breakfast_kds_payload(now=None):
             'companions': companions,
             'updated_at': status_meta.get('updated_at') or '',
             'updated_by': status_meta.get('updated_by') or '',
+            'status_history': status_history,
         })
 
+    restaurant_orders = _collect_breakfast_restaurant_orders(now=ref_now)
     return {
         'generated_at': ref_now.isoformat(),
         'generated_label': ref_now.strftime('%d/%m/%Y %H:%M'),
         'rooms': rows,
+        'restaurant_orders': restaurant_orders,
+        'dev_mode': _is_breakfast_runtime_env(),
         'summary': {
-            'total_rooms': len(rows),
+            'total_rooms': len(occupancy),
+            'visible_rooms': len(rows),
             'total_pax': sum(int(r.get('pax') or 0) for r in rows),
+            'restaurant_orders': len(restaurant_orders),
             'statuses': status_totals
         }
     }
@@ -758,26 +912,53 @@ def kitchen_breakfast_kds_update_status():
     status = _normalize_breakfast_status(data.get('status'))
     if not room:
         return jsonify({'success': False, 'error': 'Quarto inválido.'}), 400
-    now = datetime.now()
-    today_key = now.strftime('%Y-%m-%d')
-    store = _load_breakfast_kds_store()
-    by_date = store.get('status_by_date') if isinstance(store.get('status_by_date'), dict) else {}
-    day_map = by_date.get(today_key) if isinstance(by_date.get(today_key), dict) else {}
-    day_map[room] = {
-        'status': status,
-        'updated_at': now.strftime('%d/%m/%Y %H:%M'),
-        'updated_by': session.get('user') or 'Sistema'
-    }
-    by_date[today_key] = day_map
-    store['status_by_date'] = by_date
-    _save_breakfast_kds_store(store)
+    result = _svc_update_breakfast_status(
+        room=room,
+        status=status,
+        user=session.get('user') or 'Sistema',
+        source='kitchen_breakfast_manual',
+        context={'action': 'manual_update'},
+    )
+    if not result.get('success'):
+        return jsonify({'success': False, 'error': 'Falha ao atualizar status.'}), 500
     LoggerService.log_acao(
         acao='KDS café status atualizado',
         entidade='Cozinha',
-        detalhes={'room': room, 'status': status, 'updated_by': session.get('user')},
+        detalhes={
+            'room': room,
+            'status': status,
+            'updated_by': session.get('user'),
+            'previous_status': result.get('previous_status'),
+            'changed': bool(result.get('changed')),
+        },
         nivel_severidade='INFO'
     )
-    return jsonify({'success': True, 'room': room, 'status': status})
+    return jsonify({'success': True, 'room': room, 'status': status, 'changed': bool(result.get('changed'))})
+
+
+@kitchen_bp.route('/kitchen/breakfast-kds/dev-test-orders', methods=['POST'])
+@login_required
+def kitchen_breakfast_kds_dev_test_orders():
+    if session.get('role') not in ['admin', 'gerente'] and session.get('department') != 'Cozinha':
+        return jsonify({'success': False, 'error': 'Acesso restrito.'}), 403
+    if not _is_breakfast_runtime_env():
+        return jsonify({'success': False, 'error': 'Disponível apenas em ambiente DEV.'}), 403
+    try:
+        payload = request.get_json(force=True) or {}
+    except Exception:
+        payload = {}
+    action = str(payload.get('action') or 'seed').strip().lower()
+    if action == 'clear':
+        removed = _clear_breakfast_dev_test_orders()
+        return jsonify({'success': True, 'action': 'clear', 'removed_tables': removed})
+    created = _seed_breakfast_dev_test_orders(session.get('user') or 'dev')
+    LoggerService.log_acao(
+        acao='Seed DEV pedidos café',
+        entidade='Cozinha',
+        detalhes={'tables': created, 'action': 'seed_dev_breakfast_orders'},
+        nivel_severidade='INFO'
+    )
+    return jsonify({'success': True, 'action': 'seed', 'tables': created})
 
 @kitchen_bp.route('/kitchen/portion/settings', methods=['GET', 'POST'])
 @login_required

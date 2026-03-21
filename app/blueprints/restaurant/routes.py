@@ -30,6 +30,7 @@ from app.services.data_service import load_stock_entries
 from app.utils.logger import log_action
 from app.services.cashier_service import CashierService, file_lock
 from app.services.transfer_service import transfer_table_to_room, TransferError
+from app.services.breakfast_kds_service import auto_set_in_preparo_from_table_open
 from app.services.system_config_manager import TABLE_ORDERS_FILE, SALES_HISTORY_FILE, STOCK_ENTRIES_FILE
 from app.utils.validators import (
     validate_required, sanitize_input, validate_room_number
@@ -1169,6 +1170,69 @@ def restaurant_table_order(table_id):
                     
                     save_table_orders(orders)
                     log_action('Mesa Aberta', f'Mesa {table_id} aberta por {session.get("user")}', department='Restaurante')
+                    try:
+                        automation_result = auto_set_in_preparo_from_table_open(
+                            customer_type=customer_type,
+                            customer_name=customer_name,
+                            room_number=room_number,
+                            user=session.get('user') or 'Sistema',
+                        )
+                        auto_result = str((automation_result or {}).get('result') or '').strip().lower()
+                        if auto_result in {'updated', 'already_pronto'}:
+                            log_system_action(
+                                action='KDS_CAFE_AUTO_STATUS',
+                                details={
+                                    'table_id': str_table_id,
+                                    'result': auto_result,
+                                    'room': (automation_result or {}).get('room'),
+                                    'customer_type': customer_type,
+                                    'customer_name': customer_name,
+                                },
+                                user=session.get('user', 'Sistema'),
+                                category='Restaurante'
+                            )
+                        elif auto_result == 'ambiguous':
+                            current_app.logger.warning(
+                                "KDS café automação ambígua ao abrir mesa %s: %s",
+                                str_table_id,
+                                automation_result,
+                            )
+                            log_system_action(
+                                action='KDS_CAFE_AUTO_AMBIGUOUS',
+                                details={
+                                    'table_id': str_table_id,
+                                    'result': auto_result,
+                                    'rooms': (automation_result or {}).get('rooms') or [],
+                                    'customer_type': customer_type,
+                                    'customer_name': customer_name,
+                                },
+                                user=session.get('user', 'Sistema'),
+                                category='Restaurante'
+                            )
+                        elif auto_result == 'no_match':
+                            current_app.logger.info(
+                                "KDS café sem correspondência ao abrir mesa %s: %s",
+                                str_table_id,
+                                (automation_result or {}).get('reason') or 'no_match',
+                            )
+                    except Exception as automation_error:
+                        current_app.logger.warning(
+                            "Falha na automação do KDS café ao abrir mesa %s: %s",
+                            str_table_id,
+                            automation_error,
+                        )
+                        log_system_action(
+                            action='KDS_CAFE_AUTO_ERROR',
+                            details={
+                                'table_id': str_table_id,
+                                'customer_type': customer_type,
+                                'customer_name': customer_name,
+                                'room_number': room_number,
+                                'error': str(automation_error),
+                            },
+                            user=session.get('user', 'Sistema'),
+                            category='Restaurante'
+                        )
                 else:
                     flash('Mesa já está aberta.')
                 

@@ -22,6 +22,10 @@
     </div>
 
     <div class="breakfast-kds-summary mb-3" id="breakfast-kds-summary"></div>
+    <div class="breakfast-kds-future-lane mb-2" id="breakfast-kds-future-lane">
+        <span class="future-lane-title"><i class="bi bi-journal-plus"></i> À la carte do café (espaço reservado)</span>
+        <span class="future-lane-chip">Em breve</span>
+    </div>
     <div class="breakfast-kds-grid" id="breakfast-kds-grid"></div>
 </div>
 
@@ -52,13 +56,18 @@
                             <div id="breakfastKdsDetailGuests" class="small text-muted">Sem hóspedes adicionais</div>
                         </div>
                     </div>
+                    <div class="col-12">
+                        <div class="breakfast-kds-detail-card">
+                            <h6 class="mb-2">Histórico Operacional</h6>
+                            <div id="breakfastKdsDetailHistory" class="small text-muted">Sem histórico de mudanças.</div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer breakfast-kds-modal-footer">
                 <button type="button" class="btn btn-outline-secondary btn-lg flex-fill" data-bs-dismiss="modal">Fechar</button>
-                <button type="button" class="btn btn-warning btn-lg flex-fill breakfast-status-action" data-next-status="preparing">Marcar Em Preparo</button>
-                <button type="button" class="btn btn-success btn-lg flex-fill breakfast-status-action" data-next-status="ready">Marcar Pronto</button>
-                <button type="button" class="btn btn-dark btn-lg flex-fill breakfast-status-action" data-next-status="delivered">Marcar Entregue</button>
+                <button type="button" class="btn btn-warning btn-lg flex-fill breakfast-status-action" data-next-status="in_preparo">Iniciar preparo</button>
+                <button type="button" class="btn btn-success btn-lg flex-fill breakfast-status-action" data-next-status="pronto">Marcar pronto</button>
             </div>
         </div>
     </div>
@@ -67,15 +76,15 @@
 <script>
 const breakfastDataUrl = "{{ url_for('kitchen.kitchen_breakfast_kds_data') }}";
 const breakfastUpdateUrl = "{{ url_for('kitchen.kitchen_breakfast_kds_update_status') }}";
+const breakfastDevSeedUrl = "{{ url_for('kitchen.kitchen_breakfast_kds_dev_test_orders') }}";
 const breakfastPollingMs = 10000;
 const breakfastInitialPayload = {{ (initial_payload or {})|tojson }};
 const breakfastStatusMeta = {
     pending: { label: 'Pendente', className: 'status-pending' },
-    preparing: { label: 'Em preparo', className: 'status-preparing' },
-    ready: { label: 'Pronto', className: 'status-ready' },
-    delivered: { label: 'Entregue', className: 'status-delivered' }
+    in_preparo: { label: 'Em preparo', className: 'status-preparing' },
+    pronto: { label: 'Pronto', className: 'status-ready' }
 };
-let breakfastState = { rooms: [] };
+let breakfastState = { rooms: [], restaurantOrders: [], devMode: false };
 let breakfastModal = null;
 let breakfastSelectedRoom = null;
 let breakfastTimerId = null;
@@ -92,24 +101,83 @@ function normalizeArray(value) {
     return String(value).split(',').map(v => v.trim()).filter(Boolean);
 }
 
+function summarizeList(value, maxItems) {
+    const items = normalizeArray(value);
+    if (!items.length) return '-';
+    if (items.length <= maxItems) return items.join(', ');
+    return `${items.slice(0, maxItems).join(', ')} +${items.length - maxItems}`;
+}
+
+function escapeHtml(value) {
+    return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 function renderBreakfastSummary(data) {
     const summary = (data && data.summary) || {};
     const statuses = summary.statuses || {};
     const wrap = document.getElementById('breakfast-kds-summary');
     if (!wrap) return;
     wrap.innerHTML = `
-        <div class="summary-pill">Quartos <strong>${summary.total_rooms || 0}</strong></div>
+        <div class="summary-pill">Quartos dia <strong>${summary.total_rooms || 0}</strong></div>
+        <div class="summary-pill">No board <strong>${summary.visible_rooms || 0}</strong></div>
         <div class="summary-pill">Hóspedes <strong>${summary.total_pax || 0}</strong></div>
+        <div class="summary-pill">Pedidos restaurante <strong>${summary.restaurant_orders || 0}</strong></div>
         <div class="summary-pill status-pending">Pendentes <strong>${statuses.pending || 0}</strong></div>
-        <div class="summary-pill status-preparing">Em preparo <strong>${statuses.preparing || 0}</strong></div>
-        <div class="summary-pill status-ready">Prontos <strong>${statuses.ready || 0}</strong></div>
-        <div class="summary-pill status-delivered">Entregues <strong>${statuses.delivered || 0}</strong></div>
+        <div class="summary-pill status-preparing">Em preparo <strong>${statuses.in_preparo || 0}</strong></div>
+        <div class="summary-pill status-ready">Prontos <strong>${statuses.pronto || 0}</strong></div>
     `;
+}
+
+function renderBreakfastRestaurantOrders(data) {
+    const lane = document.getElementById('breakfast-kds-future-lane');
+    if (!lane) return;
+    const orders = Array.isArray(data && data.restaurant_orders) ? data.restaurant_orders : [];
+    const isDevMode = Boolean(data && data.dev_mode);
+    const ticketsHtml = orders.length
+        ? orders.map(order => `<div class="future-ticket ${order.is_dev_test ? 'future-ticket-dev' : ''}">
+                <span class="ticket-main">${escapeHtml(order.table_label || order.table_id)} · ${escapeHtml(order.item)} ×${Number(order.qty || 1)}</span>
+                ${order.observation ? `<span class="ticket-note">${escapeHtml(order.observation)}</span>` : ''}
+                <span class="ticket-time">${escapeHtml(order.time || '--:--')}</span>
+            </div>`).join('')
+        : '<div class="future-empty">Sem pedidos de restaurante para café no intervalo 07:00–11:00.</div>';
+    const devActions = isDevMode
+        ? `<div class="future-dev-actions">
+                <button type="button" class="btn btn-outline-light btn-sm px-2" data-dev-breakfast-action="seed">Gerar teste DEV</button>
+                <button type="button" class="btn btn-outline-warning btn-sm px-2" data-dev-breakfast-action="clear">Limpar teste DEV</button>
+           </div>`
+        : '';
+    lane.innerHTML = `
+        <div class="future-lane-head">
+            <span class="future-lane-title"><i class="bi bi-journal-plus"></i> Pedidos restaurante do café (07:00–11:00)</span>
+            <span class="future-lane-chip">${orders.length} itens</span>
+        </div>
+        <div class="future-lane-tickets">${ticketsHtml}</div>
+        ${devActions}
+    `;
+}
+
+function quickActionConfig(status) {
+    if (status === 'in_preparo') {
+        return { label: 'Marcar pronto', nextStatus: 'pronto', className: 'btn-success' };
+    }
+    if (status === 'pending') {
+        return { label: 'Iniciar', nextStatus: 'in_preparo', className: 'btn-warning' };
+    }
+    return null;
 }
 
 function renderBreakfastCards(data) {
     const rooms = Array.isArray(data && data.rooms) ? data.rooms : [];
-    breakfastState = { rooms: rooms };
+    breakfastState = {
+        rooms: rooms,
+        restaurantOrders: Array.isArray(data && data.restaurant_orders) ? data.restaurant_orders : [],
+        devMode: Boolean(data && data.dev_mode),
+    };
     const grid = document.getElementById('breakfast-kds-grid');
     if (!grid) return;
     if (!rooms.length) {
@@ -120,24 +188,38 @@ function renderBreakfastCards(data) {
         const statusMeta = breakfastStatusMeta[room.status] || breakfastStatusMeta.pending;
         const alertClass = room.has_alert ? 'alert-on' : '';
         const obsClass = room.has_observation ? 'obs-on' : '';
-        const special = room.special ? `<span class="special-badge" title="${room.special_desc || ''}">🎉</span>` : '';
+        const special = room.special ? `<span class="special-badge" title="${room.special_desc || ''}">🎉 ${room.special}</span>` : '';
+        const allergies = normalizeArray(room.allergies);
+        const restrictions = normalizeArray(room.restrictions);
+        const hasAllergy = allergies.length > 0;
+        const hasRestriction = restrictions.length > 0;
+        const hasObservation = Boolean(room.has_observation && room.observations && room.observations !== '-');
+        const allergiesSummary = hasAllergy ? summarizeList(room.allergies, 1) : 'Sem alergias';
+        const restrictionsSummary = hasRestriction ? summarizeList(room.restrictions, 1) : (room.restrictions_summary || 'Sem restrições');
+        const observationSummary = hasObservation ? String(room.observations).trim() : '';
+        const compactAlert = hasAllergy
+            ? `Alergia: ${allergiesSummary}`
+            : (hasRestriction ? `Restrição: ${restrictionsSummary}` : (hasObservation ? `Obs: ${observationSummary}` : ''));
+        const quickAction = quickActionConfig(room.status);
         return `
-            <button type="button" class="breakfast-kds-card ${statusMeta.className} ${alertClass} ${obsClass}" data-room="${room.room}">
-                <div class="card-top">
+            <div class="breakfast-kds-card ${statusMeta.className} ${alertClass} ${obsClass}" data-room="${room.room}" role="button" tabindex="0">
+                <div class="kds-status-accent ${statusMeta.className}"></div>
+                <div class="card-top-row">
                     <div class="room-label">Quarto ${room.room}</div>
                     <div class="status-pill ${statusMeta.className}">${statusMeta.label}</div>
                 </div>
                 <div class="guest-line">${room.guest_main || 'Hóspede'} ${special}</div>
-                <div class="metrics-row">
-                    <div><span class="metric-label">Pax</span><span class="metric-value">${room.pax || 1}</span></div>
-                    <div><span class="metric-label">Horário</span><span class="metric-value">${room.breakfast_time || '--:--'}</span></div>
+                <div class="card-body-row">
+                    <div class="metric-inline">
+                        <span class="metric-chip"><span class="metric-label">Pax</span><span class="metric-value">${room.pax || 1}</span></span>
+                        <span class="metric-chip metric-time"><span class="metric-label">Horário</span><span class="metric-value">${room.breakfast_time || '--:--'}</span></span>
+                    </div>
+                    ${compactAlert ? `<div class="summary-line compact-alert ${hasAllergy ? 'alert-critical' : (hasRestriction ? 'alert-warning' : 'alert-neutral')}"><span class="summary-value one-line">${compactAlert}</span></div>` : ''}
                 </div>
-                <div class="chips-row">
-                    <span class="chip">${room.fruits_summary || '-'}</span>
-                    <span class="chip ${room.has_alert ? 'chip-alert' : ''}">${room.restrictions_summary || 'Sem restrições'}</span>
+                <div class="card-footer-row">
+                    ${quickAction ? `<button type="button" class="btn btn-sm breakfast-card-action ${quickAction.className}" data-room="${room.room}" data-next-status="${quickAction.nextStatus}">${quickAction.label}</button>` : ''}
                 </div>
-                <div class="obs-row">${room.observations || '-'}</div>
-            </button>
+            </div>
         `;
     }).join('');
     grid.innerHTML = html;
@@ -171,6 +253,24 @@ function renderBreakfastModal(roomData) {
     if (roomData.has_observation && roomData.observations && roomData.observations !== '-') alertRows.push(`<div><strong>Observações:</strong> ${roomData.observations}</div>`);
     if (!alertRows.length) alertRows.push('<div class="text-muted">Sem alertas críticos.</div>');
     document.getElementById('breakfastKdsAlertBlock').innerHTML = alertRows.join('');
+    const historyEl = document.getElementById('breakfastKdsDetailHistory');
+    const historyItems = Array.isArray(roomData.status_history) ? roomData.status_history : [];
+    if (!historyItems.length) {
+        historyEl.innerHTML = 'Sem histórico de mudanças.';
+    } else {
+        historyEl.innerHTML = historyItems.slice(-6).reverse().map(item => {
+            const rawStatus = String((item && item.status) || '').trim();
+            const meta = breakfastStatusMeta[rawStatus] || { label: rawStatus || 'Pendente' };
+            const at = (item && item.at) ? item.at : '-';
+            const by = (item && item.by) ? item.by : 'Sistema';
+            const source = (item && item.source) ? item.source : 'manual';
+            return `<div class="history-row"><span class="history-status">${meta.label}</span><span class="history-at">${at}</span><span class="history-by">${by}</span><span class="history-source">${source}</span></div>`;
+        }).join('');
+    }
+    const startBtn = document.querySelector('.breakfast-status-action[data-next-status="in_preparo"]');
+    const doneBtn = document.querySelector('.breakfast-status-action[data-next-status="pronto"]');
+    if (startBtn) startBtn.classList.toggle('d-none', roomData.status === 'in_preparo' || roomData.status === 'pronto');
+    if (doneBtn) doneBtn.classList.toggle('d-none', roomData.status === 'pronto');
     if (!breakfastModal) {
         breakfastModal = new bootstrap.Modal(document.getElementById('breakfastKdsDetailsModal'));
     }
@@ -180,6 +280,7 @@ function renderBreakfastModal(roomData) {
 function applyBreakfastPayload(payload) {
     const data = payload && payload.data ? payload.data : payload;
     renderBreakfastSummary(data || {});
+    renderBreakfastRestaurantOrders(data || {});
     renderBreakfastCards(data || {});
 }
 
@@ -203,12 +304,13 @@ function requestBreakfastFullscreen() {
     }
 }
 
-function updateBreakfastStatus(status) {
-    if (!breakfastSelectedRoom) return;
+function updateBreakfastStatus(status, roomOverride) {
+    const targetRoom = roomOverride || breakfastSelectedRoom;
+    if (!targetRoom) return;
     fetch(breakfastUpdateUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ room: breakfastSelectedRoom, status: status })
+        body: JSON.stringify({ room: targetRoom, status: status })
     })
     .then(resp => resp.json().then(data => ({ ok: resp.ok, data: data })))
     .then(result => {
@@ -220,15 +322,53 @@ function updateBreakfastStatus(status) {
     .catch(() => null);
 }
 
+function runBreakfastDevSeed(action) {
+    return fetch(breakfastDevSeedUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: action || 'seed' })
+    })
+    .then(resp => resp.json().then(data => ({ ok: resp.ok, data: data })))
+    .then(result => {
+        if (!result.ok || !result.data.success) {
+            throw new Error((result.data && result.data.error) || 'Falha em pedidos de teste DEV');
+        }
+        return fetchBreakfastData();
+    })
+    .catch(() => null);
+}
+
 function setupBreakfastEvents() {
     const grid = document.getElementById('breakfast-kds-grid');
     if (grid) {
         grid.addEventListener('click', function(event) {
+            const actionBtn = event.target.closest('.breakfast-card-action');
+            if (actionBtn) {
+                event.preventDefault();
+                event.stopPropagation();
+                const next = String(actionBtn.dataset.nextStatus || '').trim();
+                const roomKey = String(actionBtn.dataset.room || '').trim();
+                if (next && roomKey) {
+                    updateBreakfastStatus(next, roomKey);
+                }
+                return;
+            }
             const card = event.target.closest('.breakfast-kds-card');
             if (!card) return;
             const roomKey = String(card.dataset.room || '');
             const roomData = (breakfastState.rooms || []).find(r => String(r.room) === roomKey);
             renderBreakfastModal(roomData);
+        });
+    }
+    const lane = document.getElementById('breakfast-kds-future-lane');
+    if (lane) {
+        lane.addEventListener('click', function(event) {
+            const btn = event.target.closest('[data-dev-breakfast-action]');
+            if (!btn) return;
+            event.preventDefault();
+            event.stopPropagation();
+            const action = String(btn.getAttribute('data-dev-breakfast-action') || 'seed').trim().toLowerCase();
+            runBreakfastDevSeed(action);
         });
     }
     document.querySelectorAll('.breakfast-status-action').forEach(btn => {
@@ -254,149 +394,510 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <style>
-    .breakfast-kds-page {
-        min-height: calc(100vh - 1rem);
-        background: #0f172a;
-        border-radius: 12px;
-        padding: 14px;
-        color: #e5e7eb;
+    :root {
+        --kds-bg-main: #171c24;
+        --kds-bg-surface: #222a35;
+        --kds-bg-raised: #2b3644;
+        --kds-text-main: #f8fafc;
+        --kds-text-soft: #d1d8e2;
+        --kds-border-soft: rgba(201, 214, 230, 0.2);
+        --kds-shadow-soft: 0 10px 28px rgba(7, 10, 16, 0.46);
+        --kds-gold-soft: #c8a46a;
+        --kds-amber-elegant: #f4bf32;
+        --kds-burnt-orange: #f28b3c;
+        --kds-green-soft: #35be68;
+        --kds-blue-deep: #50a2f2;
+        --kds-red-sober: #d16666;
+        --kds-yellow-soft: #d1b55a;
     }
-    .breakfast-kds-header h2 { font-size: clamp(1.2rem, 2vw, 1.9rem); }
+    .breakfast-kds-page {
+        min-height: 100vh;
+        background: radial-gradient(1200px 720px at 10% -10%, #252f3c 0%, var(--kds-bg-main) 50%, #131821 100%);
+        border-radius: 0;
+        padding: 12px 14px 16px;
+        color: var(--kds-text-main);
+        width: 100%;
+        max-width: 100%;
+    }
+    .breakfast-kds-header {
+        max-width: 1800px;
+        margin: 0 auto 10px;
+    }
+    .breakfast-kds-header h2 {
+        font-size: clamp(1.15rem, 1.55vw, 1.6rem);
+        letter-spacing: 0.01em;
+    }
+    .breakfast-kds-header .badge {
+        background: rgba(200, 164, 106, 0.28) !important;
+        color: #ffe9bf !important;
+        border: 1px solid rgba(232, 194, 125, 0.54);
+        border-radius: 999px;
+        padding: 4px 10px;
+        letter-spacing: 0.06em;
+        font-size: 0.73rem;
+    }
+    #breakfast-kds-clock {
+        font-size: 1rem;
+        color: #f3f6fa !important;
+        min-width: 56px;
+        text-align: right;
+    }
+    .breakfast-kds-header .btn {
+        min-height: 44px;
+        font-size: 0.88rem;
+        border-radius: 11px;
+        padding: 7px 11px !important;
+        border-width: 1px;
+        transition: background-color 0.2s ease, transform 0.12s ease, box-shadow 0.2s ease;
+        box-shadow: 0 4px 12px rgba(10, 8, 6, 0.3);
+    }
+    .breakfast-kds-header .btn:hover {
+        transform: translateY(-1px);
+    }
+    .breakfast-kds-header .btn:active {
+        transform: translateY(0);
+    }
     .breakfast-kds-summary {
         display: flex;
         flex-wrap: wrap;
-        gap: 10px;
+        gap: 8px;
+        max-width: 1800px;
+        margin: 0 auto 10px;
     }
-    .summary-pill {
-        background: rgba(255,255,255,0.08);
-        border: 1px solid rgba(255,255,255,0.18);
-        border-radius: 12px;
-        padding: 8px 12px;
-        font-size: 1rem;
-        font-weight: 600;
-    }
-    .breakfast-kds-grid {
+    .breakfast-kds-future-lane {
+        max-width: 1800px;
+        margin: 0 auto 9px;
+        min-height: 32px;
+        border: 1px dashed rgba(197, 211, 227, 0.32);
+        border-radius: 10px;
+        padding: 5px 9px;
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-        gap: 12px;
+        gap: 5px;
+        color: #cdd9e8;
+        background: rgba(30, 40, 51, 0.35);
     }
-    .breakfast-kds-card {
-        text-align: left;
-        border: 1px solid rgba(255,255,255,0.16);
-        border-radius: 14px;
-        background: #111827;
-        color: #f9fafb;
-        min-height: 260px;
-        padding: 14px;
+    .future-lane-head {
         display: flex;
-        flex-direction: column;
-        gap: 10px;
-        touch-action: manipulation;
-    }
-    .breakfast-kds-card.alert-on { border-color: #ef4444; box-shadow: 0 0 0 2px rgba(239,68,68,0.2); }
-    .breakfast-kds-card.obs-on { box-shadow: 0 0 0 2px rgba(14,165,233,0.16); }
-    .card-top {
-        display: flex;
-        justify-content: space-between;
         align-items: center;
+        justify-content: space-between;
         gap: 8px;
     }
-    .room-label { font-size: 1.25rem; font-weight: 800; }
-    .status-pill {
-        border-radius: 999px;
-        padding: 4px 10px;
-        font-size: 0.86rem;
-        font-weight: 700;
-    }
-    .status-pending { background: #f59e0b22; color: #fcd34d; border: 1px solid #f59e0b55; }
-    .status-preparing { background: #0ea5e922; color: #7dd3fc; border: 1px solid #0ea5e955; }
-    .status-ready { background: #22c55e22; color: #86efac; border: 1px solid #22c55e55; }
-    .status-delivered { background: #6b728022; color: #d1d5db; border: 1px solid #6b728055; }
-    .guest-line { font-size: 1.1rem; font-weight: 700; line-height: 1.2; }
-    .special-badge { margin-left: 6px; }
-    .metrics-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-    }
-    .metric-label {
-        display: block;
-        font-size: 0.78rem;
+    .future-lane-title {
+        font-size: 0.77rem;
+        letter-spacing: 0.04em;
         text-transform: uppercase;
-        opacity: 0.8;
+        opacity: 0.9;
     }
-    .metric-value { font-size: 1.08rem; font-weight: 700; }
-    .chips-row {
+    .future-lane-chip {
+        font-size: 0.7rem;
+        border-radius: 999px;
+        padding: 2px 8px;
+        border: 1px solid rgba(197, 211, 227, 0.3);
+        background: rgba(255,255,255,0.08);
+    }
+    .future-lane-tickets {
         display: flex;
         flex-wrap: wrap;
         gap: 6px;
     }
-    .chip {
-        background: rgba(255,255,255,0.08);
+    .future-ticket {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
         border-radius: 999px;
-        padding: 4px 10px;
-        font-size: 0.84rem;
-        font-weight: 600;
+        border: 1px solid rgba(197, 211, 227, 0.3);
+        background: rgba(36, 47, 60, 0.7);
+        padding: 3px 8px;
+        max-width: 100%;
+        min-height: 24px;
     }
-    .chip-alert { background: rgba(239,68,68,0.22); color: #fecaca; border: 1px solid rgba(239,68,68,0.45); }
-    .obs-row {
-        margin-top: auto;
-        font-size: 0.9rem;
-        line-height: 1.3;
-        color: #d1d5db;
+    .future-ticket-dev {
+        border-color: rgba(242, 188, 66, 0.6);
+        background: rgba(90, 73, 27, 0.38);
+    }
+    .ticket-main {
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: #f3f8ff;
+    }
+    .ticket-note {
+        font-size: 0.67rem;
+        color: #d2deec;
+        max-width: 190px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .ticket-time {
+        font-size: 0.66rem;
+        color: #9ec2eb;
+        border-left: 1px solid rgba(158, 194, 235, 0.4);
+        padding-left: 6px;
+    }
+    .future-empty {
+        font-size: 0.72rem;
+        color: #c0d0e2;
+    }
+    .future-dev-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 6px;
+    }
+    .summary-pill {
+        background: linear-gradient(180deg, rgba(47, 59, 75, 0.94) 0%, rgba(36, 46, 60, 0.94) 100%);
+        border: 1px solid var(--kds-border-soft);
+        border-radius: 12px;
+        padding: 7px 10px;
+        font-size: 0.86rem;
+        font-weight: 600;
+        color: #edf2f9;
+        box-shadow: 0 7px 18px rgba(8, 11, 18, 0.32);
+    }
+    .breakfast-kds-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
+        max-width: 1800px;
+        margin: 0 auto;
+        align-items: stretch;
+    }
+    .breakfast-kds-card {
+        position: relative;
+        overflow: hidden;
+        text-align: left;
+        border: 1px solid var(--kds-border-soft);
+        border-radius: 16px;
+        background: linear-gradient(170deg, rgba(47, 59, 74, 0.96) 0%, rgba(36, 46, 58, 0.96) 100%);
+        color: var(--kds-text-main);
+        min-height: 82px;
+        padding: 8px 9px 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        touch-action: manipulation;
+        cursor: pointer;
+        box-shadow: var(--kds-shadow-soft), 0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+        transition: transform 0.18s ease, box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+    }
+    .breakfast-kds-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 16px 34px rgba(7, 11, 18, 0.5);
+    }
+    .breakfast-kds-card:active {
+        transform: translateY(0);
+        box-shadow: 0 9px 20px rgba(7, 11, 18, 0.5);
+    }
+    .kds-status-accent {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 6px;
+    }
+    .breakfast-kds-card.alert-on { border-color: rgba(209, 102, 102, 0.86); box-shadow: 0 0 0 2px rgba(209, 102, 102, 0.36), var(--kds-shadow-soft); }
+    .breakfast-kds-card.obs-on { box-shadow: 0 0 0 2px rgba(80, 162, 242, 0.32), var(--kds-shadow-soft); }
+    .card-top-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+    }
+    .room-label {
+        font-size: clamp(0.9rem, 1.25vw, 1.05rem);
+        font-weight: 900;
+        line-height: 1;
+        letter-spacing: 0.03em;
+        color: #ffffff;
+    }
+    .status-pill {
+        border-radius: 999px;
+        padding: 2px 7px;
+        font-size: 0.62rem;
+        font-weight: 800;
+        min-height: 22px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        letter-spacing: 0.02em;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2), 0 4px 10px rgba(5, 7, 11, 0.35);
+    }
+    .status-pending { background: rgba(244, 191, 50, 0.3); color: #fff8e8; border: 1px solid rgba(244, 191, 50, 0.9); }
+    .status-preparing { background: rgba(242, 139, 60, 0.3); color: #fff1e7; border: 1px solid rgba(242, 139, 60, 0.88); }
+    .status-ready { background: rgba(53, 190, 104, 0.28); color: #edfff2; border: 1px solid rgba(53, 190, 104, 0.86); }
+    .kds-status-accent.status-pending { background: var(--kds-amber-elegant); }
+    .kds-status-accent.status-preparing { background: var(--kds-burnt-orange); }
+    .kds-status-accent.status-ready { background: var(--kds-green-soft); }
+    .card-body-row {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    .guest-line {
+        font-size: clamp(0.74rem, 0.88vw, 0.82rem);
+        font-weight: 650;
+        line-height: 1.12;
+        color: #f8fbff;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        min-height: 1.05em;
+    }
+    .special-badge {
+        margin-left: 8px;
+        background: rgba(255,255,255,0.12);
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 999px;
+        padding: 2px 8px;
+        font-size: 0.76rem;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+    .metric-inline {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        flex-wrap: wrap;
+    }
+    .metric-chip {
+        border-radius: 10px;
+        padding: 2px 6px;
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(220, 233, 247, 0.26);
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .metric-time {
+        background: rgba(80, 162, 242, 0.24);
+        border-color: rgba(80, 162, 242, 0.58);
+    }
+    .metric-label {
+        display: inline;
+        font-size: 0.51rem;
+        text-transform: uppercase;
+        opacity: 0.82;
+        font-weight: 650;
+        letter-spacing: 0.06em;
+        color: #dce6f3;
+    }
+    .metric-value { font-size: 0.65rem; font-weight: 760; line-height: 1; color: #ffffff; }
+    .card-footer-row {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 5px;
+        border-top: 1px solid rgba(214, 227, 241, 0.16);
+        padding-top: 5px;
+    }
+    .breakfast-card-action {
+        min-height: 24px;
+        border-radius: 7px;
+        font-size: 0.62rem;
+        font-weight: 700;
+        padding: 3px 7px;
+        width: fit-content;
+        align-self: flex-end;
+        box-shadow: 0 4px 10px rgba(5, 7, 11, 0.28);
+    }
+    .compact-alert {
+        min-height: 22px;
+    }
+    .summary-line {
+        border-radius: 9px;
+        border: 1px solid rgba(214, 226, 240, 0.24);
+        background: rgba(255,255,255,0.08);
+        padding: 2px 6px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 22px;
+    }
+    .summary-value {
+        font-size: 0.64rem;
+        line-height: 1.1;
+        font-weight: 640;
+        color: #f7fbff;
+        min-width: 0;
+    }
+    .alert-critical {
+        background: rgba(209, 102, 102, 0.3);
+        border-color: rgba(209, 102, 102, 0.78);
+        color: #ffe8e8;
+    }
+    .alert-warning {
+        background: rgba(209, 181, 90, 0.28);
+        border-color: rgba(209, 181, 90, 0.72);
+        color: #fff5dd;
+    }
+    .alert-neutral {
+        background: rgba(26, 34, 44, 0.65);
+        border-color: rgba(166, 191, 216, 0.26);
+        color: #e2ebf6;
+    }
+    .one-line {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     .breakfast-kds-empty {
         min-height: 180px;
-        border: 1px dashed rgba(255,255,255,0.25);
-        border-radius: 12px;
+        border: 1px dashed rgba(190, 208, 229, 0.36);
+        border-radius: 16px;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 1.1rem;
-        color: #cbd5e1;
-        background: rgba(255,255,255,0.04);
+        color: #e0ebf7;
+        background: rgba(35, 47, 61, 0.62);
     }
     .breakfast-kds-modal-content {
-        border-radius: 14px;
+        border-radius: 20px;
+        border: 1px solid rgba(196, 214, 236, 0.32);
+        box-shadow: 0 18px 40px rgba(7, 11, 18, 0.42);
+        overflow: hidden;
+    }
+    .breakfast-kds-modal-content .modal-header {
+        background: linear-gradient(180deg, rgba(237, 244, 252, 0.98) 0%, rgba(224, 234, 247, 0.98) 100%);
+        border-bottom: 1px solid rgba(144, 170, 200, 0.34);
+        padding: 18px 22px;
+    }
+    .breakfast-kds-modal-content .modal-body {
+        background: #ecf3fb;
+        padding: 20px 22px;
+    }
+    .breakfast-kds-modal-content .modal-title {
+        font-size: 1.5rem;
+        font-weight: 760;
+        color: #1e2d40;
+    }
+    #breakfastKdsModalMeta {
+        color: #4e6581;
+        font-size: 0.95rem;
+        letter-spacing: 0.02em;
     }
     .breakfast-kds-alert-block {
-        border: 1px solid #ef4444;
-        border-radius: 10px;
-        background: #fff5f5;
-        color: #7f1d1d;
-        padding: 10px 12px;
-        font-size: 1rem;
-        line-height: 1.35;
+        border: 1px solid rgba(209, 102, 102, 0.58);
+        border-radius: 14px;
+        background: rgba(253, 237, 237, 0.96);
+        color: #5e2525;
+        padding: 12px 14px;
+        font-size: 0.98rem;
+        line-height: 1.4;
     }
     .breakfast-kds-detail-card {
-        border: 1px solid #d1d5db;
-        border-radius: 10px;
-        padding: 12px;
-        background: #fff;
+        border: 1px solid rgba(157, 180, 206, 0.34);
+        border-radius: 14px;
+        padding: 14px;
+        background: rgba(255, 255, 255, 0.92);
+        color: #203347;
+    }
+    .breakfast-kds-detail-card h6 {
+        color: #2a4562;
+        font-size: 1rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
     }
     .breakfast-kds-modal-footer .btn {
-        min-height: 62px;
-        font-size: 1.03rem;
-        font-weight: 700;
+        min-height: 64px;
+        font-size: 1.01rem;
+        font-weight: 720;
+        border-radius: 14px;
+        margin: 2px 0;
+        transition: transform 0.12s ease, box-shadow 0.18s ease;
+    }
+    .breakfast-kds-modal-footer .btn:active {
+        transform: scale(0.99);
     }
     .guest-pill {
-        border: 1px solid #d1d5db;
+        border: 1px solid rgba(158, 180, 206, 0.38);
         border-radius: 999px;
-        padding: 4px 10px;
+        padding: 5px 11px;
         margin-bottom: 6px;
-        background: #f8fafc;
-        color: #1f2937;
+        background: #edf3fb;
+        color: #2e4a67;
         display: inline-block;
         margin-right: 6px;
     }
-    @media (pointer: coarse) {
+    .history-row {
+        display: grid;
+        grid-template-columns: 1fr auto auto auto;
+        gap: 10px;
+        align-items: center;
+        border-bottom: 1px dashed rgba(100, 129, 161, 0.28);
+        padding: 5px 0;
+        font-size: 0.8rem;
+    }
+    .history-row:last-child {
+        border-bottom: none;
+    }
+    .history-status {
+        font-weight: 700;
+        color: #2a4562;
+    }
+    .history-at,
+    .history-by,
+    .history-source {
+        color: #587292;
+        white-space: nowrap;
+    }
+    @media (max-width: 1700px) {
         .breakfast-kds-grid {
-            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
-            gap: 14px;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+    }
+    @media (max-width: 1380px) {
+        .breakfast-kds-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+    }
+    @media (max-width: 980px) {
+        .breakfast-kds-card {
+            min-height: 78px;
+        }
+        .breakfast-kds-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 7px;
+        }
+        .breakfast-kds-header {
+            flex-direction: column;
+            align-items: stretch !important;
+            gap: 10px;
+        }
+        .breakfast-kds-header .btn {
+            width: 100%;
+        }
+        .room-label {
+            font-size: clamp(0.92rem, 3.1vw, 1.04rem);
+        }
+        .history-row {
+            grid-template-columns: 1fr;
+            gap: 3px;
+        }
+    }
+    @media (max-width: 720px) {
+        .breakfast-kds-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    @media (pointer: coarse) {
+        .breakfast-kds-page {
+            padding: 12px 12px 16px;
+        }
+        .breakfast-kds-grid {
+            gap: 7px;
         }
         .breakfast-kds-card {
-            min-height: 290px;
-            padding: 16px;
+            min-height: 86px;
+            padding: 8px 9px 8px;
+        }
+        .summary-pill {
+            min-height: 36px;
+            display: inline-flex;
+            align-items: center;
+        }
+        .breakfast-kds-header .btn {
+            min-height: 42px;
         }
         .breakfast-kds-card, .btn, .breakfast-status-action {
             touch-action: manipulation;

@@ -802,3 +802,91 @@ def test_add_batch_items_blocks_duplicate_persisted_batch_id(monkeypatch):
     assert response.location.endswith("/restaurant/table/73")
     assert len(state["73"]["items"]) == 1
     assert not saves
+
+
+def test_open_table_triggers_breakfast_kds_automation_with_reliable_room_match(monkeypatch):
+    app = _make_test_app()
+    state = {}
+    automation_calls = []
+    system_logs = []
+
+    monkeypatch.setattr(restaurant_routes, "load_table_orders", lambda: state)
+    monkeypatch.setattr(restaurant_routes, "load_room_occupancy", lambda: {"10": {"guest_name": "Ana"}})
+    monkeypatch.setattr(restaurant_routes, "load_complements", lambda: [])
+    monkeypatch.setattr(restaurant_routes, "load_users", lambda: {})
+    monkeypatch.setattr(restaurant_routes, "load_restaurant_settings", lambda: {"live_music_active": False})
+    monkeypatch.setattr(restaurant_routes, "save_table_orders", lambda payload: True)
+    monkeypatch.setattr(restaurant_routes, "log_action", lambda *args, **kwargs: None)
+    monkeypatch.setattr(restaurant_routes, "log_system_action", lambda *args, **kwargs: system_logs.append((args, kwargs)))
+    monkeypatch.setattr(
+        restaurant_routes,
+        "auto_set_in_preparo_from_table_open",
+        lambda customer_type, customer_name, room_number, user, now=None: (
+            automation_calls.append(
+                {
+                    "customer_type": customer_type,
+                    "customer_name": customer_name,
+                    "room_number": room_number,
+                    "user": user,
+                }
+            )
+            or {"success": True, "result": "updated", "room": "10"}
+        ),
+    )
+
+    with app.test_request_context(
+        "/restaurant/table/10",
+        method="POST",
+        data={"action": "open_table", "num_adults": "2", "waiter": "Carlos"},
+    ):
+        _set_profile(user="carlos", role="colaborador", department="Serviço", permissions=["restaurante_mirapraia"])
+        response = restaurant_routes.restaurant_table_order.__wrapped__("10")
+
+    assert response.status_code == 302
+    assert response.location.endswith("/restaurant/table/10")
+    assert len(automation_calls) == 1
+    assert automation_calls[0]["customer_type"] == "hospede"
+    assert automation_calls[0]["room_number"] == "10"
+    assert any(
+        kwargs.get("action") == "KDS_CAFE_AUTO_STATUS"
+        for _, kwargs in system_logs
+    )
+
+
+def test_open_table_keeps_safe_fallback_when_breakfast_kds_match_is_ambiguous(monkeypatch):
+    app = _make_test_app()
+    state = {}
+    system_logs = []
+
+    monkeypatch.setattr(restaurant_routes, "load_table_orders", lambda: state)
+    monkeypatch.setattr(restaurant_routes, "load_room_occupancy", lambda: {"11": {"guest_name": "Ana"}})
+    monkeypatch.setattr(restaurant_routes, "load_complements", lambda: [])
+    monkeypatch.setattr(restaurant_routes, "load_users", lambda: {})
+    monkeypatch.setattr(restaurant_routes, "load_restaurant_settings", lambda: {"live_music_active": False})
+    monkeypatch.setattr(restaurant_routes, "save_table_orders", lambda payload: True)
+    monkeypatch.setattr(restaurant_routes, "log_action", lambda *args, **kwargs: None)
+    monkeypatch.setattr(restaurant_routes, "log_system_action", lambda *args, **kwargs: system_logs.append((args, kwargs)))
+    monkeypatch.setattr(
+        restaurant_routes,
+        "auto_set_in_preparo_from_table_open",
+        lambda customer_type, customer_name, room_number, user, now=None: {
+            "success": True,
+            "result": "ambiguous",
+            "rooms": ["11", "21"],
+        },
+    )
+
+    with app.test_request_context(
+        "/restaurant/table/11",
+        method="POST",
+        data={"action": "open_table", "num_adults": "2", "waiter": "Carlos"},
+    ):
+        _set_profile(user="carlos", role="colaborador", department="Serviço", permissions=["restaurante_mirapraia"])
+        response = restaurant_routes.restaurant_table_order.__wrapped__("11")
+
+    assert response.status_code == 302
+    assert response.location.endswith("/restaurant/table/11")
+    assert any(
+        kwargs.get("action") == "KDS_CAFE_AUTO_AMBIGUOUS"
+        for _, kwargs in system_logs
+    )

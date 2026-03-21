@@ -6,6 +6,7 @@ import pytest
 from flask import Blueprint, Flask
 
 import app.blueprints.kitchen as kitchen_module
+import app.services.breakfast_kds_service as breakfast_kds_service
 from app.blueprints.kitchen import kitchen_bp
 
 
@@ -142,10 +143,38 @@ def test_breakfast_kds_template_has_tablet_and_modal_patterns():
     assert "KDS Café da Manhã" in html
     assert "breakfast-kds-card" in html
     assert 'id="breakfastKdsDetailsModal"' in html
-    assert "data-next-status=\"preparing\"" in html
-    assert "data-next-status=\"ready\"" in html
-    assert "data-next-status=\"delivered\"" in html
+    assert "data-next-status=\"in_preparo\"" in html
+    assert "data-next-status=\"pronto\"" in html
+    assert "card-footer-row" in html
+    assert "breakfast-card-action" in html
     assert "requestBreakfastFullscreen" in html
+
+
+def test_breakfast_kds_template_landscape_touch_first_hierarchy():
+    root = Path(__file__).resolve().parents[1] / "app" / "templates"
+    html = (root / "kitchen_breakfast_kds.html").read_text(encoding="utf-8")
+    assert "grid-template-columns: repeat(4, minmax(0, 1fr));" in html
+    assert "grid-template-columns: repeat(3, minmax(0, 1fr));" in html
+    assert "kds-status-accent" in html
+    assert "alert-critical" in html
+    assert "Check-in" not in html
+    assert "--kds-bg-main" in html
+    assert "--kds-burnt-orange" in html
+    assert "--kds-blue-deep" in html
+    assert "--kds-bg-main: #171c24;" in html
+    assert ".status-pending { background: rgba(244, 191, 50, 0.3);" in html
+    assert ".status-preparing { background: rgba(242, 139, 60, 0.3);" in html
+    assert ".status-ready { background: rgba(53, 190, 104, 0.28);" in html
+    assert "card-top-row" in html
+    assert "card-body-row" in html
+    assert "metric-inline" in html
+    assert "compact-alert" in html
+    assert "summary-line" in html
+    assert "card-footer-row" in html
+    assert "align-self: flex-end;" in html
+    assert "summarizeList" in html
+    assert "min-height: 82px;" in html
+    assert "min-height: 86px;" in html
 
 
 def test_kds_data_and_status_flow(app_client, monkeypatch):
@@ -249,26 +278,218 @@ def test_breakfast_kds_data_and_status_flow(app_client, monkeypatch):
             }
 
     monkeypatch.setattr(kitchen_module, "load_room_occupancy", lambda: occupancy)
+    monkeypatch.setattr(
+        kitchen_module,
+        "load_table_orders",
+        lambda: {
+            "10": {
+                "status": "open",
+                "is_breakfast": True,
+                "opened_at": "19/03/2026 07:40",
+                "items": [
+                    {
+                        "id": "ord-1",
+                        "name": "Tapioca",
+                        "qty": 1,
+                        "category": "Café da Manhã",
+                        "created_at": "19/03/2026 07:45",
+                        "observations": ["Sem queijo"],
+                        "kds_status": "pending",
+                    }
+                ],
+            },
+            "11": {
+                "status": "open",
+                "is_breakfast": True,
+                "opened_at": "19/03/2026 12:10",
+                "items": [
+                    {
+                        "id": "ord-2",
+                        "name": "Omelete",
+                        "qty": 1,
+                        "category": "Café da Manhã",
+                        "created_at": "19/03/2026 12:15",
+                        "observations": [],
+                        "kds_status": "pending",
+                    }
+                ],
+            },
+        },
+    )
     monkeypatch.setattr(kitchen_module, "ReservationService", lambda: _BreakfastServiceStub())
-    monkeypatch.setattr(kitchen_module, "_load_breakfast_kds_store", lambda: {"status_by_date": {}})
-    monkeypatch.setattr(kitchen_module, "_save_breakfast_kds_store", lambda payload: saved_store.update(payload))
+    monkeypatch.setattr(kitchen_module, "_load_breakfast_kds_store", lambda: {"status_by_date": {}, "history_by_date": {}})
+    monkeypatch.setattr(kitchen_module, "_svc_get_statuses_for_day", lambda store, date_key: {"2": {"status": "pronto"}})
+    monkeypatch.setattr(
+        kitchen_module,
+        "_svc_get_room_history_for_day",
+        lambda store, date_key, room: [{"status": "in_preparo", "at": "19/03/2026 07:10", "by": "carlos", "source": "manual"}] if room == "12" else [],
+    )
+    monkeypatch.setattr(
+        kitchen_module,
+        "_svc_update_breakfast_status",
+        lambda room, status, user, source="manual", context=None: (
+            saved_store.update({"room": room, "status": status, "user": user, "source": source, "context": context})
+            or {"success": True, "room": room, "status": status, "previous_status": "pending", "changed": True}
+        ),
+    )
 
     resp = app_client.get("/kitchen/breakfast-kds/data")
     assert resp.status_code == 200
     payload = resp.get_json()
     assert payload["success"] is True
     rooms = payload["data"]["rooms"]
-    assert rooms[0]["room"] == "2"
-    assert rooms[0]["special"] == "🎉"
-    assert rooms[1]["room"] == "12"
+    assert len(rooms) == 1
+    assert rooms[0]["room"] == "12"
+    assert rooms[0]["status"] == "pending"
+    assert rooms[0]["status_history"][0]["status"] == "in_preparo"
+    assert payload["data"]["summary"]["visible_rooms"] == 1
+    assert payload["data"]["summary"]["statuses"]["pronto"] == 1
+    assert payload["data"]["summary"]["restaurant_orders"] == 1
+    assert payload["data"]["restaurant_orders"][0]["table_id"] == "10"
+    assert payload["data"]["restaurant_orders"][0]["item"] == "Tapioca"
 
     resp_update = app_client.post("/kitchen/breakfast-kds/update_status", json={"room": "12", "status": "ready"})
     assert resp_update.status_code == 200
     out = resp_update.get_json()
     assert out["success"] is True
-    assert out["status"] == "ready"
-    day_map = next(iter(saved_store["status_by_date"].values()))
-    assert day_map["12"]["status"] == "ready"
+    assert out["status"] == "pronto"
+    assert saved_store["room"] == "12"
+    assert saved_store["status"] == "pronto"
+    assert saved_store["source"] == "kitchen_breakfast_manual"
+
+
+def test_collect_breakfast_restaurant_orders_applies_time_window_and_match(monkeypatch):
+    now_ref = kitchen_module.datetime(2026, 3, 19, 9, 0)
+    monkeypatch.setattr(
+        kitchen_module,
+        "load_table_orders",
+        lambda: {
+            "21": {
+                "status": "open",
+                "is_breakfast": False,
+                "opened_at": "19/03/2026 08:00",
+                "items": [
+                    {
+                        "id": "i-1",
+                        "name": "Tapioca de queijo",
+                        "qty": 1,
+                        "category": "Lanches",
+                        "created_at": "19/03/2026 08:12",
+                        "observations": [],
+                        "kds_status": "pending",
+                    },
+                    {
+                        "id": "i-2",
+                        "name": "Filé",
+                        "qty": 1,
+                        "category": "Pratos",
+                        "created_at": "19/03/2026 08:14",
+                        "observations": [],
+                        "kds_status": "pending",
+                    },
+                ],
+            },
+            "22": {
+                "status": "open",
+                "is_breakfast": True,
+                "opened_at": "19/03/2026 11:10",
+                "items": [
+                    {
+                        "id": "i-3",
+                        "name": "Cuscuz",
+                        "qty": 1,
+                        "category": "Café da Manhã",
+                        "created_at": "19/03/2026 11:12",
+                        "observations": [],
+                        "kds_status": "pending",
+                    }
+                ],
+            },
+        },
+    )
+
+    rows = kitchen_module._collect_breakfast_restaurant_orders(now=now_ref)
+    assert len(rows) == 1
+    assert rows[0]["table_id"] == "21"
+    assert rows[0]["item"] == "Tapioca de queijo"
+    assert rows[0]["time"] == "08:12"
+
+
+def test_breakfast_dev_test_orders_route_is_dev_only_and_reversible(app_client, monkeypatch):
+    _login(app_client)
+    app_client.application.config["ALMAREIA_RUNTIME_ENV"] = "production"
+    denied = app_client.post("/kitchen/breakfast-kds/dev-test-orders", json={"action": "seed"})
+    assert denied.status_code == 403
+
+    app_client.application.config["ALMAREIA_RUNTIME_ENV"] = "development"
+    state = {}
+    saved = []
+
+    monkeypatch.setattr(kitchen_module, "load_table_orders", lambda: state)
+    monkeypatch.setattr(
+        kitchen_module,
+        "save_table_orders",
+        lambda payload: saved.append(json.loads(json.dumps(payload))) or state.clear() or state.update(payload),
+    )
+
+    seeded = app_client.post("/kitchen/breakfast-kds/dev-test-orders", json={"action": "seed"})
+    assert seeded.status_code == 200
+    seeded_payload = seeded.get_json()
+    assert seeded_payload["success"] is True
+    assert len(seeded_payload["tables"]) == 4
+    assert all(str(t).startswith("DEV_CAFE_TEST_") for t in seeded_payload["tables"])
+    assert len(state) == 4
+
+    cleared = app_client.post("/kitchen/breakfast-kds/dev-test-orders", json={"action": "clear"})
+    assert cleared.status_code == 200
+    cleared_payload = cleared.get_json()
+    assert cleared_payload["success"] is True
+    assert len(cleared_payload["removed_tables"]) == 4
+    assert state == {}
+    assert len(saved) >= 2
+
+
+def test_breakfast_kds_service_auto_set_in_preparo_safe_matching(monkeypatch):
+    now_ref = kitchen_module.datetime(2026, 3, 20, 7, 30)
+    monkeypatch.setattr(breakfast_kds_service, "build_today_breakfast_candidates", lambda now=None: [
+        {"room": "12", "guest_main": "Ana Clara", "guest_key": "ana clara", "reservation_id": "R12"},
+        {"room": "13", "guest_main": "Ana Clara", "guest_key": "ana clara", "reservation_id": "R13"},
+    ])
+    monkeypatch.setattr(
+        breakfast_kds_service,
+        "load_breakfast_kds_store",
+        lambda: {"status_by_date": {now_ref.strftime("%Y-%m-%d"): {}}, "history_by_date": {}},
+    )
+    updates = []
+    monkeypatch.setattr(
+        breakfast_kds_service,
+        "update_breakfast_status",
+        lambda room, status, user, source="manual", context=None, now=None: (
+            updates.append({"room": room, "status": status, "user": user, "source": source, "context": context}) or
+            {"success": True, "room": room, "status": status, "changed": True}
+        ),
+    )
+
+    by_room = breakfast_kds_service.auto_set_in_preparo_from_table_open(
+        customer_type="hospede",
+        customer_name="Ana Clara",
+        room_number="12",
+        user="operador",
+        now=now_ref,
+    )
+    assert by_room["result"] == "updated"
+    assert updates[0]["room"] == "12"
+    assert updates[0]["status"] == "in_preparo"
+
+    ambiguous = breakfast_kds_service.auto_set_in_preparo_from_table_open(
+        customer_type="passante",
+        customer_name="Ana Clara",
+        room_number="",
+        user="operador",
+        now=now_ref,
+    )
+    assert ambiguous["result"] == "ambiguous"
+    assert len(updates) == 1
 
 
 def test_kds_visual_lane_by_print_destination(app_client, monkeypatch):
