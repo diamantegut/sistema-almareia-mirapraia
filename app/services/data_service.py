@@ -591,7 +591,45 @@ def save_stock_logs(data): return _save_json(STOCK_LOGS_FILE, data)
 from app.services.stock_security_service import StockSecurityService
 from app.services.menu_security_service import MenuSecurityService
 
-def load_products(): return _load_json(PRODUCTS_FILE, [])
+def load_products():
+    canonical_path = _canonical_write_path(PRODUCTS_FILE)
+    products = _load_json(canonical_path, [])
+    canonical_count = len(products) if isinstance(products, list) else 0
+    fallback_used = False
+    legacy_count = 0
+    source = "canonical"
+    if not isinstance(products, list):
+        products = []
+        canonical_count = 0
+    legacy_path = get_legacy_root_json_path('products.json')
+    try:
+        if canonical_count == 0 and os.path.abspath(str(legacy_path)) != os.path.abspath(str(canonical_path)) and os.path.exists(legacy_path):
+            legacy_products = _load_json(legacy_path, [])
+            if isinstance(legacy_products, list):
+                legacy_count = len(legacy_products)
+                if legacy_count > 0:
+                    products = legacy_products
+                    fallback_used = True
+                    source = "legacy_root"
+                    logging.warning(
+                        "products_load_fallback_using_legacy canonical_path=%s legacy_path=%s canonical_count=%s legacy_count=%s",
+                        canonical_path,
+                        legacy_path,
+                        canonical_count,
+                        legacy_count,
+                    )
+    except Exception as e:
+        logging.error(f"products_load_fallback_error canonical_path={canonical_path} legacy_path={legacy_path} error={e}")
+    logging.info(
+        "products_load_source source=%s canonical_path=%s legacy_path=%s canonical_count=%s legacy_count=%s fallback_used=%s",
+        source,
+        canonical_path,
+        legacy_path,
+        canonical_count,
+        legacy_count,
+        fallback_used,
+    )
+    return products
 
 from app.utils.lock import file_lock
 from app.services.system_config_manager import PRODUCTS_FILE
@@ -599,7 +637,7 @@ from app.services.system_config_manager import PRODUCTS_FILE
 def save_products(data):
     return secure_save_products(data, user_id='Sistema')
 
-def secure_save_products(new_products, user_id='Sistema'):
+def secure_save_products(new_products, user_id='Sistema', allow_empty_overwrite=False):
     """
     Securely saves products with validation, auditing, and integrity checks.
     """
@@ -694,6 +732,12 @@ def secure_save_products(new_products, user_id='Sistema'):
                 changes_detected = True
                 StockSecurityService.log_audit('DELETE', user_id, old_id, old_p)
 
+        if len(processed_products) == 0 and len(old_products) > 0 and not bool(allow_empty_overwrite):
+            msg = f"Bloqueio de integridade: tentativa de sobrescrever products.json com lista vazia (old_count={len(old_products)})."
+            logging.error(msg)
+            StockSecurityService.log_audit('EMPTY_OVERWRITE_BLOCKED', user_id, 'ALL', {'message': msg})
+            raise ValueError(msg)
+
         # 3.1. Detect Bulk Changes (Anti-Overwrite)
         try:
             is_bulk, bulk_details = StockSecurityService.detect_bulk_changes(old_products, processed_products)
@@ -710,6 +754,15 @@ def secure_save_products(new_products, user_id='Sistema'):
         if changes_detected:
             # Create Checkpoint periodically or on critical changes? 
             # Let's do standard backup first
+            canonical_products_path = _canonical_write_path(PRODUCTS_FILE)
+            logging.info(
+                "products_save_write target_path=%s old_count=%s new_count=%s changes_detected=%s user=%s",
+                canonical_products_path,
+                len(old_products),
+                len(processed_products),
+                changes_detected,
+                user_id,
+            )
             _backup_before_write(PRODUCTS_FILE)
             return _save_json_atomic(PRODUCTS_FILE, processed_products)
         

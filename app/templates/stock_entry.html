@@ -14,9 +14,6 @@
             <button type="button" class="btn btn-outline-secondary" onclick="openHelpModal()">
                 <i class="bi bi-question-circle"></i> Ajuda
             </button>
-            <button type="button" class="btn btn-outline-primary" onclick="saveDraft()">
-                <i class="bi bi-save"></i> Salvar Rascunho
-            </button>
             <div class="dropdown">
                 <button class="btn btn-primary dropdown-toggle" type="button" id="importDropdown" data-bs-toggle="dropdown">
                     <i class="bi bi-cloud-upload"></i> Importar
@@ -31,6 +28,385 @@
     </div>
     
     <input type="file" id="xmlFile" accept=".xml" style="display: none;" onchange="handleXmlUpload(this)">
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <div class="row g-3 align-items-center">
+                <div class="col-lg-3">
+                    <div class="small text-muted">Saúde da integração</div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-{{ nfe_sync_status.color }}">{{ nfe_sync_status.label }}</span>
+                        <span class="fw-semibold">{{ nfe_sync_status.last_sync_result or '-' }}</span>
+                    </div>
+                    <div class="small text-muted mt-2">Última sincronização: {{ nfe_sync_state.ultima_consulta_em[:19]|replace('T', ' ') if nfe_sync_state.ultima_consulta_em else '-' }}</div>
+                    <div class="small text-muted">Último sucesso: {{ nfe_sync_state.ultimo_sucesso_em[:19]|replace('T', ' ') if nfe_sync_state.ultimo_sucesso_em else '-' }}</div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="small text-muted">Pendências operacionais</div>
+                    <div class="fw-semibold">{{ nfe_sync_status.pending_action_count or 0 }} ação sugerida / {{ nfe_sync_status.pending_gaps or 0 }} gap(s)</div>
+                    <div class="small text-muted mt-2">Cooldown: {{ nfe_sync_state.cooldown_ate[:19]|replace('T', ' ') if nfe_sync_state.cooldown_ate else 'Livre' }}</div>
+                    <div class="small text-muted">Último erro: {{ nfe_sync_state.ultimo_erro_resumo or '-' }}</div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="small text-muted">Progresso NSU</div>
+                    <div class="fw-semibold">ultNSU {{ nfe_sync_state.ultimo_nsu_processado or '0' }} / maxNSU {{ nfe_sync_state.max_nsu_recebido or '0' }}</div>
+                    <div class="small text-muted mt-2">Agenda ativa: {{ (nfe_scheduler_plan.windows or [])|join(', ') }}</div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="small text-muted mb-2">Próxima ação</div>
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-sm btn-primary" onclick="syncNfeXmls(this)">Sincronização assistida</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="openNfeList()">Consultar notas na SEFAZ</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h6 class="mb-0 text-primary"><i class="bi bi-link-45deg me-2"></i>Gaps de sincronização</h6>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-warning text-dark">{{ nfe_sync_status.pending_action_count or 0 }} ação sugerida / {{ nfe_sync_status.pending_gaps or 0 }} em análise</span>
+                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#syncGapsPanel">Mostrar/ocultar</button>
+            </div>
+        </div>
+        <div class="table-responsive collapse" id="syncGapsPanel">
+            <table class="table table-sm table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr><th>NSU</th><th>Status</th><th>Detectado em</th><th>Última atualização</th><th>Ação</th></tr>
+                </thead>
+                <tbody>
+                    {% for gap in nfe_gaps %}
+                    <tr>
+                        <td>{{ gap.nsu }}</td>
+                        <td><span class="badge bg-secondary">{{ gap.classification or gap.status }}</span></td>
+                        <td>{{ (gap.detected_at or '')[:19]|replace('T', ' ') }}</td>
+                        <td>{{ (gap.updated_at or gap.last_seen_at or '')[:19]|replace('T', ' ') }}</td>
+                        <td>
+                            {% if gap.status == 'pending' %}
+                            <button type="button" class="btn btn-sm btn-outline-primary recover-gap-btn" onclick="recoverGapNsu(this, '{{ gap.nsu }}')">Recuperar NSU</button>
+                            {% else %}
+                            <span class="text-muted small">Sem ação</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not nfe_gaps %}
+                    <tr><td colspan="5" class="text-center text-muted py-3">Sem gaps de NSU registrados.</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h6 class="mb-0 text-primary"><i class="bi bi-clock-history me-2"></i>Histórico de sincronizações</h6>
+            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#syncHistoryPanel">Mostrar/ocultar</button>
+        </div>
+        <div class="table-responsive collapse" id="syncHistoryPanel">
+            <table class="table table-sm table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr><th>Data</th><th>Correlation</th><th>ultNSU</th><th>maxNSU</th><th>Novos</th><th>Ignorados</th><th>Gaps</th><th>Duração</th><th>Resultado</th><th>Detalhes</th></tr>
+                </thead>
+                <tbody>
+                    {% for row in nfe_sync_audit %}
+                    <tr>
+                        <td>{{ (row.finished_at or row.started_at or '')[:19]|replace('T', ' ') }}</td>
+                        <td><small class="font-monospace">{{ row.correlation_id }}</small></td>
+                        <td>{{ row.ult_nsu_enviado or '-' }}</td>
+                        <td>{{ row.max_nsu_recebido or '-' }}</td>
+                        <td>{{ (row.nsus_processados or [])|length }}</td>
+                        <td>{{ (row.nsus_ignorados or [])|length }}</td>
+                        <td>{{ (row.gaps_detected or [])|length }}</td>
+                        <td>{{ "%.2f"|format((row.duration_ms|default(0, true) / 1000.0)) }}s</td>
+                        <td><span class="badge {% if row.result == 'success' %}bg-success{% elif row.result == 'error' %}bg-danger{% else %}bg-warning text-dark{% endif %}">{{ row.result }}</span></td>
+                        <td>
+                            <details>
+                                <summary class="small">expandir</summary>
+                                <div class="small text-muted">NSUs processados: {{ (row.nsus_processados or [])|join(', ') or '-' }}</div>
+                                <div class="small text-muted">NSUs ignorados: {{ (row.nsus_ignorados or [])|join(', ') or '-' }}</div>
+                                <div class="small text-muted">Erro: {{ row.error or '-' }}</div>
+                            </details>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not nfe_sync_audit %}
+                    <tr><td colspan="10" class="text-center text-muted py-3">Sem histórico de sincronização.</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h6 class="mb-0 text-primary"><i class="bi bi-inboxes me-2"></i>Fila operacional de NF-es locais</h6>
+            <form method="GET" class="d-flex gap-2">
+                <input class="form-control form-control-sm" name="supplier" placeholder="Fornecedor" value="{{ nfe_filters.supplier }}">
+                <input class="form-control form-control-sm" name="number" placeholder="Nº nota" value="{{ nfe_filters.number }}">
+                <select class="form-select form-select-sm" name="status">
+                    <option value="">Todos status</option>
+                    <option value="pending_conference" {% if nfe_filters.status == 'pending_conference' %}selected{% endif %}>Pendentes</option>
+                    <option value="in_conference" {% if nfe_filters.status == 'in_conference' %}selected{% endif %}>Em conferência</option>
+                    <option value="conferenced" {% if nfe_filters.status == 'conferenced' %}selected{% endif %}>Conferidas</option>
+                    <option value="received_not_stocked" {% if nfe_filters.status == 'received_not_stocked' %}selected{% endif %}>Recebidas pendentes</option>
+                    <option value="imported" {% if nfe_filters.status == 'imported' %}selected{% endif %}>Importadas</option>
+                    <option value="error" {% if nfe_filters.status == 'error' %}selected{% endif %}>Erro</option>
+                </select>
+                <button class="btn btn-sm btn-outline-secondary">Filtrar</button>
+            </form>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr><th>Data</th><th>Fornecedor</th><th>Nº</th><th>Chave</th><th>Valor</th><th>Status</th><th>Fornecedor</th><th>Itens</th><th>Ações</th></tr>
+                </thead>
+                <tbody>
+                    {% for note in nfe_queue %}
+                    <tr>
+                        <td>{{ (note.data_emissao or note.downloaded_at or '')[:10] }}</td>
+                        <td>{{ note.nome_emitente }}</td>
+                        <td>{{ note.numero_nfe or '-' }}</td>
+                        <td><small class="font-monospace">{{ note.chave_nfe or '-' }}</small></td>
+                        <td>R$ {{ "%.2f"|format(note.valor_total|default(0, true)) }}</td>
+                        <td><span class="badge bg-secondary">{{ note.status }}</span></td>
+                        <td>
+                            {% if note.status_match_fornecedor == 'auto_matched' %}
+                            <span class="badge bg-success">Fornecedor identificado</span>
+                            {% elif note.status_match_fornecedor == 'manual_matched' %}
+                            <span class="badge bg-info text-dark">Fornecedor vinculado</span>
+                            {% else %}
+                            <span class="badge bg-warning text-dark">Pendente de vínculo</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% set pending_items = note.item_pending_count|default(0, true) %}
+                            {% if pending_items > 0 %}
+                            <span class="badge bg-warning text-dark">{{ pending_items }} pendentes</span>
+                            {% else %}
+                            <span class="badge bg-success">Pronto</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="d-flex gap-1 flex-wrap">
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick='loadRepositoryNfe({{ (note.chave_nfe or "")|tojson }}, this)'>Lançar em formulário</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick='openNfeConferenceModal({{ (note.chave_nfe or "")|tojson }}, this)'>Ver detalhes</button>
+                                <button type="button" class="btn btn-sm btn-outline-warning" onclick='updateNfeConference({{ (note.chave_nfe or "")|tojson }}, "in_conference", this)'>Iniciar conferência</button>
+                                <button type="button" class="btn btn-sm btn-outline-success" onclick='updateNfeConference({{ (note.chave_nfe or "")|tojson }}, "conferenced", this)'>Concluir conferência</button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not nfe_queue %}
+                    <tr><td colspan="9" class="text-center text-muted py-4">Nenhuma NF-e local no filtro atual.</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h6 class="mb-0 text-warning"><i class="bi bi-hourglass-split me-2"></i>Recebidas aguardando lançamento</h6>
+            <span class="badge bg-warning text-dark">{{ (nfe_received_pending_queue or [])|length }} pendente(s)</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr><th>Data</th><th>Fornecedor</th><th>Chave</th><th>Valor</th><th>Recebido por</th><th>Status</th><th>Ações</th></tr>
+                </thead>
+                <tbody>
+                    {% for note in nfe_received_pending_queue %}
+                    <tr>
+                        <td>{{ (note.received_not_stocked_at or note.last_seen_at or '')[:19]|replace('T', ' ') }}</td>
+                        <td>{{ note.nome_emitente }}</td>
+                        <td><small class="font-monospace">{{ note.chave_nfe or '-' }}</small></td>
+                        <td>R$ {{ "%.2f"|format(note.valor_total|default(0, true)) }}</td>
+                        <td>{{ note.received_not_stocked_by or '-' }}</td>
+                        <td><span class="badge bg-warning text-dark">Recebida sem estoque</span></td>
+                        <td>
+                            <div class="d-flex gap-1 flex-wrap">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick='openNfeConferenceModal({{ (note.chave_nfe or "")|tojson }}, this)'>Abrir</button>
+                                <button type="button" class="btn btn-sm btn-outline-success" onclick='approvePendingReceiptForStock({{ (note.chave_nfe or "")|tojson }}, this)'>Aprovar para estoque</button>
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick='cancelPendingReceiptState({{ (note.chave_nfe or "")|tojson }}, this)'>Cancelar</button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not nfe_received_pending_queue %}
+                    <tr><td colspan="7" class="text-center text-muted py-4">Nenhuma nota recebida pendente de lançamento.</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h6 class="mb-0 text-dark"><i class="bi bi-shield-check me-2"></i>Aguardando aprovação</h6>
+            <span class="badge bg-dark">{{ (approval_queue or [])|length }} registro(s)</span>
+        </div>
+        <div class="card-body border-bottom">
+            <form method="GET" class="row g-2 align-items-end">
+                <div class="col-md-2">
+                    <label class="form-label small text-muted">Origem</label>
+                    <select class="form-select form-select-sm" name="approval_origin">
+                        <option value="" {% if not approval_filters.origin %}selected{% endif %}>Todas</option>
+                        <option value="nfe" {% if approval_filters.origin == 'nfe' %}selected{% endif %}>NF-e</option>
+                        <option value="manual_entry" {% if approval_filters.origin == 'manual_entry' %}selected{% endif %}>Manual</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small text-muted">Status</label>
+                    <select class="form-select form-select-sm" name="approval_status">
+                        <option value="pending" {% if approval_filters.status == 'pending' %}selected{% endif %}>Recebida sem lançar</option>
+                        <option value="approved" {% if approval_filters.status == 'approved' %}selected{% endif %}>Aprovada</option>
+                        <option value="rejected" {% if approval_filters.status == 'rejected' %}selected{% endif %}>Rejeitada</option>
+                        <option value="all" {% if approval_filters.status == 'all' %}selected{% endif %}>Todas</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small text-muted">Fornecedor</label>
+                    <input class="form-control form-control-sm" name="approval_supplier" value="{{ approval_filters.supplier or '' }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small text-muted">Responsável</label>
+                    <input class="form-control form-control-sm" name="approval_user" value="{{ approval_filters.user or '' }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small text-muted">De</label>
+                    <input type="date" class="form-control form-control-sm" name="approval_start_date" value="{{ approval_filters.start_date or '' }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small text-muted">Até</label>
+                    <input type="date" class="form-control form-control-sm" name="approval_end_date" value="{{ approval_filters.end_date or '' }}">
+                </div>
+                <div class="col-12 d-flex justify-content-end gap-2 mt-2">
+                    <button type="submit" class="btn btn-sm btn-outline-primary">Filtrar</button>
+                    <a href="{{ url_for('stock.stock_entry') }}" class="btn btn-sm btn-outline-secondary">Limpar</a>
+                </div>
+            </form>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr><th>Origem</th><th>Data</th><th>Fornecedor</th><th>ID/Chave</th><th>Valor</th><th>Responsável</th><th>Status</th><th>Observação</th><th>Ações</th></tr>
+                </thead>
+                <tbody>
+                    {% for row in approval_queue %}
+                    <tr>
+                        <td><span class="badge {{ 'bg-primary' if row.origin_type == 'nfe' else 'bg-secondary' }}">{{ 'NF-e' if row.origin_type == 'nfe' else 'Manual' }}</span></td>
+                        <td>{{ (row.entry_date or '')[:19]|replace('T', ' ') }}</td>
+                        <td>{{ row.supplier_name or '-' }}</td>
+                        <td><small class="font-monospace">{{ row.entry_id or '-' }}</small></td>
+                        <td>R$ {{ "%.2f"|format(row.total_value|default(0, true)) }}</td>
+                        <td>{{ row.responsible_user or '-' }}</td>
+                        <td>
+                            {% if row.status == 'received_not_stocked' %}<span class="badge bg-warning text-dark">Recebida sem lançar</span>{% endif %}
+                            {% if row.status == 'approved_for_stock' %}<span class="badge bg-info text-dark">Aprovada</span>{% endif %}
+                            {% if row.status == 'rejected' %}<span class="badge bg-danger">Rejeitada</span>{% endif %}
+                        </td>
+                        <td>{{ row.observation or '-' }}</td>
+                        <td>
+                            <div class="d-flex gap-1 flex-wrap">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick='openApprovalEntryDetail({{ (row.origin_type or "")|tojson }}, {{ (row.entry_id or "")|tojson }})'>Abrir detalhes</button>
+                                {% if row.status != 'approved_for_stock' %}
+                                <button type="button" class="btn btn-sm btn-outline-success" onclick='decideApprovalEntry({{ (row.origin_type or "")|tojson }}, {{ (row.entry_id or "")|tojson }}, "approve", this)'>Aprovar</button>
+                                {% endif %}
+                                {% if row.status != 'approved_for_stock' %}
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick='decideApprovalEntry({{ (row.origin_type or "")|tojson }}, {{ (row.entry_id or "")|tojson }}, "approve_asset", this)'>Aprovar para ativo</button>
+                                {% endif %}
+                                {% if row.status != 'received_not_stocked' %}
+                                <button type="button" class="btn btn-sm btn-outline-warning" onclick='decideApprovalEntry({{ (row.origin_type or "")|tojson }}, {{ (row.entry_id or "")|tojson }}, "pending", this)'>Manter pendente</button>
+                                {% endif %}
+                                {% if row.status != 'rejected' %}
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick='decideApprovalEntry({{ (row.origin_type or "")|tojson }}, {{ (row.entry_id or "")|tojson }}, "reject", this)'>Rejeitar</button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not approval_queue %}
+                    <tr><td colspan="9" class="text-center text-muted py-4">Nenhuma entrada aguardando aprovação no filtro atual.</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h6 class="mb-0 text-primary"><i class="bi bi-clipboard-plus me-2"></i>Entradas sem nota fiscal</h6>
+            <button type="button" class="btn btn-sm btn-outline-primary" onclick="openManualEntryModal()">Nova entrada sem nota</button>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr><th>Data</th><th>Fornecedor</th><th>Documento</th><th>Status</th><th>Rastro</th><th>Itens</th><th>Última edição</th><th>Responsável</th><th>Ações</th></tr>
+                </thead>
+                <tbody>
+                    {% for entry in manual_entries %}
+                    <tr>
+                        <td>{{ (entry.entry_date or entry.created_at or '')[:10] }}</td>
+                        <td>{{ entry.supplier_name or '-' }}</td>
+                        <td>{{ entry.document_type }} {{ entry.document_number }}</td>
+                        <td>
+                            {% if entry.status == 'draft' %}
+                            <span class="badge bg-secondary">Rascunho</span>
+                            {% elif entry.status == 'received_not_stocked' %}
+                            <span class="badge bg-warning text-dark">Recebida sem estoque</span>
+                            {% elif entry.status == 'approved_for_stock' %}
+                            <span class="badge bg-info text-dark">Aprovada para estoque</span>
+                            {% elif entry.status == 'imported' %}
+                            <span class="badge bg-success">Importada</span>
+                            {% elif entry.status == 'imported_asset' %}
+                            <span class="badge bg-primary">Registrada em ativos</span>
+                            {% elif entry.status == 'canceled' %}
+                            <span class="badge bg-dark">Cancelada</span>
+                            {% else %}
+                            <span class="badge bg-secondary">{{ entry.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge {{ 'bg-success' if entry.financial_trace else 'bg-secondary' }}">Financeiro</span>
+                            <span class="badge {{ 'bg-success' if entry.stock_applied else 'bg-warning text-dark' }}">Estoque</span>
+                        </td>
+                        <td>{{ (entry.get('items', []) or [])|length }}</td>
+                        <td>{{ (entry.updated_at or entry.created_at or '')[:19]|replace('T', ' ') }}</td>
+                        <td>{{ entry.updated_by or entry.created_by or '-' }}</td>
+                        <td>
+                            <div class="d-flex gap-1">
+                                {% if entry.status == 'draft' %}
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="openManualEntryModal('{{ entry.id }}')">Abrir/Editar</button>
+                                {% endif %}
+                                {% if entry.status in ['draft', 'received_not_stocked'] %}
+                                <button type="button" class="btn btn-sm btn-outline-warning" onclick="updateManualEntryStatus('{{ entry.id }}', 'received_not_stocked')">Recebida sem lançar</button>
+                                {% endif %}
+                                {% if entry.status in ['draft', 'received_not_stocked'] %}
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="updateManualEntryStatus('{{ entry.id }}', 'approved_for_stock')">Aprovar</button>
+                                {% endif %}
+                                {% if entry.status in ['approved_for_stock', 'draft'] %}
+                                <button type="button" class="btn btn-sm btn-outline-success" onclick="updateManualEntryStatus('{{ entry.id }}', 'imported')">Lançar estoque</button>
+                                {% endif %}
+                                {% if entry.status in ['approved_for_stock', 'draft'] %}
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="updateManualEntryStatus('{{ entry.id }}', 'imported_asset')">Enviar para ativos</button>
+                                {% endif %}
+                                {% if entry.status not in ['imported', 'canceled'] %}
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="updateManualEntryStatus('{{ entry.id }}', 'canceled')">Cancelar</button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not manual_entries %}
+                    <tr><td colspan="9" class="text-center text-muted py-4">Nenhuma entrada manual registrada.</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 
     <!-- Main Form Grid -->
     <form id="entryForm" onsubmit="event.preventDefault(); submitEntry();">
@@ -385,10 +761,197 @@
     </div>
 </div>
 
+<div class="modal fade" id="nfeConferenceModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Conferência da NF-e</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="conferenceAccessKey">
+                <div class="border rounded p-2 mb-3">
+                    <div class="row g-2 small">
+                        <div class="col-md-6"><span class="text-muted">Fornecedor:</span> <span id="conferenceMetaSupplier" class="fw-semibold">-</span></div>
+                        <div class="col-md-3"><span class="text-muted">Nota:</span> <span id="conferenceMetaInvoice" class="fw-semibold">-</span></div>
+                        <div class="col-md-3"><span class="text-muted">Total:</span> <span id="conferenceMetaTotal" class="fw-semibold">R$ 0,00</span></div>
+                        <div class="col-md-12"><span class="text-muted">Tipo de documento:</span> <span id="conferenceDocumentBadge" class="badge bg-secondary">-</span> <span class="ms-2 text-muted">Completude:</span> <span id="conferenceCompletenessBadge" class="badge bg-secondary">-</span></div>
+                    </div>
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label small text-muted">Fornecedor identificado</label>
+                        <select id="conferenceSupplierId" class="form-select form-select-sm"></select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small text-muted">Status fornecedor</label>
+                        <select id="conferenceSupplierStatus" class="form-select form-select-sm">
+                            <option value="auto_matched">auto_matched</option>
+                            <option value="manual_matched">manual_matched</option>
+                            <option value="not_matched">not_matched</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 d-grid">
+                        <button type="button" class="btn btn-sm btn-outline-primary mt-4" onclick="saveSupplierBinding()">Salvar vínculo fornecedor</button>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small text-muted">Confiança da sugestão</label>
+                        <div id="supplierSuggestionConfidence" class="fw-semibold">-</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small text-muted">Motivo da sugestão</label>
+                        <div id="supplierSuggestionReason" class="small text-muted">-</div>
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label small text-muted">Criar fornecedor novo (opcional)</label>
+                        <div class="input-group input-group-sm">
+                            <input id="conferenceNewSupplierName" class="form-control" placeholder="Nome do novo fornecedor">
+                            <button type="button" class="btn btn-outline-secondary" onclick="createSupplierFromNote()">Cadastrar fornecedor da nota</button>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="border rounded p-2 bg-white">
+                            <div class="small fw-semibold mb-1">Resumo do fornecedor</div>
+                            <div id="supplierFlowBadges" class="d-flex flex-wrap gap-1 mb-1"></div>
+                            <div id="supplierFlowDetails" class="small text-muted">Sem ações registradas nesta conferência.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="border rounded p-2 mb-3 bg-light">
+                    <div class="fw-semibold mb-1">Resumo inteligente da nota</div>
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                        <span id="conferenceGlobalStatusBadge" class="badge bg-secondary">Status global</span>
+                        <span id="conferenceGlobalStatusText" class="small text-muted">Aguardando análise operacional.</span>
+                    </div>
+                    <div id="conferenceSummaryText" class="small text-muted">-</div>
+                    <div id="conferenceOperationalBreakdown" class="small text-muted mt-1">Semáforo operacional aguardando atualização.</div>
+                    <div id="conferenceCriteriaStatus" class="small mt-2 d-grid gap-1"></div>
+                    <div id="conferenceSummaryCta" class="small fw-semibold mt-1">-</div>
+                    <div class="d-flex flex-wrap gap-2 mt-2">
+                        <span id="conferenceReadinessBadge" class="badge bg-secondary">Status operacional</span>
+                        <span id="conferencePendingBadge" class="badge bg-secondary">Pendências: -</span>
+                    </div>
+                    <div id="conferenceLaunchHint" class="small text-muted mt-1">-</div>
+                    <div id="conferenceBlockReasons" class="small text-danger mt-1">-</div>
+                </div>
+                <div class="row g-2 mb-2">
+                    <div class="col-md-3">
+                        <label class="form-label small text-muted">Filtro de itens</label>
+                        <select id="conferenceItemFilter" class="form-select form-select-sm" onchange="applyConferenceItemFilter()">
+                            <option value="all">Todos</option>
+                            <option value="pending">Itens pendentes</option>
+                            <option value="low_confidence">Baixa confiança</option>
+                            <option value="divergence">Com divergência</option>
+                            <option value="linked">Já vinculados</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-grid">
+                        <label class="form-label small text-muted">Ação rápida</label>
+                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="activateQuickReviewMode()">Modo revisão rápida</button>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small text-muted">Resumo da revisão rápida</label>
+                        <div id="quickReviewSummary" class="small text-muted">Mostra itens pendentes, baixa confiança e divergências.</div>
+                    </div>
+                </div>
+                <div id="conferenceItemsWarning" class="alert alert-warning d-none py-2 small mb-2"></div>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead class="table-light">
+                            <tr><th>Descrição fiscal</th><th>Código</th><th>Qtd</th><th>Unidade</th><th>Vlr. unit.</th><th>Vlr. total</th><th>Insumo vinculado</th><th>Conversão</th><th>Status</th><th>Ação</th></tr>
+                        </thead>
+                        <tbody id="conferenceItemsBody"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-outline-info d-none" id="conferenceManifestBtn" onclick="registerConferenceManifestation(this)">Enviar Ciência da Operação</button>
+                <button type="button" class="btn btn-outline-primary d-none" id="conferenceTryFullXmlBtn" onclick="attemptFullXmlDownload(this)">Tentar obter XML completo</button>
+                <button type="button" class="btn btn-outline-warning d-none" id="conferenceMarkReceivedBtn" onclick="markConferenceReceivedNotStocked(this)">Recebida sem lançar</button>
+                <button type="button" class="btn btn-outline-success d-none" id="conferenceApproveLaunchBtn" onclick="approveAndLaunchConferenceToStock(this)">Aprovar e lançar</button>
+                <button type="button" class="btn btn-outline-success" id="conferenceConcludeBtn" onclick="updateNfeConference(document.getElementById('conferenceAccessKey').value,'conferenced', this)">Concluir conferência</button>
+                <button type="button" class="btn btn-primary" id="conferenceLaunchBtn" onclick="launchConferenceToStock(this)">Lançar entrada no estoque</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="manualEntryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="manualEntryModalTitle">Nova entrada sem nota fiscal</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="manualEntryId">
+                <div class="row g-2 mb-2">
+                    <div class="col-md-6">
+                        <label class="form-label">Fornecedor</label>
+                        <input id="manualSupplierName" class="form-control form-control-sm" placeholder="Nome do fornecedor">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Data</label>
+                        <input id="manualEntryDate" type="date" class="form-control form-control-sm">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Documento</label>
+                        <input id="manualDocNumber" class="form-control form-control-sm" placeholder="Número opcional">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Motivo/Observação</label>
+                        <input id="manualObservation" class="form-control form-control-sm" placeholder="Motivo da entrada sem nota">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Motivo da alteração (somente edição)</label>
+                        <input id="manualUpdatedReason" class="form-control form-control-sm" placeholder="Descreva o ajuste realizado no rascunho">
+                    </div>
+                </div>
+                <div class="border rounded p-2 mb-2">
+                    <div class="row g-2 align-items-end">
+                        <div class="col-md-3"><input id="manualItemName" class="form-control form-control-sm" placeholder="Item"></div>
+                        <div class="col-md-3">
+                            <select id="manualItemProductId" class="form-select form-select-sm">
+                                <option value="">Vincular insumo</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2"><input id="manualItemQty" type="number" step="0.001" class="form-control form-control-sm" placeholder="Qtd"></div>
+                        <div class="col-md-1"><input id="manualItemUnit" class="form-control form-control-sm" placeholder="UN"></div>
+                        <div class="col-md-1"><input id="manualItemFactor" type="number" step="0.0001" class="form-control form-control-sm" placeholder="Conv"></div>
+                        <div class="col-md-1"><input id="manualItemCost" type="number" step="0.01" class="form-control form-control-sm" placeholder="Custo"></div>
+                        <div class="col-md-1"><input id="manualItemDivergence" class="form-control form-control-sm" placeholder="Obs"></div>
+                        <div class="col-md-2">
+                            <select id="manualItemNature" class="form-select form-select-sm">
+                                <option value="stock_item">Item de estoque</option>
+                                <option value="asset_item">Item patrimonial</option>
+                            </select>
+                        </div>
+                        <div class="col-md-1 d-grid"><button type="button" class="btn btn-sm btn-outline-primary" onclick="addManualItem()">+</button></div>
+                    </div>
+                </div>
+                <ul id="manualItemsList" class="list-group small"></ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-outline-secondary" id="manualSaveDraftBtn" onclick="submitManualEntry('draft')">Salvar rascunho</button>
+                <button type="button" class="btn btn-outline-warning" id="manualMarkReceivedBtn" onclick="submitManualEntry('received_not_stocked')">Recebida sem lançar</button>
+                <button type="button" class="btn btn-primary" id="manualLaunchStockBtn" onclick="submitManualEntry('imported')">Lançar direto no estoque</button>
+                <button type="button" class="btn btn-outline-primary" id="manualLaunchAssetBtn" onclick="submitManualEntry('imported_asset')">Registrar como ativo</button>
+                <button type="button" class="btn btn-outline-danger d-none" id="manualCancelDraftBtn" onclick="cancelManualDraftFromModal()">Cancelar rascunho</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Data Injection -->
 <script type="application/json" id="products-data">
     {{ products | tojson | safe }}
 </script>
+<script type="application/json" id="suppliers-data">
+    {{ suppliers | tojson | safe }}
+</script>
+<datalist id="conferenceProductsDatalist"></datalist>
 
 <style>
     .border-dashed { border-style: dashed !important; }
@@ -404,7 +967,47 @@
     let items = [];
     let bills = [];
     let attachments = [];
+    let manualItems = [];
+    let conferenceItemsState = [];
+    let conferenceRawItems = [];
+    let conferenceContext = {};
+    let manualEditingEntryId = '';
+    let conferenceModalInstance = null;
+    let conferenceReprocessButtonRef = null;
     const productsDB = JSON.parse(document.getElementById('products-data').textContent || '[]');
+    const suppliersDataRaw = JSON.parse(document.getElementById('suppliers-data').textContent || '[]');
+
+    function normalizeSupplierOptions(options) {
+        const rows = Array.isArray(options) ? options : ((options && typeof options === 'object') ? Object.values(options) : []);
+        const normalized = [];
+        rows.forEach((s, index) => {
+            if (typeof s === 'string') {
+                const nameText = String(s || '').trim();
+                if (!nameText) return;
+                normalized.push({ id: `legacy-${index}-${nameText}`, name: nameText, trade_name: '', cnpj: '' });
+                return;
+            }
+            if (!s || typeof s !== 'object') return;
+            const nameText = String(s.name || s.trade_name || s.razao_social || s.nome || '').trim();
+            const idText = String(s.id || s.supplier_id || '').trim();
+            if (!nameText && !idText) return;
+            normalized.push({
+                id: idText || `legacy-${index}-${nameText || 'fornecedor'}`,
+                name: nameText || idText,
+                trade_name: String(s.trade_name || s.nome_fantasia || '').trim(),
+                cnpj: String(s.cnpj || s.cpf_cnpj || '').trim(),
+            });
+        });
+        return normalized;
+    }
+
+    function formatSupplierCnpj(cnpjRaw) {
+        const digits = String(cnpjRaw || '').replace(/\D/g, '');
+        if (digits.length !== 14) return String(cnpjRaw || '').trim();
+        return `${digits.slice(0,2)}.${digits.slice(2,5)}.${digits.slice(5,8)}/${digits.slice(8,12)}-${digits.slice(12,14)}`;
+    }
+
+    const suppliersData = normalizeSupplierOptions(suppliersDataRaw);
 
     // --- Initialization ---
     document.addEventListener('DOMContentLoaded', () => {
@@ -413,11 +1016,7 @@
         document.getElementById('entryDate').value = today;
         document.getElementById('issueDate').value = today;
 
-        // Auto-Save Timer (30s)
-        setInterval(saveDraft, 30000);
-        
-        // Restore Draft if exists
-        restoreDraft();
+        localStorage.removeItem('stock_entry_draft');
 
         // Populate Datalist
         const datalist = document.getElementById('productList');
@@ -428,16 +1027,25 @@
         });
         
         // Supplier Datalist (From suppliers variable)
-        const suppliers = JSON.parse('{{ (suppliers | default([])) | tojson | safe }}');
         const supplierList = document.getElementById('supplierList');
-        suppliers.forEach(s => {
+        suppliersData.forEach(s => {
             const option = document.createElement('option');
-            option.value = s.name; // Assuming s is an object now
+            option.value = String(s.name || '');
             supplierList.appendChild(option);
         });
 
         // Initialize one bill row
         if(bills.length === 0) addBill();
+        const manualToday = new Date().toISOString().split('T')[0];
+        const manualDateInput = document.getElementById('manualEntryDate');
+        if (manualDateInput) manualDateInput.value = manualToday;
+
+        const conferenceModalEl = document.getElementById('nfeConferenceModal');
+        if (conferenceModalEl) {
+            conferenceModalEl.addEventListener('hidden.bs.modal', () => {
+                cleanupConferenceBackdrop();
+            });
+        }
     });
 
     // --- Item Management ---
@@ -640,35 +1248,6 @@
     }
 
     // --- Helpers ---
-    function saveDraft() {
-        const data = {
-            header: {
-                number: document.getElementById('invoiceNumber').value,
-                supplier: document.getElementById('supplierName').value
-            },
-            items: items
-        };
-        localStorage.setItem('stock_entry_draft', JSON.stringify(data));
-        showToast('Rascunho salvo.', 'info');
-    }
-
-    function restoreDraft() {
-        const draft = localStorage.getItem('stock_entry_draft');
-        if (draft) {
-            try {
-                const data = JSON.parse(draft);
-                if (confirm('Rascunho encontrado. Deseja restaurar?')) {
-                    document.getElementById('invoiceNumber').value = data.header.number || '';
-                    document.getElementById('supplierName').value = data.header.supplier || '';
-                    items = data.items || [];
-                    renderItems();
-                } else {
-                    localStorage.removeItem('stock_entry_draft');
-                }
-            } catch(e) {}
-        }
-    }
-
     function handleXmlUpload(input) {
         const file = input.files[0];
         if (!file) return;
@@ -1000,6 +1579,24 @@
         .catch(err => showToast('Erro na busca: ' + err.message, 'danger'));
     }
 
+    function recoverGapNsu(button, nsu) {
+        const nsuValue = String(nsu || '').trim();
+        if (!nsuValue) return;
+        if (button) button.disabled = true;
+        showToast(`Recuperação assistida do NSU ${nsuValue} iniciada...`, 'info');
+        fetch(`/recover-nfe-dfe?nsu=${encodeURIComponent(nsuValue)}`)
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) throw new Error(data.error);
+            showToast(`NSU ${nsuValue} processado com sucesso.`, 'success');
+            window.location.reload();
+        })
+        .catch(err => showToast('Erro ao recuperar gap: ' + err.message, 'danger'))
+        .finally(() => {
+            if (button) button.disabled = false;
+        });
+    }
+
     function fillFormWithNfeData(data) {
         // Reuse logic from handleXmlUpload
         document.getElementById('supplierName').value = data.supplier;
@@ -1022,6 +1619,1591 @@
             });
         });
         renderItems();
+    }
+
+    const nfeActionLocks = {};
+
+    function parseJsonResponse(response) {
+        return response.text().then(text => {
+            let payload = {};
+            try {
+                payload = text ? JSON.parse(text) : {};
+            } catch (e) {
+                payload = { error: text || 'Resposta inválida do servidor.' };
+            }
+            if (!response.ok) {
+                const message = (payload.error || `Falha HTTP ${response.status}`) + buildTechnicalHint(payload);
+                throw new Error(message);
+            }
+            return payload;
+        });
+    }
+
+    function buildTechnicalHint(payload) {
+        const requestId = payload && payload.request_id ? String(payload.request_id) : '';
+        return requestId ? ` [request_id: ${requestId}]` : '';
+    }
+
+    function lockAction(button, lockKey) {
+        if (!lockKey) return true;
+        if (nfeActionLocks[lockKey]) return false;
+        nfeActionLocks[lockKey] = true;
+        if (button) button.disabled = true;
+        return true;
+    }
+
+    function unlockAction(button, lockKey) {
+        if (lockKey) nfeActionLocks[lockKey] = false;
+        if (button) button.disabled = false;
+    }
+
+    function getConferenceModalInstance() {
+        const modalEl = document.getElementById('nfeConferenceModal');
+        if (!modalEl) return null;
+        conferenceModalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+        return conferenceModalInstance;
+    }
+
+    function cleanupConferenceBackdrop() {
+        document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+        if (!document.querySelector('.modal.show')) {
+            document.body.classList.remove('modal-open');
+            document.body.style.removeProperty('overflow');
+            document.body.style.removeProperty('padding-right');
+        }
+    }
+
+    function setReprocessButtonLoading(isLoading) {
+        if (!conferenceReprocessButtonRef) return;
+        conferenceReprocessButtonRef.disabled = Boolean(isLoading);
+        conferenceReprocessButtonRef.textContent = isLoading ? 'Reprocessando...' : 'Reprocessar leitura local';
+    }
+
+    function loadRepositoryNfe(accessKey, triggerButton = null) {
+        if (!accessKey) {
+            showToast('Chave da nota não informada.', 'warning');
+            return;
+        }
+        const actionKey = `load:${String(accessKey)}`;
+        if (!lockAction(triggerButton, actionKey)) {
+            showToast('Carregamento já em andamento para esta NF-e.', 'info');
+            return;
+        }
+        console.log('[stock-entry] loadRepositoryNfe:click', { accessKey: String(accessKey) });
+        showToast('Carregando NF-e do repositório local...', 'info');
+        fetch('/stock/nfe/repository/load', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ access_key: accessKey })
+        })
+        .then(r => parseJsonResponse(r))
+        .then(data => {
+            console.log('[stock-entry] loadRepositoryNfe:response', { accessKey: String(accessKey), ok: true, request_id: data.request_id || '' });
+            if (data.error) throw new Error(data.error);
+            fillFormWithNfeData(data);
+            if (data.repository_note) {
+                const statusEl = document.getElementById('nfeStatusLabel');
+                if (statusEl) statusEl.textContent = data.repository_note.status_conferencia || '';
+            }
+            showToast('NF-e carregada para conferência e lançamento.', 'success');
+        })
+        .catch(err => {
+            console.log('[stock-entry] loadRepositoryNfe:error', { accessKey: String(accessKey), error: err.message });
+            showToast('Não foi possível carregar a conferência desta nota. ' + err.message, 'danger');
+        })
+        .finally(() => unlockAction(triggerButton, actionKey));
+    }
+
+    function updateNfeConference(accessKey, status, triggerButton = null) {
+        if (!accessKey) {
+            showToast('Chave da nota não informada.', 'warning');
+            return;
+        }
+        const actionKey = `status:${String(accessKey)}:${String(status || '')}`;
+        if (!lockAction(triggerButton, actionKey)) {
+            showToast('Atualização já em andamento para esta NF-e.', 'info');
+            return;
+        }
+        console.log('[stock-entry] updateNfeConference:click', { accessKey: String(accessKey), status: String(status || '') });
+        fetch('/stock/nfe/repository/conference', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ access_key: accessKey, status: status })
+        })
+        .then(r => parseJsonResponse(r))
+        .then(data => {
+            console.log('[stock-entry] updateNfeConference:response', { accessKey: String(accessKey), status: String(status || ''), ok: true, request_id: data.request_id || '' });
+            if (data.error) throw new Error(data.error);
+            if (String(status || '') === 'in_conference') {
+                showToast('Conferência iniciada. Abrindo detalhes da nota...', 'success');
+                openNfeConferenceModal(accessKey);
+                return;
+            }
+            showToast('Status de conferência atualizado.', 'success');
+            setTimeout(() => window.location.reload(), 700);
+        })
+        .catch(err => {
+            console.log('[stock-entry] updateNfeConference:error', { accessKey: String(accessKey), status: String(status || ''), error: err.message });
+            showToast('Não foi possível atualizar a conferência desta nota. ' + err.message, 'danger');
+        })
+        .finally(() => unlockAction(triggerButton, actionKey));
+    }
+
+    function openNfeConferenceModal(accessKey, triggerButton = null, reprocessLocal = false) {
+        if (!accessKey) {
+            showToast('Chave da nota não informada.', 'warning');
+            return;
+        }
+        const actionKey = `modal:${String(accessKey)}:${reprocessLocal ? 'reprocess' : 'load'}`;
+        if (!lockAction(triggerButton, actionKey)) {
+            showToast('Abertura de conferência já em andamento para esta NF-e.', 'info');
+            return;
+        }
+        console.log('[stock-entry] openNfeConferenceModal:click', {
+            accessKey: String(accessKey),
+            reprocessLocal: Boolean(reprocessLocal),
+            itemsBefore: Array.isArray(conferenceRawItems) ? conferenceRawItems.length : 0,
+            backdropsBefore: document.querySelectorAll('.modal-backdrop').length,
+        });
+        fetch('/stock/nfe/repository/load', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ access_key: accessKey, reprocess_local: Boolean(reprocessLocal) })
+        })
+        .then(r => parseJsonResponse(r))
+        .then(data => {
+            console.log('[stock-entry] openNfeConferenceModal:response', { accessKey: String(accessKey), ok: true, request_id: data.request_id || '' });
+            if (data.error) throw new Error(data.error);
+            document.getElementById('conferenceAccessKey').value = accessKey;
+            const supplierSelect = document.getElementById('conferenceSupplierId');
+            if (!supplierSelect) throw new Error('Campo conferenceSupplierId não encontrado no modal.');
+            const supplierOptionsFromApi = normalizeSupplierOptions(data.supplier_options);
+            let supplierOptions = supplierOptionsFromApi.length > 0 ? supplierOptionsFromApi : suppliersData;
+            const supplierMatchObj = data.supplier_match || {};
+            const suggestedOptions = Array.isArray(supplierMatchObj.options) ? supplierMatchObj.options : [];
+            const beforeSupplierOptions = supplierOptions.length;
+            supplierOptions = supplierOptions.filter(s => String(s.id || '').trim() && String(s.name || '').trim());
+            const suggestedIds = new Set(
+                [
+                    ...suggestedOptions.map(x => String(x.id || x.supplier_id || '').trim()),
+                    String(supplierMatchObj.supplier_id || '').trim(),
+                ].filter(Boolean)
+            );
+            const sortByName = (a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'pt-BR', { sensitivity: 'base' });
+            const prioritized = supplierOptions.filter(s => suggestedIds.has(String(s.id || '').trim())).sort(sortByName);
+            const others = supplierOptions.filter(s => !suggestedIds.has(String(s.id || '').trim())).sort(sortByName);
+            supplierOptions = [...prioritized, ...others];
+            const supplierOptionRows = supplierOptions.map(s => {
+                const cnpjLabel = formatSupplierCnpj(s.cnpj);
+                const tradeName = String(s.trade_name || '').trim();
+                const mainName = String(s.name || '');
+                const tradeSuffix = tradeName && tradeName.toLowerCase() !== mainName.toLowerCase() ? ` (${tradeName})` : '';
+                const cnpjSuffix = cnpjLabel ? ` — CNPJ: ${cnpjLabel}` : '';
+                return {
+                    value: String(s.id || ''),
+                    text: `${mainName}${tradeSuffix}${cnpjSuffix}`,
+                };
+            });
+            const hasTomSelect = Boolean(supplierSelect.tomselect);
+            if (hasTomSelect) {
+                const ts = supplierSelect.tomselect;
+                ts.clear(true);
+                ts.clearOptions();
+                ts.addOption({ value: '', text: 'Selecione um fornecedor cadastrado' });
+                supplierOptionRows.forEach(row => ts.addOption(row));
+                ts.refreshOptions(false);
+                ts.setValue('', true);
+            } else {
+                supplierSelect.innerHTML = '<option value="">Selecione um fornecedor cadastrado</option>';
+                supplierOptionRows.forEach(row => {
+                    const opt = document.createElement('option');
+                    opt.value = row.value;
+                    opt.textContent = row.text;
+                    supplierSelect.appendChild(opt);
+                });
+            }
+            const apiRawCount = Array.isArray(data.supplier_options)
+                ? data.supplier_options.length
+                : ((data.supplier_options && typeof data.supplier_options === 'object') ? Object.keys(data.supplier_options).length : 0);
+            const firstApi = supplierOptionsFromApi[0] || null;
+            const firstOptions = hasTomSelect
+                ? supplierOptionRows.slice(0, 5).map(o => ({ value: o.value, text: o.text }))
+                : Array.from(supplierSelect.options).slice(0, 5).map(o => ({ value: String(o.value || ''), text: String(o.text || '') }));
+            console.log('[stock-entry] modal_supplier_options_received_count', {
+                accessKey: String(accessKey),
+                modal_supplier_options_received_count: supplierOptionsFromApi.length,
+                supplier_options_payload_count: apiRawCount,
+                supplier_options_first_item: firstApi,
+            });
+            console.log('[stock-entry] supplier_options_pipeline', {
+                accessKey: String(accessKey),
+                suppliersDataRaw: Array.isArray(suppliersDataRaw) ? suppliersDataRaw.length : 0,
+                suppliersDataNormalized: Array.isArray(suppliersData) ? suppliersData.length : 0,
+                supplierOptionsApiRaw: apiRawCount,
+                supplierOptionsApiNormalized: supplierOptionsFromApi.length,
+                supplierOptionsBeforeFilter: beforeSupplierOptions,
+                supplierOptionsAfterFilter: supplierOptions.length,
+                selectOptionsCount: hasTomSelect ? supplierOptionRows.length + 1 : supplierSelect.options.length,
+                usingTomSelect: hasTomSelect,
+            });
+            console.log('[stock-entry] supplier_select_option_count', {
+                accessKey: String(accessKey),
+                supplier_select_option_count: hasTomSelect ? supplierOptionRows.length + 1 : supplierSelect.options.length,
+                supplier_select_first_options: firstOptions,
+                supplier_select_html_preview: String(supplierSelect.innerHTML || '').slice(0, 500),
+            });
+            conferenceContext = {
+                access_key: String(data.access_key || accessKey),
+                supplier: String(data.supplier || ''),
+                invoice: String(data.invoice || ''),
+                serial: String(data.serial || ''),
+                date: String(data.date || ''),
+                total: Number(data.total || 0),
+                document_type: String(data.document_type || ''),
+                has_full_items: Boolean(data.has_full_items),
+                items_reason: String(data.items_reason || ''),
+                manifestation_status: String(data.manifestation_status || ''),
+                manifestation_result: String(data.repository_note?.manifestation_result || ''),
+                status_estoque: String(data.repository_note?.status_estoque || ''),
+                approved_for_stock: Boolean(data.repository_note?.approved_for_stock),
+                receipt_status: String(data.repository_note?.receipt_status || ''),
+                supplier_match: supplierMatchObj,
+                supplier_match_source: String(data.repository_note?.supplier_match_source || ''),
+                supplier_suggestion_used: Boolean(data.repository_note?.supplier_suggestion_used),
+                enrichment_applied: Boolean(data.repository_note?.enrichment_applied),
+                enriched_fields: Array.isArray(data.repository_note?.enriched_fields) ? data.repository_note.enriched_fields : [],
+                supplier_divergences: Array.isArray(data.repository_note?.supplier_divergences) ? data.repository_note.supplier_divergences : [],
+                created_via_nfe: Boolean(data.repository_note?.created_via_nfe),
+                created_supplier_id: String(data.repository_note?.created_supplier_id || ''),
+                supplier_decision_notes: String(data.repository_note?.supplier_decision_notes || ''),
+                supplier_decided_by: String(data.repository_note?.supplier_decided_by || ''),
+                supplier_decided_at: String(data.repository_note?.supplier_decided_at || ''),
+            };
+            const metaSupplierEl = document.getElementById('conferenceMetaSupplier');
+            if (metaSupplierEl) metaSupplierEl.textContent = conferenceContext.supplier || '-';
+            const metaInvoiceEl = document.getElementById('conferenceMetaInvoice');
+            if (metaInvoiceEl) metaInvoiceEl.textContent = [conferenceContext.invoice, conferenceContext.serial].filter(Boolean).join('/') || '-';
+            const metaTotalEl = document.getElementById('conferenceMetaTotal');
+            if (metaTotalEl) metaTotalEl.textContent = `R$ ${Number(conferenceContext.total || 0).toFixed(2)}`;
+            const documentType = String(data.document_type || data.repository_note?.document_type || '');
+            const hasFullItems = Boolean(data.has_full_items);
+            const completenessStatus = String(data.completeness_status || data.repository_note?.completeness_status || '');
+            const docBadgeEl = document.getElementById('conferenceDocumentBadge');
+            if (docBadgeEl) {
+                if (documentType === 'summarized_nfe') {
+                    docBadgeEl.className = 'badge bg-warning text-dark';
+                    docBadgeEl.textContent = 'Documento resumido';
+                } else if (documentType === 'full_nfe') {
+                    docBadgeEl.className = 'badge bg-success';
+                    docBadgeEl.textContent = 'NF-e completa';
+                } else if (documentType === 'event_only') {
+                    docBadgeEl.className = 'badge bg-info text-dark';
+                    docBadgeEl.textContent = 'Evento fiscal';
+                } else {
+                    docBadgeEl.className = 'badge bg-secondary';
+                    docBadgeEl.textContent = 'Estrutura não classificada';
+                }
+            }
+            const completenessBadgeEl = document.getElementById('conferenceCompletenessBadge');
+            if (completenessBadgeEl) {
+                if (completenessStatus === 'ready_for_conference') {
+                    completenessBadgeEl.className = 'badge bg-success';
+                    completenessBadgeEl.textContent = 'Pronta para conferência';
+                } else if (completenessStatus === 'awaiting_manifestation') {
+                    completenessBadgeEl.className = 'badge bg-warning text-dark';
+                    completenessBadgeEl.textContent = 'Aguardando manifestação';
+                } else if (completenessStatus === 'awaiting_full_download') {
+                    completenessBadgeEl.className = 'badge bg-info text-dark';
+                    completenessBadgeEl.textContent = 'Aguardando XML completo';
+                } else if (completenessStatus === 'full_download_failed') {
+                    completenessBadgeEl.className = 'badge bg-danger';
+                    completenessBadgeEl.textContent = 'Tentativa de download falhou';
+                } else {
+                    completenessBadgeEl.className = 'badge bg-secondary';
+                    completenessBadgeEl.textContent = 'Bloqueada para estoque';
+                }
+            }
+            const match = supplierMatchObj;
+            if (match.supplier_id) {
+                if (hasTomSelect) {
+                    supplierSelect.tomselect.setValue(String(match.supplier_id), true);
+                } else {
+                    supplierSelect.value = String(match.supplier_id);
+                }
+            }
+            supplierSelect.onchange = () => {
+                conferenceRawItems.forEach((x, idx) => suggestConversionForItem(Number(x.item_index ?? idx)));
+            };
+            const statusSelect = document.getElementById('conferenceSupplierStatus');
+            if (statusSelect && match.match_type) statusSelect.value = String(match.match_type);
+            const confEl = document.getElementById('supplierSuggestionConfidence');
+            if (confEl) confEl.textContent = `${String(match.confidence || '-')} (${Math.round(Number(match.confidence_score || 0) * 100)}%)`;
+            const reasonEl = document.getElementById('supplierSuggestionReason');
+            if (reasonEl) {
+                if (!match.matched && suggestedOptions.length > 0) {
+                    reasonEl.textContent = `Sem correspondência automática conclusiva. Foram encontradas ${suggestedOptions.length} opção(ões) para revisão manual.`;
+                } else {
+                    reasonEl.textContent = String(match.reason || '-');
+                }
+            }
+            renderSupplierFlowSummary();
+            const summary = data.assist_summary || {};
+            const conferenceSummary = data.conference_summary || {};
+            conferenceContext.assist_summary = summary;
+            conferenceContext.conference_summary = conferenceSummary;
+            conferenceContext.document_type = documentType;
+            conferenceContext.has_full_items = hasFullItems;
+            renderConferenceOperationalSummary();
+            conferenceRawItems = Array.isArray(data.conference_items) && data.conference_items.length > 0
+                ? data.conference_items
+                : (Array.isArray(data.items) ? data.items.map((it, index) => ({
+                    item_index: index,
+                    codigo_fornecedor: String(it.code || ''),
+                    descricao_fiscal: String(it.name || ''),
+                    quantidade: Number(it.qty || 0),
+                    unidade_fiscal: String(it.unit || ''),
+                    valor_unitario: Number(it.price || 0),
+                    valor_total: Number(it.qty || 0) * Number(it.price || 0),
+                    ncm: '',
+                    cfop: '',
+                    binding_atual: {},
+                    sugestao_binding: {},
+                    conversao_sugerida: {},
+                    status_conferencia: 'nao_vinculado',
+                    divergence_level: '',
+                    divergence_reason: '',
+                    confidence: {},
+                })) : []);
+            conferenceItemsState = Array.isArray(data.item_bindings) ? data.item_bindings.map(row => {
+                const suggestion = row && row.suggestion ? row.suggestion : {};
+                const confidence = row && row.confidence ? row.confidence : {};
+                const currentItem = conferenceRawItems.find(x => Number(x.item_index) === Number(row.item_index)) || {};
+                return {
+                    item_index: Number(row.item_index),
+                    suggestion: Object.keys(currentItem.binding_atual || {}).length ? (currentItem.binding_atual || suggestion) : suggestion,
+                    confidence: confidence,
+                    divergence_level: String(currentItem.divergence_level || row.divergence_level || ''),
+                    divergence_reason: String(currentItem.divergence_reason || row.divergence_reason || ''),
+                    status: String(currentItem.status_conferencia || row.status || ''),
+                };
+            }) : [];
+            if (conferenceItemsState.length === 0) {
+                conferenceItemsState = conferenceRawItems.map((row, index) => ({
+                    item_index: Number(row.item_index ?? index),
+                    suggestion: row.binding_atual || row.sugestao_binding || {},
+                    confidence: row.confidence || {},
+                    divergence_level: String(row.divergence_level || ''),
+                    divergence_reason: String(row.divergence_reason || ''),
+                    status: String(row.status_conferencia || 'nao_vinculado'),
+                }));
+            }
+            const tbody = document.getElementById('conferenceItemsBody');
+            tbody.innerHTML = '';
+            conferenceRawItems.forEach((it, index) => {
+                const itemIndex = Number(it.item_index ?? index);
+                const bindInfo = conferenceItemsState.find(x => Number(x.item_index) === itemIndex) || {};
+                const suggestion = bindInfo.suggestion || {};
+                const confidence = bindInfo.confidence || {};
+                const confidenceLabel = String(confidence.label || 'Baixa');
+                const confidenceColor = confidenceLabel === 'Alta' ? 'success' : (confidenceLabel === 'Média' ? 'warning text-dark' : 'danger');
+                const divergenceLevel = String(bindInfo.divergence_level || '');
+                const divergenceReason = String(bindInfo.divergence_reason || '');
+                const rowStatus = String(bindInfo.status || '');
+                const selectedProduct = productsDB.find(p => String(p.id || '') === String(suggestion.product_id || '')) || {};
+                const productDisplay = selectedProduct && selectedProduct.name ? `${String(selectedProduct.name || '')} · ${String(selectedProduct.id || '')}` : '';
+                const tr = document.createElement('tr');
+                tr.setAttribute('data-confidence', confidenceLabel.toLowerCase());
+                tr.setAttribute('data-status', rowStatus);
+                tr.setAttribute('data-divergence', divergenceLevel);
+                tr.innerHTML = `
+                    <td>${it.descricao_fiscal || '-'}</td>
+                    <td><small class="text-muted">${it.codigo_fornecedor || '-'}</small></td>
+                    <td>${Number(it.quantidade || 0)}</td>
+                    <td>${it.unidade_fiscal || '-'}</td>
+                    <td>${(Number(it.valor_unitario || 0)).toFixed(2)}</td>
+                    <td>${(Number(it.valor_total || 0)).toFixed(2)}</td>
+                    <td>
+                        <input class="form-control form-control-sm product-search" data-item-index="${itemIndex}" list="conferenceProductsDatalist" value="${productDisplay}" placeholder="Digite para buscar insumo">
+                        <input type="hidden" class="product-select" data-item-index="${itemIndex}" value="${String(suggestion.product_id || '')}">
+                    </td>
+                    <td class="d-flex gap-1"><input class="form-control form-control-sm unit-from" data-item-index="${itemIndex}" value="${String((suggestion.unidade_fornecedor || it.unidade_fiscal || '') || '')}" placeholder="Origem"><input class="form-control form-control-sm unit-to" data-item-index="${itemIndex}" value="${String(suggestion.unidade_estoque || it.conversao_sugerida?.unidade_estoque || '')}" placeholder="Destino"><input type="number" step="0.0001" class="form-control form-control-sm factor" data-item-index="${itemIndex}" value="${Number(suggestion.fator_conversao || it.conversao_sugerida?.fator_conversao || 1)}"></td>
+                    <td>
+                        ${rowStatus === 'conferido' ? '<span class="badge bg-success">conferido</span>' : rowStatus === 'divergente' ? '<span class="badge bg-danger">divergente</span>' : suggestion.product_id ? '<span class="badge bg-info text-dark">vinculado</span>' : '<span class="badge bg-warning text-dark">não vinculado</span>'}
+                        <span class="badge bg-${confidenceColor} ms-1">${confidenceLabel}</span>
+                        ${divergenceLevel ? `<div class="small text-danger mt-1">${divergenceLevel}: ${divergenceReason}</div>` : ''}
+                    </td>
+                    <td>
+                        <div class="small text-muted mb-1">Sugestão do sistema: ${String(suggestion.reason || 'Revisão recomendada')}</div>
+                        <div class="d-flex gap-1 flex-wrap">
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="saveItemBinding(${itemIndex}, '${String(it.codigo_fornecedor || '').replace(/'/g, '')}', '${String(it.descricao_fiscal || '').replace(/'/g, '')}', '${String(suggestion.source || '')}')">Vincular item</button>
+                            <button type="button" class="btn btn-sm btn-outline-success" onclick="markConferenceItemStatus(${itemIndex}, 'conferido')">Conferido</button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="markConferenceItemStatus(${itemIndex}, 'divergente')">Divergência</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            buildConferenceProductsDatalist();
+            wireConferenceProductSearchControls();
+            const warningEl = document.getElementById('conferenceItemsWarning');
+            if (warningEl) {
+                if (conferenceRawItems.length === 0) {
+                    warningEl.classList.remove('d-none');
+                    const reason = String(data.items_reason || data.parse_warning || 'itens_nao_disponiveis');
+                    const manifestationStatus = String(data.manifestation_status || '');
+                    const manifestationProtocol = String(data.repository_note?.manifestation_protocol || '');
+                    const manifestationCStat = String(data.repository_note?.manifestation_response_cstat || '');
+                    const manifestationXMotivo = String(data.repository_note?.manifestation_response_xmotivo || '');
+                    const manifestationRegisteredAt = String(data.repository_note?.manifestation_registered_at || '');
+                    const friendlyReason = reason === 'document_summary_without_det'
+                        ? 'Documento resumido sem itens detalhados'
+                        : reason === 'infnfe_without_det'
+                        ? 'XML local sem estrutura completa de produtos'
+                        : reason === 'xml_ausente'
+                        ? 'XML local não disponível'
+                        : reason;
+                    const manifestationMsg = manifestationStatus
+                        ? ` Status da manifestação: ${manifestationStatus}${manifestationProtocol ? ` (protocolo ${manifestationProtocol})` : ''}${manifestationCStat ? `, cStat ${manifestationCStat}` : ''}${manifestationXMotivo ? `, motivo: ${manifestationXMotivo}` : ''}${manifestationRegisteredAt ? `, registrado em ${manifestationRegisteredAt}` : ''}.`
+                        : '';
+                    warningEl.innerHTML = `Os itens desta nota ainda não foram carregados corretamente (${friendlyReason}).${manifestationMsg} <button type="button" class="btn btn-link btn-sm p-0 ms-1" id="conferenceReprocessBtn" onclick="reprocessLocalConferenceItems(this)">Reprocessar leitura local</button>`;
+                } else {
+                    warningEl.classList.add('d-none');
+                    warningEl.textContent = '';
+                }
+            }
+            conferenceReprocessButtonRef = document.getElementById('conferenceReprocessBtn');
+            const launchBtn = document.getElementById('conferenceLaunchBtn');
+            if (launchBtn) {
+                const readyNow = Boolean(conferenceContext.ready_for_launch);
+                launchBtn.disabled = !readyNow;
+                launchBtn.textContent = readyNow ? 'Lançar entrada no estoque' : 'Lançamento bloqueado';
+            }
+            const markReceivedBtn = document.getElementById('conferenceMarkReceivedBtn');
+            if (markReceivedBtn) {
+                const canMarkReceived = hasFullItems && conferenceContext.status_estoque !== 'imported' && conferenceContext.status_estoque !== 'received_not_stocked';
+                markReceivedBtn.classList.toggle('d-none', !canMarkReceived);
+                markReceivedBtn.disabled = false;
+            }
+            const approveLaunchBtn = document.getElementById('conferenceApproveLaunchBtn');
+            if (approveLaunchBtn) {
+                const canApprove = conferenceContext.status_estoque === 'received_not_stocked' && !conferenceContext.approved_for_stock;
+                approveLaunchBtn.classList.toggle('d-none', !canApprove);
+                approveLaunchBtn.disabled = false;
+            }
+            const concludeBtn = document.getElementById('conferenceConcludeBtn');
+            if (concludeBtn) concludeBtn.disabled = conferenceRawItems.length === 0 && documentType === 'summarized_nfe';
+            const manifestBtn = document.getElementById('conferenceManifestBtn');
+            const tryFullXmlBtn = document.getElementById('conferenceTryFullXmlBtn');
+            if (manifestBtn) {
+                const shouldShow = documentType === 'summarized_nfe' && !hasFullItems;
+                manifestBtn.classList.toggle('d-none', !shouldShow);
+                manifestBtn.disabled = false;
+            }
+            if (tryFullXmlBtn) {
+                const shouldShowTry = documentType === 'summarized_nfe'
+                    && !hasFullItems
+                    && (
+                        ['registered', 'sent'].includes(String(data.manifestation_status || ''))
+                        || String(data.repository_note?.manifestation_result || '') === 'already_registered'
+                    );
+                tryFullXmlBtn.classList.toggle('d-none', !shouldShowTry);
+                tryFullXmlBtn.disabled = false;
+            }
+            applyConferenceItemFilter();
+            const modalEl = document.getElementById('nfeConferenceModal');
+            const modalInstance = getConferenceModalInstance();
+            if (modalEl && modalInstance && !modalEl.classList.contains('show')) {
+                modalInstance.show();
+            }
+            cleanupConferenceBackdrop();
+            console.log('[stock-entry] openNfeConferenceModal:rendered', {
+                accessKey: String(accessKey),
+                reprocessLocal: Boolean(reprocessLocal),
+                itemsAfter: Array.isArray(conferenceRawItems) ? conferenceRawItems.length : 0,
+                itemsLoaded: Boolean(data.items_loaded),
+                itemsReason: String(data.items_reason || ''),
+                backdropsAfter: document.querySelectorAll('.modal-backdrop').length,
+            });
+            if (reprocessLocal) {
+                if (Array.isArray(conferenceRawItems) && conferenceRawItems.length > 0) {
+                    showToast('Reprocessamento local concluído. Itens atualizados.', 'success');
+                } else {
+                    showToast(`Reprocessamento concluído sem itens. Motivo: ${String(data.items_reason || 'itens_nao_disponiveis')}`, 'warning');
+                }
+            }
+        })
+        .catch(err => {
+            console.log('[stock-entry] openNfeConferenceModal:error', { accessKey: String(accessKey), error: err.message });
+            showToast((reprocessLocal ? 'Não foi possível reprocessar a leitura local desta NF-e. ' : 'Não foi possível carregar a conferência desta nota. ') + err.message, 'danger');
+        })
+        .finally(() => {
+            console.log('[stock-entry] openNfeConferenceModal:finally', {
+                accessKey: String(accessKey),
+                reprocessLocal: Boolean(reprocessLocal),
+                backdropsFinally: document.querySelectorAll('.modal-backdrop').length,
+            });
+            cleanupConferenceBackdrop();
+            setReprocessButtonLoading(false);
+            unlockAction(triggerButton, actionKey);
+        });
+    }
+
+    function reprocessLocalConferenceItems(button = null) {
+        const accessKey = document.getElementById('conferenceAccessKey')?.value || '';
+        if (!accessKey) {
+            showToast('Chave da nota não informada para reprocessar.', 'warning');
+            return;
+        }
+        conferenceReprocessButtonRef = button || document.getElementById('conferenceReprocessBtn');
+        setReprocessButtonLoading(true);
+        showToast('Reprocessando leitura local da NF-e...', 'info');
+        openNfeConferenceModal(accessKey, conferenceReprocessButtonRef, true);
+    }
+
+    function registerConferenceManifestation(button = null) {
+        const accessKey = document.getElementById('conferenceAccessKey')?.value || '';
+        if (!accessKey) {
+            showToast('Chave da nota não informada para manifestação.', 'warning');
+            return;
+        }
+        const manifestationType = 'ciencia_da_operacao';
+        if (button) button.disabled = true;
+        showToast('Enviando Ciência da Operação para SEFAZ...', 'info');
+        fetch('/stock/nfe/repository/manifestation', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                access_key: accessKey,
+                manifestation_type: manifestationType
+            })
+        })
+        .then(r => parseJsonResponse(r))
+        .then(data => {
+            if (data.error) throw new Error(data.error);
+            if (!data.success) {
+                const reason = String(data.manifestation?.xMotivo || 'Manifestação não autorizada.');
+                throw new Error(reason);
+            }
+            const protocol = String(data.manifestation?.eventNProt || data.manifestation?.protocol || '');
+            const eventCStat = String(data.manifestation?.eventCStat || data.manifestation?.cStat || '');
+            const eventXMotivo = String(data.manifestation?.eventXMotivo || data.manifestation?.xMotivo || '');
+            showToast(`Lote processado${eventCStat ? ` (cStat ${eventCStat})` : ''}${eventXMotivo ? ` - ${eventXMotivo}` : ''}.${protocol ? ' Protocolo: ' + protocol : ''}`, 'success');
+            openNfeConferenceModal(accessKey, null, false);
+        })
+        .catch(err => {
+            const message = String(err.message || '');
+            if (message.includes('Aguarde alguns segundos')) {
+                showToast(message, 'warning');
+            } else if (message.includes('cStat') || message.includes('SEFAZ') || message.includes('autorizada')) {
+                showToast('Erro SEFAZ ao enviar manifestação: ' + message, 'danger');
+            } else {
+                showToast('Erro interno ao enviar manifestação: ' + message, 'danger');
+            }
+        })
+        .finally(() => {
+            if (button) button.disabled = false;
+        });
+    }
+
+    function attemptFullXmlDownload(button = null) {
+        const accessKey = document.getElementById('conferenceAccessKey')?.value || '';
+        if (!accessKey) {
+            showToast('Chave da nota não informada para obter XML completo.', 'warning');
+            return;
+        }
+        if (button) button.disabled = true;
+        showToast('Tentando obter XML completo da NF-e...', 'info');
+        fetch('/stock/nfe/repository/full-xml-attempt', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ access_key: accessKey })
+        })
+        .then(r => parseJsonResponse(r))
+        .then(data => {
+            if (data.error) throw new Error(data.error);
+            const fullXml = data.full_xml || {};
+            const upgraded = Boolean(fullXml.upgrade_success);
+            if (upgraded) {
+                showToast('NF-e completa obtida com sucesso. Reabrindo conferência com itens detalhados...', 'success');
+            } else {
+                const reason = String(fullXml.items_reason || data.message || 'Manifestação registrada, mas XML completo ainda não disponível');
+                showToast(`Manifestação registrada, mas XML completo ainda não disponível (${reason}).`, 'warning');
+            }
+            openNfeConferenceModal(accessKey, null, true);
+        })
+        .catch(err => {
+            const message = String(err.message || '');
+            if (message.includes('Manifestação registrada')) {
+                showToast(message, 'warning');
+            } else {
+                showToast('Não foi possível obter XML completo: ' + message, 'warning');
+            }
+        })
+        .finally(() => {
+            if (button) button.disabled = false;
+        });
+    }
+
+    function applyConferenceItemFilter() {
+        const filter = (document.getElementById('conferenceItemFilter')?.value || 'all').toLowerCase();
+        let visibleCount = 0;
+        let divergenceCount = 0;
+        let lowConfidenceCount = 0;
+        let pendingCount = 0;
+        document.querySelectorAll('#conferenceItemsBody tr').forEach(row => {
+            const status = String(row.getAttribute('data-status') || '');
+            const confidence = String(row.getAttribute('data-confidence') || '');
+            const divergence = String(row.getAttribute('data-divergence') || '');
+            let show = true;
+            if (filter === 'pending') show = status === 'nao_vinculado' || status === 'pending';
+            else if (filter === 'low_confidence') show = confidence === 'baixa' || confidence === 'low';
+            else if (filter === 'divergence') show = divergence !== '';
+            else if (filter === 'linked') show = status === 'linked' || status === 'vinculado' || status === 'conferido';
+            row.style.display = show ? '' : 'none';
+            if (show) {
+                visibleCount += 1;
+                if (divergence) divergenceCount += 1;
+                if (confidence === 'baixa' || confidence === 'low') lowConfidenceCount += 1;
+                if (status === 'nao_vinculado' || status === 'pending') pendingCount += 1;
+            }
+        });
+        const summaryEl = document.getElementById('quickReviewSummary');
+        if (summaryEl) {
+            summaryEl.textContent = `Itens visíveis: ${visibleCount} | Pendentes: ${pendingCount} | Baixa confiança: ${lowConfidenceCount} | Divergências: ${divergenceCount}`;
+        }
+    }
+
+    function buildConferenceProductsDatalist() {
+        const datalist = document.getElementById('conferenceProductsDatalist');
+        if (!datalist) return;
+        datalist.innerHTML = '';
+        productsDB.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = `${String(p.name || '')} · ${String(p.id || '')}`;
+            datalist.appendChild(opt);
+        });
+    }
+
+    function findProductBySearchValue(value) {
+        const text = String(value || '').trim();
+        if (!text) return null;
+        const token = text.includes('·') ? text.split('·').pop().trim() : '';
+        if (token) {
+            const byId = productsDB.find(p => String(p.id || '') === token);
+            if (byId) return byId;
+        }
+        const lower = text.toLowerCase();
+        return productsDB.find(p => String(p.name || '').toLowerCase().includes(lower)) || null;
+    }
+
+    function suggestConversionForItem(itemIndex) {
+        const idx = Number(itemIndex);
+        const row = conferenceRawItems.find(x => Number(x.item_index) === idx) || {};
+        const hiddenProduct = document.querySelector(`.product-select[data-item-index="${idx}"]`);
+        const unitFromInput = document.querySelector(`.unit-from[data-item-index="${idx}"]`);
+        const unitToInput = document.querySelector(`.unit-to[data-item-index="${idx}"]`);
+        const factorInput = document.querySelector(`.factor[data-item-index="${idx}"]`);
+        if (!hiddenProduct || !unitFromInput || !unitToInput || !factorInput) return;
+        const product = productsDB.find(p => String(p.id || '') === String(hiddenProduct.value || '')) || {};
+        if (!product || !product.id) return;
+        const selectedSupplierId = String(document.getElementById('conferenceSupplierId')?.value || '');
+        const bindState = conferenceItemsState.find(x => Number(x.item_index) === idx) || {};
+        const suggestion = bindState.suggestion || {};
+        let suggestedFactor = Number(suggestion.fator_conversao || row.conversao_sugerida?.fator_conversao || 1);
+        let suggestedFrom = String(suggestion.unidade_fornecedor || row.unidade_fiscal || '');
+        let suggestedTo = String(suggestion.unidade_estoque || row.conversao_sugerida?.unidade_estoque || product.unidade_base || product.unit || '');
+        if (!(String(suggestion.product_id || '') === String(product.id || '') && Number(suggestion.fator_conversao || 0) > 0)) {
+            const profiles = Array.isArray(product.supplier_profiles) ? product.supplier_profiles : [];
+            const supplierCode = String(row.codigo_fornecedor || '').trim().toLowerCase();
+            const supplierDesc = String(row.descricao_fiscal || '').trim().toLowerCase();
+            const profileExact = profiles.find(sp => String(sp.supplier_id || '') === selectedSupplierId && supplierCode && String(sp.supplier_product_code || '').trim().toLowerCase() === supplierCode);
+            const profileName = profiles.find(sp => String(sp.supplier_id || '') === selectedSupplierId && supplierDesc && String(sp.supplier_product_name || '').trim().toLowerCase() === supplierDesc);
+            const profileAny = profiles.find(sp => String(sp.supplier_id || '') === selectedSupplierId);
+            const profile = profileExact || profileName || profileAny || null;
+            if (profile) {
+                suggestedFactor = Number(profile.conversion_factor || suggestedFactor || 1);
+                suggestedFrom = String(profile.fiscal_unit || suggestedFrom || '');
+                suggestedTo = String(profile.stock_unit || suggestedTo || '');
+            } else {
+                suggestedTo = String(product.unidade_base || product.unit || suggestedTo || '');
+            }
+        }
+        if (suggestedFrom) unitFromInput.value = suggestedFrom;
+        if (suggestedTo) unitToInput.value = suggestedTo;
+        factorInput.value = Number.isFinite(suggestedFactor) && suggestedFactor > 0 ? suggestedFactor : Number(factorInput.value || 1);
+    }
+
+    function wireConferenceProductSearchControls() {
+        document.querySelectorAll('.product-search').forEach(input => {
+            input.addEventListener('change', () => {
+                const idx = Number(input.getAttribute('data-item-index') || 0);
+                const hidden = document.querySelector(`.product-select[data-item-index="${idx}"]`);
+                if (!hidden) return;
+                const product = findProductBySearchValue(input.value);
+                if (product) {
+                    hidden.value = String(product.id || '');
+                    input.value = `${String(product.name || '')} · ${String(product.id || '')}`;
+                    suggestConversionForItem(idx);
+                } else {
+                    hidden.value = '';
+                }
+            });
+            const idxInit = Number(input.getAttribute('data-item-index') || 0);
+            if (String(document.querySelector(`.product-select[data-item-index="${idxInit}"]`)?.value || '')) {
+                suggestConversionForItem(idxInit);
+            }
+        });
+    }
+
+    function activateQuickReviewMode() {
+        const filter = document.getElementById('conferenceItemFilter');
+        if (filter) {
+            filter.value = 'divergence';
+        }
+        applyConferenceItemFilter();
+        showToast('Modo revisão rápida ativado: exibindo itens com divergência.', 'warning');
+    }
+
+    function setConferenceSupplierSelection(supplierId, supplierLabel = '') {
+        const supplierSelect = document.getElementById('conferenceSupplierId');
+        if (!supplierSelect) return;
+        const idValue = String(supplierId || '').trim();
+        if (!idValue) return;
+        if (supplierSelect.tomselect) {
+            const ts = supplierSelect.tomselect;
+            const exists = Boolean(ts.options && ts.options[idValue]);
+            if (!exists) {
+                ts.addOption({ value: idValue, text: String(supplierLabel || idValue) });
+            }
+            ts.setValue(idValue, true);
+            ts.refreshOptions(false);
+            return;
+        }
+        const existing = Array.from(supplierSelect.options).find(o => String(o.value || '') === idValue);
+        if (!existing) {
+            const opt = document.createElement('option');
+            opt.value = idValue;
+            opt.textContent = String(supplierLabel || idValue);
+            supplierSelect.appendChild(opt);
+        }
+        supplierSelect.value = idValue;
+    }
+
+    function renderSupplierFlowSummary() {
+        const badgesEl = document.getElementById('supplierFlowBadges');
+        const detailsEl = document.getElementById('supplierFlowDetails');
+        if (!badgesEl || !detailsEl) return;
+        badgesEl.innerHTML = '';
+        const c = conferenceContext || {};
+        const badges = [];
+        const pushBadge = (text, cls) => badges.push({ text: String(text || ''), cls: String(cls || 'bg-secondary') });
+        if (Boolean(c.supplier_match?.matched || c.supplier_suggestion_used)) pushBadge('Sugerido automaticamente', 'bg-success');
+        if (String(c.supplier_match_source || '').includes('manual')) pushBadge('Selecionado manualmente', 'bg-primary');
+        if (Boolean(c.created_via_nfe)) pushBadge('Criado via NF-e', 'bg-info text-dark');
+        if (Boolean(c.enrichment_applied)) pushBadge('Enriquecido', 'bg-warning text-dark');
+        if (Array.isArray(c.supplier_divergences) && c.supplier_divergences.length > 0) pushBadge('Divergências detectadas', 'bg-danger');
+        if (badges.length === 0) pushBadge('Sem ação registrada', 'bg-secondary');
+        badges.forEach(b => {
+            const span = document.createElement('span');
+            span.className = `badge ${b.cls}`;
+            span.textContent = b.text;
+            badgesEl.appendChild(span);
+        });
+        const details = [];
+        if (Array.isArray(c.enriched_fields) && c.enriched_fields.length > 0) details.push(`Enriquecido: ${c.enriched_fields.join(', ')}`);
+        if (Array.isArray(c.supplier_divergences) && c.supplier_divergences.length > 0) details.push(`Divergências: ${c.supplier_divergences.join(', ')}`);
+        if (String(c.supplier_match_source || '').trim()) details.push(`Origem: ${c.supplier_match_source}`);
+        if (String(c.supplier_decided_by || '').trim()) details.push(`Responsável: ${c.supplier_decided_by}`);
+        if (String(c.supplier_decided_at || '').trim()) details.push(`Em: ${String(c.supplier_decided_at).replace('T', ' ').slice(0, 19)}`);
+        detailsEl.textContent = details.length > 0 ? details.join(' | ') : 'Sem ações registradas nesta conferência.';
+    }
+
+    function renderConferenceOperationalSummary() {
+        const summary = conferenceContext.assist_summary || {};
+        const conferenceSummary = conferenceContext.conference_summary || {};
+        const hasFullItems = Boolean(conferenceContext.has_full_items);
+        const documentType = String(conferenceContext.document_type || '');
+        const pendingReviewCount = Number(summary.items_pending_review || 0);
+        const lowConfidenceCount = Number(summary.items_low_confidence || 0);
+        const divergenceCount = Number(summary.items_divergence || 0);
+        const linkedCount = Number(summary.items_linked || 0);
+        const totalItems = Number(summary.items_total || 0);
+        const supplierResolved = Boolean(summary.supplier_identified) || Boolean(conferenceContext.supplier_id);
+        const waitingApproval = conferenceContext.status_estoque === 'received_not_stocked' && !Boolean(conferenceContext.approved_for_stock);
+        const readyForLaunch = Boolean(conferenceSummary.ready_for_stock_launch) && hasFullItems && totalItems > 0 && !waitingApproval;
+        const hardReady = readyForLaunch && pendingReviewCount === 0 && divergenceCount === 0 && lowConfidenceCount === 0 && linkedCount >= totalItems && supplierResolved;
+        const blockReasons = [];
+        if (!supplierResolved) blockReasons.push('Fornecedor não resolvido');
+        if (!hasFullItems) blockReasons.push('Itens detalhados indisponíveis (XML resumido)');
+        if (pendingReviewCount > 0) blockReasons.push(`${pendingReviewCount} item(ns) pendente(s)`);
+        if (divergenceCount > 0) blockReasons.push(`${divergenceCount} divergência(s)`);
+        if (lowConfidenceCount > 0) blockReasons.push(`${lowConfidenceCount} item(ns) de baixa confiança`);
+        if (linkedCount < totalItems) blockReasons.push(`Itens vinculados insuficientes (${linkedCount}/${totalItems})`);
+        if (waitingApproval) blockReasons.push('Aguardando aprovação administrativa');
+        conferenceContext.operational_block_reasons = blockReasons;
+        conferenceContext.ready_for_launch = hardReady;
+        const hasCriticalBlock = !supplierResolved || !hasFullItems || divergenceCount > 0 || linkedCount < totalItems || waitingApproval;
+        const hasAttention = pendingReviewCount > 0 || lowConfidenceCount > 0;
+        const globalLevel = hardReady ? 'green' : (hasCriticalBlock ? 'red' : (hasAttention ? 'yellow' : 'red'));
+        const summaryTextEl = document.getElementById('conferenceSummaryText');
+        if (summaryTextEl) {
+            summaryTextEl.textContent = `Fornecedor identificado: ${supplierResolved ? 'sim' : 'não'} | Itens com vínculo: ${linkedCount} de ${totalItems} | Pendentes: ${pendingReviewCount} | Baixa confiança: ${lowConfidenceCount} | Divergências: ${divergenceCount}`;
+        }
+        const breakdownEl = document.getElementById('conferenceOperationalBreakdown');
+        if (breakdownEl) {
+            const okCriteria = [
+                supplierResolved,
+                linkedCount >= totalItems && totalItems > 0,
+                divergenceCount === 0,
+                lowConfidenceCount === 0,
+                pendingReviewCount === 0,
+            ].filter(Boolean).length;
+            breakdownEl.textContent = `Semáforo por critério: ${okCriteria}/5 em conformidade`;
+        }
+        const criteriaEl = document.getElementById('conferenceCriteriaStatus');
+        if (criteriaEl) {
+            const row = (icon, cls, label, text) => `<div class="d-flex align-items-center gap-2"><i class="bi ${icon} ${cls}"></i><span class="fw-semibold">${label}</span><span class="text-muted">${text}</span></div>`;
+            const supplierRow = supplierResolved
+                ? row('bi-check-circle-fill', 'text-success', 'Fornecedor', 'OK')
+                : row('bi-x-circle-fill', 'text-danger', 'Fornecedor', 'pendente');
+            const linkedOk = linkedCount >= totalItems && totalItems > 0;
+            const linkedRow = linkedOk
+                ? row('bi-check-circle-fill', 'text-success', 'Itens vinculados', `${linkedCount}/${totalItems}`)
+                : row('bi-x-circle-fill', 'text-danger', 'Itens vinculados', `${linkedCount}/${totalItems}`);
+            const divergenceRow = divergenceCount === 0
+                ? row('bi-check-circle-fill', 'text-success', 'Divergências', '0')
+                : row('bi-x-circle-fill', 'text-danger', 'Divergências', String(divergenceCount));
+            const confidenceRow = lowConfidenceCount === 0
+                ? row('bi-check-circle-fill', 'text-success', 'Baixa confiança', '0')
+                : row('bi-exclamation-triangle-fill', 'text-warning', 'Baixa confiança', String(lowConfidenceCount));
+            const pendingRow = pendingReviewCount === 0
+                ? row('bi-check-circle-fill', 'text-success', 'Pendências', '0')
+                : row('bi-exclamation-triangle-fill', 'text-warning', 'Pendências', String(pendingReviewCount));
+            criteriaEl.innerHTML = [supplierRow, linkedRow, divergenceRow, confidenceRow, pendingRow].join('');
+        }
+        const ctaEl = document.getElementById('conferenceSummaryCta');
+        if (ctaEl) {
+            ctaEl.textContent = documentType === 'summarized_nfe' && !hasFullItems
+                ? 'Documento disponível apenas em resumo local. Itens detalhados indisponíveis.'
+                : hardReady
+                ? 'Pronto para lançar entrada no estoque'
+                : String(summary.cta || 'Revisão necessária antes de lançar');
+        }
+        const globalBadge = document.getElementById('conferenceGlobalStatusBadge');
+        const globalText = document.getElementById('conferenceGlobalStatusText');
+        if (globalBadge) {
+            if (globalLevel === 'green') {
+                globalBadge.className = 'badge bg-success';
+                globalBadge.textContent = 'Pronta para lançar';
+            } else if (globalLevel === 'yellow') {
+                globalBadge.className = 'badge bg-warning text-dark';
+                globalBadge.textContent = 'Atenção necessária';
+            } else {
+                globalBadge.className = 'badge bg-danger';
+                globalBadge.textContent = 'Revisão necessária';
+            }
+        }
+        if (globalText) {
+            globalText.textContent = hardReady
+                ? 'Sem bloqueios operacionais identificados.'
+                : (blockReasons[0] || 'Ajustes operacionais são necessários antes do lançamento.');
+        }
+        const readinessBadge = document.getElementById('conferenceReadinessBadge');
+        const pendingBadge = document.getElementById('conferencePendingBadge');
+        const launchHint = document.getElementById('conferenceLaunchHint');
+        const blockReasonsEl = document.getElementById('conferenceBlockReasons');
+        if (readinessBadge) {
+            if (hardReady) {
+                readinessBadge.className = 'badge bg-success';
+                readinessBadge.textContent = 'Pronto para lançar';
+            } else if (!hasFullItems) {
+                readinessBadge.className = 'badge bg-warning text-dark';
+                readinessBadge.textContent = 'Aguardando XML completo';
+            } else if (waitingApproval) {
+                readinessBadge.className = 'badge bg-warning text-dark';
+                readinessBadge.textContent = 'Recebida aguardando aprovação';
+            } else {
+                readinessBadge.className = 'badge bg-danger';
+                readinessBadge.textContent = 'Revisão necessária';
+            }
+        }
+        if (pendingBadge) {
+            pendingBadge.className = (pendingReviewCount + divergenceCount + lowConfidenceCount) > 0 ? 'badge bg-warning text-dark' : 'badge bg-success';
+            pendingBadge.textContent = `Pendências: ${pendingReviewCount} | Divergências: ${divergenceCount} | Baixa confiança: ${lowConfidenceCount}`;
+        }
+        if (launchHint) {
+            launchHint.textContent = hardReady
+                ? 'Todos os critérios operacionais foram atendidos para lançamento em estoque.'
+                : 'Resolva os pontos abaixo para liberar o lançamento no estoque.';
+        }
+        if (blockReasonsEl) {
+            blockReasonsEl.textContent = hardReady ? 'Sem bloqueios operacionais.' : `Bloqueios: ${blockReasons.join(' | ')}`;
+            blockReasonsEl.className = hardReady ? 'small text-success mt-1' : 'small text-danger mt-1';
+        }
+        const launchBtn = document.getElementById('conferenceLaunchBtn');
+        if (launchBtn) {
+            launchBtn.disabled = !hardReady;
+            launchBtn.textContent = hardReady ? 'Lançar entrada no estoque' : 'Lançamento bloqueado';
+        }
+    }
+
+    function saveSupplierBinding() {
+        const accessKey = document.getElementById('conferenceAccessKey').value;
+        const supplierId = document.getElementById('conferenceSupplierId').value;
+        const supplierNameNew = document.getElementById('conferenceNewSupplierName')?.value || '';
+        const status = document.getElementById('conferenceSupplierStatus').value || 'manual_matched';
+        const supplierMatch = conferenceContext.supplier_match || {};
+        const usedSuggestion = Boolean(supplierMatch.matched) && String(supplierMatch.supplier_id || '') === String(supplierId || '');
+        fetch('/stock/nfe/repository/supplier-bind', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                access_key: accessKey,
+                supplier_id: supplierId,
+                supplier_name_new: supplierNameNew,
+                status_match_fornecedor: status,
+                suggestion_used: usedSuggestion,
+                supplier_match_source: usedSuggestion ? String(supplierMatch.source || 'assist') : 'manual_selection'
+            })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) throw new Error(data.error);
+            const enrichment = data.enrichment || {};
+            const modeLabel = usedSuggestion ? 'sugestão automática' : 'seleção manual';
+            const enrichLabel = enrichment.enriched ? ` Cadastro enriquecido: ${(enrichment.fields || []).join(', ')}.` : '';
+            const divergenceLabel = Array.isArray(enrichment.divergences) && enrichment.divergences.length > 0
+                ? ` Divergências detectadas (sem sobrescrita): ${enrichment.divergences.join(', ')}.`
+                : '';
+            showToast(`Fornecedor vinculado (${modeLabel}).${enrichLabel}${divergenceLabel}`, 'success');
+            conferenceContext.supplier_match_source = usedSuggestion ? String(supplierMatch.source || 'suggestion_selected') : 'manual_selected';
+            conferenceContext.enrichment_applied = Boolean(enrichment.enriched);
+            conferenceContext.enriched_fields = Array.isArray(enrichment.fields) ? enrichment.fields : [];
+            conferenceContext.supplier_divergences = Array.isArray(enrichment.divergences) ? enrichment.divergences : [];
+            conferenceContext.created_via_nfe = Boolean(data.created_via_nfe);
+            conferenceContext.created_supplier_id = String(data.created_supplier_id || '');
+            conferenceContext.supplier_decided_by = String('{{ session.get("user") or "" }}');
+            conferenceContext.supplier_decided_at = new Date().toISOString();
+            const matchSource = usedSuggestion ? 'suggestion_selected' : 'manual_selected';
+            const reasonEl = document.getElementById('supplierSuggestionReason');
+            if (reasonEl) {
+                reasonEl.textContent = `Fonte do vínculo: ${matchSource}${enrichment.enriched ? ` | Enriquecido: ${String((enrichment.fields || []).join(', '))}` : ''}`;
+            }
+            renderSupplierFlowSummary();
+            renderConferenceOperationalSummary();
+        })
+        .catch(err => showToast('Erro ao salvar fornecedor: ' + err.message, 'danger'));
+    }
+
+    function createSupplierFromNote() {
+        const accessKey = document.getElementById('conferenceAccessKey').value;
+        const supplierNameNew = (document.getElementById('conferenceNewSupplierName')?.value || '').trim();
+        if (!accessKey) {
+            showToast('Chave da nota não informada.', 'warning');
+            return;
+        }
+        fetch('/stock/nfe/repository/supplier-create-from-note', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ access_key: accessKey, supplier_name_new: supplierNameNew })
+        })
+        .then(r => parseJsonResponse(r))
+        .then(data => {
+            if (data.error) throw new Error(data.error);
+            const supplierId = String(data.supplier_id || data.created_supplier_id || '');
+            const supplierLabel = (document.getElementById('conferenceNewSupplierName')?.value || '').trim();
+            setConferenceSupplierSelection(supplierId, supplierLabel || 'Fornecedor criado via NF-e');
+            const enr = data.enrichment || {};
+            conferenceContext.supplier_match_source = 'created_from_note';
+            conferenceContext.enrichment_applied = Boolean(enr.enriched);
+            conferenceContext.enriched_fields = Array.isArray(enr.fields) ? enr.fields : [];
+            conferenceContext.supplier_divergences = Array.isArray(enr.divergences) ? enr.divergences : [];
+            conferenceContext.created_via_nfe = Boolean(data.created_via_nfe);
+            conferenceContext.created_supplier_id = String(data.created_supplier_id || '');
+            conferenceContext.supplier_decided_by = String('{{ session.get("user") or "" }}');
+            conferenceContext.supplier_decided_at = new Date().toISOString();
+            showToast('Fornecedor cadastrado a partir da NF-e e vinculado à nota.', 'success');
+            const reasonEl = document.getElementById('supplierSuggestionReason');
+            if (reasonEl) {
+                reasonEl.textContent = `Fornecedor criado_via_nfe=true | source=created_from_note | enriched_fields=${(enr.fields || []).join(', ')}`;
+            }
+            renderSupplierFlowSummary();
+            renderConferenceOperationalSummary();
+        })
+        .catch(err => showToast('Erro ao criar fornecedor da nota: ' + err.message, 'danger'));
+    }
+
+    function saveItemBinding(itemIndex, supplierProductCode, supplierProductName, itemMatchSource) {
+        const accessKey = document.getElementById('conferenceAccessKey').value;
+        const supplierId = document.getElementById('conferenceSupplierId').value;
+        const productId = document.querySelector(`.product-select[data-item-index="${itemIndex}"]`)?.value || '';
+        const unitFrom = document.querySelector(`.unit-from[data-item-index="${itemIndex}"]`)?.value || '';
+        const unitTo = document.querySelector(`.unit-to[data-item-index="${itemIndex}"]`)?.value || '';
+        const factorRaw = document.querySelector(`.factor[data-item-index="${itemIndex}"]`)?.value || '1';
+        const factor = Number(factorRaw);
+        fetch('/stock/nfe/repository/item-bind', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                access_key: accessKey,
+                item_index: itemIndex,
+                supplier_id: supplierId,
+                product_id: productId,
+                supplier_product_code: supplierProductCode,
+                supplier_product_name: supplierProductName,
+                unidade_fornecedor: unitFrom,
+                unidade_estoque: unitTo,
+                fator_conversao: Number.isFinite(factor) && factor > 0 ? factor : 1,
+                is_preferred: true,
+                suggestion_used: true,
+                item_match_source: String(itemMatchSource || ''),
+                accepted_conversion: true
+            })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) throw new Error(data.error);
+            showToast('Item vinculado com sucesso.', 'success');
+            openNfeConferenceModal(accessKey);
+        })
+        .catch(err => showToast('Erro ao vincular item: ' + err.message, 'danger'));
+    }
+
+    function markConferenceItemStatus(itemIndex, status) {
+        const accessKey = document.getElementById('conferenceAccessKey').value;
+        fetch('/stock/nfe/repository/item-review', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ access_key: accessKey, item_index: Number(itemIndex), status: String(status || '') })
+        })
+        .then(r => parseJsonResponse(r))
+        .then(data => {
+            if (data.error) throw new Error(data.error);
+            showToast('Status do item atualizado.', 'success');
+            openNfeConferenceModal(accessKey);
+        })
+        .catch(err => showToast('Erro ao marcar item: ' + err.message, 'danger'));
+    }
+
+    function launchConferenceToStock(button) {
+        const accessKey = document.getElementById('conferenceAccessKey').value;
+        if (!accessKey) {
+            showToast('Chave da nota não informada.', 'warning');
+            return;
+        }
+        if (!Array.isArray(conferenceRawItems) || conferenceRawItems.length === 0) {
+            showToast('Os itens desta nota ainda não foram carregados corretamente.', 'warning');
+            return;
+        }
+        if (!Boolean(conferenceContext.has_full_items)) {
+            showToast('Esta NF-e está disponível apenas em formato resumido. Não é possível lançar entrada sem itens detalhados.', 'warning');
+            return;
+        }
+        if (String(conferenceContext.status_estoque || '') === 'received_not_stocked' && !Boolean(conferenceContext.approved_for_stock)) {
+            showToast('Nota recebida sem lançamento. Aguardando aprovação administrativa para aplicar no estoque.', 'warning');
+            return;
+        }
+        if (!Boolean(conferenceContext.ready_for_launch)) {
+            const reasons = Array.isArray(conferenceContext.operational_block_reasons) ? conferenceContext.operational_block_reasons : [];
+            const msg = reasons.length > 0
+                ? `Lançamento bloqueado: ${reasons.join(' | ')}.`
+                : 'Revisão necessária: conclua pendências e divergências antes do lançamento final.';
+            showToast(msg, 'warning');
+            return;
+        }
+        const productById = {};
+        productsDB.forEach(p => {
+            productById[String(p.id || '')] = p;
+        });
+        const launchItems = [];
+        let pendingCount = 0;
+        let divergingCount = 0;
+        let conversionAppliedCount = 0;
+        let launchTotalCost = 0;
+        conferenceRawItems.forEach((item, index) => {
+            const idx = Number(item.item_index ?? index);
+            const bindInfo = conferenceItemsState.find(x => Number(x.item_index) === idx) || {};
+            const status = String(bindInfo.status || item.status_conferencia || '');
+            if (status === 'divergente') {
+                divergingCount += 1;
+                return;
+            }
+            const productId = document.querySelector(`.product-select[data-item-index="${idx}"]`)?.value || String((bindInfo.suggestion || {}).product_id || '');
+            const product = productById[String(productId)];
+            if (!product) {
+                pendingCount += 1;
+                return;
+            }
+            const fatorRaw = document.querySelector(`.factor[data-item-index="${idx}"]`)?.value || String((bindInfo.suggestion || {}).fator_conversao || 1);
+            const fator = Number(fatorRaw);
+            const qtyFiscal = Number(item.quantidade || 0);
+            const qtyEstoque = Number.isFinite(fator) && fator > 0 ? qtyFiscal * fator : qtyFiscal;
+            const totalItem = Number(item.valor_total || 0);
+            const priceEstoque = qtyEstoque > 0 ? totalItem / qtyEstoque : Number(item.valor_unitario || 0);
+            if (Number.isFinite(fator) && Math.abs(fator - 1) > 0.000001) conversionAppliedCount += 1;
+            launchTotalCost += Number.isFinite(totalItem) ? totalItem : 0;
+            launchItems.push({
+                name: String(product.name || ''),
+                qty: Number.isFinite(qtyEstoque) ? qtyEstoque : 0,
+                price: Number.isFinite(priceEstoque) ? priceEstoque : 0,
+                unit: String(document.querySelector(`.unit-to[data-item-index="${idx}"]`)?.value || (bindInfo.suggestion || {}).unidade_estoque || item.unidade_fiscal || 'UN'),
+                original_name: String(item.descricao_fiscal || ''),
+            });
+        });
+        if (divergingCount > 0) {
+            showToast(`Existem ${divergingCount} item(ns) com divergência. Resolva antes de lançar no estoque.`, 'danger');
+            return;
+        }
+        if (pendingCount > 0) {
+            showToast(`Existem ${pendingCount} item(ns) sem vínculo de insumo.`, 'warning');
+            return;
+        }
+        if (launchItems.length === 0) {
+            showToast('Nenhum item válido para lançar no estoque.', 'warning');
+            return;
+        }
+        if (button) button.disabled = true;
+        const payload = {
+            header: {
+                number: conferenceContext.invoice || '',
+                serial: conferenceContext.serial || '',
+                supplier: conferenceContext.supplier || '',
+                issue_date: conferenceContext.date || new Date().toISOString().split('T')[0],
+                entry_date: new Date().toISOString().split('T')[0],
+                access_key: accessKey,
+                total: Number(conferenceContext.total || 0),
+            },
+            items: launchItems,
+            financials: { taxes: 0, freight: 0, bills: [] },
+        };
+        fetch('/stock/entry', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'data=' + encodeURIComponent(JSON.stringify(payload))
+        })
+        .then(response => {
+            if (response.redirected) {
+                window.location.href = response.url;
+                return;
+            }
+            const launchedAt = new Date().toLocaleString('pt-BR');
+            showToast(`Entrada lançada com sucesso. Usuário: operação atual | Data/hora: ${launchedAt} | Fornecedor: ${conferenceContext.supplier || '-'} | Chave: ${accessKey} | Itens: ${launchItems.length} | Conversões aplicadas: ${conversionAppliedCount} | Custo de entrada: R$ ${launchTotalCost.toFixed(2)}`, 'success');
+            setTimeout(() => window.location.reload(), 800);
+        })
+        .catch(err => showToast('Erro ao lançar entrada no estoque: ' + err.message, 'danger'))
+        .finally(() => {
+            if (button) button.disabled = false;
+        });
+    }
+
+    function markConferenceReceivedNotStocked(button) {
+        const accessKey = document.getElementById('conferenceAccessKey').value;
+        if (!accessKey) {
+            showToast('Chave da nota não informada.', 'warning');
+            return;
+        }
+        const observation = prompt('Observação de recebimento (opcional):', '') || '';
+        if (button) button.disabled = true;
+        fetch('/stock/nfe/repository/mark-received', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ access_key: accessKey, observation: observation })
+        })
+        .then(r => parseJsonResponse(r))
+        .then(data => {
+            if (data.error) throw new Error(data.error);
+            showToast('Mercadoria marcada como recebida sem lançamento no estoque.', 'success');
+            openNfeConferenceModal(accessKey);
+        })
+        .catch(err => showToast('Erro ao marcar recebimento: ' + err.message, 'danger'))
+        .finally(() => {
+            if (button) button.disabled = false;
+        });
+    }
+
+    function approveAndLaunchConferenceToStock(button) {
+        const accessKey = document.getElementById('conferenceAccessKey').value;
+        if (!accessKey) {
+            showToast('Chave da nota não informada.', 'warning');
+            return;
+        }
+        const observation = prompt('Observação da aprovação (opcional):', '') || '';
+        if (button) button.disabled = true;
+        fetch('/stock/nfe/repository/approve-stock-launch', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ access_key: accessKey, observation: observation })
+        })
+        .then(r => parseJsonResponse(r))
+        .then(data => {
+            if (data.error) throw new Error(data.error);
+            conferenceContext.approved_for_stock = true;
+            showToast('Aprovação registrada. Prosseguindo com lançamento no estoque...', 'success');
+            launchConferenceToStock(document.getElementById('conferenceLaunchBtn'));
+        })
+        .catch(err => showToast('Erro ao aprovar lançamento: ' + err.message, 'danger'))
+        .finally(() => {
+            if (button) button.disabled = false;
+        });
+    }
+
+    function approvePendingReceiptForStock(accessKey, button) {
+        if (!accessKey) {
+            showToast('Chave da nota não informada.', 'warning');
+            return;
+        }
+        if (button) button.disabled = true;
+        fetch('/stock/nfe/repository/approve-stock-launch', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ access_key: String(accessKey), observation: 'Aprovação pela fila de recebidas' })
+        })
+        .then(r => parseJsonResponse(r))
+        .then(data => {
+            if (data.error) throw new Error(data.error);
+            showToast('Aprovação registrada. Abra a nota para confirmar e lançar no estoque.', 'success');
+            openNfeConferenceModal(String(accessKey));
+        })
+        .catch(err => showToast('Erro ao aprovar: ' + err.message, 'danger'))
+        .finally(() => {
+            if (button) button.disabled = false;
+        });
+    }
+
+    function cancelPendingReceiptState(accessKey, button) {
+        if (!accessKey) {
+            showToast('Chave da nota não informada.', 'warning');
+            return;
+        }
+        const reason = prompt('Motivo do cancelamento (opcional):', '') || '';
+        if (button) button.disabled = true;
+        fetch('/stock/nfe/repository/cancel-received', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ access_key: String(accessKey), reason: reason })
+        })
+        .then(r => parseJsonResponse(r))
+        .then(data => {
+            if (data.error) throw new Error(data.error);
+            showToast('Estado de recebida sem lançamento cancelado.', 'success');
+            window.location.reload();
+        })
+        .catch(err => showToast('Erro ao cancelar estado pendente: ' + err.message, 'danger'))
+        .finally(() => {
+            if (button) button.disabled = false;
+        });
+    }
+
+    function decideApprovalEntry(originType, entryId, decision, button) {
+        if (!originType || !entryId) {
+            showToast('Entrada inválida para decisão.', 'warning');
+            return;
+        }
+        let decisionNotes = '';
+        if (decision === 'reject') {
+            decisionNotes = prompt('Motivo da rejeição (obrigatório):', '') || '';
+            if (!decisionNotes.trim()) {
+                showToast('Informe o motivo da rejeição.', 'warning');
+                return;
+            }
+        } else {
+            decisionNotes = prompt('Observação da decisão (opcional):', '') || '';
+        }
+        if (button) button.disabled = true;
+        fetch('/stock/approval/decision', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                origin_type: String(originType),
+                entry_id: String(entryId),
+                decision: String(decision),
+                decision_notes: String(decisionNotes),
+            })
+        })
+        .then(r => parseJsonResponse(r))
+        .then(data => {
+            if (data.error) throw new Error(data.error);
+            if (decision === 'approve') {
+                showToast('Entrada aprovada para lançamento em estoque.', 'success');
+            } else if (decision === 'approve_asset') {
+                showToast('Entrada aprovada e encaminhada para ativos.', 'success');
+            } else if (decision === 'reject') {
+                showToast('Entrada rejeitada com rastreabilidade registrada.', 'warning');
+            } else {
+                showToast('Entrada mantida pendente para nova decisão.', 'info');
+            }
+            window.location.reload();
+        })
+        .catch(err => showToast('Erro na decisão administrativa: ' + err.message, 'danger'))
+        .finally(() => {
+            if (button) button.disabled = false;
+        });
+    }
+
+    function openApprovalEntryDetail(originType, entryId) {
+        if (originType === 'nfe') {
+            openNfeConferenceModal(String(entryId));
+            return;
+        }
+        fetch(`/stock/manual-entry/get?entry_id=${encodeURIComponent(String(entryId))}`)
+        .then(r => parseJsonResponse(r))
+        .then(data => {
+            if (data.error) throw new Error(data.error);
+            const entry = data.entry || {};
+            const summary = `Fornecedor: ${entry.supplier_name || '-'} | Data: ${entry.entry_date || '-'} | Status: ${entry.status || '-'} | Itens: ${(entry.items || []).length}`;
+            showToast(summary, 'info');
+        })
+        .catch(err => showToast('Erro ao abrir detalhes: ' + err.message, 'danger'));
+    }
+
+    function _populateManualProductSelect() {
+        manualItems = [];
+        const productSelect = document.getElementById('manualItemProductId');
+        if (productSelect) {
+            productSelect.innerHTML = '<option value="">Vincular insumo</option>';
+            productsDB.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = String(p.id || '');
+                opt.textContent = String(p.name || '');
+                productSelect.appendChild(opt);
+            });
+        }
+    }
+
+    function _resetManualModalToCreate() {
+        manualEditingEntryId = '';
+        document.getElementById('manualEntryModalTitle').textContent = 'Nova entrada sem nota fiscal';
+        document.getElementById('manualEntryId').value = '';
+        document.getElementById('manualSupplierName').value = '';
+        document.getElementById('manualDocNumber').value = '';
+        document.getElementById('manualObservation').value = '';
+        document.getElementById('manualUpdatedReason').value = '';
+        const manualToday = new Date().toISOString().split('T')[0];
+        const manualDateInput = document.getElementById('manualEntryDate');
+        if (manualDateInput) manualDateInput.value = manualToday;
+        document.getElementById('manualSaveDraftBtn').textContent = 'Salvar rascunho';
+        document.getElementById('manualCancelDraftBtn').classList.add('d-none');
+        document.getElementById('manualMarkReceivedBtn').disabled = false;
+        document.getElementById('manualLaunchStockBtn').disabled = false;
+    }
+
+    function _fillManualModalWithEntry(entry) {
+        const item = entry || {};
+        manualEditingEntryId = String(item.id || '');
+        document.getElementById('manualEntryId').value = manualEditingEntryId;
+        document.getElementById('manualEntryModalTitle').textContent = `Editar rascunho manual ${manualEditingEntryId.slice(0, 8)}`;
+        document.getElementById('manualSupplierName').value = String(item.supplier_name || '');
+        document.getElementById('manualDocNumber').value = String(item.document_number || '');
+        document.getElementById('manualObservation').value = String(item.observation || '');
+        document.getElementById('manualEntryDate').value = String(item.entry_date || new Date().toISOString().split('T')[0]);
+        document.getElementById('manualSaveDraftBtn').textContent = 'Salvar alterações';
+        document.getElementById('manualCancelDraftBtn').classList.remove('d-none');
+        manualItems = Array.isArray(item.items) ? item.items.map(row => ({
+            name: String(row.name || row.product_name || ''),
+            product_id: String(row.product_id || ''),
+            product_name: String((productsDB.find(p => String(p.id || '') === String(row.product_id || '')) || {}).name || ''),
+            qty: Number(row.qty || 0),
+            unit: String(row.unit || ''),
+            base_unit: String(row.base_unit || ''),
+            conversion_factor: Number(row.conversion_factor || 1),
+            cost: Number(row.cost || row.price || 0),
+            divergence_note: String(row.divergence_note || ''),
+            item_nature: String(row.item_nature || 'stock_item'),
+        })) : [];
+    }
+
+    function openManualEntryModal(entryId = '') {
+        _populateManualProductSelect();
+        _resetManualModalToCreate();
+        if (entryId) {
+            fetch(`/stock/manual-entry/get?entry_id=${encodeURIComponent(String(entryId))}`)
+            .then(r => parseJsonResponse(r))
+            .then(data => {
+                if (data.error) throw new Error(data.error);
+                const entry = data.entry || {};
+                if (String(entry.status || '').toLowerCase() !== 'draft') {
+                    showToast('Somente rascunhos podem ser editados.', 'warning');
+                    return;
+                }
+                _fillManualModalWithEntry(entry);
+                renderManualItems();
+                new bootstrap.Modal(document.getElementById('manualEntryModal')).show();
+            })
+            .catch(err => showToast('Erro ao abrir rascunho: ' + err.message, 'danger'));
+            return;
+        }
+        renderManualItems();
+        new bootstrap.Modal(document.getElementById('manualEntryModal')).show();
+    }
+
+    function addManualItem() {
+        const name = (document.getElementById('manualItemName').value || '').trim();
+        const productId = (document.getElementById('manualItemProductId').value || '').trim();
+        const qty = Number(document.getElementById('manualItemQty').value || 0);
+        const unit = (document.getElementById('manualItemUnit').value || 'UN').trim();
+        const factor = Number(document.getElementById('manualItemFactor').value || 1);
+        const cost = Number(document.getElementById('manualItemCost').value || 0);
+        const divergence = (document.getElementById('manualItemDivergence').value || '').trim();
+        const nature = (document.getElementById('manualItemNature').value || 'stock_item').trim();
+        if (!name || !Number.isFinite(qty) || qty <= 0) {
+            showToast('Informe item e quantidade válida.', 'warning');
+            return;
+        }
+        const selected = productsDB.find(p => String(p.id || '') === productId) || {};
+        manualItems.push({
+            name,
+            product_id: productId,
+            product_name: String(selected.name || ''),
+            qty,
+            unit,
+            base_unit: String(selected.unit || unit || 'UN'),
+            conversion_factor: Number.isFinite(factor) && factor > 0 ? factor : 1,
+            cost: Number.isFinite(cost) ? cost : 0,
+            divergence_note: divergence,
+            item_nature: nature === 'asset_item' ? 'asset_item' : 'stock_item',
+        });
+        document.getElementById('manualItemName').value = '';
+        document.getElementById('manualItemProductId').value = '';
+        document.getElementById('manualItemQty').value = '';
+        document.getElementById('manualItemFactor').value = '';
+        document.getElementById('manualItemDivergence').value = '';
+        document.getElementById('manualItemCost').value = '';
+        document.getElementById('manualItemNature').value = 'stock_item';
+        renderManualItems();
+    }
+
+    function renderManualItems() {
+        const list = document.getElementById('manualItemsList');
+        list.innerHTML = '';
+        manualItems.forEach((item, idx) => {
+            const li = document.createElement('li');
+            li.className = 'list-group-item d-flex justify-content-between align-items-center';
+            const total = Number(item.qty || 0) * Number(item.cost || 0);
+            const natureLabel = item.item_nature === 'asset_item' ? 'Ativo' : 'Estoque';
+            li.innerHTML = `<span>[${natureLabel}] ${item.name} (${item.product_name || 'sem vínculo'}) — ${item.qty} ${item.unit} → ${item.base_unit || item.unit} (x${Number(item.conversion_factor || 1).toFixed(4)}) — R$ ${Number(item.cost || 0).toFixed(2)} | Total R$ ${total.toFixed(2)}${item.divergence_note ? ` | Obs: ${item.divergence_note}` : ''}</span><button type="button" class="btn btn-sm btn-link text-danger" onclick="removeManualItem(${idx})">remover</button>`;
+            list.appendChild(li);
+        });
+    }
+
+    function removeManualItem(index) {
+        manualItems.splice(index, 1);
+        renderManualItems();
+    }
+
+    function submitManualEntry(mode = 'draft') {
+        const supplierName = (document.getElementById('manualSupplierName').value || '').trim();
+        const entryDate = document.getElementById('manualEntryDate').value || '';
+        const documentNumber = (document.getElementById('manualDocNumber').value || '').trim();
+        const observation = (document.getElementById('manualObservation').value || '').trim();
+        if (!supplierName || manualItems.length === 0) {
+            showToast('Preencha fornecedor e itens da entrada manual.', 'warning');
+            return;
+        }
+        const updatedReason = (document.getElementById('manualUpdatedReason').value || '').trim();
+        if (manualEditingEntryId && mode === 'draft' && !updatedReason) {
+            showToast('Informe o motivo da alteração do rascunho.', 'warning');
+            return;
+        }
+        if (manualItems.some(x => String(x.item_nature || 'stock_item') === 'stock_item' && !String(x.product_id || '').trim())) {
+            showToast('Itens de estoque precisam estar vinculados a um insumo.', 'warning');
+            return;
+        }
+        if (mode === 'imported' && manualItems.some(x => String(x.item_nature || 'stock_item') === 'asset_item')) {
+            showToast('Há itens patrimoniais. Use "Registrar como ativo" para estes itens.', 'warning');
+            return;
+        }
+        if (mode === 'imported_asset' && manualItems.some(x => String(x.item_nature || 'stock_item') === 'stock_item')) {
+            showToast('Há itens de estoque. Use "Lançar direto no estoque" para estes itens.', 'warning');
+            return;
+        }
+        const createOrUpdatePromise = manualEditingEntryId
+            ? fetch('/stock/manual-entry/update', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    entry_id: manualEditingEntryId,
+                    supplier_name: supplierName,
+                    document_number: documentNumber,
+                    observation: observation,
+                    entry_date: entryDate,
+                    items: manualItems,
+                    updated_reason: updatedReason,
+                })
+            })
+            : fetch('/stock/manual-entry', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                mode: mode,
+                supplier_name: supplierName,
+                document_type: 'manual_entry',
+                document_number: documentNumber,
+                observation: observation,
+                entry_date: entryDate,
+                items: manualItems
+            })
+            });
+        createOrUpdatePromise
+        .then(r => parseJsonResponse(r))
+        .then(data => {
+            if (data.error) throw new Error(data.error);
+            const entry = data.entry || {};
+            const entryId = String(entry.id || manualEditingEntryId || '');
+            if (!entryId) throw new Error('Entrada manual sem ID retornado.');
+            if (mode === 'draft') {
+                showToast(manualEditingEntryId ? 'Rascunho atualizado com sucesso.' : 'Rascunho de entrada manual salvo.', 'success');
+                window.location.reload();
+                return;
+            }
+            fetch('/stock/manual-entry/status', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ entry_id: entryId, status: mode, reason: updatedReason })
+            })
+            .then(r2 => parseJsonResponse(r2))
+            .then(data2 => {
+                if (data2.error) throw new Error(data2.error);
+                showToast(mode === 'imported' ? 'Entrada manual lançada no estoque.' : (mode === 'imported_asset' ? 'Entrada manual registrada em ativos.' : (mode === 'received_not_stocked' ? 'Entrada manual recebida sem lançar no estoque.' : 'Status da entrada atualizado.')), 'success');
+                window.location.reload();
+            });
+        })
+        .catch(err => showToast('Erro ao salvar entrada manual: ' + err.message, 'danger'));
+    }
+
+    function cancelManualDraftFromModal() {
+        if (!manualEditingEntryId) {
+            showToast('Nenhum rascunho aberto para cancelamento.', 'warning');
+            return;
+        }
+        const reason = (document.getElementById('manualUpdatedReason').value || '').trim() || (prompt('Motivo do cancelamento do rascunho:', '') || '');
+        fetch('/stock/manual-entry/status', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ entry_id: manualEditingEntryId, status: 'canceled', reason: reason })
+        })
+        .then(r => parseJsonResponse(r))
+        .then(data => {
+            if (data.error) throw new Error(data.error);
+            showToast('Rascunho cancelado com sucesso.', 'success');
+            window.location.reload();
+        })
+        .catch(err => showToast('Erro ao cancelar rascunho: ' + err.message, 'danger'));
+    }
+
+    function updateManualEntryStatus(entryId, status) {
+        const reason = (status === 'canceled') ? (prompt('Motivo do cancelamento (opcional):', '') || '') : '';
+        fetch('/stock/manual-entry/status', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ entry_id: entryId, status: status, reason: reason })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) throw new Error(data.error);
+            showToast('Status da entrada manual atualizado.', 'success');
+            window.location.reload();
+        })
+        .catch(err => showToast('Erro ao atualizar entrada manual: ' + err.message, 'danger'));
     }
 
     function formatMoney(val) {

@@ -7,6 +7,7 @@ import re
 import csv
 import uuid
 import threading
+import importlib.util
 from decimal import Decimal, ROUND_HALF_UP
 from datetime import datetime, timedelta
 from app.services.system_config_manager import (
@@ -943,7 +944,7 @@ def manifest_nfe(access_key, settings, event_code=210210):
     except Exception as e:
         return False, str(e)
 
-def consult_nfe_sefaz(access_key, settings):
+def consult_nfe_sefaz(access_key, settings, allow_manifestation=False):
     """
     Consults an NFe from SEFAZ using Nuvem Fiscal API and returns the XML content.
     """
@@ -964,20 +965,15 @@ def consult_nfe_sefaz(access_key, settings):
                      if 'nfeProc' in doc['content'] or '<NFe' in doc['content']:
                          return doc['content'].encode('utf-8'), None
                          
-                 # Se não achou, tenta manifestar Ciência
-                 logger.info(f"XML não disponível para {access_key}. Tentando manifestar Ciência.")
-                 manif_res = service.manifestar_ciencia_operacao(access_key, settings.get('cnpj_emitente'))
-                 if manif_res.get('success'): # Atenção: sefaz_service retorna dict padronizado?
-                      # manifestar_ciencia_operacao chama _enviar_evento que precisa ser implementado ou retorna o _enviar_soap
-                      # Se _enviar_evento não estiver implementado (retorna None), vai falhar.
-                      # Mas deixamos o TODO lá. Se falhar, falha aqui.
-                      
-                      time.sleep(2)
-                      result_retry = service.consultar_por_chave(access_key, settings.get('cnpj_emitente'))
-                      for doc in result_retry.get('documents', []):
-                         if 'nfeProc' in doc['content'] or '<NFe' in doc['content']:
-                             return doc['content'].encode('utf-8'), None
-                             
+                 if allow_manifestation:
+                     logger.info(f"XML não disponível para {access_key}. Tentando manifestar Ciência.")
+                     manif_res = service.manifestar_ciencia_operacao(access_key, settings.get('cnpj_emitente'))
+                     if manif_res.get('success'):
+                          time.sleep(2)
+                          result_retry = service.consultar_por_chave(access_key, settings.get('cnpj_emitente'))
+                          for doc in result_retry.get('documents', []):
+                             if 'nfeProc' in doc['content'] or '<NFe' in doc['content']:
+                                 return doc['content'].encode('utf-8'), None
                  return None, "XML completo não disponível (nota resumida ou pendente de autorização)."
         except Exception as e:
             return None, f"Erro SEFAZ Direto: {str(e)}"
@@ -1110,25 +1106,214 @@ def save_sefaz_last_check(cstat, message=""):
     except Exception as e:
         logger.error(f"Error saving SEFAZ last check: {e}")
 
-def _get_sefaz_service_instance(settings):
-    pfx_path = settings.get('certificate_path')
-    pfx_password = settings.get('certificate_password')
-    
-    if not pfx_path:
-        return None
-        
-    if not os.path.isabs(pfx_path):
-        possible_path = os.path.join(os.getcwd(), 'data', 'certs', pfx_path)
+def _resolve_sefaz_certificate_config(settings):
+    cfg = settings if isinstance(settings, dict) else {}
+    configured_path = str(cfg.get('certificate_path') or '').strip()
+    resolved_path = configured_path
+    if configured_path and not os.path.isabs(configured_path):
+        possible_path = os.path.join(os.getcwd(), 'data', 'certs', configured_path)
         if os.path.exists(possible_path):
-            pfx_path = possible_path
+            resolved_path = possible_path
         else:
-             pfx_path = os.path.join(os.getcwd(), pfx_path)
-             
-    if not os.path.exists(pfx_path):
-        logger.error(f"Certificado não encontrado em: {pfx_path}")
+            resolved_path = os.path.join(os.getcwd(), configured_path)
+    password_env_name = str(cfg.get('certificate_password_env') or '').strip()
+    password_source = 'none'
+    password_value = str(cfg.get('certificate_password') or '')
+    if not password_value and password_env_name and os.getenv(password_env_name):
+        password_value = os.getenv(password_env_name)
+        password_source = f'env:{password_env_name}'
+    elif not password_value and os.getenv('SEFAZ_CERT_PASSWORD'):
+        password_value = os.getenv('SEFAZ_CERT_PASSWORD')
+        password_source = 'env:SEFAZ_CERT_PASSWORD'
+    elif password_value:
+        password_source = 'settings.certificate_password'
+    exists = bool(resolved_path and os.path.exists(resolved_path))
+    size_bytes = os.path.getsize(resolved_path) if exists else 0
+    return {
+        "configured_path": configured_path,
+        "resolved_path": resolved_path,
+        "exists": exists,
+        "size_bytes": int(size_bytes),
+        "password_source": password_source,
+        "password_value": password_value,
+        "password_env_name": password_env_name,
+        "cnpj_emitente": str(cfg.get('cnpj_emitente') or ''),
+        "provider": str(cfg.get('provider') or ''),
+        "environment": str(cfg.get('environment') or ''),
+    }
+
+
+def check_xml_signature_dependencies():
+    missing = []
+    for module_name in ("signxml", "lxml"):
+        if importlib.util.find_spec(module_name) is None:
+            missing.append(module_name)
+    return {"ok": len(missing) == 0, "missing": missing}
+
+
+def _get_sefaz_service_instance(settings):
+    resolved = _resolve_sefaz_certificate_config(settings)
+    logger.info(
+        "sefaz_certificate_resolve provider=%s env=%s path=%s exists=%s size_bytes=%s password_source=%s cnpj_emitente=%s",
+        str(resolved.get("provider") or ""),
+        str(resolved.get("environment") or ""),
+        str(resolved.get("resolved_path") or ""),
+        str(bool(resolved.get("exists"))),
+        int(resolved.get("size_bytes") or 0),
+        str(resolved.get("password_source") or "none"),
+        str(resolved.get("cnpj_emitente") or ""),
+    )
+    if not resolved.get("resolved_path"):
         return None
-        
-    return SefazService(pfx_path, pfx_password)
+    if not resolved.get("exists"):
+        logger.error(f"Certificado não encontrado em: {resolved.get('resolved_path')}")
+        return None
+    return SefazService(str(resolved.get("resolved_path")), str(resolved.get("password_value") or ""))
+
+
+def load_certificate(settings):
+    resolved = _resolve_sefaz_certificate_config(settings)
+    service = _get_sefaz_service_instance(settings)
+    if not service:
+        return {
+            "success": False,
+            "message": "Certificado A1 não configurado ou caminho inválido.",
+            "resolved_path": str(resolved.get("resolved_path") or ""),
+            "password_source": str(resolved.get("password_source") or "none"),
+        }
+    try:
+        with service:
+            cert_info = service.load_certificate()
+            return {
+                "success": bool(cert_info.get("ok")),
+                "message": "Certificado carregado com sucesso." if cert_info.get("ok") else "Falha ao carregar certificado.",
+                "resolved_path": str(resolved.get("resolved_path") or ""),
+                "password_source": str(resolved.get("password_source") or "none"),
+                "metadata": cert_info.get("metadata") if isinstance(cert_info.get("metadata"), dict) else {},
+            }
+    except Exception as e:
+        return {
+            "success": False,
+            "message": f"Falha ao carregar certificado A1: {str(e)}",
+            "resolved_path": str(resolved.get("resolved_path") or ""),
+            "password_source": str(resolved.get("password_source") or "none"),
+        }
+
+
+def send_manifestation_ciencia_operacao(access_key, settings, sequencia_evento=1, correlation_id=None, binding_profile=None):
+    if settings.get('provider') != 'sefaz_direto':
+        return {"success": False, "message": "Manifestação SEFAZ Direto disponível apenas para provider 'sefaz_direto'."}
+    deps = check_xml_signature_dependencies()
+    if not deps.get("ok"):
+        return {
+            "success": False,
+            "message": "Assinatura fiscal indisponível: bibliotecas XML não instaladas no servidor.",
+            "missing_dependencies": deps.get("missing") or [],
+        }
+    service = _get_sefaz_service_instance(settings)
+    if not service:
+        return {"success": False, "message": "Certificado A1 não configurado ou inválido."}
+    cnpj = settings.get('cnpj_emitente')
+    ambiente = 2 if settings.get('environment') == 'homologation' else 1
+    logger.info(
+        "manifestation_send_start access_key=%s ambiente=%s provider=%s correlation_id=%s",
+        str(access_key),
+        str(ambiente),
+        str(settings.get('provider') or ''),
+        str(correlation_id or ''),
+    )
+    try:
+        with service:
+            cert_check = service.load_certificate()
+            if not cert_check.get("ok"):
+                return {"success": False, "message": "Certificado não pôde ser carregado para manifestação."}
+            logger.info("manifestation_certificate_loaded access_key=%s", str(access_key))
+            result = service.manifestar_ciencia_operacao(
+                access_key,
+                cnpj,
+                ambiente=ambiente,
+                sequencia_evento=sequencia_evento,
+                correlation_id=correlation_id,
+                binding_profile=binding_profile,
+            )
+            logger.info(
+                "manifestation_send_finish access_key=%s success=%s cStat=%s xMotivo=%s protocol=%s",
+                str(access_key),
+                str(bool(result.get("success"))),
+                str(result.get("cStat") or ""),
+                str(result.get("xMotivo") or ""),
+                str(result.get("protocol") or ""),
+            )
+            return {
+                "success": bool(result.get("success")),
+                "cStat": str(result.get("cStat") or ""),
+                "xMotivo": str(result.get("xMotivo") or result.get("message") or ""),
+                "protocol": str(result.get("protocol") or ""),
+                "tpEvento": str(result.get("tpEvento") or "210210"),
+                "dhRegEvento": str(result.get("dhRegEvento") or ""),
+                "event_result_type": str(result.get("event_result_type") or ""),
+                "event_cStat": str(result.get("event_cStat") or ""),
+                "event_xMotivo": str(result.get("event_xMotivo") or ""),
+                "event_nProt": str(result.get("event_nProt") or ""),
+                "event_dhRegEvento": str(result.get("event_dhRegEvento") or ""),
+                "event_tpEvento": str(result.get("event_tpEvento") or ""),
+                "event_chNFe": str(result.get("event_chNFe") or ""),
+                "event_nSeqEvento": str(result.get("event_nSeqEvento") or ""),
+                "lote_cStat": str(result.get("lote_cStat") or ""),
+                "lote_xMotivo": str(result.get("lote_xMotivo") or ""),
+                "raw_xml": str(result.get("raw_xml") or ""),
+                "http_status": result.get("http_status"),
+                "faultcode": str(result.get("faultcode") or ""),
+                "faultstring": str(result.get("faultstring") or ""),
+                "remote_body_excerpt": str(result.get("remote_body_excerpt") or ""),
+                "response_content_type": str(result.get("response_content_type") or ""),
+                "request_diagnostics": result.get("request_diagnostics") if isinstance(result.get("request_diagnostics"), dict) else {},
+            }
+    except Exception as e:
+        logger.exception("manifestation_send_exception access_key=%s error=%s", str(access_key), str(e))
+        return {"success": False, "message": str(e)}
+
+
+def get_sefaz_certificate_runtime_status(settings):
+    resolved = _resolve_sefaz_certificate_config(settings)
+    response = {
+        "provider": str(resolved.get("provider") or ""),
+        "environment": str(resolved.get("environment") or ""),
+        "cnpj_emitente": str(resolved.get("cnpj_emitente") or ""),
+        "certificate_configured": bool(str(resolved.get("configured_path") or "")),
+        "configured_path": str(resolved.get("configured_path") or ""),
+        "resolved_path": str(resolved.get("resolved_path") or ""),
+        "file_exists": bool(resolved.get("exists")),
+        "file_size_bytes": int(resolved.get("size_bytes") or 0),
+        "password_source": str(resolved.get("password_source") or "none"),
+        "password_env_name_used": str(resolved.get("password_env_name") or ("SEFAZ_CERT_PASSWORD" if str(resolved.get("password_source") or "").startswith("env:SEFAZ_CERT_PASSWORD") else "")),
+        "load_success": False,
+        "error": "",
+        "certificate": {},
+        "xml_signature_dependencies": check_xml_signature_dependencies(),
+    }
+    service = _get_sefaz_service_instance(settings)
+    if not service:
+        response["error"] = "Certificado A1 não configurado ou caminho inválido."
+        return response
+    try:
+        with service:
+            info = service.load_certificate()
+            metadata = info.get("metadata") if isinstance(info.get("metadata"), dict) else {}
+            response["load_success"] = bool(info.get("ok"))
+            response["certificate"] = {
+                "subject": str(metadata.get("subject") or ""),
+                "issuer": str(metadata.get("issuer") or ""),
+                "serial_number": str(metadata.get("serial_number") or ""),
+                "fingerprint_sha256": str(metadata.get("fingerprint_sha256") or ""),
+                "valid_from": str(metadata.get("not_valid_before") or ""),
+                "valid_to": str(metadata.get("not_valid_after") or ""),
+            }
+            if not bool(info.get("ok")):
+                response["error"] = "Falha ao carregar certificado."
+    except Exception as e:
+        response["error"] = str(e)
+    return response
 
 def get_sefaz_lock_status():
     if not os.path.exists(FISCAL_SEFAZ_LOCK_FILE):

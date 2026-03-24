@@ -6,7 +6,7 @@
 <style>
     /* Spacing Adjustments */
     .table-sm td, .table-sm th {
-        padding: 0.5rem 0.5rem !important; /* Reduced padding */
+        padding: 0.42rem 0.45rem !important;
         vertical-align: middle;
     }
     .service-page {
@@ -47,12 +47,80 @@
     .collapsible-content.show {
         display: block;
     }
+    .products-table-wrap {
+        overflow-x: auto;
+    }
+    .products-table {
+        width: 100%;
+        table-layout: auto;
+        font-size: 0.78rem;
+    }
+    .products-table th,
+    .products-table td {
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+        vertical-align: top;
+    }
+    .products-table th.col-check { width: 2.2rem; }
+    .products-table th.col-product { width: 24%; min-width: 15rem; }
+    .products-table th.col-dept { width: 8%; min-width: 5.2rem; }
+    .products-table th.col-unit { width: 4rem; }
+    .products-table th.col-min { width: 4.5rem; }
+    .products-table th.col-balance { width: 5rem; }
+    .products-table th.col-price { width: 5.5rem; }
+    .products-table th.col-supplier { width: 13%; min-width: 9rem; }
+    .products-table th.col-status { width: 12%; min-width: 8rem; }
+    .products-table th.col-actions { width: 10%; min-width: 8.8rem; }
+    .product-main-name {
+        font-weight: 700;
+        line-height: 1.15;
+    }
+    .product-meta-line {
+        font-size: 0.68rem;
+        color: #6c757d;
+        line-height: 1.2;
+    }
+    .supplier-cell {
+        font-size: 0.72rem;
+        line-height: 1.2;
+    }
+    .status-stack {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.18rem;
+    }
+    .status-stack .badge {
+        font-size: 0.62rem;
+        padding: 0.2rem 0.38rem;
+        line-height: 1.1;
+    }
+    .table-actions {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 2px;
+        align-items: center;
+        justify-content: flex-start;
+        white-space: nowrap;
+    }
+    .table-actions .action-btn {
+        min-width: 30px !important;
+        min-height: 28px !important;
+        width: 30px;
+        padding: 3px !important;
+        font-size: 0.68rem !important;
+        margin-left: 0 !important;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
 </style>
 
 <div class="service-page">
     <div class="service-header">
         <span class="service-icon"><i class="bi bi-clipboard-data"></i></span>
-        <h2>Insumos (Estoque) <small style="font-size: 0.5em; color: #7f8c8d;">(Total: {{ products|length }})</small></h2>
+        <h2>Insumos (Estoque) <small style="font-size: 0.5em; color: #7f8c8d;">(Total: {{ stock_products_summary.total if stock_products_summary else products|length }})</small></h2>
     </div>
 
     <div style="margin-bottom: 16px;">
@@ -67,6 +135,33 @@
         {% else %}
         <a href="?filter=low_stock" class="action-btn" style="background-color: #e74c3c; text-decoration: none;"><i class="bi bi-exclamation-triangle"></i> Ver Críticos</a>
         {% endif %}
+    </div>
+
+    <div class="row g-2 mb-3">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm"><div class="card-body py-2">
+                <div class="small text-muted">Abaixo do mínimo</div>
+                <div class="fw-semibold text-danger">{{ stock_products_summary.low_stock if stock_products_summary else 0 }}</div>
+            </div></div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm"><div class="card-body py-2">
+                <div class="small text-muted">Sem fornecedor vinculado</div>
+                <div class="fw-semibold text-warning">{{ stock_products_summary.no_supplier if stock_products_summary else 0 }}</div>
+            </div></div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm"><div class="card-body py-2">
+                <div class="small text-muted">Sem histórico de compra</div>
+                <div class="fw-semibold text-secondary">{{ stock_products_summary.no_history if stock_products_summary else 0 }}</div>
+            </div></div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm"><div class="card-body py-2">
+                <div class="small text-muted">Sem conversão NF-e</div>
+                <div class="fw-semibold text-primary">{{ stock_products_summary.no_conversion if stock_products_summary else 0 }}</div>
+            </div></div>
+        </div>
     </div>
 
     <!-- Smart Review Modal -->
@@ -143,6 +238,10 @@
                     <label for="name">Nome do Insumo:</label>
                     <input type="text" id="name" name="name" required placeholder="Ex: Papel A4, Detergente..." style="padding: 6px;">
                 </div>
+                    <div class="form-group" style="flex: 2;">
+                        <label for="nome_padrao">Nome padrão (compatibilidade):</label>
+                        <input type="text" id="nome_padrao" name="nome_padrao" placeholder="Nome interno padrão para ficha técnica" style="padding: 6px;">
+                    </div>
                 <div class="form-group" style="flex: 1;">
                     <label for="department">Estoque:</label>
                     <select id="department" name="department" required style="padding: 6px;">
@@ -169,8 +268,18 @@
                     </select>
                 </div>
                 <div class="form-group" style="flex: 1;">
+                    <label for="unidade_base">Unidade base:</label>
+                    <input type="text" id="unidade_base" name="unidade_base" placeholder="Ex: Gramas, Unidades" style="padding: 6px;">
+                </div>
+                <div class="form-group" style="flex: 1;">
                     <label for="price">Preço Unitário (R$):</label>
                     <input type="number" id="price" name="price" step="0.01" min="0" required placeholder="0.00" style="padding: 6px;">
+                </div>
+            </div>
+
+            <div class="form-row" style="margin-bottom: 12px;">
+                <div class="form-group" style="flex: 1;">
+                    <label><input type="checkbox" id="ativo" name="ativo" checked> Insumo ativo para operação</label>
                 </div>
             </div>
 
@@ -300,6 +409,13 @@
                     <input type="text" name="search" placeholder="Buscar nome..." value="{{ request.args.get('search', '') }}" style="padding: 5px; border: 1px solid #ddd; border-radius: 4px 0 0 4px;">
                     <button type="submit" style="padding: 5px 10px; background: #1e3a8a; color: white; border: none; border-radius: 0 4px 4px 0; cursor: pointer;"><i class="bi bi-search"></i></button>
                 </div>
+                <select name="filter" class="form-select" style="width: auto; padding: 5px;" onchange="this.form.submit()">
+                    <option value="">Todos status</option>
+                    <option value="low_stock" {% if request.args.get('filter') == 'low_stock' %}selected{% endif %}>Abaixo do mínimo</option>
+                    <option value="no_supplier" {% if request.args.get('filter') == 'no_supplier' %}selected{% endif %}>Sem fornecedor</option>
+                    <option value="no_history" {% if request.args.get('filter') == 'no_history' %}selected{% endif %}>Sem histórico</option>
+                    <option value="no_conversion" {% if request.args.get('filter') == 'no_conversion' %}selected{% endif %}>Sem conversão NF-e</option>
+                </select>
                 
                 {% if request.args.get('department') or request.args.get('category') or request.args.get('search') or request.args.get('sort') %}
                 <a href="{{ url_for('stock.stock_products') }}" style="color: #e74c3c; text-decoration: none; margin-left: 5px;" title="Limpar Filtros"><i class="bi bi-x-lg"></i></a>
@@ -318,21 +434,20 @@
             </div>
         </div>
 
-        <div class="table-responsive">
-            <table class="table table-striped table-hover table-sm" style="font-size: 0.8rem;">
+        <div class="table-responsive products-table-wrap">
+            <table class="table table-striped table-hover table-sm products-table">
                 <thead>
                     <tr>
-                        <th style="width: 40px;"><input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()"></th>
-                        <th>Produto</th>
-                        <th>Estoque</th>
-                        <th>Categoria</th>
-                        <th>Unid.</th>
-                        <th>Min</th>
-                        <th>Estoque</th>
-                        <th>Preço</th>
-                        <th>Total</th>
-                        <th>Fornec.</th>
-                        <th>Ações</th>
+                        <th class="col-check"><input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()"></th>
+                        <th class="col-product">Produto</th>
+                        <th class="col-dept">Depto</th>
+                        <th class="col-unit">Unid.</th>
+                        <th class="col-min">Mín.</th>
+                        <th class="col-balance">Saldo</th>
+                        <th class="col-price">Preço</th>
+                        <th class="col-supplier">Fornecedor recente</th>
+                        <th class="col-status">Status</th>
+                        <th class="col-actions">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -340,7 +455,13 @@
                     <tr>
                         <td><input type="checkbox" class="product-checkbox" value="{{ product.id }}" onchange="updateBulkActionsUI()"></td>
                         <td>
-                            <div class="fw-bold">{{ product.name }}</div>
+                            <div class="product-main-name">{{ product.name }}</div>
+                            <div class="product-meta-line">
+                                Cat.: {{ product.category or '-' }} · Total: R$ {{ "%.2f"|format(product.total_value) if product.total_value else '0.00' }}
+                                {% if product.last_supplier_name %}
+                                · Últ. fornec.: {{ product.last_supplier_name|truncate(18, True) }}
+                                {% endif %}
+                            </div>
                             {% if product.is_internal or product.category == 'Porcionado' %}
                             <span class="status-badge" style="background-color: #8e44ad; color: white; font-size: 0.7em; padding: 1px 4px;">Interno</span>
                             {% endif %}
@@ -352,10 +473,6 @@
                                 <span>{{ product.department }}</span>
                             </div>
                         </td>
-                        <td>
-                            <span>{{ product.category or '-' }}</span>
-                        </td>
-                        
                         <td>{{ (product.unit or '-')|abbreviate_unit }}</td>
                         <td>{{ "%.2f"|format(product.min_stock) if product.min_stock is not none else '0.00' }}</td>
                         <td class="{% if (product.balance or 0) < (product.min_stock or 0) %}text-danger{% else %}text-success{% endif %}" style="font-weight: bold;">
@@ -365,10 +482,9 @@
                             {% endif %}
                         </td>
                         <td>R$ {{ "%.2f"|format(product.price) if product.price else '0.00' }}</td>
-                        <td>R$ {{ "%.2f"|format(product.total_value) if product.total_value else '0.00' }}</td>
                         
                         <!-- Improved Supplier Column -->
-                        <td style="font-size: 0.8em;">
+                        <td class="supplier-cell">
                             {% if product.suppliers %}
                                 {% set first_supplier_name = product.suppliers[0] %}
                                 {% set s_obj = supplier_map.get(first_supplier_name) %}
@@ -387,8 +503,21 @@
                                     {% endif %}
                                 </div>
                             {% else %}
-                                <span class="text-muted">-</span>
+                                <span class="text-danger">Sem vínculo</span>
                             {% endif %}
+                            <div class="text-muted mt-1">{{ product.last_supplier_name or '-' }} · R$ {{ '%.2f'|format(product.last_purchase_price or 0) }}</div>
+                        </td>
+                        <td>
+                            <div class="status-stack">
+                                {% if product.is_low_stock %}<span class="badge bg-danger" title="Abaixo do estoque mínimo">Abaixo mín.</span>{% endif %}
+                                {% if not product.has_supplier_link %}<span class="badge bg-warning text-dark" title="Sem fornecedor vinculado">Sem forn.</span>{% endif %}
+                                {% if not product.has_price_history %}<span class="badge bg-secondary" title="Sem histórico de compra">Sem hist.</span>{% endif %}
+                                {% if not product.has_conversion_defined %}<span class="badge bg-info text-dark" title="Sem conversão para NF-e">Sem conv.</span>{% endif %}
+                                {% if not product.ativo %}<span class="badge bg-dark">Inativo</span>{% endif %}
+                                {% if not product.is_low_stock and product.has_supplier_link and product.has_price_history and product.has_conversion_defined and product.ativo %}
+                                <span class="badge bg-success">OK</span>
+                                {% endif %}
+                            </div>
                         </td>
                         
                         <td>
@@ -397,18 +526,18 @@
                                     data-product="{{ product|tojson|forceescape }}"
                                     onclick="openEditProductModal(JSON.parse(this.dataset.product))" 
                                     class="action-btn" 
-                                    style="padding: 5px 10px; font-size: 0.8em; background-color: #f39c12; min-width: 36px; min-height: 36px;" 
+                                    style="background-color: #f39c12;" 
                                     title="Editar" aria-label="Editar"><i class="bi bi-pencil"></i></button>
                                 <button 
                                     data-product="{{ product|tojson|forceescape }}"
                                     onclick="openStockEditModal(JSON.parse(this.dataset.product))" 
                                     class="action-btn" 
-                                    style="padding: 5px 10px; font-size: 0.8em; background-color: #1e3a8a; min-width: 36px; min-height: 36px;" 
+                                    style="background-color: #1e3a8a;" 
                                     title="Ajuste Rápido de Estoque" aria-label="Ajuste Rápido de Estoque"><i class="bi bi-box-seam"></i></button>
                                 <button 
                                     onclick="viewHistory('{{ product.name }}')" 
                                     class="action-btn" 
-                                    style="padding: 5px 10px; font-size: 0.8em; background-color: #34495e; min-width: 36px; min-height: 36px;" 
+                                    style="background-color: #34495e;" 
                                     title="Histórico" aria-label="Histórico"><i class="bi bi-clock-history"></i></button>
                                 <button 
                                     data-id="{{ product.id }}"
@@ -416,14 +545,14 @@
                                     data-balance="{{ product.balance or 0 }}"
                                     onclick="deleteProduct(this.dataset.id, this.dataset.name, parseFloat(this.dataset.balance))" 
                                     class="action-btn" 
-                                    style="padding: 5px 10px; font-size: 0.8em; background-color: #e74c3c; margin-left: 0; min-width: 36px; min-height: 36px;" 
+                                    style="background-color: #e74c3c;" 
                                     title="Excluir" aria-label="Excluir"><i class="bi bi-trash"></i></button>
                             </div>
                         </td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="11" style="text-align: center; padding: 10px; color: #7f8c8d;">
+                        <td colspan="10" style="text-align: center; padding: 10px; color: #7f8c8d;">
                             Nenhum produto encontrado na lista.
                         </td>
                     </tr>
@@ -490,6 +619,10 @@
                     <label for="edit_name">Nome do Insumo:</label>
                     <input type="text" id="edit_name" name="name" required style="padding: 6px;">
                 </div>
+                <div class="form-group" style="flex: 2;">
+                    <label for="edit_nome_padrao">Nome padrão:</label>
+                    <input type="text" id="edit_nome_padrao" name="nome_padrao" style="padding: 6px;">
+                </div>
                 <div class="form-group" style="flex: 1;">
                     <label for="edit_department">Estoque:</label>
                     <select id="edit_department" name="department" required style="padding: 6px;">
@@ -515,8 +648,17 @@
                     </select>
                 </div>
                 <div class="form-group" style="flex: 1;">
+                    <label for="edit_unidade_base">Unidade base:</label>
+                    <input type="text" id="edit_unidade_base" name="unidade_base" style="padding: 6px;">
+                </div>
+                <div class="form-group" style="flex: 1;">
                     <label for="edit_price">Preço Unitário (R$):</label>
                     <input type="number" id="edit_price" name="price" step="0.01" min="0" required style="padding: 6px;">
+                </div>
+            </div>
+            <div class="form-row" style="margin-bottom: 12px;">
+                <div class="form-group" style="flex: 1;">
+                    <label><input type="checkbox" id="edit_ativo" name="ativo" checked> Insumo ativo para operação</label>
                 </div>
             </div>
             <h4 style="background-color: #fef9e7; padding: 10px 15px; border-left: 5px solid #f1c40f; color: #2c3e50; margin-top: 16px; margin-bottom: 16px; border-radius: 4px; font-size: 1.0em;">
@@ -1098,10 +1240,13 @@ function addSupplier() {
 function openEditProductModal(product) {
     document.getElementById('edit_product_id').value = product.id || '';
     document.getElementById('edit_name').value = product.name || '';
+    document.getElementById('edit_nome_padrao').value = product.nome_padrao || product.name || '';
     document.getElementById('edit_department').value = product.department || 'Geral';
     document.getElementById('edit_category').value = product.category || '';
     document.getElementById('edit_unit').value = product.unit || 'Unidades';
+    document.getElementById('edit_unidade_base').value = product.unidade_base || product.unit || '';
     document.getElementById('edit_price').value = product.price || 0;
+    document.getElementById('edit_ativo').checked = (product.ativo !== false);
     document.getElementById('edit_min_stock').value = product.min_stock || 0;
     document.getElementById('edit_frequency').value = product.frequency || 'Sem Frequência';
     document.getElementById('edit_package_size').value = product.package_size || 1;
@@ -1140,6 +1285,18 @@ function openEditProductModal(product) {
     }
     document.getElementById('editProductModal').style.display = 'block';
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const nameInput = document.getElementById('name');
+    const nomePadraoInput = document.getElementById('nome_padrao');
+    if (nameInput && nomePadraoInput) {
+        nameInput.addEventListener('input', function() {
+            if (!nomePadraoInput.value) {
+                nomePadraoInput.value = nameInput.value;
+            }
+        });
+    }
+});
 
 function closeEditProductModal() {
     document.getElementById('editProductModal').style.display = 'none';
